@@ -94,10 +94,16 @@ For enhanced proof of authorship, consider:
 
 ## Revision History
 
-| Date | Action | Notes |
-|------|--------|-------|
-| 2026-01-13 | Initial fingerprinting | WHITEPAPER.md v1.0.0, ARCHITECTURE v0.3.0 |
+| Date | Action | Git Commit | Notes |
+|------|--------|------------|-------|
+| 2026-01-13 | Initial fingerprinting | [`2ba0bc4696e163e9529792b4fdc4664c764d7019`](https://github.com/GodOfAgents/VAMS/commit/2ba0bc4696e163e9529792b4fdc4664c764d7019) | WHITEPAPER.md v1.0.0, ARCHITECTURE v0.3.0 |
 
 ---
+
+## Verification Links
+
+- **GitHub Repository**: [github.com/GodOfAgents/VAMS](https://github.com/GodOfAgents/VAMS)
+- **Commit URL**: [github.com/GodOfAgents/VAMS/commit/2ba0bc4](https://github.com/GodOfAgents/VAMS/commit/2ba0bc4696e163e9529792b4fdc4664c764d7019)
+- **Archive.org Snapshot**: [Create snapshot](https://web.archive.org/save/https://github.com/GodOfAgents/VAMS)
 
 *This document was generated as part of the VAMS Protocol intellectual property protection strategy.*
