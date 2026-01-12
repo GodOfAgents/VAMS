@@ -45,3 +45,16 @@ broadcast/
 # Misc
 *.zip
 *.tar.gz
+
+# Large media files
+*.mp4
+*.mov
+*.avi
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+.env

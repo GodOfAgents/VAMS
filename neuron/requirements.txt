@@ -1,0 +1,6 @@
+# VAMS Neuron Dependencies
+# Install with: pip install -r requirements.txt
+
+requests>=2.31.0      # HTTP client for Celestia RPC
+ecdsa>=0.18.0         # ECDSA cryptography (Secp256k1)
+colorama>=0.4.6       # Terminal colors (cross-platform)
