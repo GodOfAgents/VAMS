@@ -202,7 +202,7 @@ $ vams usage --month          # View monthly breakdown
 | **Protocol Treasury** | 21% | 210,000,000 | Development, partnerships, ecosystem growth |
 | **Founder** | 16% | 160,000,000 | Founder equity (solo founder) |
 | **Investors** | 14% | 140,000,000 | Pre-seed, Seed, Strategic rounds |
-| **Team & Advisors** | 10% | 100,000,000 | Future hires, co-founder reserve, advisors |
+| **Team & Advisors** | 10% | 100,000,000 | Future engineering hires, advisors |
 | **Initial Liquidity** | 5% | 50,000,000 | DEX/CEX liquidity at TGE |
 | **Total** | 100% | 1,000,000,000 | |
 
@@ -210,9 +210,9 @@ $ vams usage --month          # View monthly breakdown
 
 | Round | Allocation | Tokens | Status |
 |-------|-----------|--------|--------|
-| **Pre-Seed** (Alliance/Pivot/Antler) | 7% | 70,000,000 | Proposal pending ($500K) |
+| **Strategic Partners** | 7% | 70,000,000 | Active outreach (Grants + Partnerships) |
 | **Seed Round** | 4% | 40,000,000 | Future (~$800K-1M) |
-| **Strategic** | 3% | 30,000,000 | Ecosystem partners |
+| **Ecosystem Partners** | 3% | 30,000,000 | Protocol integrations |
 
 ---
 
@@ -559,12 +559,12 @@ As a solo founder, the following structure applies:
 | **Year 4 Salary** | $12,000/mo ($144K/yr) | Scaling |
 | **Year 5 Salary** | Market Rate | Mature company |
 
-### 10.2 Future Co-Founder/CTO Reserve
+### 10.2 Engineering Team Reserve
 
 | Reserved Allocation | Purpose |
 |---------------------|---------|
-| 5-8% from Team Pool | Future technical co-founder |
-| 2-year vest, 1-year cliff | Standard co-founder terms |
+| 5-8% from Team Pool | Hire specialized engineers (Blockchain, AI/ML, DePIN) |
+| 2-year vest, 1-year cliff | Standard employee terms |
 
 ### 10.3 Advisory Pool
 
