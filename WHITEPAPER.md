@@ -182,9 +182,25 @@ The economic layer aligns incentives and enables machine-to-machine payments:
 
 **$VAMS Token**: Single payment gateway for the entire DePIN stack, abstracting AKT, IO, TAO, TIA, and other protocol tokens.
 
+**Universal Top-Up Model**:
+
+Users top-up with any token (USDC, ETH, credit card). Protocol auto-converts to $VAMS.
+
+| Fee Type | Range | Description |
+|----------|-------|-------------|
+| **Protocol Fee** | 0.1% - 1.0% | Dynamic based on network load |
+| **Gas Abstraction** | 2% - 7% | Cross-chain gas conversion |
+| **Micropayments** | $0.005 - $0.02 fixed OR 0.5% - 1.0% | Competitive fixed fee floor |
+
+All fees → 100% Buyback & Burn. No discounts, no cashback — pure utility.
+
+**Developer Console**: AWS-style dashboard showing USD balance, usage breakdown, active services, and multi-token top-up options.
+
 **Agentic Commerce Protocols**:
 - **x402**: HTTP 402-based micropayments enabling pay-per-inference
 - **AP2**: Google's Agent Payments Protocol integration
+
+> **Security Note**: x402 micropayments use atomic escrow with nonce-based double-spend prevention to ensure settlement guarantees. Providers are protected by bonding requirements and insurance fund coverage. See [ARCHITECTURE_v0-3-0.md §20.2](./ARCHITECTURE_v0-3-0.md) for complete settlement security specification.
 
 ### 2.3 Conditional L1 Router (CLR)
 
@@ -219,6 +235,8 @@ VAMS maintains connectivity across multiple settlement layers:
 
 **Multi-ISM Bridge Security**: To mitigate single-vendor bridge risk, VAMS implements a 2/3 consensus across TEE-based, Oracle-based, and Multisig ISMs for Hyperlane verification.
 
+> **Note**: Comprehensive failure recovery procedures for all settlement layers, including Avalanche P-Chain halt scenarios, are specified in [ARCHITECTURE_v0-3-0.md §21.1.10](./ARCHITECTURE_v0-3-0.md). This includes locked fund recovery, queue processing priority, and compensation mechanisms.
+
 ---
 
 ## 3. Technical Implementation
@@ -245,6 +263,8 @@ Agents operate within the DBOS runtime, which provides:
 1. Reading the last committed Merkle root from the StateCheckpointRegistry contract
 2. Verifying their state against the root using provided Merkle proofs
 3. Resuming execution from the verified checkpoint
+
+> **Note**: DBOS checkpoint operators follow a progressive decentralization path from Phase 1 multisig to fully permissionless validators. A fraud-proof challenge mechanism ensures agents are protected even under centralized operation. See [ARCHITECTURE_v0-3-0.md §20.8](./ARCHITECTURE_v0-3-0.md) for complete DBOS State Anchoring specification including operator bonding, 7-day challenge windows, and slashing conditions.
 
 ### 3.3 AI Inference Pipeline
 
@@ -275,40 +295,50 @@ VAMS implements four principles for data sovereignty:
 | Parameter | Value |
 |-----------|-------|
 | **Total Supply** | 1,000,000,000 $VAMS (fixed cap) |
-| **Initial Circulating** | 150,000,000 $VAMS (15%) |
+| **Initial Circulating** | 150,000,000 $VAMS (15%) — see TGE breakdown |
 | **Token Standard** | ERC-20 (Ethereum) + Wrapped variants |
+
+#### TGE Circulating Supply Breakdown (150M / 15%)
+
+| Source | Tokens | % | Notes |
+|--------|--------|---|-------|
+| Initial Liquidity | 50,000,000 | 5% | DEX/CEX liquidity pools |
+| Community Airdrop | 50,000,000 | 5% | Testnet participants, early adopters |
+| Ecosystem Grants | 50,000,000 | 5% | Developer incentives, integrations |
+| **Total at TGE** | **150,000,000** | **15%** | |
 
 ### 4.2 Allocation
 
 | Category | Allocation | Vesting |
 |----------|-----------|---------|
-| Community & Ecosystem | 40% | 5-year linear unlock |
-| Protocol Treasury | 20% | DAO-controlled, 2-year cliff |
-| Core Team | 15% | 4-year vest, 1-year cliff |
-| Early Investors | 12% | 3-year vest, 6-month cliff |
-| Validators & Staking | 8% | Emission over 10 years |
+| Community & Ecosystem | 34% | 5-year linear unlock |
+| Protocol Treasury | 21% | 6-month cliff, 2%/month operational runway |
+| Founder | 16% | 4-year vest, 1-year cliff |
+| Investors | 14% | Pre-seed/Seed/Strategic, 6-36 month vests |
+| Team & Advisors | 10% | 3-year vest, 1-year cliff |
 | Initial Liquidity | 5% | Unlocked at TGE |
 
 ### 4.3 Emission Schedule
 
 ```
-Year 1:   25,000,000 $VAMS (3.125%)
-Year 2:   20,000,000 $VAMS (2.5%)
-Year 3:   15,000,000 $VAMS (1.875%)
-Year 4:   10,000,000 $VAMS (1.25%)
-Year 5:    5,000,000 $VAMS (0.625%)
+Year 1:   25,000,000 $VAMS (2.5%)
+Year 2:   20,000,000 $VAMS (1.95%)
+Year 3:   15,000,000 $VAMS (1.42%)
+Year 4:   10,000,000 $VAMS (0.92%)
+Year 5:    5,000,000 $VAMS (0.46%)
 Years 6-10: 1,000,000 $VAMS/year (tail emission)
+Post-Year 10: 500,000 $VAMS/year (terminal rate, DAO can reduce only)
 
-Total Inflation: ~2.5% Year 1, decreasing to <0.1% by Year 10
+Total Inflation: ~2.5% Year 1, decreasing to 0.05% terminal
 ```
 
 ### 4.4 Value Accrual Mechanisms
 
 | Mechanism | Rate | Distribution |
 |-----------|------|--------------|
-| Protocol Fees | 0.1-0.5% | Buyback & burn |
-| Gas Abstraction Premium | 5% markup | Treasury revenue |
-| Staking Rewards | 8% base APY | Validator incentives |
+| Protocol Fees | 0.1-0.5% | 100% Buyback & burn (Phase 1) → 40% (Phase 2) |
+| Gas Abstraction Premium | 2-7% markup | Treasury revenue |
+| Staking Rewards | 6-12% target APY | Validator incentives |
 | x402 Settlement Fees | 0.05% | LP rewards |
 | Bridge Fees | 0.25% | Insurance fund + LP |
 
@@ -321,6 +351,8 @@ VAMS employs reinforcement learning for economic parameter adjustment:
 - **Circuit Breakers**: Automatic override if parameters approach dangerous bounds
 
 This creates a self-adjusting economic system that responds to network demand while preventing runaway inflation or deflation.
+
+> **Note**: The RL model undergoes rigorous validation including adversarial testing, regime change detection, and formal bounds verification. A multi-model ensemble with automatic rollback ensures safety. See [ARCHITECTURE_v0-3-0.md §3.5](./ARCHITECTURE_v0-3-0.md) for the complete RL Model Validation Framework.
 
 ---
 
@@ -454,6 +486,11 @@ VAMS positions itself as the "Sovereign Brain" for the agentic web—a meta-laye
 
 ## References
 
+### Companion Documents
+- [VAMS Tokenomics Specification](./TOKENOMICS.md) — Complete $VAMS token economics
+- [VAMS Architecture Reference v0.3.0](./ARCHITECTURE_v0-3-0.md) — Detailed technical specification
+
+### External References
 1. Celestia Network Documentation. https://docs.celestia.org/
 2. DBOS: The Database Operating System. https://docs.dbos.dev/
 3. Phala Network Technical Specification. https://docs.phala.network/
