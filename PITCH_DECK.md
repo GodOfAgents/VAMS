@@ -1,8 +1,8 @@
 # VAMS Pitch Deck
-## 19 Slides for Antler: The Sovereign Brain
+## Strategic Partnership Proposal: The Sovereign Brain
 ### Infrastructure for the Agentic Economy
 
-**Version:** 3.2 (Data-Driven Pro)  
+**Version:** 3.3 (Strategic Partners)  
 **Date:** January 2026  
 **Stage:** Pre-Seed (Architecture Locked & Ready to Build)
 
@@ -17,13 +17,13 @@
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
-│                                                                          │
-│                              🧠 VAMS                                     │
-│                         ───────────────────                              │
-│                    Verifiable and Agentic Modular Stack                  │
-│                                                                          │
+│                                                                         │
+│                              🧠 VAMS                                    │
+│                         ───────────────────                             │
+│                    Verifiable and Agentic Modular Stack                 │
+│                                                                         │
 │          Unified Infrastructure for Sovereign AI Economies              │
-│                                                                          │
+│                                                                         │
 └─────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -214,12 +214,12 @@ Designed for maximum value accrual and deflationary pressure.
 
 We don't sell to end-users; we sell to the builders. Does your agent framework work on VAMS? **YES.**
 
-| Framework | Status | Integration |
-| :--- | :--- | :--- |
-| **LangChain** | ✅ Supported | Full Python SDK Support |
-| **CrewAI** | ✅ Supported | Automated Orchestration |
-| **AutoGPT** | ✅ Supported | Containerized Deployment |
-| **OpenAI SDK** | ✅ Supported | Function Calling Bridge |
+| Framework      | Status        | Integration              |
+|----------------|---------------|--------------------------|
+| **LangChain**  | ✅ Supported | Full Python SDK Support  |
+| **CrewAI**     | ✅ Supported | Automated Orchestration  |
+| **AutoGPT**    | ✅ Supported | Containerized Deployment |
+| **OpenAI SDK** | ✅ Supported | Function Calling Bridge  |
 
 **Phase 2: Vertical Expansion**
 *   **DeFAI:** High-frequency trading agents (Sub-second routing).
@@ -231,12 +231,12 @@ We don't sell to end-users; we sell to the builders. Does your agent framework w
 
 ## **Why We Win**
 
-| Competitor | Their Focus | The Gap | VAMS Advantage |
-| :--- | :--- | :--- | :--- |
-| **AWS / Google** | Web2 Cloud | Centralized, Censored | Sovereign & Unstoppable |
-| **Akash** | Compute Marketplace | Just hosting, no AI stack | Full 5-Layer Integration |
-| **Bittensor** | AI Models | Complex incentives, siloed | Aggregation Meta-Layer |
-| **Polygon** | L2 Aggregation | Ethereum-centric | **Chain Agnostic (Any L1)** |
+| Competitor       | Their Focus         | The Gap                    | VAMS Advantage              |
+|------------------|---------------------|----------------------------|-----------------------------|
+| **AWS / Google** | Web2 Cloud          | Centralized, Censored      | Sovereign & Unstoppable     |
+| **Akash**        | Compute Marketplace | Just hosting, no AI stack  | Full 5-Layer Integration    |
+| **Bittensor**    | AI Models           | Complex incentives, siloed | Aggregation Meta-Layer      |
+| **Polygon**      | L2 Aggregation      | Ethereum-centric           | **Chain Agnostic (Any L1)** |
 
 **Reliability Advantage:**
 We are the only protocol with a **Black Swan Recovery Matrix** (defined in Architecture §21), guaranteeing asset safety even if underlying chains halt.
@@ -249,75 +249,90 @@ We are the only protocol with a **Black Swan Recovery Matrix** (defined in Archi
 
 We have spent 6 months perfecting the design before writing a line of permanent code.
 
-*   ✅ **Architecture:** 100% Complete (`v0.3.0` Spec)
-*   ✅ **Tokenomics:** 100% Complete (Vesting/Burns modeled)
-*   ✅ **Prototype:** Core "Immortal" Agent Logic Verified (Python/SQLite)
-*   🏗️ **Contracts:** Ready to start Phase 1 (Week 1)
-*   🏗️ **Frontend:** Designs Wireframed, Ready to build
+*   ✅ **Architecture Specification:** 100% Complete (`v0.3.0` Spec)
+*   ✅ **Token Economic Model:** 100% Complete (Vesting/Burns/Emissions modeled)
+*   ✅ **Market Analysis:** 100% Complete (`MARKET_ANALYSIS.md`)
+*   🧪 **Agent Logic Prototype:** 30% Complete (Local checkpointing works)
+*   🧪 **Gateway MVP:** 20% Complete (Basic heartbeat server)
+*   🏗️ **Smart Contracts:** 0% (Ready to start Phase 1)
 
-**Status:** We are ready to execute. The blueprint is finished.
+**Status:** Architecture locked. Ready to execute.
 
 ---
 
 # Slide 13: The Roadmap (12-Week Sprint)
 
-## **From Zero to Testnet**
+## **From Simulation to Live Testnet**
 
-We have a detailed 4-Phase Execution Plan ready to trigger immediately upon funding.
+We have a detailed 4-Phase Execution Plan ready to trigger immediately.
 
-*   **Phase 1 (Weeks 1-3): Economic Foundation**
-    *   Deploy $VAMS Token, Staking, and Vesting Contracts.
-*   **Phase 2 (Weeks 4-6): The Neuron**
-    *   Connect Python Logic to On-Chain Registry.
-    *   Integrate real Akash/io.net SDKs.
-*   **Phase 3 (Weeks 7-9): The Dashboard**
-    *   Launch "AWS-style" Console for users.
-*   **Phase 4 (Weeks 10+): Testnet Launch**
-    *   Public incentivized testnet (Sepolia).
+*   **Phase 1 (Weeks 1-3): Economic Foundation** *("The Blood")*
+    *   Deploy $VAMS Token, Staking, Vesting, and FeeCollector Contracts.
+    *   Deploy to Sepolia/Holesky Testnet.
+*   **Phase 2 (Weeks 4-6): The Real Neuron** *("The Nerves")*
+    *   Connect Python Client to On-Chain Registry.
+    *   Replace mocks with real Akash/io.net SDKs.
+    *   Migrate SQLite to Arweave (True Immortality).
+*   **Phase 3 (Weeks 7-9): The Dashboard** *("The Face")*
+    *   Launch "AWS-style" Console (Next.js + RainbowKit).
+*   **Phase 4 (Weeks 10+): Intelligence & Scale** *("The Brain")*
+    *   Dynamic TAO (RL-based emission control).
+    *   x402 Payment Channels.
+    *   Mainnet Launch Prep (Audits).
 
 ---
 
 # Slide 14: The Team
 
-## **Founder-Led. Seeking Co-Pilot.**
+## **Building in Public. Hiring Engineers.**
 
 **Aseem Chishti** (Founder & Architect)
 *   Designed the entire 5-Layer VAMS Stack.
-*   Authored 1,700+ lines of technical specs.
+*   Authored **6,100+ lines** of technical specifications across all docs.
 *   Deep expertise in DePIN, Agentic workflows, and Tokenomics.
 
-**Current Priority:** Hiring a **Technical Co-Founder (CTO)**
-*   Profile: Rust/Solidity Expert + AI Systems background.
-*   Status: Recruiting actively.
+**Hiring Priority:** Engineers with expertise in:
+*   Blockchain Protocols & Smart Contracts (Solidity/Rust)
+*   DAO Governance & DePIN Infrastructure
+*   AI/ML Systems & Cloud Infrastructure
+
+**Our Commitment:** Document every decision, maintain full transparency for the community.
 
 ---
 
 # Slide 15: The Ask
 
-## **Seeking $500K Pre-Seed**
+## **Strategic Partnership Opportunity (7% Allocation)**
 
-To turn this world-class architecture into a live testnet.
+We are seeking strategic partners and grants to accelerate the VAMS vision.
 
-### Use of Funds (Runway: 12-15 Months)
-1.  **Engineering (50%):** Hire CTO + 2 Senior Engineers (Contract/Rust).
-2.  **Security (20%):** Audits for Core Contracts.
-3.  **Operations (15%):** Legal/Compliance (Token issuance).
-4.  **Growth (15%):** Hackathons & DevRel.
+### Why We Need Grants/Funds
+1.  **Legal & Compliance:** Register the entity legally (Foundation/DAO structure).
+2.  **Workspace Setup:** Establish an on-site workspace to manage development and community.
+3.  **Engineering Team:** Hire specialized engineers (Smart Contracts, DePIN, AI/ML).
+4.  **Security Audits:** Third-party audits for core protocol contracts.
+
+### What Strategic Partners Get
+*   **7% Token Allocation** (from Strategic Investor pool).
+*   Early access to protocol integrations.
+*   Governance influence on roadmap direction.
 
 ---
 
-# Slide 16: Return on Investment
+# Slide 16: Partnership Value
 
-## **The Math Works**
+## **Strategic Alignment**
 
-If VAMS captures just **0.1%** of the Agent Infrastructure market by 2030:
+Strategic partners gain access to a high-growth protocol at the ground floor.
 
-*   **Volume:** $100M / year
-*   **Revenue:** $5M / year (at 5% take rate)
-*   **Valuation:** ~$100M+ (20x multiple)
-*   **Return:** **20x - 100x** from Pre-Seed entry.
+| Partner Benefit       | Value                                      |
+|-----------------------|--------------------------------------------|
+| **Token Allocation**  | 7% of 1B supply (70M $VAMS)                |
+| **Early Integration** | First-mover advantage on DePIN aggregation |
+| **Governance Rights** | Shape protocol direction from Day 1        |
+| **Revenue Share**     | Fee revenue from protocol usage            |
 
-*And that's the bear case.*
+**Our Promise:** Radical transparency in development. Every decision documented publicly.
 
 ---
 
@@ -337,12 +352,13 @@ They will use verifiable, decentralized, sovereign infrastructure.
 
 # Slide 18: Summary
 
-## **Why Invest Now?**
+## **Why Partner Now?**
 
 1.  **Right Market:** AI Agents are the biggest trend of the decade.
 2.  **Right Problem:** Infrastructure fragmentation is the #1 blocker.
 3.  **Right Solution:** An aggregator meta-layer (AWS model) always wins.
-4.  **Right Time:** "Pre-Product" valuation for "Post-Architecture" maturity.
+4.  **Right Time:** Ground-floor partnership before Testnet launch.
+5.  **Right Team:** Transparent, community-first development approach.
 
 ---
 
@@ -355,4 +371,4 @@ They will use verifiable, decentralized, sovereign infrastructure.
 *   **LinkedIn:** linkedin.com/in/aseemchishti
 *   **GitHub:** github.com/GodOfAgents
 
-*Deck Version 3.2 • Confidential*
+*Deck Version 3.3 (Strategic Partners) • Confidential*
