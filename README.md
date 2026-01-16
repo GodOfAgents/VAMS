@@ -134,7 +134,7 @@ $ vams usage --month          # View monthly breakdown
 
 | Document | Description |
 |----------|-------------|
-| **[REPO_STATUS_REPORT](./REPO_STATUS_REPORT.md)** | **Start Here.** Current stage & 12-week roadmap. |
+| **[REPO_STATUS_REPORT](./REPO_STATUS_REPORT.md)** | **Start Here.** Current stage & 24-week MVP roadmap. |
 | **[WHITEPAPER](./WHITEPAPER.md)** | Academic-style technical whitepaper. |
 | **[ARCHITECTURE v0.3.0](./ARCHITECTURE_v0-3-0.md)** | Deep specs: CLR, TEEs, Failover Matrix. |
 | **[TOKENOMICS](./TOKENOMICS.md)** | $VAMS utility, 100% burn, vesting. |
@@ -143,14 +143,25 @@ $ vams usage --month          # View monthly breakdown
 
 ---
 
-## 🚦 Roadmap (12-Week Sprint)
+## 🚦 Roadmap
+
+### MVP Phase (24 Weeks)
 
 | Phase | Timeline | Goal | Deliverables |
 |-------|----------|------|--------------|
-| **1: Economic Foundation** | Weeks 1-3 | Smart Contracts | $VAMS, Staking, Vesting → Sepolia |
-| **2: The Real Neuron** | Weeks 4-6 | DePIN Integration | Akash/io.net SDKs, Arweave storage |
-| **3: The Dashboard** | Weeks 7-9 | User Interface | Next.js Console, RainbowKit |
-| **4: Intelligence & Scale** | Weeks 10+ | Advanced Features | Dynamic TAO, x402 Channels, Audits |
+| **1: Economic Foundation** | Weeks 1-8 | Smart Contracts + Team | $VAMS, Staking, Vesting → Sepolia/Fuji |
+| **2: Avalanche Integration** | Weeks 9-12 | C-Chain + Teleporter | Contracts on Fuji, cross-chain bridge |
+| **3: CLR & Elastic L1** | Weeks 13-16 | Sovereign Execution | CLR router, first Avalanche L1, AWM |
+| **4: Dashboard & Docs** | Weeks 17-24 | User Interface + Testing | Next.js Console, documentation, testnet launch |
+
+### Post-MVP (Weeks 25-52)
+
+| Phase | Timeline | Goal |
+|-------|----------|------|
+| **5: Full DePIN Stack** | Weeks 25-36 | io.net GPU, Bittensor, Render |
+| **6: TEE & Security** | Weeks 28-40 | Phala TEE, Marlin Oyster, audits |
+| **7: Advanced Features** | Weeks 36-52 | Dynamic TAO, ZKML, x402 channels |
+| **8: Mainnet** | Week 52+ | Production launch |
 
 ---
 
