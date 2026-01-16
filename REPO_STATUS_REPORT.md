@@ -48,62 +48,136 @@ The VAMS project is currently in the **Pre-Contracts & Pre-Testnet** phase of de
 
 ## 4. Phase-by-Phase Execution Roadmap
 
-This roadmap moves the project from "Simulation" to "Live Testnet" in approximately 12 weeks.
+This roadmap moves the project from "Simulation" to "Live Testnet" in approximately **24 weeks (MVP)**, with advanced features following in the post-MVP phase (Weeks 25-52).
 
-### Phase 1: The Economic Foundation (The "Blood")
-**Timeline:** Weeks 1-3  
-**Goal:** Deploy the Token and Economic Engines to Testnet.
+---
 
-- [ ] **Week 1: Token & Vesting contracts**
-    - [ ] Setup Foundry/Hardhat environment.
+### MVP PHASE (24 Weeks)
+
+---
+
+### Phase 1: Economic Foundation & Team Setup
+**Timeline:** Weeks 1-8  
+**Goal:** Build core smart contracts and establish engineering team.
+
+- [ ] **Weeks 1-2: Team & Environment Setup**
+    - [ ] Hire 1-2 blockchain engineers (Solidity/Rust).
+    - [ ] Setup Foundry development environment.
+    - [ ] Establish CI/CD pipeline and code review processes.
+- [ ] **Weeks 3-4: Token Contracts**
     - [ ] Implement `$VAMS` (ERC-20 + Burnable + Permit).
     - [ ] Implement `VAMSVesting` (Custom schedules for Founders/Seed).
-- [ ] **Week 2: Staking Architecture**
+- [ ] **Weeks 5-6: Staking Architecture**
     - [ ] Implement `VAMSStaking` (Tiered APY, Locking logic).
     - [ ] Implement `FeeCollector` (Buyback & Burn logic).
-- [ ] **Week 3: Testing & Deployment**
+- [ ] **Weeks 7-8: Testing & Sepolia Deployment**
     - [ ] Unit tests for all contracts (target >90% coverage).
-    - [ ] Deploy to **Sepolia/Holesky Testnet**.
+    - [ ] Deploy to **Sepolia Testnet**.
     - [ ] Verify contracts on Etherscan.
 
-### Phase 2: The Real Neuron (The "Nerves")
-**Timeline:** Weeks 4-6  
-**Goal:** Connect the Python Client (`neuron.py`) to the Contract Layer and Real DePINs.
+---
 
-- [ ] **Week 4: Wallet & Contract Integration**
-    - [ ] Integrate `web3.py` into `neuron`.
-    - [ ] Allow Neuron to "Register" by staking $VAMS on-chain.
-    - [ ] Allow Neuron to post "Heartbeats" to a smart contract registry (instead of just Gateway).
-- [ ] **Week 5: Infrastructure Integration A (Compute)**
+### Phase 2: Avalanche C-Chain Integration
+**Timeline:** Weeks 9-12  
+**Goal:** Deploy contracts to Avalanche and integrate Teleporter bridge.
+
+- [ ] **Weeks 9-10: Fuji Deployment**
+    - [ ] Deploy all VAMS contracts to **Avalanche Fuji C-Chain** testnet.
+    - [ ] Configure Avalanche Core wallet integration.
+    - [ ] Test cross-chain compatibility and gas optimization.
+- [ ] **Weeks 11-12: Teleporter Bridge**
+    - [ ] Configure Teleporter bridge contracts for C-Chain communication.
+    - [ ] Implement cross-chain token transfer functionality (Sepolia ↔ Fuji).
+    - [ ] Test and validate bridge security.
+
+---
+
+### Phase 3: CLR Router & Sovereign Elastic L1
+**Timeline:** Weeks 13-16  
+**Goal:** Launch the Conditional L1 Router and first Avalanche Sovereign L1.
+
+- [ ] **Weeks 13-14: CLR Implementation**
+    - [ ] Implement CLR smart contract with routing decision tree.
+    - [ ] Route logic: Privacy → Value → Sovereignty → Velocity.
+    - [ ] Integrate Avalanche-specific routing for Sovereign L1 selection.
+- [ ] **Weeks 15-16: Elastic L1 Launch**
+    - [ ] Spin up first VAMS Elastic L1 on Fuji testnet (ACP-77).
+    - [ ] Configure **$VAMS as custom gas token** on Elastic L1.
+    - [ ] Integrate Avalanche Warp Messaging (AWM) for inter-L1 communication.
+    - [ ] Implement agent heartbeat/registration contract on Elastic L1.
+
+---
+
+### Phase 4: Agent Runtime, Dashboard & Documentation
+**Timeline:** Weeks 17-24  
+**Goal:** Connect agent runtime to chain, build dashboard, launch testnet.
+
+- [ ] **Weeks 17-18: Agent Runtime Integration**
+    - [ ] Integrate `web3.py` into `neuron.py`.
+    - [ ] Allow Neuron to register on Avalanche L1 by staking $VAMS.
+    - [ ] Allow Neuron to post heartbeats to on-chain agent registry.
+- [ ] **Weeks 19-20: First DePIN Integration**
     - [ ] Replace `AkashProvider` mock with real Akash CLI/SDL deployment.
-    - [ ] Replace `IoNetProvider` mock with real API calls (if access available).
-- [ ] **Week 6: Infrastructure Integration B (Storage)**
-    - [ ] Replace `sqlite3` checkpoints with **Arweave (Irys)** or **IPFS**.
-    - [ ] Achieve "True Immortality" (state survives local machine death).
-
-### Phase 3: The Dashboard (The "Face")
-**Timeline:** Weeks 7-9  
-**Goal:** A user-facing "AWS Console" for Web3.
-
-- [ ] **Week 7: Project Scaffolding**
+    - [ ] Replace SQLite checkpoints with **Arweave (Irys)** for decentralized state.
+    - [ ] Achieve "True Immortality" (state survives local machine failure).
+- [ ] **Weeks 21-22: Dashboard Development**
     - [ ] Initialize Next.js 14 App Router project.
-    - [ ] Setup RainbowKit + Wagmi for wallet connection.
-    - [ ] Implement VAMS Design System (Tailwind + Framer Motion).
-- [ ] **Week 8: Core Features**
-    - [ ] **Balance View**: Show $VAMS, Staked Amount, Unlocks.
-    - [ ] **Top-Up**: Mock "Fiat On-Ramp" UI.
-    - [ ] **Neuron Status**: Read on-chain registry to show active nodes.
-- [ ] **Week 9: Polish & Deploy**
-    - [ ] Add "Awwwards" quality animations (Spline 3D).
-    - [ ] Deploy frontend to Vercel/Amplify.
+    - [ ] Setup RainbowKit + Wagmi with Avalanche Core wallet support.
+    - [ ] Build Balance View, Staking Interface, Top-Up Flow, Agent Registry.
+- [ ] **Weeks 23-24: Testing & Documentation**
+    - [ ] Comprehensive testnet stress testing on Avalanche Fuji.
+    - [ ] Complete developer documentation (README, API reference, guides).
+    - [ ] Deploy frontend to Vercel.
+    - [ ] Prepare security audit scope document.
 
-### Phase 4: Intelligence & Scale (The "Brain")
-**Timeline:** Weeks 10+  
-**Goal:** Advanced AI features and Mainnet prep.
+---
 
-- [ ] Support **Dynamic TAO** (RL Model controlling emission rates).
-- [ ] Implement **x402 Payment Channels** for high-frequency billing.
-- [ ] Mainnet Launch Preparation (Audits).
+### POST-MVP PHASE (Weeks 25-52)
+
+---
+
+### Phase 5: Full DePIN Stack
+**Timeline:** Weeks 25-36  
+**Goal:** Integrate remaining compute and storage providers.
+
+- [ ] Integrate **io.net GPU API** for high-performance AI inference.
+- [ ] Integrate **Bittensor Subnets** for decentralized model access.
+- [ ] Integrate **Render Network** for GPU rendering workloads.
+- [ ] Complete multi-provider failover logic in Neuron client.
+
+---
+
+### Phase 6: TEE & Security Hardening
+**Timeline:** Weeks 28-40  
+**Goal:** Production-grade security and trust layer.
+
+- [ ] Integrate **Phala TEE** for confidential execution.
+- [ ] Integrate **Marlin Oyster** for additional TEE coverage.
+- [ ] Implement **Multi-ISM** for bridge security.
+- [ ] Complete **external security audit** (smart contracts + CLR).
+- [ ] Launch bug bounty program.
+
+---
+
+### Phase 7: Advanced Features
+**Timeline:** Weeks 36-52  
+**Goal:** Implement advanced economic and AI features.
+
+- [ ] Implement **Dynamic TAO** (RL model controlling emission rates).
+- [ ] Implement **x402 Payment Channels** for high-frequency micropayments.
+- [ ] Explore **ZKML** integration for private model inference.
+- [ ] Multi-chain expansion (Solana via Hyperlane, SEI via LayerZero).
+
+---
+
+### Phase 8: Mainnet Launch
+**Timeline:** Week 52+  
+**Goal:** Production deployment.
+
+- [ ] Final security review and penetration testing.
+- [ ] Mainnet deployment (Avalanche C-Chain + Elastic L1).
+- [ ] Token Generation Event (TGE) preparation.
+- [ ] Ecosystem launch and developer onboarding.
 
 ---
 
@@ -112,4 +186,5 @@ This roadmap moves the project from "Simulation" to "Live Testnet" in approximat
 The Development Environment is currently **blocking** on the lack of Smart Contracts.
 
 **Recommended Action:**
-> Initialize the **Foundry** project in `/contracts` and begin **Phase 1: Week 1** (Token Implementation).
+> Initialize the **Foundry** project in `/contracts` and begin **Phase 1: Weeks 1-2** (Team Setup & Environment).
+

@@ -260,25 +260,33 @@ We have spent 6 months perfecting the design before writing a line of permanent 
 
 ---
 
-# Slide 13: The Roadmap (12-Week Sprint)
+# Slide 13: The Roadmap (24-Week MVP + Post-MVP)
 
 ## **From Simulation to Live Testnet**
 
-We have a detailed 4-Phase Execution Plan ready to trigger immediately.
+We have a detailed 8-Phase Execution Plan: **24-week MVP** followed by **post-MVP hardening**.
 
-*   **Phase 1 (Weeks 1-3): Economic Foundation** *("The Blood")*
+### **MVP Phase (24 Weeks)**
+
+*   **Phase 1 (Weeks 1-8): Economic Foundation** *("The Blood")*
     *   Deploy $VAMS Token, Staking, Vesting, and FeeCollector Contracts.
-    *   Deploy to Sepolia/Holesky Testnet.
-*   **Phase 2 (Weeks 4-6): The Real Neuron** *("The Nerves")*
-    *   Connect Python Client to On-Chain Registry.
-    *   Replace mocks with real Akash/io.net SDKs.
-    *   Migrate SQLite to Arweave (True Immortality).
-*   **Phase 3 (Weeks 7-9): The Dashboard** *("The Face")*
+    *   Deploy to Sepolia, then Avalanche Fuji C-Chain.
+*   **Phase 2 (Weeks 9-12): Avalanche Integration**
+    *   Deploy all contracts to Avalanche Fuji C-Chain.
+    *   Integrate Teleporter for cross-chain bridging.
+*   **Phase 3 (Weeks 13-16): CLR & Elastic L1**
+    *   Launch Conditional L1 Router (CLR).
+    *   Spin up first VAMS Sovereign L1 on Avalanche (ACP-77).
+    *   $VAMS as custom gas token + AWM integration.
+*   **Phase 4 (Weeks 17-24): Dashboard & Docs**
     *   Launch "AWS-style" Console (Next.js + RainbowKit).
-*   **Phase 4 (Weeks 10+): Intelligence & Scale** *("The Brain")*
-    *   Dynamic TAO (RL-based emission control).
-    *   x402 Payment Channels.
-    *   Mainnet Launch Prep (Audits).
+    *   First DePIN integration (Akash, Arweave).
+    *   Complete documentation + testnet launch.
+
+### **Post-MVP (Weeks 25-52)**
+
+*   **Phase 5-6 (Weeks 25-40):** Full DePIN Stack + TEE Security (io.net, Phala, Audits)
+*   **Phase 7-8 (Weeks 36-52+):** Dynamic TAO, x402 Channels, ZKML, Mainnet Launch
 
 ---
 
