@@ -95,8 +95,8 @@ Agent Request ──► [VAMS CLR] ──► Auto-routes to Best Chain
                       ├── Value > $10k? ───► Ethereum (Asset Safety)
                       ├── Need Privacy? ───► Phala TEE (Confidentiality)
                       ├── Sovereignty? ────► Avalanche L1 (Compliance)
-                      ├── Velocity < 1s? ──► Solana/SEI (Speed)
-                      └── Default ─────────► VAMS L3 (Cost Efficiency)
+                      ├── Velocity < 500ms? ► Solana/SEI (Speed)
+                      └── Default ─────────► Polygon CDK (Primary L3)
 ```
 
 ---
@@ -122,7 +122,7 @@ We don't just aggregate; we vertically integrate the essential primitives.
 │  io.net (GPU) • Akash (CPU) • Render (3D) • Bittensor (Models)          │
 ├─────────────────────────────────────────────────────────────────────────┤
 │  LAYER 1: FOUNDATION (The Ledger)                                        │
-│  Celestia • Near DA • Avalanche Sovereign L1s (Enterprise)              │
+│  Celestia • Near DA • Polygon (Primary) • Avalanche (Sovereign)         │
 └─────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -136,9 +136,9 @@ We don't just aggregate; we vertically integrate the essential primitives.
     *   **The Innovation:** A ZK-verified engine that dynamically routes based on a 4-step logic: *Privacy → Value → Sovereignty → Velocity*.
     *   **The Moat:** Complex cross-chain state verification that competitors (simple aggregators) simply cannot replicate.
 
-2.  **Sovereign Execution Domains (Avalanche)**
-    *   **The Innovation:** We don't just run *on* a chain; we spin up dedicated **Avalanche L1s** for enterprise agents.
-    *   **The Moat:** Regulatory compliance (GDPR/OFAC) built-in at the chain level. *No other aggregator offers this.*
+2.  **Dual-Chain Execution (Polygon + Avalanche)**
+    *   **The Innovation:** We use Polygon CDK for broad liquidity and Avalanche L1s for "Sovereign AI" custom VMs.
+    *   **The Moat:** Chain-agnostic execution that no single-chain protocol can match. *Best of both worlds.*
 
 3.  **Crash-Proof "Immortal" Agents**
     *   **The Innovation:** DBOS-integrated workflows that survive node failures.
@@ -236,7 +236,7 @@ We don't sell to end-users; we sell to the builders. Does your agent framework w
 | **AWS / Google** | Web2 Cloud          | Centralized, Censored      | Sovereign & Unstoppable     |
 | **Akash**        | Compute Marketplace | Just hosting, no AI stack  | Full 5-Layer Integration    |
 | **Bittensor**    | AI Models           | Complex incentives, siloed | Aggregation Meta-Layer      |
-| **Polygon**      | L2 Aggregation      | Ethereum-centric           | **Chain Agnostic (Any L1)** |
+| **Polygon**      | L2 Aggregation      | Ethereum-centric           | **VAMS Use:** Our Primary L3 Layer  |
 
 **Reliability Advantage:**
 We are the only protocol with a **Black Swan Recovery Matrix** (defined in Architecture §21), guaranteeing asset safety even if underlying chains halt.
@@ -271,13 +271,13 @@ We have a detailed 8-Phase Execution Plan: **24-week MVP** followed by **post-MV
 *   **Phase 1 (Weeks 1-8): Economic Foundation** *("The Blood")*
     *   Deploy $VAMS Token, Staking, Vesting, and FeeCollector Contracts.
     *   Deploy to Sepolia, then Avalanche Fuji C-Chain.
-*   **Phase 2 (Weeks 9-12): Avalanche Integration**
-    *   Deploy all contracts to Avalanche Fuji C-Chain.
-    *   Integrate Teleporter for cross-chain bridging.
-*   **Phase 3 (Weeks 13-16): CLR & Elastic L1**
+*   **Phase 2 (Weeks 9-12): Polygon CDK Integration**
+    *   Deploy VAMS L3 Validium stack (AggLayer).
+    *   Setup unified liquidity bridge.
+*   **Phase 3 (Weeks 13-16): CLR & Dual-Chain**
     *   Launch Conditional L1 Router (CLR).
-    *   Spin up first VAMS Sovereign L1 on Avalanche (ACP-77).
-    *   $VAMS as custom gas token + AWM integration.
+    *   Spin up secondary Avalanche Sovereign L1 (ACP-77).
+    *   $VAMS as custom gas token on both chains.
 *   **Phase 4 (Weeks 17-24): Dashboard & Docs**
     *   Launch "AWS-style" Console (Next.js + RainbowKit).
     *   First DePIN integration (Akash, Arweave).

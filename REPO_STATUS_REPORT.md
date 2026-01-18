@@ -24,13 +24,14 @@ The VAMS project is currently in the **Pre-Contracts & Pre-Testnet** phase of de
 | **Market Analysis** | **100%** | `MARKET_ANALYSIS.md` & `PITCH_DECK.md` ready for investors. |
 
 ### ⏳ Pending Items (The Implementation)
-| Component | Status | Priority | Requirement |
+| component | Status | Priority | Requirement |
 | :--- | :--- | :--- | :--- |
 | **Smart Contracts** | **0%** | 🚨 **CRITICAL** | $VAMS Token, Staking, Vesting, x402 Payments. |
 | **Real Infrastructure** | **0%** | 🟧 **HIGH** | Replace HTTP pings with real Akash/io.net SDK calls. |
+| **Polygon CDK Integration** | **0%** | 🟧 **HIGH** | Deploy VAMS L3 Validium stack (AggLayer). |
 | **Frontend Dashboard** | **0%** | 🟧 **HIGH** | "AWS Console" for user deposits and management. |
 | **Decentralized Storage** | **0%** | 🟨 **MEDIUM** | Migrate SQLite checkpoints to Arweave/Ceramic. |
-| **Testnet Deployment** | **0%** | 🟨 **MEDIUM** | Deploy contracts to Sepolia/Holesky. |
+| **Testnet Deployment** | **0%** | 🟨 **MEDIUM** | Deploy contracts to Polygon Amoy / Sepolia. |
 
 ---
 
@@ -77,18 +78,18 @@ This roadmap moves the project from "Simulation" to "Live Testnet" in approximat
 
 ---
 
-### Phase 2: Avalanche C-Chain Integration
+### Phase 2: Polygon CDK Integration
 **Timeline:** Weeks 9-12  
-**Goal:** Deploy contracts to Avalanche and integrate Teleporter bridge.
+**Goal:** Deploy VAMS L3 Validium stack and connect to AggLayer.
 
-- [ ] **Weeks 9-10: Fuji Deployment**
-    - [ ] Deploy all VAMS contracts to **Avalanche Fuji C-Chain** testnet.
-    - [ ] Configure Avalanche Core wallet integration.
-    - [ ] Test cross-chain compatibility and gas optimization.
-- [ ] **Weeks 11-12: Teleporter Bridge**
-    - [ ] Configure Teleporter bridge contracts for C-Chain communication.
-    - [ ] Implement cross-chain token transfer functionality (Sepolia ↔ Fuji).
-    - [ ] Test and validate bridge security.
+- [ ] **Weeks 9-10: VAMS L3 Deployment**
+    - [ ] Deploy Polygon CDK Validium (with Celestia DA).
+    - [ ] Configure unified liquidity bridge (AggLayer).
+    - [ ] Test cross-chain token transfers (Eth L1 ↔ VAMS L3).
+- [ ] **Weeks 11-12: AggLayer Integration**
+    - [ ] Implement atomic cross-chain swaps via AggLayer.
+    - [ ] Optimize proof submission frequency for cost/latency balance.
+    - [ ] Verify validity proofs on Ethereum Sepolia.
 
 ---
 
@@ -99,7 +100,8 @@ This roadmap moves the project from "Simulation" to "Live Testnet" in approximat
 - [ ] **Weeks 13-14: CLR Implementation**
     - [ ] Implement CLR smart contract with routing decision tree.
     - [ ] Route logic: Privacy → Value → Sovereignty → Velocity.
-    - [ ] Integrate Avalanche-specific routing for Sovereign L1 selection.
+    - [ ] Default route set to **Polygon CDK (VAMS L3)**.
+    - [ ] Implement secondary routing to Avalanche Elastic L1.
 - [ ] **Weeks 15-16: Elastic L1 Launch**
     - [ ] Spin up first VAMS Elastic L1 on Fuji testnet (ACP-77).
     - [ ] Configure **$VAMS as custom gas token** on Elastic L1.
@@ -175,7 +177,7 @@ This roadmap moves the project from "Simulation" to "Live Testnet" in approximat
 **Goal:** Production deployment.
 
 - [ ] Final security review and penetration testing.
-- [ ] Mainnet deployment (Avalanche C-Chain + Elastic L1).
+- [ ] Mainnet deployment (Polygon CDK + Avalanche L1).
 - [ ] Token Generation Event (TGE) preparation.
 - [ ] Ecosystem launch and developer onboarding.
 

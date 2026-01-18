@@ -31,7 +31,7 @@
 
 ## Abstract
 
-The emergence of autonomous AI agents as economic actors represents a fundamental shift in computational paradigms. However, the current decentralized infrastructure landscape presents an insurmountable "Usability Crisis"—fragmented protocols, volatile gas economics, and deterministic execution models that fundamentally conflict with probabilistic agent workflows. VAMS (Verifiable and Agentic Modular Stack) introduces a Layer 3 meta-architecture that unifies Decentralized Physical Infrastructure Networks (DePIN) into a coherent, agent-native execution environment. By functioning as the "AWS of Web3," VAMS provides programmatic access to federated compute, storage, and networking resources while preserving data sovereignty and enabling machine-to-machine micropayments through the x402 protocol. The architecture implements a novel Conditional L1 Router (CLR) that dynamically allocates transactions across settlement layers based on value, latency, and privacy requirements—eliminating the developer burden of chain selection. This paper presents the complete technical specification for VAMS v0.3.0, including its five-layer stack, cross-chain infrastructure, tokenomic model, and security mechanisms designed for mainnet deployment.
+The emergence of autonomous AI agents as economic actors represents a fundamental shift in computational paradigms. However, the current decentralized infrastructure landscape presents an insurmountable "Usability Crisis"—fragmented protocols, volatile gas economics, and deterministic execution models that fundamentally conflict with probabilistic agent workflows. VAMS (Verifiable and Agentic Modular Stack) introduces a Layer 3 meta-architecture that unifies Decentralized Physical Infrastructure Networks (DePIN) into a coherent, agent-native execution environment. **VAMS L3 operates primarily on Polygon CDK Validium with native AggLayer integration for unified liquidity, while offering Avalanche Elastic L1s for agents requiring custom VMs or sovereign execution.** By functioning as the "AWS of Web3," VAMS provides programmatic access to federated compute, storage, and networking resources while preserving data sovereignty and enabling machine-to-machine micropayments through the x402 protocol. The architecture implements a novel Conditional L1 Router (CLR) that dynamically allocates transactions across settlement layers based on value, latency, sovereignty, and privacy requirements—eliminating the developer burden of chain selection. This paper presents the complete technical specification for VAMS v0.3.0, including its five-layer stack, dual-chain infrastructure, tokenomic model, and security mechanisms designed for mainnet deployment.
 
 ---
 
@@ -213,11 +213,11 @@ Transaction Intake
         │
         ├── Value > $10,000? ───────► Route to Ethereum (via AggLayer)
         │
-        ├── Sovereignty Required? ──► Route to Avalanche L1 (Elastic/Evergreen)
+        ├── Sovereignty/Custom VM? ─► Route to Avalanche L1 (Elastic/Evergreen)
         │
-        ├── Latency < 1 second? ────► Route to Solana/SEI
+        ├── Latency < 500ms? ───────► Route to Solana/SEI
         │
-        └── Default ────────────────► Route to VAMS L3
+        └── Default ────────────────► Route to Polygon CDK (Primary VAMS L3)
 ```
 
 **Routing Proof Verification**: To ensure routing integrity, CLR decisions are accompanied by ZK-proofs verifying that the routing followed on-chain committed rules. Any party can challenge a routing decision, triggering stake slashing if fraud is proven.
@@ -228,10 +228,11 @@ VAMS maintains connectivity across multiple settlement layers:
 
 | Source | Destination | Transport | Latency | Security Model |
 |--------|-------------|-----------|---------|----------------|
-| VAMS L3 | Ethereum | AggLayer | ~12min | Pessimistic Proofs |
+| **VAMS L3 (Polygon CDK)** | Ethereum | AggLayer | ~5min | Validity Proofs |
+| **VAMS L3 (Polygon CDK)** | Other CDK Chains | AggLayer | ~1min | Unified Bridge |
 | VAMS L3 | Solana | Hyperlane | ~400ms | Multi-ISM verification |
 | VAMS L3 | SEI | LayerZero v2 | ~380ms | DVN consensus |
-| VAMS L3 | Avalanche L1s | AWM/Teleporter | ~250ms | BLS multi-sig |
+| VAMS L3 | Avalanche L1s (Secondary) | AWM/Teleporter | ~250ms | BLS multi-sig |
 
 **Multi-ISM Bridge Security**: To mitigate single-vendor bridge risk, VAMS implements a 2/3 consensus across TEE-based, Oracle-based, and Multisig ISMs for Hyperlane verification.
 

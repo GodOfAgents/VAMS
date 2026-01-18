@@ -1731,57 +1731,127 @@ graph TD
 ### 14.3 Routing Implementation (v2.1 with Sovereignty Check)
 
 ```python
-class CLRouter_V2:
+class CLRouter_V3:  # Updated for Dual-Chain Architecture
+    """
+    VAMS Dual-Chain Router (v3.0):
+    - PRIMARY: Polygon CDK Validium (default for most agents)
+    - SECONDARY: Avalanche Elastic L1 (sovereignty/custom VM needs)
+    """
     SECURITY_THRESHOLD = 10_000  # USD
     VELOCITY_THRESHOLD = 1_000   # ms
     
     async def route(self, tx: VAMSTransaction) -> RoutingDecision:
-        # Priority 1: Privacy
+        # Priority 1: Privacy → TEE
         if tx.metadata.requires_privacy:
             return await self._route_to_tee(tx)
         
-        # Priority 2: Security (High-value → Ethereum)
+        # Priority 2: Security (High-value → Ethereum via AggLayer)
         if tx.metadata.value_usd > self.SECURITY_THRESHOLD:
-            return await self._route_to_ethereum(tx)
+            return await self._route_to_ethereum_via_agglayer(tx)
         
-        # Priority 3: Sovereignty (NEW - Avalanche L1s)
-        if tx.metadata.requires_custom_gas or tx.metadata.requires_isolated_throughput:
+        # Priority 3: Sovereignty → Avalanche L1 (Secondary)
+        # Only route to Avalanche if agent explicitly needs:
+        # - Custom VM (HyperSDK), or
+        # - Sovereign validator set, or
+        # - Enterprise compliance (Evergreen)
+        if tx.metadata.requires_custom_vm or tx.metadata.requires_sovereignty:
             if tx.metadata.requires_compliance:
                 return await self._route_to_avalanche_evergreen(tx)
             return await self._route_to_avalanche_elastic(tx)
         
         # Priority 4: Velocity
         if tx.metadata.max_latency_ms < self.VELOCITY_THRESHOLD:
-            # Compare congestion: Avalanche L1 offers deterministic velocity
-            if self._get_solana_congestion() > CONGESTION_THRESHOLD:
-                return await self._route_to_avalanche_l1(optimized_for="velocity")
             if self._is_evm_payload(tx.payload):
                 return await self._route_to_sei(tx)
             return await self._route_to_solana(tx)
         
-        # Default: VAMS L3
-        return await self._route_to_vams_l3(tx)
+        # DEFAULT: Polygon CDK Validium (Primary VAMS L3)
+        # Most agents land here - unified liquidity via AggLayer
+        return await self._route_to_polygon_cdk(tx)
 ```
 
 ---
 
-## 15. Avalanche Network (Sovereign Execution Domain)
+## 15. Polygon CDK (Primary Execution Domain)
 
-Avalanche introduces a critical new architectural vector: **Sovereign Execution Domains**. With the Avalanche9000 upgrade and ACP-77, agents can control the entire vertical stack—from gas tokens to validator sets.
+Polygon CDK provides the **primary execution layer** for VAMS L3, leveraging Validium mode for cost-effective operations with Ethereum-grade security via validity proofs.
 
-### 15.1 Why Avalanche for VAMS?
+> [!NOTE]
+> VAMS L3 operates on **Polygon CDK Validium** by default. Agents requiring custom VMs or sovereign validator sets are routed to **Avalanche Elastic L1s** (Section 15B).
 
-| Capability | Solana | Ethereum | Avalanche L1 |
-|------------|--------|----------|---------------|
-| **State Isolation** | No (shared) | No (shared) | ✅ Dedicated blockspace |
-| **Custom Gas Token** | No (SOL only) | No (ETH only) | ✅ Any token |
-| **Validator Control** | No | No | ✅ Sovereign validator sets |
-| **Time to Finality** | ~400ms | ~12min | ~800ms-2s |
-| **TPS (Per Agent)** | Shared 2-5k | Shared ~15 | ✅ ~4,500 dedicated |
+### 15.1 Why Polygon CDK for Primary Execution?
+
+| Criteria | Polygon CDK | Avalanche L1 | Winner |
+|----------|-------------|--------------|--------|
+| **Liquidity Access** | AggLayer ($50B+ unified) | Isolated liquidity | Polygon |
+| **Ethereum Security** | ZK validity proofs to L1 | Independent consensus | Polygon |
+| **Ecosystem Grants** | Breakout, Village, ESP-eligible | infraBUIDL | Polygon |
+| **Custom Gas Token** | ✅ Native $VAMS | ✅ Native $VAMS | Tie |
+| **Custom VM** | ❌ EVM-only | ✅ HyperSDK | Avalanche |
+| **Configuration Cost** | Ultra-low (Validium) | Low (pay-as-you-go) | Polygon |
+
+### 15.2 Polygon CDK Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                    VAMS L3 on POLYGON CDK VALIDIUM                       │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                          │
+│  Agents → VAMS Gateway → Polygon CDK Validium (VAMS L3)                 │
+│                              │                                           │
+│                    ┌─────────┴─────────┐                                │
+│                    │                   │                                 │
+│              Celestia DA         AggLayer                               │
+│              (Data Avail)        (Unified Liquidity)                    │
+│                    │                   │                                 │
+│                    └─────────┬─────────┘                                │
+│                              │                                           │
+│                        Ethereum L1                                      │
+│                    (Validity Proofs Settlement)                         │
+│                                                                          │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+### 15.3 Key Integration Points
+
+| Component | Integration | Value |
+|-----------|-------------|-------|
+| **AggLayer** | Native participant | Access to $50B+ unified liquidity |
+| **Celestia DA** | Data Availability layer | Already in VAMS stack (Layer 1) |
+| **Custom Gas Token** | $VAMS as native gas | No ETH needed for txs |
+| **Ethereum Settlement** | Validity proofs | Maximum security for high-value |
+
+### 15.4 When to Use Polygon CDK (Default Route)
+
+- Standard agent transactions
+- DeFi/trading agents requiring deep liquidity
+- General-purpose AI agents
+- Agents prioritizing cost over sovereignty
+- Any workload where EVM is sufficient
+
+---
+
+## 15B. Avalanche Network (Sovereign Execution - Secondary)
+
+> [!IMPORTANT]
+> Avalanche Elastic L1s serve as the **secondary execution domain** for agents requiring features unavailable on EVM chains: custom VMs, sovereign validator sets, or enterprise compliance.
+
+Avalanche introduces a critical architectural vector: **Sovereign Execution Domains**. With the Avalanche9000 upgrade and ACP-77, agents can control the entire vertical stack—from gas tokens to validator sets.
+
+### 15B.1 Why Avalanche for Sovereign Agents?
+
+| Capability | Polygon CDK | Avalanche L1 |
+|------------|-------------|--------------|
+| **Custom VM** | ❌ EVM only | ✅ HyperSDK (any VM) |
+| **Validator Control** | ❌ Shared sequencer | ✅ Sovereign validator sets |
+| **State Isolation** | Shared with other CDK chains | ✅ Dedicated blockspace |
+| **Enterprise Compliance** | Standard | ✅ Evergreen (permissioned) |
+| **Time to Finality** | ~5-12min (to Eth L1) | ~800ms-2s |
+| **TPS (Per Agent)** | Shared | ✅ ~4,500 dedicated |
 
 > **Key Insight**: While Solana wins on raw latency, Avalanche wins on **predictability and control**. An agent on Avalanche L1 is the network—no competition with global traffic.
 
-### 15.2 ACP-77: The Sovereignty Catalyst
+### 15B.2 ACP-77: The Sovereignty Catalyst
 
 ACP-77 fundamentally changes the Avalanche economic model:
 
@@ -1792,7 +1862,7 @@ ACP-77 fundamentally changes the Avalanche economic model:
 | Heavy CapEx | Manageable OpEx (SaaS model) |
 | Enterprise-only | Accessible to all agents |
 
-### 15.3 HyperSDK: Custom Agent VMs
+### 15B.3 HyperSDK: Custom Agent VMs
 
 HyperSDK enables purpose-built Virtual Machines optimized for agent workloads:
 
@@ -1801,7 +1871,7 @@ HyperSDK enables purpose-built Virtual Machines optimized for agent workloads:
 - **Proof of Inference Consensus**: Custom consensus for compute verification
 - **Sub-second finality**: Stripped-down, lean execution environments
 
-### 15.4 Avalanche Warp Messaging (AWM) & Teleporter
+### 15B.4 Avalanche Warp Messaging (AWM) & Teleporter
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
@@ -1830,7 +1900,7 @@ HyperSDK enables purpose-built Virtual Machines optimized for agent workloads:
 └─────────────────────────────────────────────────────────────────────────┘
 ```
 
-### 15.5 VAMS Gateway Architecture (Hyperlane ↔ Teleporter)
+### 15B.5 VAMS Gateway Architecture (Hyperlane ↔ Teleporter)
 
 ```
 1. INGRESS:     Solana Agent → Hyperlane → VAMS_Gateway (C-Chain)
@@ -1839,7 +1909,7 @@ HyperSDK enables purpose-built Virtual Machines optimized for agent workloads:
 4. EGRESS:      Teleporter message → AWM → Target Avalanche L1
 ```
 
-### 15.6 Avalanche L1 Types for VAMS
+### 15B.6 Avalanche L1 Types for VAMS
 
 | L1 Type | Validator Set | Use Case |
 |---------|---------------|----------|
@@ -1847,7 +1917,7 @@ HyperSDK enables purpose-built Virtual Machines optimized for agent workloads:
 | **Evergreen L1** | Permissioned, KYC validators | Institutional/compliant agents |
 | **Ephemeral L1** | Spin up/down on demand | Just-in-Time blockchains |
 
-### 15.7 Integration with VAMS Layers
+### 15B.7 Integration with VAMS Layers
 
 | VAMS Layer | Avalanche Component | Value Proposition |
 |------------|---------------------|-------------------|
@@ -1865,19 +1935,29 @@ HyperSDK enables purpose-built Virtual Machines optimized for agent workloads:
 
 | Source | Destination | Transport | Latency | Security |
 |--------|-------------|-----------|---------|----------|
-| VAMS L3 | Ethereum | AggLayer | ~12min | Pessimistic Proofs |
+| **VAMS L3 (Polygon CDK)** | Ethereum | AggLayer | ~5min | Validity Proofs |
+| **VAMS L3 (Polygon CDK)** | Other CDK Chains | AggLayer | ~1min | Unified Bridge |
 | VAMS L3 | Solana | Hyperlane | ~400ms | ISM verification |
 | VAMS L3 | SEI | LayerZero v2 | ~380ms | DVN consensus |
 | VAMS L3 | Cosmos | Union Labs | ~1s | IBC |
 | VAMS L3 | Avalanche C-Chain | Hyperlane | ~800ms | ISM verification |
-| VAMS L3 | Avalanche L1s | AWM/Teleporter | ~250ms | BLS multi-sig |
+| VAMS L3 | Avalanche L1s (Secondary) | AWM/Teleporter | ~250ms | BLS multi-sig |
 | Avalanche L1 | Avalanche L1 | AWM | ~250ms | P-Chain validation |
 
-### 16.2 Polygon AggLayer (Unified Settlement Hub)
+### 16.2 Polygon AggLayer (Native Integration)
 
-- **Unified Liquidity**: Multichain network that feels like single chain
-- **Pessimistic Proofs**: Cryptographic guarantee against over-withdrawal
-- **Atomic Transactions**: Cross-chain execution in single action
+> [!IMPORTANT]
+> VAMS L3 is a **native AggLayer participant**, not just a consumer. This provides unified liquidity access and atomic cross-chain execution.
+
+**Key Benefits of Native AggLayer Integration:**
+
+| Benefit | Description |
+|---------|-------------|
+| **Unified Liquidity** | Access to $50B+ liquidity across all AggLayer chains |
+| **Pessimistic Proofs** | Cryptographic guarantee against over-withdrawal attacks |
+| **Atomic Transactions** | Cross-chain execution in single action |
+| **Fast Settlement** | ~5min to Ethereum L1 (vs ~12min for external bridges) |
+| **Grant Eligibility** | Breakout Program, Village Grants, ESP alignment |
 
 ### 16.3 Solana via Hyperlane
 

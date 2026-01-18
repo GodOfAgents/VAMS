@@ -39,7 +39,7 @@ No other project combines all six:
 | **2. Intelligent Routing** | CLR auto-selects optimal chain (Privacy → Value → Sovereignty → Velocity) |
 | **3. Agent-Native Runtime** | DBOS exactly-once execution, crash-proof workflows |
 | **4. Native Micropayments** | x402 agent-to-agent commerce |
-| **5. Cross-Chain Sovereignty** | Avalanche L1 custom chains for enterprises |
+| **5. Dual-Chain Execution** | Polygon CDK (primary) + Avalanche L1 (sovereignty) |
 | **6. Privacy by Default** | TEE + ZKML at every layer |
 
 ### vs. Competitors
@@ -149,9 +149,9 @@ $ vams usage --month          # View monthly breakdown
 
 | Phase | Timeline | Goal | Deliverables |
 |-------|----------|------|--------------|
-| **1: Economic Foundation** | Weeks 1-8 | Smart Contracts + Team | $VAMS, Staking, Vesting → Sepolia/Fuji |
-| **2: Avalanche Integration** | Weeks 9-12 | C-Chain + Teleporter | Contracts on Fuji, cross-chain bridge |
-| **3: CLR & Elastic L1** | Weeks 13-16 | Sovereign Execution | CLR router, first Avalanche L1, AWM |
+| **1: Economic Foundation** | Weeks 1-8 | Smart Contracts + Team | $VAMS, Staking, Vesting → Sepolia |
+| **2: Polygon CDK Integration** | Weeks 9-12 | Polygon CDK + AggLayer | VAMS L3 Validium, AggLayer liquidity |
+| **3: CLR & Dual-Chain** | Weeks 13-16 | Multi-Chain Routing | CLR router, Avalanche L1 (secondary) |
 | **4: Dashboard & Docs** | Weeks 17-24 | User Interface + Testing | Next.js Console, documentation, testnet launch |
 
 ### Post-MVP (Weeks 25-52)
