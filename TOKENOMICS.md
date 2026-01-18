@@ -299,6 +299,7 @@ VAMS is uniquely positioned to receive grants from the protocols it aggregates:
 | Provider             | Grant Program      | Potential      | Priority |
 |----------------------|--------------------|----------------|----------|
 | **Polygon/AggLayer** | Village Grants     | $25k - $100k   | High     |
+| **Avalanche**        | infraBUIDL         | $50k - $100k   | Medium   |
 | **Near Protocol**    | Horizon/Foundation | $10k - $50k    | High     |
 | **Filecoin/Arweave** | Open Data/Permaweb | $5k - $50k     | Medium   |
 | **Bittensor**        | Subnet Grants      | TAO Allocation | Medium   |
