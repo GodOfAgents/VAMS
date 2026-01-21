@@ -1,182 +1,209 @@
-# VAMS - Verifiable and Agentic Modular Stack
+<div align="center">
 
-> **The Sovereign Brain: A Unified Infrastructure Layer for Autonomous AI Agents**
+# VAMS
+### The Operating System for the Agentic Economy
+
+**Unified Infrastructure Layer | Autonomous AI Agents | Zero Friction**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Status](https://img.shields.io/badge/Status-Pre--Contracts-orange.svg)](./REPO_STATUS_REPORT.md)
-[![Architecture](https://img.shields.io/badge/Architecture-v0.3.0-blue.svg)](./ARCHITECTURE_v0-3-0.md)
-[![Market](https://img.shields.io/badge/TAM-$507B-green.svg)](./MARKET_ANALYSIS.md)
+[![Status](https://img.shields.io/badge/Status-Pre--Testnet-orange.svg)](./REPO_STATUS_REPORT.md)
+[![Architecture](https://img.shields.io/badge/Architecture-v0.3.0-blue.svg)](./Team%20Docs/ARCHITECTURE_v0-3-0.md)
+[![Market](https://img.shields.io/badge/TAM-$507B-green.svg)](./Team%20Docs/MARKET_ANALYSIS.md)
+
+**[Documentation](./REPO_STATUS_REPORT.md)** • **[Architecture](./Team%20Docs/ARCHITECTURE_v0-3-0.md)** • **[Whitepaper](./Team%20Docs/WHITEPAPER.md)** • **[Roadmap](./REPO_STATUS_REPORT.md#4-phase-by-phase-execution-roadmap)**
+
+</div>
 
 ---
 
-## 🧠 What is VAMS?
+## 💡 What is VAMS?
 
-VAMS (Verifiable and Agentic Modular Stack) is a **Layer 3 Meta-Architecture** that acts as the operating system for the Agentic Economy. It unifies fragmented decentralized infrastructure (DePIN) into a single, consumable API.
+**VAMS** (Verifiable and Agentic Modular Stack) is the **AWS of Web3** — a Layer 3 meta-architecture that unifies fragmented decentralized infrastructure (DePIN) into a single, consumable API.
 
-Think of it as the **"AWS of Web3"**—but 80% cheaper, censorship-resistant, and built for autonomous software.
+**One API. One Token. Any Agent. Any Chain.**
 
-### 🎯 The Problem We Solve
-
-| Friction | Traditional Web3 | VAMS Solution |
-|----------|------------------|---------------|
-| **Complexity** | 10+ wallets/tokens | One API, one token ($VAMS) |
-| **Cost** | AWS EC2: $0.10/hr | Akash: $0.02/hr (**80% cheaper**) |
-| **Payments** | Stripe: 2.9% + $0.30 | x402: 0.05% (**98% cheaper**) |
-| **Latency** | 12+ second blocks | Sub-second CLR routing |
-| **State** | Stateless transactions | Crash-proof durable execution |
-
----
-
-## 🚀 Why VAMS?
-
-### 6 Competitive Moats
-
-No other project combines all six:
-
-| Moat | Description |
-|------|-------------|
-| **1. Unified DePIN Access** | Single API for compute, storage, networking |
-| **2. Intelligent Routing** | CLR auto-selects optimal chain (Privacy → Value → Sovereignty → Velocity) |
-| **3. Agent-Native Runtime** | DBOS exactly-once execution, crash-proof workflows |
-| **4. Native Micropayments** | x402 agent-to-agent commerce |
-| **5. Dual-Chain Execution** | Polygon CDK (primary) + Avalanche L1 (sovereignty) |
-| **6. Privacy by Default** | TEE + ZKML at every layer |
-
-### vs. Competitors
-
-| Competitor | Their Focus | The Gap | VAMS Advantage |
-|------------|-------------|---------|----------------|
-| **AWS/GCP** | Centralized Cloud | Vendor lock-in, censorship | Decentralized, sovereign |
-| **Akash** | Compute only | No payments, no AI stack | Full 5-layer integration |
-| **io.net** | GPU clusters | Just GPUs, no runtime | Agent lifecycle management |
-| **Bittensor** | AI models | Complex, siloed | Infrastructure aggregator |
-| **Hyperlane** | Bridges | Just messaging | Full execution stack |
+<table>
+<tr>
+<td width="33%" align="center">
+<h3>🌐 $507B TAM</h3>
+<p>Cloud + AI infrastructure market</p>
+</td>
+<td width="33%" align="center">
+<h3>⚡ 80% Cheaper</h3>
+<p>vs AWS/GCP (Akash: $0.02/hr)</p>
+</td>
+<td width="33%" align="center">
+<h3>🔗 15+ Integrations</h3>
+<p>Polygon, Avalanche, Celestia, io.net</p>
+</td>
+</tr>
+</table>
 
 ---
 
-## 🔧 Framework Compatibility
+## 🎯 The Problem
 
-VAMS supports **any Python/TypeScript-based AI agent framework**:
+Building autonomous agents today means juggling **10+ wallets, 15+ protocols, and complex DevOps**.
 
-| Framework | Type | Integration | Deployment Target |
-|-----------|------|-------------|-------------------|
-| **LangChain** | LLM Orchestration | Python SDK | DBOS + io.net |
-| **CrewAI** | Multi-Agent | DBOS Workflows | Akash clusters |
-| **AutoGPT** | Autonomous Agent | Container | Akash + io.net |
-| **Pipecat** | Voice/Video AI | Streaming | Livepeer + Phala |
-| **OpenAI SDK** | Commercial | API Bridge | Marlin Oyster |
-| **Hugging Face** | Open Source | Container | io.net GPU |
-| **Custom Python** | Any | Docker/WASM | Full stack access |
+**Web2 Developer Pain:**
+- 💸 **High Costs** — AWS EC2: $0.10/hr, Stripe: 2.9% + $0.30
+- 🔒 **Vendor Lock-in** — Censorship, downtime, arbitrary ToS changes
+- 🧩 **No Stateful Execution** — Agents can't survive crashes
+
+**Web3 Developer Pain:**
+- 🌀 **Fragmentation** — Different wallet for each chain/token
+- 🐌 **Latency** — 12+ second block times kill UX
+- 💥 **Complexity** — Manually integrating Akash, Celestia, Phala, etc.
 
 ---
 
-## 🏗️ The 5-Layer Stack
+## ✨ The VAMS Solution
+
+### 🏗️ Three Core Pillars
+
+#### 1️⃣ **Unified DePIN Access**
+Single API for compute (io.net, Akash), storage (Arweave, Ceramic), and networking. No multi-wallet juggling.
+
+#### 2️⃣ **Intelligent Routing (CLR)**
+Conditional L1 Router auto-selects the optimal chain:
+- 🔐 **Privacy** → Phala TEE
+- 💰 **High Value** → Ethereum L1
+- 🚀 **Velocity** → Polygon CDK (sub-second)
+- 🏛️ **Sovereignty** → Avalanche L1
+
+#### 3️⃣ **Immortal Agents**
+DBOS-style durable execution. Agents checkpoint state to Arweave/Celestia and **survive crashes, network failures, even your laptop dying**.
+
+---
+
+## 🏛️ Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────────────────┐
-│  LAYER 5: ECONOMIC (Universal Settlement)                               │
-│  $VAMS Token • x402 Micropayments • Dynamic TAO Emission Control        │
-├─────────────────────────────────────────────────────────────────────────┤
-│  LAYER 4: TRUST (Verification)                                          │
-│  Phala TEE • Marlin Oyster • ZKML • Multi-ISM Bridge Security           │
-├─────────────────────────────────────────────────────────────────────────┤
-│  LAYER 3: LOGIC (The Kernel)                                            │
-│  DBOS Durable Execution • Kwil • WeaveDB • Glacier Vector DB            │
-├─────────────────────────────────────────────────────────────────────────┤
-│  LAYER 2: COMPUTE (The Muscle)                                          │
-│  io.net (GPU) • Akash (CPU) • Render Network • Bittensor (Models)       │
-├─────────────────────────────────────────────────────────────────────────┤
-│  LAYER 1: FOUNDATIONAL (The Ledger)                                     │
-│  Celestia (DA) • EigenDA (Security) • Near DA (Velocity) • Avail (ZK)   │
-└─────────────────────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────┐
+│  L5: ECONOMIC    $VAMS Token • x402 Micropayments        │
+├──────────────────────────────────────────────────────────┤
+│  L4: TRUST       Phala TEE • Marlin Oyster • ZKML        │
+├──────────────────────────────────────────────────────────┤
+│  L3: LOGIC       DBOS • Kwil • WeaveDB • Glacier         │
+├──────────────────────────────────────────────────────────┤
+│  L2: COMPUTE     io.net GPU • Akash CPU • Bittensor      │
+├──────────────────────────────────────────────────────────┤
+│  L1: FOUNDATION  Celestia • Polygon CDK • Avalanche L1   │
+└──────────────────────────────────────────────────────────┘
 ```
+
+> [!TIP]
+> **Deep Dive:** See [ARCHITECTURE_v0-3-0.md](./Team%20Docs/ARCHITECTURE_v0-3-0.md) for 4,400+ lines of technical specs including CLR routing logic, multi-TEE verification, and failover matrices.
 
 ---
 
-## 💰 Economic Model
+## 🚀 Why VAMS Wins
 
-### Fee Structure (100% Burn in Phase 1)
+| vs AWS/GCP | vs Akash | vs Bittensor | vs Hyperlane |
+|------------|----------|--------------|--------------|
+| ✅ Decentralized | ✅ Full stack | ✅ Easier UX | ✅ Execution layer |
+| ✅ 80% cheaper | ✅ Payments | ✅ Unified infra | ✅ Not just bridges |
+| ✅ Censorship-resistant | ✅ Agent runtime | ✅ Production-ready | ✅ Multi-chain routing |
 
-| Transaction Type | Min | Default | Max |
-|------------------|-----|---------|-----|
-| Standard Compute | 0.1% | 0.3% | 1.0% |
-| High-Value (>$10K) | 0.05% | 0.1% | 0.5% |
-| Micropayments (<$1) | $0.005 | $0.01 | $0.02 |
-| Bridge Transfers | 0.1% | 0.25% | 0.5% |
-
-### CLI Preview
-
-```bash
-$ vams balance                # View balance in USD
-$ vams topup 100 --from usdc  # Top up with USDC
-$ vams deploy ./agent.yaml    # Deploy with cost estimate
-$ vams usage --month          # View monthly breakdown
-```
+**No other project combines**: Unified DePIN + Intelligent Routing + Immortal Agents + Native Micropayments + Dual-Chain Execution + Privacy-First TEEs.
 
 ---
 
 ## 📊 Current Status
 
-**Stage:** Pre-Contracts & Pre-Testnet
+**Stage:** Pre-Testnet (Active Development) | **Version:** 1.2
 
-| Component | Status | Description |
-|-----------|--------|-------------|
-| **Architecture Specification** | ✅ 100% | 4,400+ lines of technical specs |
-| **Token Economic Model** | ✅ 100% | Vesting, burns, emissions defined |
-| **Market Analysis** | ✅ 100% | $507B TAM, competitor analysis |
-| **Agent Logic Prototype** | 🧪 30% | Local checkpointing works |
-| **Gateway MVP** | 🧪 20% | Basic heartbeat server |
-| **Smart Contracts** | 🏗️ 0% | Ready to start Phase 1 |
+| Component | Progress | Description |
+|-----------|----------|-------------|
+| 📋 **Specs** | 🟢 100% | Architecture, Tokenomics, Market Analysis |
+| 📜 **Smart Contracts** | 🟡 60% | Router, Slasher, Governance, Base (8 contracts) |
+| 🤖 **Agent Runtime** | 🟡 70% | 15 Python modules, DBOS workflows, TEE integration |
+| 🎨 **Frontend** | 🟡 40% | Next.js 16 + React 19, 9 components, 3D animations |
+| 🌐 **Gateway** | 🟡 50% | FastAPI server with dashboard |
+| ✅ **Tests** | 🔴 0% | Next milestone: Unit tests (>90% coverage) |
+
+> [!IMPORTANT]
+> **Next Milestone:** Implement `$VAMS` ERC-20 token and `VAMSVesting` contracts (Phase 1, Weeks 3-4). Foundation contracts already complete.
+
+Full roadmap: [REPO_STATUS_REPORT.md](./REPO_STATUS_REPORT.md)
 
 ---
 
 ## 📚 Documentation
 
-| Document | Description |
-|----------|-------------|
-| **[REPO_STATUS_REPORT](./REPO_STATUS_REPORT.md)** | **Start Here.** Current stage & 24-week MVP roadmap. |
-| **[WHITEPAPER](./WHITEPAPER.md)** | Academic-style technical whitepaper. |
-| **[ARCHITECTURE v0.3.0](./ARCHITECTURE_v0-3-0.md)** | Deep specs: CLR, TEEs, Failover Matrix. |
-| **[TOKENOMICS](./TOKENOMICS.md)** | $VAMS utility, 100% burn, vesting. |
-| **[MARKET ANALYSIS](./MARKET_ANALYSIS.md)** | $507B TAM, framework support. |
-| **[PITCH DECK](./PITCH_DECK.md)** | Strategic Partnership Proposal v3.3. |
+| Document | Purpose |
+|----------|---------|
+| **[📋 REPO STATUS](./REPO_STATUS_REPORT.md)** | **👈 Start here.** Current stage, 24-week MVP roadmap |
+| **[📖 Whitepaper](./Team%20Docs/WHITEPAPER.md)** | Academic technical overview |
+| **[🏗️ Architecture v0.3.0](./Team%20Docs/ARCHITECTURE_v0-3-0.md)** | Deep specs: CLR, TEEs, Failover Matrix |
+| **[💰 Tokenomics](./Team%20Docs/TOKENOMICS.md)** | $VAMS utility, burns, vesting, emissions |
+| **[📈 Market Analysis](./Team%20Docs/MARKET_ANALYSIS.md)** | $507B TAM, competitor analysis |
+| **[🎤 Pitch Deck](./Team%20Docs/PITCH_DECK.md)** | Strategic partnership proposal |
 
 ---
 
-## 🚦 Roadmap
+## 🛠️ Repository Structure
 
-### MVP Phase (24 Weeks)
-
-| Phase | Timeline | Goal | Deliverables |
-|-------|----------|------|--------------|
-| **1: Economic Foundation** | Weeks 1-8 | Smart Contracts + Team | $VAMS, Staking, Vesting → Sepolia |
-| **2: Polygon CDK Integration** | Weeks 9-12 | Polygon CDK + AggLayer | VAMS L3 Validium, AggLayer liquidity |
-| **3: CLR & Dual-Chain** | Weeks 13-16 | Multi-Chain Routing | CLR router, Avalanche L1 (secondary) |
-| **4: Dashboard & Docs** | Weeks 17-24 | User Interface + Testing | Next.js Console, documentation, testnet launch |
-
-### Post-MVP (Weeks 25-52)
-
-| Phase | Timeline | Goal |
-|-------|----------|------|
-| **5: Full DePIN Stack** | Weeks 25-36 | io.net GPU, Bittensor, Render |
-| **6: TEE & Security** | Weeks 28-40 | Phala TEE, Marlin Oyster, audits |
-| **7: Advanced Features** | Weeks 36-52 | Dynamic TAO, ZKML, x402 channels |
-| **8: Mainnet** | Week 52+ | Production launch |
+```bash
+VAMS-main/
+├── contracts/       # Foundry smart contracts (60% complete)
+│   ├── src/
+│   │   ├── routing/      # VAMSRouter (CLR implementation)
+│   │   ├── slashing/     # VAMSSlasher, SlashingParameters
+│   │   ├── governance/   # VAMSTimelockController
+│   │   └── base/         # VAMSUpgradeableBase, Emergency Pausable
+│   └── foundry.toml
+│
+├── frontend/        # Next.js 16 + React 19 (40% complete)
+│   ├── components/       # Hero, Problem, Solution (9 components)
+│   └── app/
+│
+├── neuron/          # "Immortal Agent" client (70% complete)
+│   ├── neuron.py         # Orchestration loop
+│   ├── workflows.py      # DBOS durable execution
+│   ├── compute.py        # Akash, io.net providers
+│   └── trust.py          # Phala, Marlin TEE integration
+│
+└── Team Docs/       # All documentation
+    ├── ARCHITECTURE_v0-3-0.md
+    ├── WHITEPAPER.md
+    └── TOKENOMICS.md
+```
 
 ---
 
-## 🤝 Strategic Partnership
+## 🔧 Quick Start
 
-**7% Token Allocation** available for strategic investors and partners.
+> [!NOTE]
+> **Prerequisites:** Foundry (contracts), Node.js 18+ (frontend), Python 3.10+ (neuron)
 
-| What We Offer | What We Need |
-|---------------|--------------|
-| 70M $VAMS tokens | Legal registration (Foundation/DAO) |
-| Early protocol access | Workspace for development |
-| Governance influence | Engineering talent (Blockchain, AI/ML, DePIN) |
-| Revenue share | Security audits |
+### 1️⃣ Clone the Repository
+```bash
+git clone https://github.com/GodOfAgents/VAMS-main.git
+cd VAMS-main
+```
 
-> See [PITCH_DECK.md](./PITCH_DECK.md) for the full proposal.
+### 2️⃣ Smart Contracts (Foundry)
+```bash
+cd contracts
+forge install
+forge build
+forge test  # (tests coming in Phase 1)
+```
+
+### 3️⃣ Frontend
+```bash
+cd frontend
+npm install
+npm run dev  # Opens on http://localhost:3000
+```
+
+### 4️⃣ Agent Runtime
+```bash
+cd neuron
+pip install -r requirements.txt
+python demo_cli.py  # Interactive demo
+```
 
 ---
 
@@ -184,38 +211,27 @@ $ vams usage --month          # View monthly breakdown
 
 We are committed to **radical transparency**:
 
-- 📝 **Every design decision** documented in `ARCHITECTURE_v0-3-0.md`
-- 💰 **Every token allocation** specified in `TOKENOMICS.md`
-- 🔍 **Every gap** between design and code tracked in `REPO_STATUS_REPORT.md`
+- 📝 **Every design decision** documented in [ARCHITECTURE_v0-3-0.md](./Team%20Docs/ARCHITECTURE_v0-3-0.md)
+- 💰 **Every token allocation** specified in [TOKENOMICS.md](./Team%20Docs/TOKENOMICS.md)
+- 🔍 **Every gap** tracked in [REPO_STATUS_REPORT.md](./REPO_STATUS_REPORT.md)
 
-This repository is our single source of truth.
-
----
-
-## 🛠️ Repository Structure
-
-```
-/VAMS-main
-├── /contracts        # (Pending) $VAMS Token, Staking, Vesting
-├── /gateway          # Python FastAPI node coordinator
-├── /neuron           # "Immortal Agent" client
-│   ├── neuron.py     # Main interaction loop
-│   ├── workflows.py  # DBOS-style durable execution
-│   ├── compute.py    # Layer 2 providers (Akash, io.net)
-│   └── trust.py      # Layer 4 TEE providers (Phala, Marlin)
-├── ARCHITECTURE_v0-3-0.md
-├── TOKENOMICS.md
-├── MARKET_ANALYSIS.md
-├── WHITEPAPER.md
-├── PITCH_DECK.md
-└── REPO_STATUS_REPORT.md
-```
+**This repository is our single source of truth.**
 
 ---
 
-## 🔐 Intellectual Property
+## 🤝 Contributing & Partnership
 
-Cryptographic proof of authorship available. See [PROOF_OF_AUTHORSHIP.md](./PROOF_OF_AUTHORSHIP.md) for SHA-256 fingerprints.
+### For Developers
+- **Contributions welcome!** See roadmap in [REPO_STATUS_REPORT.md](./REPO_STATUS_REPORT.md)
+- **Join the build:** Phase 1 (Smart Contracts) is active
+
+### For Investors
+- **7% token allocation** (70M $VAMS) available for strategic partners
+- See [PITCH_DECK.md](./Team%20Docs/PITCH_DECK.md) for full proposal
+
+### For Ecosystem Partners
+- Grant applications: [Ecosystem_Grants.md](./Team%20Docs/Ecosystem_Grants.md)
+- Integration opportunities: Polygon, Avalanche, Celestia, io.net, Bittensor
 
 ---
 
@@ -229,9 +245,16 @@ Cryptographic proof of authorship available. See [PROOF_OF_AUTHORSHIP.md](./PROO
 | **LinkedIn** | [linkedin.com/in/aseemchishti](https://www.linkedin.com/in/aseemchishti) |
 | **GitHub** | [GodOfAgents](https://github.com/GodOfAgents) |
 
+**Proof of Authorship:** [PROOF_OF_AUTHORSHIP.md](./PROOF_OF_AUTHORSHIP.md)
+
 ---
 
-<p align="center">
-  <b>VAMS: Any Agent. Any Chain. One Stack.</b><br>
-  <i>The Operating System for the Agentic Economy</i>
-</p>
+<div align="center">
+
+**VAMS: Any Agent. Any Chain. One Stack.** 🚀
+
+*The Operating System for the Agentic Economy*
+
+[![Star](https://img.shields.io/github/stars/GodOfAgents/VAMS-main?style=social)](https://github.com/GodOfAgents/VAMS-main)
+
+</div>
