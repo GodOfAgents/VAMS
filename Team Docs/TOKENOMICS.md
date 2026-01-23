@@ -452,7 +452,7 @@ To prevent governance spam and ensure serious proposals:
 
 | Parameter | Value |
 |-----------|-------|
-| **Minimum Stake** | 100 $VAMS |
+| **Minimum Stake** | 1,000 $VAMS |
 | **Lock Period** | 7 days (unbonding) |
 | **Compounding** | Auto-compound option available |
 
