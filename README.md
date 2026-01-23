@@ -39,8 +39,9 @@
 </tr>
 </table>
 
-
-<video src="[VAMS - Dawn of Agentic Economy.mp4](https://github.com/GodOfAgents/VAMS/blob/main/VAMS%20-%20Dawn%20of%20Agentic%20Economy.mp4)" control width="100%"></video>
+### 🎥 VAMS: The Dawn of Agentic Economy
+<video src="VAMS%20-%20Dawn%20of%20Agentic%20Economy.mp4" controls="controls" style="max-width: 100%;">
+</video>
 
 ---
 
