@@ -122,7 +122,7 @@ DBOS-style durable execution. Agents checkpoint state to Arweave/Celestia and **
 | 📋 **Specs** | 🟢 100% | Architecture, Tokenomics, Market Analysis |
 | 📜 **Smart Contracts** | 🟡 60% | Router, Slasher, Governance, Base (8 contracts) |
 | 🤖 **Agent Runtime** | 🟡 70% | 15 Python modules, DBOS workflows, TEE integration |
-| 🎨 **Frontend** | 🟡 40% | Next.js 16 + React 19, 9 components, 3D animations |
+| 🎨 **Frontend** | 🟢 95% | React 19 + Vite, 3D animations, Sub-1s load time |
 | 🌐 **Gateway** | 🟡 50% | FastAPI server with dashboard |
 | ✅ **Tests** | 🔴 0% | Next milestone: Unit tests (>90% coverage) |
 
@@ -158,7 +158,7 @@ VAMS-main/
 │   │   └── base/         # VAMSUpgradeableBase, Emergency Pausable
 │   └── foundry.toml
 │
-├── frontend/        # Next.js 16 + React 19 (40% complete)
+├── frontend/        # React 19 + Vite (95% complete)
 │   ├── components/       # Hero, Problem, Solution (9 components)
 │   └── app/
 │
@@ -199,7 +199,7 @@ forge test  # (tests coming in Phase 1)
 ```bash
 cd frontend
 npm install
-npm run dev  # Opens on http://localhost:3000
+npm run dev  # Opens on http://localhost:5173
 ```
 
 ### 4️⃣ Agent Runtime

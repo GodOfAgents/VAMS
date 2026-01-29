@@ -243,7 +243,13 @@ class AutomataProvider(TrustProvider):
 class TrustManager:
     """Manages TEE providers with health monitoring."""
     
-    def __init__(self, providers: Optional[List[TrustProvider]] = None):
+    def __init__(
+        self, 
+        providers: Optional[List[TrustProvider]] = None,
+        mock_mode: bool = False
+    ):
+        self.mock_mode = mock_mode
+        
         if providers is None:
             providers = [
                 PhalaProvider(),
@@ -259,8 +265,38 @@ class TrustManager:
     
     def check_all_status(self) -> Dict[str, TrustInfo]:
         """Check status of all TEE providers."""
+        if self.mock_mode:
+            return self._get_mock_status()
+        
         for name, provider in self.providers.items():
             self.status_cache[name] = provider.get_status()
+        return self.status_cache
+    
+    def _get_mock_status(self) -> Dict[str, TrustInfo]:
+        """Return mock status for testing."""
+        self.status_cache = {
+            "phala": TrustInfo(
+                provider="phala",
+                status=TrustStatus.HEALTHY,
+                technology="Intel SGX",
+                capacity={"network": "mock", "mock": True},
+                latency_ms=50.0
+            ),
+            "marlin": TrustInfo(
+                provider="marlin",
+                status=TrustStatus.HEALTHY,
+                technology="AWS Nitro",
+                capacity={"service": "mock", "mock": True},
+                latency_ms=45.0
+            ),
+            "automata": TrustInfo(
+                provider="automata",
+                status=TrustStatus.HEALTHY,
+                technology="Multi-Prover",
+                capacity={"chain_id": 1, "mock": True},
+                latency_ms=40.0
+            )
+        }
         return self.status_cache
     
     def get_healthy_providers(self) -> List[str]:
@@ -284,6 +320,7 @@ class TrustManager:
         return result
 
 
-def create_trust_manager() -> TrustManager:
+def create_trust_manager(mock_mode: bool = False) -> TrustManager:
     """Create a trust manager with all default providers."""
-    return TrustManager()
+    return TrustManager(mock_mode=mock_mode)
+

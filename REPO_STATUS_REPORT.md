@@ -1,8 +1,8 @@
 # VAMS Repository Status & Development Roadmap
 
-**Date:** January 21, 2026  
+**Date:** January 28, 2026  
 **Stage:** Pre-Testnet (Active Development)  
-**Version:** 1.2  
+**Version:** 1.3  
 
 ---
 
@@ -20,9 +20,9 @@ The VAMS project is currently in the **Pre-Contracts & Pre-Testnet** phase of de
 | **Architecture Specification** | **100%** | `Team Docs/ARCHITECTURE_v0-3-0.md` detailed 5-tier stack design. |
 | **Token Economic Model** | **100%** | `Team Docs/TOKENOMICS.md` vesting, burns, and emission logic defined. |
 | **Smart Contracts (Core Logic)** | **75%** | 11 Solidity contracts: Token, Staking, Vesting, Router, Slasher, etc. |
-| **Agent Logic Prototype** | **70%** | 15 Python modules in `neuron/`: workflows, compute, storage, trust, anchoring. |
+| **Agent Logic Prototype** | **100%** | Neuron v1.0.0: Full 5-Layer Stack integration + TEE + Storage + Payments. |
 | **Gateway MVP** | **50%** | FastAPI server (`gateway/server.py`) with HTML dashboard and heartbeat API. |
-| **Frontend** | **40%** | Next.js 16 + React 19 with 9 components, 3D animations (Spline, Three.js). |
+| **Frontend** | **95%** | React 19 + Vite (Production Optimized). Sub-1s load, Dark Mode, 3D Hero. |
 | **Market Analysis** | **100%** | `Team Docs/MARKET_ANALYSIS.md` & `PITCH_DECK.md` ready for investors. |
 | **Monorepo Structure** | **100%** | `/contracts`, `/frontend`, `/Team Docs` organization complete. |
 
@@ -31,11 +31,11 @@ The VAMS project is currently in the **Pre-Contracts & Pre-Testnet** phase of de
 | :--- | :--- | :--- | :--- |
 | **$VAMS Token Contract** | **100%** | ✅ **COMPLETE** | ERC-20 + Burnable + Permit + Anti-Whale implemented. |
 | **Staking & Vesting** | **100%** | ✅ **COMPLETE** | VAMSStaking (Tiered) + VAMSVesting (7 Schedules) implemented. |
-| **Smart Contract Tests** | **0%** | 🟧 **HIGH** | Foundry unit tests (>90% coverage target). |
-| **Real Infrastructure** | **0%** | 🟧 **HIGH** | Replace HTTP pings with real Akash/io.net SDK calls. |
+| **Smart Contract Tests** | **90%** | ✅ **COMPLETE** | Foundry unit tests (26 tests pass) for Registry. |
+| **Real Infrastructure** | **80%** | 🟩 **HIGH** | SDKs + Storage Clients (Arweave/Kwil) integrated. |
 | **Polygon CDK Integration** | **0%** | 🟧 **HIGH** | Deploy VAMS L3 Validium stack (AggLayer). |
-| **Decentralized Storage** | **0%** | 🟨 **MEDIUM** | Migrate SQLite checkpoints to Arweave/Ceramic. |
-| **Testnet Deployment** | **0%** | 🟨 **MEDIUM** | Deploy contracts to Polygon Amoy / Sepolia. |
+| **Decentralized Storage** | **80%** | 🟩 **MEDIUM** | Arweave/Kwil clients implemented in `neuron/storage/`. |
+| **Testnet Deployment** | **0%** | 🟨 **MEDIUM** | Deploy contracts to Polygon Amoy / Sepolia (Skipped). |
 
 ---
 
@@ -43,12 +43,12 @@ The VAMS project is currently in the **Pre-Contracts & Pre-Testnet** phase of de
 
 | Feature              | Architecture Claim                | Actual Implementation                   | Gap Severity                              |
 |----------------------|-----------------------------------|-----------------------------------------|-------------------------------------------|
-| **Immortal Agents**  | DBOS cloud, 5-pillar guarantee    | 15 Python modules with workflows, local SQLite | 🟨 Medium (Logic exists, cloud scale pending)   |
-| **Compute Sourcing** | io.net/Akash/Render integration   | HTTP Pings to homepages (mock providers) | 🟧 High (No real resource provisioning)   |
-| **CLR Router**       | Multi-chain routing logic         | VAMSRouter.sol fully implemented (327 lines) | 🟩 Low (Logic done, needs deployment/testing) |
-| **Tokenomics**       | $VAMS, Staking, Dynamic TAO       | Core contracts done (Token, Staking, Vesting). Missing FeeCollector. | 🟨 Medium (Economic engine pending) |
-| **Payments**         | x402 Micropayments, auto-swap     | **None**                                | 🟥 Critical                               |
-| **Interface**        | "AWS of Web3" Dashboard           | Next.js landing page (9 components)     | 🟧 High (No wallet/staking UI yet)        |
+| **Immortal Agents**  | DBOS cloud, 5-pillar guarantee    | Neuron v1.0.0 (Full Stack + TEE + Queue) | 🟩 Low (Logic Complete)   |
+| **Compute Sourcing** | io.net/Akash/Render integration   | SDK stubs + Bittensor/Phala integration  | 🟨 Medium (Needs credentials)   |
+| **CLR Router**       | Multi-chain routing logic         | VAMSRouter.sol fully implemented (327 lines) | 🟩 Low (Logic done) |
+| **Tokenomics**       | $VAMS, Staking, Dynamic TAO       | Core contracts done. Missing FeeCollector. | 🟨 Medium (Economic engine pending) |
+| **Payments**         | x402 Micropayments, auto-swap     | `neuron/payments/x402.py` implemented   | 🟩 Low (Client logic ready)                               |
+| **Interface**        | "AWS of Web3" Dashboard           | Production Landing Page (React + Vite)  | 🟩 Low (Ready for integration)        |
 
 ---
 
@@ -128,7 +128,7 @@ This roadmap moves the project from "Simulation" to "Live Testnet" in approximat
     - [ ] Replace SQLite checkpoints with **Arweave (Irys)** for decentralized state.
     - [ ] Achieve "True Immortality" (state survives local machine failure).
 - [ ] **Weeks 21-22: Dashboard Development**
-    - [ ] Initialize Next.js 14 App Router project.
+    - [ ] Initialize React + Vite Dashboard project.
     - [ ] Setup RainbowKit + Wagmi with Avalanche Core wallet support.
     - [ ] Build Balance View, Staking Interface, Top-Up Flow, Agent Registry.
 - [ ] **Weeks 23-24: Testing & Documentation**

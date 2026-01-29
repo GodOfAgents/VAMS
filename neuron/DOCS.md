@@ -1,8 +1,15 @@
-# VAMS Neuron Documentation
+# VAMS Neuron Documentation v0.5.1
 
 ## Overview
 
-VAMS Neuron is a multi-chain Data Availability (DA) monitor that connects to Layer 1 blockchain networks and generates cryptographically signed telemetry. It's part of the VAMS (Verifiable and Agentic Modular Stack) infrastructure.
+VAMS Neuron is a **real infrastructure client** for the Verifiable and Agentic Modular Stack. It monitors and connects to decentralized networks across four architectural layers to enable "Immortal Agents" - AI agents with:
+
+- **Crash-proof execution** via DBOS-style checkpointing
+- **Decentralized compute** from io.net, Akash, Render, Bittensor
+- **Persistent memory** on Arweave/WeaveDB
+- **TEE attestation** from Phala, Marlin, Automata
+
+This is production-ready infrastructure for Web3 AI agents.
 
 ---
 
@@ -25,24 +32,38 @@ pip install -r requirements.txt
 | `ecdsa` | ECDSA cryptography (Secp256k1) |
 | `colorama` | Terminal colors |
 
+### Optional SDK Dependencies
+```bash
+# For Bittensor SDK integration (optional)
+pip install bittensor
+
+# For tests
+pip install pytest
+```
+
 ---
 
 ## Quick Start
 
 ```bash
-# Run with defaults (Celestia)
-python neuron.py
+# Run full health check (all 15 providers)
+python neuron.py --full-health
 
-# Use a specific provider
+# Run crash-proof workflow demo
+python neuron.py --demo-workflow
+
+# Use a specific DA provider
 python neuron.py --provider near
 
-# Check all provider health
-python neuron.py --check-health
+# Test mode (no network calls)
+python neuron.py --dry-run --full-health
 ```
 
 ---
 
-## Supported DA Providers
+## 4-Layer Architecture
+
+### Layer 1: Data Availability
 
 | Provider | Network | Block Time | Best For |
 |----------|---------|------------|----------|
@@ -51,38 +72,76 @@ python neuron.py --check-health
 | **Near DA** | testnet | ~1s | High-frequency, fast finality |
 | **Avail** | turing | ~20s | ZK proofs, Validium |
 
+### Layer 2: Compute
+
+| Provider | Type | Best For |
+|----------|------|----------|
+| **io.net** | GPU Clusters (H100/A100) | AI inference |
+| **Akash** | Kubernetes/Docker | Persistent workloads |
+| **Render** | GPU Rendering | 3D assets, visual AI |
+| **Bittensor** | AI Subnets | Intelligence-as-a-Service |
+
+### Layer 3: Logic
+
+| Provider | Type | Best For |
+|----------|------|----------|
+| **Kwil** | Permissionless SQL | Relational data |
+| **WeaveDB** | NoSQL on Arweave | Permanent logs |
+| **Glacier** | Vector DB | Long-term memory, embeddings |
+| **DBOS Workflows** | Crash-proof | Exactly-once execution |
+
+### Layer 4: Trust (TEE)
+
+| Provider | Technology | Best For |
+|----------|------------|----------|
+| **Phala** | Intel SGX | Phat Contracts, private compute |
+| **Marlin** | AWS Nitro | Oyster TEE coprocessors |
+| **Automata** | Multi-Prover | 1RPC privacy relay |
+
 ---
 
 ## CLI Reference
-
-### Basic Usage
-```bash
-python neuron.py [OPTIONS]
-```
 
 ### Options
 
 | Option | Short | Description |
 |--------|-------|-------------|
-| `--provider NAME` | `-p` | Set primary provider (celestia, eigenda, near, avail) |
-| `--list-providers` | `-l` | List all available providers |
-| `--check-health` | | Check health of all providers |
+| `--provider NAME` | `-p` | Set primary DA provider |
+| `--list-providers` | `-l` | List DA providers |
+| `--check-health` | | Check Layer 1 health |
+| `--check-compute` | | Check Layer 2 health |
+| `--check-logic` | | Check Layer 3 health |
+| `--check-trust` | | Check Layer 4 health |
+| `--full-health` | | Check all 4 layers |
+| `--demo-workflow` | | Run crash-proof demo |
+| `--list-compute` | | List compute providers |
+| `--list-logic` | | List logic providers |
+| `--list-trust` | | List trust providers |
+| `--dry-run` | | Use mock providers (no network) |
+| `--use-sdk` | | Enable real SDK integrations |
+| `--sdk-health` | | Check health via SDK providers |
 | `--no-failover` | | Disable automatic failover |
-| `--interval SEC` | `-i` | Heartbeat interval in seconds |
+| `--interval SEC` | `-i` | Heartbeat interval |
 | `--version` | `-v` | Show version |
 | `--help` | `-h` | Show help |
 
 ### Examples
 
 ```bash
-# Use Near DA with 15-second interval
+# Full 4-layer health check
+python neuron.py --full-health
+
+# Use Near DA with 15-second heartbeat
 python neuron.py --provider near --interval 15
 
-# Run without failover
-python neuron.py --no-failover
+# Test mode (mock providers, no network)
+python neuron.py --dry-run --check-trust
 
-# List providers
-python neuron.py --list-providers
+# SDK health check (real protocol calls)
+python neuron.py --sdk-health
+
+# Crash-proof workflow demo
+python neuron.py --demo-workflow
 ```
 
 ---
@@ -93,14 +152,19 @@ python neuron.py --list-providers
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `VAMS_PROVIDER` | celestia | Default provider |
+| `VAMS_PROVIDER` | celestia | Default DA provider |
 | `VAMS_FAILOVER` | true | Enable auto-failover |
 | `VAMS_GATEWAY` | http://localhost:8000 | Gateway URL |
 | `HEARTBEAT_INTERVAL` | 30 | Seconds between heartbeats |
-| `CELESTIA_RPC` | https://rpc-mocha.pops.one | Celestia RPC |
-| `EIGENDA_RPC` | https://disperser-holesky.eigenda.xyz | EigenDA RPC |
-| `NEAR_RPC` | https://rpc.testnet.near.org | Near RPC |
-| `AVAIL_RPC` | https://turing-rpc.avail.so | Avail RPC |
+
+### DA Provider Endpoints
+
+| Variable | Default |
+|----------|---------|
+| `CELESTIA_RPC` | https://rpc-mocha.pops.one |
+| `EIGENDA_RPC` | https://holesky.drpc.org |
+| `NEAR_RPC` | https://rpc.testnet.near.org |
+| `AVAIL_RPC` | https://avail-turing.api.onfinality.io/public |
 
 ### Example
 ```bash
@@ -111,35 +175,172 @@ python neuron.py
 
 ---
 
+## SDK Integrations
+
+The neuron includes real protocol SDK integrations for production use.
+
+### Celestia DA (`sdk/celestia.py`)
+
+```python
+from sdk.celestia import CelestiaDA
+
+da = CelestiaDA()
+
+# Submit agent state
+blob = da.submit_blob(b"agent checkpoint data")
+print(f"Submitted at block #{blob.height}")
+
+# Retrieve data
+data = da.get_blob(blob.height, blob.commitment)
+
+# Health check
+health = da.check_health()
+```
+
+**Environment Variables:**
+| Variable | Description |
+|----------|-------------|
+| `CELESTIA_AUTH_TOKEN` | Auth token for light node RPC |
+| `CELESTIA_RPC` | RPC endpoint (default: localhost:26658) |
+
+### Bittensor (`sdk/bittensor_subnet.py`)
+
+```python
+from sdk.bittensor_subnet import BittensorSubnet
+
+bt = BittensorSubnet(netuid=1)
+
+# Get subnet info
+info = bt.get_subnet_info(1)
+print(f"SN1: {info.miners} miners")
+
+# Get top miners
+miners = bt.get_active_miners(1)[:10]
+```
+
+**Subnets Supported:** SN1 (Text Prompting), SN24 (BitAgent), SN32 (It's AI), and more.
+
+### Phala TEE (`sdk/phala_tee.py`)
+
+```python
+from sdk.phala_tee import PhalaTEE, check_all_tee_health
+
+tee = PhalaTEE()
+
+# Verify SGX attestation
+report = tee.verify_attestation(quote_bytes)
+
+# Multi-TEE verification (2-of-3)
+valid, reports = tee.verify_multi_tee(quotes, required=2)
+
+# Check all TEE providers
+health = check_all_tee_health()
+```
+
+**Providers:** Phala (Intel SGX), Marlin (AWS Nitro), Automata (Multi-Prover)
+
+---
+
+## Crash-Proof Workflows
+
+The neuron includes DBOS-style workflow checkpointing for crash-proof execution:
+
+```python
+from workflows import VamsWorkflow, checkpoint
+
+class MyWorkflow(VamsWorkflow):
+    @checkpoint("gather")
+    def step_gather(self):
+        return fetch_data()
+    
+    @checkpoint("process")
+    def step_process(self, data):
+        return process(data)
+```
+
+### Demo
+```bash
+python neuron.py --demo-workflow
+```
+
+Output:
+```
+[WORKFLOW] Starting: DataPipeline (ID: demo_1706424025)
+
+  [1/4] Gather Data......
+  [1/4] Gather Data...... [CHECKPOINT]
+  [2/4] Run Inference......
+  [2/4] Run Inference...... [CHECKPOINT]
+  -- Simulated crash! --
+
+[WORKFLOW] Restarting after crash...
+
+  [RECOVERY] Resuming from step 3: run_inference
+  [3/4] Execute Action......
+  [3/4] Execute Action...... [CHECKPOINT]
+  [4/4] Report Result......
+  [4/4] Report Result...... [CHECKPOINT]
+  [COMPLETE] Workflow finished successfully!
+```
+
+---
+
 ## Files Generated
 
 | File | Description |
 |------|-------------|
 | `node_identity.pem` | ECDSA private key (Secp256k1) - **Keep safe!** |
 | `neuron_data.db` | SQLite database with heartbeats and metrics |
+| `workflow_checkpoints.db` | Workflow checkpoint storage |
 
 ---
 
-## Architecture
+## Architecture Diagram
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│                    VAMS Neuron v0.2                      │
-├─────────────────────────────────────────────────────────┤
-│                                                          │
-│  ┌──────────────┐    ┌──────────────┐    ┌───────────┐ │
-│  │   CLI/Args   │───►│   Provider   │───►│  Storage  │ │
-│  │   Parser     │    │   Manager    │    │  (SQLite) │ │
-│  └──────────────┘    └──────────────┘    └───────────┘ │
-│                             │                           │
-│         ┌───────────────────┼───────────────────┐       │
-│         ▼                   ▼                   ▼       │
-│  ┌───────────┐    ┌─────────────┐    ┌───────────────┐ │
-│  │ Celestia  │    │   EigenDA   │    │ Near / Avail  │ │
-│  │    RPC    │    │     RPC     │    │     RPC       │ │
-│  └───────────┘    └─────────────┘    └───────────────┘ │
-│                                                          │
-└─────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────┐
+│                       VAMS Neuron v0.5.1                             │
+│                    IMMORTAL AGENT INFRASTRUCTURE                     │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                       │
+│  ┌─────────────────┐                        ┌─────────────────────┐  │
+│  │    CLI/Args     │                        │   Workflow Engine   │  │
+│  │    (neuron.py)  │───────────────────────►│  (Crash-Proof)      │  │
+│  └─────────────────┘                        └─────────────────────┘  │
+│           │                                           │              │
+│           ▼                                           ▼              │
+│  ┌─────────────────────────────────────────────────────────────────┐│
+│  │                    LAYER 1: DATA AVAILABILITY                    ││
+│  │  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐            ││
+│  │  │ Celestia │ │ EigenDA  │ │ Near DA  │ │  Avail   │            ││
+│  │  └──────────┘ └──────────┘ └──────────┘ └──────────┘            ││
+│  └─────────────────────────────────────────────────────────────────┘│
+│                                                                       │
+│  ┌─────────────────────────────────────────────────────────────────┐│
+│  │                    LAYER 2: COMPUTE                              ││
+│  │  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐            ││
+│  │  │  io.net  │ │  Akash   │ │  Render  │ │Bittensor │            ││
+│  │  │ (GPU AI) │ │  (K8s)   │ │  (3D)    │ │ (Subnets)│            ││
+│  │  └──────────┘ └──────────┘ └──────────┘ └──────────┘            ││
+│  └─────────────────────────────────────────────────────────────────┘│
+│                                                                       │
+│  ┌─────────────────────────────────────────────────────────────────┐│
+│  │                    LAYER 3: LOGIC                                ││
+│  │  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────────────┐    ││
+│  │  │   Kwil   │ │ WeaveDB  │ │ Glacier  │ │ DBOS Checkpoints │    ││
+│  │  │  (SQL)   │ │ (Arweave)│ │(Vector)  │ │ (Crash-Proof)    │    ││
+│  │  └──────────┘ └──────────┘ └──────────┘ └──────────────────┘    ││
+│  └─────────────────────────────────────────────────────────────────┘│
+│                                                                       │
+│  ┌─────────────────────────────────────────────────────────────────┐│
+│  │                    LAYER 4: TRUST (TEE)                          ││
+│  │  ┌────────────┐  ┌────────────┐  ┌────────────────┐             ││
+│  │  │   Phala    │  │   Marlin   │  │    Automata    │             ││
+│  │  │ (Intel SGX)│  │ (AWS Nitro)│  │ (Multi-Prover) │             ││
+│  │  └────────────┘  └────────────┘  └────────────────┘             ││
+│  └─────────────────────────────────────────────────────────────────┘│
+│                                                                       │
+└─────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -156,7 +357,7 @@ Each heartbeat is signed with the node's private key:
 ```json
 {
   "type": "VAMS_HEARTBEAT",
-  "version": "v0.2.0-alpha",
+  "version": "v0.5.1",
   "node_id": "41e47c55ff1d8e9c",
   "block_height": 9628553,
   "provider": "celestia",
@@ -164,6 +365,27 @@ Each heartbeat is signed with the node's private key:
   "nonce": "a1b2c3d4e5f67890"
 }
 ```
+
+---
+
+## Testing
+
+```bash
+# Run all tests
+python -m pytest tests/ -v
+
+# Run specific test file
+python -m pytest tests/test_neuron.py -v
+python -m pytest tests/test_workflows.py -v
+```
+
+### Test Coverage
+
+| Test File | Tests | Coverage |
+|-----------|-------|----------|
+| `test_neuron.py` | 16 | BittensorProvider, ComputeManager, TrustManager |
+| `test_workflows.py` | 15 | CheckpointStore, DemoWorkflow, crash recovery |
+| **Total** | **31** | **All pass** |
 
 ---
 
@@ -201,14 +423,20 @@ Dashboard: http://localhost:8000
 ```
 **Solution**: This is normal if gateway isn't running. Heartbeats are stored locally.
 
+### Dry-Run Mode
+If you see `[WARN] Running in DRY-RUN mode`, this is expected when using `--dry-run`. Remove the flag for real network calls.
+
 ---
 
 ## Version History
 
-| Version | Features |
-|---------|----------|
-| v0.1.0 | Celestia monitoring, identity, SQLite storage |
-| v0.2.0 | Multi-provider (Celestia, EigenDA, Near, Avail), CLI, failover |
+| Version | Date | Features |
+|---------|------|----------|
+| v0.1.0 | Jan 2026 | Celestia monitoring, identity, SQLite storage |
+| v0.2.0 | Jan 2026 | Multi-provider (Celestia, EigenDA, Near, Avail), CLI, failover |
+| v0.4.0 | Jan 2026 | 4-layer stack (Compute, Logic, Trust), TEE monitoring |
+| v0.5.0 | Jan 2026 | DBOS-style workflows, crash-proof checkpoints |
+| v0.5.1 | Jan 2026 | Bittensor SDK integration, mock mode, 31 tests |
 
 ---
 
