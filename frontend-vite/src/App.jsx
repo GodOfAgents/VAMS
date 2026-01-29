@@ -33,6 +33,7 @@ import {
   Moon
 } from 'lucide-react';
 import vamsLogo from './assets/vams-logo.png';
+import aseemProfile from './assets/aseem.jpg';
 
 /* VAMS DESIGN SYSTEM 6.0: Immersive 3D Experiences
    - Added: Section-specific Three.js backgrounds
@@ -443,9 +444,9 @@ export default function VAMS_Web3_Guild() {
               text="Infrastructure for"
               tag="h1"
               isDark={isDark}
-              className={`font-serif text-5xl md:text-7xl lg:text-[7rem] leading-[0.9] tracking-tight ${isDark ? 'text-[#DEE2E6]' : ''}`}
+              className={`font-serif text-4xl md:text-7xl lg:text-[7rem] leading-[0.9] tracking-tight ${isDark ? 'text-[#DEE2E6]' : ''}`}
             />
-            <div className={`font-serif text-5xl md:text-7xl lg:text-[7rem] leading-[0.9] italic tracking-tight ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+            <div className={`font-serif text-4xl md:text-7xl lg:text-[7rem] leading-[0.9] italic tracking-tight ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
               <SmokeHeader
                 text="The Agentic Economy"
                 tag="span"
@@ -603,7 +604,7 @@ export default function VAMS_Web3_Guild() {
         <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10">
           <header className="mb-20">
             <span className="font-mono text-[10px] uppercase text-red-600 tracking-[0.2em] mb-4 block font-bold">The Great Filter</span>
-            <SmokeHeader text="Paradigm Shift" isDark={isDark} className="font-serif text-5xl md:text-6xl mb-6 block" />
+            <SmokeHeader text="Paradigm Shift" isDark={isDark} className="font-serif text-4xl md:text-6xl mb-6 block" />
             <p className={`max-w-2xl ${textSub} tracking-wide`}>
               The transition from Human-Centric Web2 to Agentic Web3 requires a fundamental infrastructure overhaul.
             </p>
@@ -696,7 +697,7 @@ export default function VAMS_Web3_Guild() {
                     <span className="font-mono text-[9px] opacity-40">0{i + 1}</span>
                   </div>
 
-                  <h3 className="font-serif text-xl md:text-2xl mb-3">{item.title}</h3>
+                  <h3 className="font-serif text-2xl md:text-3xl mb-3">{item.title}</h3>
                   <p className={`text-sm ${textSub} mb-8 leading-relaxed max-w-[90%]`}>{item.desc}</p>
                 </div>
 
@@ -714,7 +715,7 @@ export default function VAMS_Web3_Guild() {
             <div className={`md:col-span-4 relative group p-10 rounded-[9px] border ${isDark ? 'border-gray-800' : 'border-gray-200'} ${isDark ? 'bg-white' : 'bg-black'} overflow-hidden flex flex-col md:flex-row items-center justify-between gap-8 transition-all duration-500 mt-4`}>
 
               <div className="text-center md:text-left z-10">
-                <h3 className={`${isDark ? 'text-black' : 'text-white'} font-serif text-3xl mb-2`}>Join the Guild</h3>
+                <h3 className={`${isDark ? 'text-black' : 'text-white'} font-serif text-2xl md:text-3xl mb-2`}>Join the Guild</h3>
                 <p className={`${isDark ? 'text-gray-600' : 'text-gray-300'} text-sm font-mono uppercase tracking-widest`}>
                   Community & Builder Access
                 </p>
@@ -747,7 +748,7 @@ export default function VAMS_Web3_Guild() {
       <SectionWrapper id="stack">
         <header className="mb-24">
           <span className={`font-mono text-[10px] uppercase ${textSub} tracking-[0.2em] mb-4 block`}>The Technology</span>
-          <SmokeHeader text="The 5-Layer Stack" isDark={isDark} className="font-serif text-5xl md:text-6xl mb-6 block" />
+          <SmokeHeader text="The 5-Layer Stack" isDark={isDark} className="font-serif text-4xl md:text-6xl mb-6 block" />
           <p className={`max-w-2xl ${textSub} leading-relaxed font-light text-lg tracking-wide`}>
             We don't just aggregate; we vertically integrate essential primitives into a unified operating system. The "AWS" for software agents.
           </p>
@@ -824,7 +825,7 @@ export default function VAMS_Web3_Guild() {
                 <Network size={16} aria-hidden="true" />
                 <span className="font-mono text-[10px] uppercase tracking-[0.2em]">Core Innovation</span>
               </div>
-              <SmokeHeader text="Conditional L1 Router" tag="h2" isDark={false} className="font-serif text-5xl md:text-6xl mb-8 block text-white" />
+              <SmokeHeader text="Conditional L1 Router" tag="h2" isDark={false} className="font-serif text-4xl md:text-6xl mb-8 block text-white" />
               <p className="text-xl text-gray-400 font-light leading-relaxed mb-16 max-w-lg tracking-wide">
                 A ZK-verified engine that dynamically routes transactions based on a deterministic 4-step logic gate.
               </p>
@@ -863,7 +864,7 @@ export default function VAMS_Web3_Guild() {
                   <div className="group cursor-default">
                     <div className="flex items-center gap-4 mb-3">
                       <div className="w-2 h-2 bg-purple-500 rounded-full group-hover:animate-ping"></div>
-                      <h4 className="text-3xl font-serif">Polygon CDK</h4>
+                      <h4 className="text-2xl md:text-3xl font-serif">Polygon CDK</h4>
                     </div>
                     <div className="text-sm text-gray-500 mb-4 pl-6 font-mono uppercase tracking-wide">Primary L3 Layer</div>
                     <p className="text-gray-400 text-sm leading-relaxed pl-6 border-l border-white/10 tracking-wide">
@@ -874,7 +875,7 @@ export default function VAMS_Web3_Guild() {
                   <div className="group cursor-default">
                     <div className="flex items-center gap-4 mb-3">
                       <div className="w-2 h-2 bg-red-500 rounded-full group-hover:animate-ping"></div>
-                      <h4 className="text-3xl font-serif">Avalanche L1s</h4>
+                      <h4 className="text-2xl md:text-3xl font-serif">Avalanche L1s</h4>
                     </div>
                     <div className="text-sm text-gray-500 mb-4 pl-6 font-mono uppercase tracking-wide">Secondary Sovereign Layer</div>
                     <p className="text-gray-400 text-sm leading-relaxed pl-6 border-l border-white/10 tracking-wide">
@@ -899,7 +900,7 @@ export default function VAMS_Web3_Guild() {
         <SectionWrapper id="tokenomics" className="relative z-10">
           <header className="flex flex-col items-center text-center max-w-3xl mx-auto mb-20">
             <span className={`font-mono text-[10px] uppercase ${textSub} tracking-[0.2em] mb-4 block`}>Economic Model</span>
-            <SmokeHeader text="$VAMS Tokenomics" isDark={isDark} className="font-serif text-5xl md:text-6xl mb-8 block text-center mx-auto" />
+            <SmokeHeader text="$VAMS Tokenomics" isDark={isDark} className={`font-serif text-4xl md:text-6xl mb-8 block text-center mx-auto ${isDark ? 'text-[#DEE2E6]' : ''}`} />
             <p className={`${textSub} font-light text-lg tracking-wide text-center`}>
               Designed for maximum value accrual and deflationary pressure. <br />We generate revenue from utility, not speculation.
             </p>
@@ -994,7 +995,7 @@ export default function VAMS_Web3_Guild() {
                 <div className={`font-mono text-[10px] ${textSub} uppercase mb-4 tracking-widest`}>{card.time}</div>
                 <div className="flex items-center gap-3 mb-6">
                   <div className={`w-6 h-6 ${isDark ? 'bg-white text-black group-hover:bg-green-500 group-hover:text-white' : 'bg-black text-white group-hover:bg-green-600'} flex items-center justify-center font-mono text-[10px] rounded-full transition-colors`}>{i + 1}</div>
-                  <h3 className="font-serif text-xl">{card.title}</h3>
+                  <h3 className="font-serif text-2xl md:text-3xl">{card.title}</h3>
                 </div>
                 <ul className="space-y-3">
                   {card.items.map((item, j) => (
@@ -1015,20 +1016,18 @@ export default function VAMS_Web3_Guild() {
         <div className="grid md:grid-cols-2 gap-24 items-center">
           <article>
             <span className={`font-mono text-[10px] uppercase ${textSub} tracking-[0.2em] mb-4 block`}>The Team</span>
-            <SmokeHeader text="Building in Public" isDark={isDark} className="font-serif text-5xl mb-8 block" />
-            <div className={`flex items-start gap-8 mb-12 border ${borderLight} p-8 shadow-sm ${bgAlt}`}>
-              <div className={`w-24 h-24 ${isDark ? 'bg-gray-800' : 'bg-gray-100'} grayscale rounded-full overflow-hidden flex-shrink-0 border ${borderLight}`}>
-                <div className={`w-full h-full flex items-center justify-center ${textSub}`}>
-                  <span className="font-serif text-2xl">AC</span>
-                </div>
+            <SmokeHeader text="Building in Public" isDark={isDark} className="font-serif text-4xl md:text-6xl mb-8 block" />
+            <div className={`flex flex-col md:flex-row items-center md:items-start gap-8 mb-12 border ${borderLight} p-8 shadow-sm ${bgAlt} text-center md:text-left`}>
+              <div className={`w-32 h-32 md:w-24 md:h-24 ${isDark ? 'bg-gray-800' : 'bg-gray-100'} rounded-full overflow-hidden flex-shrink-0 border ${borderLight} mx-auto md:mx-0`}>
+                <img src={aseemProfile} alt="Aseem Chishti" className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-500" />
               </div>
-              <div>
-                <h3 className="font-serif text-2xl mb-1">Aseem Chishti</h3>
+              <div className="w-full">
+                <h3 className="font-serif text-2xl md:text-3xl mb-1">Aseem Chishti</h3>
                 <p className={`font-mono text-[10px] uppercase ${textSub} mb-4 tracking-widest`}>Founder & Architect</p>
-                <p className={`${textSub} text-sm leading-relaxed max-w-sm font-light tracking-wide`}>
+                <p className={`${textSub} text-sm leading-relaxed font-light tracking-wide mx-auto md:mx-0`}>
                   Sole developer of the 5-Layer VAMS codebase and 6,100+ lines of technical specs. Deep expertise in DePIN, Agentic workflows, and tokenomics.
                 </p>
-                <div className="flex gap-4 mt-6">
+                <div className="flex gap-4 mt-6 justify-center md:justify-start">
                   <a href="https://github.com/GodOfAgents" target="_blank" rel="noopener noreferrer" className={`${textSub} hover:${isDark ? 'text-white' : 'text-black'} transition-colors`} aria-label="GitHub Profile"><Github size={18} /></a>
                   <a href="mailto:aseeminksa@gmail.com" className={`${textSub} hover:${isDark ? 'text-white' : 'text-black'} transition-colors`} aria-label="Email Contact"><Mail size={18} /></a>
                   <a href="https://t.me/AseemChishti" target="_blank" rel="noopener noreferrer" className={`${textSub} hover:${isDark ? 'text-white' : 'text-black'} transition-colors`} aria-label="Telegram"><Send size={18} /></a>
@@ -1049,7 +1048,7 @@ export default function VAMS_Web3_Guild() {
           <aside className="relative">
             <div className={`absolute inset-0 bg-gradient-to-br ${isDark ? 'from-gray-900 to-black' : 'from-gray-100 to-white'} -z-10 transform rotate-2 scale-105 border ${borderLight}`} aria-hidden="true"></div>
             <div className={`${isDark ? 'bg-white text-black' : 'bg-black text-white'} p-12 md:p-16 relative shadow-2xl transition-colors duration-700`}>
-              <h3 className="font-serif text-3xl mb-6">Join the Sovereign Revolution</h3>
+              <h3 className="font-serif text-2xl md:text-3xl mb-6">Join the Sovereign Revolution</h3>
               <p className={`${isDark ? 'text-gray-600' : 'text-gray-400'} mb-10 font-light leading-relaxed tracking-wide`}>
                 In 5 years, AI Agents will outnumber humans on the internet 100:1. VAMS will be the ground they walk on.
               </p>
@@ -1081,8 +1080,7 @@ export default function VAMS_Web3_Guild() {
         <div className="max-w-7xl mx-auto grid md:grid-cols-4 gap-12 text-sm text-gray-400">
           <div className="col-span-2">
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-8 h-8 border border-white flex items-center justify-center font-serif font-bold bg-white text-black">V</div>
-              <span className="font-mono tracking-[0.2em] uppercase text-white font-bold text-xs">VAMS Protocol</span>
+              <img src={vamsLogo} alt="VAMS Protocol" className="w-8 h-8 object-contain" />
             </div>
             <p className="max-w-xs mb-8 font-light leading-relaxed tracking-wide">
               The Verifiable and Agentic Modular Stack.<br />Infrastructure for the next generation of the internet.
@@ -1093,9 +1091,9 @@ export default function VAMS_Web3_Guild() {
           <nav aria-label="Footer Resources">
             <h4 className="text-white font-serif text-lg mb-6">Resources</h4>
             <ul className="space-y-4 font-light">
-              <li><a href="#" className="hover:text-white transition-colors">Whitepaper</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Documentation</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">GitHub</a></li>
+              <li><a href="https://drive.google.com/file/d/1H6tKKyeqczKr6pmsdqSGdYPrrA4oGr0R/" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Whitepaper</a></li>
+              <li><a href="https://github.com/GodOfAgents/VAMS" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Documentation</a></li>
+              <li><a href="https://github.com/GodOfAgents/VAMS" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">GitHub</a></li>
               <li><a href="#" className="hover:text-white transition-colors">Brand Assets</a></li>
             </ul>
           </nav>
@@ -1103,10 +1101,10 @@ export default function VAMS_Web3_Guild() {
           <nav aria-label="Social Links">
             <h4 className="text-white font-serif text-lg mb-6">Social</h4>
             <ul className="space-y-4 font-light">
-              <li><a href="#" className="hover:text-white transition-colors">Twitter / X</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Discord</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Telegram</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">LinkedIn</a></li>
+              <li><a href="https://x.com/aseemchishti" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Twitter / X</a></li>
+              <li><a href="https://discord.gg/Kp2PpXfkV" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Discord</a></li>
+              <li><a href="https://t.me/AseemChishti" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Telegram</a></li>
+              <li><a href="https://www.linkedin.com/in/aseemchishti" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">LinkedIn</a></li>
             </ul>
           </nav>
         </div>
