@@ -7,7 +7,7 @@ Centralized configuration for the VAMS Neuron client.
 import os
 
 # Version
-VERSION = "v0.5.0-alpha"
+VERSION = "v0.5.1"
 
 # VAMS Gateway (Optional - for connected mode)
 VAMS_GATEWAY = os.getenv("VAMS_GATEWAY", "http://localhost:8000")

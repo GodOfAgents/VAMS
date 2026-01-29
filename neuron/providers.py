@@ -106,16 +106,42 @@ class DAProvider(ABC):
 
 
 class CelestiaProvider(DAProvider):
-    """Celestia Mocha Testnet provider."""
+    """Celestia Mocha Testnet provider with SDK integration."""
     
     name = "celestia"
     network = "mocha-4"
     
-    def __init__(self, rpc_url: str = "https://rpc-mocha.pops.one", timeout: int = 10):
+    def __init__(self, rpc_url: str = "https://rpc-mocha.pops.one", timeout: int = 10, use_sdk: bool = False):
         super().__init__(rpc_url, timeout)
+        self.use_sdk = use_sdk
+        self._sdk = None
+        
+        if use_sdk:
+            try:
+                from sdk.celestia import CelestiaDA
+                self._sdk = CelestiaDA(rpc_url=rpc_url, timeout=timeout)
+            except ImportError:
+                self.use_sdk = False
     
     def get_latest_block(self) -> Optional[BlockInfo]:
-        """Query Celestia RPC for latest block."""
+        """Query Celestia RPC for latest block (with SDK fallback)."""
+        
+        # Try SDK first if enabled
+        if self._sdk:
+            try:
+                head = self._sdk.get_head()
+                if head and head.height > 0:
+                    return BlockInfo(
+                        height=head.height,
+                        network=self.network,
+                        provider=self.name,
+                        timestamp=time.time(),
+                        block_hash=head.hash[:16] if head.hash else None
+                    )
+            except Exception:
+                pass  # Fall back to RPC
+        
+        # Standard RPC approach
         try:
             response = self.session.get(
                 f"{self.rpc_url}/status",

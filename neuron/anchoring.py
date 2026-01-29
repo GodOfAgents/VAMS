@@ -61,66 +61,106 @@ class L1StateAnchor:
         self._anchor_count = 0
         self._last_block = self.BASE_BLOCK_NUMBER
     
+
     def compute_merkle_root(self, checkpoint_data: List[Dict[str, Any]]) -> str:
         """
-        Compute Merkle root from checkpoint data.
-        
-        In production: Uses proper Merkle tree with keccak256.
-        In PoC+: Uses SHA256 hash chain for demonstration.
+        Compute proper Merkle root from checkpoint data.
+        Uses SHA256 (or Keccak if using web3) for tree construction.
         """
         if not checkpoint_data:
             return "0x" + "0" * 64
         
-        # Create leaf hashes
+        # 1. Create leaf hashes
         leaves = []
         for cp in checkpoint_data:
             leaf_data = json.dumps(cp, sort_keys=True).encode('utf-8')
-            leaf_hash = hashlib.sha256(leaf_data).hexdigest()
+            # Using keccak256 would be better for ETH compatibility, but sticking to 
+            # consistent hashing for now (sha256). For real prod, switch to keccak.
+            leaf_hash = hashlib.sha256(leaf_data).digest()
             leaves.append(leaf_hash)
-        
-        # Simple hash chain (production would use proper Merkle tree)
-        combined = "".join(leaves)
-        root = hashlib.sha256(combined.encode('utf-8')).hexdigest()
-        
-        return f"0x{root}"
+            
+        if not leaves:
+            return "0x" + "0" * 64
+
+        # 2. Build tree
+        while len(leaves) > 1:
+            next_level = []
+            for i in range(0, len(leaves), 2):
+                if i + 1 < len(leaves):
+                    # Combine pair: H(a + b)
+                    combined = leaves[i] + leaves[i+1]
+                else:
+                    # Promote single leaf (or duplicate)
+                    # OpenZeppelin standard usually duplicates for balanced proof
+                    combined = leaves[i] + leaves[i]
+                
+                next_level.append(hashlib.sha256(combined).digest())
+            leaves = next_level
+            
+        return f"0x{leaves[0].hex()}"
     
     def submit_anchor(self, merkle_root: str, checkpoints_count: int = 0) -> AnchorReceipt:
         """
-        Submit state anchor to L1 (simulated).
+        Submit state anchor to L1.
         
-        In production: Sends transaction to StateAnchor contract on L1.
-        In PoC+: Generates fake tx hash and block number.
+        If Web3 client is configured, sends real transaction.
+        Otherwise falls back to simulation.
         """
         self._anchor_count += 1
         self._last_block += 1
         
-        # Generate simulated tx hash
-        tx_data = f"{merkle_root}:{self._anchor_count}:{time.time()}"
-        tx_hash = hashlib.sha256(tx_data.encode('utf-8')).hexdigest()
+        tx_hash = ""
+        block_number = self._last_block
+        simulated = True
         
-        # Simulate brief delay (L1 submission)
-        time.sleep(0.1)
+        # Try real Web3 submission
+        try:
+            from neuron.web3.registration import AgentRegistryClient
+            client = AgentRegistryClient()
+            if client.contract:
+                # Convert hex string "0x..." to bytes
+                root_bytes = bytes.fromhex(merkle_root[2:])
+                # Agent ID would be configured in real node, using dummy for now or derived
+                # For demo, we just use a hash of "agent"
+                agent_id = hashlib.sha256(b"agent").digest() 
+                
+                tx_hash_str = client.submit_checkpoint(root_bytes, agent_id)
+                tx_hash = tx_hash_str
+                block_number = client.w3.eth.block_number
+                simulated = False
+        except ImportError:
+            pass # Module not found or dependency missing
+        except Exception as e:
+            print(f"Warning: Web3 submission failed: {e}. Falling back to simulation.")
+            
+        if simulated:
+            # Generate simulated tx hash
+            tx_data = f"{merkle_root}:{self._anchor_count}:{time.time()}"
+            tx_hash_val = hashlib.sha256(tx_data.encode('utf-8')).hexdigest()
+            tx_hash = f"0x{tx_hash_val}"
+            
+            # Simulate brief delay (L1 submission)
+            time.sleep(0.1)
         
         return AnchorReceipt(
             merkle_root=merkle_root,
-            tx_hash=f"0x{tx_hash}",
-            block_number=self._last_block,
+            tx_hash=tx_hash,
+            block_number=block_number,
             timestamp=time.time(),
             checkpoints_included=checkpoints_count,
-            simulated=True
+            simulated=simulated
         )
     
     def verify_anchor(self, receipt: AnchorReceipt, checkpoint_data: List[Dict[str, Any]]) -> bool:
         """
         Verify that checkpoints match the anchored Merkle root.
-        
-        This is what allows state recovery even if VAMS L3 fails completely.
         """
         recomputed_root = self.compute_merkle_root(checkpoint_data)
         return recomputed_root == receipt.merkle_root
     
     def format_receipt(self, receipt: AnchorReceipt) -> str:
         """Format anchor receipt for display."""
+        status = "✓ REAL (Polygon)" if not receipt.simulated else "~ SIMULATED"
         return f"""
 ┌─────────────────────────────────────────────────────────────────────┐
 │  L1 STATE ANCHOR RECEIPT                                             │
@@ -128,7 +168,7 @@ class L1StateAnchor:
 │  Merkle Root:  {receipt.merkle_root[:18]}...{receipt.merkle_root[-8:]}  │
 │  Tx Hash:      {receipt.tx_hash[:18]}...{receipt.tx_hash[-8:]}  │
 │  Block:        #{receipt.block_number:,}                               │
-│  Chain:        {self.SIMULATED_CHAIN}                         │
+│  Status:       {status}                                   │
 │  Checkpoints:  {receipt.checkpoints_included} states anchored                          │
 └─────────────────────────────────────────────────────────────────────┘
 """

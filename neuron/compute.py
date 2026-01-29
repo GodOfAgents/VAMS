@@ -244,7 +244,13 @@ class BittensorProvider(ComputeProvider):
     """
     Bittensor - The Global Brain
     
-    Checks bittensor.org for reachability. Full API requires auth.
+    Primary: HTTP check to bittensor.org for reachability.
+    Optional: Real Bittensor SDK integration (requires `bittensor` package).
+    
+    Features:
+    - Mock mode for testing without real network
+    - Graceful fallback when wallet not configured
+    - TAO balance fetch with error handling
     """
     
     name = "bittensor"
@@ -256,11 +262,54 @@ class BittensorProvider(ComputeProvider):
         18: "Vision"
     }
     
-    def __init__(self, endpoint: str = "https://bittensor.org", timeout: int = 15):
+    def __init__(
+        self, 
+        endpoint: str = "https://bittensor.org", 
+        timeout: int = 15,
+        use_sdk: bool = False,
+        mock_mode: bool = False
+    ):
         super().__init__(endpoint, timeout)
+        self.use_sdk = use_sdk
+        self.mock_mode = mock_mode
+        self._subtensor = None
+        self._wallet = None
+        self._sdk_available = False
+        
+        # Try to import bittensor SDK if requested
+        if use_sdk and not mock_mode:
+            try:
+                import bittensor as bt
+                self._sdk_available = True
+            except ImportError:
+                self._sdk_available = False
     
     def get_status(self) -> ComputeInfo:
-        """Check Bittensor reachability."""
+        """Check Bittensor reachability or SDK status."""
+        if self.mock_mode:
+            return self._get_mock_status()
+        
+        if self.use_sdk and self._sdk_available:
+            return self._get_sdk_status()
+        
+        return self._get_http_status()
+    
+    def _get_mock_status(self) -> ComputeInfo:
+        """Return mock status for testing."""
+        return ComputeInfo(
+            provider=self.name,
+            status=ComputeStatus.HEALTHY,
+            capacity={
+                "subnets": "32+",
+                "network": "mock",
+                "tao_balance": 0.0,
+                "mock": True
+            },
+            latency_ms=50.0
+        )
+    
+    def _get_http_status(self) -> ComputeInfo:
+        """Check Bittensor reachability via HTTP."""
         start = time.time()
         try:
             response = self.session.get(
@@ -296,6 +345,63 @@ class BittensorProvider(ComputeProvider):
                 error=str(e)[:50]
             )
     
+    def _get_sdk_status(self) -> ComputeInfo:
+        """Check Bittensor status via SDK (requires bittensor package)."""
+        start = time.time()
+        try:
+            import bittensor as bt
+            
+            # Initialize subtensor connection if not already done
+            if self._subtensor is None:
+                self._subtensor = bt.subtensor(network="finney")
+            
+            # Get block number to verify connectivity
+            block = self._subtensor.get_current_block()
+            latency = (time.time() - start) * 1000
+            
+            # Try to get TAO balance if wallet is configured
+            tao_balance = None
+            try:
+                if self._wallet is None:
+                    self._wallet = bt.wallet()
+                balance = self._subtensor.get_balance(
+                    self._wallet.coldkeypub.ss58_address
+                )
+                tao_balance = float(balance)
+            except Exception as e:
+                # Wallet not configured or balance fetch failed - this is OK
+                # Log but don't fail the health check
+                tao_balance = None
+            
+            return ComputeInfo(
+                provider=self.name,
+                status=ComputeStatus.HEALTHY,
+                capacity={
+                    "subnets": "32+",
+                    "network": "finney",
+                    "block": block,
+                    "tao_balance": tao_balance,
+                    "sdk_mode": True
+                },
+                latency_ms=latency
+            )
+            
+        except ImportError:
+            return ComputeInfo(
+                provider=self.name,
+                status=ComputeStatus.DEGRADED,
+                latency_ms=0,
+                error="bittensor package not installed"
+            )
+        except Exception as e:
+            latency = (time.time() - start) * 1000
+            return ComputeInfo(
+                provider=self.name,
+                status=ComputeStatus.OFFLINE,
+                latency_ms=latency,
+                error=str(e)[:50]
+            )
+    
     def get_subnet_info(self, netuid: int) -> Optional[BittensorSubnetInfo]:
         """Get info about a specific subnet."""
         try:
@@ -316,6 +422,12 @@ class BittensorProvider(ComputeProvider):
         except Exception:
             pass
         return None
+    
+    def set_wallet(self, wallet) -> None:
+        """Set wallet for TAO balance queries (optional)."""
+        self._wallet = wallet
+
+
 
 
 class ComputeManager:

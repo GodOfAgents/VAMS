@@ -68,6 +68,14 @@ class CheckpointStore:
     def __init__(self, db_path: str = "workflow_checkpoints.db"):
         self.db_path = db_path
         self._init_db()
+        # Phase D: Decentralized Storage
+        try:
+            from storage import ArweaveStorage, KwilStorage
+            self.arweave = ArweaveStorage()
+            self.kwil = KwilStorage()
+            self.decentralized_enabled = True
+        except ImportError:
+            self.decentralized_enabled = False
     
     def _init_db(self):
         """Initialize the checkpoint database."""
@@ -82,6 +90,7 @@ class CheckpointStore:
                 step_index INTEGER NOT NULL,
                 data TEXT NOT NULL,
                 timestamp REAL NOT NULL,
+                arweave_tx TEXT,
                 UNIQUE(workflow_id, step_name)
             )
         ''')
@@ -103,19 +112,36 @@ class CheckpointStore:
     
     def save_checkpoint(self, checkpoint: Checkpoint):
         """Save a checkpoint."""
+        # 1. Store in decentralized storage (if enabled)
+        arweave_tx = None
+        if self.decentralized_enabled:
+            # We don't block on Arweave upload (it's slow or simulated)
+            # ideally we'd queue this, but for PoC we do it or skip
+            try:
+                # Store permanent memory of this checkpoint
+                arweave_tx = self.arweave.store_memory(
+                    agent_id="self", # TODO: Get actual ID
+                    data=checkpoint.to_dict(),
+                    tags={"Type": "Checkpoint", "Workflow": checkpoint.workflow_id}
+                )
+            except Exception:
+                pass
+
+        # 2. Store locally (SQLite)
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
         
         cursor.execute('''
             INSERT OR REPLACE INTO checkpoints 
-            (workflow_id, step_name, step_index, data, timestamp)
-            VALUES (?, ?, ?, ?, ?)
+            (workflow_id, step_name, step_index, data, timestamp, arweave_tx)
+            VALUES (?, ?, ?, ?, ?, ?)
         ''', (
             checkpoint.workflow_id,
             checkpoint.step_name,
             checkpoint.step_index,
             json.dumps(checkpoint.data),
-            checkpoint.timestamp
+            checkpoint.timestamp,
+            arweave_tx
         ))
         
         conn.commit()

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-VAMS Neuron v0.5.0
+VAMS Neuron v0.5.1
 ==================
 Immortal Agent - Full 4-Layer Stack with TEE
 
@@ -54,6 +54,15 @@ from compute import ComputeManager, ComputeStatus
 from workflows import run_demo_workflow, LogicLayerMonitor
 from trust import TrustManager, TrustStatus
 
+# SDK imports (optional - for real protocol integration)
+try:
+    from sdk.celestia import CelestiaDA, check_celestia_health
+    from sdk.bittensor_subnet import BittensorSubnet, check_bittensor_health
+    from sdk.phala_tee import PhalaTEE, check_all_tee_health
+    SDK_AVAILABLE = True
+except ImportError:
+    SDK_AVAILABLE = False
+
 
 def parse_args():
     """Parse command line arguments."""
@@ -95,6 +104,12 @@ Examples:
     # General
     parser.add_argument("--interval", "-i", type=int, default=HEARTBEAT_INTERVAL,
                         help=f"Heartbeat interval (default: {HEARTBEAT_INTERVAL}s)")
+    parser.add_argument("--dry-run", action="store_true", 
+                        help="Run with mock providers (no real network calls)")
+    parser.add_argument("--use-sdk", action="store_true",
+                        help="Use real SDK integrations (Celestia, Bittensor, Phala)")
+    parser.add_argument("--sdk-health", action="store_true",
+                        help="Check health using real SDK providers")
     parser.add_argument("--version", "-v", action="version", version=f"VAMS Neuron {VERSION}")
     
     return parser.parse_args()
@@ -103,7 +118,15 @@ Examples:
 class VamsNeuron:
     """VAMS Neuron Client v0.5 - 4-Layer Stack + TEE"""
     
-    def __init__(self, provider_name: str = "celestia", enable_failover: bool = True):
+    def __init__(
+        self, 
+        provider_name: str = "celestia", 
+        enable_failover: bool = True,
+        mock_mode: bool = False,
+        use_sdk: bool = False
+    ):
+        self.mock_mode = mock_mode
+        self.use_sdk = use_sdk and SDK_AVAILABLE
         self.sk: Optional[SigningKey] = None
         self.vk: Optional[VerifyingKey] = None
         self.node_id: str = ""
@@ -119,14 +142,48 @@ class VamsNeuron:
         self.provider_manager.set_primary(provider_name)
         self.provider_manager.enable_failover(enable_failover)
         
-        # Layer 2
-        self.compute_manager = ComputeManager()
+        # Layer 2 - Pass mock_mode to BittensorProvider
+        if mock_mode:
+            from compute import BittensorProvider, IoNetProvider, AkashProvider, RenderProvider
+            providers = [
+                IoNetProvider(),  # Uses HTTP which is OK
+                AkashProvider(),
+                RenderProvider(),
+                BittensorProvider(mock_mode=True)  # Use mock mode
+            ]
+            self.compute_manager = ComputeManager(providers=providers)
+        else:
+            self.compute_manager = ComputeManager()
         
         # Layer 3
         self.logic_monitor = LogicLayerMonitor()
         
+        # Phase D: Decentralized Storage & Queue (Pillars 4, 5)
+        try:
+            from storage import ArweaveStorage, KwilStorage
+            from request_queue import RequestQueue
+            self.arweave = ArweaveStorage(key=os.getenv("VAMS_IRYS_KEY"))
+            self.kwil = KwilStorage(db_id=os.getenv("VAMS_KWIL_DB"))
+            self.queue = RequestQueue()
+            self.log(f"Decentralized Storage & Queue initialized", "INFO")
+        except ImportError:
+            self.log("Storage/Queue modules missing or failed to load", "WARN")
+            self.queue = None
+
+        # Phase E: Gateway & Economics
+        try:
+            from gateway.client import GatewayClient
+            from payments.x402 import X402Client
+            from economic.circuit_breaker import CircuitBreaker
+            self.gateway = GatewayClient(base_url=VAMS_GATEWAY)
+            self.x402 = X402Client(private_key=os.getenv("VAMS_PRIVATE_KEY"))
+            self.breaker = CircuitBreaker()
+            self.log("Gateway & Economic Layer 5 initialized", "INFO")
+        except ImportError as e:
+            self.log(f"Economic modules failed: {e}", "WARN")
+
         # Layer 4
-        self.trust_manager = TrustManager()
+        self.trust_manager = TrustManager(mock_mode=mock_mode)
         
         signal.signal(signal.SIGINT, self._signal_handler)
         signal.signal(signal.SIGTERM, self._signal_handler)
@@ -201,12 +258,20 @@ class VamsNeuron:
         self.log(f"Signature: {signature[:24]}...", "CRYPTO")
         
         try:
-            r = self.session.post(f"{VAMS_GATEWAY}/heartbeat", json={"payload": payload, "signature": signature}, timeout=5)
-            if r.status_code == 200:
+            success = False
+            if hasattr(self, 'gateway') and self.gateway:
+                success = self.gateway.send_heartbeat(payload, signature)
+            else:
+                # Fallback if gateway module failed to load but imports exist (unlikely)
+                r = self.session.post(f"{VAMS_GATEWAY}/heartbeat", json={"payload": payload, "signature": signature}, timeout=5)
+                success = r.status_code == 200
+            
+            if success:
                 self.gateway_available = True
                 self.log("Gateway sync: SUCCESS", "SUCCESS")
                 return True
-        except:
+        except Exception as e:
+            # self.log(f"Gateway error: {e}", "WARN") # Optional verbosity
             pass
         self.gateway_available = False
         self.log("Gateway offline - stored locally", "INFO")
@@ -274,6 +339,78 @@ class VamsNeuron:
         self.check_l2_health()
         self.check_l3_health()
         self.check_l4_health()
+    
+    def check_sdk_health(self):
+        """Check health using real SDK integrations."""
+        if not SDK_AVAILABLE:
+            self.log("SDK modules not available. Install with: pip install -r requirements.txt", "ERROR")
+            return
+        
+        print()
+        self.log("SDK Health Check - Real Protocol Integrations", "INFO")
+        print()
+        
+        # Layer 1: Celestia DA
+        print(f"  {Fore.CYAN}--- Layer 1: Data Availability ---{Style.RESET_ALL}")
+        try:
+            celestia = CelestiaDA()
+            health = celestia.check_health()
+            if health["status"] == "healthy":
+                c, s = Fore.GREEN, "[OK]"
+            elif health["status"] == "degraded":
+                c, s = Fore.YELLOW, "[!!]"
+            else:
+                c, s = Fore.RED, "[XX]"
+            block = health.get("block_height", "N/A")
+            print(f"  {c}{s}{Style.RESET_ALL} CELESTIA    {health.get('latency_ms', 0):>6.0f}ms | Block #{block}")
+        except Exception as e:
+            print(f"  {Fore.RED}[XX]{Style.RESET_ALL} CELESTIA    Error: {str(e)[:40]}")
+        
+        print()
+        
+        # Layer 2: Bittensor
+        print(f"  {Fore.YELLOW}--- Layer 2: Compute (Bittensor) ---{Style.RESET_ALL}")
+        try:
+            bt = BittensorSubnet()
+            health = bt.check_health()
+            if health["status"] == "healthy":
+                c, s = Fore.GREEN, "[OK]"
+            elif health["status"] == "unavailable":
+                c, s = Fore.YELLOW, "[!!]"
+            else:
+                c, s = Fore.RED, "[XX]"
+            block = health.get("block", "N/A")
+            print(f"  {c}{s}{Style.RESET_ALL} BITTENSOR   {health.get('latency_ms', 0):>6.0f}ms | Network: {health.get('network', 'N/A')}")
+            
+            # Show subnet info
+            sn1 = bt.get_subnet_info(1)
+            if sn1:
+                print(f"       +-- SN1 ({sn1.name[:25]}): {sn1.miners} miners, {sn1.validators} validators")
+        except Exception as e:
+            print(f"  {Fore.RED}[XX]{Style.RESET_ALL} BITTENSOR   Error: {str(e)[:40]}")
+        
+        print()
+        
+        # Layer 4: TEE Providers
+        print(f"  {Fore.MAGENTA}--- Layer 4: Trust (TEE) ---{Style.RESET_ALL}")
+        try:
+            tee_health = check_all_tee_health()
+            for provider, health in tee_health.items():
+                if health["status"] == "healthy":
+                    c, s = Fore.GREEN, "[OK]"
+                elif health["status"] == "degraded":
+                    c, s = Fore.YELLOW, "[!!]"
+                else:
+                    c, s = Fore.RED, "[XX]"
+                tech = health.get("technology", "N/A")
+                print(f"  {c}{s}{Style.RESET_ALL} {provider.upper():10} {health.get('latency_ms', 0):>6.0f}ms | {tech}")
+        except Exception as e:
+            print(f"  {Fore.RED}[XX]{Style.RESET_ALL} TEE         Error: {str(e)[:40]}")
+        
+        print()
+        print(f"  {Fore.CYAN}Tip:{Style.RESET_ALL} For Celestia, run a light node: celestia light start --p2p.network mocha")
+        print(f"  {Fore.CYAN}Tip:{Style.RESET_ALL} For Bittensor, install: pip install bittensor")
+        print()
     
     def run_workflow_demo(self):
         print()
@@ -346,8 +483,21 @@ def main():
     if args.list_logic: list_logic_providers(); return
     if args.list_trust: list_trust_providers(); return
     
-    node = VamsNeuron(args.provider, not args.no_failover)
+    # Create node with mock_mode if --dry-run is specified
+    node = VamsNeuron(
+        provider_name=args.provider, 
+        enable_failover=not args.no_failover,
+        mock_mode=args.dry_run,
+        use_sdk=args.use_sdk
+    )
     
+    if args.dry_run:
+        node.log("Running in DRY-RUN mode (mock providers)", "WARN")
+    
+    if args.use_sdk:
+        node.log("Using real SDK integrations", "INFO")
+    
+    if args.sdk_health: node.check_sdk_health(); return
     if args.full_health: node.check_full_health(); return
     if args.check_health: node.check_l1_health(); return
     if args.check_compute: node.check_l2_health(); return
