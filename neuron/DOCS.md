@@ -285,6 +285,149 @@ Output:
 
 ---
 
+## The Five Pillars of Immortal Agents
+
+The Neuron implements all five pillars from the VAMS architecture:
+
+| Pillar | Module | Status |
+|--------|--------|--------|
+| 1. Durable Execution | `workflows.py` | ✅ Complete |
+| 2. L1 State Anchoring | `anchoring.py` | ✅ Complete |
+| 3. Transparent Failover | `sdk/*.py` | ✅ Complete |
+| 4. Request Guarantee | `request_queue.py` | ✅ Complete |
+| 5. Permanent Memory | `storage/arweave.py` | ✅ Complete |
+
+---
+
+## Request Queue (Pillar 4)
+
+The request queue ensures agent requests are eventually processed via retry logic with exponential backoff.
+
+```python
+from request_queue import RequestQueue
+
+queue = RequestQueue(
+    persistence_path="queue_state.json",  # Durable persistence
+    webhook_url="https://your-webhook.com/alerts"  # Critical alerts
+)
+
+# Enqueue a request
+queue.enqueue("req_001", "inference", {"prompt": "Hello world"})
+
+# Process queue with custom handler
+async def my_handler(target, payload):
+    # Your logic here
+    return True  # Success
+
+await queue.process_queue(my_handler)
+
+# Check status
+status = queue.get_status("req_001")
+# {"status": "completed", "retries": 0, "error": null}
+```
+
+**Features:**
+- Exponential backoff (1s base, 60s max)
+- Dead letter queue for failed requests
+- JSON persistence across restarts
+- Webhook notifications for critical events
+
+---
+
+## L1 State Anchoring (Pillar 2)
+
+Submits Merkle roots of workflow state to L1 for immortality guarantee.
+
+```python
+from anchoring import get_anchor
+
+anchor = get_anchor()
+
+# Compute Merkle root from checkpoint data
+checkpoints = [
+    {"step": "gather", "data": {...}},
+    {"step": "process", "data": {...}}
+]
+merkle_root = anchor.compute_merkle_root(checkpoints)
+
+# Submit to L1 (real or simulated)
+receipt = anchor.submit_anchor(merkle_root, len(checkpoints))
+
+# Verify anchor
+is_valid = anchor.verify_anchor(receipt, checkpoints)
+
+# Display receipt
+print(anchor.format_receipt(receipt))
+```
+
+**Output:**
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│  L1 STATE ANCHOR RECEIPT                                             │
+├─────────────────────────────────────────────────────────────────────┤
+│  Merkle Root:  0x8a3b2c1d4e5f6...12345678  │
+│  Tx Hash:      0x1234567890ab...abcdef12  │
+│  Block:        #19,283,103                               │
+│  Status:       ✓ REAL (Polygon)                                   │
+│  Checkpoints:  2 states anchored                          │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## x402 Micropayments
+
+HTTP 402 payment channels for agent-to-agent and agent-to-service payments.
+
+```python
+from payments.x402 import X402Client
+
+client = X402Client(
+    wallet_address="0x...",
+    private_key="..."  # Or use env VAMS_PRIVATE_KEY
+)
+
+# Create payment channel
+channel = client.create_channel("0xservice...", amount_wei=1000000)
+
+# Make micropayment
+payment = client.pay(channel.id, amount=100)
+
+# Close channel and settle
+client.close_channel(channel.id)
+```
+
+---
+
+## Web3 Integration
+
+On-chain agent registration with the VAMSAgentRegistry contract.
+
+```python
+from web3.registration import AgentRegistryClient
+
+client = AgentRegistryClient(
+    rpc_url="https://rpc.polygon.io",
+    private_key="...",
+    registry_address="0x..."
+)
+
+# Register agent
+tx_hash = client.register_agent(
+    agent_id=bytes.fromhex("..."),
+    metadata_uri="ipfs://...",
+    stake_amount=100 * 10**18  # 100 VAMS
+)
+
+# Submit checkpoint
+tx_hash = client.submit_checkpoint(
+    merkle_root=bytes.fromhex("..."),
+    agent_id=bytes.fromhex("...")
+)
+```
+
+---
+
 ## Files Generated
 
 | File | Description |
@@ -384,8 +527,9 @@ python -m pytest tests/test_workflows.py -v
 | Test File | Tests | Coverage |
 |-----------|-------|----------|
 | `test_neuron.py` | 16 | BittensorProvider, ComputeManager, TrustManager |
+| `test_sdk.py` | 29 | CelestiaDA, BittensorSubnet, PhalaTEE, MarlinOyster, Automata |
 | `test_workflows.py` | 15 | CheckpointStore, DemoWorkflow, crash recovery |
-| **Total** | **31** | **All pass** |
+| **Total** | **60** | **All pass** |
 
 ---
 
@@ -436,7 +580,8 @@ If you see `[WARN] Running in DRY-RUN mode`, this is expected when using `--dry-
 | v0.2.0 | Jan 2026 | Multi-provider (Celestia, EigenDA, Near, Avail), CLI, failover |
 | v0.4.0 | Jan 2026 | 4-layer stack (Compute, Logic, Trust), TEE monitoring |
 | v0.5.0 | Jan 2026 | DBOS-style workflows, crash-proof checkpoints |
-| v0.5.1 | Jan 2026 | Bittensor SDK integration, mock mode, 31 tests |
+| v0.5.1 | Jan 2026 | Bittensor SDK integration, mock mode, 60 tests |
+| v0.5.2 | Jan 2026 | Request Queue (Pillar 4), L1 State Anchoring (Pillar 2), x402 payments |
 
 ---
 

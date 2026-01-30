@@ -14,6 +14,8 @@ VAMS Neuron is a **real infrastructure client** that connects to decentralized n
 - **Decentralized Compute** - No single point of failure
 - **Cryptographic Identity** - ECDSA key pair, verifiable signatures
 - **TEE Attestation** - Trusted execution environment support
+- **Request Guarantee** - Durable queue with retry and webhooks
+- **L1 State Anchoring** - Merkle root submission to Polygon CDK
 
 ## Architecture
 
@@ -109,19 +111,30 @@ python neuron.py --use-sdk                # Enable SDK mode
 neuron/
 ├── neuron.py          # Main client entry point
 ├── config.py          # Configuration & provider endpoints
-├── storage.py         # SQLite persistence
 ├── providers.py       # Layer 1: Data Availability
 ├── compute.py         # Layer 2: Compute (io.net, Akash, Bittensor)
 ├── workflows.py       # Layer 3: Logic + DBOS-style checkpoints
 ├── trust.py           # Layer 4: TEE providers
+├── anchoring.py       # L1 State Anchoring (Merkle roots)
+├── request_queue.py   # Request Guarantee (retry + webhooks)
+├── demo_cli.py        # Interactive CLI demo
 ├── sdk/               # Real protocol SDKs
 │   ├── celestia.py        # Celestia DA (blob operations)
 │   ├── bittensor_subnet.py # Bittensor (metagraph, subnets)
 │   └── phala_tee.py       # Multi-TEE (Phala, Marlin, Automata)
-├── tests/             # Unit & integration tests
-│   ├── test_neuron.py     # 16 tests
-│   ├── test_sdk.py        # 29 tests
-│   └── test_workflows.py  # 15 tests
+├── storage/           # Decentralized storage clients
+│   ├── arweave.py         # Arweave permanent storage
+│   ├── kwil.py            # Kwil SQL client
+│   └── local.py           # Local SQLite fallback
+├── payments/          # Payment protocols
+│   └── x402.py            # x402 micropayments
+├── web3/              # On-chain integration
+│   ├── registration.py    # Agent registry client
+│   └── abi.json           # Contract ABIs
+├── tests/             # Unit & integration tests (60 total)
+│   ├── test_neuron.py     # 16 tests (providers, managers)
+│   ├── test_sdk.py        # 29 tests (Celestia, Bittensor, Phala)
+│   └── test_workflows.py  # 15 tests (checkpoints, recovery)
 ├── README.md
 ├── DOCS.md
 └── requirements.txt
