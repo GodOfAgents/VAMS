@@ -115,19 +115,19 @@ DBOS-style durable execution. Agents checkpoint state to Arweave/Celestia and **
 
 ## 📊 Current Status
 
-**Stage:** Pre-Testnet (Active Development) | **Version:** 1.2
+**Stage:** Pre-Testnet (Active Development) | **Version:** 1.4
 
 | Component | Progress | Description |
 |-----------|----------|-------------|
 | 📋 **Specs** | 🟢 100% | Architecture, Tokenomics, Market Analysis |
-| 📜 **Smart Contracts** | 🟡 60% | Router, Slasher, Governance, Base (8 contracts) |
-| 🤖 **Agent Runtime** | 🟡 70% | 15 Python modules, DBOS workflows, TEE integration |
+| 📜 **Smart Contracts** | 🟢 75% | 14 production contracts (Token, Staking, Vesting, Router, Slasher, Registry, Governance) |
+| 🤖 **Agent Runtime** | 🟢 85% | 15 Python modules, DBOS workflows, TEE integration, 60 tests passing |
 | 🎨 **Frontend** | 🟢 95% | React 19 + Vite, 3D animations, Sub-1s load time |
 | 🌐 **Gateway** | 🟡 50% | FastAPI server with dashboard |
-| ✅ **Tests** | 🔴 0% | Next milestone: Unit tests (>90% coverage) |
+| ✅ **Tests** | 🟡 20% | 28 contract tests, 60 neuron tests |
 
 > [!IMPORTANT]
-> **Next Milestone:** Implement `$VAMS` ERC-20 token and `VAMSVesting` contracts (Phase 1, Weeks 3-4). Foundation contracts already complete.
+> **Next Milestone:** Deploy contracts to testnet & integrate with Polygon CDK (Phase 2). Core economic layer complete.
 
 Full roadmap: [REPO_STATUS_REPORT.md](./REPO_STATUS_REPORT.md)
 
@@ -150,23 +150,32 @@ Full roadmap: [REPO_STATUS_REPORT.md](./REPO_STATUS_REPORT.md)
 
 ```bash
 VAMS-main/
-├── contracts/       # Foundry smart contracts (60% complete)
+├── contracts/       # Foundry smart contracts (75% complete)
 │   ├── src/
+│   │   ├── token/        # VAMSToken (ERC-20 + Burnable + Permit + Votes)
+│   │   ├── staking/      # VAMSStaking (Tiered APY, Lock Periods)
+│   │   ├── vesting/      # VAMSVesting (7 schedule types)
 │   │   ├── routing/      # VAMSRouter (CLR implementation)
 │   │   ├── slashing/     # VAMSSlasher, SlashingParameters
+│   │   ├── registry/     # VAMSAgentRegistry (Challenge system)
 │   │   ├── governance/   # VAMSTimelockController
 │   │   └── base/         # VAMSUpgradeableBase, Emergency Pausable
-│   └── foundry.toml
+│   └── test/             # 28 tests (VAMSAgentRegistry.t.sol)
 │
-├── frontend/        # React 19 + Vite (95% complete)
-│   ├── components/       # Hero, Problem, Solution (9 components)
-│   └── app/
+├── frontend-vite/   # React 19 + Vite (95% complete)
+│   ├── src/              # App.jsx, components
+│   └── dist/             # Production build
 │
-├── neuron/          # "Immortal Agent" client (70% complete)
+├── neuron/          # "Immortal Agent" client (85% complete)
 │   ├── neuron.py         # Orchestration loop
 │   ├── workflows.py      # DBOS durable execution
 │   ├── compute.py        # Akash, io.net providers
-│   └── trust.py          # Phala, Marlin TEE integration
+│   ├── trust.py          # Phala, Marlin TEE integration
+│   ├── sdk/              # Celestia, Bittensor, Phala SDKs
+│   ├── storage/          # Arweave, Kwil clients
+│   └── tests/            # 60 passing tests
+│
+├── gateway/         # FastAPI server (50% complete)
 │
 └── Team Docs/       # All documentation
     ├── ARCHITECTURE_v0-3-0.md

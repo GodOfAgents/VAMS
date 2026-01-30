@@ -1,7 +1,9 @@
+import os
 import time
 import json
 import logging
 import asyncio
+import requests
 from typing import Dict, Any, Optional, Callable
 from dataclasses import dataclass, field
 from enum import Enum
@@ -36,11 +38,13 @@ class RequestQueue:
     BASE_BACKOFF_MS = 1000
     MAX_BACKOFF_MS = 60000
     
-    def __init__(self, persistence_path: Optional[str] = "queue_state.json"):
+    def __init__(self, persistence_path: Optional[str] = "queue_state.json", webhook_url: Optional[str] = None):
         self.queue: Dict[str, QueuedRequest] = {}
         self.persistence_path = persistence_path
+        self.webhook_url = webhook_url or os.getenv("VAMS_WEBHOOK_URL")
         self._load_state()
-        logger.info(f"Request Queue initialized")
+        logger.info(f"Request Queue initialized (Webhook: {'Yes' if self.webhook_url else 'No'})")
+
 
     def _load_state(self):
         """Load queue from disk."""
@@ -143,8 +147,32 @@ class RequestQueue:
 
     def _notify_webhook(self, req: QueuedRequest, event: str):
         """Send webhook notification for critical events."""
-        # TODO: Configure actual webhook URL from config
         logger.warning(f"🔔 WEBHOOK ALERT: Request {req.id} {event} - {req.error}")
+        
+        if not self.webhook_url:
+            return
+            
+        try:
+            payload = {
+                "event": event,
+                "request_id": req.id,
+                "target": req.target,
+                "error": req.error,
+                "retry_count": req.retry_count,
+                "timestamp": time.time()
+            }
+            response = requests.post(
+                self.webhook_url,
+                json=payload,
+                timeout=5,
+                headers={"Content-Type": "application/json"}
+            )
+            if response.status_code == 200:
+                logger.info(f"Webhook delivered for {req.id}")
+            else:
+                logger.warning(f"Webhook failed: {response.status_code}")
+        except Exception as e:
+            logger.error(f"Webhook error: {e}")
 
     def get_status(self, request_id: str) -> Optional[Dict[str, Any]]:
         req = self.queue.get(request_id)

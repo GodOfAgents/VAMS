@@ -1,8 +1,8 @@
 # VAMS Repository Status & Development Roadmap
 
-**Date:** January 28, 2026  
+**Date:** January 30, 2026  
 **Stage:** Pre-Testnet (Active Development)  
-**Version:** 1.3  
+**Version:** 1.4  
 
 ---
 
@@ -19,19 +19,21 @@ The VAMS project is currently in the **Pre-Contracts & Pre-Testnet** phase of de
 | :--- | :--- | :--- |
 | **Architecture Specification** | **100%** | `Team Docs/ARCHITECTURE_v0-3-0.md` detailed 5-tier stack design. |
 | **Token Economic Model** | **100%** | `Team Docs/TOKENOMICS.md` vesting, burns, and emission logic defined. |
-| **Smart Contracts (Core Logic)** | **75%** | 11 Solidity contracts: Token, Staking, Vesting, Router, Slasher, etc. |
-| **Agent Logic Prototype** | **100%** | Neuron v1.0.0: Full 5-Layer Stack integration + TEE + Storage + Payments. |
+| **Smart Contracts (Core Logic)** | **75%** | 14 production contracts: Token, Staking, Vesting, Router, Slasher, Registry, Governance, Base. |
+| **Agent Logic Prototype** | **85%** | Neuron v1.0.0: Full 5-Layer Stack + TEE + Storage + Payments. 60 tests passing. |
 | **Gateway MVP** | **50%** | FastAPI server (`gateway/server.py`) with HTML dashboard and heartbeat API. |
 | **Frontend** | **95%** | React 19 + Vite (Production Optimized). Sub-1s load, Dark Mode, 3D Hero. |
 | **Market Analysis** | **100%** | `Team Docs/MARKET_ANALYSIS.md` & `PITCH_DECK.md` ready for investors. |
-| **Monorepo Structure** | **100%** | `/contracts`, `/frontend`, `/Team Docs` organization complete. |
+| **Monorepo Structure** | **100%** | `/contracts`, `/frontend-vite`, `/neuron`, `/gateway`, `/Team Docs` organization complete. |
+| **Smart Contract Tests** | **Complete** | 28 Foundry tests (26 unit + 2 fuzz) for AgentRegistry. |
+| **Neuron Tests** | **Complete** | 60 pytest tests covering SDK, workflows, compute, and trust managers. |
 
 ### ⏳ Pending Items (The Implementation)
 | component | Status | Priority | Requirement |
 | :--- | :--- | :--- | :--- |
-| **$VAMS Token Contract** | **100%** | ✅ **COMPLETE** | ERC-20 + Burnable + Permit + Anti-Whale implemented. |
-| **Staking & Vesting** | **100%** | ✅ **COMPLETE** | VAMSStaking (Tiered) + VAMSVesting (7 Schedules) implemented. |
-| **Smart Contract Tests** | **90%** | ✅ **COMPLETE** | Foundry unit tests (26 tests pass) for Registry. |
+| **$VAMS Token Contract** | **100%** | ✅ **COMPLETE** | ERC-20 + Burnable + Permit + Votes + Anti-Whale implemented. |
+| **Staking & Vesting** | **100%** | ✅ **COMPLETE** | VAMSStaking (Tiered 6-12% APY) + VAMSVesting (7 Schedules) implemented. |
+| **Smart Contract Tests** | **100%** | ✅ **COMPLETE** | 28 Foundry tests (26 unit + 2 fuzz) for AgentRegistry passing. |
 | **Real Infrastructure** | **80%** | 🟩 **HIGH** | SDKs + Storage Clients (Arweave/Kwil) integrated. |
 | **Polygon CDK Integration** | **0%** | 🟧 **HIGH** | Deploy VAMS L3 Validium stack (AggLayer). |
 | **Decentralized Storage** | **80%** | 🟩 **MEDIUM** | Arweave/Kwil clients implemented in `neuron/storage/`. |
