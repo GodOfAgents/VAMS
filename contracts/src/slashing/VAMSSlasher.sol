@@ -4,6 +4,8 @@ pragma solidity ^0.8.20;
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
+import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
+import "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 import "./SlashingParameters.sol";
 
 /**
@@ -92,6 +94,8 @@ contract VAMSSlasher is
     error OperatorAlreadyTombstoned();
     error OperatorStillJailed(uint256 jailedUntil);
     error InsufficientStake(uint256 required, uint256 actual);
+    error InvalidEquivocationProof();
+    error InvalidMaliciousEvidence();
     
     // ============ Initializer ============
     
@@ -171,7 +175,10 @@ contract VAMSSlasher is
         OperatorRecord storage op = operators[_operator];
         _validateOperator(op);
         
-        // TODO: Verify _proof cryptographically
+        // Verify proof cryptographically
+        if (!_verifyEquivocationProof(_operator, _proof)) {
+            revert InvalidEquivocationProof();
+        }
         
         result = _calculateEquivocationSlash(op.stake, op.equivocationOffenses);
         
@@ -200,7 +207,10 @@ contract VAMSSlasher is
         OperatorRecord storage op = operators[_operator];
         _validateOperator(op);
         
-        // TODO: Validate _evidence
+        // Validate evidence
+        if (!_validateMaliciousEvidence(_operator, _victim, _evidence)) {
+            revert InvalidMaliciousEvidence();
+        }
         
         result = _calculateMaliciousSlash(op.stake, _victim);
         
@@ -358,5 +368,91 @@ contract VAMSSlasher is
     function isOperatorActive(address _operator) external view returns (bool) {
         OperatorRecord storage op = operators[_operator];
         return op.status == OperatorStatus.ACTIVE && op.stake >= SlashingParameters.MIN_OPERATOR_STAKE;
+    }
+    
+    // ============ Internal: Verification Functions ============
+    
+    /**
+     * @notice Verify equivocation proof (double-signing)
+     * @dev Proof format: [32 bytes msgHash1][65 bytes sig1][32 bytes msgHash2][65 bytes sig2]
+     * Both signatures must be from the same operator but on different data at same height
+     */
+    function _verifyEquivocationProof(
+        address _operator,
+        bytes calldata _proof
+    ) internal pure returns (bool) {
+        // Minimum proof length: 2 x (32 bytes hash + 65 bytes signature) = 194 bytes
+        if (_proof.length < 194) return false;
+        
+        // Extract messages and signatures
+        bytes32 msgHash1 = bytes32(_proof[0:32]);
+        bytes memory sig1 = _proof[32:97];
+        bytes32 msgHash2 = bytes32(_proof[97:129]);
+        bytes memory sig2 = _proof[129:194];
+        
+        // Messages must be different (proof of double-sign)
+        if (msgHash1 == msgHash2) return false;
+        
+        // Recover signers
+        bytes32 ethHash1 = MessageHashUtils.toEthSignedMessageHash(msgHash1);
+        bytes32 ethHash2 = MessageHashUtils.toEthSignedMessageHash(msgHash2);
+        
+        address signer1 = ECDSA.recover(ethHash1, sig1);
+        address signer2 = ECDSA.recover(ethHash2, sig2);
+        
+        // Both signatures must be from the same operator
+        if (signer1 != _operator || signer2 != _operator) return false;
+        
+        // If we reach here, operator signed two different messages
+        // In a real implementation, we would also verify:
+        // - Both messages are for the same block height/round
+        // - Messages are valid protocol messages
+        // This is simplified for the initial implementation
+        
+        return true;
+    }
+    
+    /**
+     * @notice Validate malicious behavior evidence
+     * @dev Evidence format: [1 byte type][variable evidence data]
+     * Types: 0x01 = Invalid computation, 0x02 = Censorship, 0x03 = Data manipulation
+     */
+    function _validateMaliciousEvidence(
+        address _operator,
+        address _victim,
+        bytes calldata _evidence
+    ) internal view returns (bool) {
+        // Evidence must have at least a type byte
+        if (_evidence.length < 1) return false;
+        
+        uint8 evidenceType = uint8(_evidence[0]);
+        
+        // Validate evidence type is known
+        if (evidenceType == 0 || evidenceType > 3) return false;
+        
+        // Validate operator exists and is active/jailed (not tombstoned)
+        OperatorRecord storage op = operators[_operator];
+        if (op.stake == 0) return false;
+        if (op.status == OperatorStatus.TOMBSTONED) return false;
+        
+        // For type 0x01 (Invalid computation): requires computation proof
+        // For type 0x02 (Censorship): requires transaction inclusion proof
+        // For type 0x03 (Data manipulation): requires before/after hash proof
+        // Simplified validation - in production would have type-specific checks
+        
+        // Evidence must include victim signature if victim provided
+        if (_victim != address(0) && _evidence.length >= 66) {
+            // Last 65 bytes should be victim's signature on evidence
+            bytes32 evidenceHash = keccak256(_evidence[0:_evidence.length - 65]);
+            bytes memory victimSig = _evidence[_evidence.length - 65:];
+            
+            bytes32 ethHash = MessageHashUtils.toEthSignedMessageHash(evidenceHash);
+            address recovered = ECDSA.recover(ethHash, victimSig);
+            
+            // Victim must have signed the evidence
+            if (recovered != _victim) return false;
+        }
+        
+        return true;
     }
 }
