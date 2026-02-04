@@ -268,6 +268,6 @@ We are committed to **radical transparency**:
 
 *The Operating System for the Agentic Economy*
 
-[![Star](https://img.shields.io/github/stars/GodOfAgents/VAMS-main?style=social)](https://github.com/GodOfAgents/VAMS-main)
+[![Star](https://img.shields.io/github/stars/GodOfAgents/VAMS-main?style=social)](https://github.com/GodOfAgents/VAMS)
 
 </div>
