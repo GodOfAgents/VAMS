@@ -597,4 +597,8 @@ contract X402EscrowManager is
         _unpause();
     }
     
+    // ============ Storage Gap ============
+    
+    /// @dev Reserved storage space for future upgrades
+    uint256[50] private __gap;
 }

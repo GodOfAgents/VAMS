@@ -16,8 +16,12 @@ forge install OpenZeppelin/openzeppelin-contracts-upgradeable
 # Build
 forge build
 
-# Test
+# Test (375 tests)
 forge test
+
+# Static Analysis
+pip install slither-analyzer
+slither . --config-file slither.config.json
 ```
 
 ## Architecture
@@ -25,19 +29,30 @@ forge test
 ```
 contracts/
 ├── src/
-│   ├── base/
-│   │   ├── VAMSUpgradeableBase.sol    # UUPS + ownership transfer
-│   │   └── VAMSEmergencyPausable.sol  # 48h pause + guardians
-│   ├── governance/
-│   │   └── VAMSTimelockController.sol # 48h timelock
-│   ├── examples/
-│   │   └── VAMSFeeCollector.sol       # Example implementation
-│   └── VAMSCombinedBase.sol           # Combined base
-├── test/                               # Forge tests
-├── script/                             # Deployment scripts
-├── foundry.toml                        # Foundry config
-└── remappings.txt                      # Import remappings
+│   ├── base/           # UUPS + Emergency Pause (2 contracts)
+│   ├── token/          # VAMSToken (ERC-20 + Burnable + Permit + Votes)
+│   ├── staking/        # VAMSStaking (Tiered APY, Lock Periods)
+│   ├── vesting/        # VAMSVesting (7 schedule types)
+│   ├── routing/        # VAMSRouter (CLR implementation)
+│   ├── slashing/       # SlashingOracle, VAMSSlasher
+│   ├── registry/       # VAMSAgentRegistry
+│   ├── economic/       # FeeCollector, Insurance, Payment, 2PC, Compensation
+│   └── governance/     # VAMSTimelockController
+├── test/               # 375 tests (Unit, Integration, Fuzz, Governance)
+├── script/             # Deployment scripts
+└── slither.config.json # Static analysis config
 ```
+
+## Security Status
+
+| Item | Status |
+|------|--------|
+| Storage Gaps | ✅ All 16 upgradeable contracts |
+| SafeERC20 | ✅ VAMSAgentRegistry |
+| Flash Loan Protection | ✅ 7-day stake age for voting |
+| Slither Analysis | ✅ 280 findings (no critical/high) |
+| Governance Tests | ✅ 32 phase transition tests |
+| External Audit | 📅 Ready to schedule |
 
 ## Upgrade Pattern
 
@@ -79,6 +94,12 @@ contract MyContract is VAMSCombinedBase {
     }
 }
 ```
+
+## Documentation
+
+- [CONTRACTS.md](./CONTRACTS.md) - Full contract architecture
+- [SECURITY.md](../.github/SECURITY.md) - Security policy
+- [slither_report.txt](./slither_report.txt) - Static analysis results
 
 ## License
 

@@ -157,4 +157,9 @@ abstract contract VAMSUpgradeableBase is
         if (governancePhase == 4) return "Phase 4: Immutable";
         return "Unknown";
     }
+    
+    // ============ Storage Gap ============
+    
+    /// @dev Reserved storage space for future upgrades
+    uint256[50] private __gap;
 }

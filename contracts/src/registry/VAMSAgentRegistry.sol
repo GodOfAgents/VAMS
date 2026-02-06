@@ -6,6 +6,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 /**
  * @title VAMSAgentRegistry
@@ -26,6 +27,7 @@ contract VAMSAgentRegistry is
     ReentrancyGuardUpgradeable,
     PausableUpgradeable
 {
+    using SafeERC20 for IERC20;
     // ============ Constants ============
     
     /// @notice Challenge window duration (7 days per §20.8)
@@ -48,6 +50,7 @@ contract VAMSAgentRegistry is
     bytes32 public constant OPERATOR_ROLE = keccak256("OPERATOR_ROLE");
     bytes32 public constant CHALLENGER_ROLE = keccak256("CHALLENGER_ROLE");
     bytes32 public constant GUARDIAN_ROLE = keccak256("GUARDIAN_ROLE");
+    bytes32 public constant VERIFIER_ROLE = keccak256("VERIFIER_ROLE");
     
     // ============ Enums ============
     
@@ -219,7 +222,7 @@ contract VAMSAgentRegistry is
         }
         
         // Transfer stake from user to this contract
-        IERC20(vamsToken).transferFrom(msg.sender, address(this), _stake);
+        IERC20(vamsToken).safeTransferFrom(msg.sender, address(this), _stake);
         
         agents[agentId] = Agent({
             owner: msg.sender,
@@ -324,7 +327,7 @@ contract VAMSAgentRegistry is
     ) external {
         Agent storage agent = agents[_agentId];
         
-        if (agent.owner != msg.sender) revert NotAgentOwner();
+        if (agent.owner != msg.sender && !hasRole(VERIFIER_ROLE, msg.sender)) revert NotAgentOwner();
         
         agent.teeAttestation = _attestation;
         
@@ -359,7 +362,7 @@ contract VAMSAgentRegistry is
         challengeId = keccak256(abi.encodePacked(_agentId, msg.sender, block.timestamp));
         
         // Transfer challenger stake
-        IERC20(vamsToken).transferFrom(msg.sender, address(this), _stake);
+        IERC20(vamsToken).safeTransferFrom(msg.sender, address(this), _stake);
         
         challenges[challengeId] = Challenge({
             challenger: msg.sender,
@@ -515,4 +518,9 @@ contract VAMSAgentRegistry is
     function unpause() external onlyRole(DEFAULT_ADMIN_ROLE) {
         _unpause();
     }
+    
+    // ============ Storage Gap ============
+    
+    /// @dev Reserved storage space for future upgrades
+    uint256[50] private __gap;
 }

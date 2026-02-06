@@ -215,12 +215,29 @@ class VamsNeuron:
         print(" " + "-" * 60)
     
     def load_or_generate_identity(self):
-        self.log("Loading cryptographic identity...", "CRYPTO")
+        self.log("Loading VAMS Identity (Standard v1.0)...", "CRYPTO")
+        
+        # 1. Load Profile (The Soul)
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        profile_path = os.path.join(base_dir, "profile.json")
+        if os.path.exists(profile_path):
+            try:
+                with open(profile_path, "r") as f:
+                    self.profile = json.load(f)
+                self.log(f"Profile loaded: {self.profile.get('identity', {}).get('name', 'Unknown')}", "SUCCESS")
+            except Exception as e:
+                self.log(f"Failed to parse profile.json: {e}", "ERROR")
+                self.profile = {}
+        else:
+            self.log("No profile.json found - using default Identity Standard", "WARN")
+            self.profile = {"identity": {"name": "Anon-Agent"}, "capabilities": []}
+
+        # 2. Load Keys (The Wallet)
         if os.path.exists(IDENTITY_PATH):
             try:
                 with open(IDENTITY_PATH, "rb") as f:
                     self.sk = SigningKey.from_pem(f.read())
-                self.log(f"Identity loaded from {IDENTITY_PATH}", "SUCCESS")
+                self.log(f"Keys loaded from {IDENTITY_PATH}", "SUCCESS")
             except Exception:
                 self._generate_new_identity()
         else:
@@ -229,7 +246,11 @@ class VamsNeuron:
         self.vk = self.sk.verifying_key
         self.node_id = self.vk.to_string().hex()[:16]
         self.storage.set_node_info("node_id", self.node_id)
+        
+        # 3. Print Identity Summary
         self.log(f"Node ID: {Fore.GREEN}{self.node_id}{Style.RESET_ALL}", "INFO")
+        caps = len(self.profile.get("capabilities", []))
+        self.log(f"Capabilities: {caps} skills loaded", "INFO")
     
     def _generate_new_identity(self):
         self.log("Generating new Secp256k1 keypair...", "CRYPTO")

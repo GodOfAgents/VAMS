@@ -323,4 +323,9 @@ contract VAMSRouter is VAMSUpgradeableBase {
         if (routingMode == RoutingMode.MANUAL) return "MANUAL";
         return "HYBRID";
     }
+    
+    // ============ Storage Gap ============
+    
+    /// @dev Reserved storage space for future upgrades
+    uint256[50] private __gap;
 }

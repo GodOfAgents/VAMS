@@ -31,7 +31,7 @@
 
 ## Abstract
 
-The emergence of autonomous AI agents as economic actors represents a fundamental shift in computational paradigms. However, the current decentralized infrastructure landscape presents an insurmountable "Usability Crisis"—fragmented protocols, volatile gas economics, and deterministic execution models that fundamentally conflict with probabilistic agent workflows. VAMS (Verifiable and Agentic Modular Stack) introduces a Layer 3 meta-architecture that unifies Decentralized Physical Infrastructure Networks (DePIN) into a coherent, agent-native execution environment. **VAMS L3 operates primarily on Polygon CDK Validium with native AggLayer integration for unified liquidity, while offering Avalanche Elastic L1s for agents requiring custom VMs or sovereign execution.** By functioning as the "AWS of Web3," VAMS provides programmatic access to federated compute, storage, and networking resources while preserving data sovereignty and enabling machine-to-machine micropayments through the x402 protocol. The architecture implements a novel Conditional L1 Router (CLR) that dynamically allocates transactions across settlement layers based on value, latency, sovereignty, and privacy requirements—eliminating the developer burden of chain selection. This paper presents the complete technical specification for VAMS v0.3.0, including its five-layer stack, dual-chain infrastructure, tokenomic model, and security mechanisms designed for mainnet deployment.
+The emergence of autonomous AI agents as economic actors represents a fundamental shift in computational paradigms. However, the current decentralized infrastructure landscape presents an insurmountable "Usability Crisis"—fragmented protocols, volatile gas economics, and deterministic execution models that fundamentally conflict with probabilistic agent workflows. VAMS (Verifiable and Agentic Modular Stack) introduces a Layer 3 meta-architecture that unifies Decentralized Physical Infrastructure Networks (DePIN) into a coherent, agent-native execution environment. **VAMS L3 operates primarily on Polygon CDK Validium with native AggLayer integration for unified liquidity, while offering Avalanche Elastic L1s for agents requiring custom VMs or sovereign execution.** By functioning as the "AWS of Web3," VAMS provides programmatic access to federated compute, storage, and networking resources while preserving data sovereignty and enabling machine-to-machine micropayments through the x402 protocol. The architecture implements a novel Conditional L1 Router (CLR) that dynamically allocates transactions across settlement layers based on value, latency, sovereignty, and privacy requirements—eliminating the developer burden of chain selection. This paper presents the complete technical specification for VAMS v0.3.0, including its five-layer stack, dual-host architecture, tokenomic model, and security mechanisms designed for mainnet deployment.
 
 ---
 
@@ -190,6 +190,7 @@ Users top-up with any token (USDC, ETH, credit card). Protocol auto-converts to 
 |----------|-------|-------------|
 | **Protocol Fee** | 0.1% - 1.0% | Dynamic based on network load |
 | **Gas Abstraction** | 2% - 7% | Cross-chain gas conversion |
+| **Infrastructure Markup** | 1% - 5% | Commission on managed L1 resources |
 | **Micropayments** | $0.005 - $0.02 fixed OR 0.5% - 1.0% | Competitive fixed fee floor |
 
 All fees → 100% Buyback & Burn. No discounts, no cashback — pure utility.
@@ -412,6 +413,19 @@ The protocol maintains an insurance fund targeting 5% of TVL (minimum 1M $VAMS),
 
 Claims require DAO approval and cover bridge exploits, TEE compromises, provider insolvency, and oracle manipulation.
 
+
+### 5.6 VAMS x ERC-8004: The Superset Model
+
+VAMS adopts a "Superset" relationship with the **ERC-8004 (Trustless Agent)** standard. While ERC-8004 provides the fundamental cryptographic proof of *hardware integrity* (Standardized TEE Attestations), VAMS extends this with the "Software Soul" required for intelligent, sovereign operation.
+
+| Feature | ERC-8004 (The Passport) | VAMS (The Citizen) |
+| :--- | :--- | :--- |
+| **Trust Root** | Hardware (TEE) | Hybrid (TEE + ZKML + Optimistic) |
+| **Identity** | Enclave Report (MRENCLAVE) | **VAMS Profile** (Skills, Reputation, History) |
+| **State** | Stateless (Resets on restart) | **Immortal** (DBOS Durable State Roots) |
+| **Economy** | None | **x402** (Machine-to-Machine Payments) |
+
+VAMS agents utilize ERC-8004 proofs as their **Hardware Passport** to gain entry to the network, but their execution, memory, and economic interactions are governed by the full VAMS stack. This ensures backward compatibility with the broader TEE ecosystem while delivering the advanced capabilities (Micropayments, Immortality) that agents require.
 ---
 
 ## 6. Governance Framework

@@ -80,6 +80,10 @@ contract SlashingOracleTest is BaseTest {
         
         // Fund admin for proposals
         _setupVoter(admin, PROPOSAL_STAKE * 2);
+        
+        // IMPORTANT: Advance time past MIN_STAKE_AGE (7 days) so staking is valid for voting
+        // This is required after HIGH-2 security fix for flash loan attack prevention
+        vm.warp(block.timestamp + 8 days);
     }
     
     // ============ Initialization Tests ============
@@ -213,6 +217,33 @@ contract SlashingOracleTest is BaseTest {
         vm.expectRevert(abi.encodeWithSelector(ISlashingOracle.NoStake.selector, user1));
         vm.prank(user1);
         oracle.commitVote(proposalId, _createCommitment(true, bytes32(uint256(1))));
+    }
+    
+    function test_CommitVote_Revert_StakeTooNew() public {
+        // Create a new voter with fresh stake BEFORE proposal
+        address newVoter = makeAddr("newVoter");
+        token.mint(newVoter, MIN_STAKE * 5);
+        vm.startPrank(newVoter);
+        token.approve(address(staking), MIN_STAKE * 5);
+        staking.stake(MIN_STAKE * 5, IVAMSStaking.LockPeriod.ThirtyDays);
+        vm.stopPrank();
+        
+        // Create proposal now (newVoter's stake is still too new)
+        uint256 proposalId = _createProposal();
+        
+        // Try to vote immediately (stake is too new)
+        vm.expectRevert(abi.encodeWithSelector(ISlashingOracle.StakeTooNew.selector, newVoter, 7 days));
+        vm.prank(newVoter);
+        oracle.commitVote(proposalId, _createCommitment(true, bytes32(uint256(1))));
+        
+        // After waiting 7 days, create new proposal and voting should work
+        vm.warp(block.timestamp + 7 days + 1);
+        
+        uint256 proposalId2 = _createProposal();
+        
+        vm.prank(newVoter);
+        oracle.commitVote(proposalId2, _createCommitment(true, bytes32(uint256(1))));
+        assertTrue(oracle.hasCommitted(proposalId2, newVoter));
     }
     
     function test_CommitVote_EmitsEvent() public {

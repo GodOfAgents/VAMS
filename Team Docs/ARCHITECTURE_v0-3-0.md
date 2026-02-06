@@ -525,6 +525,21 @@ Agent encrypts data → Phala/Marlin TEE → Process inside enclave
                               Only state root posted to chain
 ```
 
+
+---
+
+### 3.4.1 VAMS Agent Identity Standard (ERC-8004 Superset)
+
+VAMS implements a **Superset Architecture** over the ERC-8004 (Trustless Agent) standard. While ERC-8004 provides the cryptographic "Hardware Passport" (proving code execution in a specific TEE), VAMS defines the "Software Soul" required for intelligent, sovereign operation.
+
+**The VAMS Profile (`profile.json`):**
+- **Identity**: Name, bio, avatar, and reputation scores.
+- **Security**: ERC-8004 `MRENCLAVE` and Remote Attestation Proofs.
+- **Capabilities**: List of supported Skills (Inputs/Outputs) and pricing models.
+- **State**: DBOS Checkpoint URIs for crash recovery ("Immortality").
+
+This ensures that while VAMS agents are compatible with the broader ERC-8004 ecosystem, they possess advanced capabilities (State, Economy, Skills) that standard stateless agents lack. All VAMS agents must register with a valid ERC-8004 proof to verify their hardware integrity, but their logic execution is governed by the VAMS stack.
+
 ---
 
 ### 3.5 Layer 5: Economic Layer
@@ -568,6 +583,7 @@ Users top-up their VAMS account with any token. Protocol auto-converts to $VAMS 
 | High-Value (>$10K) | 0.05% | 0.1% | 0.5% | Volume discount |
 | Micropayments (<$1) | $0.005 OR 0.5% | $0.01 OR 0.75% | $0.02 OR 1.0% | Fixed fee floor |
 | Gas Abstraction | 2% | 5% | 7% | Reduced for UX retention |
+| Infrastructure Markup | 1% | 1-5% | 5% | Markup on managed L1s |
 
 **Developer Console (AWS-Style UX):**
 - Balance shown in USD (backed by VAMS)
@@ -1692,6 +1708,11 @@ contract BatchSettlement {
 
 ## 14. Conditional L1 Router (CLR)
 
+#### Host Domains vs. Routing Targets (Reach)
+To ensure scalability without compromising reach, VAMS distinguishes between its host infrastructure and its execution targets:
+*   **Host Domains (Deployment):** The VAMS L3 stack and agent logic are hosted on **Polygon CDK** (Primary) or **Avalanche L1s** (Sovereign). This is where the "Brain" lives.
+*   **Routing Targets (Reach):** The "Arms" of the agent can reach out to transact on **Solana, Ethereum, SEI**, and others via the CLR. VAMS is *not* deployed on these chains; it simply routes signed transactions to them.
+
 ### 14.1 VAMSTransaction Metadata (v2.1)
 
 ```solidity
@@ -1731,9 +1752,9 @@ graph TD
 ### 14.3 Routing Implementation (v2.1 with Sovereignty Check)
 
 ```python
-class CLRouter_V3:  # Updated for Dual-Chain Architecture
+class CLRouter_V3:  # Updated for Dual-Host Architecture
     """
-    VAMS Dual-Chain Router (v3.0):
+    VAMS Dual-Host Router (v3.0):
     - PRIMARY: Polygon CDK Validium (default for most agents)
     - SECONDARY: Avalanche Elastic L1 (sovereignty/custom VM needs)
     """
@@ -4955,6 +4976,100 @@ contract VAMSInsuranceFund {
 | 2 | Q2 2026 | Compliance integration |
 | 3 | Q3 2026 | Guarded mainnet |
 | 4 | Q4 2026 | Open mainnet |
+
+---
+
+## 23. Infrastructure Management (Managed L1s)
+
+VAMS offers **Managed Avalanche L1s** to enterprises with a 1-5% dynamic markup on Total Cost of Ownership (TCO). This section documents the on-chain governance mechanism.
+
+### 23.1 Bounded DAO Governance Model
+
+The markup rate is governed by a **Bounded DAO** model:
+
+- **DAO Controls:** Parameters (min/max bounds, base rate, tiers, thresholds)
+- **Algorithm Calculates:** Per-deposit rate within DAO-set bounds (no per-transaction voting)
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                         BOUNDED DAO GOVERNANCE                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│  DAO-CONTROLLED PARAMETERS                                                  │
+│  ├── minMarkupBps      = 100  (1%)     ← Floor                             │
+│  ├── maxMarkupBps      = 500  (5%)     ← Ceiling                           │
+│  ├── baseRateBps       = 300  (3%)     ← Starting point                    │
+│  ├── targetCapacity    = 100           ← Utilization denominator           │
+│  ├── demandThresholds  = [50%,80%,95%] ← Curve breakpoints                 │
+│  ├── demandModifiers   = [-1%,0%,+1%,+2%] ← bps adjustments                │
+│  └── loyaltyTiers[]    = [(stake,days,discount), ...]                      │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+### 23.2 Dynamic Markup Formula
+
+```
+EffectiveMarkup = clamp(MIN, MAX, BaseRate + DemandModifier − LoyaltyDiscount)
+```
+
+| Component | Range | Description |
+|-----------|-------|-------------|
+| **BaseRate** | 3% (default) | DAO-set starting point |
+| **DemandModifier** | -1% to +2% | Based on utilization of managed L1 capacity |
+| **LoyaltyDiscount** | 0% to 1% | Based on enterprise's staked VAMS tokens |
+| **Effective Range** | 1% to 5% | Clamped to DAO-set bounds |
+
+#### Demand Curve (Utilization-Based)
+
+| Utilization | Modifier | Rationale |
+|-------------|----------|-----------|
+| < 50% | -1% | Underutilized → attract more users |
+| 50-80% | 0% | Optimal operating range |
+| 80-95% | +1% | High demand → sustainable pricing |
+| > 95% | +2% | Congested → discourage spam |
+
+#### Loyalty Tiers (Staking-Based)
+
+| Staked VAMS | Min Lock | Discount |
+|-------------|----------|----------|
+| ≥ 100,000 | 90 days | -1.0% |
+| ≥ 50,000 | 60 days | -0.5% |
+| ≥ 10,000 | 30 days | -0.25% |
+
+### 23.3 VAMSValidatorManager Contract
+
+**Location:** `contracts/src/infrastructure/VAMSValidatorManager.sol`
+
+**Key Functions:**
+
+| Function | Access | Description |
+|----------|--------|-------------|
+| `calculateMarkup(address)` | Public | Calculate effective markup for enterprise |
+| `deposit(bytes32 subnetId)` | Public | Deposit AVAX for managed L1 |
+| `registerSubnet(bytes32, uint256)` | Public | Register new managed subnet |
+| `updateBounds(uint256, uint256)` | Governance | Change min/max markup |
+| `updateBaseRate(uint256)` | Governance | Adjust base rate |
+| `updateDemandCurve(uint256[], int256[])` | Governance | Modify utilization curve |
+| `updateLoyaltyTiers(LoyaltyTier[])` | Governance | Change staking discounts |
+| `emergencyFreeze(uint256)` | Emergency | Lock to fixed rate |
+
+### 23.4 Fund Flow
+
+```
+Enterprise Deposit (AVAX)
+         │
+         ▼
+VAMSValidatorManager.deposit()
+         │
+         ├───┬──────────────────────────┐
+         │   │                          │
+         ▼   │                          ▼
+   95-99% AVAX                      1-5% AVAX
+   (netAmount)                     (markupAmount)
+         │                              │
+         ▼                              ▼
+   P-Chain (ACP-77)              VAMSFeeCollector
+   Validator Balance             (Protocol Revenue)
+```
 
 ---
 

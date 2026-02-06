@@ -69,6 +69,10 @@ class TrustProvider(ABC):
         """Get provider status."""
         pass
 
+    def generate_proof(self) -> Dict[str, Any]:
+        """Generate a TEE remote attestation."""
+        return {"error": "Not implemented"}
+
 
 class PhalaProvider(TrustProvider):
     """
@@ -121,6 +125,19 @@ class PhalaProvider(TrustProvider):
                 latency_ms=latency,
                 error=str(e)[:50]
             )
+
+    def generate_proof(self) -> Dict[str, Any]:
+        """Generate Phala TEE attestation (Mock/Simulated)."""
+        # In real SGX, we would call /dev/attestation/quote
+        # This returns the format required by VAMSERC8004Adapter
+        return {
+            "provider": self.name,
+            "mrenclave": "0x5f9c...mock...enclave",
+            "mrsigner": "0xabc...mock...signer",
+            "report_data": "0x...user...data",
+            "quote": "0x...signed...quote...bytes",
+            "timestamp": time.time()
+        }
 
 
 class MarlinProvider(TrustProvider):

@@ -484,4 +484,9 @@ contract TwoPhaseCommitManager is
     function unpause() external onlyRole(ADMIN_ROLE) {
         _unpause();
     }
+    
+    // ============ Storage Gap ============
+    
+    /// @dev Reserved storage space for future upgrades
+    uint256[50] private __gap;
 }

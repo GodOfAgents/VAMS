@@ -347,4 +347,9 @@ contract VAMSInsuranceFund is
         return claim.claimant != address(0) && 
                block.timestamp <= claim.submittedAt + CLAIM_WINDOW;
     }
+    
+    // ============ Storage Gap ============
+    
+    /// @dev Reserved storage space for future upgrades
+    uint256[50] private __gap;
 }

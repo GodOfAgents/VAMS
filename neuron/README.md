@@ -1,4 +1,4 @@
-# VAMS Neuron v0.5.1
+# VAMS Neuron v0.5.2
 
 **Immortal Agent** – Full 4-Layer Stack with TEE
 

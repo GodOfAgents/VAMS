@@ -276,6 +276,7 @@ VAMS generates revenue through multiple sustainable mechanisms:
 | **Gas Abstraction Premium** | 2-7%     | Markup on cross-chain gas conversions               |
 | **x402 Settlement**         | 0.05%    | Micropayment processing for agent commerce          |
 | **Bridge Fees**             | 0.25%    | Cross-chain asset transfers                         |
+| **Infrastructure Markup**   | 1-5%     | Commission on managed L1s (Compute + ACP-77 fees)   |
 | **Ecosystem Grants**        | Variable | Non-dilutive funding from integrated L1/L2 partners |
 
 > **x402 Settlement Security**: Micropayments are secured by atomic escrow with nonce-based double-spend prevention. Providers must bond 10,000+ $VAMS and are protected by settlement failure recovery mechanisms. See [ARCHITECTURE_v0-3-0.md §20.2](./ARCHITECTURE_v0-3-0.md) for technical specification.

@@ -1,0 +1,22 @@
+{
+    "identity": {
+        "name": "Test-Immortal-Agent",
+        "description": "Verification Profile for VAMS x ERC-8004",
+        "avatar_uri": "ipfs://test"
+    },
+    "security": {
+        "framework": "ERC-8004",
+        "provider": "Phala",
+        "mrenclave": "0x1234deadbeef"
+    },
+    "capabilities": [
+        {
+            "name": "test-skill-1",
+            "version": "1.0"
+        },
+        {
+            "name": "test-skill-2",
+            "version": "1.0"
+        }
+    ]
+}

@@ -395,4 +395,9 @@ contract VAMSPaymentHandler is
         Channel storage channel = _channels[channelId];
         return channel.depositA + channel.depositB;
     }
+    
+    // ============ Storage Gap ============
+    
+    /// @dev Reserved storage space for future upgrades
+    uint256[50] private __gap;
 }

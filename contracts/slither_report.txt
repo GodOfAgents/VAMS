@@ -1,0 +1,852 @@
+﻿slither : 'forge clean' running (wd: C:\Users\aseem\Desktop\VAMS-main\VAMS-main\contracts)
+At line:1 char:48
++ ... oundry\bin"; slither . --config-file slither.config.json 2>&1 | Out-F ...
++                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ('forge clean' r...main\contracts):String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+'forge config --json' running
+'forge build --build-info --skip ./test/** ./script/** --force' running (wd: 
+C:\Users\aseem\Desktop\VAMS-main\VAMS-main\contracts)
+INFO:Detectors:
+Detector: arbitrary-send-erc20
+TransactionCompensation.fundPool(uint256) (src/economic/TransactionCompensation.sol#292-296) uses arbitrary from in 
+transferFrom: vamsToken.safeTransferFrom(insuranceFund,address(this),amount) 
+(src/economic/TransactionCompensation.sol#293-296)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#arbitrary-from-in-transferfrom
+INFO:Detectors:
+Detector: unchecked-transfer
+VAMSAgentRegistry.deregisterAgent(bytes32) (src/registry/VAMSAgentRegistry.sol#257-277) ignores return value by 
+IERC20(vamsToken).transfer(msg.sender,stakeToReturn) (src/registry/VAMSAgentRegistry.sol#273-274)
+VAMSAgentRegistry.resolveChallenge(bytes32,bool,bytes) (src/registry/VAMSAgentRegistry.sol#376-421) ignores return 
+value by IERC20(vamsToken).transfer(challenge.challenger,slashAmount) (src/registry/VAMSAgentRegistry.sol#400-403)
+VAMSAgentRegistry.resolveChallenge(bytes32,bool,bytes) (src/registry/VAMSAgentRegistry.sol#376-421) ignores return 
+value by IERC20(vamsToken).transfer(challenge.challenger,challenge.challengerStake) 
+(src/registry/VAMSAgentRegistry.sol#404-405)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#unchecked-transfer
+INFO:Detectors:
+Detector: divide-before-multiply
+VAMSPaymentHandler._executeSettlement(bytes32,uint256,uint256) (src/economic/VAMSPaymentHandler.sol#271-306) performs 
+a multiplication on the result of a division:
+	- fee = (totalSettlement * SETTLEMENT_FEE_BPS) / BPS_DENOMINATOR (src/economic/VAMSPaymentHandler.sol#282-284)
+	- feeA = (balanceA * fee) / totalSettlement (src/economic/VAMSPaymentHandler.sol#286-287)
+VAMSStaking.getVotingPower(address) (src/staking/VAMSStaking.sol#350-370) performs a multiplication on the result of a 
+division:
+	- basePower = (basePower * GOV_MULT_PLATINUM) / BPS_DENOMINATOR (src/staking/VAMSStaking.sol#362-363)
+	- basePower = (basePower * GOV_MULT_GOLD) / BPS_DENOMINATOR (src/staking/VAMSStaking.sol#365-366)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#divide-before-multiply
+INFO:Detectors:
+Detector: incorrect-equality
+TransactionCompensation.getPendingClaimsCount() (src/economic/TransactionCompensation.sol#366-372) uses a dangerous 
+strict equality:
+	- claims[pendingClaimIds[i]].status == ClaimStatus.PENDING (src/economic/TransactionCompensation.sol#370-371)
+VAMSStaking._updatePool() (src/staking/VAMSStaking.sol#436-450) uses a dangerous strict equality:
+	- totalStaked == 0 (src/staking/VAMSStaking.sol#437)
+VAMSStaking.claimRewards() (src/staking/VAMSStaking.sol#254-265) uses a dangerous strict equality:
+	- amount == 0 (src/staking/VAMSStaking.sol#260-262)
+VAMSStaking.compoundRewards() (src/staking/VAMSStaking.sol#266-288) uses a dangerous strict equality:
+	- amount == 0 (src/staking/VAMSStaking.sol#273)
+VAMSVesting.batchRelease(bytes32[]) (src/vesting/VAMSVesting.sol#184-208) uses a dangerous strict equality:
+	- released == 0 (src/vesting/VAMSVesting.sol#199-200)
+VAMSVesting.release(bytes32) (src/vesting/VAMSVesting.sol#165-183) uses a dangerous strict equality:
+	- released == 0 (src/vesting/VAMSVesting.sol#177)
+VAMSVesting.releaseAll() (src/vesting/VAMSVesting.sol#209-230) uses a dangerous strict equality:
+	- released == 0 (src/vesting/VAMSVesting.sol#221-222)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#dangerous-strict-equalities
+INFO:Detectors:
+Detector: reentrancy-no-eth
+Reentrancy in BatchSettlement._claimPayment(uint256,IBatchSettlement.Payment,bytes32[]) 
+(src/economic/BatchSettlement.sol#375-437):
+	External calls:
+	- nonceRegistry.consumeNonce(payment.agent,payment.nonce,receiptHash,bytes32(batchId)) 
+(src/economic/BatchSettlement.sol#410-414)
+	State variables written after the call(s):
+	- _claims[paymentHash] = 
+PaymentClaim({batchId:batchId,paymentHash:paymentHash,claimedAt:block.timestamp,status:PaymentStatus.CLAIMED}) 
+(src/economic/BatchSettlement.sol#420-425)
+	BatchSettlement._claims (src/economic/BatchSettlement.sol#79-81) can be used in cross function reentrancies:
+	- BatchSettlement.disputePayment(uint256,IBatchSettlement.Payment,bytes32[],bytes) 
+(src/economic/BatchSettlement.sol#263-305)
+	- BatchSettlement.getPaymentClaim(bytes32) (src/economic/BatchSettlement.sol#132-139)
+Reentrancy in X402EscrowManager.claimEscrow(bytes32,IX402EscrowManager.ServiceProof,bytes32) 
+(src/economic/X402EscrowManager.sol#328-402):
+	External calls:
+	- nonceRegistry.consumeNonce(escrow.agent,escrow.nonce,receiptHash,escrowId) 
+(src/economic/X402EscrowManager.sol#371-375)
+	State variables written after the call(s):
+	- escrow.status = EscrowStatus.CLAIMED (src/economic/X402EscrowManager.sol#381-384)
+	X402EscrowManager._escrows (src/economic/X402EscrowManager.sol#81-83) can be used in cross function reentrancies:
+	- X402EscrowManager.disputeEscrow(bytes32,bytes) (src/economic/X402EscrowManager.sol#405-442)
+	- X402EscrowManager.extendEscrow(bytes32,uint256) (src/economic/X402EscrowManager.sol#299-325)
+	- X402EscrowManager.getEscrow(bytes32) (src/economic/X402EscrowManager.sol#138-145)
+	- X402EscrowManager.isClaimable(bytes32) (src/economic/X402EscrowManager.sol#176-185)
+	- X402EscrowManager.isRefundable(bytes32) (src/economic/X402EscrowManager.sol#186-192)
+Reentrancy in TwoPhaseCommitManager.initiateWorkflow(bytes32,ITwoPhaseCommitManager.ServiceRequest[],bytes32,uint256) 
+(src/economic/TwoPhaseCommitManager.sol#168-249):
+	External calls:
+	- escrowId = escrowManager.lockEscrow(svc.provider,svc.amount,nonce,svc.timeout,commitSecretHash,svc.serviceType) 
+(src/economic/TwoPhaseCommitManager.sol#220-229)
+	- escrowId = escrowManager.lockEscrow(svc.provider,svc.amount,nonce,actualPrepareWindow + 
+DEFAULT_COMMIT_WINDOW,commitSecretHash,svc.serviceType) (src/economic/TwoPhaseCommitManager.sol#220-229)
+	State variables written after the call(s):
+	- _workflowEscrows[workflowId].push(escrowId) (src/economic/TwoPhaseCommitManager.sol#230)
+	TwoPhaseCommitManager._workflowEscrows (src/economic/TwoPhaseCommitManager.sol#63-65) can be used in cross function 
+reentrancies:
+	- TwoPhaseCommitManager.getWorkflowEscrows(bytes32) (src/economic/TwoPhaseCommitManager.sol#120-127)
+Reentrancy in VAMSAgentRegistry.resolveChallenge(bytes32,bool,bytes) (src/registry/VAMSAgentRegistry.sol#376-421):
+	External calls:
+	- IERC20(vamsToken).transfer(challenge.challenger,slashAmount) (src/registry/VAMSAgentRegistry.sol#400-403)
+	- IERC20(vamsToken).transfer(challenge.challenger,challenge.challengerStake) 
+(src/registry/VAMSAgentRegistry.sol#404-405)
+	State variables written after the call(s):
+	- agent.stake -= slashAmount (src/registry/VAMSAgentRegistry.sol#409-410)
+	VAMSAgentRegistry.agents (src/registry/VAMSAgentRegistry.sol#102-104) can be used in cross function reentrancies:
+	- VAMSAgentRegistry.agents (src/registry/VAMSAgentRegistry.sol#102-104)
+	- VAMSAgentRegistry.finalizeAgent(bytes32) (src/registry/VAMSAgentRegistry.sol#242-255)
+	- VAMSAgentRegistry.getAgent(bytes32) (src/registry/VAMSAgentRegistry.sol#424-441)
+	- VAMSAgentRegistry.getChallengeWindowRemaining(bytes32) (src/registry/VAMSAgentRegistry.sol#476-484)
+	- VAMSAgentRegistry.isAgentActive(bytes32) (src/registry/VAMSAgentRegistry.sol#444-452)
+	- VAMSAgentRegistry.isChallengeWindowExpired(bytes32) (src/registry/VAMSAgentRegistry.sol#455-462)
+	- VAMSAgentRegistry.submitMerkleRoot(bytes32,bytes32) (src/registry/VAMSAgentRegistry.sol#283-308)
+	- VAMSAgentRegistry.updateTEEAttestation(bytes32,bytes32) (src/registry/VAMSAgentRegistry.sol#312-323)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#reentrancy-vulnerabilities-2
+INFO:Detectors:
+Detector: missing-zero-check
+BatchSettlement.initialize(address,address,address,address)._treasury (src/economic/BatchSettlement.sol#105-106) lacks 
+a zero-check on :
+		- treasury = _treasury (src/economic/BatchSettlement.sol#119-121)
+BatchSettlement.setTreasury(address)._treasury (src/economic/BatchSettlement.sol#478) lacks a zero-check on :
+		- treasury = _treasury (src/economic/BatchSettlement.sol#479)
+ProviderBondRegistry.initialize(address,address,address)._insuranceFund 
+(src/economic/ProviderBondRegistry.sol#100-102) lacks a zero-check on :
+		- insuranceFund = _insuranceFund (src/economic/ProviderBondRegistry.sol#114-115)
+ProviderBondRegistry.setInsuranceFund(address)._insuranceFund (src/economic/ProviderBondRegistry.sol#524) lacks a 
+zero-check on :
+		- insuranceFund = _insuranceFund (src/economic/ProviderBondRegistry.sol#526-528)
+VAMSFeeCollector.initialize(address,address,address,address,address)._stakingContract 
+(src/economic/VAMSFeeCollector.sol#98-99) lacks a zero-check on :
+		- stakingContract = _stakingContract (src/economic/VAMSFeeCollector.sol#115)
+VAMSFeeCollector.initialize(address,address,address,address,address)._insuranceFund 
+(src/economic/VAMSFeeCollector.sol#99-100) lacks a zero-check on :
+		- insuranceFund = _insuranceFund (src/economic/VAMSFeeCollector.sol#117)
+VAMSFeeCollector.setStakingContract(address)._stakingContract (src/economic/VAMSFeeCollector.sol#332) lacks a 
+zero-check on :
+		- stakingContract = _stakingContract (src/economic/VAMSFeeCollector.sol#332-333)
+VAMSFeeCollector.setInsuranceFund(address)._insuranceFund (src/economic/VAMSFeeCollector.sol#339) lacks a zero-check 
+on :
+		- insuranceFund = _insuranceFund (src/economic/VAMSFeeCollector.sol#341)
+VAMSInsuranceFund.initialize(address,address,address,address[])._stakingContract 
+(src/economic/VAMSInsuranceFund.sol#90-91) lacks a zero-check on :
+		- stakingContract = _stakingContract (src/economic/VAMSInsuranceFund.sol#105)
+VAMSInsuranceFund.setTimelockController(address)._timelockController (src/economic/VAMSInsuranceFund.sol#263) lacks a 
+zero-check on :
+		- timelockController = _timelockController (src/economic/VAMSInsuranceFund.sol#266-269)
+VAMSInsuranceFund.setStakingContract(address)._stakingContract (src/economic/VAMSInsuranceFund.sol#280-281) lacks a 
+zero-check on :
+		- stakingContract = _stakingContract (src/economic/VAMSInsuranceFund.sol#281-282)
+X402EscrowManager.initialize(address,address,address,address,address)._treasury 
+(src/economic/X402EscrowManager.sol#119) lacks a zero-check on :
+		- treasury = _treasury (src/economic/X402EscrowManager.sol#136-137)
+X402EscrowManager.setTreasury(address)._treasury (src/economic/X402EscrowManager.sol#548) lacks a zero-check on :
+		- treasury = _treasury (src/economic/X402EscrowManager.sol#549)
+X402NonceRegistry.initialize(address,address)._escrowManager (src/economic/X402NonceRegistry.sol#71-73) lacks a 
+zero-check on :
+		- escrowManager = _escrowManager (src/economic/X402NonceRegistry.sol#83-84)
+X402NonceRegistry.setEscrowManager(address)._escrowManager (src/economic/X402NonceRegistry.sol#255-256) lacks a 
+zero-check on :
+		- escrowManager = _escrowManager (src/economic/X402NonceRegistry.sol#257-261)
+VAMSFeeCollector.initialize(address,address[],address,address,address)._treasury 
+(src/examples/VAMSFeeCollector.sol#77-78) lacks a zero-check on :
+		- treasury = _treasury (src/examples/VAMSFeeCollector.sol#84-85)
+VAMSFeeCollector.initialize(address,address[],address,address,address)._stakingContract 
+(src/examples/VAMSFeeCollector.sol#78-79) lacks a zero-check on :
+		- stakingContract = _stakingContract (src/examples/VAMSFeeCollector.sol#86)
+VAMSFeeCollector.initialize(address,address[],address,address,address)._insuranceFund 
+(src/examples/VAMSFeeCollector.sol#79-80) lacks a zero-check on :
+		- insuranceFund = _insuranceFund (src/examples/VAMSFeeCollector.sol#87-88)
+VAMSAgentRegistry.initialize(address,address,address)._slasher (src/registry/VAMSAgentRegistry.sol#175-176) lacks a 
+zero-check on :
+		- slasher = _slasher (src/registry/VAMSAgentRegistry.sol#190-191)
+VAMSAgentRegistry.setSlasher(address)._slasher (src/registry/VAMSAgentRegistry.sol#487-489) lacks a zero-check on :
+		- slasher = _slasher (src/registry/VAMSAgentRegistry.sol#490-491)
+VAMSSlasher.initialize(address,address)._insuranceFund (src/slashing/VAMSSlasher.sol#100) lacks a zero-check on :
+		- insuranceFund = _insuranceFund (src/slashing/VAMSSlasher.sol#109-110)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#missing-zero-address-validation
+INFO:Detectors:
+Detector: calls-loop
+BatchSettlement._claimPayment(uint256,IBatchSettlement.Payment,bytes32[]) (src/economic/BatchSettlement.sol#375-437) 
+has external calls inside a loop: nonceRegistry.consumeNonce(payment.agent,payment.nonce,receiptHash,bytes32(batchId)) 
+(src/economic/BatchSettlement.sol#410-414)
+	Calls stack containing the loop:
+		BatchSettlement.batchClaimPayments(uint256,IBatchSettlement.Payment[],bytes32[][])
+TransactionCompensation._processClaim(uint256) (src/economic/TransactionCompensation.sol#268-287) has external calls 
+inside a loop: balance = vamsToken.balanceOf(address(this)) (src/economic/TransactionCompensation.sol#276-278)
+	Calls stack containing the loop:
+		TransactionCompensation.batchProcessClaims(uint256[])
+TwoPhaseCommitManager.initiateWorkflow(bytes32,ITwoPhaseCommitManager.ServiceRequest[],bytes32,uint256) 
+(src/economic/TwoPhaseCommitManager.sol#168-249) has external calls inside a loop: escrowId = 
+escrowManager.lockEscrow(svc.provider,svc.amount,nonce,svc.timeout,commitSecretHash,svc.serviceType) 
+(src/economic/TwoPhaseCommitManager.sol#220-229)
+TwoPhaseCommitManager.initiateWorkflow(bytes32,ITwoPhaseCommitManager.ServiceRequest[],bytes32,uint256) 
+(src/economic/TwoPhaseCommitManager.sol#168-249) has external calls inside a loop: escrowId = 
+escrowManager.lockEscrow(svc.provider,svc.amount,nonce,actualPrepareWindow + 
+DEFAULT_COMMIT_WINDOW,commitSecretHash,svc.serviceType) (src/economic/TwoPhaseCommitManager.sol#220-229)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation/#calls-inside-a-loop
+INFO:Detectors:
+Detector: reentrancy-benign
+Reentrancy in BatchSettlement._claimPayment(uint256,IBatchSettlement.Payment,bytes32[]) 
+(src/economic/BatchSettlement.sol#375-437):
+	External calls:
+	- nonceRegistry.consumeNonce(payment.agent,payment.nonce,receiptHash,bytes32(batchId)) 
+(src/economic/BatchSettlement.sol#410-414)
+	State variables written after the call(s):
+	- totalFees += fee (src/economic/BatchSettlement.sol#428-429)
+	- totalSettled += payment.amount (src/economic/BatchSettlement.sol#426-428)
+Reentrancy in X402EscrowManager.claimEscrow(bytes32,IX402EscrowManager.ServiceProof,bytes32) 
+(src/economic/X402EscrowManager.sol#328-402):
+	External calls:
+	- nonceRegistry.consumeNonce(escrow.agent,escrow.nonce,receiptHash,escrowId) 
+(src/economic/X402EscrowManager.sol#371-375)
+	State variables written after the call(s):
+	- _claimTimestamps[escrowId] = block.timestamp (src/economic/X402EscrowManager.sol#384-385)
+	- totalEscrowed -= escrow.amount (src/economic/X402EscrowManager.sol#386-387)
+	- totalFeesCollected += fee (src/economic/X402EscrowManager.sol#387-388)
+Reentrancy in TwoPhaseCommitManager.initiateWorkflow(bytes32,ITwoPhaseCommitManager.ServiceRequest[],bytes32,uint256) 
+(src/economic/TwoPhaseCommitManager.sol#168-249):
+	External calls:
+	- escrowId = escrowManager.lockEscrow(svc.provider,svc.amount,nonce,svc.timeout,commitSecretHash,svc.serviceType) 
+(src/economic/TwoPhaseCommitManager.sol#220-229)
+	- escrowId = escrowManager.lockEscrow(svc.provider,svc.amount,nonce,actualPrepareWindow + 
+DEFAULT_COMMIT_WINDOW,commitSecretHash,svc.serviceType) (src/economic/TwoPhaseCommitManager.sol#220-229)
+	State variables written after the call(s):
+	- _agentWorkflows[msg.sender].push(workflowId) (src/economic/TwoPhaseCommitManager.sol#239-240)
+	- _services[workflowId][escrowId] = 
+ServiceEntry({escrowId:escrowId,provider:svc.provider,amount:svc.amount,state:ServiceState.PENDING,preparedAt:0}) 
+(src/economic/TwoPhaseCommitManager.sol#231-239)
+	- totalWorkflows ++ (src/economic/TwoPhaseCommitManager.sol#241)
+Reentrancy in X402EscrowManager.lockEscrow(address,uint256,uint256,uint256,bytes32,bytes32) 
+(src/economic/X402EscrowManager.sol#204-264):
+	External calls:
+	- bondRegistry.acceptRequest(provider,escrowId,amount) (src/economic/X402EscrowManager.sol#255-256)
+	State variables written after the call(s):
+	- escrowCount ++ (src/economic/X402EscrowManager.sol#260)
+	- totalEscrowed += amount (src/economic/X402EscrowManager.sol#259-260)
+Reentrancy in VAMSStaking.stakeWithPermit(uint256,IVAMSStaking.LockPeriod,uint256,uint8,bytes32,bytes32) 
+(src/staking/VAMSStaking.sol#145-160):
+	External calls:
+	- IERC20Permit(address(stakingToken)).permit(msg.sender,address(this),amount,deadline,v,r,s) 
+(src/staking/VAMSStaking.sol#152-158)
+	State variables written after the call(s):
+	- _stake(msg.sender,amount,lockPeriod) (src/staking/VAMSStaking.sol#158-160)
+		- info.pendingRewards = 0 (src/staking/VAMSStaking.sol#471-473)
+		- info.rewardDebt = (info.amount * accRewardPerShare) / PRECISION (src/staking/VAMSStaking.sol#473)
+		- info.amount += amount (src/staking/VAMSStaking.sol#415-416)
+		- info.stakedAt = block.timestamp (src/staking/VAMSStaking.sol#416)
+		- info.lockPeriod = lockPeriod (src/staking/VAMSStaking.sol#417)
+		- info.lockedUntil = block.timestamp + _getLockDuration(lockPeriod) (src/staking/VAMSStaking.sol#417-424)
+		- info.rewardDebt = (info.amount * accRewardPerShare) / PRECISION (src/staking/VAMSStaking.sol#424-426)
+	- _stake(msg.sender,amount,lockPeriod) (src/staking/VAMSStaking.sol#158-160)
+		- accRewardPerShare += (reward * PRECISION) / totalStaked (src/staking/VAMSStaking.sol#446)
+	- _stake(msg.sender,amount,lockPeriod) (src/staking/VAMSStaking.sol#158-160)
+		- lastRewardTime = block.timestamp (src/staking/VAMSStaking.sol#439-441)
+		- lastRewardTime = block.timestamp (src/staking/VAMSStaking.sol#448-450)
+	- _stake(msg.sender,amount,lockPeriod) (src/staking/VAMSStaking.sol#158-160)
+		- totalStaked += amount (src/staking/VAMSStaking.sol#426)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#reentrancy-vulnerabilities-3
+INFO:Detectors:
+Detector: timestamp
+VAMSEmergencyPausable.checkAndUnpause() (src/base/VAMSEmergencyPausable.sol#143-151) uses timestamp for comparisons
+	Dangerous comparisons:
+	- block.timestamp < pauseExpiresAt (src/base/VAMSEmergencyPausable.sol#146)
+VAMSEmergencyPausable.pauseTimeRemaining() (src/base/VAMSEmergencyPausable.sol#191-197) uses timestamp for comparisons
+	Dangerous comparisons:
+	- ! paused() || block.timestamp >= pauseExpiresAt (src/base/VAMSEmergencyPausable.sol#194-195)
+BatchSettlement.finalizeBatch(uint256) (src/economic/BatchSettlement.sol#218-236) uses timestamp for comparisons
+	Dangerous comparisons:
+	- block.timestamp < disputeExpiry (src/economic/BatchSettlement.sol#231)
+BatchSettlement.disputePayment(uint256,IBatchSettlement.Payment,bytes32[],bytes) 
+(src/economic/BatchSettlement.sol#263-305) uses timestamp for comparisons
+	Dangerous comparisons:
+	- block.timestamp > disputeExpiry (src/economic/BatchSettlement.sol#283)
+BatchSettlement.disputeBatch(uint256,bytes) (src/economic/BatchSettlement.sol#306-326) uses timestamp for comparisons
+	Dangerous comparisons:
+	- block.timestamp > disputeExpiry (src/economic/BatchSettlement.sol#322-324)
+OutageRecoveryManager.activateEmergencyMode() (src/economic/OutageRecoveryManager.sol#166-190) uses timestamp for 
+comparisons
+	Dangerous comparisons:
+	- require(bool,string)(outage.declaringGuardians >= DECLARATION_THRESHOLD,Insufficient declarations) 
+(src/economic/OutageRecoveryManager.sol#175-178)
+	- block.timestamp < gracePeriodEnd (src/economic/OutageRecoveryManager.sol#181)
+OutageRecoveryManager.requestEmergencyWithdraw(address,uint256) (src/economic/OutageRecoveryManager.sol#192-232) uses 
+timestamp for comparisons
+	Dangerous comparisons:
+	- block.timestamp > outage.emergencyStartAt + EMERGENCY_DURATION (src/economic/OutageRecoveryManager.sol#205-206)
+OutageRecoveryManager.cancelWithdrawal(uint256) (src/economic/OutageRecoveryManager.sol#261-272) uses timestamp for 
+comparisons
+	Dangerous comparisons:
+	- require(bool,string)(request.status == WithdrawalStatus.PENDING || request.status == 
+WithdrawalStatus.APPROVED,Cannot cancel) (src/economic/OutageRecoveryManager.sol#269-271)
+OutageRecoveryManager.getGracePeriodRemaining() (src/economic/OutageRecoveryManager.sol#396-407) uses timestamp for 
+comparisons
+	Dangerous comparisons:
+	- block.timestamp >= gracePeriodEnd (src/economic/OutageRecoveryManager.sol#405-406)
+OutageRecoveryManager.getEmergencyTimeRemaining() (src/economic/OutageRecoveryManager.sol#409-420) uses timestamp for 
+comparisons
+	Dangerous comparisons:
+	- block.timestamp >= emergencyEnd (src/economic/OutageRecoveryManager.sol#419-420)
+ProviderBondRegistry.isRegistered(address) (src/economic/ProviderBondRegistry.sol#164-171) uses timestamp for 
+comparisons
+	Dangerous comparisons:
+	- _bonds[provider].registeredAt > 0 (src/economic/ProviderBondRegistry.sol#168-171)
+ProviderBondRegistry.executeWithdrawal() (src/economic/ProviderBondRegistry.sol#328-359) uses timestamp for comparisons
+	Dangerous comparisons:
+	- block.timestamp < bond.withdrawalUnlockTime (src/economic/ProviderBondRegistry.sol#337-338)
+TransactionCompensation.resolveIncident(uint256) (src/economic/TransactionCompensation.sol#155-166) uses timestamp for 
+comparisons
+	Dangerous comparisons:
+	- require(bool,string)(incident.active,Incident not active) (src/economic/TransactionCompensation.sol#161)
+TransactionCompensation.submitClaim(bytes32,ITransactionCompensation.TransactionType,uint256,string) 
+(src/economic/TransactionCompensation.sol#170-207) uses timestamp for comparisons
+	Dangerous comparisons:
+	- block.timestamp > incident.claimDeadline (src/economic/TransactionCompensation.sol#183-184)
+TransactionCompensation._processClaim(uint256) (src/economic/TransactionCompensation.sol#268-287) uses timestamp for 
+comparisons
+	Dangerous comparisons:
+	- require(bool,string)(claim.status == ClaimStatus.APPROVED,Claim not approved) 
+(src/economic/TransactionCompensation.sol#271-276)
+TransactionCompensation.expireClaim(uint256) (src/economic/TransactionCompensation.sol#307-323) uses timestamp for 
+comparisons
+	Dangerous comparisons:
+	- require(bool,string)(claim.status == ClaimStatus.PENDING,Not pending) 
+(src/economic/TransactionCompensation.sol#310-311)
+	- require(bool,string)(block.timestamp > incidents[incidentId].claimDeadline + 604800,Window not expired) 
+(src/economic/TransactionCompensation.sol#318-320)
+TransactionCompensation.getPendingClaimsCount() (src/economic/TransactionCompensation.sol#366-372) uses timestamp for 
+comparisons
+	Dangerous comparisons:
+	- claims[pendingClaimIds[i]].status == ClaimStatus.PENDING (src/economic/TransactionCompensation.sol#370-371)
+TwoPhaseCommitManager.isExpired(bytes32) (src/economic/TwoPhaseCommitManager.sol#144-166) uses timestamp for 
+comparisons
+	Dangerous comparisons:
+	- wf.state == WorkflowState.PENDING && block.timestamp > wf.prepareDeadline 
+(src/economic/TwoPhaseCommitManager.sol#155-157)
+	- wf.state == WorkflowState.PREPARED && block.timestamp > wf.commitDeadline 
+(src/economic/TwoPhaseCommitManager.sol#160-162)
+TwoPhaseCommitManager.commitWorkflow(bytes32,bytes32) (src/economic/TwoPhaseCommitManager.sol#252-291) uses timestamp 
+for comparisons
+	Dangerous comparisons:
+	- block.timestamp > wf.commitDeadline (src/economic/TwoPhaseCommitManager.sol#277-278)
+TwoPhaseCommitManager.markServicePrepared(bytes32,bytes32) (src/economic/TwoPhaseCommitManager.sol#316-356) uses 
+timestamp for comparisons
+	Dangerous comparisons:
+	- block.timestamp > wf.prepareDeadline (src/economic/TwoPhaseCommitManager.sol#335-336)
+TwoPhaseCommitManager.processExpiredWorkflow(bytes32) (src/economic/TwoPhaseCommitManager.sol#359-382) uses timestamp 
+for comparisons
+	Dangerous comparisons:
+	- wf.state == WorkflowState.PENDING && block.timestamp > wf.prepareDeadline 
+(src/economic/TwoPhaseCommitManager.sol#367-369)
+	- wf.state == WorkflowState.PREPARED && block.timestamp > wf.commitDeadline 
+(src/economic/TwoPhaseCommitManager.sol#370-371)
+VAMSInsuranceFund.approveClaim(bytes32) (src/economic/VAMSInsuranceFund.sol#174-213) uses timestamp for comparisons
+	Dangerous comparisons:
+	- block.timestamp > claim.submittedAt + CLAIM_WINDOW (src/economic/VAMSInsuranceFund.sol#182-184)
+VAMSInsuranceFund.isClaimWindowOpen(bytes32) (src/economic/VAMSInsuranceFund.sol#333-341) uses timestamp for 
+comparisons
+	Dangerous comparisons:
+	- claim.claimant != address(0) && block.timestamp <= claim.submittedAt + CLAIM_WINDOW 
+(src/economic/VAMSInsuranceFund.sol#336-341)
+VAMSPaymentHandler.dispute(bytes32,IVAMSPaymentHandler.ChannelState,bytes) 
+(src/economic/VAMSPaymentHandler.sol#225-256) uses timestamp for comparisons
+	Dangerous comparisons:
+	- block.timestamp >= channel.closingAt (src/economic/VAMSPaymentHandler.sol#237)
+VAMSPaymentHandler.settle(bytes32) (src/economic/VAMSPaymentHandler.sol#257-269) uses timestamp for comparisons
+	Dangerous comparisons:
+	- block.timestamp < channel.closingAt (src/economic/VAMSPaymentHandler.sol#265-266)
+VAMSPaymentHandler.isDisputable(bytes32) (src/economic/VAMSPaymentHandler.sol#370-375) uses timestamp for comparisons
+	Dangerous comparisons:
+	- channel.status == ChannelStatus.CLOSING && block.timestamp < channel.closingAt 
+(src/economic/VAMSPaymentHandler.sol#374-375)
+X402EscrowManager.isClaimable(bytes32) (src/economic/X402EscrowManager.sol#176-185) uses timestamp for comparisons
+	Dangerous comparisons:
+	- escrow.status == EscrowStatus.LOCKED && block.timestamp <= escrow.expiresAt 
+(src/economic/X402EscrowManager.sol#183-185)
+X402EscrowManager.isRefundable(bytes32) (src/economic/X402EscrowManager.sol#186-192) uses timestamp for comparisons
+	Dangerous comparisons:
+	- escrow.status == EscrowStatus.LOCKED && block.timestamp > escrow.expiresAt 
+(src/economic/X402EscrowManager.sol#189-192)
+X402EscrowManager.refundExpiredEscrow(bytes32) (src/economic/X402EscrowManager.sol#266-299) uses timestamp for 
+comparisons
+	Dangerous comparisons:
+	- block.timestamp <= escrow.expiresAt (src/economic/X402EscrowManager.sol#280-281)
+X402EscrowManager.extendEscrow(bytes32,uint256) (src/economic/X402EscrowManager.sol#299-325) uses timestamp for 
+comparisons
+	Dangerous comparisons:
+	- block.timestamp > escrow.expiresAt (src/economic/X402EscrowManager.sol#313-315)
+	- newExpiry > maxExpiry (src/economic/X402EscrowManager.sol#320)
+X402EscrowManager.claimEscrow(bytes32,IX402EscrowManager.ServiceProof,bytes32) 
+(src/economic/X402EscrowManager.sol#328-402) uses timestamp for comparisons
+	Dangerous comparisons:
+	- block.timestamp > escrow.expiresAt (src/economic/X402EscrowManager.sol#345)
+X402EscrowManager.disputeEscrow(bytes32,bytes) (src/economic/X402EscrowManager.sol#405-442) uses timestamp for 
+comparisons
+	Dangerous comparisons:
+	- block.timestamp > claimTime + DISPUTE_WINDOW (src/economic/X402EscrowManager.sol#424-425)
+	- _disputes[escrowId].escrowId != bytes32(0) (src/economic/X402EscrowManager.sol#430-431)
+X402EscrowManager.resolveDispute(bytes32,address,uint256,uint256) (src/economic/X402EscrowManager.sol#442-491) uses 
+timestamp for comparisons
+	Dangerous comparisons:
+	- require(bool,string)(agentRefund + providerPayout == escrow.amount,Split must equal escrow amount) 
+(src/economic/X402EscrowManager.sol#466-469)
+	- require(bool,string)(winner == escrow.agent || winner == escrow.provider,Winner must be party to escrow) 
+(src/economic/X402EscrowManager.sol#469-471)
+VAMSAgentRegistry.finalizeAgent(bytes32) (src/registry/VAMSAgentRegistry.sol#242-255) uses timestamp for comparisons
+	Dangerous comparisons:
+	- block.timestamp < agent.finalizedAt (src/registry/VAMSAgentRegistry.sol#251)
+VAMSAgentRegistry.isChallengeWindowExpired(bytes32) (src/registry/VAMSAgentRegistry.sol#455-462) uses timestamp for 
+comparisons
+	Dangerous comparisons:
+	- block.timestamp >= agents[_agentId].finalizedAt (src/registry/VAMSAgentRegistry.sol#461-462)
+VAMSAgentRegistry.getChallengeWindowRemaining(bytes32) (src/registry/VAMSAgentRegistry.sol#476-484) uses timestamp for 
+comparisons
+	Dangerous comparisons:
+	- block.timestamp >= agent.finalizedAt (src/registry/VAMSAgentRegistry.sol#479-480)
+VAMSRouter.routeTransaction(bytes32,VAMSRouter.TransactionMetadata) (src/routing/VAMSRouter.sol#126-174) uses 
+timestamp for comparisons
+	Dangerous comparisons:
+	- globalOverrideActive && block.timestamp < globalManualOverride.expiresAt (src/routing/VAMSRouter.sol#133)
+	- manualRoute.expiresAt > 0 && block.timestamp < manualRoute.expiresAt (src/routing/VAMSRouter.sol#144-147)
+SlashingOracle.commitVote(uint256,bytes32) (src/slashing/SlashingOracle.sol#159-196) uses timestamp for comparisons
+	Dangerous comparisons:
+	- block.timestamp > proposal.commitDeadline (src/slashing/SlashingOracle.sol#168-169)
+	- voterInfo.stakedAt == 0 || block.timestamp - voterInfo.stakedAt < MIN_STAKE_AGE 
+(src/slashing/SlashingOracle.sol#183-185)
+SlashingOracle.revealVote(uint256,bool,bytes32) (src/slashing/SlashingOracle.sol#197-246) uses timestamp for 
+comparisons
+	Dangerous comparisons:
+	- block.timestamp <= proposal.commitDeadline (src/slashing/SlashingOracle.sol#210-211)
+	- block.timestamp > proposal.revealDeadline (src/slashing/SlashingOracle.sol#212)
+SlashingOracle.finalizeProposal(uint256) (src/slashing/SlashingOracle.sol#247-280) uses timestamp for comparisons
+	Dangerous comparisons:
+	- require(bool,string)(block.timestamp > proposal.revealDeadline,Reveal phase not ended) 
+(src/slashing/SlashingOracle.sol#256-257)
+	- require(bool,string)(proposal.status == ProposalStatus.COMMIT_PHASE || proposal.status == 
+ProposalStatus.REVEAL_PHASE,Already finalized) (src/slashing/SlashingOracle.sol#257-261)
+SlashingOracle.getCurrentPhase(uint256) (src/slashing/SlashingOracle.sol#331-354) uses timestamp for comparisons
+	Dangerous comparisons:
+	- block.timestamp <= proposal.commitDeadline (src/slashing/SlashingOracle.sol#345-346)
+	- block.timestamp <= proposal.revealDeadline (src/slashing/SlashingOracle.sol#349)
+VAMSSlasher.unjail(address) (src/slashing/VAMSSlasher.sol#228-239) uses timestamp for comparisons
+	Dangerous comparisons:
+	- block.timestamp < op.jailedUntil (src/slashing/VAMSSlasher.sol#236)
+VAMSStaking.unstake(uint256) (src/staking/VAMSStaking.sol#189-222) uses timestamp for comparisons
+	Dangerous comparisons:
+	- block.timestamp < info.lockedUntil (src/staking/VAMSStaking.sol#199-200)
+VAMSStaking.withdraw() (src/staking/VAMSStaking.sol#223-234) uses timestamp for comparisons
+	Dangerous comparisons:
+	- block.timestamp < request.unbondingEnd (src/staking/VAMSStaking.sol#230-231)
+VAMSStaking.claimRewards() (src/staking/VAMSStaking.sol#254-265) uses timestamp for comparisons
+	Dangerous comparisons:
+	- amount == 0 (src/staking/VAMSStaking.sol#260-262)
+VAMSStaking.compoundRewards() (src/staking/VAMSStaking.sol#266-288) uses timestamp for comparisons
+	Dangerous comparisons:
+	- amount == 0 (src/staking/VAMSStaking.sol#273)
+VAMSStaking.pendingRewards(address) (src/staking/VAMSStaking.sol#312-336) uses timestamp for comparisons
+	Dangerous comparisons:
+	- block.timestamp > lastRewardTime && totalStaked > 0 (src/staking/VAMSStaking.sol#318-321)
+VAMSStaking.timeToUnlock(address) (src/staking/VAMSStaking.sol#344-349) uses timestamp for comparisons
+	Dangerous comparisons:
+	- block.timestamp >= info.lockedUntil (src/staking/VAMSStaking.sol#348)
+VAMSStaking._updatePool() (src/staking/VAMSStaking.sol#436-450) uses timestamp for comparisons
+	Dangerous comparisons:
+	- block.timestamp <= lastRewardTime (src/staking/VAMSStaking.sol#436-437)
+	- totalStaked == 0 (src/staking/VAMSStaking.sol#437)
+VAMSStaking._getTier(uint256) (src/staking/VAMSStaking.sol#476-484) uses timestamp for comparisons
+	Dangerous comparisons:
+	- amount >= TIER_PLATINUM_MIN (src/staking/VAMSStaking.sol#477-478)
+	- amount >= TIER_GOLD_MIN (src/staking/VAMSStaking.sol#478-480)
+	- amount >= TIER_SILVER_MIN (src/staking/VAMSStaking.sol#480)
+	- amount >= TIER_BRONZE_MIN (src/staking/VAMSStaking.sol#482-483)
+VAMSToken.getDailyTransferAmount(address) (src/token/VAMSToken.sol#195-202) uses timestamp for comparisons
+	Dangerous comparisons:
+	- _lastTransferDay[account] != currentDay (src/token/VAMSToken.sol#197-200)
+VAMSToken._checkAntiWhale(address,address,uint256) (src/token/VAMSToken.sol#231-273) uses timestamp for comparisons
+	Dangerous comparisons:
+	- block.timestamp >= antiWhaleEndTimestamp (src/token/VAMSToken.sol#238-240)
+	- _lastTransferDay[from] != currentDay (src/token/VAMSToken.sol#258-262)
+VAMSVesting.release(bytes32) (src/vesting/VAMSVesting.sol#165-183) uses timestamp for comparisons
+	Dangerous comparisons:
+	- released == 0 (src/vesting/VAMSVesting.sol#177)
+VAMSVesting.batchRelease(bytes32[]) (src/vesting/VAMSVesting.sol#184-208) uses timestamp for comparisons
+	Dangerous comparisons:
+	- released == 0 (src/vesting/VAMSVesting.sol#199-200)
+VAMSVesting.releaseAll() (src/vesting/VAMSVesting.sol#209-230) uses timestamp for comparisons
+	Dangerous comparisons:
+	- released == 0 (src/vesting/VAMSVesting.sol#221-222)
+	- totalReleased > 0 (src/vesting/VAMSVesting.sol#227-229)
+VAMSVesting.revoke(bytes32) (src/vesting/VAMSVesting.sol#233-264) uses timestamp for comparisons
+	Dangerous comparisons:
+	- unreleased > 0 (src/vesting/VAMSVesting.sol#252)
+	- unvested > 0 (src/vesting/VAMSVesting.sol#259)
+VAMSVesting._vestedAmount(IVAMSVesting.VestingSchedule) (src/vesting/VAMSVesting.sol#412-442) uses timestamp for 
+comparisons
+	Dangerous comparisons:
+	- elapsed < schedule.cliffDuration (src/vesting/VAMSVesting.sol#417-418)
+	- elapsed >= schedule.vestingDuration (src/vesting/VAMSVesting.sol#424)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#block-timestamp
+INFO:Detectors:
+Detector: costly-loop
+BatchSettlement._claimPayment(uint256,IBatchSettlement.Payment,bytes32[]) (src/economic/BatchSettlement.sol#375-437) 
+has costly operations inside a loop:
+	- totalSettled += payment.amount (src/economic/BatchSettlement.sol#426-428)
+	Calls stack containing the loop:
+		BatchSettlement.batchClaimPayments(uint256,IBatchSettlement.Payment[],bytes32[][])
+BatchSettlement._claimPayment(uint256,IBatchSettlement.Payment,bytes32[]) (src/economic/BatchSettlement.sol#375-437) 
+has costly operations inside a loop:
+	- totalFees += fee (src/economic/BatchSettlement.sol#428-429)
+	Calls stack containing the loop:
+		BatchSettlement.batchClaimPayments(uint256,IBatchSettlement.Payment[],bytes32[][])
+TransactionCompensation._processClaim(uint256) (src/economic/TransactionCompensation.sol#268-287) has costly 
+operations inside a loop:
+	- totalCompensationPaid += claim.amount (src/economic/TransactionCompensation.sol#281)
+	Calls stack containing the loop:
+		TransactionCompensation.batchProcessClaims(uint256[])
+X402NonceRegistry._consumeNonce(address,uint256,bytes32,bytes32) (src/economic/X402NonceRegistry.sol#283-321) has 
+costly operations inside a loop:
+	- totalNoncesConsumed ++ (src/economic/X402NonceRegistry.sol#316-318)
+	Calls stack containing the loop:
+		X402NonceRegistry.batchConsumeNonces(address[],uint256[],bytes32[],bytes32[])
+VAMSVesting._createSchedule(address,uint256,uint256,uint256,uint16,bool,IVAMSVesting.ScheduleType) 
+(src/vesting/VAMSVesting.sol#333-380) has costly operations inside a loop:
+	- _scheduleCount ++ (src/vesting/VAMSVesting.sol#369)
+	Calls stack containing the loop:
+		VAMSVesting.batchCreateSchedules(address[],uint256[],IVAMSVesting.ScheduleType,bool)
+VAMSVesting._createSchedule(address,uint256,uint256,uint256,uint16,bool,IVAMSVesting.ScheduleType) 
+(src/vesting/VAMSVesting.sol#333-380) has costly operations inside a loop:
+	- _totalLocked += amount (src/vesting/VAMSVesting.sol#370)
+	Calls stack containing the loop:
+		VAMSVesting.batchCreateSchedules(address[],uint256[],IVAMSVesting.ScheduleType,bool)
+VAMSVesting.batchRelease(bytes32[]) (src/vesting/VAMSVesting.sol#184-208) has costly operations inside a loop:
+	- _totalLocked -= released (src/vesting/VAMSVesting.sol#202)
+VAMSVesting.releaseAll() (src/vesting/VAMSVesting.sol#209-230) has costly operations inside a loop:
+	- _totalLocked -= released (src/vesting/VAMSVesting.sol#222-224)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#costly-operations-inside-a-loop
+INFO:Detectors:
+Detector: naming-convention
+Function VAMSCombinedBase.__VAMSCombinedBase_init(address,address[]) (src/VAMSCombinedBase.sol#31-38) is not in 
+mixedCase
+Parameter VAMSCombinedBase.__VAMSCombinedBase_init(address,address[])._admin (src/VAMSCombinedBase.sol#33) is not in 
+mixedCase
+Parameter VAMSCombinedBase.__VAMSCombinedBase_init(address,address[])._guardians (src/VAMSCombinedBase.sol#33-35) is 
+not in mixedCase
+Function VAMSEmergencyPausable.__VAMSEmergencyPausable_init(address,address[]) 
+(src/base/VAMSEmergencyPausable.sol#74-86) is not in mixedCase
+Parameter VAMSEmergencyPausable.__VAMSEmergencyPausable_init(address,address[])._admin 
+(src/base/VAMSEmergencyPausable.sol#74) is not in mixedCase
+Parameter VAMSEmergencyPausable.__VAMSEmergencyPausable_init(address,address[])._guardians 
+(src/base/VAMSEmergencyPausable.sol#76) is not in mixedCase
+Parameter VAMSEmergencyPausable.emergencyPause(string)._reason (src/base/VAMSEmergencyPausable.sol#96) is not in 
+mixedCase
+Parameter VAMSEmergencyPausable.extendPause(uint256)._additionalSeconds (src/base/VAMSEmergencyPausable.sol#117-118) 
+is not in mixedCase
+Variable VAMSEmergencyPausable.__gap (src/base/VAMSEmergencyPausable.sol#221-222) is not in mixedCase
+Function VAMSUpgradeableBase.__VAMSUpgradeableBase_init(address) (src/base/VAMSUpgradeableBase.sol#51-60) is not in 
+mixedCase
+Parameter VAMSUpgradeableBase.__VAMSUpgradeableBase_init(address)._admin (src/base/VAMSUpgradeableBase.sol#51-53) is 
+not in mixedCase
+Parameter VAMSUpgradeableBase.transferToMultisig(address)._multisig (src/base/VAMSUpgradeableBase.sol#68) is not in 
+mixedCase
+Parameter VAMSUpgradeableBase.transferToDAO(address)._daoTimelock (src/base/VAMSUpgradeableBase.sol#90) is not in 
+mixedCase
+Variable VAMSUpgradeableBase.__gap (src/base/VAMSUpgradeableBase.sol#157-158) is not in mixedCase
+Parameter BatchSettlement.initialize(address,address,address,address)._vamsToken 
+(src/economic/BatchSettlement.sol#102-103) is not in mixedCase
+Parameter BatchSettlement.initialize(address,address,address,address)._nonceRegistry 
+(src/economic/BatchSettlement.sol#103-105) is not in mixedCase
+Parameter BatchSettlement.initialize(address,address,address,address)._treasury 
+(src/economic/BatchSettlement.sol#105-106) is not in mixedCase
+Parameter BatchSettlement.setTreasury(address)._treasury (src/economic/BatchSettlement.sol#478) is not in mixedCase
+Variable BatchSettlement.__gap (src/economic/BatchSettlement.sol#492) is not in mixedCase
+Function IBatchSettlement.DISPUTE_WINDOW() (src/economic/IBatchSettlement.sol#161-164) is not in mixedCase
+Function IBatchSettlement.MIN_SIGNATURES() (src/economic/IBatchSettlement.sol#166-167) is not in mixedCase
+Function IBatchSettlement.SETTLEMENT_FEE_BPS() (src/economic/IBatchSettlement.sol#169-170) is not in mixedCase
+Function IProviderBondRegistry.MIN_BOND() (src/economic/IProviderBondRegistry.sol#158-160) is not in mixedCase
+Function IProviderBondRegistry.BOND_COVERAGE_RATIO() (src/economic/IProviderBondRegistry.sol#162-163) is not in 
+mixedCase
+Function IProviderBondRegistry.WITHDRAWAL_DELAY() (src/economic/IProviderBondRegistry.sol#165-166) is not in mixedCase
+Function ITwoPhaseCommitManager.DEFAULT_PREPARE_WINDOW() (src/economic/ITwoPhaseCommitManager.sol#172-174) is not in 
+mixedCase
+Function ITwoPhaseCommitManager.DEFAULT_COMMIT_WINDOW() (src/economic/ITwoPhaseCommitManager.sol#177-178) is not in 
+mixedCase
+Function IX402EscrowManager.MIN_VALIDITY() (src/economic/IX402EscrowManager.sol#197-198) is not in mixedCase
+Function IX402EscrowManager.MAX_VALIDITY() (src/economic/IX402EscrowManager.sol#200-202) is not in mixedCase
+Function IX402EscrowManager.DISPUTE_WINDOW() (src/economic/IX402EscrowManager.sol#203-205) is not in mixedCase
+Function IX402EscrowManager.SETTLEMENT_FEE_BPS() (src/economic/IX402EscrowManager.sol#206-208) is not in mixedCase
+Parameter OutageRecoveryManager.initialize(address,address[],address[])._admin 
+(src/economic/OutageRecoveryManager.sol#102-103) is not in mixedCase
+Parameter OutageRecoveryManager.initialize(address,address[],address[])._guardians 
+(src/economic/OutageRecoveryManager.sol#103) is not in mixedCase
+Parameter OutageRecoveryManager.initialize(address,address[],address[])._supportedTokens 
+(src/economic/OutageRecoveryManager.sol#104-106) is not in mixedCase
+Variable OutageRecoveryManager.__gap (src/economic/OutageRecoveryManager.sol#423) is not in mixedCase
+Parameter ProviderBondRegistry.initialize(address,address,address)._vamsToken 
+(src/economic/ProviderBondRegistry.sol#100) is not in mixedCase
+Parameter ProviderBondRegistry.initialize(address,address,address)._insuranceFund 
+(src/economic/ProviderBondRegistry.sol#100-102) is not in mixedCase
+Parameter ProviderBondRegistry.setInsuranceFund(address)._insuranceFund (src/economic/ProviderBondRegistry.sol#524) is 
+not in mixedCase
+Variable ProviderBondRegistry.__gap (src/economic/ProviderBondRegistry.sol#566-567) is not in mixedCase
+Parameter TransactionCompensation.initialize(address,address[],address,address)._admin 
+(src/economic/TransactionCompensation.sol#103-104) is not in mixedCase
+Parameter TransactionCompensation.initialize(address,address[],address,address)._guardians 
+(src/economic/TransactionCompensation.sol#104) is not in mixedCase
+Parameter TransactionCompensation.initialize(address,address[],address,address)._vamsToken 
+(src/economic/TransactionCompensation.sol#105-106) is not in mixedCase
+Parameter TransactionCompensation.initialize(address,address[],address,address)._insuranceFund 
+(src/economic/TransactionCompensation.sol#106-107) is not in mixedCase
+Variable TransactionCompensation.__gap (src/economic/TransactionCompensation.sol#390-391) is not in mixedCase
+Parameter TwoPhaseCommitManager.initialize(address,address,address)._vamsToken 
+(src/economic/TwoPhaseCommitManager.sol#83) is not in mixedCase
+Parameter TwoPhaseCommitManager.initialize(address,address,address)._escrowManager 
+(src/economic/TwoPhaseCommitManager.sol#85) is not in mixedCase
+Parameter TwoPhaseCommitManager.setEscrowManager(address)._escrowManager 
+(src/economic/TwoPhaseCommitManager.sol#449-450) is not in mixedCase
+Variable TwoPhaseCommitManager.__gap (src/economic/TwoPhaseCommitManager.sol#469-471) is not in mixedCase
+Parameter VAMSFeeCollector.initialize(address,address,address,address,address)._admin 
+(src/economic/VAMSFeeCollector.sol#95-96) is not in mixedCase
+Parameter VAMSFeeCollector.initialize(address,address,address,address,address)._vamsToken 
+(src/economic/VAMSFeeCollector.sol#96) is not in mixedCase
+Parameter VAMSFeeCollector.initialize(address,address,address,address,address)._treasury 
+(src/economic/VAMSFeeCollector.sol#96-98) is not in mixedCase
+Parameter VAMSFeeCollector.initialize(address,address,address,address,address)._stakingContract 
+(src/economic/VAMSFeeCollector.sol#98-99) is not in mixedCase
+Parameter VAMSFeeCollector.initialize(address,address,address,address,address)._insuranceFund 
+(src/economic/VAMSFeeCollector.sol#99-100) is not in mixedCase
+Parameter VAMSFeeCollector.updateDistribution(uint256,uint256,uint256,uint256)._burnBps 
+(src/economic/VAMSFeeCollector.sol#225-227) is not in mixedCase
+Parameter VAMSFeeCollector.updateDistribution(uint256,uint256,uint256,uint256)._stakingBps 
+(src/economic/VAMSFeeCollector.sol#227) is not in mixedCase
+Parameter VAMSFeeCollector.updateDistribution(uint256,uint256,uint256,uint256)._treasuryBps 
+(src/economic/VAMSFeeCollector.sol#227) is not in mixedCase
+Parameter VAMSFeeCollector.updateDistribution(uint256,uint256,uint256,uint256)._insuranceBps 
+(src/economic/VAMSFeeCollector.sol#227-230) is not in mixedCase
+Parameter VAMSFeeCollector.setTreasury(address)._treasury (src/economic/VAMSFeeCollector.sol#319-320) is not in 
+mixedCase
+Parameter VAMSFeeCollector.setStakingContract(address)._stakingContract (src/economic/VAMSFeeCollector.sol#332) is not 
+in mixedCase
+Parameter VAMSFeeCollector.setInsuranceFund(address)._insuranceFund (src/economic/VAMSFeeCollector.sol#339) is not in 
+mixedCase
+Variable VAMSFeeCollector.__gap (src/economic/VAMSFeeCollector.sol#423) is not in mixedCase
+Parameter VAMSInsuranceFund.initialize(address,address,address,address[])._admin 
+(src/economic/VAMSInsuranceFund.sol#89) is not in mixedCase
+Parameter VAMSInsuranceFund.initialize(address,address,address,address[])._vamsToken 
+(src/economic/VAMSInsuranceFund.sol#89) is not in mixedCase
+Parameter VAMSInsuranceFund.initialize(address,address,address,address[])._stakingContract 
+(src/economic/VAMSInsuranceFund.sol#90-91) is not in mixedCase
+Parameter VAMSInsuranceFund.initialize(address,address,address,address[])._guardians 
+(src/economic/VAMSInsuranceFund.sol#92-93) is not in mixedCase
+Parameter VAMSInsuranceFund.setTimelockController(address)._timelockController 
+(src/economic/VAMSInsuranceFund.sol#263) is not in mixedCase
+Parameter VAMSInsuranceFund.setStakingContract(address)._stakingContract (src/economic/VAMSInsuranceFund.sol#280-281) 
+is not in mixedCase
+Variable VAMSInsuranceFund.__gap (src/economic/VAMSInsuranceFund.sol#345) is not in mixedCase
+Parameter VAMSPaymentHandler.initialize(address,address,address)._admin (src/economic/VAMSPaymentHandler.sol#75) is 
+not in mixedCase
+Parameter VAMSPaymentHandler.initialize(address,address,address)._vamsToken 
+(src/economic/VAMSPaymentHandler.sol#75-76) is not in mixedCase
+Parameter VAMSPaymentHandler.initialize(address,address,address)._treasury (src/economic/VAMSPaymentHandler.sol#77-78) 
+is not in mixedCase
+Parameter VAMSPaymentHandler.setTreasury(address)._treasury (src/economic/VAMSPaymentHandler.sol#338) is not in 
+mixedCase
+Variable VAMSPaymentHandler.__gap (src/economic/VAMSPaymentHandler.sol#388-392) is not in mixedCase
+Parameter X402EscrowManager.initialize(address,address,address,address,address)._vamsToken 
+(src/economic/X402EscrowManager.sol#115-116) is not in mixedCase
+Parameter X402EscrowManager.initialize(address,address,address,address,address)._nonceRegistry 
+(src/economic/X402EscrowManager.sol#116) is not in mixedCase
+Parameter X402EscrowManager.initialize(address,address,address,address,address)._bondRegistry 
+(src/economic/X402EscrowManager.sol#117-118) is not in mixedCase
+Parameter X402EscrowManager.initialize(address,address,address,address,address)._treasury 
+(src/economic/X402EscrowManager.sol#119) is not in mixedCase
+Parameter X402EscrowManager.setTreasury(address)._treasury (src/economic/X402EscrowManager.sol#548) is not in mixedCase
+Parameter X402EscrowManager.setNonceRegistry(address)._nonceRegistry (src/economic/X402EscrowManager.sol#552-553) is 
+not in mixedCase
+Parameter X402EscrowManager.setBondRegistry(address)._bondRegistry (src/economic/X402EscrowManager.sol#563-564) is not 
+in mixedCase
+Variable X402EscrowManager.__gap (src/economic/X402EscrowManager.sol#580) is not in mixedCase
+Parameter X402NonceRegistry.initialize(address,address)._escrowManager (src/economic/X402NonceRegistry.sol#71-73) is 
+not in mixedCase
+Parameter X402NonceRegistry.setEscrowManager(address)._escrowManager (src/economic/X402NonceRegistry.sol#255-256) is 
+not in mixedCase
+Variable X402NonceRegistry.__gap (src/economic/X402NonceRegistry.sol#339-341) is not in mixedCase
+Parameter VAMSFeeCollector.initialize(address,address[],address,address,address)._admin 
+(src/examples/VAMSFeeCollector.sol#75) is not in mixedCase
+Parameter VAMSFeeCollector.initialize(address,address[],address,address,address)._guardians 
+(src/examples/VAMSFeeCollector.sol#75-77) is not in mixedCase
+Parameter VAMSFeeCollector.initialize(address,address[],address,address,address)._treasury 
+(src/examples/VAMSFeeCollector.sol#77-78) is not in mixedCase
+Parameter VAMSFeeCollector.initialize(address,address[],address,address,address)._stakingContract 
+(src/examples/VAMSFeeCollector.sol#78-79) is not in mixedCase
+Parameter VAMSFeeCollector.initialize(address,address[],address,address,address)._insuranceFund 
+(src/examples/VAMSFeeCollector.sol#79-80) is not in mixedCase
+Parameter VAMSAgentRegistry.initialize(address,address,address)._admin (src/registry/VAMSAgentRegistry.sol#173-174) is 
+not in mixedCase
+Parameter VAMSAgentRegistry.initialize(address,address,address)._vamsToken 
+(src/registry/VAMSAgentRegistry.sol#174-175) is not in mixedCase
+Parameter VAMSAgentRegistry.initialize(address,address,address)._slasher (src/registry/VAMSAgentRegistry.sol#175-176) 
+is not in mixedCase
+Parameter VAMSAgentRegistry.registerAgent(bytes32,uint256,string)._publicKeyHash 
+(src/registry/VAMSAgentRegistry.sol#203-204) is not in mixedCase
+Parameter VAMSAgentRegistry.registerAgent(bytes32,uint256,string)._stake (src/registry/VAMSAgentRegistry.sol#204) is 
+not in mixedCase
+Parameter VAMSAgentRegistry.registerAgent(bytes32,uint256,string)._metadata (src/registry/VAMSAgentRegistry.sol#205) 
+is not in mixedCase
+Parameter VAMSAgentRegistry.finalizeAgent(bytes32)._agentId (src/registry/VAMSAgentRegistry.sol#242) is not in 
+mixedCase
+Parameter VAMSAgentRegistry.deregisterAgent(bytes32)._agentId (src/registry/VAMSAgentRegistry.sol#260) is not in 
+mixedCase
+Parameter VAMSAgentRegistry.submitMerkleRoot(bytes32,bytes32)._agentId (src/registry/VAMSAgentRegistry.sol#284) is not 
+in mixedCase
+Parameter VAMSAgentRegistry.submitMerkleRoot(bytes32,bytes32)._merkleRoot (src/registry/VAMSAgentRegistry.sol#285-287) 
+is not in mixedCase
+Parameter VAMSAgentRegistry.updateTEEAttestation(bytes32,bytes32)._agentId (src/registry/VAMSAgentRegistry.sol#314) is 
+not in mixedCase
+Parameter VAMSAgentRegistry.updateTEEAttestation(bytes32,bytes32)._attestation 
+(src/registry/VAMSAgentRegistry.sol#314) is not in mixedCase
+Parameter VAMSAgentRegistry.submitChallenge(bytes32,bytes32,uint256,string)._agentId 
+(src/registry/VAMSAgentRegistry.sol#336-338) is not in mixedCase
+Parameter VAMSAgentRegistry.submitChallenge(bytes32,bytes32,uint256,string)._fraudProofHash 
+(src/registry/VAMSAgentRegistry.sol#339) is not in mixedCase
+Parameter VAMSAgentRegistry.submitChallenge(bytes32,bytes32,uint256,string)._stake 
+(src/registry/VAMSAgentRegistry.sol#339) is not in mixedCase
+Parameter VAMSAgentRegistry.submitChallenge(bytes32,bytes32,uint256,string)._evidence 
+(src/registry/VAMSAgentRegistry.sol#339-340) is not in mixedCase
+Parameter VAMSAgentRegistry.resolveChallenge(bytes32,bool,bytes)._challengeId 
+(src/registry/VAMSAgentRegistry.sol#376-377) is not in mixedCase
+Parameter VAMSAgentRegistry.resolveChallenge(bytes32,bool,bytes)._fraudProven 
+(src/registry/VAMSAgentRegistry.sol#378-379) is not in mixedCase
+Parameter VAMSAgentRegistry.getAgent(bytes32)._agentId (src/registry/VAMSAgentRegistry.sol#425) is not in mixedCase
+Parameter VAMSAgentRegistry.isAgentActive(bytes32)._agentId (src/registry/VAMSAgentRegistry.sol#445-446) is not in 
+mixedCase
+Parameter VAMSAgentRegistry.isChallengeWindowExpired(bytes32)._agentId (src/registry/VAMSAgentRegistry.sol#456) is not 
+in mixedCase
+Parameter VAMSAgentRegistry.getAgentsByOwner(address)._owner (src/registry/VAMSAgentRegistry.sol#464) is not in 
+mixedCase
+Parameter VAMSAgentRegistry.getMerkleHistory(bytes32)._agentId (src/registry/VAMSAgentRegistry.sol#469-470) is not in 
+mixedCase
+Parameter VAMSAgentRegistry.getChallengeWindowRemaining(bytes32)._agentId (src/registry/VAMSAgentRegistry.sol#476-478) 
+is not in mixedCase
+Parameter VAMSAgentRegistry.setSlasher(address)._slasher (src/registry/VAMSAgentRegistry.sol#487-489) is not in 
+mixedCase
+Variable VAMSAgentRegistry.__gap (src/registry/VAMSAgentRegistry.sol#502-503) is not in mixedCase
+Parameter VAMSRouter.initialize(address,address[])._admin (src/routing/VAMSRouter.sol#105) is not in mixedCase
+Parameter VAMSRouter.routeTransaction(bytes32,VAMSRouter.TransactionMetadata)._txHash (src/routing/VAMSRouter.sol#127) 
+is not in mixedCase
+Parameter VAMSRouter.routeTransaction(bytes32,VAMSRouter.TransactionMetadata)._metadata 
+(src/routing/VAMSRouter.sol#127-128) is not in mixedCase
+Parameter VAMSRouter.setManualRoute(bytes32,VAMSRouter.ChainId,uint256,string)._txHash 
+(src/routing/VAMSRouter.sol#186) is not in mixedCase
+Parameter VAMSRouter.setManualRoute(bytes32,VAMSRouter.ChainId,uint256,string)._targetChain 
+(src/routing/VAMSRouter.sol#186-187) is not in mixedCase
+Parameter VAMSRouter.setManualRoute(bytes32,VAMSRouter.ChainId,uint256,string)._duration 
+(src/routing/VAMSRouter.sol#187) is not in mixedCase
+Parameter VAMSRouter.setManualRoute(bytes32,VAMSRouter.ChainId,uint256,string)._reason 
+(src/routing/VAMSRouter.sol#187-188) is not in mixedCase
+Parameter VAMSRouter.activateGlobalOverride(VAMSRouter.ChainId,uint256,string)._targetChain 
+(src/routing/VAMSRouter.sol#210-211) is not in mixedCase
+Parameter VAMSRouter.activateGlobalOverride(VAMSRouter.ChainId,uint256,string)._duration 
+(src/routing/VAMSRouter.sol#211) is not in mixedCase
+Parameter VAMSRouter.activateGlobalOverride(VAMSRouter.ChainId,uint256,string)._reason 
+(src/routing/VAMSRouter.sol#211-212) is not in mixedCase
+Parameter VAMSRouter.setRoutingMode(VAMSRouter.RoutingMode)._mode (src/routing/VAMSRouter.sol#237) is not in mixedCase
+Parameter VAMSRouter.previewRoute(VAMSRouter.TransactionMetadata)._meta (src/routing/VAMSRouter.sol#296) is not in 
+mixedCase
+Variable VAMSRouter.__gap (src/routing/VAMSRouter.sol#321) is not in mixedCase
+Parameter SlashingOracle.initialize(address,address,address)._admin (src/slashing/SlashingOracle.sol#94-95) is not in 
+mixedCase
+Parameter SlashingOracle.initialize(address,address,address)._slasher (src/slashing/SlashingOracle.sol#95) is not in 
+mixedCase
+Parameter SlashingOracle.initialize(address,address,address)._staking (src/slashing/SlashingOracle.sol#95-97) is not 
+in mixedCase
+Parameter SlashingOracle.setSlasher(address)._slasher (src/slashing/SlashingOracle.sol#380) is not in mixedCase
+Parameter SlashingOracle.setStaking(address)._staking (src/slashing/SlashingOracle.sol#394) is not in mixedCase
+Variable SlashingOracle.__gap (src/slashing/SlashingOracle.sol#415-416) is not in mixedCase
+Parameter VAMSSlasher.initialize(address,address)._admin (src/slashing/VAMSSlasher.sol#98-99) is not in mixedCase
+Parameter VAMSSlasher.initialize(address,address)._insuranceFund (src/slashing/VAMSSlasher.sol#100) is not in mixedCase
+Parameter VAMSSlasher.registerOperator(address,uint256)._operator (src/slashing/VAMSSlasher.sol#116) is not in 
+mixedCase
+Parameter VAMSSlasher.registerOperator(address,uint256)._stake (src/slashing/VAMSSlasher.sol#117-119) is not in 
+mixedCase
+Parameter VAMSSlasher.slashLiveness(address,uint256)._operator (src/slashing/VAMSSlasher.sol#140) is not in mixedCase
+Parameter VAMSSlasher.slashLiveness(address,uint256)._missedBlocks (src/slashing/VAMSSlasher.sol#140-141) is not in 
+mixedCase
+Parameter VAMSSlasher.slashEquivocation(address,bytes)._operator (src/slashing/VAMSSlasher.sol#167) is not in mixedCase
+Parameter VAMSSlasher.slashEquivocation(address,bytes)._proof (src/slashing/VAMSSlasher.sol#168) is not in mixedCase
+Parameter VAMSSlasher.slashMalicious(address,address,bytes)._operator (src/slashing/VAMSSlasher.sol#198) is not in 
+mixedCase
+Parameter VAMSSlasher.slashMalicious(address,address,bytes)._victim (src/slashing/VAMSSlasher.sol#198-199) is not in 
+mixedCase
+Parameter VAMSSlasher.slashMalicious(address,address,bytes)._evidence (src/slashing/VAMSSlasher.sol#199) is not in 
+mixedCase
+Parameter VAMSSlasher.unjail(address)._operator (src/slashing/VAMSSlasher.sol#228) is not in mixedCase
+Parameter VAMSSlasher.getOperatorStatus(address)._operator (src/slashing/VAMSSlasher.sol#337-338) is not in mixedCase
+Parameter VAMSSlasher.isOperatorActive(address)._operator (src/slashing/VAMSSlasher.sol#354) is not in mixedCase
+Variable VAMSSlasher.__gap (src/slashing/VAMSSlasher.sol#447-449) is not in mixedCase
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#conformance-to-solidity-naming-conventions
+INFO:Detectors:
+Detector: reentrancy-unlimited-gas
+Reentrancy in VAMSFeeCollector.distributeFees() (src/examples/VAMSFeeCollector.sol#105-132):
+	External calls:
+	- address(BURN_ADDRESS).transfer(toBurn) (src/examples/VAMSFeeCollector.sol#119-120)
+	- address(stakingContract).transfer(toStaking) (src/examples/VAMSFeeCollector.sol#123-124)
+	- address(treasury).transfer(toTreasury) (src/examples/VAMSFeeCollector.sol#126)
+	- address(insuranceFund).transfer(toInsurance) (src/examples/VAMSFeeCollector.sol#129)
+	Event emitted after the call(s):
+	- FeesDistributed(toBurn,toStaking,toTreasury,toInsurance) (src/examples/VAMSFeeCollector.sol#131-132)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#reentrancy-vulnerabilities-5
+INFO:Detectors:
+Detector: unindexed-event-address
+Event VAMSRouter.GlobalOverrideDeactivated(address) (src/routing/VAMSRouter.sol#95-96) has address parameters but no 
+indexed parameters
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#unindexed-event-address-parameters
+INFO:Detectors:
+Detector: unused-state
+BatchSettlement.__gap (src/economic/BatchSettlement.sol#492) is never used in BatchSettlement 
+(src/economic/BatchSettlement.sol#31-492)
+OutageRecoveryManager.__gap (src/economic/OutageRecoveryManager.sol#423) is never used in OutageRecoveryManager 
+(src/economic/OutageRecoveryManager.sol#27-423)
+ProviderBondRegistry.__gap (src/economic/ProviderBondRegistry.sol#566-567) is never used in ProviderBondRegistry 
+(src/economic/ProviderBondRegistry.sol#28-567)
+TransactionCompensation.__gap (src/economic/TransactionCompensation.sol#390-391) is never used in 
+TransactionCompensation (src/economic/TransactionCompensation.sol#23-391)
+TwoPhaseCommitManager.__gap (src/economic/TwoPhaseCommitManager.sol#469-471) is never used in TwoPhaseCommitManager 
+(src/economic/TwoPhaseCommitManager.sol#29-471)
+VAMSFeeCollector.__gap (src/economic/VAMSFeeCollector.sol#423) is never used in VAMSFeeCollector 
+(src/economic/VAMSFeeCollector.sol#26-423)
+VAMSInsuranceFund.__gap (src/economic/VAMSInsuranceFund.sol#345) is never used in VAMSInsuranceFund 
+(src/economic/VAMSInsuranceFund.sol#20-345)
+VAMSPaymentHandler.__gap (src/economic/VAMSPaymentHandler.sol#388-392) is never used in VAMSPaymentHandler 
+(src/economic/VAMSPaymentHandler.sol#22-392)
+X402EscrowManager.__gap (src/economic/X402EscrowManager.sol#580) is never used in X402EscrowManager 
+(src/economic/X402EscrowManager.sol#30-580)
+X402NonceRegistry.__gap (src/economic/X402NonceRegistry.sol#339-341) is never used in X402NonceRegistry 
+(src/economic/X402NonceRegistry.sol#27-341)
+VAMSAgentRegistry.__gap (src/registry/VAMSAgentRegistry.sol#502-503) is never used in VAMSAgentRegistry 
+(src/registry/VAMSAgentRegistry.sol#22-503)
+VAMSRouter.__gap (src/routing/VAMSRouter.sol#321) is never used in VAMSRouter (src/routing/VAMSRouter.sol#18-321)
+SlashingOracle.__gap (src/slashing/SlashingOracle.sol#415-416) is never used in SlashingOracle 
+(src/slashing/SlashingOracle.sol#26-416)
+VAMSSlasher.__gap (src/slashing/VAMSSlasher.sol#447-449) is never used in VAMSSlasher 
+(src/slashing/VAMSSlasher.sol#15-449)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#unused-state-variable
+INFO:Detectors:
+Detector: cache-array-length
+Loop condition i < pendingClaimIds.length (src/economic/TransactionCompensation.sol#367-370) should use cached array 
+length instead of referencing `length` member of the storage array.
+ Loop condition i < supportedTokenList.length (src/economic/VAMSFeeCollector.sol#416) should use cached array length 
+instead of referencing `length` member of the storage array.
+ Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#cache-array-length
+INFO:Detectors:
+Detector: immutable-states
+VAMSToken.antiWhaleEndTimestamp (src/token/VAMSToken.sol#74-76) should be immutable 
+Reference: 
+https://github.com/crytic/slither/wiki/Detector-Documentation#state-variables-that-could-be-declared-immutable
+INFO:Slither:. analyzed (96 contracts with 101 detectors), 280 result(s) found
