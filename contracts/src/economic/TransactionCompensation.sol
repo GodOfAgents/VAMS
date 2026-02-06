@@ -398,4 +398,9 @@ contract TransactionCompensation is
     function getPoolBalance() external view returns (uint256) {
         return vamsToken.balanceOf(address(this));
     }
+    
+    // ============ Storage Gap ============
+    
+    /// @dev Reserved storage space for future upgrades
+    uint256[50] private __gap;
 }

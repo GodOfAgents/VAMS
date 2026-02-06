@@ -136,7 +136,7 @@ We don't just aggregate; we vertically integrate the essential primitives.
     *   **The Innovation:** A ZK-verified engine that dynamically routes based on a 4-step logic: *Privacy → Value → Sovereignty → Velocity*.
     *   **The Moat:** Complex cross-chain state verification that competitors (simple aggregators) simply cannot replicate.
 
-2.  **Dual-Chain Execution (Polygon + Avalanche)**
+2.  **Dual-Host Architecture (Polygon + Avalanche)**
     *   **The Innovation:** We use Polygon CDK for broad liquidity and Avalanche L1s for "Sovereign AI" custom VMs.
     *   **The Moat:** Chain-agnostic execution that no single-chain protocol can match. *Best of both worlds.*
 
@@ -180,9 +180,10 @@ We generate revenue from utility, not just speculation.
     *   Charged for the convenience of paying in $VAMS while we handle ETH/SOL swaps.
     *   **Projected Y3:** $15M Annual Revenue.
 
-3.  **Sovereign L1 Licensing (B2B)**
-    *   Enterprise agents paying for dedicated Avalanche L1 setups.
-    *   **Projected Y3:** $10M Annual Revenue.
+3.  **Infrastructure Reseller (Managed L1s)**
+    *   **Model:** Commission on Total Validator OpEx (Compute + ACP-77 Fees).
+    *   **Rate:** 1-5% Dynamic Markup.
+    *   **Value:** One-click deployment of compliant Avalanche L1s. We handle the dev-ops; they pay-as-they-go.
 
 **Total Y3 Target:** ~$50M - $70M Annual Revenue.
 
@@ -279,7 +280,7 @@ We have a detailed 8-Phase Execution Plan: **24-week MVP** followed by **post-MV
 *   **Phase 2 (Weeks 9-12): Polygon CDK Integration**
     *   Deploy VAMS L3 Validium stack (AggLayer).
     *   Setup unified liquidity bridge.
-*   **Phase 3 (Weeks 13-16): CLR & Dual-Chain**
+*   **Phase 3 (Weeks 13-16): CLR & Dual-Host**
     *   Launch Conditional L1 Router (CLR).
     *   Spin up secondary Avalanche Sovereign L1 (ACP-77).
     *   $VAMS as custom gas token on both chains.

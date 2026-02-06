@@ -101,6 +101,9 @@ interface ISlashingOracle {
     /// @notice Proposal not finalized
     error ProposalNotFinalized(uint256 proposalId);
 
+    /// @notice Stake too new to vote (flash loan protection)
+    error StakeTooNew(address voter, uint256 requiredAge);
+
     // ============ Proposal Management ============
 
     /// @notice Propose a contested slash

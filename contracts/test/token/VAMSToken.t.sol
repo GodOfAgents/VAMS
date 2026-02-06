@@ -83,7 +83,8 @@ contract VAMSTokenTest is BaseTest {
         
         // Transfer from treasury to user1 (treasury is exempt)
         vm.prank(treasury);
-        vamsToken.transfer(user1, amount);
+        bool success = vamsToken.transfer(user1, amount);
+        assertTrue(success, "Transfer failed");
         
         assertEq(vamsToken.balanceOf(user1), amount);
         assertEq(vamsToken.balanceOf(treasury), INITIAL_SUPPLY - amount);
@@ -131,7 +132,8 @@ contract VAMSTokenTest is BaseTest {
         
         // Treasury transfers to user1
         vm.prank(treasury);
-        vamsToken.transfer(user1, amount);
+        bool success = vamsToken.transfer(user1, amount);
+        assertTrue(success, "Treasury transfer failed");
         
         // Exempt user1 from limits for testing
         vm.prank(admin);
@@ -153,7 +155,8 @@ contract VAMSTokenTest is BaseTest {
         uint256 amount = 1000 ether;
         
         vm.prank(treasury);
-        vamsToken.transfer(user1, amount);
+        // We verify success here to silence warning, though main test is expectation below
+        assertTrue(vamsToken.transfer(user1, amount));
         
         // No approval
         vm.prank(user2);
@@ -175,7 +178,8 @@ contract VAMSTokenTest is BaseTest {
         
         // Transfer some tokens to user1 and burn them
         vm.prank(treasury);
-        vamsToken.transfer(user1, 1000 ether);
+        bool success = vamsToken.transfer(user1, 1000 ether);
+        assertTrue(success);
         
         vm.prank(user1);
         vamsToken.burn(1000 ether);
@@ -200,7 +204,8 @@ contract VAMSTokenTest is BaseTest {
         uint256 burnAmount = 100 ether;
         
         vm.prank(treasury);
-        vamsToken.transfer(user1, amount);
+        bool success = vamsToken.transfer(user1, amount);
+        assertTrue(success);
         
         vm.prank(user1);
         vamsToken.burn(burnAmount);
@@ -214,7 +219,8 @@ contract VAMSTokenTest is BaseTest {
         uint256 burnAmount = 100 ether;
         
         vm.prank(treasury);
-        vamsToken.transfer(user1, amount);
+        bool success = vamsToken.transfer(user1, amount);
+        assertTrue(success);
         
         vm.expectEmit(true, true, false, true);
         emit IERC20.Transfer(user1, address(0), burnAmount);
@@ -228,7 +234,7 @@ contract VAMSTokenTest is BaseTest {
         uint256 burnAmount = 100 ether;
         
         vm.prank(treasury);
-        vamsToken.transfer(user1, amount);
+        assertTrue(vamsToken.transfer(user1, amount));
         
         vm.prank(user1);
         vamsToken.approve(user2, burnAmount);
@@ -245,7 +251,7 @@ contract VAMSTokenTest is BaseTest {
         uint256 amount = 1000 ether;
         
         vm.prank(treasury);
-        vamsToken.transfer(user1, amount);
+        assertTrue(vamsToken.transfer(user1, amount));
         
         vm.prank(admin);
         vamsToken.pause();
@@ -265,7 +271,7 @@ contract VAMSTokenTest is BaseTest {
         uint256 amount = 1000 ether;
         
         vm.prank(treasury);
-        vamsToken.transfer(user1, amount);
+        assertTrue(vamsToken.transfer(user1, amount));
         
         // Exempt user1 for this test
         vm.prank(admin);
@@ -278,7 +284,7 @@ contract VAMSTokenTest is BaseTest {
         vamsToken.unpause();
         
         vm.prank(user1);
-        vamsToken.transfer(user2, 100 ether);
+        assertTrue(vamsToken.transfer(user2, 100 ether));
         
         assertEq(vamsToken.balanceOf(user2), 100 ether);
     }
@@ -291,7 +297,7 @@ contract VAMSTokenTest is BaseTest {
         
         // First transfer some tokens from treasury to user2 (user2 will be our tester)
         vm.prank(treasury);
-        vamsToken.transfer(user2, maxWallet + 10 ether);
+        assertTrue(vamsToken.transfer(user2, maxWallet + 10 ether));
         
         // Now user2 (not exempt) tries to send to user1
         // This should fail because user1 would exceed max wallet
@@ -306,11 +312,11 @@ contract VAMSTokenTest is BaseTest {
         
         // Transfer from treasury to user2 first  
         vm.prank(treasury);
-        vamsToken.transfer(user2, transferAmount);
+        assertTrue(vamsToken.transfer(user2, transferAmount));
         
         // User2 (non-exempt) transfers to user1 within both wallet and daily limits
         vm.prank(user2);
-        vamsToken.transfer(user1, transferAmount / 2);
+        assertTrue(vamsToken.transfer(user1, transferAmount / 2));
         
         assertEq(vamsToken.balanceOf(user1), transferAmount / 2);
     }
@@ -320,7 +326,7 @@ contract VAMSTokenTest is BaseTest {
         
         // Treasury is already exempt, so it can transfer any amount
         vm.prank(treasury);
-        vamsToken.transfer(user1, overLimit);
+        assertTrue(vamsToken.transfer(user1, overLimit));
         
         assertEq(vamsToken.balanceOf(user1), overLimit);
     }
@@ -329,7 +335,7 @@ contract VAMSTokenTest is BaseTest {
         // Transfer some tokens to user1 (within limits)
         uint256 amount = 1_000_000 ether; // 0.1% of supply, within max wallet
         vm.prank(treasury);
-        vamsToken.transfer(user1, amount);
+        assertTrue(vamsToken.transfer(user1, amount));
         
         // Daily limit is 1% = 10M tokens
         uint256 dailyLimit = vamsToken.dailyTransferLimit();
@@ -337,7 +343,7 @@ contract VAMSTokenTest is BaseTest {
         // First transfer should work (if within daily limit)
         uint256 firstTransfer = dailyLimit / 2;
         vm.prank(user1);
-        vamsToken.transfer(user2, firstTransfer);
+        assertTrue(vamsToken.transfer(user2, firstTransfer));
         
         // Second transfer exceeding daily limit should fail
         vm.prank(user1);
@@ -353,7 +359,7 @@ contract VAMSTokenTest is BaseTest {
         vamsToken.addExemptAddress(user1);
         
         vm.prank(treasury);
-        vamsToken.transfer(user1, amount * 3);
+        assertTrue(vamsToken.transfer(user1, amount * 3));
         
         // Remove exemption to test daily limits on transfers
         vm.prank(admin);
@@ -361,14 +367,14 @@ contract VAMSTokenTest is BaseTest {
         
         // First day transfer
         vm.prank(user1);
-        vamsToken.transfer(user2, amount / 2);
+        assertTrue(vamsToken.transfer(user2, amount / 2));
         
         // Advance to next day
         _advanceTime(1 days + 1);
         
         // Should be able to transfer again
         vm.prank(user1);
-        vamsToken.transfer(user3, amount / 2);
+        assertTrue(vamsToken.transfer(user3, amount / 2));
         
         assertEq(vamsToken.balanceOf(user3), amount / 2);
     }
@@ -379,7 +385,7 @@ contract VAMSTokenTest is BaseTest {
         
         // Should be able to receive unlimited tokens
         vm.prank(treasury);
-        vamsToken.transfer(user1, 100_000_000 ether);
+        assertTrue(vamsToken.transfer(user1, 100_000_000 ether));
         
         assertEq(vamsToken.balanceOf(user1), 100_000_000 ether);
     }
@@ -392,7 +398,7 @@ contract VAMSTokenTest is BaseTest {
         
         // Should now bypass limits
         vm.prank(treasury);
-        vamsToken.transfer(user1, 100_000_000 ether);
+        assertTrue(vamsToken.transfer(user1, 100_000_000 ether));
         
         assertEq(vamsToken.balanceOf(user1), 100_000_000 ether);
     }
@@ -477,7 +483,7 @@ contract VAMSTokenTest is BaseTest {
         amount = bound(amount, 1, vamsToken.maxWalletAmount());
         
         vm.prank(treasury);
-        vamsToken.transfer(to, amount);
+        assertTrue(vamsToken.transfer(to, amount));
         
         assertEq(vamsToken.balanceOf(to), amount);
     }
@@ -496,7 +502,7 @@ contract VAMSTokenTest is BaseTest {
         burnAmount = bound(burnAmount, 1, userBalance);
         
         vm.prank(treasury);
-        vamsToken.transfer(user1, userBalance);
+        assertTrue(vamsToken.transfer(user1, userBalance));
         
         uint256 supplyBefore = vamsToken.totalSupply();
         

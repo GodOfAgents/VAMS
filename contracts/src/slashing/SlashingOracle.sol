@@ -58,6 +58,9 @@ contract SlashingOracle is
     /// @notice Proposal stake requirement (10,000 VAMS)
     uint256 public constant PROPOSAL_STAKE = 10_000 ether;
 
+    /// @notice Minimum stake age to vote (prevents flash loan attacks)
+    uint256 public constant MIN_STAKE_AGE = 7 days;
+
     // ============ State Variables ============
 
     /// @notice VAMSSlasher contract
@@ -179,6 +182,11 @@ contract SlashingOracle is
         uint256 voterStake = voterInfo.amount;
         if (voterStake < MIN_STAKE_TO_VOTE) {
             revert NoStake(msg.sender);
+        }
+
+        // Check stake age (prevents flash loan attacks per security audit HIGH-2)
+        if (voterInfo.stakedAt == 0 || block.timestamp - voterInfo.stakedAt < MIN_STAKE_AGE) {
+            revert StakeTooNew(msg.sender, MIN_STAKE_AGE);
         }
 
         // Calculate √stake weight
@@ -418,4 +426,9 @@ contract SlashingOracle is
             z = (x / z + z) / 2;
         }
     }
+    
+    // ============ Storage Gap ============
+    
+    /// @dev Reserved storage space for future upgrades
+    uint256[50] private __gap;
 }

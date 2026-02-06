@@ -346,4 +346,8 @@ contract X402NonceRegistry is
         return keccak256(abi.encodePacked(agent, nonce, amount));
     }
     
+    // ============ Storage Gap ============
+    
+    /// @dev Reserved storage space for future upgrades
+    uint256[50] private __gap;
 }

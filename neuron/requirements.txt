@@ -1,10 +1,12 @@
 # VAMS Neuron Dependencies
 # Install with: pip install -r requirements.txt
 
-requests>=2.31.0      # HTTP client for Celestia RPC
+requests>=2.31.0      # HTTP client for Celestia/Arweave RPC
 ecdsa>=0.18.0         # ECDSA cryptography (Secp256k1)
 colorama>=0.4.6       # Terminal colors (cross-platform)
-web3>=6.0.0           # Ethereum interaction (Polygon CDK)
+web3>=6.0.0           # Ethereum interaction (Polygon CDK, x402)
+pytest>=7.0.0         # Testing framework
 
-# Phase D: Storage
-# requests is used for Irys/Arweave/Kwil HTTP APIs
+# Optional Dependencies (install manually if needed):
+# bittensor           # For Bittensor SDK integration
+

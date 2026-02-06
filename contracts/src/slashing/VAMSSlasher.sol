@@ -455,4 +455,9 @@ contract VAMSSlasher is
         
         return true;
     }
+    
+    // ============ Storage Gap ============
+    
+    /// @dev Reserved storage space for future upgrades
+    uint256[50] private __gap;
 }

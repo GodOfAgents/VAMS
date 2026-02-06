@@ -1,4 +1,4 @@
-# VAMS Neuron Documentation v0.5.1
+# VAMS Neuron Documentation v0.5.2
 
 ## Overview
 
