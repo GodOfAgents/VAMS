@@ -249,6 +249,15 @@ We are committed to **radical transparency**:
 
 ---
 
+## 💸 Support the Mission
+
+**Funds are needed for further research (not just to go on Mainnet).**
+
+- **Donation Protocol**:
+  - **ETH / USDT / USDC (ERC20)**: `0xd1d54f39eeba2f2538f5cdab92e7b134be8f9e82`
+
+---
+
 ## 📄 License & Contact
 
 | | |
