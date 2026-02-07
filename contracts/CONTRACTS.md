@@ -184,7 +184,25 @@ All upgradeable contracts include `uint256[50] private __gap;` to reserve storag
 - Guardian quorum required for activation
 - Grace periods before state changes
 
-## Deployment
+## Deployed Contracts
+
+### Polygon Amoy Testnet (Chain ID: 80002)
+
+| Contract | Address | Verified |
+|----------|---------|----------|
+| **VAMSToken** | [`0x62a705eD1cAbBBafFCd99e9b2497024031329fd4`](https://amoy.polygonscan.com/address/0x62a705eD1cAbBBafFCd99e9b2497024031329fd4) | ✅ |
+| VAMSVesting | *Pending deployment* | - |
+| VAMSStaking | *Pending deployment* | - |
+| VAMSAgentRegistry | *Pending deployment* | - |
+| VAMSRouter | *Pending deployment* | - |
+| SlashingOracle | *Pending deployment* | - |
+
+> **Deployer:** `0xd1d54F39eeBa2f2538f5cdab92e7b134be8f9e82`  
+> **Deployment Date:** February 7, 2026
+
+---
+
+## Local Development
 
 ```bash
 # Build contracts
