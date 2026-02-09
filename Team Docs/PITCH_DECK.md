@@ -2,9 +2,9 @@
 ## Strategic Partnership Proposal: The Sovereign Brain
 ### Infrastructure for the Agentic Economy
 
-**Version:** 3.3 (Strategic Partners)  
-**Date:** January 2026  
-**Stage:** Pre-Seed (Architecture Locked & Ready to Build)
+**Version:** 3.4 (Strategic Partners)  
+**Date:** February 2026  
+**Stage:** Testnet Live (Polygon Amoy)
 
 ---
 
@@ -37,12 +37,12 @@
 
 AI Agents are becoming economic actors, but they cannot effectively use decentralized infrastructure today.
 
-| The Friction | Traditional Blockchain | Agent Requirement |
-| :--- | :--- | :--- |
-| **Latency** | 12+ second blocks | Sub-second feedback loops |
-| **Cost** | Volatile Gas (10x swings) | Predictable economic planning |
-| **Context** | Stateless Transactions | Persistent Memory & Context |
-| **Complexity** | 10+ Wallets/Tokens | Single API & Currency |
+| The Friction           | Traditional Approach | Agent Requirement |
+| :---                   | :---                 | :---              |
+| **Developer Adoption** | <1% of AI devs build on Web3 | Familiar SDK, instant onboarding |
+| **Cost**               | Volatile Gas (10x swings between chains) | Predictable economic planning |
+| **Context**            | Stateless Transactions | Persistent Memory & Context |
+| **Complexity**         | 10+ Wallets/Tokens across ecosystems | Single API & Currency |
 
 ### The Developer Nightmare
 To build a truly sovereign agent today, a developer must integrate:
@@ -62,12 +62,12 @@ To build a truly sovereign agent today, a developer must integrate:
 
 We have built incredible decentralized infrastructure (DePIN), but it is fragmented and unusable for agents.
 
-| Protocol | Capacity | Utilization | The Problem |
-| :--- | :--- | :--- | :--- |
-| **io.net** | 20k+ GPUs | Low | No payment rails for agents |
-| **Akash** | Unbeatable Cost | Low | Complex Kubernetes setup |
-| **Celestia** | Infinite DA | Niche | Deep technical friction |
-| **Bittensor** | High Intelligence | Isolated | Closed ecosystem |
+| Protocol      | Capacity          | Utilization | The Problem                 |
+| :---          | :---              | :---        | :---                        |
+| **io.net**    | 20k+ GPUs         | Low         | No payment rails for agents |
+| **Akash**     | Unbeatable Cost   | Low         | Complex Kubernetes setup    |
+| **Celestia**  | Infinite DA       | Niche       | Deep technical friction     |
+| **Bittensor** | High Intelligence | Isolated    | Closed ecosystem            |
 
 **The Gap:** There is no "Meta-Layer" that aggregates these resources into a coherent stack.
 **VAMS is that Meta-Layer.**
@@ -109,19 +109,19 @@ We don't just aggregate; we vertically integrate the essential primitives.
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
-│  LAYER 5: ECONOMIC (Universal Settlement)                                │
+│  LAYER 5: ECONOMIC (Universal Settlement)                               │
 │  $VAMS Token • x402 Micropayments • Dynamic TAO Emission Control        │
 ├─────────────────────────────────────────────────────────────────────────┤
-│  LAYER 4: TRUST (Verification)                                           │
+│  LAYER 4: TRUST (Verification)                                          │
 │  Multi-TEE Witness (Intel/AMD) • ZK-Proofs • Bridge Security (Multi-ISM)│
 ├─────────────────────────────────────────────────────────────────────────┤
-│  LAYER 3: LOGIC (The Kernel)                                             │
+│  LAYER 3: LOGIC (The Kernel)                                            │
 │  DBOS (Crash-proof workflows) • Kwil (Relational SQL)                   │
 ├─────────────────────────────────────────────────────────────────────────┤
-│  LAYER 2: COMPUTE (The Muscle)                                           │
+│  LAYER 2: COMPUTE (The Muscle)                                          │
 │  io.net (GPU) • Akash (CPU) • Render (3D) • Bittensor (Models)          │
 ├─────────────────────────────────────────────────────────────────────────┤
-│  LAYER 1: FOUNDATION (The Ledger)                                        │
+│  LAYER 1: FOUNDATION (The Ledger)                                       │
 │  Celestia • Near DA • Polygon (Primary) • Avalanche (Sovereign)         │
 └─────────────────────────────────────────────────────────────────────────┘
 ```
@@ -148,17 +148,20 @@ We don't just aggregate; we vertically integrate the essential primitives.
 
 # Slide 7: Market Opportunity
 
-## **$507B Addressable Market by 2030**
+## **$730B+ Addressable Market by 2030**
 
-We sit at the convergence of three mega-trends: **AI Agents**, **DePIN**, and **Cross-Chain**.
+We sit at the convergence of four mega-trends: **AI Agents**, **DePIN**, **Cross-Chain**, and **Decentralized IoT**.
 
 | Segment | TAM (2030) | VAMS Target (SOM) |
 | :--- | :--- | :--- |
 | **Agent Infrastructure** | $47B | **$2.4B** (5% share) |
 | **DePIN Aggregation** | $120B | **$1.2B** (1% share) |
+| **Decentralized IoT*** | $130B | **$1.3B** (1% share) |
 | **DAO Tooling** | $25B | **$2.5B** (10% share) |
 | **Cloud Gaming** | $65B | **$1.3B** (2% share) |
-| **Total Target** | **$500B+** | **~$9.4B Revenue Potential** |
+| **Total Target** | **$730B+** | **~$11.7B Revenue Potential** |
+
+**IoT is $865B by 2030 (9.6% CAGR). ~15% addressable for decentralized infrastructure.*
 
 **Value Proposition:**
 *   **80% Cheaper than AWS:** Akash ($0.02/hr) vs AWS EC2 ($0.10/hr).
@@ -168,48 +171,155 @@ We sit at the convergence of three mega-trends: **AI Agents**, **DePIN**, and **
 
 # Slide 8: Business Model
 
-## **Sustainable Protocol Revenue**
+## **Four Pillars of Revenue**
 
-We generate revenue from utility, not just speculation.
+We generate sustainable, recurring revenue from protocol utility—not speculation.
 
-1.  **Protocol Fees (0.1% - 0.5%)**
-    *   Applied to *every* compute job, storage store, or inference.
-    *   **Projected Y3:** $25M Annual Revenue.
+```
+┌────────────────────────────────────────────────────────────────────────────┐
+│                    VAMS REVENUE ENGINE                                     │
+├────────────────────────────────────────────────────────────────────────────┤
+│                                                                            │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐    │
+│  │   PROTOCOL   │  │     GAS      │  │   MANAGED    │  │   PREMIUM    │    │
+│  │     FEES     │  │ ABSTRACTION  │  │ INFRA (L1s)  │  │   SERVICES   │    │
+│  │   0.1-0.5%   │  │    2-7%      │  │    1-5%      │  │   Monthly    │    │
+│  └──────────────┘  └──────────────┘  └──────────────┘  └──────────────┘    │
+│         │                │                │                 │              │
+│         └────────────────┴────────────────┴─────────────────┘              │
+│                                    │                                       │
+│                              ▼ 100% Buyback & Burn                         │
+│                                                                            │
+└────────────────────────────────────────────────────────────────────────────┘
+```
 
-2.  **Gas Abstraction Premium (5%)**
-    *   Charged for the convenience of paying in $VAMS while we handle ETH/SOL swaps.
-    *   **Projected Y3:** $15M Annual Revenue.
+### Revenue Stream Breakdown
 
-3.  **Infrastructure Reseller (Managed L1s)**
-    *   **Model:** Commission on Total Validator OpEx (Compute + ACP-77 Fees).
-    *   **Rate:** 1-5% Dynamic Markup.
-    *   **Value:** One-click deployment of compliant Avalanche L1s. We handle the dev-ops; they pay-as-they-go.
-
-**Total Y3 Target:** ~$50M - $70M Annual Revenue.
+| Stream                     | Rate                   | Y3 Projection | Y5 Projection |
+| :------------------------- | :--------------------- | :------------ | :------------ |
+| **Protocol Fees**          | 0.1-0.5% per tx        | $1.8M         | $36M          |
+| **Gas Abstraction**        | 2-7% markup            | $3.6M         | $18M          |
+| **Managed Infrastructure** | 1-5% of validator OpEx | $1.2M         | $12M          |
+| **Premium Support**        | $500-5K/mo             | $600K         | $6M           |
+| **Total Annual Revenue**   | —                      | **$7.2M**     | **$72M**      |
 
 ---
 
-# Slide 9: Tokenomics ($VAMS)
+# Slide 9: Unit Economics
+
+## **Path to Profitability**
+
+Every transaction on VAMS generates protocol value.
+
+### Per-Transaction Economics
+
+| Metric                     | Value     | Notes                   |
+| :------------------------- | :-------- | :---------------------- |
+| **Avg. Job Size**          | $50       | Compute + Storage + DA  |
+| **Protocol Take Rate**     | 0.3%      | $0.15 per job           |
+| **Gas Abstraction**        | 5%        | $2.50 per job           |
+| **Revenue Per Job**        | **$2.65** | Goes to buyback & burn  |
+| **COGS (Infra)**           | ~$0.10    | Node hosting, RPC calls |
+| **Gross Margin**           | **96%**   | Pure protocol margin    |
+
+### Volume-to-Revenue Model
+
+```
+  Monthly Volume ($)    Active Agents    Monthly Revenue    Tokens Burned*
+  ─────────────────    ──────────────    ──────────────    ──────────────
+  $500K                100               $15K              150K VAMS
+  $5M                  1,000             $150K             1.5M VAMS
+  $50M                 10,000            $1.5M             7.5M VAMS
+  $250M                50,000            $7.5M             25M VAMS
+  $1B                  200,000           $30M              60M VAMS
+  
+  * At $0.10/VAMS. Burn rate decreases as price appreciates.
+```
+
+---
+
+# Slide 10: Token Appreciation Mechanics
+
+## **Why $VAMS Appreciates**
+
+Multiple mechanisms create sustained buy pressure and supply reduction.
+
+### The Value Flywheel
+
+```
+          ┌─────────────────────────────────────────────────────────┐
+          │                                                         │
+          ▼                                                         │
+   ┌─────────────┐      ┌─────────────┐      ┌─────────────┐        │
+   │   USAGE     │ ───► │   REVENUE   │ ───► │   BUYBACK   │        │
+   │   GROWS     │      │   GROWS     │      │   & BURN    │        │
+   └─────────────┘      └─────────────┘      └─────────────┘        │
+                                                    │               │
+                                                    ▼               │
+                                             ┌─────────────┐        │
+                                             │   SUPPLY    │        │
+                                             │  SHRINKS    │        │
+                                             └─────────────┘        │
+                                                    │               │
+                                                    ▼               │
+   ┌─────────────┐      ┌─────────────┐      ┌─────────────┐        │
+   │    MORE     │ ◄─── │   DEMAND    │ ◄─── │   PRICE     │        │
+   │   AGENTS    │      │  INCREASES  │      │   RISES     │ ───────┘
+   └─────────────┘      └─────────────┘      └─────────────┘
+```
+
+### Five Price Appreciation Drivers
+
+| Driver                    | Mechanism                          | Impact                     |
+| :------------------------ | :--------------------------------  | :------------------------- |
+| **1. 100% Fee Burn**      | All protocol fees buy & burn $VAMS | Direct supply reduction    |
+| **2. Staking Lock**       | 40%+ of supply locked for rewards  | Reduced circulating supply |
+| **3. CLR Operator Bonds** | 100K+ VAMS locked per operator     | Infrastructure demand      |
+| **4. Gas Payment**        | All users need $VAMS for gas       | Constant buy pressure      |
+| **5. Governance Utility** | Proposals require 100K+ stake      | Holder incentive           |
+
+### Supply Reduction Projections
+
+| Year | Tokens Emitted | Tokens Burned* | Net Supply Change         |
+| :--- | :------------- | :------------- | :------------------------ |
+| Y1   | 25M            | 1.8M           | +23.2M (inflationary)     |
+| Y2   | 20M            | 7.5M           | +12.5M (inflationary)     |
+| Y3   | 15M            | 18M            | **-3M (deflationary)**    |
+| Y4   | 10M            | 37.5M          | **-27.5M (deflationary)** |
+| Y5   | 5M             | 72M            | **-67M (deflationary)**   |
+
+*Burn projections based on revenue targets at $0.10/VAMS.
+
+> **Key Insight:** Once annual revenue exceeds ~$2.5M (at $0.10/VAMS), the protocol becomes **net deflationary**.
+
+---
+
+# Slide 11: Tokenomics ($VAMS)
 
 ## **The Economic Engine**
 
 Designed for maximum value accrual and deflationary pressure.
 
-*   **Fixed Supply:** 1,000,000,000 (1B)
-*   **Hyper-Deflationary (Phase 1):** 100% of Protocol Fees are **BURNED**.
-*   **Utility:** Payment, Staking (Security), and Governance.
+| Category                  | Allocation | Tokens | Notes                                      |
+| :------------------------ | :--------- | :----- | :----------------------------------------  |
+| **Community & Ecosystem** | 34%        | 340M   | Airdrops, staking rewards, grants          |
+| **Protocol Treasury**     | 21%        | 210M   | Development, partnerships, growth          |
+| **Founder**               | 16%        | 160M   | 4-year vest, 1-year cliff                  |
+| **Investors**             | 14%        | 140M   | Strategic (5%), Seed (6%), Ecosystem (3%)  |
+| **Team & Advisors**       | 10%        | 100M   | Future hires, advisors                     |
+| **Initial Liquidity**     | 5%         | 50M    | DEX/CEX liquidity at TGE                   |
+| **Total**                 | 100%       | **1B** | Fixed supply, no inflation                 |
 
-### Vesting Profile
-*   **Community:** 34% (5-year distribution)
-*   **Treasury:** 21% (Long-term growth)
-*   **Founders:** 16% (**4-Year Vest**, 1-Year Cliff)
-*   **Investors:** 14% (Standard periods)
+### Value Accrual
+*   **Hyper-Deflationary (Phase 1):** 100% of Protocol Fees are **BURNED**
+*   **Staking Requirement:** CLR operators must stake 100K+ $VAMS
+*   **Governance:** Only stakers vote on protocol direction
 
-*Detailed models available in `TOKENOMICS.md`*
+*Full vesting schedules in `TOKENOMICS.md`*
 
 ---
 
-# Slide 10: Go-To-Market
+# Slide 12: Go-To-Market
 
 ## **Phase 1: Developers First (The "Vercel Strategy")**
 
@@ -228,7 +338,7 @@ We don't sell to end-users; we sell to the builders. Does your agent framework w
 
 ---
 
-# Slide 11: Competitive Landscape
+# Slide 13: Competitive Landscape
 
 ## **Why We Win**
 
@@ -244,29 +354,32 @@ We are the only protocol with a **Black Swan Recovery Matrix** (defined in Archi
 
 ---
 
-# Slide 12: Traction & Status
+# Slide 14: Traction & Status
 
-## **Active Development. Contracts Deployed.**
+## **Testnet Live. Contracts Deployed.**
 
-We have spent 6 months perfecting the design and are now in active implementation.
+We have shipped real infrastructure to Polygon Amoy.
 
 *   ✅ **Architecture Specification:** 100% Complete (`v0.3.0` Spec)
 *   ✅ **Token Economic Model:** 100% Complete (Vesting/Burns/Emissions modeled)
-*   ✅ **Market Analysis:** 100% Complete (`MARKET_ANALYSIS.md`)
-*   ✅ **Smart Contracts:** 75% Complete (14 production contracts, 28 tests)
+*   ✅ **Smart Contracts:** 100% Complete (18 production contracts, 375 tests)
     *   VAMSToken, VAMSStaking, VAMSVesting, VAMSRouter, VAMSSlasher
-    *   VAMSAgentRegistry, VAMSTimelockController + base contracts
+    *   VAMSAgentRegistry, VAMSTimelockController + X402 Economic Layer
+*   ✅ **Testnet Deployment:** Polygon Amoy (Feb 2026)
+    *   **$VAMS Token:** `0x62a705eD...329fd4`
+    *   **Agent Registry:** `0x7e29035...Dd347`
+    *   **Staking Protocol:** `0x0e6aE5B...186C2`
+    *   8 contracts total, all verified on PolygonScan
 *   ✅ **Agent Runtime (Neuron):** 85% Complete (60 tests passing)
     *   Full SDK: Celestia DA, Bittensor, Phala TEE integrations
-    *   Storage clients: Arweave, Kwil + x402 payments
 *   🧪 **Gateway MVP:** 50% Complete (FastAPI server + dashboard)
 *   🧪 **Frontend:** 95% Complete (Vite + React 19 landing page)
 
-**Status:** Active development. Phase 1 contracts complete.
+**Status:** Testnet live. First sovereign agent operational.
 
 ---
 
-# Slide 13: The Roadmap (24-Week MVP + Post-MVP)
+# Slide 15: The Roadmap (24-Week MVP + Post-MVP)
 
 ## **From Simulation to Live Testnet**
 
@@ -296,7 +409,7 @@ We have a detailed 8-Phase Execution Plan: **24-week MVP** followed by **post-MV
 
 ---
 
-# Slide 14: The Team
+# Slide 16: The Team
 
 ## **Building in Public. Hiring Engineers.**
 
@@ -314,9 +427,9 @@ We have a detailed 8-Phase Execution Plan: **24-week MVP** followed by **post-MV
 
 ---
 
-# Slide 15: The Ask
+# Slide 17: The Ask
 
-## **Strategic Partnership Opportunity (7% Allocation)**
+## **Strategic Partnership Opportunity (5% Allocation)**
 
 We are seeking strategic partners and grants to accelerate the VAMS vision.
 
@@ -327,13 +440,13 @@ We are seeking strategic partners and grants to accelerate the VAMS vision.
 4.  **Security Audits:** Third-party audits for core protocol contracts.
 
 ### What Strategic Partners Get
-*   **7% Token Allocation** (from Strategic Investor pool).
+*   **5% Token Allocation** (from Strategic Investor pool).
 *   Early access to protocol integrations.
 *   Governance influence on roadmap direction.
 
 ---
 
-# Slide 16: Partnership Value
+# Slide 18: Partnership Value
 
 ## **Strategic Alignment**
 
@@ -341,7 +454,7 @@ Strategic partners gain access to a high-growth protocol at the ground floor.
 
 | Partner Benefit       | Value                                      |
 |-----------------------|--------------------------------------------|
-| **Token Allocation**  | 7% of 1B supply (70M $VAMS)                |
+| **Token Allocation**  | 5% of 1B supply (50M $VAMS)                |
 | **Early Integration** | First-mover advantage on DePIN aggregation |
 | **Governance Rights** | Shape protocol direction from Day 1        |
 | **Revenue Share**     | Fee revenue from protocol usage            |
@@ -350,11 +463,12 @@ Strategic partners gain access to a high-growth protocol at the ground floor.
 
 ---
 
-# Slide 17: Vision 2030
+# Slide 19: Vision 2030
 
 ## **The Operating System for AGI**
 
-In 5 years, AI Agents will outnumber humans on the internet 100:1.
+By 2028, **33% of enterprise software** will include agentic AI (Gartner) — up from <1% in 2024.
+By 2030, **$50B+ in AI agent infrastructure** will be deployed globally.
 They will trade, create, and transact autonomously.
 
 They won't use Visa. They won't use AWS.
@@ -364,7 +478,7 @@ They will use verifiable, decentralized, sovereign infrastructure.
 
 ---
 
-# Slide 18: Summary
+# Slide 20: Summary
 
 ## **Why Partner Now?**
 
@@ -376,7 +490,7 @@ They will use verifiable, decentralized, sovereign infrastructure.
 
 ---
 
-# Slide 19: Contact
+# Slide 21: Contact
 
 ## **Join the Sovereign Revolution**
 
@@ -384,5 +498,6 @@ They will use verifiable, decentralized, sovereign infrastructure.
 *   **Email:** aseeminksa@gmail.com
 *   **LinkedIn:** linkedin.com/in/aseemchishti
 *   **GitHub:** github.com/GodOfAgents
-
+*   **Telegram:** @AseemChishti
+*   **Twitter:** @aseemchishti
 *Deck Version 3.3 (Strategic Partners) • Confidential*

@@ -210,8 +210,8 @@ $ vams usage --month          # View monthly breakdown
 
 | Round | Allocation | Tokens | Status |
 |-------|-----------|--------|--------|
-| **Strategic Partners** | 7% | 70,000,000 | Active outreach (Grants + Partnerships) |
-| **Seed Round** | 4% | 40,000,000 | Future (~$800K-1M) |
+| **Strategic Partners** | 5% | 50,000,000 | Active outreach (Grants + Partnerships) |
+| **Seed Round** | 6% | 60,000,000 | Future (~$1.2M-1.5M) |
 | **Ecosystem Partners** | 3% | 30,000,000 | Protocol integrations |
 
 ---

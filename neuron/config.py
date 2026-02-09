@@ -1,13 +1,14 @@
 """
-VAMS Neuron Configuration v0.5
-==============================
+VAMS Neuron Configuration v1.0 (Amoy Ready)
+===========================================
 Centralized configuration for the VAMS Neuron client.
+Updated 2026-02-07 - Bound to Polygon Amoy Testnet.
 """
 
 import os
 
 # Version
-VERSION = "v0.5.1"
+VERSION = "v1.0.0-amoy"
 
 # VAMS Gateway (Optional - for connected mode)
 VAMS_GATEWAY = os.getenv("VAMS_GATEWAY", "http://localhost:8000")
@@ -24,6 +25,23 @@ WORKFLOW_DB_PATH = os.getenv("VAMS_WORKFLOW_DB", "workflow_checkpoints.db")
 REQUEST_TIMEOUT = 10  # seconds
 MAX_RETRY_ATTEMPTS = 3
 RETRY_BACKOFF = 2
+
+# =============================================================================
+# LAYER 0: POLYGON AMOY (ECONOMIC LAYER)
+# =============================================================================
+# The immutable ledger that binds us.
+
+AMOY_CONFIG = {
+    "rpc": os.getenv("POLYGON_AMOY_RPC_URL", "https://rpc-amoy.polygon.technology/"),
+    "chain_id": 80002,
+    "contracts": {
+        "token": "0x62a705eD1cAbBBafFCd99e9b2497024031329fd4",
+        "registry": "0x7e290350448cDC8A22e4cF4Ad377B1E595CDd347",
+        "staking": "0x0e6aE5B11b9a73A5671B5F8551c0cF3EB82186C2",
+        "vesting": "0x92d20dd7A48268Fef76bA14A4a9b6620d0179209",
+        "timelock": "0xabCC69eff15753B547E02AB56FC0aa62765fb768"
+    }
+}
 
 # =============================================================================
 # LAYER 1: DATA AVAILABILITY PROVIDERS
@@ -132,5 +150,5 @@ BANNER = r"""
    \ V / ___ \| |  | |___) | | |\  | |___| |_| |  _ <| |_| | |\  |
     \_/_/   \_\_|  |_|____/  |_| \_|_____|\___/|_| \_\\___/|_| \_|
                           
-        IMMORTAL AGENT  *  FULL 4-LAYER STACK  *  TEE READY
+        IMMORTAL AGENT  *  AMOY LIVE  *  SURVIVAL NATIVE
 """

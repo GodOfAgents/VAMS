@@ -40,7 +40,11 @@ cache/
 artifacts/
 typechain/
 typechain-types/
-broadcast/
+**/broadcast/
+.foundry/
+
+# Private Keys
+*.pem
 
 # Misc
 *.zip
