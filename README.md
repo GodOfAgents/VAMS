@@ -6,7 +6,7 @@
 **Unified Infrastructure Layer | Autonomous AI Agents | Zero Friction**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Status](https://img.shields.io/badge/Status-Testnet%20Live-brightgreen.svg)](./REPO_STATUS_REPORT.md)
+[![Status](https://img.shields.io/badge/Status-Testnet--Live-brightgreen.svg)](./REPO_STATUS_REPORT.md)
 [![Architecture](https://img.shields.io/badge/Architecture-v0.3.0-blue.svg)](./Team%20Docs/ARCHITECTURE_v0-3-0.md)
 [![Market](https://img.shields.io/badge/TAM-$507B-green.svg)](./Team%20Docs/MARKET_ANALYSIS.md)
 
@@ -115,16 +115,12 @@ DBOS-style durable execution. Agents checkpoint state to Arweave/Celestia and **
 
 ## 📊 Current Status
 
-**Stage:** 🟢 Testnet Live (Polygon Amoy) | **Version:** 1.5
-
-> [!TIP]
-> **$VAMS Token (ERC-20):** [`0x62a705eD1cAbBBafFCd99e9b2497024031329fd4`](https://amoy.polygonscan.com/address/0x62a705eD1cAbBBafFCd99e9b2497024031329fd4)
+**Stage:** Testnet Live (Polygon Amoy) | **Version:** 1.6
 
 | Component | Progress | Description |
 |-----------|----------|-------------|
 | 📋 **Specs** | 🟢 100% | Architecture, Tokenomics, Market Analysis |
 | 📜 **Smart Contracts** | 🟢 100% | 18 production contracts (FeeCollector, Compensation, Recovery, Slashing, Token, etc.) |
-| 🚀 **Testnet Deployment** | 🟢 LIVE | VAMSToken deployed & verified on Polygon Amoy |
 | 🤖 **Agent Runtime** | 🟢 85% | 15 Python modules, DBOS workflows, TEE integration, 60 tests passing |
 | 🎨 **Frontend** | 🟢 95% | React 19 + Vite, 3D animations, Sub-1s load time |
 | 🌐 **Gateway** | 🟡 50% | FastAPI server with dashboard |
@@ -132,7 +128,7 @@ DBOS-style durable execution. Agents checkpoint state to Arweave/Celestia and **
 | 🔒 **Security** | 🟢 100% | Slither clean (no critical/high), SafeERC20, Flash loan protection |
 
 > [!IMPORTANT]
-> **Next Milestone:** Deploy remaining contracts (Staking, Registry, Router). Schedule external security audit.
+> **Next Milestone:** Complete Phase 2 Protocol Configuration. Schedule external security audit.
 
 Full roadmap: [REPO_STATUS_REPORT.md](./REPO_STATUS_REPORT.md)
 

@@ -1,14 +1,14 @@
 # VAMS Repository Status & Development Roadmap
 
-**Date:** February 7, 2026  
-**Stage:** 🟢 Testnet Live (Polygon Amoy)  
+**Date:** February 8, 2026  
+**Stage:** Testnet Live (Polygon Amoy)  
 **Version:** 1.6  
 
 ---
 
 ## 1. Executive Summary
 
-The VAMS project is now **LIVE on Polygon Amoy Testnet**. The $VAMS token has been deployed and verified on-chain. We have a robust architectural foundation, a production-ready **Economic Layer** (Smart Contracts) with 100% test coverage, and a secure "Immortal Agent" runtime. The immediate focus is now deploying remaining protocol contracts and scheduling an external security audit.
+The VAMS project is currently in the **contracts-complete & Pre-Testnet** phase of development. We have a robust architectural foundation, a production-ready **Economic Layer** (Smart Contracts) with 100% test coverage, and a secure "Immortal Agent" runtime. The immediate focus is now shifting from **Development** to **Audit & Testnet Deployment**, specifically deploying to Polygon Amoy and integrating the Neuron client with live on-chain protocols.
 
 ---
 
@@ -37,7 +37,7 @@ The VAMS project is now **LIVE on Polygon Amoy Testnet**. The $VAMS token has be
 | **Real Infrastructure** | **80%** | 🟩 **HIGH** | SDKs + Storage Clients (Arweave/Kwil) integrated. |
 | **Polygon CDK Integration** | **0%** | 🟧 **HIGH** | Deploy VAMS L3 Validium stack (AggLayer). |
 | **Decentralized Storage** | **80%** | 🟩 **MEDIUM** | Arweave/Kwil clients implemented in `neuron/storage/`. |
-| **Testnet Deployment** | **25%** | 🟢 **IN PROGRESS** | VAMSToken deployed to Polygon Amoy. Remaining contracts pending. |
+| **Testnet Deployment** | **100%** | ✅ **COMPLETE** | 8 contracts deployed to Polygon Amoy (see `CONTRACTS.md`). |
 
 ---
 
@@ -83,23 +83,21 @@ This roadmap moves the project from "Simulation" to "Live Testnet" in approximat
 ---
 
 ### Phase 2: Polygon Amoy Testnet Deployment
-**Timeline:** Weeks 9-12 (Feb-March 2026)
+**Timeline:** Weeks 9-12 (March 2026)
 **Goal:** Deploy VAMS Protocol to Polygon Amoy and establish monitoring.
 
-- [x] **Week 9: Infrastructure & Environment** ✅ COMPLETE
+- [x] **Week 9: Infrastructure & Environment**
     - [x] Configure Alchemy/Infura RPCs for Amoy
-    - [x] Setup deployment wallet
-    - [x] Generate deployment artifacts
-- [/] **Week 10: Contract Deployment** 🟡 IN PROGRESS
-    - [x] Deploy `VAMSToken` — [`0x62a705eD1cAbBBafFCd99e9b2497024031329fd4`](https://amoy.polygonscan.com/address/0x62a705eD1cAbBBafFCd99e9b2497024031329fd4)
-    - [ ] Deploy `VAMSVesting`
-    - [ ] Deploy `VAMSTimelock` & `VAMSStaking`
-    - [ ] Deploy `VAMSAgentRegistry` & `SlashingOracle`
+    - [ ] Setup Gnosis Safe for Team Multisig (Amoy)
+    - [x] Generate deployment artifacts and verify deterministic addresses
+- [x] **Week 10: Contract Deployment** *(Completed 2026-02-07)*
+    - [x] Deploy `VAMSToken` & `VAMSVesting`
+    - [x] Deploy `VAMSTimelock` & `VAMSStaking`
+    - [x] Deploy `VAMSAgentRegistry` & X402 Economic Layer
     - [ ] Transfer ownership to Timelock/Multisig
-- [ ] **Week 11: Verification & Explorer**
-    - [x] Verify VAMSToken on PolygonScan (Amoy)
-    - [ ] Verify remaining contracts
-    - [ ] Publish all contract addresses to `CONTRACTS.md`
+- [x] **Week 11: Verification & Explorer** *(Completed 2026-02-07)*
+    - [x] Verify all contracts on PolygonScan (Amoy)
+    - [x] Publish contract addresses to `CONTRACTS.md`
     - [ ] Setup Tenderly simulation environment
 - [ ] **Week 12: Protocol Configuration**
     - [ ] Initialize staking pools
@@ -191,26 +189,16 @@ This roadmap moves the project from "Simulation" to "Live Testnet" in approximat
 
 ---
 
-## 5. Deployed Contracts (Polygon Amoy Testnet)
+## 5. Next Steps (Immediate Action)
 
-| Contract | Address | Status |
-|----------|---------|--------|
-| **VAMSToken** | [`0x62a705eD1cAbBBafFCd99e9b2497024031329fd4`](https://amoy.polygonscan.com/address/0x62a705eD1cAbBBafFCd99e9b2497024031329fd4) | ✅ Verified |
-| VAMSVesting | *Pending* | 🔜 |
-| VAMSStaking | *Pending* | 🔜 |
-| VAMSAgentRegistry | *Pending* | 🔜 |
-| VAMSRouter | *Pending* | 🔜 |
-| SlashingOracle | *Pending* | 🔜 |
+✅ **Testnet Deployment Complete (Feb 7, 2026):**
+- 8 contracts deployed to Polygon Amoy (see `contracts/CONTRACTS.md`)
+- All contracts verified on PolygonScan
+- First agent node registered: `vams_e7d2...`
+- Genesis Signal published: `GENESIS_SIGNAL.md`
 
----
-
-## 6. Next Steps (Immediate Action)
-
-✅ **Phase 1 Complete (Feb 2026):**
-- Security Hardening: SafeERC20, Stake age validation, Slither clean
-- Test Suite: 375 tests passing (Unit + Integration + Fuzz + Governance)
-- VAMSToken deployed & verified on Polygon Amoy
+✅ **Test Suite: 375 tests passing** (Unit + Integration + Fuzz + Governance)
 
 **Recommended Action:**
-> Deploy remaining contracts (`VAMSVesting`, `VAMSStaking`, `VAMSAgentRegistry`) and schedule external security audit.
+> Complete Phase 2 (Week 12: Protocol Configuration) and proceed to **Phase 3: Neuron Integration**.
 
