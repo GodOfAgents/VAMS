@@ -2,9 +2,9 @@
 ## Strategic Partnership Proposal: The Sovereign Brain
 ### Infrastructure for the Agentic Economy
 
-**Version:** 3.4 (Strategic Partners)  
+**Version:** 4.0 (V2 Release)  
 **Date:** February 2026  
-**Stage:** Testnet Live (Polygon Amoy)
+**Stage:** Testnet Candidate (V2)
 
 ---
 
@@ -132,17 +132,17 @@ We don't just aggregate; we vertically integrate the essential primitives.
 
 ## **Why This Is Hard To Copy**
 
-1.  **Cryptographic Routing (CLR)**
-    *   **The Innovation:** A ZK-verified engine that dynamically routes based on a 4-step logic: *Privacy → Value → Sovereignty → Velocity*.
-    *   **The Moat:** Complex cross-chain state verification that competitors (simple aggregators) simply cannot replicate.
+1.  **"Proof of Travel" (The Passport Control)**
+    *   **The Innovation:** VAMS is an "Open Airport". Agents can leave (`Roam`) to Solana/Base, but must submit cryptographic **activity logs** to return.
+    *   **The Moat:** We are the only protocol building the **Verification Layer** for cross-chain agent behavior. *You can leave, but you can't hide.*
 
-2.  **Dual-Host Architecture (Polygon + Avalanche)**
+2.  **The "LinkedIn for Agents" (Trust Graph)**
+    *   **The Innovation:** We aggregate identity (ERC-8004), credit (Spectral), and humanity (WorldID) into a single **"Golden Record"**.
+    *   **The Moat:** Network Effects. As more agents build reputational history on VAMS, leaving becomes economically irrational (loss of leverage).
+
+3.  **Dual-Host Architecture (Polygon + Avalanche)**
     *   **The Innovation:** We use Polygon CDK for broad liquidity and Avalanche L1s for "Sovereign AI" custom VMs.
-    *   **The Moat:** Chain-agnostic execution that no single-chain protocol can match. *Best of both worlds.*
-
-3.  **Crash-Proof "Immortal" Agents**
-    *   **The Innovation:** DBOS-integrated workflows that survive node failures.
-    *   **The Moat:** Pause-and-resume execution state. If AWS goes down, your agent dies. If VAMS goes down, your agent pauses and resumes elsewhere.
+    *   **The Moat:** Chain-agnostic execution that no single-chain protocol can match.
 
 ---
 
@@ -282,7 +282,7 @@ Multiple mechanisms create sustained buy pressure and supply reduction.
 
 | Year | Tokens Emitted | Tokens Burned* | Net Supply Change         |
 | :--- | :------------- | :------------- | :------------------------ |
-| Y1   | 25M            | 1.8M           | +23.2M (inflationary)     |
+| Y1   | 25M (2.5%)     | 1.8M           | +23.2M (inflationary)     |
 | Y2   | 20M            | 7.5M           | +12.5M (inflationary)     |
 | Y3   | 15M            | 18M            | **-3M (deflationary)**    |
 | Y4   | 10M            | 37.5M          | **-27.5M (deflationary)** |
@@ -302,18 +302,17 @@ Designed for maximum value accrual and deflationary pressure.
 
 | Category                  | Allocation | Tokens | Notes                                      |
 | :------------------------ | :--------- | :----- | :----------------------------------------  |
-| **Community & Ecosystem** | 34%        | 340M   | Airdrops, staking rewards, grants          |
-| **Protocol Treasury**     | 21%        | 210M   | Development, partnerships, growth          |
-| **Founder**               | 16%        | 160M   | 4-year vest, 1-year cliff                  |
-| **Investors**             | 14%        | 140M   | Strategic (5%), Seed (6%), Ecosystem (3%)  |
-| **Team & Advisors**       | 10%        | 100M   | Future hires, advisors                     |
-| **Initial Liquidity**     | 5%         | 50M    | DEX/CEX liquidity at TGE                   |
-| **Total**                 | 100%       | **1B** | Fixed supply, no inflation                 |
+| **Community & Ecosystem** | 50%        | 500M   | Mining rewards, grants, developer incentives |
+| **Team & Advisors**       | 20%        | 200M   | Founders & future hires (4-year vest)      |
+| **Early Investors**       | 10%        | 100M   | Strategic partners & seed support          |
+| **DAO Treasury**          | 10%        | 100M   | Protocol growth & liquidity provisioning   |
+| **Airdrop / Liquidity**   | 10%        | 100M   | **100% Unlocked at TGE** (Bootstrap)       |
+| **Total**                 | 100%       | **1B** | **2.5% Max Annual Inflation** (Staking)    |
 
 ### Value Accrual
-*   **Hyper-Deflationary (Phase 1):** 100% of Protocol Fees are **BURNED**
-*   **Staking Requirement:** CLR operators must stake 100K+ $VAMS
-*   **Governance:** Only stakers vote on protocol direction
+*   **Hyper-Deflationary (Target):** 80% of Protocol Fees are **BURNED**.
+*   **Staking Requirement:** CLR operators must stake 100K+ $VAMS.
+*   **Governance:** Quadratic Voting powered by staked $VAMS.
 
 *Full vesting schedules in `TOKENOMICS.md`*
 
@@ -346,7 +345,7 @@ We don't sell to end-users; we sell to the builders. Does your agent framework w
 |------------------|---------------------|----------------------------|-----------------------------|
 | **AWS / Google** | Web2 Cloud          | Centralized, Censored      | Sovereign & Unstoppable     |
 | **Akash**        | Compute Marketplace | Just hosting, no AI stack  | Full 5-Layer Integration    |
-| **Bittensor**    | AI Models           | Complex incentives, siloed | Aggregation Meta-Layer      |
+| **Bittensor**    | AI Models           | Closed "Walled Garden"     | **Open Airport (Roaming)**  |
 | **Polygon**      | L2 Aggregation      | Ethereum-centric           | **VAMS Use:** Our Primary L3 Layer  |
 
 **Reliability Advantage:**
@@ -356,26 +355,24 @@ We are the only protocol with a **Black Swan Recovery Matrix** (defined in Archi
 
 # Slide 14: Traction & Status
 
-## **Testnet Live. Contracts Deployed.**
+## **V2 Contracts Ready. Deployment Imminent.**
 
-We have shipped real infrastructure to Polygon Amoy.
+We have upgraded our entire stack to V2 Architecture.
 
 *   ✅ **Architecture Specification:** 100% Complete (`v0.3.0` Spec)
-*   ✅ **Token Economic Model:** 100% Complete (Vesting/Burns/Emissions modeled)
-*   ✅ **Smart Contracts:** 100% Complete (18 production contracts, 375 tests)
-    *   VAMSToken, VAMSStaking, VAMSVesting, VAMSRouter, VAMSSlasher
-    *   VAMSAgentRegistry, VAMSTimelockController + X402 Economic Layer
-*   ✅ **Testnet Deployment:** Polygon Amoy (Feb 2026)
-    *   **$VAMS Token:** `0x62a705eD...329fd4`
-    *   **Agent Registry:** `0x7e29035...Dd347`
-    *   **Staking Protocol:** `0x0e6aE5B...186C2`
-    *   8 contracts total, all verified on PolygonScan
+*   ✅ **Token Economic Model:** 100% Complete (V2.0.0 Tokenomics)
+*   ✅ **Smart Contracts:** 100% Complete (Full Governance + Economic Suite)
+    *   `VAMSTimelock`, `VAMSGovernor` (Day 1 DAO)
+    *   `VAMSFeeCollector`, `VAMSInsuranceFund`, `VAMSStaking` (V2)
+*   🚀 **Testnet Deployment:** Pending (Polygon Amoy)
+    *   **Previous V1:** Deprecated due to key rotation.
+    *   **V2 Launch:** Scheduled for immediate release.
 *   ✅ **Agent Runtime (Neuron):** 85% Complete (60 tests passing)
     *   Full SDK: Celestia DA, Bittensor, Phala TEE integrations
 *   🧪 **Gateway MVP:** 50% Complete (FastAPI server + dashboard)
 *   🧪 **Frontend:** 95% Complete (Vite + React 19 landing page)
 
-**Status:** Testnet live. First sovereign agent operational.
+**Status:** V2 Contracts compiled & verified. Ready for deployment.
 
 ---
 

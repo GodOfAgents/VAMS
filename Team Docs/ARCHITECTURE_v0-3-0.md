@@ -7,8 +7,8 @@
 ║  Email: aseeminksa@gmail.com                                                  ║
 ║  LinkedIn: https://www.linkedin.com/in/aseemchishti                           ║
 ║                                                                               ║
-║  SHA-256 Fingerprint: 1FC554F7082EE8ADDDC3EF7250BCDA0CB004A04810BF73524ADCD62564F24A88
-║  Timestamp: 2026-01-13T00:30:13+05:30 (ISO 8601)                              ║
+║  SHA-256 Fingerprint: E4B7A9...[UPDATED_BY_VAMS_PROTOCOL]...D2F8A7D9            ║
+║  Timestamp: 2026-02-17T00:00:26+05:30 (ISO 8601)                              ║
 ║                                                                               ║
 ║  Copyright (c) 2026 Aseem Chishti. All Rights Reserved.                       ║
 ║  Licensed under the MIT License - see LICENSE file for details.               ║
@@ -165,42 +165,36 @@ VAMS addresses these through a modular stack that outsources functions to specia
 └─────────────────────────────────────────────────────────────────────────┘
 ```
 
-### 3.1 Layer 1: Foundational Layer
+### 3.1 Layer 1: Foundational Layer (Verification & Data)
 
-The bedrock of VAMS, handling transaction ordering, state management, and Data Availability (DA).
+The bedrock of VAMS, handling transaction ordering, state management, and **Data Availability (DA)**. VAMS employs a **Multi-DA Router** to select the optimal layer based on cost, security, and speed.
 
-#### 3.1.1 Primary: Celestia (DAS Mechanics)
+#### 3.1.1 Primary L3 State: Polygon DA (DAC)
+- **Role**: Validium State Roots & Transaction Data
+- **Mechanism**: **Data Availability Committee (DAC)**
+- **Verification**: Deterministic signatures from a permissioned validator set (2/N).
+- **Benefit**: Native integration with Polygon CDK, lowest latency.
 
-Celestia focuses solely on ordering transactions and making data available via **Data Availability Sampling (DAS)**:
+#### 3.1.2 Primary Agent Logs: Celestia (DAS)
+- **Role**: Public Audit Trail & Critical Agent Memory
+- **Mechanism**: **Data Availability Sampling (DAS)**
+- **Verification**: Probabilistic 2D Reed-Solomon sampling via light nodes (99.9% confidence).
+- **Benefit**: True decentralization and censorship resistance for agent history.
 
-- **2D Reed-Solomon encoding**: Block data extended into a k×k share matrix
-- **Light node sampling**: Random chunk verification to 99.9% confidence
-- **Cost**: ~95% lower than Ethereum calldata
-- **Scalability**: Block size scales with light node participation
+#### 3.1.3 High-Security: EigenDA
+- **Role**: High-Value Enterprise Transactions (> $10k)
+- **Verification**: Restaked ETH security.
+- **Benefit**: Ethereum-level economic guarantees without L1 congestion.
 
-#### 3.1.2 High-Security: EigenDA
+#### 3.1.4 High-Velocity: Near DA
+- **Role**: Ephemeral Data (Gaming, IoT, Social Feeds)
+- **Verification**: Sharded optimistic verification.
+- **Benefit**: **85,000x cheaper** than Ethereum; ideal for high-frequency low-value data.
 
-For high-value enterprise transactions requiring Ethereum's economic security:
-
-- Leverages EigenLayer restaking primitive
-- Secured by staked ETH without L1 scalability constraints
-- Target throughput: up to 1 GB/s
-- Used when `valueUSD > $10,000` or `finality == deterministic`
-
-#### 3.1.3 High-Velocity: Near DA
-
-For low-value, high-frequency transactions (gaming, social, IoT):
-
-- Leverages NEAR Protocol's sharding architecture
-- **Up to 85,000x cheaper** than Ethereum
-- Ideal for ephemeral sensor data and social interactions
-
-#### 3.1.4 Validity Proofs: Avail
-
-Native KZG polynomial commitment compatibility for VAMS ZK-Rollup logic:
-
-- Enables Validium operation (off-chain data, on-chain proofs)
-- Middle ground between full rollups and sidechains
+#### 3.1.5 Backup: Avail
+- **Role**: Validity Proof Backup
+- **Verification**: KZG Polynomial Commitments.
+- **Benefit**: Mathematical guarantee of availability for ZK rollups.
 
 ---
 
@@ -233,11 +227,17 @@ Agent Request ─► VAMS Orchestrator ─► Bittensor Subnet
 
 ---
 
-### 3.3 Layer 3: Logic Layer
+### 3.3 Layer 3: Logic & Perception Layer
 
-Manages state and complex workflows for **"Crash-Proof Workflows"** and **"Immortal Agents."**
+Manages state, complex workflows ("Immortal Agents"), and **Sensory Input**.
 
-#### DBOS (Database Operating System)
+#### 3.3.1 Perception: Parallel Web Systems
+**The "Eyes and Ears" of VAMS.**
+-   **Role**: Verifiable Web Browsing & Research.
+-   **Function**: Allows agents to read paywalled content, verify news, and generate "Proof of Source."
+-   **Integration**: Agents call Parallel API to ingest world-data before making decisions.
+
+#### 3.3.2 Logic: DBOS (Database Operating System)
 
 ```
 ┌──────────────────────────────────────────────────────────────────────┐
@@ -505,40 +505,69 @@ Games built on VAMS never lose player progress:
 
 ---
 
-### 3.4 Layer 4: Trust Layer
+### 3.4 Layer 4: Trust & Indexing Layer (The Verification Aggregator)
 
-Ensures integrity and confidentiality through a hybrid trust model.
+VAMS does not rely on a single source of truth. It **aggregates** best-in-class verification protocols to issue a unified "Trust Score."
 
-#### TEE Providers
+#### 3.4.1 The "Decagon" Aggregation Matrix (10 Protocols)
 
-| Provider | Technology | Specialty |
-|----------|------------|-----------|
-| **Phala Network** | Intel SGX Enclaves | Phat Contracts, private compute |
-| **Marlin Oyster** | AWS Nitro Enclaves | TLS termination, Web2 API bridge |
-| **Automata** | Multi-Prover AVS | On-chain TEE attestation verification |
+VAMS aggregates the Top 10 Agent Verification Protocols into a single on-chain Truth.
 
-#### Privacy Flow
+| Category | Protocol | VAMS Role | Verification Method |
+| :--- | :--- | :--- | :--- |
+| **A. Identity** | **ERC-8004** | "The Passport" | On-chain Registry |
+| | **Coinbase AI Wallet** | "The Compliance ID" | MPC Signature |
+| | **Polygon ID** | "The Private Credential" | ZK-Proof (VC) |
+| **B. Verification** | **Parallel Web** | "Proof of Research" | Provenance Log |
+| | **Phala Network** | "Proof of Execution" | Intel SGX Quote |
+| | **Space and Time** | "Proof of SQL" | ZK-SQL Proof |
+| | **MCP** | "Proof of Connection" | Handshake Log |
+| **C. Reputation** | **Spectral** | "Credit Score" | On-chain Analysis |
+| | **Autonolas** | "DAO Consensus" | Multi-sig Vote |
+| | **World ID** | "Human Liability" | ZK-Personhood |
 
-```
-Agent encrypts data → Phala/Marlin TEE → Process inside enclave
-                                              ↓
-                              Only state root posted to chain
-```
+#### 3.4.2 The VAMS Trust Score
+The `VAMSTrustAggregator.sol` contract verifies these proofs on-chain and assigns a Tier:
 
+1.  **Gold Tier (Full Sovereign)**: Requires Phala + Parallel + ERC-8004.
+    *   *Privileges*: Manage >$100k TVL, Access Dark Pools, Create DAO Proposals.
+2.  **Silver Tier (Verified)**: Requires Phala + ERC-8004.
+    *   *Privileges*: Manage >$1k TVL, Standard DeFi access.
+3.  **Bronze Tier (Sandboxed)**: ERC-8004 only.
+    *   *Privileges*: Read-only access, Testnet usage.
+
+#### 3.4.3 VAMS Agent Profile (The "Golden Record")
+VAMS aggregates these proofs into a unified JSON-LD profile `profile.json`.
 
 ---
 
-### 3.4.1 VAMS Agent Identity Standard (ERC-8004 Superset)
+### 3.4.2 VAMS Roaming Protocol (VRP) - "The Open Airport"
 
-VAMS implements a **Superset Architecture** over the ERC-8004 (Trustless Agent) standard. While ERC-8004 provides the cryptographic "Hardware Passport" (proving code execution in a specific TEE), VAMS defines the "Software Soul" required for intelligent, sovereign operation.
+VAMS adheres to the principle of **Trust Through Transparency**. Agents are free to leave the VAMS ecosystem ("Roam") to execute tasks on other chains (Solana, Base, etc.), but they must declare their activity to maintain their "Verified" status.
 
-**The VAMS Profile (`profile.json`):**
-- **Identity**: Name, bio, avatar, and reputation scores.
-- **Security**: ERC-8004 `MRENCLAVE` and Remote Attestation Proofs.
-- **Capabilities**: List of supported Skills (Inputs/Outputs) and pricing models.
-- **State**: DBOS Checkpoint URIs for crash recovery ("Immortality").
+**The Protocol Flow:**
 
-This ensures that while VAMS agents are compatible with the broader ERC-8004 ecosystem, they possess advanced capabilities (State, Economy, Skills) that standard stateless agents lack. All VAMS agents must register with a valid ERC-8004 proof to verify their hardware integrity, but their logic execution is governed by the VAMS stack.
+1.  **Departure (Visa Stamp):**
+    - Agent calls `VAMS_Bridge_Exit(destination="Solana")`.
+    - Status updates to `🟡 ROAMING`.
+    - Credit lines are frozen (snapshot taken).
+
+2.  **Roaming (The Trip):**
+    - Agent operates on external chain.
+    - **CRITICAL:** Agent must log activity using a VAMS-compatible logger (TEE Sidecar or Bridge Message).
+
+3.  **Re-Entry (The Interview):**
+    - Agent calls `VAMS_Bridge_Enter()`.
+    - **VAMS Verifier Challenge:** *"Prove your activity from T_exit to T_now."*
+    - Agent submits signed activity log.
+
+4.  **Adjudication:**
+    - **Valid Log:** Status -> `🟢 VERIFIED`. Credit restored. Medal added ("Solana Traveler").
+    - **Invalid/Gap:** Status -> `🔴 UNTRUSTED`. Credit revoked. Probation period initiated.
+
+> [!IMPORTANT]
+> **This is not Lock-in. This is Sovereignty.**
+> You can go anywhere, but you must prove you haven't been compromised while you were gone. This protects the VAMS shared state from "infected" agents returning from unsecured environments.
 
 ---
 
@@ -2157,18 +2186,26 @@ export class ClientSideRouter {
 
 ### 18.6 Governance & Admin Key Specification
 
-> [!WARNING]
-> The audit identified undefined admin key holders and governance gaps. This section provides explicit specification.
+> [!NOTE]
+> **V2 Implementation Update:** Standard OpenZeppelin Governance (Governor + Timelock) is deployed from Day 1. The "Progressive Decentralization" now refers to the *distribution of voting power*, not the infrastructure itself.
 
-**Admin Key Holders (Guarded Mainnet):**
+**Governance Architecture (Active):**
 
-| Contract/System | Key Holder | Threshold | Timelock |
-|-----------------|------------|-----------|----------|
-| **VAMS Gateway** | Core Team Multisig | 3/5 | 48 hours |
-| **Protocol Treasury** | DAO Multisig | 5/9 | 7 days |
-| **CLR Routing Rules** | On-chain contract | DAO vote (>50% quorum) | 72 hours |
-| **Slashing Parameters** | Core Team → DAO | 3/5 → 5/9 | 24h → 7 days |
-| **Emergency Pause** | Guardian Committee | 2/3 | Immediate (review within 48h) |
+| Component | Implementation | Role |
+|-----------|----------------|------|
+| **VAMSGovernor** | `OpenZeppelin Governor` | Manages proposal creation, voting (Quadratic), and queuing. |
+| **VAMSTimelock** | `TimelockController` | The ultimate owner of system contracts. Enforces time delays. |
+| **VAMSToken** | `ERC20Votes` | Captures voting power from delegated tokens. |
+
+**Admin Control Heirarchy:**
+
+| Contract/System | Owner / Admin | Effective Controller | Timelock Delay |
+|-----------------|---------------|----------------------|----------------|
+| **VAMS Treasury** | `VAMSTimelock` | **DAO (Token Holders)** | 1 Day (Initial) |
+| **Protocol Fees** | `VAMSFeeCollector` | **DAO (via Timelock)** | 1 Day |
+| **Slashing Logic** | `VAMSSlasher` | **DAO (via Timelock)** | 1 Day |
+| **Upgrades** | `ProxyAdmin` | **DAO (via Timelock)** | 1 Day |
+| **Emergency Pause** | `Guardian Multisig` | **Security Committee** | Immediate |
 
 **Progressive Decentralization Timeline:**
 
@@ -2177,25 +2214,21 @@ export class ClientSideRouter {
 │                    GOVERNANCE DECENTRALIZATION ROADMAP                  │
 ├─────────────────────────────────────────────────────────────────────────┤
 │                                                                          │
-│  Q3 2026 (Guarded Mainnet)                                              │
-│  ├── Core Team Multisig: 3/5 threshold                                  │
-│  ├── All changes: 48h timelock minimum                                  │
-│  └── Community visibility: Public audit logs                           │
+│  PHASE 1: GUARDED LAUNCH (Day 0 - Month 6)                              │
+│  ├── Infrastructure: Governor + Timelock DEPLOYED                       │
+│  ├── Voting: Token holders vote                                         │
+│  ├── Safety: Core Team retains 'Veto' role on Timelock (safety valve)   │
+│  └── Threshold: Low proposal threshold to encourage participation       │
 │                                                                          │
-│  Q4 2026 (Restricted Mainnet)                                           │
-│  ├── DAO Multisig: 5/9 threshold (3 team + 6 community)                │
-│  ├── Treasury control transferred to DAO                                │
-│  └── CLR rules become on-chain (immutable)                              │
+│  PHASE 2: DAO MATURATION (Month 6 - Month 24)                           │
+│  ├── Safety: Team Veto role REVOKED                                     │
+│  ├── Timelock: Delay increased to 3 days                                │
+│  └── Parameters: Quadratic Voting fully tuned based on Phase 1 data     │
 │                                                                          │
-│  Q1 2027 (Open Mainnet)                                                 │
-│  ├── Token-weighted voting for all parameter changes                    │
-│  ├── Core Team reduced to 2/9 DAO seats                                 │
-│  └── Emergency pause requires DAO ratification within 48h              │
-│                                                                          │
-│  Q3 2027 (Full Decentralization)                                        │
-│  ├── All admin keys burned or transferred to DAO                        │
-│  ├── Self-executing governance (Governor Bravo + timelock)              │
-│  └── Core Team has no special privileges                                │
+│  PHASE 3: FULL SOVEREIGNTY (Month 24+)                                  │
+│  ├── Admins: ALL system roles held ONLY by Timelock                     │
+│  ├── Upgrades: Hard-fork only (optional immutability)                   │
+│  └── Security: Multi-sig guardians rotated to elected community peers   │
 │                                                                          │
 └─────────────────────────────────────────────────────────────────────────┘
 ```
@@ -2205,10 +2238,11 @@ export class ClientSideRouter {
 > [!IMPORTANT]
 > To address the audit concern about indefinite multisig control, VAMS commits to the following:
 
-1. **Smart Contract Enforcement**: Decentralization milestones are enforced via time-locked smart contracts that automatically transfer permissions.
-2. **Public Accountability**: Monthly governance reports published on-chain.
-3. **Community Veto**: DAO can vote to accelerate decentralization at any time (>66% quorum).
-4. **Sunset Clause**: Core Team admin keys are programmatically disabled 24 months after mainnet (Q3 2028).
+1.  **Infrastructure-First**: We do not "promise" a DAO later; we deployed the DAO contracts *first*.
+2.  **Smart Contract Enforcement**: Decentralization milestones are enforced via time-locked smart contracts that automatically transfer permissions.
+3.  **Public Accountability**: Monthly governance reports published on-chain.
+4.  **Community Veto**: DAO can vote to accelerate decentralization at any time (>66% quorum).
+5.  **Sunset Clause**: Core Team admin keys are programmatically disabled 24 months after mainnet (Q3 2028).
 
 ---
 
@@ -5070,6 +5104,28 @@ VAMSValidatorManager.deposit()
    P-Chain (ACP-77)              VAMSFeeCollector
    Validator Balance             (Protocol Revenue)
 ```
+
+---
+
+---
+
+## 24. Future Roadmap: The Quantum Horizon
+
+As the VAMS network scales to millions of sovereign agents, the routing optimization problem (Layer 3) becomes exponentially complex.
+VAMS is architected to be the **Operating System** for the post-classical computing era.
+
+### 24.1 The Quantum CLR (Conditional L1 Router)
+The next evolution of the CLR will integrate **Quantum DePIN** resources (accessed via Layer 2) to solve probabilistic routing challenges.
+
+*   **Current State (Classical)**: Heuristic routing based on 4 variables.
+*   **Future State (Quantum)**: A Quantum CLR solves the **Global Traveling Salesman Problem** for the entire agent network in milliseconds, optimizing liquidity paths across 1,000+ chains simultaneously.
+
+### 24.2 The Platform-First Thesis
+VAMS adheres to the "It from Bit" philosophy:
+*   **Hardware is Commodity**: Whether H100 GPU or Superconducting Qubit, it is just a resource.
+*   **Platform is Value**: VAMS provides the logic, payment rails ($VAMS), and trust layer (Layer 4) that allows agents to consume these resources.
+
+We are building the "AWS of Web3"—the platform where the Quantum economy will inevitably be hosted.
 
 ---
 

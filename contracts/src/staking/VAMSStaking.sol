@@ -8,6 +8,7 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/utils/Pausable.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "./IVAMSStaking.sol";
+import "../token/IVAMSToken.sol"; // Import IVAMSToken for minting
 
 /**
  * @title VAMSStaking
@@ -16,7 +17,7 @@ import "./IVAMSStaking.sol";
  * @dev Implements staking tiers from TOKENOMICS.md:
  *
  * Tiers:
- * - Bronze (1K-10K): 6% APY
+ * - Bronze (1K-1K): 6% APY
  * - Silver (10K-100K): 8% APY + priority support
  * - Gold (100K-1M): 10% APY + 1.5x governance weight
  * - Platinum (1M+): 12% APY + CLR operator eligible
@@ -268,7 +269,8 @@ contract VAMSStaking is IVAMSStaking, AccessControl, Pausable, ReentrancyGuard {
 
         if (amount == 0) revert NothingToClaim();
 
-        rewardToken.safeTransfer(msg.sender, amount);
+        // MINT rewards instead of transferring
+        IVAMSToken(address(rewardToken)).mint(msg.sender, amount);
 
         emit RewardsClaimed(msg.sender, amount);
     }
@@ -385,8 +387,13 @@ contract VAMSStaking is IVAMSStaking, AccessControl, Pausable, ReentrancyGuard {
 
     // ============ Admin Functions ============
 
+    /// @notice Maximum emission rate (2% per year of 1B initial supply)
+    /// 20,000,000 * 1e18 / 365 days / 86400 = ~0.634 VAMS/sec
+    uint256 public constant MAX_EMISSION_RATE = 634195839675291; // ~0.634 * 1e18
+
     /// @inheritdoc IVAMSStaking
     function updateEmissionRate(uint256 newRate) external override onlyRole(EMISSION_ADMIN_ROLE) {
+        if (newRate > MAX_EMISSION_RATE) revert("Rate exceeds 2% annual cap");
         _updatePool();
         emit EmissionRateUpdated(rewardPerSecond, newRate);
         rewardPerSecond = newRate;

@@ -1,0 +1,25 @@
+{
+    "chain_id": 4022026,
+    "name": "VAMS Sovereign L3",
+    "consensus": "zkevm",
+    "datacommittee": {
+        "members": [
+            "0xCDK_VALIDATOR_1",
+            "0xCDK_VALIDATOR_2"
+        ],
+        "required_signatures": 2
+    },
+    "data_availability": {
+        "mode": "validium",
+        "primary": "polygon-da",
+        "fallback": "celestia"
+    },
+    "genesis": {
+        "root": "0x...",
+        "alloc": {
+            "0xDeployer": {
+                "balance": "1000000000000000000000000"
+            }
+        }
+    }
+}
