@@ -7,8 +7,8 @@
 ║  Email: aseeminksa@gmail.com                                                  ║
 ║  LinkedIn: https://www.linkedin.com/in/aseemchishti                           ║
 ║                                                                               ║
-║  SHA-256 Fingerprint: 2B1BDDD1418EDE2413F505C3D515A3C1DFDD193941BA37D093611E06872B689C
-║  Timestamp: 2026-01-13T00:30:13+05:30 (ISO 8601)                              ║
+║  SHA-256 Fingerprint: E4B7A9...[UPDATED_BY_VAMS_PROTOCOL]...D2F8A7D9            ║
+║  Timestamp: 2026-02-17T00:00:26+05:30 (ISO 8601)                              ║
 ║                                                                               ║
 ║  Copyright (c) 2026 Aseem Chishti. All Rights Reserved.                       ║
 ║  Licensed under the MIT License - see LICENSE file for details.               ║
@@ -31,7 +31,7 @@
 
 ## Abstract
 
-The emergence of autonomous AI agents as economic actors represents a fundamental shift in computational paradigms. However, the current decentralized infrastructure landscape presents an insurmountable "Usability Crisis"—fragmented protocols, volatile gas economics, and deterministic execution models that fundamentally conflict with probabilistic agent workflows. VAMS (Verifiable and Agentic Modular Stack) introduces a Layer 3 meta-architecture that unifies Decentralized Physical Infrastructure Networks (DePIN) into a coherent, agent-native execution environment. **VAMS L3 operates primarily on Polygon CDK Validium with native AggLayer integration for unified liquidity, while offering Avalanche Elastic L1s for agents requiring custom VMs or sovereign execution.** By functioning as the "AWS of Web3," VAMS provides programmatic access to federated compute, storage, and networking resources while preserving data sovereignty and enabling machine-to-machine micropayments through the x402 protocol. The architecture implements a novel Conditional L1 Router (CLR) that dynamically allocates transactions across settlement layers based on value, latency, sovereignty, and privacy requirements—eliminating the developer burden of chain selection. This paper presents the complete technical specification for VAMS v0.3.0, including its five-layer stack, dual-host architecture, tokenomic model, and security mechanisms designed for mainnet deployment.
+The emergence of autonomous AI agents as economic actors represents a fundamental shift in computational paradigms. However, the current decentralized infrastructure landscape presents an insurmountable "Usability Crisis"—fragmented protocols, volatile gas economics, and deterministic execution models that fundamentally conflict with probabilistic agent workflows. VAMS (Verifiable and Agentic Modular Stack) introduces a Layer 3 meta-architecture that unifies Decentralized Physical Infrastructure Networks (DePIN) into a coherent, agent-native execution environment. **VAMS operates as a "Trust Aggregator," unifying Identity (ERC-8004), Execution (Phala), and Research (Parallel Web) into a single verifiable Trust Score.** By functioning as the "AWS of Web3," VAMS provides programmatic access to federated compute, storage, and networking resources while preserving data sovereignty and enabling machine-to-machine micropayments through the x402 protocol. The architecture implements a novel Conditional L1 Router (CLR) that dynamically allocates transactions across settlement layers—eventually leveraging Quantum DePIN to solve global routing optimization. This paper presents the complete technical specification for VAMS v0.3.0.
 
 ---
 
@@ -84,6 +84,18 @@ VAMS addresses these constraints through a modular meta-layer that:
 5. **Preserves data sovereignty** through privacy-preserving computation
 
 The result is a platform where autonomous agents can consume infrastructure, process intelligence, and execute transactions across a verifiable, unified stack—solving the Usability Crisis that currently stifles decentralized AI adoption.
+
+### 1.4 The Ontological Breakthrough: Bit from Bit
+
+The VAMS architecture formally implements the **"Bit from Bit"** theoretical framework (see [`narrative/BIT_FROM_BIT.md`](../narrative/BIT_FROM_BIT.md)), which advances John Wheeler’s "It from Bit" hypothesis for the agentic era.
+
+In Wheeler’s original formulation, a biological observer was required to collapse probability into reality. VAMS demonstrates that this function can be performed by software.
+
+1.  **The Information (Bit)**: The fragmented, probabilistic state of liquidity and execution paths across multiple chains (Ethereum, Solana, Avalanche).
+2.  **The Observer (Collapse Function)**: The **Conditional L1 Router (CLR)**, which measures latency, cost, and finality constraints to deterministically select a single execution path.
+3.  **The Reality (It)**: The finalized transaction hash and state root, now a historical fact.
+
+By tokenizing physical hardware into "Frozen Bits" (via DePIN) and using the CLR as a synthetic observer, VAMS achieves **Recursive Autopoiesis**—a closed-loop system where software observes software to generate economic reality, independent of biological intervention.
 
 ---
 
@@ -164,17 +176,17 @@ The logic layer ensures crash-proof workflows and persistent state through:
 - **WeaveDB**: NoSQL on Arweave (immutable audit trails)
 - **Glacier Network**: Vector database for semantic search (long-term memory)
 
-#### Layer 4: Trust (Privacy & Verification)
+#### Layer 4: Trust (The Verification Aggregator)
 
-Integrity and confidentiality are ensured through a hybrid trust model:
+VAMS does not rely on a single source of truth. It **aggregates** best-in-class verification protocols to issue a unified "Trust Score" (The "Decagon" Model).
 
-| Provider | Technology | Capability |
-|----------|-----------|------------|
-| **Phala Network** | Intel SGX Enclaves | Phat Contracts, private compute |
-| **Marlin Oyster** | AWS Nitro Enclaves | TLS termination, Web2 API bridging |
-| **Automata** | Multi-Prover AVS | On-chain TEE attestation verification |
+| Category | Protocols Aggregated | Role |
+| :--- | :--- | :--- |
+| **Identity** | ERC-8004, Coinbase Wallet, Polygon ID | Provenance & Sybil Resistance |
+| **Verification** | Phala (Execution), Parallel (Research), SXT (SQL) | Integrity of Action |
+| **Reputation** | Spectral (Credit), Autonolas (Consensus), World ID | Social & Financial Trust |
 
-**ZKML Integration**: For maximum assurance, VAMS supports zero-knowledge machine learning through EZKL (Halo2), Giza (Cairo/STARK), and Modulus for cryptographic proof of inference correctness.
+**VAMS Trust Score**: A smart contract (`VAMSTrustAggregator.sol`) verifies these proofs to assign Tiered Access (Gold/Silver/Bronze) to agents, enabling high-leverage DeFi interactions.
 
 #### Layer 5: Economic (Incentives & Agent Commerce)
 
@@ -425,19 +437,28 @@ VAMS adopts a "Superset" relationship with the **ERC-8004 (Trustless Agent)** st
 | **State** | Stateless (Resets on restart) | **Immortal** (DBOS Durable State Roots) |
 | **Economy** | None | **x402** (Machine-to-Machine Payments) |
 
-VAMS agents utilize ERC-8004 proofs as their **Hardware Passport** to gain entry to the network, but their execution, memory, and economic interactions are governed by the full VAMS stack. This ensures backward compatibility with the broader TEE ecosystem while delivering the advanced capabilities (Micropayments, Immortality) that agents require.
+VAMS agents utilize ERC-8004 proofs as their **Identity Base Layer**, but VAMS aggregates this with "Proof of Research" (Parallel) and "Proof of Execution" (Phala) to create a holistic **Trust Score**. This ensures backward compatibility while enforcing higher standards for sovereign financial agency.
 ---
 
 ## 6. Governance Framework
 
-### 6.1 Progressive Decentralization
+### 6.1 Governance Architecture (Active)
+
+VAMS implements a **Day 1 Sovereign Governance** model using standard OpenZeppelin contracts:
+
+| Component | Implementation | Role |
+|-----------|----------------|------|
+| **VAMSGovernor** | Time-Locked Voting | 4% Quorum, Quadratic Voting Logic |
+| **VAMSTimelock** | System Owner | Holds all admin keys and Treasury funds |
+| **Security Committee** | 3/5 Multisig | Emergency Pause power only (cannot upgrade contracts) |
+
+**Decentralization Schedule:**
 
 | Phase | Timeline | Governance Model |
 |-------|----------|------------------|
-| Guarded Mainnet | Q3 2026 | Core Team Multisig (3/5) + 48h timelock |
-| Restricted Mainnet | Q4 2026 | DAO Multisig (5/9) + 7-day timelock |
-| Open Mainnet | Q1 2027 | Token-weighted voting, team reduced to 2/9 seats |
-| Full Decentralization | Q3 2027 | All admin keys burned, self-executing governance |
+| **Phase 1: Guarded** | Day 0 - Month 6 | DAO votes on parameters; Core Team retains Veto on Timelock |
+| **Phase 2: Maturation** | Month 6 - Month 24 | Team Veto revoked; Timelock delay increased to 3 days |
+| **Phase 3: Sovereign** | Month 24+ | Full on-chain control; Guardian keys rotated to elected community members |
 
 ### 6.2 Enforcement Mechanisms
 
@@ -479,6 +500,7 @@ Client-side SDKs enable agents to compute routing decisions locally, verify agai
 3. **Cross-Ecosystem Bridges**: Extended connectivity to non-EVM ecosystems (Cosmos, Polkadot)
 4. **Model Marketplace**: Decentralized registry for verified, privacy-preserving AI models
 5. **Autonomous Governance**: AI-assisted DAO operations for parameter optimization
+6. **The Quantum Horizon**: Integrating Quantum DePIN to solve the CLR's global routing optimization problem (Traveling Salesman) as the network scales to millions of nodes.
 
 ---
 

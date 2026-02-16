@@ -1,14 +1,14 @@
 # VAMS Repository Status & Development Roadmap
 
-**Date:** February 8, 2026  
-**Stage:** Testnet Live (Polygon Amoy)  
-**Version:** 1.6  
+**Date:** February 14, 2026  
+**Stage:** Testnet Candidate (V2)  
+**Version:** 2.0.0  
 
 ---
 
 ## 1. Executive Summary
 
-The VAMS project is currently in the **contracts-complete & Pre-Testnet** phase of development. We have a robust architectural foundation, a production-ready **Economic Layer** (Smart Contracts) with 100% test coverage, and a secure "Immortal Agent" runtime. The immediate focus is now shifting from **Development** to **Audit & Testnet Deployment**, specifically deploying to Polygon Amoy and integrating the Neuron client with live on-chain protocols.
+The VAMS project has completed the **V2 Architecture Upgrade**. We have a production-ready **Economic Layer** (Smart Contracts) with standard OpenZeppelin Governance and a secure "Immortal Agent" runtime. The immediate focus is **V2 Testnet Deployment** to Polygon Amoy.
 
 ---
 
@@ -19,7 +19,7 @@ The VAMS project is currently in the **contracts-complete & Pre-Testnet** phase 
 | :--- | :--- | :--- |
 | **Architecture Specification** | **100%** | `Team Docs/ARCHITECTURE_v0-3-0.md` detailed 5-tier stack design. |
 | **Token Economic Model** | **100%** | `Team Docs/TOKENOMICS.md` vesting, burns, and emission logic defined. |
-| **Smart Contracts (Core Logic)** | **100%** | 18 production contracts: Token, Staking, Vesting, Router, Slasher, Registry, FeeCollector, Compensation, Recovery. |
+| **Smart Contracts (Core Logic)** | **100%** | Full V2 Suite: Governance, Staking, Vesting, Router, Slasher, Registry, FeeCollector. |
 | **Agent Logic Prototype** | **85%** | Neuron v1.0.0: Full 5-Layer Stack + TEE + Storage + Payments. 60 tests passing. |
 | **Gateway MVP** | **50%** | FastAPI server (`gateway/server.py`) with HTML dashboard and heartbeat API. |
 | **Frontend** | **95%** | React 19 + Vite (Production Optimized). Sub-1s load, Dark Mode, 3D Hero. |
@@ -33,11 +33,11 @@ The VAMS project is currently in the **contracts-complete & Pre-Testnet** phase 
 | :--- | :--- | :--- | :--- |
 | **$VAMS Token Contract** | **100%** | ✅ **COMPLETE** | ERC-20 + Burnable + Permit + Votes + Anti-Whale implemented. |
 | **Staking & Vesting** | **100%** | ✅ **COMPLETE** | VAMSStaking (Tiered 6-12% APY) + VAMSVesting (7 Schedules) implemented. |
-| **Smart Contract Tests** | **100%** | ✅ **COMPLETE** | 342 Foundry tests passing (Unit + Integration + Fuzz). |
+| **Smart Contract Tests** | **100%** | ✅ **COMPLETE** | 375 Foundry tests passing (Unit + Integration + Fuzz). |
+| **Testnet Deployment** | **Pending** | 🔴 **URGENT** | Deploy V2 contracts to Polygon Amoy (V1 deprecated). |
 | **Real Infrastructure** | **80%** | 🟩 **HIGH** | SDKs + Storage Clients (Arweave/Kwil) integrated. |
 | **Polygon CDK Integration** | **0%** | 🟧 **HIGH** | Deploy VAMS L3 Validium stack (AggLayer). |
 | **Decentralized Storage** | **80%** | 🟩 **MEDIUM** | Arweave/Kwil clients implemented in `neuron/storage/`. |
-| **Testnet Deployment** | **100%** | ✅ **COMPLETE** | 8 contracts deployed to Polygon Amoy (see `CONTRACTS.md`). |
 
 ---
 
@@ -82,22 +82,22 @@ This roadmap moves the project from "Simulation" to "Live Testnet" in approximat
 
 ---
 
-### Phase 2: Polygon Amoy Testnet Deployment
-**Timeline:** Weeks 9-12 (March 2026)
-**Goal:** Deploy VAMS Protocol to Polygon Amoy and establish monitoring.
+### Phase 2: Polygon Amoy Testnet Deployment (V2 Upgrade)
+**Timeline:** Weeks 9-12 (Current Focus)
+**Goal:** Deploy V2 Protocol to Polygon Amoy and establish monitoring.
 
 - [x] **Week 9: Infrastructure & Environment**
     - [x] Configure Alchemy/Infura RPCs for Amoy
     - [ ] Setup Gnosis Safe for Team Multisig (Amoy)
     - [x] Generate deployment artifacts and verify deterministic addresses
-- [x] **Week 10: Contract Deployment** *(Completed 2026-02-07)*
-    - [x] Deploy `VAMSToken` & `VAMSVesting`
-    - [x] Deploy `VAMSTimelock` & `VAMSStaking`
-    - [x] Deploy `VAMSAgentRegistry` & X402 Economic Layer
-    - [ ] Transfer ownership to Timelock/Multisig
-- [x] **Week 11: Verification & Explorer** *(Completed 2026-02-07)*
-    - [x] Verify all contracts on PolygonScan (Amoy)
-    - [x] Publish contract addresses to `CONTRACTS.md`
+- [ ] **Week 10: V2 Redeployment** *(Pending)*
+    - [ ] Deploy `VAMSToken`, `VAMSVesting`, `VAMSStaking` (V2)
+    - [ ] Deploy `VAMSGovernor` & `VAMSTimelock` (DAO Active)
+    - [ ] Deploy `VAMSAgentRegistry` & `VAMSFeeCollector`
+    - [ ] Transfer ownership to Timelock
+- [ ] **Week 11: Verification & Explorer**
+    - [ ] Verify all contracts on PolygonScan (Amoy)
+    - [ ] Publish contract addresses to `CONTRACTS.md`
     - [ ] Setup Tenderly simulation environment
 - [ ] **Week 12: Protocol Configuration**
     - [ ] Initialize staking pools
@@ -195,7 +195,7 @@ This roadmap moves the project from "Simulation" to "Live Testnet" in approximat
 - 8 contracts deployed to Polygon Amoy (see `contracts/CONTRACTS.md`)
 - All contracts verified on PolygonScan
 - First agent node registered: `vams_e7d2...`
-- Genesis Signal published: `GENESIS_SIGNAL.md`
+
 
 ✅ **Test Suite: 375 tests passing** (Unit + Integration + Fuzz + Governance)
 

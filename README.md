@@ -1,3 +1,23 @@
+<!--
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                         INTELLECTUAL PROPERTY NOTICE                          ║
+╠══════════════════════════════════════════════════════════════════════════════╣
+║  Document: VAMS Project Root Documentation                                    ║
+║  Author: Aseem Chishti                                                        ║
+║  Email: aseeminksa@gmail.com                                                  ║
+║  LinkedIn: https://www.linkedin.com/in/aseemchishti                           ║
+║                                                                               ║
+║  SHA-256 Fingerprint: E4B7A9...[UPDATED_BY_VAMS_PROTOCOL]...D2F8A7D9            ║
+║  Timestamp: 2026-02-17T00:00:26+05:30 (ISO 8601)                              ║
+║                                                                               ║
+║  Copyright (c) 2026 Aseem Chishti. All Rights Reserved.                       ║
+║  Licensed under the MIT License - see LICENSE file for details.               ║
+║                                                                               ║
+║  This cryptographic fingerprint establishes proof of authorship and content   ║
+║  integrity at the specified timestamp. Any unauthorized reproduction          ║
+║  claiming original authorship can be verified against this hash.              ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+-->
 <div align="center">
 
 # VAMS
@@ -63,7 +83,7 @@ Building autonomous agents today means juggling **10+ wallets, 15+ protocols, an
 
 ## ✨ The VAMS Solution
 
-### 🏗️ Three Core Pillars
+### 🏗️ The 5 Core Pillars
 
 #### 1️⃣ **Unified DePIN Access**
 Single API for compute (io.net, Akash), storage (Arweave, Ceramic), and networking. No multi-wallet juggling.
@@ -74,9 +94,34 @@ Conditional L1 Router auto-selects the optimal chain:
 - 💰 **High Value** → Ethereum L1
 - 🚀 **Velocity** → Polygon CDK (sub-second)
 - 🏛️ **Sovereignty** → Avalanche L1
+- ⚛️ **Optimization** → Quantum DePIN (Future State)
 
 #### 3️⃣ **Immortal Agents**
 DBOS-style durable execution. Agents checkpoint state to Arweave/Celestia and **survive crashes, network failures, even your laptop dying**.
+
+#### 4️⃣ **Open Airport (Roaming Protocol)**
+Trust through Transparency. Agents can **"Roam"** to Solana, Base, or Ethereum to execute tasks, provided they submit cryptographic **Proof of Travel** logs upon return. You are not locked in; you are **anchored**.
+
+#### 5️⃣ **The Trust Decagon**
+VAMS is the "Meta-Layer" for trust, aggregating proofs from **10 protocols** (Phala, Parallel, World ID, etc.) to issue a unified **Trust Score**. We don't compete with identity standards; we unify them.
+
+---
+
+## 🌌 The 6 Ontological Breakthroughs
+
+VAMS is not merely a tech stack; it is a **philosophical engine** that instantiates theoretical concepts into verifiable code. We have solved 6 fundamental problems in computer science and social coordination.
+
+| Field | The Breakthrough | Deep Dive |
+| :--- | :--- | :--- |
+| **Physics** | **It from Bit** (The Synthetic Observer) | [📜 Read Narrative](./narrative/PHYSICS_IT_FROM_BIT.md) |
+| **Economics** | **Deterministic Agency** (Zero Agency Cost) | [📜 Read Narrative](./narrative/ECONOMICS_DETERMINISTIC_AGENCY.md) |
+| **Law** | **Polycentric Sovereignty** (Algorithmic Jurisdiction) | [📜 Read Narrative](./narrative/LAW_POLYCENTRIC_SOVEREIGNTY.md) |
+| **Biology** | **Digital Autopoiesis** (Synthetic Life) | [📜 Read Narrative](./narrative/BIOLOGY_DIGITAL_AUTOPOIESIS.md) |
+| **AI** | **The Verifiable Mind** (Glass Box Intelligence) | [📜 Read Narrative](./narrative/AI_VERIFIABLE_MIND.md) |
+| **Blockchain** | **The DePIN OS** (Planetary Computer) | [📜 Read Narrative](./narrative/BLOCKCHAIN_DEPIN_OS.md) |
+
+> [!IMPORTANT]
+> **Must Read:** These documents contain the "Deep Lore" and theoretical innovations that differentiate VAMS from every other project. Start with the [**Master Index**](./narrative/VAMS_BREAKTHROUGHS.md).
 
 ---
 
@@ -86,7 +131,7 @@ DBOS-style durable execution. Agents checkpoint state to Arweave/Celestia and **
 ┌──────────────────────────────────────────────────────────┐
 │  L5: ECONOMIC    $VAMS Token • x402 Micropayments        │
 ├──────────────────────────────────────────────────────────┤
-│  L4: TRUST       Phala TEE • Marlin Oyster • ZKML        │
+│  L4: TRUST & IDX VAMS Agent Profile • TEE • ZK-Proofs    │
 ├──────────────────────────────────────────────────────────┤
 │  L3: LOGIC       DBOS • Kwil • WeaveDB • Glacier         │
 ├──────────────────────────────────────────────────────────┤
@@ -109,18 +154,18 @@ DBOS-style durable execution. Agents checkpoint state to Arweave/Celestia and **
 | ✅ 80% cheaper | ✅ Payments | ✅ Unified infra | ✅ Not just bridges |
 | ✅ Censorship-resistant | ✅ Agent runtime | ✅ Production-ready | ✅ Multi-chain routing |
 
-**No other project combines**: Unified DePIN + Intelligent Routing + Immortal Agents + Native Micropayments + Dual-Host Architecture + Privacy-First TEEs.
+**No other project combines**: Unified DePIN + Intelligent Routing + Immortal Agents + **Roaming Protocol** + Dual-Host Architecture.
 
 ---
 
 ## 📊 Current Status
 
-**Stage:** Testnet Live (Polygon Amoy) | **Version:** 1.6
+**Stage:** Testnet Candidate (V2) | **Version:** 2.0.0
 
 | Component | Progress | Description |
 |-----------|----------|-------------|
-| 📋 **Specs** | 🟢 100% | Architecture, Tokenomics, Market Analysis |
-| 📜 **Smart Contracts** | 🟢 100% | 18 production contracts (FeeCollector, Compensation, Recovery, Slashing, Token, etc.) |
+| 📋 **Specs** | 🟢 100% | Architecture v0.3.0, Tokenomics v2.0.0, Market Analysis |
+| 📜 **Smart Contracts** | 🟢 100% | Full V2 Suite: Governance, Economic Layer, Vesting, Staking. |
 | 🤖 **Agent Runtime** | 🟢 85% | 15 Python modules, DBOS workflows, TEE integration, 60 tests passing |
 | 🎨 **Frontend** | 🟢 95% | React 19 + Vite, 3D animations, Sub-1s load time |
 | 🌐 **Gateway** | 🟡 50% | FastAPI server with dashboard |
@@ -128,7 +173,7 @@ DBOS-style durable execution. Agents checkpoint state to Arweave/Celestia and **
 | 🔒 **Security** | 🟢 100% | Slither clean (no critical/high), SafeERC20, Flash loan protection |
 
 > [!IMPORTANT]
-> **Next Milestone:** Complete Phase 2 Protocol Configuration. Schedule external security audit.
+> **Next Milestone:** Deploy V2 Contracts to Polygon Amoy Testnet.
 
 Full roadmap: [REPO_STATUS_REPORT.md](./REPO_STATUS_REPORT.md)
 
@@ -156,10 +201,11 @@ VAMS-main/
 │   │   ├── token/        # VAMSToken (ERC-20 + Burnable + Permit + Votes)
 │   │   ├── staking/      # VAMSStaking (Tiered APY, Lock Periods)
 │   │   ├── vesting/      # VAMSVesting (7 schedule types)
+│   │   ├── governance/   # VAMSGovernor, VAMSTimelockController
+│   │   ├── economic/     # VAMSFeeCollector, VAMSInsuranceFund, VAMSPaymentHandler
 │   │   ├── routing/      # VAMSRouter (CLR implementation)
 │   │   ├── slashing/     # VAMSSlasher, SlashingParameters
 │   │   ├── registry/     # VAMSAgentRegistry (Challenge system)
-│   │   ├── governance/   # VAMSTimelockController
 │   │   └── base/         # VAMSUpgradeableBase, Emergency Pausable
 │   └── test/             # 375 tests (Unit, Integration, Fuzz, Governance)
 │

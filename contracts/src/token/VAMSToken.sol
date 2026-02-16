@@ -44,11 +44,8 @@ contract VAMSToken is
     /// @notice Role required to pause/unpause transfers
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
 
-    /// @notice Total supply: 1 billion tokens with 18 decimals
-    uint256 public constant TOTAL_SUPPLY = 1_000_000_000 * 1e18;
-
-    /// @notice TGE circulating supply: 150 million tokens
-    uint256 public constant INITIAL_SUPPLY = 150_000_000 * 1e18;
+    /// @notice Initial supply: 1 billion tokens with 18 decimals
+    uint256 public constant INITIAL_SUPPLY = 1_000_000_000 * 1e18;
 
     /// @notice Six months in seconds (anti-whale duration)
     uint256 public constant SIX_MONTHS = 180 days;
@@ -105,6 +102,7 @@ contract VAMSToken is
         // Grant roles
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
         _grantRole(PAUSER_ROLE, admin);
+        _grantRole(MINTER_ROLE, admin); // Admin can mint initial supply adjustment if needed
 
         // Set anti-whale parameters
         antiWhaleEnabled = true;
@@ -130,10 +128,7 @@ contract VAMSToken is
         if (to == address(0)) revert ZeroAddress();
         if (amount == 0) revert ZeroAmount();
         
-        // Ensure we don't exceed total supply
-        if (totalSupply() + amount > TOTAL_SUPPLY) {
-            revert ExceedsMaxWallet(to, totalSupply() + amount, TOTAL_SUPPLY);
-        }
+        // No hard cap check - inflationary model managed by Staking/Governance
         
         _mint(to, amount);
     }
