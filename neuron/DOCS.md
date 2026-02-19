@@ -61,7 +61,7 @@ python neuron.py --dry-run --full-health
 
 ---
 
-## 4-Layer Architecture
+## Architecture: 4-Layer Stack + Execution Chains
 
 ### Layer 1: Data Availability
 
@@ -97,6 +97,46 @@ python neuron.py --dry-run --full-health
 | **Phala** | Intel SGX | Phat Contracts, private compute |
 | **Marlin** | AWS Nitro | Oyster TEE coprocessors |
 | **Automata** | Multi-Prover | 1RPC privacy relay |
+
+### Layer 5: Execution Chains (CLR Routing Targets)
+
+> These are **not** host domains — VAMS agents are not deployed here. The CLR routes signed transactions to these chains when specific constraints are required.
+
+| Chain | Type | Privacy | Finality | Bridge | Best For |
+|-------|------|---------|----------|--------|----------|
+| **Cardano** | eUTXO (Ouroboros) | Public | ~12 min | Rosen Bridge | Formally verified settlement |
+| **Midnight** | Cardano Sidechain | ZK-SD | ~1 min | Hyperlane (ZK-ISM) | Compliance-grade privacy |
+
+### Chain Oracle Layer
+
+The oracle sits between agents and the CLR, fetching **live metrics** from all 10 execution chains:
+
+```python
+from neuron.chain_oracle import OracleManager
+
+oracle = OracleManager()
+
+# Get all chain metrics (TTL-cached, 30s default)
+metrics = oracle.get_all_metrics()
+for name, m in metrics.items():
+    print(f"{name}: gas={m.gas_price_gwei:.4f} gwei, block #{m.last_block:,}")
+
+# Single chain lookup
+eth = oracle.get_metrics("Ethereum")
+
+# Force refresh (ignores cache)
+oracle.refresh()
+
+# Print formatted table
+oracle.print_metrics_table()
+```
+
+**Standalone:**
+```bash
+python -m neuron.chain_oracle    # Prints live metrics for all 10 chains
+```
+
+**Metrics returned per chain:** `gas_price_gwei`, `block_time_ms`, `last_block`, `congestion_pct`, `finality_ms`, `stale` flag
 
 ---
 
@@ -165,6 +205,28 @@ python neuron.py --demo-workflow
 | `EIGENDA_RPC` | https://holesky.drpc.org |
 | `NEAR_RPC` | https://rpc.testnet.near.org |
 | `AVAIL_RPC` | https://avail-turing.api.onfinality.io/public |
+
+### Execution Chain Endpoints
+
+| Variable | Default |
+|----------|---------|
+| `CARDANO_RPC` | https://cardano-mainnet.blockfrost.io/api/v0 |
+| `MIDNIGHT_RPC` | https://midnight.network/api/v0 |
+
+### Chain Oracle
+
+| Variable | Default |
+|----------|---------|
+| `ORACLE_CACHE_TTL` | 30 (seconds) |
+| `ETHEREUM_RPC` | https://ethereum-rpc.publicnode.com |
+| `AVALANCHE_RPC` | https://api.avax.network/ext/bc/C/rpc |
+| `SOLANA_RPC` | https://api.mainnet-beta.solana.com |
+| `POLYGON_RPC` | https://polygon-rpc.com |
+| `ARBITRUM_RPC` | https://arb1.arbitrum.io/rpc |
+| `BASE_RPC` | https://mainnet.base.org |
+| `PHALA_RPC` | https://phala.api.onfinality.io/public |
+| `OASIS_RPC` | https://emerald.oasis.io |
+| `BLOCKFROST_API_KEY` | (empty — required for Cardano live data) |
 
 ### Example
 ```bash

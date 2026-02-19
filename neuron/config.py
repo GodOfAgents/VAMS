@@ -140,6 +140,85 @@ TRUST_PROVIDERS = {
 }
 
 # =============================================================================
+# LAYER 5: EXECUTION CHAINS (CLR Routing Targets)
+# =============================================================================
+# These are NOT host domains — VAMS agents are not deployed here.
+# The CLR routes signed transactions to these chains when specific
+# constraints (formal verification, compliance privacy) are required.
+
+EXECUTION_CHAINS = {
+    "cardano": {
+        "rpc": os.getenv("CARDANO_RPC", "https://cardano-mainnet.blockfrost.io/api/v0"),
+        "chain_type": "eUTXO",
+        "consensus": "Ouroboros Praos",
+        "finality_ms": 720_000,  # ~12 min (36 slots)
+        "formally_verified": True,
+        "privacy": "public",
+        "bridge": "Rosen Bridge",
+        "description": "Formally verified settlement - eUTXO deterministic execution"
+    },
+    "midnight": {
+        "rpc": os.getenv("MIDNIGHT_RPC", "https://midnight.network/api/v0"),
+        "chain_type": "Cardano Sidechain",
+        "consensus": "Ouroboros (epoch-optimized)",
+        "finality_ms": 60_000,   # ~1 min
+        "formally_verified": True,
+        "privacy": "ZK-SD",      # Zero-Knowledge with Selective Disclosure
+        "bridge": "Hyperlane (ZK-ISM)",
+        "description": "Compliance-grade privacy - ZK with selective disclosure"
+    }
+}
+
+# =============================================================================
+# CHAIN ORACLE CONFIGURATION
+# =============================================================================
+# TTL for cached chain metrics (seconds). Set higher to reduce RPC calls.
+
+ORACLE_CACHE_TTL = int(os.getenv("ORACLE_CACHE_TTL", "30"))
+
+# Per-chain RPC endpoints (used by chain_oracle.py)
+CHAIN_RPC = {
+    "ethereum": os.getenv("ETHEREUM_RPC", "https://ethereum-rpc.publicnode.com"),
+    "avalanche": os.getenv("AVALANCHE_RPC", "https://api.avax.network/ext/bc/C/rpc"),
+    "solana": os.getenv("SOLANA_RPC", "https://api.mainnet-beta.solana.com"),
+    "polygon": os.getenv("POLYGON_RPC", "https://polygon-rpc.com"),
+    "arbitrum": os.getenv("ARBITRUM_RPC", "https://arb1.arbitrum.io/rpc"),
+    "base": os.getenv("BASE_RPC", "https://mainnet.base.org"),
+    "phala": os.getenv("PHALA_RPC", "https://phala.api.onfinality.io/public"),
+    "oasis": os.getenv("OASIS_RPC", "https://emerald.oasis.io"),
+    "cardano": os.getenv("CARDANO_RPC", "https://cardano-mainnet.blockfrost.io/api/v0"),
+    "midnight": os.getenv("MIDNIGHT_RPC", "https://midnight.network/api/v0"),
+}
+
+# =============================================================================
+# CLR ROUTER CONFIGURATION
+# =============================================================================
+# Default safety thresholds for the "Hard Filter" stage
+CLR_MIN_SECURITY_SCORE = float(os.getenv("CLR_MIN_SECURITY", "0.5"))
+CLR_MAX_LATENCY_MS = int(os.getenv("CLR_MAX_LATENCY", "60000")) # 1 min default cap
+
+# Entropy-Greedy Tuning (Soft Filter)
+CLR_WEIGHT_LATENCY = float(os.getenv("CLR_WEIGHT_LATENCY", "2.0"))
+CLR_WEIGHT_COST = float(os.getenv("CLR_WEIGHT_COST", "1.0"))
+
+
+# =============================================================================
+# x402 PAYMENT PROTOCOL CONFIGURATION
+# =============================================================================
+PAYMENT_CHANNEL_DURATION = int(os.getenv("PAYMENT_CHANNEL_DURATION", "24")) # Hours
+PAYMENT_MIN_DEPOSIT = float(os.getenv("PAYMENT_MIN_DEPOSIT", "100.0")) # VAMS
+PAYMENT_DEFAULT_FEE = float(os.getenv("PAYMENT_DEFAULT_FEE", "1.0")) # 1 VAMS per service call
+
+# =============================================================================
+# CIRCUIT BREAKER CONFIGURATION (RESILIENCE)
+# =============================================================================
+BREAKER_PRICE_FLOOR = float(os.getenv("BREAKER_PRICE_FLOOR", "0.50")) # USD
+BREAKER_MAX_EXPOSURE = float(os.getenv("BREAKER_MAX_EXPOSURE", "1000.0")) # VAMS
+BREAKER_MAX_CONSECUTIVE_FAILURES = int(os.getenv("BREAKER_MAX_FAILURES", "5"))
+BREAKER_ORACLE_TIMEOUT_MS = int(os.getenv("BREAKER_ORACLE_TIMEOUT", "60000"))
+BREAKER_COOLDOWN_SEC = int(os.getenv("BREAKER_COOLDOWN", "300")) # 5 min auto-reset
+
+# =============================================================================
 # DISPLAY CONFIGURATION
 # =============================================================================
 

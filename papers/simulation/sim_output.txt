@@ -1,0 +1,71 @@
+﻿======================================================================
+  CLR Routing Simulation v2 -- Strict Guardrail Mode
+  (Privacy, Compliance & Sovereignty are hard safety constraints)
+======================================================================
+  Agents: 1000
+  Trials: 10000
+  Chains: 10
+  Seed:   42
+  Jitter: ENABLED (per-trial cost & latency variance)
+======================================================================
+
+-------------------------------------------------------------------------------------
+  TABLE 1: Routing Performance Comparison (Strict Guardrail Mode, 10 chains)
+-------------------------------------------------------------------------------------
+  Strategy           Pareto %  Avg Cost ($)  Avg Lat (ms)  Avg Final (s)  Rejected %
+  ---------------------------------------------------------------------------------
+  Random                17.8%         1.59         7614      103216.8        0.0%
+  Round-Robin           17.8%         1.62         7646      104186.8        0.0%
+  Ethereum-Only          2.5%         8.50        12000         780.0        0.0%
+  CLR (Strict)          51.0%         0.20         4979      119513.9        6.0%
+
+----------------------------------------------------------------------
+  FIGURE 1: Mean Entropy at Each Evaluation Step
+----------------------------------------------------------------------
+    Step j    H (bits)     Samples
+  --------------------------------
+         0       2.047       10000
+         1       1.783       10000
+         2       1.497        8453
+         3       1.453        8014
+         4       1.548        6683
+         5       1.543        6326
+         6       0.000        6121
+
+  Mean evaluations per decision: 4.0
+  Theoretical minimum (log2 10): 3.3
+
+----------------------------------------------------------------------
+  SCALABILITY: Evaluations vs. Number of Chains
+----------------------------------------------------------------------
+  |E| =   4  ->  Mean evaluations: 2.5  (log2: 2.0)
+  |E| =   8  ->  Mean evaluations: 3.5  (log2: 3.0)
+  |E| =  10  ->  Mean evaluations: 4.1  (log2: 3.3)
+  |E| =  16  ->  Mean evaluations: 4.8  (log2: 4.0)
+  |E| =  32  ->  Mean evaluations: 4.8  (log2: 5.0)
+  |E| =  64  ->  Mean evaluations: 4.7  (log2: 6.0)
+
+----------------------------------------------------------------------
+  CLR Chain Selection Distribution (excluding rejections)
+----------------------------------------------------------------------
+  Avalanche     2159 ( 21.6%)  ##########
+  Arbitrum      1855 ( 18.6%)  #########
+  Midnight      1737 ( 17.4%)  ########
+  Solana        1466 ( 14.7%)  #######
+  Cardano        891 (  8.9%)  ####
+  Polygon        649 (  6.5%)  ###
+  Oasis          488 (  4.9%)  ##
+  Phala          150 (  1.5%)  
+
+----------------------------------------------------------------------
+  CLR REJECTION BREAKDOWN (Strict Guardrail)
+----------------------------------------------------------------------
+    516 (  5.2%)  Privacy required but no TEE/ZK chain available
+     89 (  0.9%)  Compliance privacy (ZK-SD) required but unavailable
+  Total rejected: 605 / 10000 (6.0%)
+  -> These transactions require human review or alternative routing.
+
+  Results exported to: C:\Users\aseem\Desktop\VAMS-main\VAMS-main\papers\simulation\results.csv
+======================================================================
+  Simulation complete.
+======================================================================

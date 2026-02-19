@@ -95,8 +95,14 @@ contract MyContract is VAMSCombinedBase {
 }
 ```
 
-## Documentation
+## Integration with Neuron
 
+These contracts are designed to be consumed by the **VAMS Neuron** client (`neuron/`).
+- **Registration**: Agents use `VAMSAgentRegistry.register()`
+- **Routing**: `neuron/clr_router.py` mirrors `VAMSRouter.sol` logic off-chain for pre-validation.
+- **Payments**: `neuron/payments/x402.py` interacts with `VAMSPaymentHandler`.
+
+## Documentation
 - [CONTRACTS.md](./CONTRACTS.md) - Full contract architecture
 - [SECURITY.md](../.github/SECURITY.md) - Security policy
 - [slither_report.txt](./slither_report.txt) - Static analysis results

@@ -1751,46 +1751,59 @@ struct VAMSTransactionMetadata {
     uint256 maxLatencyMs;         // Maximum acceptable latency
     bool requiresPrivacy;         // Trigger for TEE routing
     string requiredFinality;      // "probabilistic" or "deterministic"
-    // NEW: Sovereignty fields for Avalanche L1 routing
+    // Sovereignty fields for Avalanche L1 routing
     bool requiresCustomGas;       // Agent needs custom gas token
     bool requiresIsolatedThroughput; // Agent needs dedicated blockspace
     string validatorRequirements; // "permissionless" or "permissioned"
     bool requiresCompliance;      // Evergreen/institutional mode
+    // v2.2: Cardano/Midnight fields (CLR v2)
+    bool requiresCompliancePrivacy; // ZK-SD selective disclosure (→ Midnight)
+    bool requiresFormalVerification; // Ouroboros-class formal proofs (→ Cardano)
+    uint256 maxFinalityMs;        // Max economic irreversibility time (0 = don't care)
 }
 ```
 
-### 14.2 Dynamic Routing Decision Tree (v2.1)
+### 14.2 Dynamic Routing Decision Tree (v2.2)
 
 ```mermaid
 graph TD
-    A[Transaction Intake] --> B{Privacy Check};
-    B -- Yes --> C[Route to TEE];
-    B -- No --> D{Security Check: valueUSD > $10K?};
-    D -- Yes --> E[Route to Ethereum via AggLayer];
-    D -- No --> F{Sovereignty Check};
-    F -- Yes --> G{Compliance Required?};
-    G -- Yes --> H[Route to Avalanche Evergreen L1];
-    G -- No --> I[Route to Avalanche Elastic L1];
-    F -- No --> J{Velocity Check: latency < 1s?};
-    J -- Yes --> K{EVM Compatible?};
-    K -- Yes --> L[Route to SEI];
-    K -- No --> M[Route to Solana via Hyperlane];
-    J -- No --> N[Route to VAMS L3];
+    A[Transaction Intake] --> B{Compliance Privacy?};
+    B -- Yes --> B1[Route to Midnight - ZK-SD];
+    B -- No --> C{Privacy Check};
+    C -- Yes --> D[Route to TEE];
+    C -- No --> E{Security Check: valueUSD > $10K?};
+    E -- Yes --> F[Route to Ethereum via AggLayer];
+    E -- No --> G{Sovereignty Check};
+    G -- Yes --> H{Compliance Required?};
+    H -- Yes --> I[Route to Avalanche Evergreen L1];
+    H -- No --> J[Route to Avalanche Elastic L1];
+    G -- No --> K{Formal Verification?};
+    K -- Yes --> K1[Route to Cardano - Ouroboros];
+    K -- No --> L{Velocity Check: latency < 1s?};
+    L -- Yes --> M{EVM Compatible?};
+    M -- Yes --> N[Route to SEI];
+    M -- No --> O[Route to Solana via Hyperlane];
+    L -- No --> P[Route to VAMS L3];
 ```
 
-### 14.3 Routing Implementation (v2.1 with Sovereignty Check)
+### 14.3 Routing Implementation (v2.2 with Cardano/Midnight)
 
 ```python
-class CLRouter_V3:  # Updated for Dual-Host Architecture
+class CLRouter_V3:  # Updated for Dual-Host + Cardano/Midnight
     """
-    VAMS Dual-Host Router (v3.0):
+    VAMS Dual-Host Router (v3.1):
     - PRIMARY: Polygon CDK Validium (default for most agents)
     - SECONDARY: Avalanche Elastic L1 (sovereignty/custom VM needs)
+    - ROUTING TARGETS: Cardano (formal verification), Midnight (ZK-SD)
     """
     SECURITY_THRESHOLD = 10_000  # USD
     VELOCITY_THRESHOLD = 1_000   # ms
     
     async def route(self, tx: VAMSTransaction) -> RoutingDecision:
+        # Priority 0: Compliance Privacy → Midnight (Hard Guardrail)
+        if tx.metadata.requires_compliance_privacy:
+            return await self._route_to_midnight(tx)
+        
         # Priority 1: Privacy → TEE
         if tx.metadata.requires_privacy:
             return await self._route_to_tee(tx)
@@ -1800,23 +1813,22 @@ class CLRouter_V3:  # Updated for Dual-Host Architecture
             return await self._route_to_ethereum_via_agglayer(tx)
         
         # Priority 3: Sovereignty → Avalanche L1 (Secondary)
-        # Only route to Avalanche if agent explicitly needs:
-        # - Custom VM (HyperSDK), or
-        # - Sovereign validator set, or
-        # - Enterprise compliance (Evergreen)
         if tx.metadata.requires_custom_vm or tx.metadata.requires_sovereignty:
             if tx.metadata.requires_compliance:
                 return await self._route_to_avalanche_evergreen(tx)
             return await self._route_to_avalanche_elastic(tx)
         
-        # Priority 4: Velocity
+        # Priority 4: Formal Verification (Soft Preference → Cardano)
+        if tx.metadata.requires_formal_verification:
+            return await self._route_to_cardano(tx)
+        
+        # Priority 5: Velocity
         if tx.metadata.max_latency_ms < self.VELOCITY_THRESHOLD:
             if self._is_evm_payload(tx.payload):
                 return await self._route_to_sei(tx)
             return await self._route_to_solana(tx)
         
         # DEFAULT: Polygon CDK Validium (Primary VAMS L3)
-        # Most agents land here - unified liquidity via AggLayer
         return await self._route_to_polygon_cdk(tx)
 ```
 
@@ -1979,6 +1991,62 @@ HyperSDK enables purpose-built Virtual Machines optimized for agent workloads:
 
 ---
 
+## 15C. Cardano Ecosystem (Routing Targets)
+
+> [!IMPORTANT]
+> Cardano and Midnight are **CLR routing targets**, not host domains. VAMS agents are not deployed on these chains; the CLR routes signed transactions to them when formal verification or compliance-grade privacy is required.
+
+### 15C.1 Cardano (eUTXO + Formal Verification)
+
+Cardano provides a unique architectural vector: **deterministic execution via extended UTXO (eUTXO)** and **formally verified consensus (Ouroboros Praos)**.
+
+| Capability | Value for VAMS |
+|------------|----------------|
+| **eUTXO Model** | Deterministic fee calculation — agents know exact cost before submission |
+| **Ouroboros Praos** | Mathematically proven security via Coq/Isabelle formal proofs |
+| **Plutus V3** | On-chain smart contracts with formal verification guarantees |
+| **Native Assets** | Multi-asset ledger without smart contract overhead |
+| **12-min Finality** | High-security settlement for irreversible operations |
+
+**When to Route to Cardano:**
+- Agent requires formally verified settlement guarantees
+- High-security, low-frequency transactions where finality > speed
+- Regulatory environments requiring provably correct consensus
+
+### 15C.2 Midnight (ZK-SD: Compliance-Grade Privacy)
+
+Midnight is a Cardano sidechain providing **Zero-Knowledge proofs with Selective Disclosure (ZK-SD)** — the only chain in the VAMS routing set offering compliance-grade privacy.
+
+| Capability | Value for VAMS |
+|------------|----------------|
+| **ZK-SD** | Prove compliance without revealing underlying data |
+| **Selective Disclosure** | Reveal only what regulators require, nothing more |
+| **Cardano Security** | Inherits Ouroboros finality via sidechain bridge |
+| **~1 min Finality** | Faster than Cardano mainnet (epoch-optimized) |
+
+**When to Route to Midnight:**
+- Agent requires regulatory-compliant transactions (MiCA, GDPR, OFAC)
+- Institutional agents needing provable KYC/AML without data exposure
+- Healthcare, legal, or financial agents with privacy mandates
+
+### 15C.3 Bridge Connectivity
+
+| Route | Transport | Latency | Security Model |
+|-------|-----------|---------|----------------|
+| VAMS L3 → Cardano | Rosen Bridge | ~2min | Ouroboros finality + bridge validators |
+| VAMS L3 → Midnight | Hyperlane (ZK-ISM) | ~1min | ZK-SD proofs + ISM verification |
+
+### 15C.4 Integration with VAMS Layers
+
+| VAMS Layer | Cardano/Midnight Component | Value Proposition |
+|------------|---------------------------|-------------------|
+| Layer 1: Foundational | eUTXO deterministic fees | Predictable cost for agent budgeting |
+| Layer 4: Trust | Ouroboros formal proofs | Mathematically verified settlement |
+| Layer 4: Trust | ZK-SD (Midnight) | Compliance without data exposure |
+| Layer 5: Economic | Native multi-asset | Efficient token transfers |
+
+---
+
 ## 16. Cross-Chain Infrastructure
 
 ### 16.1 Transport Matrix
@@ -1992,6 +2060,8 @@ HyperSDK enables purpose-built Virtual Machines optimized for agent workloads:
 | VAMS L3 | Cosmos | Union Labs | ~1s | IBC |
 | VAMS L3 | Avalanche C-Chain | Hyperlane | ~800ms | ISM verification |
 | VAMS L3 | Avalanche L1s (Secondary) | AWM/Teleporter | ~250ms | BLS multi-sig |
+| VAMS L3 | Cardano | Rosen Bridge | ~2min | Ouroboros finality |
+| VAMS L3 | Midnight | Hyperlane (ZK-ISM) | ~1min | ZK-SD proofs |
 | Avalanche L1 | Avalanche L1 | AWM | ~250ms | P-Chain validation |
 
 ### 16.2 Polygon AggLayer (Native Integration)

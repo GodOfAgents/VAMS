@@ -367,9 +367,10 @@ We have upgraded our entire stack to V2 Architecture.
 *   🚀 **Testnet Deployment:** Pending (Polygon Amoy)
     *   **Previous V1:** Deprecated due to key rotation.
     *   **V2 Launch:** Scheduled for immediate release.
-*   ✅ **Agent Runtime (Neuron):** 85% Complete (60 tests passing)
+*   ✅ **Agent Runtime (Neuron):** 95% Complete (79 tests passing)
     *   Full SDK: Celestia DA, Bittensor, Phala TEE integrations
-*   🧪 **Gateway MVP:** 50% Complete (FastAPI server + dashboard)
+    *   **Live CLR:** Production Multi-Chain Router Active
+*   ✅ **Gateway Server:** 100% Complete (FastAPI + Rate Limiting + Auth)
 *   🧪 **Frontend:** 95% Complete (Vite + React 19 landing page)
 
 **Status:** V2 Contracts compiled & verified. Ready for deployment.

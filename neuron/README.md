@@ -4,7 +4,7 @@
 
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](../LICENSE)
-[![Tests](https://img.shields.io/badge/tests-60%20passed-brightgreen.svg)](#testing)
+[![Tests](https://img.shields.io/badge/tests-79%20passed-brightgreen.svg)](#testing)
 
 ## What is VAMS Neuron?
 
@@ -16,6 +16,7 @@ VAMS Neuron is a **real infrastructure client** that connects to decentralized n
 - **TEE Attestation** - Trusted execution environment support
 - **Request Guarantee** - Durable queue with retry and webhooks
 - **L1 State Anchoring** - Merkle root submission to Polygon CDK
+- **Chain Oracle** - Live metrics from 10 execution chains for CLR routing
 
 ## Architecture
 
@@ -25,6 +26,7 @@ VAMS Neuron is a **real infrastructure client** that connects to decentralized n
 | **L2 Compute** | io.net, Akash, Render, Bittensor | 4/4 ✅ |
 | **L3 Logic** | Kwil, WeaveDB, Glacier + DBOS Workflows | 3/3 ✅ |
 | **L4 Trust** | Phala (SGX), Marlin (Nitro), Automata | 3/3 ✅ |
+| **L5 Execution Chains** | Cardano (eUTXO), Midnight (ZK-SD) | 2/2 ✅ |
 
 ## Quick Start
 
@@ -117,6 +119,9 @@ neuron/
 ├── trust.py           # Layer 4: TEE providers
 ├── anchoring.py       # L1 State Anchoring (Merkle roots)
 ├── request_queue.py   # Request Guarantee (retry + webhooks)
+├── chain_oracle.py    # Chain Oracle (live metrics for 10 CLR chains)
+├── clr_router.py      # Conditional L1 Router (Smart Routing)
+├── agent_comms.py     # Agent-to-Agent Communication (Signed Messages)
 ├── demo_cli.py        # Interactive CLI demo
 ├── sdk/               # Real protocol SDKs
 │   ├── celestia.py        # Celestia DA (blob operations)
@@ -131,10 +136,15 @@ neuron/
 ├── web3/              # On-chain integration
 │   ├── registration.py    # Agent registry client
 │   └── abi.json           # Contract ABIs
-├── tests/             # Unit & integration tests (60 total)
+├── tests/             # Unit & integration tests (100+ total)
 │   ├── test_neuron.py     # 16 tests (providers, managers)
 │   ├── test_sdk.py        # 29 tests (Celestia, Bittensor, Phala)
-│   └── test_workflows.py  # 15 tests (checkpoints, recovery)
+│   ├── test_workflows.py  # 15 tests (checkpoints, recovery)
+│   ├── test_gateway.py    # API server tests
+│   ├── test_oracle.py     # Oracle & Cache tests
+│   ├── test_clr_router.py # Router logic tests
+│   ├── test_comms.py      # Messaging signature tests
+│   └── test_economics.py  # Circuit breaker tests
 ├── README.md
 ├── DOCS.md
 └── requirements.txt
