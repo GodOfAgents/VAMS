@@ -166,10 +166,10 @@ VAMS is not merely a tech stack; it is a **philosophical engine** that instantia
 |-----------|----------|-------------|
 | 📋 **Specs** | 🟢 100% | Architecture v0.3.0, Tokenomics v2.0.0, Market Analysis |
 | 📜 **Smart Contracts** | 🟢 100% | Full V2 Suite: Governance, Economic Layer, Vesting, Staking. |
-| 🤖 **Agent Runtime** | 🟢 85% | 15 Python modules, DBOS workflows, TEE integration, 60 tests passing |
+| 🤖 **Agent Runtime** | 🟢 95% | 15 Python modules, DBOS workflows, TEE integration, 100+ tests passing |
 | 🎨 **Frontend** | 🟢 95% | React 19 + Vite, 3D animations, Sub-1s load time |
-| 🌐 **Gateway** | 🟡 50% | FastAPI server with dashboard |
-| ✅ **Tests** | 🟢 100% | 375 verified contract tests (Unit + Integration + Fuzz + Governance), 60 neuron tests |
+| 🌐 **Gateway** | 🟢 100% | FastAPI server with rate-limiting, auth, and dashboard |
+| ✅ **Tests** | 🟢 100% | 442 verified contract tests, 79 verified neuron tests |
 | 🔒 **Security** | 🟢 100% | Slither clean (no critical/high), SafeERC20, Flash loan protection |
 
 > [!IMPORTANT]

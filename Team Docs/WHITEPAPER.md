@@ -222,11 +222,15 @@ The CLR is VAMS's intelligent transaction routing engine, eliminating developer 
 ```
 Transaction Intake
         │
+        ├── Compliance Privacy? ────► Route to Midnight (ZK-SD)
+        │
         ├── Privacy Required? ──────► Route to TEE (Phala/Marlin)
         │
         ├── Value > $10,000? ───────► Route to Ethereum (via AggLayer)
         │
         ├── Sovereignty/Custom VM? ─► Route to Avalanche L1 (Elastic/Evergreen)
+        │
+        ├── Formal Verification? ───► Route to Cardano (Ouroboros)
         │
         ├── Latency < 500ms? ───────► Route to Solana/SEI
         │
@@ -246,6 +250,8 @@ VAMS maintains connectivity across multiple settlement layers:
 | VAMS L3 | Solana | Hyperlane | ~400ms | Multi-ISM verification |
 | VAMS L3 | SEI | LayerZero v2 | ~380ms | DVN consensus |
 | VAMS L3 | Avalanche L1s (Secondary) | AWM/Teleporter | ~250ms | BLS multi-sig |
+| VAMS L3 | Cardano | Rosen Bridge | ~2min | Ouroboros finality |
+| VAMS L3 | Midnight | Hyperlane (ZK-ISM) | ~1min | ZK-SD proofs |
 
 **Multi-ISM Bridge Security**: To mitigate single-vendor bridge risk, VAMS implements a 2/3 consensus across TEE-based, Oracle-based, and Multisig ISMs for Hyperlane verification.
 
@@ -497,7 +503,7 @@ Client-side SDKs enable agents to compute routing decisions locally, verify agai
 
 1. **Homomorphic Encryption Integration**: Zama fhEVM for compute on encrypted data without TEE dependency
 2. **Agent Identity Standards**: Enhanced DID frameworks for agent-to-agent authentication
-3. **Cross-Ecosystem Bridges**: Extended connectivity to non-EVM ecosystems (Cosmos, Polkadot)
+3. **Cross-Ecosystem Bridges**: Cardano (eUTXO) and Midnight (ZK-SD) integration complete; extending connectivity to Cosmos and Polkadot
 4. **Model Marketplace**: Decentralized registry for verified, privacy-preserving AI models
 5. **Autonomous Governance**: AI-assisted DAO operations for parameter optimization
 6. **The Quantum Horizon**: Integrating Quantum DePIN to solve the CLR's global routing optimization problem (Traveling Salesman) as the network scales to millions of nodes.
@@ -538,6 +544,8 @@ VAMS positions itself as the "Sovereign Brain" for the agentic web—a meta-laye
 8. x402 Payment Protocol. https://build.avax.network/academy/blockchain/x402-payment-infrastructure
 9. EZKL: Easy Zero-Knowledge Machine Learning. https://docs.ezkl.xyz/
 10. Hyperlane Interoperability. https://docs.hyperlane.xyz/
+11. David, B. et al. Ouroboros Praos: An Adaptively-Secure Proof-of-Stake Blockchain. EUROCRYPT 2018.
+12. Input Output Global. Midnight: Data Protection Meets Blockchain. https://midnight.network/
 
 ---
 

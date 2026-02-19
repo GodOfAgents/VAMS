@@ -1,5 +1,6 @@
 import logging
 import time
+import os
 from typing import Dict, Any, Optional
 
 # web3 import - handle case where we have a local web3 folder
@@ -8,144 +9,160 @@ try:
     web3_module = importlib.import_module("web3")
     Web3 = web3_module.Web3
 except (ImportError, AttributeError):
-    Web3 = None  # Fallback: run without on-chain features
+    Web3 = None
+
+from payments.payment_channel import PaymentChannelManager
+from payments.delivery_proof import create_proof
+from payments.batch_settlement import Payment
 
 logger = logging.getLogger("VAMSx402")
 
 class X402Client:
     """
     Economic Layer (Layer 5) - x402 Payment Protocol Client.
-    Handles HTTP 402 responses and generates payment channel signatures.
+    Handles HTTP 402 responses, channel management, and atomic payments.
     """
     
-    def __init__(self, private_key: Optional[str] = None, rpc_url: Optional[str] = None):
+    def __init__(self, private_key: Optional[str] = None, rpc_url: Optional[str] = None, circuit_breaker: Optional[Any] = None):
         self.private_key = private_key
         self.rpc_url = rpc_url or "https://polygon-rpc.com"
+        self.breaker = circuit_breaker
         
-        # Initialize Web3 if available
-        if Web3 is not None:
+        # Initialize Managers
+        self.channel_manager = PaymentChannelManager()
+        
+        # Initialize Web3
+        if Web3 is not None and rpc_url:
             try:
-                self.w3 = Web3(Web3.HTTPProvider(self.rpc_url)) if rpc_url else Web3()
-            except Exception:
+                self.w3 = Web3(Web3.HTTPProvider(self.rpc_url))
+                if self.private_key:
+                    self.account = self.w3.eth.account.from_key(self.private_key)
+                    self.address = self.account.address
+                else:
+                    self.address = "0x0000000000000000000000000000000000000000"
+            except Exception as e:
+                logger.error(f"Web3 init failed: {e}")
                 self.w3 = None
         else:
             self.w3 = None
-            
-        # Mock balance for PoC
-        self.balance = 1000.0
-        self.channels: Dict[str, Dict[str, Any]] = {}  # channel_id -> state
-        logger.info(f"X402 Client initialized (RPC: {self.rpc_url[:30]}..., Web3: {'Yes' if self.w3 else 'No'})")
+            self.address = "0xMockAgentAddress"
+
+        logger.info(f"X402 Client initialized (Address: {self.address})")
 
     def open_channel(self, counterparty: str, deposit: float, duration_hours: int = 24) -> Optional[str]:
         """
         Open a payment channel with a counterparty.
-        Returns channel_id on success.
         """
-        if deposit > self.balance:
-            logger.error(f"Insufficient balance to open channel: {deposit} > {self.balance}")
+        # Circuit Breaker Check
+        if self.breaker and not self.breaker.is_active():
+            logger.error("❌ Circuit Breaker prohibits new channels")
             return None
-            
-        channel_id = f"ch_{counterparty[:8]}_{int(time.time())}"
+
+        # 1. Create local state
+        # Convert float VAMS to uint256 wei (assume 18 decimals)
+        deposit_wei = int(deposit * 10**18)
         
-        self.channels[channel_id] = {
-            "counterparty": counterparty,
-            "deposit": deposit,
-            "spent": 0.0,
-            "opened_at": time.time(),
-            "expires_at": time.time() + (duration_hours * 3600),
-            "state": "open",
-            "nonce": 0
-        }
+        channel_id = self.channel_manager.create_channel(
+            agent=self.address,
+            provider=counterparty,
+            deposit=deposit_wei,
+            duration_hours=duration_hours
+        )
         
-        self.balance -= deposit
-        logger.info(f"Opened channel {channel_id} with {counterparty} (Deposit: {deposit} VAMS)")
+        if self.breaker:
+            self.breaker.update_exposure(deposit)
         
-        # In production: Call on-chain contract to lock funds
-        # self._call_contract("openChannel", counterparty, deposit)
-        
+        logger.info(f"Opened channel {channel_id} with {counterparty} (Cap: {deposit} VAMS)")
         return channel_id
-
-    def close_channel(self, channel_id: str, cooperative: bool = True) -> bool:
-        """
-        Close a payment channel and settle on-chain.
-        cooperative=True means both parties agree on final balance.
-        """
-        if channel_id not in self.channels:
-            logger.error(f"Channel {channel_id} not found")
-            return False
-            
-        channel = self.channels[channel_id]
-        
-        if channel["state"] != "open":
-            logger.warning(f"Channel {channel_id} already {channel['state']}")
-            return False
-        
-        # Calculate refund
-        refund = channel["deposit"] - channel["spent"]
-        self.balance += refund
-        
-        channel["state"] = "closed"
-        channel["closed_at"] = time.time()
-        
-        logger.info(f"Closed channel {channel_id} (Spent: {channel['spent']}, Refund: {refund})")
-        
-        # In production: Submit final state to on-chain contract
-        # self._call_contract("closeChannel", channel_id, channel["spent"], signature)
-        
-        return True
-
-    def get_channel_balance(self, channel_id: str) -> Optional[float]:
-        """Get remaining balance in a channel."""
-        if channel_id not in self.channels:
-            return None
-        channel = self.channels[channel_id]
-        return channel["deposit"] - channel["spent"]
 
     def handle_402(self, response_headers: Dict[str, str], url: str) -> Optional[str]:
         """
         Parse 402 headers and generate payment token.
-        Headers expected: "WWW-Authenticate: x402 chain=137 contract=0x... amount=100"
+        Headers: "WWW-Authenticate: x402 chain=137 contract=0x... amount=100 service=inference-01"
         """
+        if self.breaker and not self.breaker.is_active():
+            logger.error("❌ Circuit Breaker prohibits payments")
+            return None
+
         auth_header = response_headers.get("WWW-Authenticate") or response_headers.get("www-authenticate")
         if not auth_header or "x402" not in auth_header:
             return None
             
-        # Parse params (simplified)
         try:
-            params = {}
-            parts = auth_header.replace("x402 ", "").split(" ")
-            for p in parts:
-                if "=" in p:
-                    k, v = p.split("=")
-                    params[k] = v.strip('"')
+            params = self._parse_header(auth_header)
             
-            amount = float(params.get("amount", 0))
-            contract = params.get("contract")
+            amount_float = float(params.get("amount", 0))
+            amount_wei = int(amount_float * 10**18)
+            contract_addr = params.get("contract") # This is the provider address/contract
+            service_type = params.get("service", "default")
             
-            if amount > 0:
-                return self._sign_payment(contract, amount)
+            if amount_wei > 0 and contract_addr:
+                # Find or open channel
+                # For PoC, we just reuse any open channel or create a temp one
+                # Real logic: lookup channel by provider address
+                
+                # ... lookup logic skipped ...
+                # Assuming we have a channel_id from open_channel called previously
+                # defaulting to creating a fresh one for this request if none exists (mock)
+                
+                channel_id = self._get_or_create_channel(contract_addr, amount_float * 10) # 10x buffer
+                
+                if not channel_id:
+                     if self.breaker: self.breaker.record_failure("Channel creation failed")
+                     return None
+
+                # Generate payment
+                receipt = self.channel_manager.sign_payment(channel_id, amount_wei, service_type)
+                
+                if receipt:
+                    if self.breaker: self.breaker.record_success()
+                    # Format: "x402 <token>"
+                    # Token includes channel_id, payment proof, signature
+                    token = self._encode_token(receipt)
+                    return token
+                else:
+                    if self.breaker: self.breaker.record_failure("Payment signing failed")
                 
         except Exception as e:
-            logger.error(f"Failed to parse x402 header: {e}")
+            logger.error(f"Failed to handle 402: {e}")
+            if self.breaker: self.breaker.record_failure(str(e))
             
         return None
 
-    def _sign_payment(self, contract: str, amount: float) -> str:
-        """Generate payment signature (off-chain channel update)."""
-        if self.balance < amount:
-            logger.warning("Insufficient VAMS balance for payment")
-            return None
-            
-        self.balance -= amount
-        logger.info(f"Signing payment of {amount} VAMS for {contract}")
+    def _parse_header(self, header: str) -> Dict[str, str]:
+        params = {}
+        parts = header.replace("x402 ", "").split(" ")
+        for p in parts:
+            if "=" in p:
+                k, v = p.split("=")
+                params[k] = v.strip('"')
+        return params
+
+    def _get_or_create_channel(self, provider: str, deposit: float) -> str:
+        """Find an open channel for provider or create one."""
+        # Simple search
+        with self.channel_manager.lock:
+            for cid, c in self.channel_manager.channels.items():
+                if c.provider_address == provider and c.status == "OPEN":
+                    return cid
         
-        # Real signing would use EIP-712 typed data
-        # For PoC we return a mock signature
-        timestamp = int(time.time())
-        proof = f"x402-proof-{contract}-{amount}-{timestamp}"
-        
-        return proof
+        # Create new
+        return self.open_channel(provider, deposit)
+
+    def _encode_token(self, receipt: Dict[str, Any]) -> str:
+        """Base64 encode payment receipt for header."""
+        import base64
+        import json
+        return base64.b64encode(json.dumps(receipt, default=str).encode()).decode()
 
     def get_headers(self, auth_token: str) -> Dict[str, str]:
         """Return headers with Authorization: x402 <token>"""
         return {"Authorization": f"x402 {auth_token}"}
+
+    def get_channel_balance(self, channel_id: str) -> int:
+        """Return remaining balance in channel (wei)."""
+        channel = self.channel_manager.get_channel(channel_id)
+        if not channel:
+            return 0
+        return channel.deposit_amount - channel.spent_amount
+

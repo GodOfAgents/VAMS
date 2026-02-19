@@ -98,6 +98,27 @@ Examples:
     parser.add_argument("--check-trust", action="store_true", help="Check Layer 4 (TEE) health")
     parser.add_argument("--list-trust", action="store_true", help="List trust providers")
     
+    # CLR Router options
+    parser.add_argument("--route", action="store_true", help="Run CLR routing logic")
+    parser.add_argument("--value", type=float, default=100.0, help="Transaction value in USD")
+    parser.add_argument("--latency", type=int, default=60000, help="Max latency in ms")
+    parser.add_argument("--privacy", action="store_true", help="Require privacy (TEE/ZK)")
+    parser.add_argument("--sovereign", action="store_true", help="Require sovereign chain")
+    parser.add_argument("--tier", type=str, default="BRONZE", choices=["UNVERIFIED", "BRONZE", "SILVER", "GOLD", "PLATINUM"], 
+                        help="Agent Trust Tier (Access Control)")
+    
+    # x402 Arguments
+    parser.add_argument("--x402", action="store_true", help="Run x402 Payment Protocol demo")
+    parser.add_argument("--service-provider", type=str, help="Provider address for x402 channel")
+    parser.add_argument("--deposit", type=float, help="Initial channel deposit (VAMS)")
+
+    parser.add_argument("--gateway-server", action="store_true", help="Launch VAMS Gateway Server")
+
+    # Agent Comms
+    parser.add_argument("--comms", action="store_true", help="Run Agent Communication demo")
+    parser.add_argument("--send-to", type=str, help="Recipient Node ID")
+    parser.add_argument("--msg", type=str, help="Message payload")
+
     # Combined
     parser.add_argument("--full-health", action="store_true", help="Check all 4 layers")
     
@@ -176,8 +197,8 @@ class VamsNeuron:
             from payments.x402 import X402Client
             from economic.circuit_breaker import CircuitBreaker
             self.gateway = GatewayClient(base_url=VAMS_GATEWAY)
-            self.x402 = X402Client(private_key=os.getenv("VAMS_PRIVATE_KEY"))
             self.breaker = CircuitBreaker()
+            self.x402 = X402Client(private_key=os.getenv("VAMS_PRIVATE_KEY"), circuit_breaker=self.breaker)
             self.log("Gateway & Economic Layer 5 initialized", "INFO")
         except ImportError as e:
             self.log(f"Economic modules failed: {e}", "WARN")
@@ -459,6 +480,12 @@ class VamsNeuron:
         
         while self.running:
             try:
+                # Circuit Breaker Check
+                if hasattr(self, 'breaker') and not self.breaker.is_active():
+                    self.log(f"HALTED: {self.breaker.trip_reason} (Next check in 10s)", "ERROR")
+                    time.sleep(10)
+                    continue
+
                 block_info = self.provider_manager.get_latest_block()
                 if block_info:
                     self.blocks_seen += 1
@@ -496,9 +523,160 @@ def list_trust_providers():
         print(f"\n  {Fore.GREEN}{n.upper()}{Style.RESET_ALL} [{c['technology']}]\n    {c['description']}")
 
 
+
+def run_routing_logic(args):
+    """Execute CLR routing logic."""
+    from colorama import Fore, Style
+    from clr_router import CLRouter, TransactionIntent, TrustTier
+    
+    print(f"\n{Fore.CYAN}VAMS Conditional L1 Router (CLR){Style.RESET_ALL}")
+    print("=" * 40)
+    
+    # Map tier string to enum
+    tier_map = {
+        "UNVERIFIED": TrustTier.UNVERIFIED,
+        "BRONZE": TrustTier.BRONZE,
+        "SILVER": TrustTier.SILVER,
+        "GOLD": TrustTier.GOLD,
+        "PLATINUM": TrustTier.PLATINUM
+    }
+    agent_tier = tier_map.get(args.tier.upper(), TrustTier.UNVERIFIED)
+    
+    intent = TransactionIntent(
+        value_usd=args.value,
+        max_latency_ms=args.latency,
+        requires_privacy=args.privacy,
+        requires_sovereignty=args.sovereign
+    )
+    
+    print(f"Intent: Value=${args.value:,.2f} | Latency<{args.latency}ms | Privacy={args.privacy} | Tier={agent_tier.name}")
+    print("-" * 40)
+    
+    try:
+        router = CLRouter()
+        print(f"Fetching live metrics from 10 chains...")
+        decision = router.route(intent, agent_tier)
+        
+        print(f"\n{Fore.GREEN}✅ ROUTING SUCCESS{Style.RESET_ALL}")
+        print(f"Target Chain:   {Style.BRIGHT}{decision.chain}{Style.RESET_ALL}")
+        print(f"Bridge:         {decision.target_bridge}")
+        print(f"Est Fee:        ${decision.fee_estimate_usd:.4f}")
+        print(f"Block Time:     {decision.metrics.block_time_ms} ms")
+        print(f"Reason:         {decision.reason}")
+        
+    except PermissionError as e:
+        print(f"\n{Fore.RED}❌ ACCESS DENIED (Policy Violation){Style.RESET_ALL}")
+        print(f"Reason: {str(e)}")
+    except ValueError as e:
+        print(f"\n{Fore.YELLOW}⚠️ UNROUTABLE (Hard Constraint){Style.RESET_ALL}")
+        print(f"Reason: {str(e)}")
+    except Exception as e:
+        print(f"\n{Fore.RED}❌ ERROR{Style.RESET_ALL}")
+        print(f"{str(e)}")
+    print()
+
+
 def main():
     args = parse_args()
     
+    if args.gateway_server:
+        from gateway.server import start_server
+        print(f"🚀 Starting VAMS Gateway Server on port 8000...")
+        start_server()
+        return
+
+    if args.comms:
+        from colorama import Fore, Style
+        from agent_comms import AgentCommunicator
+        from ecdsa import SigningKey, SECP256k1
+        from config import IDENTITY_PATH
+        
+        # Load Identity
+        try:
+            with open(IDENTITY_PATH, "rb") as f:
+                sk = SigningKey.from_pem(f.read())
+                node_id = sk.verifying_key.to_string().hex()[:16]
+                print(f"Identity loaded: {Fore.GREEN}{node_id}{Style.RESET_ALL} from {IDENTITY_PATH}")
+        except FileNotFoundError:
+            print(f"{Fore.RED}Identity not found. Run without args first to generate.{Style.RESET_ALL}")
+            return
+
+        comms = AgentCommunicator(sk, node_id)
+        
+        if args.send_to and args.msg:
+            print(f"[*] Sending message to {args.send_to}...")
+            msg = comms.create_message(args.send_to, {"text": args.msg})
+            print(f"{Fore.CYAN}Signed Message:{Style.RESET_ALL} {msg.signature[:16]}...")
+            
+            # Simulate Receive (Loopback)
+            print(f"[*] Simulating network transmission...")
+            from dataclasses import asdict
+            comms.receive_message(asdict(msg), sk.verifying_key.to_string().hex())
+            print(f"\n{Fore.GREEN}✅ Message logged to audit.log{Style.RESET_ALL}")
+        else:
+            print("Listening for messages... (Mock Mode)")
+            print("Use --send-to <id> --msg <text> to test.")
+        return
+
+    if args.route: run_routing_logic(args); return
+    
+    if args.x402:
+        from colorama import Fore, Style
+        from payments.x402 import X402Client
+        
+        from economic.circuit_breaker import CircuitBreaker
+        
+        print(f"\n{Fore.CYAN}VAMS x402 Payment Protocol{Style.RESET_ALL}")
+        print("=" * 40)
+        
+        breaker = CircuitBreaker()
+        client = X402Client(circuit_breaker=breaker)
+        provider = args.service_provider or "0xProviderAddress"
+        deposit = args.deposit or 100.0
+        
+        print(f"Agent:    {client.address}")
+        print(f"Provider: {provider}")
+        print(f"Goal:     Purchase 'inference-01' service")
+        print("-" * 40)
+        
+        # 1. Open Channel
+        print(f"[*] Opening Payment Channel (Cap: {deposit} VAMS)...")
+        channel_id = client.open_channel(provider, deposit)
+        
+        if channel_id:
+            print(f"\n{Fore.GREEN}✅ Channel Open: {channel_id}{Style.RESET_ALL}")
+            
+            # 2. Simulate 402 Challenge
+            print(f"[*] Requesting Service...")
+            print(f"    < HTTP 402 Payment Required")
+            headers = {
+                "WWW-Authenticate": f'x402 chain=80002 contract="{provider}" amount="5.0" service="inference-01"'
+            }
+            print(f"    < WWW-Authenticate: {headers['WWW-Authenticate']}")
+            
+            # 3. Generate Payment
+            token = client.handle_402(headers, "http://provider/api/v1/infer")
+            
+            if token:
+                print(f"\n{Fore.GREEN}✅ Payment Generated{Style.RESET_ALL}")
+                print(f"    > Authorization: x402 {token[:20]}...")
+                
+                # Decode for display
+                import base64
+                import json
+                decoded = json.loads(base64.b64decode(token).decode())
+                print(f"    - Nonce:     {decoded['payment'][3]}")
+                print(f"    - Signature: {decoded['signature']}")
+                
+                # 4. Verify Balance
+                balance = client.get_channel_balance(channel_id)
+                print(f"[*] Remaining Channel Balance: {balance / 10**18:.2f} VAMS")
+            else:
+                print(f"{Fore.RED}❌ Payment Generation Failed{Style.RESET_ALL}")
+        else:
+            print(f"{Fore.RED}❌ Channel Creation Failed{Style.RESET_ALL}")
+        return
+
     if args.list_providers: list_da_providers(); return
     if args.list_compute: list_compute_providers(); return
     if args.list_logic: list_logic_providers(); return

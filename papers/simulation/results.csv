@@ -1,0 +1,5 @@
+Strategy,Pareto_Pct,Avg_Cost,Avg_Latency,Avg_Finality_s,Rejection_Pct
+CLR (Strict),51.0,0.20,4979,119513.9,6.0
+Random,17.8,1.59,7614,103216.8,0.0
+Round-Robin,17.8,1.62,7646,104186.8,0.0
+Ethereum-Only,2.5,8.50,12000,780.0,0.0

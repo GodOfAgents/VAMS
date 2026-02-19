@@ -1,0 +1,80 @@
+{
+  "ch_0xProv_1771498217": {
+    "channel_id": "ch_0xProv_1771498217",
+    "agent_address": "0xMockAgentAddress",
+    "provider_address": "0xProviderAddress",
+    "deposit_amount": 500000000000000000000,
+    "spent_amount": 25000000000000000000,
+    "nonce": 5,
+    "status": "OPEN",
+    "opened_at": 1771498217.2029872,
+    "expires_at": 1771584617.2029872,
+    "signatures": [
+      "sig_mock_1",
+      "sig_mock_2",
+      "sig_mock_3",
+      "sig_mock_4",
+      "sig_mock_5"
+    ]
+  },
+  "ch_0xProv_1771498400": {
+    "channel_id": "ch_0xProv_1771498400",
+    "agent_address": "0xMockAgentAddress",
+    "provider_address": "0xProviderAddress",
+    "deposit_amount": 2000000000000000000000,
+    "spent_amount": 0,
+    "nonce": 0,
+    "status": "OPEN",
+    "opened_at": 1771498400.394689,
+    "expires_at": 1771584800.394689,
+    "signatures": []
+  },
+  "ch_0xProv_1771498438": {
+    "channel_id": "ch_0xProv_1771498438",
+    "agent_address": "0xMockAgentAddress",
+    "provider_address": "0xProviderAddress",
+    "deposit_amount": 2000000000000000000000,
+    "spent_amount": 0,
+    "nonce": 0,
+    "status": "OPEN",
+    "opened_at": 1771498438.2850564,
+    "expires_at": 1771584838.2850564,
+    "signatures": []
+  },
+  "ch_0xProv_1771498622": {
+    "channel_id": "ch_0xProv_1771498622",
+    "agent_address": "0xMockAgentAddress",
+    "provider_address": "0xProviderAddress",
+    "deposit_amount": 500000000000000000000,
+    "spent_amount": 0,
+    "nonce": 0,
+    "status": "OPEN",
+    "opened_at": 1771498622.2935832,
+    "expires_at": 1771585022.2935832,
+    "signatures": []
+  },
+  "ch_0xProv_1771498708": {
+    "channel_id": "ch_0xProv_1771498708",
+    "agent_address": "0xMockAgentAddress",
+    "provider_address": "0xProviderAddress",
+    "deposit_amount": 2000000000000000000000,
+    "spent_amount": 0,
+    "nonce": 0,
+    "status": "OPEN",
+    "opened_at": 1771498708.8351157,
+    "expires_at": 1771585108.8351157,
+    "signatures": []
+  },
+  "ch_0xProv_1771498721": {
+    "channel_id": "ch_0xProv_1771498721",
+    "agent_address": "0xMockAgentAddress",
+    "provider_address": "0xProviderAddress",
+    "deposit_amount": 500000000000000000000,
+    "spent_amount": 0,
+    "nonce": 0,
+    "status": "OPEN",
+    "opened_at": 1771498721.98951,
+    "expires_at": 1771585121.98951,
+    "signatures": []
+  }
+}
