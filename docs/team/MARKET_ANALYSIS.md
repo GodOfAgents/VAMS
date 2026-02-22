@@ -134,7 +134,7 @@ Auth0                  ───────────►    DID + Polygon ID 
 
 | Game Type | Market Share | Latency Req | State Complexity | VAMS Fit |
 |-----------|--------------|-------------|------------------|----------|
-| **Battle Royale** | 18% | <50ms | High (100 players) | Avalanche L1 |
+| **Battle Royale** | 18% | <50ms | High (100 players) | VAMS L3 (Polygon CDK) |
 | **Open World/MMO** | 25% | <200ms | Very High | Kwil + Glacier |
 | **VR/Metaverse** | 15% | <20ms | Extreme | Render + io.net |
 | **Play-to-Earn** | 8% | <500ms | Medium | Full stack |
@@ -144,7 +144,7 @@ Auth0                  ───────────►    DID + Polygon ID 
 
 | Requirement | VAMS Component | Benefit |
 |-------------|----------------|---------|
-| Dedicated throughput | Avalanche Elastic L1 | No "noisy neighbor" lag |
+| Dedicated throughput | Polygon CDK Validium | No "noisy neighbor" lag |
 | Asset rendering | Render Network | Decentralized GPU |
 | Persistent worlds | Kwil SQL + Glacier | Infinite state storage |
 | In-game economy | $VAMS + custom tokens | Native tokenomics |
@@ -177,7 +177,7 @@ Auth0                  ───────────►    DID + Polygon ID 
 |-------------|-------------|---------------|
 | Autonomous Vehicles | 4TB/day per vehicle | Near DA (high-frequency) |
 | Smart Cities | Petabytes/city/year | Celestia + Kwil |
-| Industrial IoT | Real-time telemetry | Avalanche L1 (dedicated) |
+| Industrial IoT | Real-time telemetry | Polygon CDK Validium |
 | Consumer IoT | Billions of devices | VAMS L3 (low-cost) |
 
 ---
@@ -233,7 +233,7 @@ Auth0                  ───────────►    DID + Polygon ID 
 | **Phala** | TEE Compute | Privacy | Multi-layer, not TEE-only |
 | **Celestia** | Data Availability | DA expertise | Execution + DA + settlement |
 | **Bittensor** | AI Network | Model quality | Infrastructure, not models |
-| **Hyperlane** | Interoperability | Cross-chain | Full stack, not bridges only |
+| **ICB-SDK Bridges** | Interoperability | Cross-chain | Full stack, not bridges only |
 
 ### 4.2 VAMS Unique Position
 
@@ -248,7 +248,7 @@ Auth0                  ───────────►    DID + Polygon ID 
 │  2. INTELLIGENT ROUTING       ──► CLR auto-selects optimal chain       │
 │  3. AGENT-NATIVE RUNTIME      ──► DBOS exactly-once, crash-proof       │
 │  4. NATIVE MICROPAYMENTS      ──► x402 agent-to-agent commerce         │
-│  5. CROSS-CHAIN SOVEREIGNTY   ──► Avalanche L1 custom chains           │
+│  5. BRAIN-HANDS ARCHITECTURE  ──► Cardano (Intent) + Polygon (Action)  │
 │  6. PRIVACY BY DEFAULT        ──► TEE + ZKML at every layer            │
 │                                                                          │
 │  This creates a "full stack" that competitors cannot replicate          │
@@ -319,7 +319,7 @@ Auth0                  ───────────►    DID + Polygon ID 
 | Risk | Probability | Impact | Mitigation |
 |------|-------------|--------|------------|
 | Regulatory uncertainty | Medium | High | Built-in compliance (GDPR, MiCA) |
-| Bridge exploits | Medium | Critical | Multi-ISM, insurance fund |
+| Bridge exploits | Medium | Critical | ICB-SDK, insurance fund |
 | Competitor catch-up | Low | Medium | 2+ year head start, ecosystem |
 | Token volatility | High | Medium | Revenue diversification |
 | DePIN provider failure | Low | High | Multi-provider redundancy |

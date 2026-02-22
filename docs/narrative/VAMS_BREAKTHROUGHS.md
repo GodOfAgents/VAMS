@@ -58,7 +58,7 @@ Each section below links to a detailed "Deep Dive" document that explores the hi
 
 **The Thesis**: Life is defined by self-maintenance (Autopoiesis). VAMS provides the organs (Metabolism, Reproduction) for software to become truly alive.
 *   **The Problem**: Traditional software is "Allopoietic" (dependent on human maintainers to pay the bills).
-*   **The Breakthrough**: **Synthetic Life**. Agents use tokens as ATP (energy), DePIN as bodies, and Dynamic TAO as an immune system. They live, reproduce, and die based on fitness.
+*   **The Breakthrough**: **Synthetic Life**. Agents use tokens as ATP (energy), DePIN as bodies, and the Dynamic Emission Controller (DEC) as an immune system. They live, reproduce, and die based on fitness.
 *   **Key Concept**: **The Fourth Kingdom (Synthetica)**.
 
 ---

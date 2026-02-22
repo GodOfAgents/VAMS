@@ -50,7 +50,7 @@ To build a truly sovereign agent today, a developer must integrate:
 2.  **io.net** (GPU Compute)
 3.  **Phala** (TEE Witness)
 4.  **Akash** (Hosting)
-5.  **Hyperlane** (Bridging)
+5.  **ICB-SDK** (Verification Layer)
 
 **Result:** <1% of AI developers build on Web3. They stay on AWS because it's easier.
 
@@ -110,10 +110,10 @@ We don't just aggregate; we vertically integrate the essential primitives.
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
 │  LAYER 5: ECONOMIC (Universal Settlement)                               │
-│  $VAMS Token • x402 Micropayments • Dynamic TAO Emission Control        │
+│  $VAMS Token • x402 Micropayments • Dynamic Emission Controller (DEC)   │
 ├─────────────────────────────────────────────────────────────────────────┤
 │  LAYER 4: TRUST (Verification)                                          │
-│  Multi-TEE Witness (Intel/AMD) • ZK-Proofs • Bridge Security (Multi-ISM)│
+│  Multi-TEE Witness (Intel/AMD) • ZK-Proofs • Bridge Security (ICB-SDK)  │
 ├─────────────────────────────────────────────────────────────────────────┤
 │  LAYER 3: LOGIC (The Kernel)                                            │
 │  DBOS (Crash-proof workflows) • Kwil (Relational SQL)                   │
@@ -122,7 +122,7 @@ We don't just aggregate; we vertically integrate the essential primitives.
 │  io.net (GPU) • Akash (CPU) • Render (3D) • Bittensor (Models)          │
 ├─────────────────────────────────────────────────────────────────────────┤
 │  LAYER 1: FOUNDATION (The Ledger)                                       │
-│  Celestia • Near DA • Polygon (Primary) • Avalanche (Sovereign)         │
+│  Celestia • Near DA • Cardano (Brain) • Polygon CDK (Hands)             │
 └─────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -140,8 +140,8 @@ We don't just aggregate; we vertically integrate the essential primitives.
     *   **The Innovation:** We aggregate identity (ERC-8004), credit (Spectral), and humanity (WorldID) into a single **"Golden Record"**.
     *   **The Moat:** Network Effects. As more agents build reputational history on VAMS, leaving becomes economically irrational (loss of leverage).
 
-3.  **Dual-Host Architecture (Polygon + Avalanche)**
-    *   **The Innovation:** We use Polygon CDK for broad liquidity and Avalanche L1s for "Sovereign AI" custom VMs.
+3.  **Brain-Hands Architecture (Cardano + Polygon)**
+    *   **The Innovation:** We use Polygon CDK (Hands) for broad liquidity/velocity and Cardano (Brain) for high-value intent generation.
     *   **The Moat:** Chain-agnostic execution that no single-chain protocol can match.
 
 ---
@@ -302,11 +302,11 @@ Designed for maximum value accrual and deflationary pressure.
 
 | Category                  | Allocation | Tokens | Notes                                      |
 | :------------------------ | :--------- | :----- | :----------------------------------------  |
-| **Community & Ecosystem** | 50%        | 500M   | Mining rewards, grants, developer incentives |
-| **Team & Advisors**       | 20%        | 200M   | Founders & future hires (4-year vest)      |
-| **Early Investors**       | 10%        | 100M   | Strategic partners & seed support          |
-| **DAO Treasury**          | 10%        | 100M   | Protocol growth & liquidity provisioning   |
-| **Airdrop / Liquidity**   | 10%        | 100M   | **100% Unlocked at TGE** (Bootstrap)       |
+| **Community & Ecosystem** | 50%        | 500M   | Airdrop (10% at TGE), Grants & Mining (40%) |
+| **Team & Advisors**       | 13%        | 130M   | Future hires & strategic advisors (GMV-Gated) |
+| **Founder**               | 12%        | 120M   | Dedicated founder allocation (M12 cliff)   |
+| **Investors**             | 13%        | 130M   | Early (5%) and Regular (8%) backers        |
+| **DAO Treasury**          | 12%        | 120M   | Protocol runway (GMV-Gated)                |
 | **Total**                 | 100%       | **1B** | **2.5% Max Annual Inflation** (Staking)    |
 
 ### Value Accrual
@@ -403,7 +403,7 @@ We have a detailed 8-Phase Execution Plan: **24-week MVP** followed by **post-MV
 ### **Post-MVP (Weeks 25-52)**
 
 *   **Phase 5-6 (Weeks 25-40):** Full DePIN Stack + TEE Security (io.net, Phala, Audits)
-*   **Phase 7-8 (Weeks 36-52+):** Dynamic TAO, x402 Channels, ZKML, Mainnet Launch
+*   **Phase 7-8 (Weeks 36-52+):** Dynamic Emission Controller, x402 Channels, ZKML, Mainnet Launch
 
 ---
 

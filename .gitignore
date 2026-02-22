@@ -66,3 +66,6 @@ venv/
 
 # Frontend (excluded per user request)
 frontend-vite/
+
+# Local State
+.data/

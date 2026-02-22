@@ -27,10 +27,10 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Status](https://img.shields.io/badge/Status-Testnet--Live-brightgreen.svg)](./REPO_STATUS_REPORT.md)
-[![Architecture](https://img.shields.io/badge/Architecture-v0.3.0-blue.svg)](./Team%20Docs/ARCHITECTURE_v0-3-0.md)
-[![Market](https://img.shields.io/badge/TAM-$507B-green.svg)](./Team%20Docs/MARKET_ANALYSIS.md)
+[![Architecture](https://img.shields.io/badge/Architecture-v0.3.0-blue.svg)](./docs/team/ARCHITECTURE_v0-3-0.md)
+[![Market](https://img.shields.io/badge/TAM-$507B-green.svg)](./docs/team/MARKET_ANALYSIS.md)
 
-**[Documentation](./REPO_STATUS_REPORT.md)** • **[Architecture](./Team%20Docs/ARCHITECTURE_v0-3-0.md)** • **[Whitepaper](./Team%20Docs/WHITEPAPER.md)** • **[Roadmap](./REPO_STATUS_REPORT.md#4-phase-by-phase-execution-roadmap)**
+**[Documentation](./REPO_STATUS_REPORT.md)** • **[Architecture](./docs/team/ARCHITECTURE_v0-3-0.md)** • **[Whitepaper](./docs/team/WHITEPAPER.md)** • **[Roadmap](./REPO_STATUS_REPORT.md#4-phase-by-phase-execution-roadmap)**
 
 </div>
 
@@ -54,7 +54,7 @@
 </td>
 <td width="33%" align="center">
 <h3>🔗 15+ Integrations</h3>
-<p>Polygon, Avalanche, Celestia, io.net</p>
+<p>Polygon CDK, Cardano, Celestia, io.net</p>
 </td>
 </tr>
 </table>
@@ -92,8 +92,9 @@ Single API for compute (io.net, Akash), storage (Arweave, Ceramic), and networki
 Conditional L1 Router auto-selects the optimal chain:
 - 🔐 **Privacy** → Phala TEE
 - 💰 **High Value** → Ethereum L1
-- 🚀 **Velocity** → Polygon CDK (sub-second)
-- 🏛️ **Sovereignty** → Avalanche L1
+- 🚀 **Velocity** → Polygon CDK (The Hands)
+- 🧠 **Intent & Roots** → Cardano (The Brain)
+- 🏛️ **Sovereignty** → Phala TEE / Midnight
 - ⚛️ **Optimization** → Quantum DePIN (Future State)
 
 #### 3️⃣ **Immortal Agents**
@@ -113,15 +114,15 @@ VAMS is not merely a tech stack; it is a **philosophical engine** that instantia
 
 | Field | The Breakthrough | Deep Dive |
 | :--- | :--- | :--- |
-| **Physics** | **It from Bit** (The Synthetic Observer) | [📜 Read Narrative](./narrative/PHYSICS_IT_FROM_BIT.md) |
-| **Economics** | **Deterministic Agency** (Zero Agency Cost) | [📜 Read Narrative](./narrative/ECONOMICS_DETERMINISTIC_AGENCY.md) |
-| **Law** | **Polycentric Sovereignty** (Algorithmic Jurisdiction) | [📜 Read Narrative](./narrative/LAW_POLYCENTRIC_SOVEREIGNTY.md) |
-| **Biology** | **Digital Autopoiesis** (Synthetic Life) | [📜 Read Narrative](./narrative/BIOLOGY_DIGITAL_AUTOPOIESIS.md) |
-| **AI** | **The Verifiable Mind** (Glass Box Intelligence) | [📜 Read Narrative](./narrative/AI_VERIFIABLE_MIND.md) |
-| **Blockchain** | **The DePIN OS** (Planetary Computer) | [📜 Read Narrative](./narrative/BLOCKCHAIN_DEPIN_OS.md) |
+| **Physics** | **It from Bit** (The Synthetic Observer) | [📜 Read Narrative](./docs/narrative/PHYSICS_IT_FROM_BIT.md) |
+| **Economics** | **Deterministic Agency** (Zero Agency Cost) | [📜 Read Narrative](./docs/narrative/ECONOMICS_DETERMINISTIC_AGENCY.md) |
+| **Law** | **Polycentric Sovereignty** (Algorithmic Jurisdiction) | [📜 Read Narrative](./docs/narrative/LAW_POLYCENTRIC_SOVEREIGNTY.md) |
+| **Biology** | **Digital Autopoiesis** (Synthetic Life) | [📜 Read Narrative](./docs/narrative/BIOLOGY_DIGITAL_AUTOPOIESIS.md) |
+| **AI** | **The Verifiable Mind** (Glass Box Intelligence) | [📜 Read Narrative](./docs/narrative/AI_VERIFIABLE_MIND.md) |
+| **Blockchain** | **The DePIN OS** (Planetary Computer) | [📜 Read Narrative](./docs/narrative/BLOCKCHAIN_DEPIN_OS.md) |
 
 > [!IMPORTANT]
-> **Must Read:** These documents contain the "Deep Lore" and theoretical innovations that differentiate VAMS from every other project. Start with the [**Master Index**](./narrative/VAMS_BREAKTHROUGHS.md).
+> **Must Read:** These documents contain the "Deep Lore" and theoretical innovations that differentiate VAMS from every other project. Start with the [**Master Index**](./docs/narrative/VAMS_BREAKTHROUGHS.md).
 
 ---
 
@@ -137,18 +138,18 @@ VAMS is not merely a tech stack; it is a **philosophical engine** that instantia
 ├──────────────────────────────────────────────────────────┤
 │  L2: COMPUTE     io.net GPU • Akash CPU • Bittensor      │
 ├──────────────────────────────────────────────────────────┤
-│  L1: FOUNDATION  Celestia • Polygon CDK • Avalanche L1   │
+│  L1: FOUNDATION  Cardano (Brain) • Polygon CDK (Hands)   │
 └──────────────────────────────────────────────────────────┘
 ```
 
 > [!TIP]
-> **Deep Dive:** See [ARCHITECTURE_v0-3-0.md](./Team%20Docs/ARCHITECTURE_v0-3-0.md) for 4,400+ lines of technical specs including CLR routing logic, multi-TEE verification, and failover matrices.
+> **Deep Dive:** See [ARCHITECTURE_v0-3-0.md](./docs/team/ARCHITECTURE_v0-3-0.md) for 4,400+ lines of technical specs including CLR routing logic, multi-TEE verification, and failover matrices.
 
 ---
 
 ## 🚀 Why VAMS Wins
 
-| vs AWS/GCP | vs Akash | vs Bittensor | vs Hyperlane |
+| vs AWS/GCP | vs Akash | vs Bittensor | vs ICB-SDK Bridges |
 |------------|----------|--------------|--------------|
 | ✅ Decentralized | ✅ Full stack | ✅ Easier UX | ✅ Execution layer |
 | ✅ 80% cheaper | ✅ Payments | ✅ Unified infra | ✅ Not just bridges |
@@ -184,11 +185,11 @@ Full roadmap: [REPO_STATUS_REPORT.md](./REPO_STATUS_REPORT.md)
 | Document | Purpose |
 |----------|---------|
 | **[📋 REPO STATUS](./REPO_STATUS_REPORT.md)** | **👈 Start here.** Current stage, 24-week MVP roadmap |
-| **[📖 Whitepaper](./Team%20Docs/WHITEPAPER.md)** | Academic technical overview |
-| **[🏗️ Architecture v0.3.0](./Team%20Docs/ARCHITECTURE_v0-3-0.md)** | Deep specs: CLR, TEEs, Failover Matrix |
-| **[💰 Tokenomics](./Team%20Docs/TOKENOMICS.md)** | $VAMS utility, burns, vesting, emissions |
-| **[📈 Market Analysis](./Team%20Docs/MARKET_ANALYSIS.md)** | $507B TAM, competitor analysis |
-| **[🎤 Pitch Deck](./Team%20Docs/PITCH_DECK.md)** | Strategic partnership proposal |
+| **[📖 Whitepaper](./docs/team/WHITEPAPER.md)** | Academic technical overview |
+| **[🏗️ Architecture v0.3.0](./docs/team/ARCHITECTURE_v0-3-0.md)** | Deep specs: CLR, TEEs, Failover Matrix |
+| **[💰 Tokenomics](./docs/team/TOKENOMICS.md)** | $VAMS utility, burns, vesting, emissions |
+| **[📈 Market Analysis](./docs/team/MARKET_ANALYSIS.md)** | $507B TAM, competitor analysis |
+| **[🎤 Pitch Deck](./docs/team/PITCH_DECK.md)** | Strategic partnership proposal |
 
 ---
 
@@ -224,7 +225,7 @@ VAMS-main/
 │
 ├── gateway/         # FastAPI server (50% complete)
 │
-└── Team Docs/       # All documentation
+└── docs/team/       # All documentation
     ├── ARCHITECTURE_v0-3-0.md
     ├── WHITEPAPER.md
     └── TOKENOMICS.md
@@ -271,8 +272,8 @@ python demo_cli.py  # Interactive demo
 
 We are committed to **radical transparency**:
 
-- 📝 **Every design decision** documented in [ARCHITECTURE_v0-3-0.md](./Team%20Docs/ARCHITECTURE_v0-3-0.md)
-- 💰 **Every token allocation** specified in [TOKENOMICS.md](./Team%20Docs/TOKENOMICS.md)
+- 📝 **Every design decision** documented in [ARCHITECTURE_v0-3-0.md](./docs/team/ARCHITECTURE_v0-3-0.md)
+- 💰 **Every token allocation** specified in [TOKENOMICS.md](./docs/team/TOKENOMICS.md)
 - 🔍 **Every gap** tracked in [REPO_STATUS_REPORT.md](./REPO_STATUS_REPORT.md)
 
 **This repository is our single source of truth.**
@@ -287,20 +288,18 @@ We are committed to **radical transparency**:
 
 ### For Investors
 - **7% token allocation** (70M $VAMS) available for strategic partners
-- See [PITCH_DECK.md](./Team%20Docs/PITCH_DECK.md) for full proposal
+- See [PITCH_DECK.md](./docs/team/PITCH_DECK.md) for full proposal
 
 ### For Ecosystem Partners
-- Grant applications: [Ecosystem_Grants.md](./Team%20Docs/Ecosystem_Grants.md)
+- Grant applications: [Ecosystem_Grants.md](./docs/team/Ecosystem_Grants.md)
 - Integration opportunities: Polygon, Avalanche, Celestia, io.net, Bittensor
 
 ---
 
 ## 💸 Support the Mission
 
-**Funds are needed for further research (not just to go on Mainnet).**
-
-- **Donation Protocol**:
-  - **ETH / USDT / USDC (ERC20)**: `0xd1d54f39eeba2f2538f5cdab92e7b134be8f9e82`
+Our development is heavily supported by strategic ecosystem grants.
+If you represent an ecosystem (L1/L2, DA layer, TEE provider) interested in integrating with VAMS, please review our [Ecosystem Grants Strategy](./docs/team/Ecosystem_Grants.md) and open a dialogue.
 
 ---
 

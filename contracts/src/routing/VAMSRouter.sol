@@ -29,12 +29,13 @@ contract VAMSRouter is VAMSUpgradeableBase {
     
     enum ChainId {
         VAMS_L3_POLYGON,    // Primary: Polygon CDK Validium
-        AVALANCHE_ELASTIC,  // Secondary: Avalanche Elastic L1
-        AVALANCHE_EVERGREEN,// Secondary: Avalanche Evergreen (compliant)
+        CARDANO_MAINNET,    // Secondary: Formal Verification (Ouroboros)
+        CARDANO_HYDRA,      // Secondary: High Velocity non-EVM
+        MIDNIGHT_ZKSD,      // Compliance Privacy
         ETHEREUM,           // High-value settlement
-        SOLANA,             // Low-latency
+        SOLANA,             // Low-latency non-EVM
         SEI,                // Fast EVM
-        PHALA_TEE           // Privacy
+        PHALA_TEE           // Privacy Compute
     }
     
     // ============ Structs ============
@@ -43,9 +44,10 @@ contract VAMSRouter is VAMSUpgradeableBase {
         uint256 valueUSD;
         uint256 maxLatencyMs;
         bool requiresPrivacy;
-        bool requiresCustomVM;
-        bool requiresSovereignty;
         bool requiresCompliance;
+        bool requiresFormalVerification;
+        bool requiresEVM;
+        bool isInstitutional;
     }
     
     struct RoutingDecision {
@@ -262,30 +264,42 @@ contract VAMSRouter is VAMSUpgradeableBase {
      * @return ChainId Target chain
      */
     function _applyRoutingRules(TransactionMetadata calldata _meta) internal pure returns (ChainId) {
-        // Priority 1: Privacy → TEE
+        // Priority 1: Compliance Privacy → Midnight ZK-SD
+        if (_meta.requiresCompliance && _meta.requiresPrivacy) {
+            return ChainId.MIDNIGHT_ZKSD;
+        }
+
+        // Priority 2: Privacy/Compute → Phala TEE
         if (_meta.requiresPrivacy) {
             return ChainId.PHALA_TEE;
         }
         
-        // Priority 2: High-value → Ethereum
+        // Priority 3: High-value → Ethereum
         if (_meta.valueUSD > SECURITY_THRESHOLD_USD) {
             return ChainId.ETHEREUM;
         }
         
-        // Priority 3: Sovereignty → Avalanche
-        if (_meta.requiresCustomVM || _meta.requiresSovereignty) {
-            if (_meta.requiresCompliance) {
-                return ChainId.AVALANCHE_EVERGREEN;
-            }
-            return ChainId.AVALANCHE_ELASTIC;
+        // Priority 4: Institutional Compliance → Polygon CDK KYC Layer
+        if (_meta.isInstitutional) {
+            // Polygon CDK has the institutional KYC layer configuration
+            return ChainId.VAMS_L3_POLYGON;
+        }
+
+        // Priority 5: Formal Verification → Cardano Ouroboros
+        if (_meta.requiresFormalVerification) {
+            return ChainId.CARDANO_MAINNET;
         }
         
-        // Priority 4: Low latency → Fast chains
+        // Priority 6: Low latency → Fast chains
         if (_meta.maxLatencyMs < VELOCITY_THRESHOLD_MS) {
-            return ChainId.SEI; // or SOLANA for non-EVM
+            if (_meta.requiresEVM) {
+                return ChainId.SEI;
+            } else {
+                return ChainId.CARDANO_HYDRA;
+            }
         }
         
-        // Default: Polygon CDK
+        // Default: Polygon CDK Validium
         return ChainId.VAMS_L3_POLYGON;
     }
     
