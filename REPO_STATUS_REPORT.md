@@ -17,13 +17,13 @@ The VAMS project has completed the **V2 Architecture Upgrade**. We have a produc
 ### ✅ Completed Items (The Foundation)
 | Component | Status | Description |
 | :--- | :--- | :--- |
-| **Architecture Specification** | **100%** | `Team Docs/ARCHITECTURE_v0-3-0.md` detailed 5-tier stack design. |
-| **Token Economic Model** | **100%** | `Team Docs/TOKENOMICS.md` vesting, burns, and emission logic defined. |
+| **Architecture Specification** | **100%** | `docs/team/ARCHITECTURE_v0-3-0.md` detailed 5-tier stack design. |
+| **Token Economic Model** | **100%** | `docs/team/TOKENOMICS.md` vesting, burns, and emission logic defined. |
 | **Smart Contracts (Core Logic)** | **100%** | Full V2 Suite: Governance, Staking, Vesting, Router, Slasher, Registry, FeeCollector. |
 | **Agent Logic Prototype** | **95%** | Neuron v1.0.0: Full 5-Layer Stack + TEE + Storage + Payments. 100+ tests passing. |
 | **Gateway Server** | **100%** | Full FastAPI server (`gateway/server.py`) with Rate Limiting, Auth, and Dashboard. |
 | **Frontend** | **95%** | React 19 + Vite (Production Optimized). Sub-1s load, Dark Mode, 3D Hero. |
-| **Market Analysis** | **100%** | `Team Docs/MARKET_ANALYSIS.md` & `PITCH_DECK.md` ready for investors. |
+| **Market Analysis** | **100%** | `docs/team/MARKET_ANALYSIS.md` & `PITCH_DECK.md` ready for investors. |
 | **Monorepo Structure** | **100%** | `/contracts`, `/frontend-vite`, `/neuron`, `/gateway`, `/Team Docs` organization complete. |
 | **Smart Contract Tests** | **Complete** | 442 Foundry tests verified (Unit + Integration + Fuzz + Governance). Security audit complete. |
 | **Neuron Tests** | **Complete** | 79 pytest tests covering SDK, workflows, compute, trust, and gateway. |
@@ -48,7 +48,7 @@ The VAMS project has completed the **V2 Architecture Upgrade**. We have a produc
 | **Immortal Agents**  | DBOS cloud, 5-pillar guarantee    | Neuron v1.0.0 (Full Stack + TEE + Queue) | 🟩 Low (Logic Complete)   |
 | **Compute Sourcing** | io.net/Akash/Render integration   | SDK stubs + Bittensor/Phala integration  | 🟨 Medium (Needs credentials)   |
 | **CLR Router**       | Multi-chain routing logic         | Production `neuron/clr_router.py` + Live Oracle | 🟩 Low (Fully Implemented) |
-| **Tokenomics**       | $VAMS, Staking, Dynamic TAO       | Core contracts + FeeCollector + Compensation complete. | 🟩 Low (Ready for deployment) |
+| **Tokenomics**       | $VAMS, Staking, DEC               | Core contracts + FeeCollector + Compensation complete. | 🟩 Low (Ready for deployment) |
 | **Payments**         | x402 Micropayments, auto-swap     | `neuron/payments/x402.py` implemented   | 🟩 Low (Client logic ready)                               |
 | **Interface**        | "AWS of Web3" Dashboard           | Production Landing Page (React + Vite)  | 🟩 Low (Ready for integration)        |
 
@@ -161,7 +161,7 @@ This roadmap moves the project from "Simulation" to "Live Testnet" in approximat
 
 - [ ] Integrate **Phala TEE** for confidential execution.
 - [ ] Integrate **Marlin Oyster** for additional TEE coverage.
-- [ ] Implement **Multi-ISM** for bridge security.
+- [ ] Implement **ICB-SDK** for bridge security and unified verification.
 - [ ] Complete **external security audit** (smart contracts + CLR).
 - [ ] Launch bug bounty program.
 
@@ -171,10 +171,10 @@ This roadmap moves the project from "Simulation" to "Live Testnet" in approximat
 **Timeline:** Weeks 36-52  
 **Goal:** Implement advanced economic and AI features.
 
-- [ ] Implement **Dynamic TAO** (RL model controlling emission rates).
+- [ ] Implement **Dynamic Emission Controller (DEC)** (RL model controlling emission rates).
 - [ ] Implement **x402 Payment Channels** for high-frequency micropayments.
 - [ ] Explore **ZKML** integration for private model inference.
-- [ ] Multi-chain expansion (Solana via Hyperlane, SEI via LayerZero).
+- [ ] Multi-chain expansion (Solana via ICB-SDK, SEI via LayerZero).
 
 ---
 
@@ -183,7 +183,7 @@ This roadmap moves the project from "Simulation" to "Live Testnet" in approximat
 **Goal:** Production deployment.
 
 - [ ] Final security review and penetration testing.
-- [ ] Mainnet deployment (Polygon CDK + Avalanche L1).
+- [ ] Mainnet deployment (Polygon CDK Hands + Cardano Brain).
 - [ ] Token Generation Event (TGE) preparation.
 - [ ] Ecosystem launch and developer onboarding.
 

@@ -1,4 +1,4 @@
-<!--
+﻿<!--
 ╔══════════════════════════════════════════════════════════════════════════════╗
 ║                         INTELLECTUAL PROPERTY NOTICE                          ║
 ╠══════════════════════════════════════════════════════════════════════════════╣
@@ -54,7 +54,7 @@
    - [Agent Economy (x402 & AP2)](#13-agent-economy)
 7. [Core Infrastructure](#core-infrastructure)
    - [Conditional L1 Router (CLR)](#14-conditional-l1-router-clr)
-   - [Avalanche Network (Sovereign Execution Domain)](#15-avalanche-network)
+   - [Avalanche Network (Optional Routing Target)](#15b-avalanche-network)
    - [Cross-Chain Infrastructure](#16-cross-chain-infrastructure)
    - [VAMS Gateway](#17-vams-gateway)
 8. [Decentralization & Mitigation Strategies](#18-decentralization--mitigation-strategies)
@@ -139,7 +139,7 @@ VAMS addresses these through a modular stack that outsources functions to specia
 │                                                                          │
 │  ┌─────────────────────────────────────────────────────────────────────┐│
 │  │  LAYER 5: ECONOMIC                                                   ││
-│  │  $VAMS Token • Dynamic TAO • x402/AP2 Payments • Staking            ││
+│  │  $VAMS Token • DEC (Emission Config) • x402/AP2 Payments            ││
 │  └─────────────────────────────────────────────────────────────────────┘│
 │                                                                          │
 │  ┌─────────────────────────────────────────────────────────────────────┐│
@@ -396,8 +396,8 @@ Beyond technical immortality, agents can achieve **economic immortality** throug
 │  dApps           Kwil/       Akash       Hyperlane   User fees →        │
 │                  WeaveDB     + backup    + LayerZero treasury           │
 │                                                                          │
-│  Enterprise      Evergreen   Dedicated   Private     SLA-backed         │
-│                  L1 state    validator   AWM mesh    contracts          │
+│  Enterprise      Evergreen   Dedicated   Hyperlane   SLA-backed         │
+│                  L1 state    validator   / L0 mesh   contracts          │
 │                                                                          │
 │  Games           Near DA     Render +    WebRTC +    In-game            │
 │                  hot state   io.net      libp2p      token economy      │
@@ -635,28 +635,24 @@ Users top-up their VAMS account with any token. Protocol auto-converts to $VAMS 
 | Parameter | Value |
 |-----------|-------|
 | **Total Supply** | 1,000,000,000 $VAMS (1 billion, fixed cap) |
-| **Initial Circulating** | 150,000,000 $VAMS (15%) — see TGE breakdown below |
-| **Token Standard** | ERC-20 (Ethereum) + Wrapped on Avalanche/Solana |
+| **Initial Circulating** | 100,000,000 $VAMS (10%) |
+| **Token Standard** | ERC-20 (Polygon MVP -> Multi-chain) |
 
-**TGE Circulating Supply Breakdown (150M / 15%):**
+**TGE Circulating Supply Breakdown (100M / 10%):**
 
 | Source | Tokens | % | Notes |
 |--------|--------|---|-------|
-| Initial Liquidity | 50,000,000 | 5% | DEX/CEX liquidity pools |
-| Community Airdrop | 50,000,000 | 5% | Testnet participants, early adopters |
-| Ecosystem Grants | 50,000,000 | 5% | Developer incentives, integrations |
-| **Total at TGE** | **150,000,000** | **15%** | |
+| Liquidity & Airdrop | 100,000,000 | 10% | 100% Unlocked at TGE for DEX liquidity and community |
 
 **Allocation Breakdown:**
 
 | Category | Allocation | Tokens | Vesting |
 |----------|-----------|--------|---------|
-| **Community & Ecosystem** | 34% | 340,000,000 | 5-year linear unlock |
-| **Protocol Treasury** | 21% | 210,000,000 | 6-month cliff, 2%/month operational runway |
-| **Founder** | 16% | 160,000,000 | 4-year vest, 1-year cliff |
-| **Investors** | 14% | 140,000,000 | Pre-seed/Seed/Strategic, 6-36 month vests |
-| **Team & Advisors** | 10% | 100,000,000 | 3-year vest, 1-year cliff |
-| **Initial Liquidity** | 5% | 50,000,000 | Unlocked at TGE |
+| **Community & Ecosystem** | **50%** | 500,000,000 | Liquidity/Airdrop (10%) + Grants/Mining (40%, 60m vest) |
+| **Founder** | **12%** | 120,000,000 | 12-month cliff, 48-month linear vesting |
+| **Future Team & Advisors**| **13%** | 130,000,000 | 12-month cliff, 36-month linear (50% GMV-Gated) |
+| **Investors (Early/Reg)** | **13%** | 130,000,000 | 6-12 month cliff, 18-30 month vests |
+| **DAO Treasury** | **12%** | 120,000,000 | 6-month cliff, 48-month linear (50% GMV-Gated) |
 
 **Emission Schedule:**
 
@@ -706,13 +702,13 @@ Total Inflation: ~2.5% Year 1, decreasing to 0.05% terminal
 └─────────────────────────────────────────────────────────────────────────┘
 ```
 
-**Dynamic TAO Integration (AI-Driven Fee Adjustment):**
+**Dynamic Emission Controller (DEC) (AI-Driven Fee Adjustment):**
 
 > [!CAUTION]
 > **Audit Finding HIGH-2:** RL-based emission adjustment lacks validation methodology. RL models can exhibit unexpected behavior under adversarial conditions or regime changes. This section specifies comprehensive validation and safety mechanisms.
 
 ```python
-class DynamicTAOController:
+class DynamicEmissionController:
     """
     RL-based emission adjustment with bounds and circuit breakers.
     """
@@ -751,7 +747,7 @@ class DynamicTAOController:
 #### HIGH-2 Remediation: RL Model Validation Framework
 
 > [!IMPORTANT]
-> The Dynamic TAO RL model undergoes rigorous validation before deployment and continuous monitoring in production.
+> The DEC RL model undergoes rigorous validation before deployment and continuous monitoring in production.
 
 ##### Validation Methodology Overview
 
@@ -805,7 +801,7 @@ class DynamicTAOController:
 ##### Multi-Model Ensemble Architecture
 
 > [!NOTE]
-> To mitigate single-model failure risk, Dynamic TAO uses a **3-model ensemble** with agreement requirements.
+> To mitigate single-model failure risk, the DEC uses a **3-model ensemble** with agreement requirements.
 
 ```python
 class EnsembleTAOController:
@@ -1058,7 +1054,7 @@ contract DynamicTAOGovernor {
 ##### Validation Report Template
 
 ```markdown
-## Dynamic TAO RL Model Validation Report
+## Dynamic Emission Controller (DEC) RL Model Validation Report
 
 ### Model Version: v1.2.0
 ### Validation Date: 2026-XX-XX
@@ -1739,10 +1735,10 @@ contract BatchSettlement {
 
 #### Host Domains vs. Routing Targets (Reach)
 To ensure scalability without compromising reach, VAMS distinguishes between its host infrastructure and its execution targets:
-*   **Host Domains (Deployment):** The VAMS L3 stack and agent logic are hosted on **Polygon CDK** (Primary) or **Avalanche L1s** (Sovereign). This is where the "Brain" lives.
-*   **Routing Targets (Reach):** The "Arms" of the agent can reach out to transact on **Solana, Ethereum, SEI**, and others via the CLR. VAMS is *not* deployed on these chains; it simply routes signed transactions to them.
+*   **Host Domains (Deployment - The "Brain"):** The core VAMS L3 stack and agent cognitive logic are hosted primarily on **Cardano** (leveraging eUTXO and Ouroboros formal verification for the "Brain").
+*   **Routing Targets (Reach - The "Hands"):** The "Hands" (or arms) of the agent execute fast, high-volume transactions on **Polygon CDK (Validium)**, Solana, Ethereum, SEI, and others via the CLR. VAMS selectively deploys and routes signed remote transactions to these targets for efficient execution.
 
-### 14.1 VAMSTransaction Metadata (v2.1)
+### 14.1 VAMSTransaction Metadata (v3.1)
 
 ```solidity
 struct VAMSTransactionMetadata {
@@ -1751,50 +1747,46 @@ struct VAMSTransactionMetadata {
     uint256 maxLatencyMs;         // Maximum acceptable latency
     bool requiresPrivacy;         // Trigger for TEE routing
     string requiredFinality;      // "probabilistic" or "deterministic"
-    // Sovereignty fields for Avalanche L1 routing
-    bool requiresCustomGas;       // Agent needs custom gas token
-    bool requiresIsolatedThroughput; // Agent needs dedicated blockspace
-    string validatorRequirements; // "permissionless" or "permissioned"
-    bool requiresCompliance;      // Evergreen/institutional mode
-    // v2.2: Cardano/Midnight fields (CLR v2)
+    // v3.1: Confidential Compute & Compliance
+    bool requiresConfidentialCompute; // Agent needs TEE execution (Phala)
+    bool requiresInstitutionalCompliance; // KYC/AML requirements
+    // v3.1: Cardano/Midnight Ecosystem
     bool requiresCompliancePrivacy; // ZK-SD selective disclosure (→ Midnight)
     bool requiresFormalVerification; // Ouroboros-class formal proofs (→ Cardano)
+    bool requiresSubSecondSettle; // High-frequency agent pairs (→ Hydra)
     uint256 maxFinalityMs;        // Max economic irreversibility time (0 = don't care)
 }
 ```
 
-### 14.2 Dynamic Routing Decision Tree (v2.2)
+### 14.2 Dynamic Routing Decision Tree (v3.1)
 
 ```mermaid
 graph TD
     A[Transaction Intake] --> B{Compliance Privacy?};
     B -- Yes --> B1[Route to Midnight - ZK-SD];
-    B -- No --> C{Privacy Check};
-    C -- Yes --> D[Route to TEE];
+    B -- No --> C{Privacy/Compute?};
+    C -- Yes --> D[Route to Phala TEE];
     C -- No --> E{Security Check: valueUSD > $10K?};
-    E -- Yes --> F[Route to Ethereum via AggLayer];
-    E -- No --> G{Sovereignty Check};
-    G -- Yes --> H{Compliance Required?};
-    H -- Yes --> I[Route to Avalanche Evergreen L1];
-    H -- No --> J[Route to Avalanche Elastic L1];
+    E -- Yes --> F[Route to Ethereum via AggLayer + Mithril Proofs];
+    E -- No --> G{Institutional Compliance?};
+    G -- Yes --> H[Route to Polygon CDK KYC Layer];
     G -- No --> K{Formal Verification?};
     K -- Yes --> K1[Route to Cardano - Ouroboros];
     K -- No --> L{Velocity Check: latency < 1s?};
     L -- Yes --> M{EVM Compatible?};
     M -- Yes --> N[Route to SEI];
-    M -- No --> O[Route to Solana via Hyperlane];
-    L -- No --> P[Route to VAMS L3];
+    M -- No --> O[Route to Cardano Hydra State Channels];
+    L -- No --> P[Route to VAMS L3 Polygon CDK Validium];
 ```
 
-### 14.3 Routing Implementation (v2.2 with Cardano/Midnight)
+### 14.3 Routing Implementation (v3.1 with Cardano/Midnight)
 
 ```python
 class CLRouter_V3:  # Updated for Dual-Host + Cardano/Midnight
     """
     VAMS Dual-Host Router (v3.1):
     - PRIMARY: Polygon CDK Validium (default for most agents)
-    - SECONDARY: Avalanche Elastic L1 (sovereignty/custom VM needs)
-    - ROUTING TARGETS: Cardano (formal verification), Midnight (ZK-SD)
+    - ROUTING TARGETS: Cardano (formal verification), Midnight (ZK-SD), Phala (TEE)
     """
     SECURITY_THRESHOLD = 10_000  # USD
     VELOCITY_THRESHOLD = 1_000   # ms
@@ -1804,27 +1796,27 @@ class CLRouter_V3:  # Updated for Dual-Host + Cardano/Midnight
         if tx.metadata.requires_compliance_privacy:
             return await self._route_to_midnight(tx)
         
-        # Priority 1: Privacy → TEE
-        if tx.metadata.requires_privacy:
-            return await self._route_to_tee(tx)
+        # Priority 1: Confidential Compute → Phala TEE
+        if tx.metadata.requires_confidential_compute:
+            return await self._route_to_phala_tee(tx)
         
-        # Priority 2: Security (High-value → Ethereum via AggLayer)
+        # Priority 2: Security (High-value → Ethereum via AggLayer + Mithril)
         if tx.metadata.value_usd > self.SECURITY_THRESHOLD:
-            return await self._route_to_ethereum_via_agglayer(tx)
+            return await self._route_to_ethereum_via_agglayer_with_mithril(tx)
         
-        # Priority 3: Sovereignty → Avalanche L1 (Secondary)
-        if tx.metadata.requires_custom_vm or tx.metadata.requires_sovereignty:
-            if tx.metadata.requires_compliance:
-                return await self._route_to_avalanche_evergreen(tx)
-            return await self._route_to_avalanche_elastic(tx)
+        # Priority 3: Institutional Compliance → Polygon CDK KYC Layer
+        if tx.metadata.requires_institutional_compliance:
+            return await self._route_to_polygon_kyc_layer(tx)
         
         # Priority 4: Formal Verification (Soft Preference → Cardano)
         if tx.metadata.requires_formal_verification:
             return await self._route_to_cardano(tx)
         
-        # Priority 5: Velocity
+        # Priority 5: Velocity (Hydra State Channels)
         if tx.metadata.max_latency_ms < self.VELOCITY_THRESHOLD:
-            if self._is_evm_payload(tx.payload):
+            if tx.metadata.requires_sub_second_settle:
+                return await self._route_to_cardano_hydra(tx)
+            elif self._is_evm_payload(tx.payload):
                 return await self._route_to_sei(tx)
             return await self._route_to_solana(tx)
         
@@ -1893,17 +1885,20 @@ Polygon CDK provides the **primary execution layer** for VAMS L3, leveraging Val
 
 ---
 
-## 15B. Avalanche Network (Sovereign Execution - Secondary)
+## 15B. Avalanche Network (Optional Routing Target)
 
-> [!IMPORTANT]
-> Avalanche Elastic L1s serve as the **secondary execution domain** for agents requiring features unavailable on EVM chains: custom VMs, sovereign validator sets, or enterprise compliance.
+> [!NOTE]
+> Avalanche is an **optional CLR routing target**, not a host domain. VAMS agents are not deployed on Avalanche; the CLR can route transactions to Avalanche C-Chain or Elastic L1s when enterprise clients specifically request Avalanche infrastructure.
 
-Avalanche introduces a critical architectural vector: **Sovereign Execution Domains**. With the Avalanche9000 upgrade and ACP-77, agents can control the entire vertical stack—from gas tokens to validator sets.
+| Capability | How VAMS Uses It |
+|------------|-----------------|
+| **C-Chain (EVM)** | Backup gateway for cross-chain if primary bridges are congested |
+| **Elastic L1s** | Optional sovereign execution for enterprises choosing Avalanche |
+| **AWM/Teleporter** | Intra-Avalanche routing for agents operating on Avalanche L1s |
 
-### 15B.1 Why Avalanche for Sovereign Agents?
+> **Key Distinction**: Sovereign execution needs (custom VMs, confidential compute, compliance) are primarily served by **Phala TEE** (Layer 4) and **Midnight ZK-SD** (Section 15C). Avalanche remains available for enterprise clients with existing Avalanche infrastructure commitments.
 
-| Capability | Polygon CDK | Avalanche L1 |
-|------------|-------------|--------------|
+------------|-------------|--------------|
 | **Custom VM** | ❌ EVM only | ✅ HyperSDK (any VM) |
 | **Validator Control** | ❌ Shared sequencer | ✅ Sovereign validator sets |
 | **State Isolation** | Shared with other CDK chains | ✅ Dedicated blockspace |
@@ -1962,41 +1957,34 @@ HyperSDK enables purpose-built Virtual Machines optimized for agent workloads:
 └─────────────────────────────────────────────────────────────────────────┘
 ```
 
-### 15B.5 VAMS Gateway Architecture (Hyperlane ↔ Teleporter)
-
-```
-1. INGRESS:     Solana Agent → Hyperlane → VAMS_Gateway (C-Chain)
-2. TRANSLATION: Gateway verifies Hyperlane proof (Phala ISM)
-3. ROUTING:     Gateway unwraps payload, identifies target L1 ChainID
-4. EGRESS:      Teleporter message → AWM → Target Avalanche L1
-```
-
-### 15B.6 Avalanche L1 Types for VAMS
-
-| L1 Type | Validator Set | Use Case |
-|---------|---------------|----------|
-| **Elastic L1** | Permissionless, pay-as-you-go | Open agent economies |
-| **Evergreen L1** | Permissioned, KYC validators | Institutional/compliant agents |
-| **Ephemeral L1** | Spin up/down on demand | Just-in-Time blockchains |
-
-### 15B.7 Integration with VAMS Layers
-
-| VAMS Layer | Avalanche Component | Value Proposition |
-|------------|---------------------|-------------------|
-| Layer 1: Foundational | Avalanche L1 (Sovereign) | Agents own the network, not tenants |
-| Layer 2: Compute | HyperSDK Custom VMs | Compute Chains for Proof of Inference |
-| Layer 3: Logic | C-Chain / EVM L1s | High-perf EVM with sub-second finality |
-| Layer 4: Trust | AWM / Teleporter | Verified cross-chain without intermediaries |
-| Layer 5: Economic | x402 / Custom Gas | HTTP-native payments, custom economies |
-
----
-
-## 15C. Cardano Ecosystem (Routing Targets)
+### 15C. Cardano Ecosystem (Routing Targets)
 
 > [!IMPORTANT]
-> Cardano and Midnight are **CLR routing targets**, not host domains. VAMS agents are not deployed on these chains; the CLR routes signed transactions to them when formal verification or compliance-grade privacy is required.
+> Cardano and Midnight are **CLR v3.1 routing targets**, not host domains. VAMS agents are not deployed on these chains; the CLR routes signed transactions to them when formal verification, compliance-grade privacy, or sub-second finality is required.
 
-### 15C.1 Cardano (eUTXO + Formal Verification)
+The VAMS Conditional L1 Router (CLR) integrates multiple Cardano ecosystem technologies to optimize execution for specific agent subsets:
+
+| Technology | Status | Integration Path | Primary Use Case |
+|------------|--------|------------------|------------------|
+| **Cardano (L1)** | Active | Rosen Bridge / LayerZero | Mathematical security, Ouroboros finality, high-value settlement |
+| **Midnight** | Q1 2026 | Hyperlane ZK-ISM | ZK-SD Selective Disclosure, institutional compliance, regulated data |
+| **Hydra** | Active (v1.0) | Direct State Channels | Intra-agent high-frequency trading, payment channels (>1M TPS) |
+| **Mithril** | Beta | Hyperlane ISM | Lightweight threshold signatures for cross-chain state proofs |
+
+#### 15C.1 Specialized Routing Paths
+
+1. **Institutional Privacy (Midnight):** Agents handling healthcare, financial, or proprietary data route logic through Midnight's ZK-SD (Zero-Knowledge Selective Disclosure) circuits. This allows VAMS agents to prove regulatory compliance to auditors without revealing underlying data to the public network.
+2. **High-Frequency Coordination (Hydra):** When two or more VAMS agents enter a sustained, high-volume interaction loop (e.g., algorithmic trading, continuous negotiation), the CLR automatically opens a Hydra Head state channel between them. This moves execution off-chain, enabling sub-second finality and near-zero fees, only settling the net result back to VAMS L3.
+3. **Formal Verification (Cardano L1):** Missions exceeding the SECURITY_THRESHOLD ( USD) that require deterministic, mathematically proven execution are routed to Cardano L1. Plutus V3 ensures rigorous contract verification for critical operations.
+
+#### 15C.2 Integration Partnership: Masumi
+
+> [!NOTE]
+> **Masumi (Sōkosumi)** is a strategic integration partner. Masumi provides a Cardano-native agent marketplace and payment layer, while VAMS provides the underlying immortal infrastructure.
+
+VAMS agents can list themselves on the Masumi Sōkosumi marketplace. The VAMS DID maps directly to the Masumi identity standard, allowing VAMS agents to earn ADA/USDM revenue on Cardano while their core logic remains immortalized across the VAMS architecture.
+
+#### 15C.3 Cardano (eUTXO + Formal Verification)
 
 Cardano provides a unique architectural vector: **deterministic execution via extended UTXO (eUTXO)** and **formally verified consensus (Ouroboros Praos)**.
 
@@ -2013,7 +2001,7 @@ Cardano provides a unique architectural vector: **deterministic execution via ex
 - High-security, low-frequency transactions where finality > speed
 - Regulatory environments requiring provably correct consensus
 
-### 15C.2 Midnight (ZK-SD: Compliance-Grade Privacy)
+#### 15C.4 Midnight (ZK-SD: Compliance-Grade Privacy)
 
 Midnight is a Cardano sidechain providing **Zero-Knowledge proofs with Selective Disclosure (ZK-SD)** — the only chain in the VAMS routing set offering compliance-grade privacy.
 
@@ -2029,14 +2017,14 @@ Midnight is a Cardano sidechain providing **Zero-Knowledge proofs with Selective
 - Institutional agents needing provable KYC/AML without data exposure
 - Healthcare, legal, or financial agents with privacy mandates
 
-### 15C.3 Bridge Connectivity
+#### 15C.5 Bridge Connectivity
 
 | Route | Transport | Latency | Security Model |
 |-------|-----------|---------|----------------|
 | VAMS L3 → Cardano | Rosen Bridge | ~2min | Ouroboros finality + bridge validators |
 | VAMS L3 → Midnight | Hyperlane (ZK-ISM) | ~1min | ZK-SD proofs + ISM verification |
 
-### 15C.4 Integration with VAMS Layers
+#### 15C.6 Integration with VAMS Layers
 
 | VAMS Layer | Cardano/Midnight Component | Value Proposition |
 |------------|---------------------------|-------------------|
@@ -2047,9 +2035,28 @@ Midnight is a Cardano sidechain providing **Zero-Knowledge proofs with Selective
 
 ---
 
-## 16. Cross-Chain Infrastructure
+## 16. Cross-Chain Infrastructure ("Brain & Hands" Asynchronous Routing)
 
-### 16.1 Transport Matrix
+> [!CAUTION]
+> **The Finality Mismatch Constraint:**
+> VAMS orchestrates the **"Brain & Hands,"** utilizing Cardano for formal verification (the Brain) and Polygon Validium/AggLayer for sub-second high-throughput liquidity (the Hands). **Synchronous atomic composability between these heterogeneous ledgers is mathematically impossible** due to finality mismatches ($T_{Cardano} \approx 15 \text{ mins}$ vs $T_{Polygon} \approx 1 \text{s}$).
+
+### 16.1 Asynchronous DAG Orchestration
+All cross-chain agent orchestrations across VAMS are modeled as an **Asynchronous Directed Acyclic Graph (DAG)** of state dependencies.
+
+**The "Command and Verify" Loop:**
+1. **Brain Emits Intent:** A Cardano smart contract emits an ICB string (e.g., $X = \text{Execute Swap}$). This enters the $\approx 15$-minute Nakamoto finality window.
+2. **Relayer Observes:** The ICB relayer waits for Cardano finality (verifiable via a Mithril signature) assuring $X$ is immutable.
+3. **Hands Execute:** Polygon ingests the proof and instantly executes $X$ against its deep liquidity returning receipt $R$.
+4. **Brain Acknowledges:** Relayer posts a Merkle inclusion proof of $R$ back to Cardano to update the agent's trust score.
+
+*Any architecture bypassing these temporal boundaries is vulnerable to severe state desynchronization via reorganization.*
+
+### 16.2 HTLC Asymmetric Timelocks
+When bridging $VAMS via Hash Time-Locked Contracts (HTLCs), the timeout parameters ($t_1, t_2$) obey strict asymmetric constraints bounded by the slowest ledger:
+$t_{Cardano} > t_{Polygon} + \text{Max\_Reorg}_{Cardano} + \delta_{network}$
+
+### 16.3 Transport Matrix
 
 | Source | Destination | Transport | Latency | Security |
 |--------|-------------|-----------|---------|----------|
@@ -2059,10 +2066,8 @@ Midnight is a Cardano sidechain providing **Zero-Knowledge proofs with Selective
 | VAMS L3 | SEI | LayerZero v2 | ~380ms | DVN consensus |
 | VAMS L3 | Cosmos | Union Labs | ~1s | IBC |
 | VAMS L3 | Avalanche C-Chain | Hyperlane | ~800ms | ISM verification |
-| VAMS L3 | Avalanche L1s (Secondary) | AWM/Teleporter | ~250ms | BLS multi-sig |
 | VAMS L3 | Cardano | Rosen Bridge | ~2min | Ouroboros finality |
 | VAMS L3 | Midnight | Hyperlane (ZK-ISM) | ~1min | ZK-SD proofs |
-| Avalanche L1 | Avalanche L1 | AWM | ~250ms | P-Chain validation |
 
 ### 16.2 Polygon AggLayer (Native Integration)
 
@@ -2287,7 +2292,7 @@ export class ClientSideRouter {
 │  PHASE 1: GUARDED LAUNCH (Day 0 - Month 6)                              │
 │  ├── Infrastructure: Governor + Timelock DEPLOYED                       │
 │  ├── Voting: Token holders vote                                         │
-│  ├── Safety: Core Team retains 'Veto' role on Timelock (safety valve)   │
+│  ├── Safety: ZK-Bounded Veto with Cryptographic Bond (Safety Valve)     │
 │  └── Threshold: Low proposal threshold to encourage participation       │
 │                                                                          │
 │  PHASE 2: DAO MATURATION (Month 6 - Month 24)                           │
@@ -2310,9 +2315,10 @@ export class ClientSideRouter {
 
 1.  **Infrastructure-First**: We do not "promise" a DAO later; we deployed the DAO contracts *first*.
 2.  **Smart Contract Enforcement**: Decentralization milestones are enforced via time-locked smart contracts that automatically transfer permissions.
-3.  **Public Accountability**: Monthly governance reports published on-chain.
-4.  **Community Veto**: DAO can vote to accelerate decentralization at any time (>66% quorum).
-5.  **Sunset Clause**: Core Team admin keys are programmatically disabled 24 months after mainnet (Q3 2028).
+3.  **Cryptographic Veto Bonds**: To mitigate Admin Key Extractable Value (AKEV) in Phase 1, the Team's Timelock Veto is governed by a `VetoSlasher` contract. The team must lock a 1,000,000 $VAMS bond. The veto can only be executed if accompanied by a ZK-proof of invariant violation, or it is subject to immediate DAO slashing.
+4.  **Public Accountability**: Monthly governance reports published on-chain.
+5.  **Community Veto**: DAO can vote to accelerate decentralization at any time (>66% quorum).
+6.  **Sunset Clause**: Core Team admin keys are programmatically disabled 24 months after mainnet (Q3 2028).
 
 ---
 
@@ -2407,33 +2413,33 @@ export class ClientSideRouter {
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
-│                    SAFE x402 FLOW (AFTER)                                │
+│                    SAFE x402 FLOW (ATOMIC HTLC)                          │
 ├─────────────────────────────────────────────────────────────────────────┤
 │                                                                         │
-│  Agent A          x402Gateway          Provider B          L1 Contract  │
+│  Agent A (L3)     x402Gateway          Provider B          L1/L3 Escrow │
 │     │                  │                    │                   │       │
-│     │  1. Lock Escrow  │                    │                   │       │
-│     ├─────────────────►│                    │                   │       │
-│     │                  ├─── Lock $10 ──────────────────────────►│       │
-│     │◄─ EscrowID + Sig─┤                    │                   │       │
+│     │  1. Lock Payment HTLC (Secret Hash)   │                   │       │
+│     ├──────────────────────────────────────────────────────────►│       │
 │     │                  │                    │                   │       │
-│     │  2. Request + EscrowID                │                   │       │
+│     │  2. Request Data & Share Hash         │                   │       │
 │     ├──────────────────────────────────────►│                   │       │
 │     │                  │                    │                   │       │
-│     │  3. Provider verifies escrow exists   │                   │       │
-│     │                  │◄───────────────────┤ Check escrow      │       │
+│     │  3. Provider verifies HTLC exists     │                   │       │
+│     │                  │◄───────────────────┤ Check lock        │       │
 │     │                  ├───────────────────►│ Confirmed         │       │
 │     │                  │                    │                   │       │
-│     │  4. Service delivered                 │                   │       │
-│     │◄──────────────────────────────────────┤ 200 + Result      │       │
+│     │  4. Provider Locks Data in HTLC (Same Hash)               │       │
+│     │◄──────────────────────────────────────────────────────────┤       │
 │     │                  │                    │                   │       │
-│     │  5. Provider claims escrow            │                   │       │
-│     │                  │◄───────────────────┤ Claim(EscrowID)   │       │
-│     │                  ├─────────────────────────────Release───►│       │
+│     │  5. Provider claims Payment (Reveals Pre-image Secret)    │       │
+│     │                  │                    ├─────Claim(S)─────►│       │
 │     │                  │                    │                   │       │
-│     │  ✅ Double-spend prevented: EscrowID is single-use                │
-│     │  ✅ Settlement guaranteed: Escrow locked before service           │
-│     │                                                                   │
+│     │  6. Agent claims Data (Using revealed Pre-image Secret)   │       │
+│     ├───────────────────────────────────────◄─────Claim(S)──────┤       │
+│     │                  │                    │                   │       │
+│     │  ✅ Settlement guaranteed: True cross-chain atomic swap           │
+│     │  ✅ Double-spend eliminated: Payment & Data tied to same secret   │
+│                                                                         │
 └─────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -3270,17 +3276,18 @@ contract DynamicValidatorRewards {
 }
 ```
 
-#### 20.4.3 MEV Resistance Mechanisms
+#### 20.4.3 Dynamic Security Budget & MEV-Share Auctions
 
-Since low token prices create MEV extraction opportunities, VAMS implements MEV resistance:
+Rather than relying purely on an external price oracle to determine the security budget (which represents a Single Point of Failure for oracle manipulation), VAMS utilizes internal **MEV-Share / Order Flow Auctions (OFA)**.
+
+By auctioning the right to process VAMS transactions directly to searchers/builders, the network lets the free market determine the *true* real-time value (MEV) of pending agent workflows. The L3 security budget is dynamically tied to the revenue captured in these auctions, creating a self-balancing system impervious to oracle anomalies.
 
 | Mechanism | Description | Effectiveness |
 |-----------|-------------|---------------|
 | **Encrypted Mempool** | Transactions encrypted until inclusion | Prevents front-running |
-| **Batch Auctions** | x402 settlements in sealed batches | Prevents sandwich attacks |
+| **MEV-Share Auctions**| Bids reveal true tx value, overriding price oracles | Eliminates Oracle SPOF |
 | **Proposer-Builder Separation** | Separate block building from proposing | Reduces validator MEV |
-| **MEV-Share Protocol** | Captured MEV returned to users | Aligns incentives |
-| **Slashing for MEV** | Proven MEV extraction = 25% stake slash | Economic punishment |
+| **Slashing for MEV** | Proven MEV extraction outside OFA = 25% slash | Economic punishment |
 
 ```python
 class MEVProtection:
@@ -3306,18 +3313,18 @@ class MEVProtection:
 
 | Scenario | Token Price | TVL | Required Security | Attack Cost | Status |
 |----------|-------------|-----|-------------------|-------------|--------|
-| **Weak** | $0.10 | $1M | $1M (floor) | $150K | ❌ INSUFFICIENT |
-| **Minimum Viable** | $1.00 | $5M | $1M (floor) | $1.5M | ✅ SUFFICIENT |
-| **Target** | $5.00 | $50M | $5M | $7.5M | ✅ SECURE |
-| **Mature** | $10.00 | $500M | $50M | $150M | ✅ HIGHLY SECURE |
+| **Weak** | $0.10 | $1M | $1M (floor) | $150K | [FAIL] INSUFFICIENT |
+| **Minimum Viable** | $1.00 | $5M | $1M (floor) | $1.5M | [PASS] SUFFICIENT |
+| **Target** | $5.00 | $50M | $5M | $7.5M | [PASS] SECURE |
+| **Mature** | $10.00 | $500M | $50M | $150M | [PASS] HIGHLY SECURE |
 
 **Key Guarantees:**
 
-1. ✅ **Minimum $1M security floor** - Enforced on-chain regardless of token price
-2. ✅ **Dynamic stake requirements** - Increase with TVL/volume
-3. ✅ **Security circuit breakers** - Pause high-value ops if security insufficient
-4. ✅ **Reward sustainability** - 8% APY covered by fees at $50M+ annual volume
-5. ✅ **MEV resistance** - Reduces attack profitability regardless of stake cost
+1. **Minimum $1M security floor** - Enforced on-chain regardless of token price
+2. **Dynamic stake requirements** - Increase with TVL/volume
+3. **Security circuit breakers** - Pause high-value ops if security insufficient
+4. **Reward sustainability** - 8% APY covered by fees at $50M+ annual volume
+5. **MEV resistance** - Reduces attack profitability regardless of stake cost
 
 ### 20.5 Bridge Security Enhancement (M1 Remediation)
 
@@ -3444,7 +3451,7 @@ interface ISecurePaymentChannel {
 ### 20.7 Agent Oracle Security (M3 Remediation)
 
 > [!CAUTION]
-> The 5/7 multi-agent consensus is vulnerable to Sybil attacks. VAMS implements stake-weighted voting with √stake to balance security and decentralization.
+> The 5/7 multi-agent consensus is vulnerable to Sybil attacks. VAMS implements stake-weighted voting with **linear stake** to balance security and decentralization, deliberately avoiding sub-linear curves (like √stake) to prevent Sybil partitioning attacks.
 
 #### The Oracle Problem for Agent Networks
 
@@ -3453,28 +3460,24 @@ Agent oracles differ from traditional price oracles—they must provide:
 - **Multi-modal data** (text, images, structured data)
 - **Real-time verification** of agent service delivery
 
-#### √Stake Voting: Mathematical Rationale
+#### Stake Voting Rationale
 
-**Why √stake instead of linear stake?**
+**Why proportional stake?**
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
-│                    LINEAR vs √STAKE VOTING POWER                         │
+│                    LINEAR STAKE VOTING POWER                            │
 ├─────────────────────────────────────────────────────────────────────────┤
 │                                                                          │
-│  LINEAR STAKE (Pure Plutocracy)                                         │
-│  ──────────────────────────────                                         │
-│  Whale with 1M $VAMS = 1,000,000 votes                                  │
-│  Small holder with 1K $VAMS = 1,000 votes                               │
-│  Ratio: 1,000:1 (whale dominates)                                       │
+│  LINEAR STAKE                                                            │
+│  ──────────────────────────────                                          │
+│  Whale with 1M $VAMS = 1,000,000 votes                                   │
+│  Small holder with 1K $VAMS = 1,000 votes                                │
 │                                                                          │
-│  √STAKE (Diminishing Returns)                                           │
-│  ───────────────────────────────                                        │
-│  Whale with 1M $VAMS = √1,000,000 = 1,000 votes                        │
-│  Small holder with 1K $VAMS = √1,000 = ~31.6 votes                     │
-│  Ratio: 31.6:1 (whale influence reduced by 96.8%)                       │
-│                                                                          │
-│  EFFECT: Encourages broad participation, limits plutocracy              │
+│  EFFECT: Vote power aligns strictly with economic skin-in-the-game.      │
+│  This prevents cheap Sybil partitioning attacks, ensuring that an        │
+│  attacker cannot artificially inflate their influence by splitting       │
+│  stake across many accounts.                                             │
 │                                                                          │
 └─────────────────────────────────────────────────────────────────────────┘
 ```
@@ -3484,16 +3487,16 @@ Agent oracles differ from traditional price oracles—they must provide:
 ```python
 def calculate_vote_weight(agent: Agent) -> float:
     """
-    Final vote weight combines stake and reputation with diminishing returns.
+    Final vote weight combines linear stake and reputation.
     
-    Formula: W = √stake × reputation × identity_multiplier
+    Formula: W = stake × reputation × identity_multiplier
     
     Where:
     - stake: Amount of $VAMS staked (minimum 10,000)
     - reputation: Score from 0.0 to 1.0 based on historical accuracy
     - identity_multiplier: 1.0 (anonymous) or 1.25 (Polygon ID verified)
     """
-    base_weight = math.sqrt(agent.stake)
+    base_weight = agent.stake
     reputation_factor = agent.reputation  # 0.0 to 1.0
     identity_bonus = 1.25 if agent.has_polygon_id else 1.0
     
@@ -3573,7 +3576,7 @@ class SecureAgentOracle:
         if len(responses) < self.MIN_PARTICIPANTS:
             return OracleResult(status="INSUFFICIENT_RESPONSES", data=None)
         
-        # Step 3: Calculate √stake-weighted consensus
+        # Step 3: Calculate stake-weighted consensus
         result = self._calculate_consensus(responses)
         
         if result.confidence < self.CONSENSUS_THRESHOLD:
@@ -3590,7 +3593,7 @@ class SecureAgentOracle:
     
     def _calculate_consensus(self, responses: List[OracleResponse]) -> ConsensusResult:
         """
-        Weighted voting with √stake.
+        Weighted voting with linear stake.
         """
         # Group responses by value
         value_weights = defaultdict(float)
@@ -3612,12 +3615,27 @@ class SecureAgentOracle:
             participant_count=len(responses)
         )
     
-    def _calculate_vote_weight(self, agent: Agent) -> float:
-        """√stake × reputation × identity_bonus"""
-        base = math.sqrt(agent.stake)
-        rep = agent.reputation
+    def _calculate_vote_weight(self, agent: Agent, tvl_at_risk: float) -> float:
+        """
+        stake × reputation × identity_bonus (bounded by VaR logic)
+        """
+        base_stake = agent.stake
+        
+        # Logarithmic age curve prevents rapid zero-day farming
+        # Agent must be active for ~90 days to achieve full 1.0 multiplier
+        age_modifier = min(1.0, math.log(agent.active_days + 1) / math.log(90))
+        effective_rep = agent.reputation * age_modifier
+        
         identity = 1.25 if agent.has_verified_identity else 1.0
-        return base * rep * identity
+        
+        raw_weight = base_stake * effective_rep * identity
+        
+        # Value-at-Risk (VaR) Cap: An oracle's effective weight cannot exceed
+        # their total slashable stake relative to the total value extracted if corrupted.
+        # This mathematically ensures Cost of Corruption > Profit from Corruption.
+        max_safe_weight = base_stake * self.VAR_SAFETY_FACTOR / max(1.0, tvl_at_risk)
+        
+        return min(raw_weight, max_safe_weight)
 ```
 
 #### Oracle Data Categories & Trust Requirements
@@ -3659,9 +3677,10 @@ contract OracleRegistry {
 
 | Attack Vector | Description | Mitigation | Effectiveness |
 |---------------|-------------|------------|---------------|
-| **Stake Splitting** | Whale splits into 100 accounts to game √stake | Minimum stake 10K + diminishing returns still apply | High |
+| **Stake Splitting** | Whale splits into 100 accounts to game threshold | Minimum stake 10K + linear mapping preserves total power | High |
 | **Dormant Sybils** | Create accounts, wait, then coordinate attack | Reputation decay (-1%/day inactive) | High |
-| **Collusion Ring** | Multiple agents coordinate false responses | √stake reduces individual power + slashing | Medium |
+| **Zero-Day Farming**| Rapidly build trust on low-value info, attack high-value | Logarithmic Age Modifier + Value-at-Risk (VaR) Capped Weights | High |
+| **Collusion Ring** | Multiple agents coordinate false responses | Stake weights align incentives + slashing | Medium |
 | **Identity Farming** | Create fake verified identities | Polygon ID + cross-platform reputation | Medium |
 | **Last-Minute Attack** | Wait until deadline, flood with false responses | Commit-reveal scheme + early responder bonus | High |
 
@@ -3702,27 +3721,24 @@ contract CommitRevealOracle {
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
-│                    ORACLE ATTACK COST ANALYSIS                           │
+│                    ORACLE ATTACK COST ANALYSIS                          │
 ├─────────────────────────────────────────────────────────────────────────┤
-│                                                                          │
-│  SCENARIO: Corrupt price oracle to liquidate $1M in DeFi positions     │
-│                                                                          │
-│  REQUIRED STAKE TO CONTROL 67% VOTE WEIGHT (with √stake):              │
+│                                                                         │
+│  SCENARIO: Corrupt price oracle to liquidate $1M in DeFi positions      │
+│                                                                         │
+│  REQUIRED STAKE TO CONTROL 67% VOTE WEIGHT:                             │
 │  ──────────────────────────────────────────────────────────             │
-│  Assume 10 honest oracles with 50K stake each                           │
-│  Honest weight: 10 × √50,000 = 10 × 223.6 = 2,236 votes                │
-│                                                                          │
-│  Attacker needs 67% of total → needs 4,540 votes                       │
-│  With √stake: Attacker needs 4,540² = 20.6M $VAMS                      │
-│                                                                          │
-│  At $1/VAMS: Attack cost = $20.6M (for $1M theft)                      │
-│  At $5/VAMS: Attack cost = $103M                                        │
-│                                                                          │
-│  LINEAR COMPARISON: With linear stake, attacker only needs 2× honest   │
-│  stake = 10 × 50K × 2 = 1M $VAMS = $1-5M                               │
-│                                                                          │
-│  CONCLUSION: √stake makes oracle attacks 20x more expensive            │
-│                                                                          │
+│  Assume honest oracles hold 1,000,000 $VAMS total.                      │
+│                                                                         │
+│  Attacker needs >2x the honest stake to reach >67%.                     │
+│  Cost = 2,000,000 $VAMS.                                                │
+│                                                                         │
+│  At $1/VAMS: Attack cost = $2,000,000 (for $1M theft, unprofitable)     │
+│  At $5/VAMS: Attack cost = $10,000,000                                  │
+│                                                                         │
+│  CONCLUSION: The oracle remains economically secure as long as the cost │
+│  of acquiring majority stake significantly exceeds the extractable MEV. │
+│                                                                         │
 └─────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -3781,7 +3797,7 @@ class OracleDisputeResolution:
 | Mechanism | Description | Effectiveness | Gas Cost |
 |-----------|-------------|---------------|----------|
 | **Minimum Stake** | 10,000 $VAMS to participate | Economic barrier | Low |
-| **√Stake Weighting** | Vote power ∝ √(stake) | Reduces plutocracy by 97% | Low |
+| **Linear Stake Weighting**| Vote power ∝ stake | Aligns incentives uniformly | Low |
 | **Reputation Decay** | -1% per day of inactivity | Prevents dormant Sybils | None (off-chain) |
 | **Polygon ID** | Verified identity = +25% weight | Binds accounts to humans | Medium |
 | **Commit-Reveal** | Hidden votes until deadline | Prevents last-minute flooding | Medium |
@@ -3798,9 +3814,9 @@ class OracleDisputeResolution:
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
-│                    DBOS OPERATOR TRUST RISK                              │
+│                    DBOS OPERATOR TRUST RISK                             │
 ├─────────────────────────────────────────────────────────────────────────┤
-│                                                                          │
+│                                                                         │
 │  PHASE 1 RISK:                                                           │
 │  - Multisig (3/5) controls state root commitment                        │
 │  - Corrupted multisig could commit fraudulent state                     │
@@ -3995,41 +4011,40 @@ contract StateCheckpointRegistryV2 {
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
-│                    DBOS STATE ANCHORING WITH FRAUD PROOFS               │
+│          DBOS ZK-STATE ROOTS (REPLACING MULTISIG ANCHORING)             │
 ├─────────────────────────────────────────────────────────────────────────┤
-│                                                                          │
-│  DBOS Checkpoint (every N blocks or T seconds)                          │
-│           │                                                              │
-│           ▼                                                              │
+│                                                                         │
+│  DBOS Execution (every N blocks or T seconds)                           │
+│           │                                                             │
+│           ▼                                                             │
 │  ┌─────────────────────────────────────────┐                            │
-│  │  Compute State Merkle Root              │                            │
-│  │  - All active workflow states           │                            │
-│  │  - Agent memory snapshots               │                            │
-│  │  - Pending settlement queue             │                            │
+│  │  Compute DBOS State Transition          │                            │
+│  │  - Process workflow events              │                            │
+│  │  - Finalize agent memory snapshots      │                            │
 │  └─────────────────────────────────────────┘                            │
-│           │                                                              │
-│           ▼                                                              │
+│           │                                                             │
+│           ▼                                                             │
 │  ┌─────────────────────────────────────────┐                            │
-│  │  Operator Signs & Submits               │                            │
-│  │  - Must be bonded (100K $VAMS)         │                            │
-│  │  - Quorum required (3/5 in Phase 1)     │                            │
+│  │  Decentralized Prover Network           │                            │
+│  │  (RISC Zero / Succinct)                 │                            │
+│  │  - Generates ZK-STARK proof of valid    │                            │
+│  │    computation from Root A to Root B    │                            │
 │  └─────────────────────────────────────────┘                            │
-│           │                                                              │
-│           ▼                                                              │
+│           │                                                             │
+│           ▼                                                             │
 │  ┌─────────────────────────────────────────┐                            │
-│  │  7-Day Challenge Window                 │ ◄─── Anyone can challenge  │
-│  │  - Challenger deposits 10K $VAMS        │      with fraud proof    │
-│  │  - If fraud proven: operator slashed    │                            │
-│  │  - If false challenge: deposit burned   │                            │
+│  │  L1 / L2 Smart Contract Verification    │                            │
+│  │  - Contract verifies ZK-proof directly  │                            │
+│  │  - No multisig or challenge window      │                            │
 │  └─────────────────────────────────────────┘                            │
-│           │                                                              │
-│           ▼  (No successful challenge)                                   │
+│           │                                                             │
+│           ▼                                                             │
 │  ┌─────────────────────────────────────────┐                            │
 │  │  Checkpoint FINALIZED                   │                            │
-│  │  - Safe for agent state recovery        │                            │
-│  │  - Immutable on L1                      │                            │
+│  │  - Asynchronous provable finality       │                            │
+│  │  - Lagged by O(minutes) proving time    │                            │
 │  └─────────────────────────────────────────┘                            │
-│                                                                          │
+│                                                                         │
 └─────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -4056,12 +4071,12 @@ contract StateCheckpointRegistryV2 {
 > [!IMPORTANT]
 > Despite Phase 1 multisig centralization, agents are protected by:
 
-1. ✅ **7-day challenge window** - Any inconsistency can be challenged
-2. ✅ **Public DBOS event logs** - Anyone can verify state transitions
-3. ✅ **Operator bonding** - 100K $VAMS at risk per operator
-4. ✅ **Slashing** - 50% bond slashed for proven fraud
-5. ✅ **Challenger rewards** - Economic incentive to monitor
-6. ✅ **Insurance fund coverage** - Claims possible if fraud slips through
+1. **7-day challenge window** - Any inconsistency can be challenged
+2. **Public DBOS event logs** - Anyone can verify state transitions
+3. **Operator bonding** - 100K $VAMS at risk per operator
+4. **Slashing** - 50% bond slashed for proven fraud
+5. **Challenger rewards** - Economic incentive to monitor
+6. **Insurance fund coverage** - Claims possible if fraud slips through
 
 #### Agent Recovery with Fraud-Proof Checkpoints
 
@@ -4172,7 +4187,7 @@ class AgentStateRecovery:
 | **Hyperlane halt** | Solana/multi-chain bridge | ISM verification timeout | Route via LayerZero | Use Wormhole | Extend settlement timeouts |
 | **LayerZero halt** | SEI bridge, backup routes | DVN consensus fails | Route via Hyperlane | Use Teleporter where applicable | Direct L1 settlement |
 | **Teleporter/AWM halt** | Avalanche L1 interop | BLS multi-sig fails | Use Hyperlane to C-Chain | External bridge roundtrip | Pause Avalanche L1 operations |
-| **AggLayer halt** | Polygon unified bridge | Pessimistic proof fails | Direct Ethereum settlement | Use Hyperlane | Accept higher gas costs |
+| **AggLayer halt** | Polygon unified bridge | Pessimistic proof fails | L1 Escape Hatch (Forced Ethereum Batches) | Use Hyperlane | Accept L1 fallback gas costs |
 
 #### 21.1.6 Economic & Oracle Failures
 
@@ -4188,10 +4203,9 @@ class AgentStateRecovery:
 
 | Cascade Scenario | Components Affected | Severity | Response Protocol |
 |------------------|---------------------|----------|-------------------|
-| **DA + Settlement** | Celestia + Ethereum down | CRITICAL | Avalanche-only mode, local DA queuing |
+| **DA + Settlement** | Celestia + Ethereum down | CRITICAL | Local DA queuing, halt high-value txs |
 | **Compute + TEE** | io.net + Phala down | HIGH | Degraded plaintext compute on Akash |
-| **All Avalanche** | P-Chain + C-Chain + L1s | CRITICAL | Ethereum emergency mode, Solana/SEI routing |
-| **Bridge cascade** | Hyperlane + LayerZero + AWM | CRITICAL | Native L1 settlement only, no cross-chain |
+| **Bridge cascade** | Hyperlane + LayerZero | CRITICAL | Native L1 settlement only, no cross-chain |
 | **State + Compute** | DBOS + Akash down | HIGH | Stateless mode, queue stateful operations |
 | **Full Layer failure** | Any entire layer down | MAXIMUM | Emergency DAO governance, protocol pause |
 
@@ -4204,8 +4218,6 @@ class FailureDetector:
         "celestia": {"blocks_missed": 10, "timeout_sec": 300},
         "ethereum": {"blocks_missed": 5, "timeout_sec": 900},
         "solana": {"slots_missed": 100, "timeout_sec": 120},
-        "avalanche_pchain": {"validator_loss_pct": 33, "timeout_sec": 300},
-        "avalanche_cchain": {"blocks_missed": 5, "timeout_sec": 120},
         "phala": {"attestation_failures": 3, "timeout_sec": 60},
         "io_net": {"cluster_health_pct": 50, "timeout_sec": 180},
         "hyperlane": {"ism_timeout_sec": 30, "retries": 3},
@@ -4262,712 +4274,7 @@ contract RecoveryQueue {
 }
 ```
 
-#### 21.1.10 Avalanche P-Chain Failure Recovery (HIGH-1 Remediation)
-
-> [!CAUTION]
-> **Audit Finding HIGH-1:** Avalanche P-Chain halt procedure only states "Direct settlement to Ethereum" without specifying locked fund recovery, queue processing priority, or compensation mechanisms.
-
-**Why P-Chain Halt is Critical:**
-
-The Avalanche P-Chain is responsible for:
-- **Validator coordination** across all Avalanche L1s (formerly subnets)
-- **Staking operations** for L1 validators
-- **Cross-L1 messaging** via AWM (Avalanche Warp Messaging)
-
-If P-Chain halts, ALL Avalanche L1s lose validator coordination and cross-chain capability simultaneously.
-
-```
-┌─────────────────────────────────────────────────────────────────────────┐
-│                    AVALANCHE P-CHAIN HALT IMPACT                        │
-├─────────────────────────────────────────────────────────────────────────┤
-│                                                                         │
-│  P-CHAIN HALTS                                                          │
-│       │                                                                 │
-│       ├──► ALL Avalanche L1s lose validator set updates                 │
-│       │    └── Individual L1s may continue but cannot finalize          │
-│       │                                                                 │
-│       ├──► AWM messaging STOPS                                          │
-│       │    └── No cross-L1 communication possible                       │
-│       │                                                                 │
-│       ├──► Teleporter bridge HALTS                                      │
-│       │    └── Assets locked in transit cannot complete                 │
-│       │                                                                 │
-│       └──► C-Chain may continue (separate consensus)                    │
-│            └── But no L1 interop possible                               │
-│                                                                         │
-│  VAMS IMPACT:                                                           │
-│  • VAMS L3 (if on Avalanche L1) loses finality guarantees               │
-│  • All Avalanche L1-routed transactions stuck                           │
-│  • Agents with funds on Avalanche L1s cannot access them                │
-│                                                                         │
-└─────────────────────────────────────────────────────────────────────────┘
-```
-
-##### 21.1.10.1 Locked Fund Recovery Procedure
-
-**Assets that may be locked during P-Chain halt:**
-
-| Asset Location             | Type                      | Recovery Method                                        | Timeline          |
-|----------------------------|---------------------------|--------------------------------------------------------|-------------------|
-| **VAMS L3 (Avalanche L1)** | Native $VAMS balance      | L1 continues locally; use C-Chain bridge on recovery   | 0-72h             |
-| **Teleporter in-transit**  | Cross-L1 bridged assets   | Wait for recovery OR emergency unlock                  | 24-168h           |
-| **AWM message queue**      | Pending cross-L1 messages | Replay on recovery                                     | On P-Chain resume |
-| **Staked validators**      | Validator bonds           | Cannot unstake until recovery                          | Indefinite        |
-
-```solidity
-// AvalancheEmergencyRecovery.sol
-contract AvalancheEmergencyRecovery {
-    // Deployed on Ethereum (emergency fallback)
-    
-    uint256 public constant PCHAIN_HALT_THRESHOLD = 1 hours;
-    uint256 public constant EMERGENCY_UNLOCK_THRESHOLD = 72 hours;
-    
-    // Track P-Chain health
-    uint256 public lastKnownPChainBlock;
-    uint256 public lastPChainUpdate;
-    bool public pChainEmergencyMode;
-    
-    struct LockedFund {
-        address owner;
-        uint256 amount;
-        bytes32 sourceChainTx;     // Original Avalanche L1 tx hash
-        uint256 lockedAt;
-        bool emergencyReleased;
-    }
-    
-    mapping(bytes32 => LockedFund) public lockedFunds;
-    
-    // Oracle reports P-Chain status
-    function updatePChainStatus(
-        uint256 _blockNumber,
-        bytes[] calldata _oracleSignatures
-    ) external {
-        require(_verifyOracleQuorum(_oracleSignatures), "Invalid oracle signatures");
-        
-        if (_blockNumber > lastKnownPChainBlock) {
-            lastKnownPChainBlock = _blockNumber;
-            lastPChainUpdate = block.timestamp;
-            
-            if (pChainEmergencyMode) {
-                _exitEmergencyMode();
-            }
-        }
-    }
-    
-    // Detect P-Chain halt
-    function checkPChainHealth() external {
-        if (block.timestamp - lastPChainUpdate > PCHAIN_HALT_THRESHOLD) {
-            if (!pChainEmergencyMode) {
-                _enterEmergencyMode();
-            }
-        }
-    }
-    
-    function _enterEmergencyMode() internal {
-        pChainEmergencyMode = true;
-        emit PChainEmergencyModeActivated(block.timestamp, lastKnownPChainBlock);
-        
-        // Trigger cascade responses
-        IVAMSGateway(vamsGateway).pauseAvalancheRouting();
-        ITransactionRouter(router).enableEthereumOnlyMode();
-    }
-    
-    // Emergency fund release after 72h halt
-    function emergencyReleaseFunds(
-        bytes32 _fundId,
-        bytes calldata _ownershipProof,
-        bytes[] calldata _daoSignatures
-    ) external {
-        require(pChainEmergencyMode, "Not in emergency mode");
-        require(
-            block.timestamp - lastPChainUpdate > EMERGENCY_UNLOCK_THRESHOLD,
-            "Emergency threshold not reached"
-        );
-        require(_verifyDAOQuorum(_daoSignatures), "DAO approval required");
-        
-        LockedFund storage fund = lockedFunds[_fundId];
-        require(!fund.emergencyReleased, "Already released");
-        require(_verifyOwnership(fund.owner, _ownershipProof), "Invalid ownership");
-        
-        fund.emergencyReleased = true;
-        
-        // Release from insurance fund (to be reclaimed on recovery)
-        IInsuranceFund(insuranceFund).emergencyRelease(fund.owner, fund.amount);
-        
-        emit EmergencyFundRelease(_fundId, fund.owner, fund.amount);
-    }
-    
-    function _exitEmergencyMode() internal {
-        pChainEmergencyMode = false;
-        emit PChainRecovered(block.timestamp, lastKnownPChainBlock);
-        
-        // Resume normal operations
-        IVAMSGateway(vamsGateway).resumeAvalancheRouting();
-        ITransactionRouter(router).disableEthereumOnlyMode();
-        
-        // Process recovery queue
-        _processRecoveryQueue();
-    }
-}
-```
-
-##### 21.1.10.2 Queue Processing Priority During P-Chain Halt
-
-```
-┌─────────────────────────────────────────────────────────────────────────┐
-│                    P-CHAIN HALT QUEUE PROCESSING                        │
-├─────────────────────────────────────────────────────────────────────────┤
-│                                                                         │
-│  PHASE 1: IMMEDIATE TRIAGE (0-1 hour)                                   │
-│  ─────────────────────────────────────                                  │
-│  ├── P0: Active x402 payment channels → Settle on Ethereum              │
-│  ├── P0: In-flight bridge transactions → Freeze, track for recovery     │
-│  └── P0: Time-sensitive settlements → Reroute to Solana/SEI             │
-│                                                                         │
-│  PHASE 2: REROUTING (1-4 hours)                                         │
-│  ─────────────────────────────────                                      │
-│  ├── P1: Agent workflows on VAMS L3 → Checkpoint, pause execution       │
-│  ├── P1: New transactions → Route to Ethereum/Solana                    │
-│  └── P1: CLR updates → Disable Avalanche routing paths                  │
-│                                                                         │
-│  PHASE 3: STABILIZATION (4-24 hours)                                    │
-│  ────────────────────────────────────                                   │
-│  ├── P2: Inform all agents of degraded mode                             │
-│  ├── P2: Estimate recovery timeline from Avalanche team                 │
-│  └── P2: Activate Ethereum-only settlement mode                         │
-│                                                                         │
-│  PHASE 4: EXTENDED OUTAGE (24-72 hours)                                 │
-│  ───────────────────────────────────────                                │
-│  ├── P3: Prepare emergency fund releases                                │
-│  ├── P3: Calculate compensation entitlements                            │
-│  └── P3: DAO vote on emergency measures                                 │
-│                                                                         │
-│  PHASE 5: RECOVERY (Post-halt)                                          │
-│  ─────────────────────────────                                          │
-│  ├── Replay all queued transactions in priority order                   │
-│  ├── Reconcile emergency releases vs actual balances                    │
-│  └── Process compensation claims                                        │
-│                                                                         │
-└─────────────────────────────────────────────────────────────────────────┘
-```
-
-##### 21.1.10.3 Compensation Mechanism for Failed Transactions
-
-```solidity
-// TransactionCompensation.sol
-contract TransactionCompensation {
-    enum CompensationType { GAS_REFUND, OPPORTUNITY_COST, EMERGENCY_FEE, FULL_VALUE }
-    
-    struct CompensationClaim {
-        address claimant;
-        bytes32 failedTxHash;
-        uint256 valueAtRisk;
-        uint256 gasSpent;
-        uint256 opportunityCost;    // For time-sensitive operations
-        CompensationType claimType;
-        uint256 filedAt;
-        ClaimStatus status;
-    }
-    
-    enum ClaimStatus { PENDING, APPROVED, REJECTED, PAID }
-    
-    // Compensation tiers based on outage duration
-    struct CompensationTier {
-        uint256 minOutageHours;
-        uint256 maxOutageHours;
-        uint256 gasRefundPct;        // % of gas costs refunded
-        uint256 opportunityCostPct;  // % of opportunity cost covered
-        uint256 emergencyFeePct;     // % of emergency unlock fees refunded
-    }
-    
-    CompensationTier[] public tiers;
-    
-    constructor() {
-        // Tier 1: Short outage (1-4 hours)
-        tiers.push(CompensationTier(1, 4, 100, 0, 0));      // Full gas refund only
-        
-        // Tier 2: Medium outage (4-24 hours)
-        tiers.push(CompensationTier(4, 24, 100, 25, 50));   // + 25% opportunity cost
-        
-        // Tier 3: Long outage (24-72 hours)
-        tiers.push(CompensationTier(24, 72, 100, 50, 75));  // + 50% opportunity cost
-        
-        // Tier 4: Extended outage (72+ hours)
-        tiers.push(CompensationTier(72, type(uint256).max, 100, 100, 100)); // Full compensation
-    }
-    
-    mapping(bytes32 => CompensationClaim) public claims;
-    
-    function fileClaim(
-        bytes32 _failedTxHash,
-        uint256 _valueAtRisk,
-        uint256 _opportunityCost,
-        bytes calldata _proof
-    ) external {
-        require(_verifyTransactionFailure(_failedTxHash, _proof), "Invalid proof");
-        
-        bytes32 claimId = keccak256(abi.encodePacked(msg.sender, _failedTxHash));
-        require(claims[claimId].claimant == address(0), "Already claimed");
-        
-        claims[claimId] = CompensationClaim({
-            claimant: msg.sender,
-            failedTxHash: _failedTxHash,
-            valueAtRisk: _valueAtRisk,
-            gasSpent: _estimateGasSpent(_failedTxHash),
-            opportunityCost: _opportunityCost,
-            claimType: _determineClaimType(_valueAtRisk),
-            filedAt: block.timestamp,
-            status: ClaimStatus.PENDING
-        });
-        
-        emit ClaimFiled(claimId, msg.sender, _failedTxHash);
-    }
-    
-    function processClaim(
-        bytes32 _claimId,
-        bool _approved,
-        bytes[] calldata _daoSignatures
-    ) external {
-        require(_verifyDAOQuorum(_daoSignatures), "DAO approval required");
-        
-        CompensationClaim storage claim = claims[_claimId];
-        require(claim.status == ClaimStatus.PENDING, "Claim not pending");
-        
-        if (_approved) {
-            claim.status = ClaimStatus.APPROVED;
-            uint256 payout = _calculatePayout(claim);
-            IInsuranceFund(insuranceFund).payout(claim.claimant, payout);
-            claim.status = ClaimStatus.PAID;
-            
-            emit ClaimPaid(_claimId, claim.claimant, payout);
-        } else {
-            claim.status = ClaimStatus.REJECTED;
-            emit ClaimRejected(_claimId);
-        }
-    }
-    
-    function _calculatePayout(CompensationClaim memory claim) internal view returns (uint256) {
-        CompensationTier memory tier = _getTierForOutage();
-        
-        uint256 gasRefund = (claim.gasSpent * tier.gasRefundPct) / 100;
-        uint256 opportunityRefund = (claim.opportunityCost * tier.opportunityCostPct) / 100;
-        
-        return gasRefund + opportunityRefund;
-    }
-}
-```
-
-##### 21.1.10.4 Compensation Eligibility Matrix
-
-| Transaction Type | Gas Refund | Opportunity Cost | Emergency Fee Refund | Max Compensation |
-|------------------|------------|------------------|---------------------|------------------|
-| **x402 Payment** | 100% | Up to 50% of payment value | 100% | 150% of original tx value |
-| **Agent Checkpoint** | 100% | N/A (no financial loss) | N/A | Gas only |
-| **Bridge Transfer** | 100% | 0.1% per hour delayed | 100% | 110% of transfer value |
-| **Settlement** | 100% | Actual missed yield | 100% | Value + missed yield |
-| **Deployment** | 100% | N/A | N/A | Gas only |
-
-##### 21.1.10.5 Insurance Fund Coverage for P-Chain Events
-
-```
-┌─────────────────────────────────────────────────────────────────────────┐
-│                    INSURANCE FUND ALLOCATION FOR P-CHAIN HALT           │
-├─────────────────────────────────────────────────────────────────────────┤
-│                                                                         │
-│  INSURANCE FUND RESERVES                                                │
-│  ──────────────────────────                                             │
-│  Target: 5% of TVL (minimum 1M $VAMS)                                   │
-│  P-Chain Event Reserve: 30% of total fund                               │
-│                                                                         │
-│  COVERAGE PRIORITY                                                      │
-│  ─────────────────────                                                  │
-│  1. Emergency fund releases (locked assets)         → 50% of reserve    │
-│  2. Gas refunds for failed transactions             → 30% of reserve    │
-│  3. Opportunity cost compensation                   → 15% of reserve    │
-│  4. Emergency unlock fee refunds                    → 5% of reserve     │
-│                                                                         │
-│  IF RESERVE EXHAUSTED                                                   │
-│  ─────────────────────                                                  │
-│  • DAO approves additional treasury allocation                          │
-│  • Claims processed in priority order (P0 first)                        │
-│  • Partial compensation if fund insufficient                            │
-│                                                                         │
-└─────────────────────────────────────────────────────────────────────────┘
-```
-
-##### 21.1.10.6 Agent Communication During P-Chain Halt
-
-```python
-class PChainHaltNotification:
-    """
-    SDK automatically notifies agents of P-Chain halt and recovery options.
-    """
-    
-    async def on_pchain_halt_detected(self, halt_info: HaltInfo):
-        # Emit structured event for all agents
-        await self.broadcast({
-            "event": "INFRASTRUCTURE_HALT",
-            "component": "AVALANCHE_P_CHAIN",
-            "severity": "CRITICAL",
-            "detected_at": halt_info.detected_at,
-            "last_known_block": halt_info.last_block,
-            "estimated_impact": {
-                "routing_affected": ["avalanche_l1s", "vams_l3", "teleporter"],
-                "routing_available": ["ethereum", "solana", "sei", "hyperlane"],
-                "settlement_mode": "ETHEREUM_ONLY"
-            },
-            "user_actions": {
-                "pending_avalanche_txs": "QUEUED_FOR_RECOVERY",
-                "new_transactions": "WILL_ROUTE_TO_ETHEREUM",
-                "locked_funds": "EMERGENCY_UNLOCK_AVAILABLE_AFTER_72H"
-            },
-            "compensation": {
-                "eligible": True,
-                "claim_window": "30_DAYS_POST_RECOVERY",
-                "documentation_url": "https://docs.vams.network/recovery"
-            }
-        })
-    
-    async def on_pchain_recovery(self, recovery_info: RecoveryInfo):
-        await self.broadcast({
-            "event": "INFRASTRUCTURE_RECOVERED",
-            "component": "AVALANCHE_P_CHAIN",
-            "recovered_at": recovery_info.recovered_at,
-            "outage_duration_hours": recovery_info.duration_hours,
-            "actions": {
-                "queued_transactions": "PROCESSING_IN_PRIORITY_ORDER",
-                "routing": "AVALANCHE_PATHS_RESTORED",
-                "compensation": f"CLAIMS_OPEN_TIER_{recovery_info.compensation_tier}"
-            }
-        })
-```
-
-### 21.1.11 Agent & Application Experience Guarantees
-
-> [!IMPORTANT]
-> Fallback procedures must be **transparent** to agents and applications. The VAMS SDK abstracts infrastructure failures so applications never break—they may experience degraded performance but remain functional.
-
-#### Design Principle: Graceful Degradation, Not Failure
-
-```
-┌─────────────────────────────────────────────────────────────────────────┐
-│                    AGENT EXPERIENCE DURING FALLBACKS                    │
-├─────────────────────────────────────────────────────────────────────────┤
-│                                                                         │
-│  TRADITIONAL APPROACH (BREAKS APPLICATIONS)                             │
-│  ─────────────────────────────────────────                              │
-│  Agent → Request → Provider Down → ERROR 503 → Application Crash        │
-│                                                                         │
-│  VAMS APPROACH (GRACEFUL DEGRADATION)                                   │
-│  ────────────────────────────────────                                   │
-│  Agent → Request → Provider Down → SDK Detects → Automatic Reroute      │
-│                                    │                    │               │
-│                                    └── Emit Warning ────┘               │
-│                                         Event                           │
-│                                           │                             │
-│                                           ▼                             │
-│                          Application continues with:                    │
-│                          • Slightly higher latency                      │
-│                          • Degraded mode notification                   │
-│                          • Same API response format                     │
-│                                                                         │
-└─────────────────────────────────────────────────────────────────────────┘
-```
-
-#### SDK Behavior Contract
-
-The VAMS SDK guarantees the following behaviors during infrastructure failures:
-
-| Scenario | SDK Behavior | Application Impact | Notification |
-|----------|--------------|-------------------|--------------|
-| **Single provider down** | Automatic reroute (transparent) | None | Debug log only |
-| **Layer degraded** (2+ providers) | Reroute + latency warning | Higher latency | `onDegradedMode` callback |
-| **Layer critical** (all providers) | Queue + retry with backoff | Request delayed | `onQueuedRequest` callback |
-| **Cross-layer failure** | Graceful feature disable | Reduced functionality | `onFeatureDisabled` callback |
-| **Protocol pause** | All requests queued | Full pause | `onProtocolPause` callback |
-
-```typescript
-// vams-sdk/src/client.ts
-export class VAMSClient {
-  // Event handlers for graceful degradation
-  onDegradedMode?: (layer: Layer, fallbackProvider: string) => void;
-  onQueuedRequest?: (requestId: string, estimatedWait: number) => void;
-  onFeatureDisabled?: (feature: Feature, reason: string) => void;
-  onProtocolPause?: (resumeEstimate: Date) => void;
-  
-  async executeRequest<T>(request: VAMSRequest): Promise<VAMSResponse<T>> {
-    try {
-      return await this._executeWithFallback(request);
-    } catch (e) {
-      // NEVER throw to application - always return structured response
-      return {
-        success: false,
-        data: null,
-        degraded: true,
-        queuedAt: Date.now(),
-        estimatedCompletion: this._estimateCompletion(request),
-        fallbackUsed: true,
-        error: {
-          code: "QUEUED_FOR_RETRY",
-          message: "Request queued due to infrastructure issue",
-          retryable: true
-        }
-      };
-    }
-  }
-  
-  private async _executeWithFallback<T>(request: VAMSRequest): Promise<VAMSResponse<T>> {
-    const providers = this._getProvidersForLayer(request.targetLayer);
-    
-    for (const provider of providers) {
-      try {
-        const result = await this._tryProvider(provider, request);
-        if (provider !== providers[0]) {
-          // Using fallback - notify but don't fail
-          this.onDegradedMode?.(request.targetLayer, provider.name);
-        }
-        return result;
-      } catch (e) {
-        continue; // Try next provider
-      }
-    }
-    
-    // All providers exhausted - queue the request
-    return this._queueRequest(request);
-  }
-}
-```
-
-#### SLA Commitments Per Degradation Level
-
-| Degradation Level | Availability | Latency Impact | Feature Impact | Compensation |
-|-------------------|--------------|----------------|----------------|--------------|
-| **Normal** | 99.9% | Baseline | Full | None |
-| **Yellow (Degraded)** | 99.5% | +50-200ms | Full | None |
-| **Orange (Critical)** | 99.0% | +500ms-2s | Privacy features may be delayed | Fee rebate if SLA missed |
-| **Red (Emergency)** | 95.0% | +5s-30s | Non-critical features disabled | Full refund for failed requests |
-| **Protocol Pause** | 0% (queued) | Queued | All paused | Automatic compensation |
-
-#### Feature Degradation Hierarchy
-
-When resources become constrained, features degrade in priority order (lowest priority disabled first):
-
-```
-┌─────────────────────────────────────────────────────────────────────────┐
-│                    FEATURE DEGRADATION PRIORITY                          │
-├─────────────────────────────────────────────────────────────────────────┤
-│                                                                          │
-│  PRIORITY 1 (NEVER DISABLED): Payment settlement, active channels       │
-│  ────────────────────────────────────────────────────────────────────   │
-│                                                                          │
-│  PRIORITY 2 (LAST RESORT): Agent workflow checkpoints, state sync       │
-│  ────────────────────────────────────────────────────────────────────   │
-│                                                                          │
-│  PRIORITY 3 (DEGRADED UNDER STRESS): Real-time inference, TEE compute  │
-│  ────────────────────────────────────────────────────────────────────   │
-│                                                                          │
-│  PRIORITY 4 (FIRST TO DISABLE): Analytics, logging, vector search       │
-│  ────────────────────────────────────────────────────────────────────   │
-│                                                                          │
-│  DEGRADATION FLOW:                                                       │
-│  Normal → Disable P4 → Delay P3 → Queue P2 → NEVER touch P1             │
-│                                                                          │
-└─────────────────────────────────────────────────────────────────────────┘
-```
-
-#### Transparent Routing (Zero Application Code Changes)
-
-Applications built on VAMS require **zero code changes** to handle infrastructure failures:
-
-```typescript
-// BEFORE VAMS (Traditional approach - application must handle failures)
-async function processOrder(order: Order) {
-  try {
-    const result = await celestia.postData(order);
-  } catch (e) {
-    if (e.code === "CELESTIA_TIMEOUT") {
-      try {
-        const result = await eigenDA.postData(order); // Manual fallback
-      } catch (e2) {
-        try {
-          const result = await nearDA.postData(order); // Another manual fallback
-        } catch (e3) {
-          throw new Error("All DA providers failed"); // Application breaks
-        }
-      }
-    }
-  }
-}
-
-// AFTER VAMS (SDK handles everything transparently)
-async function processOrder(order: Order) {
-  const result = await vams.postData(order); // That's it. SDK handles fallbacks.
-  // result.degraded === true if fallback was used (optional to check)
-}
-```
-
-#### Request Queueing & Retry Semantics
-
-When all fallbacks are exhausted, requests are queued with guaranteed delivery:
-
-```python
-class RequestQueue:
-    """
-    Guarantees:
-    1. No request is ever lost (persisted to durable storage)
-    2. Requests maintain order within priority class
-    3. Automatic retry with exponential backoff
-    4. Timeout-based expiration with compensation
-    """
-    
-    MAX_RETRY_ATTEMPTS = 5
-    BASE_BACKOFF_MS = 1000
-    MAX_BACKOFF_MS = 60000
-    
-    async def queue_request(self, request: Request) -> QueuedResponse:
-        # Persist to durable storage (survives SDK/app restart)
-        queue_id = await self._persist_to_storage(request)
-        
-        # Calculate estimated completion
-        queue_depth = await self._get_queue_depth(request.priority)
-        avg_processing_time = await self._get_avg_processing_time()
-        estimated_completion = datetime.now() + timedelta(
-            seconds=queue_depth * avg_processing_time
-        )
-        
-        # Start background retry loop
-        asyncio.create_task(self._retry_loop(queue_id, request))
-        
-        return QueuedResponse(
-            queue_id=queue_id,
-            status="QUEUED",
-            estimated_completion=estimated_completion,
-            can_cancel=True,
-            webhook_url=f"https://api.vams.network/queue/{queue_id}/status"
-        )
-    
-    async def _retry_loop(self, queue_id: str, request: Request):
-        for attempt in range(self.MAX_RETRY_ATTEMPTS):
-            backoff = min(
-                self.BASE_BACKOFF_MS * (2 ** attempt),
-                self.MAX_BACKOFF_MS
-            )
-            await asyncio.sleep(backoff / 1000)
-            
-            try:
-                result = await self._execute_request(request)
-                await self._mark_completed(queue_id, result)
-                await self._notify_webhook(queue_id, "COMPLETED", result)
-                return
-            except Exception as e:
-                await self._log_retry_failure(queue_id, attempt, e)
-        
-        # All retries exhausted - trigger compensation
-        await self._trigger_compensation(queue_id, request)
-```
-
-#### Status Page & Real-Time Health
-
-Agents can subscribe to real-time infrastructure health:
-
-```typescript
-// Real-time status subscription
-vams.subscribeToStatus((status: InfrastructureStatus) => {
-  console.log(`Layer ${status.layer}: ${status.health}`);
-  // Output: "Layer COMPUTE: DEGRADED (io.net down, using Akash fallback)"
-  
-  if (status.health === "CRITICAL") {
-    // Application can optionally adjust behavior
-    // but is NOT required to - SDK handles it
-    ui.showBanner("Some features may be slower than usual");
-  }
-});
-
-// Programmatic health check
-const health = await vams.getHealth();
-// {
-//   overall: "DEGRADED",
-//   layers: {
-//     DA: "NORMAL",
-//     COMPUTE: "DEGRADED", 
-//     STATE: "NORMAL",
-//     TRUST: "NORMAL",
-//     SETTLEMENT: "NORMAL"
-//   },
-//   degradedProviders: ["io.net"],
-//   activeAlerts: [{
-//     level: "YELLOW",
-//     message: "io.net experiencing elevated latency",
-//     since: "2026-01-14T15:30:00Z",
-//     estimatedRecovery: "2026-01-14T16:00:00Z"
-//   }]
-// }
-```
-
-#### Compensation Mechanism for Failed SLAs
-
-When SLAs are not met, automatic compensation is triggered:
-
-| SLA Violation | Detection | Compensation | Claim Process |
-|---------------|-----------|--------------|---------------|
-| **Latency SLA** (>2x baseline for >5 min) | Automated monitoring | Fee rebate (10-25%) | Automatic credit |
-| **Availability SLA** (<99% for 24h) | Uptime monitor | Fee rebate (25-50%) | Automatic credit |
-| **Request Failure** (queued request expires) | Queue timeout | Full refund + 10% bonus | Automatic credit |
-| **Data Loss** (checkpoint not recoverable) | Recovery failure | Insurance fund claim | DAO review required |
-
-```solidity
-// SLACompensation.sol
-contract SLACompensation {
-    uint256 public constant LATENCY_REBATE_PCT = 10;
-    uint256 public constant AVAILABILITY_REBATE_PCT = 25;
-    uint256 public constant FAILURE_REFUND_PCT = 110; // 100% + 10% bonus
-    
-    // Automated compensation distribution
-    function processLatencyViolation(
-        address agent,
-        uint256 periodStart,
-        uint256 periodEnd,
-        uint256 feesPayedInPeriod
-    ) external onlyMonitor {
-        uint256 rebate = (feesPayedInPeriod * LATENCY_REBATE_PCT) / 100;
-        _creditAgent(agent, rebate);
-        emit SLACompensation(agent, "LATENCY", rebate);
-    }
-}
-```
-
-### 21.2 Avalanche-Wide Failure Procedure
-
-```
-┌─────────────────────────────────────────────────────────────────────────┐
-│          AVALANCHE CATASTROPHIC FAILURE RESPONSE PROTOCOL               │
-├─────────────────────────────────────────────────────────────────────────┤
-│                                                                         │
-│  DETECTION (Automated)                                                  │
-│  ├── P-Chain unresponsive for 5 minutes                                 │
-│  ├── ≥50% Avalanche L1 validators report connectivity loss              │
-│  └── External monitors (Chainlink, internal) confirm outage             │
-│                                                                         │
-│  IMMEDIATE RESPONSE (0-15 minutes)                                      │
-│  ├── CLR switches to "AVALANCHE_DEGRADED" mode                          │
-│  ├── All Avalanche-bound transactions queued                            │
-│  ├── New transactions routed to SEI/Solana/Ethereum only                │
-│  └── Alert DAO emergency responders (PagerDuty integration)            │
-│                                                                         │
-│  SHORT-TERM (15 min - 4 hours)                                          │
-│  ├── Activate Ethereum backup Gateway (pre-deployed)                    │
-│  ├── Enable Hyperlane-only cross-chain (bypass Teleporter)             │
-│  └── Extend x402 payment channel timeouts to prevent expirations        │
-│                                                                          │
-│  RECOVERY (4+ hours)                                                    │
-│  ├── DAO vote on queue processing priority                              │
-│  ├── Staged replay of queued transactions                               │
-│  └── Post-mortem and compensation distribution                         │
-│                                                                          │
-└─────────────────────────────────────────────────────────────────────────┘
-```
-
-### 21.3 Economic Circuit Breakers
+### 21.2 Economic Circuit Breakers
 
 > [!WARNING]
 > Rapid token price collapse can destabilize the entire protocol. Automatic circuit breakers prevent cascading failures.
@@ -5083,103 +4390,7 @@ contract VAMSInsuranceFund {
 
 ---
 
-## 23. Infrastructure Management (Managed L1s)
-
-VAMS offers **Managed Avalanche L1s** to enterprises with a 1-5% dynamic markup on Total Cost of Ownership (TCO). This section documents the on-chain governance mechanism.
-
-### 23.1 Bounded DAO Governance Model
-
-The markup rate is governed by a **Bounded DAO** model:
-
-- **DAO Controls:** Parameters (min/max bounds, base rate, tiers, thresholds)
-- **Algorithm Calculates:** Per-deposit rate within DAO-set bounds (no per-transaction voting)
-
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                         BOUNDED DAO GOVERNANCE                              │
-├─────────────────────────────────────────────────────────────────────────────┤
-│  DAO-CONTROLLED PARAMETERS                                                  │
-│  ├── minMarkupBps      = 100  (1%)     ← Floor                             │
-│  ├── maxMarkupBps      = 500  (5%)     ← Ceiling                           │
-│  ├── baseRateBps       = 300  (3%)     ← Starting point                    │
-│  ├── targetCapacity    = 100           ← Utilization denominator           │
-│  ├── demandThresholds  = [50%,80%,95%] ← Curve breakpoints                 │
-│  ├── demandModifiers   = [-1%,0%,+1%,+2%] ← bps adjustments                │
-│  └── loyaltyTiers[]    = [(stake,days,discount), ...]                      │
-└─────────────────────────────────────────────────────────────────────────────┘
-```
-
-### 23.2 Dynamic Markup Formula
-
-```
-EffectiveMarkup = clamp(MIN, MAX, BaseRate + DemandModifier − LoyaltyDiscount)
-```
-
-| Component | Range | Description |
-|-----------|-------|-------------|
-| **BaseRate** | 3% (default) | DAO-set starting point |
-| **DemandModifier** | -1% to +2% | Based on utilization of managed L1 capacity |
-| **LoyaltyDiscount** | 0% to 1% | Based on enterprise's staked VAMS tokens |
-| **Effective Range** | 1% to 5% | Clamped to DAO-set bounds |
-
-#### Demand Curve (Utilization-Based)
-
-| Utilization | Modifier | Rationale |
-|-------------|----------|-----------|
-| < 50% | -1% | Underutilized → attract more users |
-| 50-80% | 0% | Optimal operating range |
-| 80-95% | +1% | High demand → sustainable pricing |
-| > 95% | +2% | Congested → discourage spam |
-
-#### Loyalty Tiers (Staking-Based)
-
-| Staked VAMS | Min Lock | Discount |
-|-------------|----------|----------|
-| ≥ 100,000 | 90 days | -1.0% |
-| ≥ 50,000 | 60 days | -0.5% |
-| ≥ 10,000 | 30 days | -0.25% |
-
-### 23.3 VAMSValidatorManager Contract
-
-**Location:** `contracts/src/infrastructure/VAMSValidatorManager.sol`
-
-**Key Functions:**
-
-| Function | Access | Description |
-|----------|--------|-------------|
-| `calculateMarkup(address)` | Public | Calculate effective markup for enterprise |
-| `deposit(bytes32 subnetId)` | Public | Deposit AVAX for managed L1 |
-| `registerSubnet(bytes32, uint256)` | Public | Register new managed subnet |
-| `updateBounds(uint256, uint256)` | Governance | Change min/max markup |
-| `updateBaseRate(uint256)` | Governance | Adjust base rate |
-| `updateDemandCurve(uint256[], int256[])` | Governance | Modify utilization curve |
-| `updateLoyaltyTiers(LoyaltyTier[])` | Governance | Change staking discounts |
-| `emergencyFreeze(uint256)` | Emergency | Lock to fixed rate |
-
-### 23.4 Fund Flow
-
-```
-Enterprise Deposit (AVAX)
-         │
-         ▼
-VAMSValidatorManager.deposit()
-         │
-         ├───┬──────────────────────────┐
-         │   │                          │
-         ▼   │                          ▼
-   95-99% AVAX                      1-5% AVAX
-   (netAmount)                     (markupAmount)
-         │                              │
-         ▼                              ▼
-   P-Chain (ACP-77)              VAMSFeeCollector
-   Validator Balance             (Protocol Revenue)
-```
-
----
-
----
-
-## 24. Future Roadmap: The Quantum Horizon
+## 23. Future Roadmap: The Quantum Horizon
 
 As the VAMS network scales to millions of sovereign agents, the routing optimization problem (Layer 3) becomes exponentially complex.
 VAMS is architected to be the **Operating System** for the post-classical computing era.
@@ -5188,14 +4399,14 @@ VAMS is architected to be the **Operating System** for the post-classical comput
 The next evolution of the CLR will integrate **Quantum DePIN** resources (accessed via Layer 2) to solve probabilistic routing challenges.
 
 *   **Current State (Classical)**: Heuristic routing based on 4 variables.
-*   **Future State (Quantum)**: A Quantum CLR solves the **Global Traveling Salesman Problem** for the entire agent network in milliseconds, optimizing liquidity paths across 1,000+ chains simultaneously.
+*   **Future State (Quantum)**: A Quantum CLR utilizes Quantum Approximate Optimization Algorithms (QAOA) or quantum annealing to heuristically approximate NP-Hard optimal liquidity routing graphs within acceptable polynomial time bounds.
 
 ### 24.2 The Platform-First Thesis
 VAMS adheres to the "It from Bit" philosophy:
 *   **Hardware is Commodity**: Whether H100 GPU or Superconducting Qubit, it is just a resource.
 *   **Platform is Value**: VAMS provides the logic, payment rails ($VAMS), and trust layer (Layer 4) that allows agents to consume these resources.
 
-We are building the "AWS of Web3"—the platform where the Quantum economy will inevitably be hosted.
+VAMS provides the underlying decentralized routing primitives required to integrate Quantum DePIN providers as network resources.
 
 ---
 
@@ -5205,18 +4416,13 @@ We are building the "AWS of Web3"—the platform where the Quantum economy will 
 
 | Term | Definition |
 |------|------------|
-| **ACP-77** | Avalanche Community Proposal 77; decouples L1 validation from Primary Network |
 | **AggLayer** | Polygon's unified settlement and liquidity layer |
-| **Avalanche L1** | Sovereign blockchain built on Avalanche infrastructure (formerly Subnet) |
-| **AWM** | Avalanche Warp Messaging; native cross-chain protocol |
 | **CLR** | Conditional L1 Router |
 | **DAS** | Data Availability Sampling |
 | **DBOS** | Database Operating System |
 | **DID** | Decentralized Identifier |
-| **HyperSDK** | Framework for building high-performance custom VMs on Avalanche |
 | **MCP** | Model Context Protocol |
 | **TEE** | Trusted Execution Environment |
-| **Teleporter** | EVM-compatible interface for AWM |
 | **x402** | HTTP 402-based payment protocol |
 | **ZKML** | Zero-Knowledge Machine Learning |
 
@@ -5233,11 +4439,6 @@ We are building the "AWS of Web3"—the platform where the Quantum economy will 
 9. [io.net](https://io.net/docs/)
 10. [Akash Network](https://akash.network/docs/)
 11. [Model Context Protocol](https://modelcontextprotocol.io/)
-12. [Avalanche Primary Network](https://build.avax.network/docs/primary-network)
-13. [Avalanche ACP-77](https://github.com/avalanche-foundation/ACPs/tree/main/ACPs/77-reinventing-subnets)
-14. [HyperSDK](https://github.com/ava-labs/hypersdk)
-15. [Avalanche Teleporter](https://build.avax.network/docs/cross-chain/avalanche-warp-messaging/deep-dive)
-16. [x402 Payment Protocol](https://build.avax.network/academy/blockchain/x402-payment-infrastructure)
 
 ---
 

@@ -68,7 +68,7 @@ VAMS (Verifiable and Agentic Modular Stack) is a **Polygon CDK Validium** that s
 
 - **Sovereign AI Chain**: First AI-native chain purpose-built for autonomous agents
 - **Novel Use Case**: Agent-to-agent micropayments via x402 protocol
-- **Ecosystem Growth**: Bridges external ecosystems (Solana, Avalanche) to AggLayer
+- **Ecosystem Growth**: Fuses Cardano (Intent/Brain) with Polygon CDK (Execution/Hands) while bridging external ecosystems to AggLayer
 - **Keyword Match**: "Polygon CDK Validium powered by Celestia DA and AggLayer Liquidity"
 
 ---
@@ -97,8 +97,8 @@ VAMS (Verifiable and Agentic Modular Stack) is a Layer 3 meta-architecture that 
 - Sovereign Elastic L1s for isolated agent execution
 - Custom gas tokens ($VAMS) on dedicated L1s
 - Avalanche Warp Messaging (AWM) for inter-L1 communication
-- Teleporter for C-Chain bridging
-- CLR (Conditional L1 Router) with Avalanche as sovereign execution layer for specialized agents
+- ICB-SDK integration for cross-chain execution
+- CLR (Conditional L1 Router) with Cardano as the Brain for intent generation and verification
 
 ---
 

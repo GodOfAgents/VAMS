@@ -87,7 +87,7 @@ The result is a platform where autonomous agents can consume infrastructure, pro
 
 ### 1.4 The Ontological Breakthrough: Bit from Bit
 
-The VAMS architecture formally implements the **"Bit from Bit"** theoretical framework (see [`narrative/BIT_FROM_BIT.md`](../narrative/BIT_FROM_BIT.md)), which advances John Wheeler’s "It from Bit" hypothesis for the agentic era.
+The VAMS architecture formally implements the **"Bit from Bit"** theoretical framework (see [`docs/narrative/BIT_FROM_BIT.md`](../docs/narrative/BIT_FROM_BIT.md)), which advances John Wheeler’s "It from Bit" hypothesis for the agentic era.
 
 In Wheeler’s original formulation, a biological observer was required to collapse probability into reality. VAMS demonstrates that this function can be performed by software.
 
@@ -118,7 +118,7 @@ VAMS organizes decentralized infrastructure into five logical layers, each addre
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
 │  LAYER 5: ECONOMIC                                                       │
-│  $VAMS Token • Dynamic TAO • x402/AP2 Payments • Staking                │
+│  $VAMS Token • DEC (Emission Config) • x402/AP2 Payments            │
 ├─────────────────────────────────────────────────────────────────────────┤
 │  LAYER 4: TRUST                                                          │
 │  Phala TEE • Marlin Oyster • Automata Attestation • ZKML                │
@@ -246,14 +246,14 @@ VAMS maintains connectivity across multiple settlement layers:
 | Source | Destination | Transport | Latency | Security Model |
 |--------|-------------|-----------|---------|----------------|
 | **VAMS L3 (Polygon CDK)** | Ethereum | AggLayer | ~5min | Validity Proofs |
-| **VAMS L3 (Polygon CDK)** | Other CDK Chains | AggLayer | ~1min | Unified Bridge |
-| VAMS L3 | Solana | Hyperlane | ~400ms | Multi-ISM verification |
+| **VAMS L3 (Polygon CDK)** | Other CDK Chains | AggLayer | ~1min | Unified Bridge / Pessimistic Proofs |
+| VAMS L3 | Solana | ICB-SDK | ~400ms | Decentralized Validation |
 | VAMS L3 | SEI | LayerZero v2 | ~380ms | DVN consensus |
 | VAMS L3 | Avalanche L1s (Secondary) | AWM/Teleporter | ~250ms | BLS multi-sig |
 | VAMS L3 | Cardano | Rosen Bridge | ~2min | Ouroboros finality |
-| VAMS L3 | Midnight | Hyperlane (ZK-ISM) | ~1min | ZK-SD proofs |
+| VAMS L3 | Midnight | ICB-SDK (ZK-Verified) | ~1min | ZK-SD proofs |
 
-**Multi-ISM Bridge Security**: To mitigate single-vendor bridge risk, VAMS implements a 2/3 consensus across TEE-based, Oracle-based, and Multisig ISMs for Hyperlane verification.
+**Bridge Security**: To mitigate single-vendor bridge risk, VAMS implements the Interchain Communication Backbone SDK (ICB-SDK) with decentralized validation layers.
 
 > **Note**: Comprehensive failure recovery procedures for all settlement layers, including Avalanche P-Chain halt scenarios, are specified in [ARCHITECTURE_v0-3-0.md §21.1.10](./ARCHITECTURE_v0-3-0.md). This includes locked fund recovery, queue processing priority, and compensation mechanisms.
 
@@ -315,54 +315,49 @@ VAMS implements four principles for data sovereignty:
 | Parameter | Value |
 |-----------|-------|
 | **Total Supply** | 1,000,000,000 $VAMS (fixed cap) |
-| **Initial Circulating** | 150,000,000 $VAMS (15%) — see TGE breakdown |
-| **Token Standard** | ERC-20 (Ethereum) + Wrapped variants |
+| **Initial Circulating** | 100,000,000 $VAMS (10%) |
+| **Token Standard** | ERC-20 (Polygon MVP -> Multi-chain) |
 
-#### TGE Circulating Supply Breakdown (150M / 15%)
+#### TGE Circulating Supply Breakdown (100M / 10%)
 
 | Source | Tokens | % | Notes |
 |--------|--------|---|-------|
-| Initial Liquidity | 50,000,000 | 5% | DEX/CEX liquidity pools |
-| Community Airdrop | 50,000,000 | 5% | Testnet participants, early adopters |
-| Ecosystem Grants | 50,000,000 | 5% | Developer incentives, integrations |
-| **Total at TGE** | **150,000,000** | **15%** | |
+| Liquidity & Airdrop | 100,000,000 | 10% | 100% Unlocked at TGE for DEX liquidity and community |
 
-### 4.2 Allocation
+### 4.2 Allocation Breakdown (Decentralized Model)
 
-| Category | Allocation | Vesting |
-|----------|-----------|---------|
-| Community & Ecosystem | 34% | 5-year linear unlock |
-| Protocol Treasury | 21% | 6-month cliff, 2%/month operational runway |
-| Founder | 16% | 4-year vest, 1-year cliff |
-| Investors | 14% | Pre-seed/Seed/Strategic, 6-36 month vests |
-| Team & Advisors | 10% | 3-year vest, 1-year cliff |
-| Initial Liquidity | 5% | Unlocked at TGE |
+| Category | Allocation | Amount | Vesting |
+|----------|-----------|---------|---------|
+| **Community & Ecosystem** | **50%** | 500,000,000 | Liquidity/Airdrop (10%) + Grants/Mining (40%, 60m vest) |
+| **Founder** | **12%** | 120,000,000 | 12-month cliff, 48-month linear vesting |
+| **Future Team & Advisors**| **13%** | 130,000,000 | 12-month cliff, 36-month linear (50% GMV-Gated) |
+| **Investors (Early/Reg)** | **13%** | 130,000,000 | 6-12 month cliff, 18-30 month vests |
+| **DAO Treasury** | **12%** | 120,000,000 | 6-month cliff, 48-month linear (50% GMV-Gated) |
 
-### 4.3 Emission Schedule
+### 4.3 Emission Schedule (Inflationary Security)
+
+To ensure perpetual network security, VAMS uses a **low-inflation model** strictly for staking rewards.
 
 ```
-Year 1:   25,000,000 $VAMS (2.5%)
-Year 2:   20,000,000 $VAMS (1.95%)
-Year 3:   15,000,000 $VAMS (1.42%)
-Year 4:   10,000,000 $VAMS (0.92%)
-Year 5:    5,000,000 $VAMS (0.46%)
-Years 6-10: 1,000,000 $VAMS/year (tail emission)
-Post-Year 10: 500,000 $VAMS/year (terminal rate, DAO can reduce only)
-
-Total Inflation: ~2.5% Year 1, decreasing to 0.05% terminal
+Max Annual Inflation: 2.5% (25M tokens/year initially)
+Phase 1 (Bootstrap): 100% of Protocol Fees go to Buyback & Burn
+Phase 2 (Mature): Continued deflationary pressure + Staking/Treasury yield
+Terminal Rate: 500,000 $VAMS/year
 ```
+
+**Net Deflation Target:** At 2.5% inflation and an average $0.20 token price, the network becomes unconditionally deflationary at **$5,000,000 in annual fee revenue**.
 
 ### 4.4 Value Accrual Mechanisms
 
 | Mechanism | Rate | Distribution |
 |-----------|------|--------------|
-| Protocol Fees | 0.1-0.5% | 100% Buyback & burn (Phase 1) → 40% (Phase 2) |
+| Protocol Fees | 0.1-1.0% | 100% Buyback & burn (Phase 1) → 40% (Phase 2) |
 | Gas Abstraction Premium | 2-7% markup | Treasury revenue |
-| Staking Rewards | 6-12% target APY | Validator incentives |
+| Staking Rewards | 8-12% target APY | L3 Sequencer & CLR validators |
 | x402 Settlement Fees | 0.05% | LP rewards |
 | Bridge Fees | 0.25% | Insurance fund + LP |
 
-### 4.5 Dynamic TAO Integration
+### 4.5 Dynamic Emission Controller (DEC)
 
 VAMS employs reinforcement learning for economic parameter adjustment:
 
@@ -383,12 +378,12 @@ This creates a self-adjusting economic system that responds to network demand wh
 | Threat | Severity | Primary Mitigation |
 |--------|----------|-------------------|
 | Gateway Compromise | Critical | Multi-sig + timelock + emergency pause |
-| Bridge Exploit | Critical | Pessimistic proofs + Multi-ISM verification |
+| Bridge Exploit | Critical | Pessimistic proofs + ICB-SDK |
 | TEE Side-Channel | High | Multi-vendor active verification (2/3 consensus) |
 | x402 MEV | High | Threshold encryption + payment channels |
 | CLR Front-Running | High | Encrypted metadata + routing proofs |
-| Oracle Manipulation | High | Stake-weighted consensus + reputation |
-| L1 Halt Cascade | Critical | Multi-chain fallback procedures |
+| Oracle Manipulation | High | Stake-weighted + VaR Capped Reputation + Logarithmic Age |
+| L1 Halt / AggLayer Halt | Critical | Multi-chain fallback + L1 Escape Hatches (Forced Batches) |
 
 ### 5.2 Defense in Depth
 
@@ -462,7 +457,7 @@ VAMS implements a **Day 1 Sovereign Governance** model using standard OpenZeppel
 
 | Phase | Timeline | Governance Model |
 |-------|----------|------------------|
-| **Phase 1: Guarded** | Day 0 - Month 6 | DAO votes on parameters; Core Team retains Veto on Timelock |
+| **Phase 1: Guarded** | Day 0 - Month 6 | DAO votes; Team constrained by ZK-Bounded Veto Bond (AKEV mitigated) |
 | **Phase 2: Maturation** | Month 6 - Month 24 | Team Veto revoked; Timelock delay increased to 3 days |
 | **Phase 3: Sovereign** | Month 24+ | Full on-chain control; Guardian keys rotated to elected community members |
 
@@ -543,7 +538,7 @@ VAMS positions itself as the "Sovereign Brain" for the agentic web—a meta-laye
 7. Model Context Protocol. https://modelcontextprotocol.io/
 8. x402 Payment Protocol. https://build.avax.network/academy/blockchain/x402-payment-infrastructure
 9. EZKL: Easy Zero-Knowledge Machine Learning. https://docs.ezkl.xyz/
-10. Hyperlane Interoperability. https://docs.hyperlane.xyz/
+10. ICB-SDK Architecture. (Replacing Hyperlane integration)
 11. David, B. et al. Ouroboros Praos: An Adaptively-Secure Proof-of-Stake Blockchain. EUROCRYPT 2018.
 12. Input Output Global. Midnight: Data Protection Meets Blockchain. https://midnight.network/
 
