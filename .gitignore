@@ -69,3 +69,7 @@ frontend-vite/
 
 # Local State
 .data/
+
+# Confidential Partnership Docs
+docs/team/Ecosystem_Grants.md
+docs/team/meeting-transcript.doc

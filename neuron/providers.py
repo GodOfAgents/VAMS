@@ -8,6 +8,7 @@ Supported Providers:
 - EigenDA (Holesky Testnet) - High-value enterprise
 - Near DA (Testnet) - High-frequency operations  
 - Avail (Turing Testnet) - ZK/Validium operations
+- Iagon (Cardano Mainnet) - eUTXO Storage
 """
 
 import time
@@ -288,6 +289,37 @@ class AvailProvider(DAProvider):
         return None
 
 
+class IagonProvider(DAProvider):
+    """Iagon Cardano-Native eUTXO Storage provider."""
+    
+    name = "iagon"
+    network = "cardano-mainnet"
+    
+    def __init__(self, rpc_url: str = "https://api.iagon.com", timeout: int = 10):
+        super().__init__(rpc_url, timeout)
+    
+    def get_latest_block(self) -> Optional[BlockInfo]:
+        """Query Iagon API for reachability."""
+        try:
+            response = self.session.get(
+                self.rpc_url,
+                timeout=self.timeout
+            )
+            
+            if response.status_code == 200:
+                # Iagon is storage, use timestamp as heartbeat block
+                return BlockInfo(
+                    height=int(time.time()),
+                    network=self.network,
+                    provider=self.name,
+                    timestamp=time.time(),
+                    block_hash=None
+                )
+        except Exception:
+            pass
+        return None
+
+
 class ProviderManager:
     """
     Manages multiple DA providers with health monitoring and failover.
@@ -300,7 +332,8 @@ class ProviderManager:
                 CelestiaProvider(),
                 EigenDAProvider(),
                 NearDAProvider(),
-                AvailProvider()
+                AvailProvider(),
+                IagonProvider()
             ]
         
         self.providers: Dict[str, DAProvider] = {p.name: p for p in providers}

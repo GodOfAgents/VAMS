@@ -961,12 +961,11 @@ export default function VAMS_Web3_Guild() {
                 <h3 className="font-serif text-2xl mb-10 relative z-10">Token Distribution</h3>
                 <ul className={`space-y-6 font-mono text-sm ${isDark ? 'text-gray-500' : 'text-gray-400'} relative z-10`}>
                     {[
-                        { l: "Community & Eco", v: "34%" },
-                        { l: "Protocol Treasury", v: "21%" },
-                        { l: "Founders", v: "16%" },
-                        { l: "Investors", v: "14%" },
-                        { l: "Team & Advisors", v: "10%" },
-                        { l: "Initial Liquidity", v: "5%" },
+                        { l: "Community & Ecosystem", v: "50%" },
+                        { l: "Future Team & Advisors", v: "13%" },
+                        { l: "Investors", v: "13%" },
+                        { l: "DAO Treasury", v: "12%" },
+                        { l: "Founder", v: "12%" },
                     ].map((row, idx) => (
                         <li key={idx} className={`flex justify-between border-b ${isDark ? 'border-black/10 hover:text-black' : 'border-white/10 hover:text-white'} pb-2 transition-colors cursor-default`}>
                             <span>{row.l}</span>

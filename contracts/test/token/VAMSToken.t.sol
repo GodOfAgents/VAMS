@@ -12,7 +12,7 @@ contract VAMSTokenTest is BaseTest {
     VAMSToken public vamsToken;
     
     // Test constants
-    uint256 constant INITIAL_SUPPLY = 150_000_000 ether; // TGE amount
+    uint256 constant INITIAL_SUPPLY = 1_000_000_000 ether; // Total Supply
     uint256 constant ANTI_WHALE_DURATION = 180 days;
     uint256 constant INITIAL_MAX_WALLET_BPS = 500; // 5%
     uint256 constant INITIAL_DAILY_LIMIT_BPS = 100; // 1%
@@ -333,7 +333,7 @@ contract VAMSTokenTest is BaseTest {
     
     function test_AntiWhale_DailyLimitEnforced() public {
         // Transfer some tokens to user1 (within limits)
-        uint256 amount = 1_000_000 ether; // 0.1% of supply, within max wallet
+        uint256 amount = 20_000_000 ether; // 2% of supply, within max wallet
         vm.prank(treasury);
         assertTrue(vamsToken.transfer(user1, amount));
         

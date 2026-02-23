@@ -230,6 +230,16 @@ class ImmortalAgentDemo:
         checkpoint_data = json.dumps(data, sort_keys=True)
         checkpoint_hash = hashlib.sha256(checkpoint_data.encode()).hexdigest()[:16]
         
+        # --- Iagon Storage Integration ---
+        iri = None
+        try:
+            from sdk.iagon_storage import IagonStorageSDK
+            os.environ["IAGON_MOCK_MODE"] = "true"
+            iagon_sdk = IagonStorageSDK()
+            iri = iagon_sdk.store_checkpoint(checkpoint_hash, data)
+        except Exception:
+            pass # Fails gracefully if no SDK 
+            
         result = StepResult(
             step_name=step_name,
             step_index=step_index,
@@ -237,6 +247,9 @@ class ImmortalAgentDemo:
             duration_ms=duration_ms,
             checkpoint_hash=checkpoint_hash
         )
+        if iri:
+             result.data['_iagon_iri'] = iri
+             
         self.checkpoints.append(result)
         return result
     

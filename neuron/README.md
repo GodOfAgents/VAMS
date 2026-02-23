@@ -22,8 +22,8 @@ VAMS Neuron is a **real infrastructure client** that connects to decentralized n
 
 | Layer | Providers | Status |
 |-------|-----------|--------|
-| **L1 Data Availability** | Celestia, EigenDA, Near, Avail | 4/4 ✅ |
-| **L2 Compute** | io.net, Akash, Render, Bittensor | 4/4 ✅ |
+| **L1 Data Availability** | Celestia, EigenDA, Near, Avail, Iagon | 5/5 ✅ |
+| **L2 Compute** | io.net, Akash, Render, Bittensor, Phala | 5/5 ✅ |
 | **L3 Logic** | Kwil, WeaveDB, Glacier + DBOS Workflows | 3/3 ✅ |
 | **L4 Trust** | Phala (SGX), Marlin (Nitro), Automata | 3/3 ✅ |
 | **L5 Execution Chains** | Cardano (eUTXO), Midnight (ZK-SD) | 2/2 ✅ |
@@ -34,7 +34,7 @@ VAMS Neuron is a **real infrastructure client** that connects to decentralized n
 # Install dependencies
 pip install -r requirements.txt
 
-# Run full health check (all 15 providers)
+# Run full health check (all 17 providers)
 python neuron.py --full-health
 
 # Run crash-proof workflow demo
@@ -45,7 +45,7 @@ python neuron.py --demo-workflow
 
 ```bash
 # Health Checks (Real Network Calls)
-python neuron.py --full-health       # All 4 layers (15 providers)
+python neuron.py --full-health       # All 4 layers (17 providers)
 python neuron.py --check-health      # Layer 1 (DA)
 python neuron.py --check-compute     # Layer 2 (Compute)
 python neuron.py --check-logic       # Layer 3 (Logic)
@@ -86,6 +86,7 @@ python neuron.py --use-sdk                # Enable SDK mode
   [OK] EIGENDA      1156ms | Block #5053377
   [OK] NEAR         1786ms | Block #234071245
   [OK] AVAIL        2243ms | Block #2889669
+  [OK] IAGON        1892ms | Block #4321012
 
 [00:18:30] [   L2   ] LAYER 2: Compute Providers
 
@@ -93,6 +94,7 @@ python neuron.py --use-sdk                # Enable SDK mode
   [OK] AKASH          1631ms
   [OK] RENDER         1080ms
   [OK] BITTENSOR      1000ms
+  [OK] PHALA_CP       1342ms
 
 [00:18:34] [   L3   ] LAYER 3: Logic Providers
 

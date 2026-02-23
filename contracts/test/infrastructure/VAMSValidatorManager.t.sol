@@ -43,7 +43,7 @@ contract MockStaking is IVAMSStaking {
     function compoundRewards() external override returns (uint256) { return 0; }
     function setAutoCompound(bool) external override {}
     function getVotingPower(address) external pure override returns (uint256) { return 0; }
-    function getTier(address) external pure override returns (StakingTier) { return StakingTier.Bronze; }
+    function getTier(address) external pure override returns (StakingTier) { return StakingTier.None; }
     function isCLROperatorEligible(address) external pure override returns (bool) { return false; }
     function pendingRewards(address) external pure override returns (uint256) { return 0; }
     function totalStaked() external pure override returns (uint256) { return 0; }

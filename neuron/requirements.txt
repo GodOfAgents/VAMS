@@ -5,8 +5,8 @@ requests>=2.31.0      # HTTP client for Celestia/Arweave RPC
 ecdsa>=0.18.0         # ECDSA cryptography (Secp256k1)
 colorama>=0.4.6       # Terminal colors (cross-platform)
 web3>=6.0.0           # Ethereum interaction (Polygon CDK, x402)
-pytest>=7.0.0         # Testing framework
+python-dotenv>=1.0.0
+cryptography>=41.0.0         # Testing framework
 
 # Optional Dependencies (install manually if needed):
 # bittensor           # For Bittensor SDK integration
-

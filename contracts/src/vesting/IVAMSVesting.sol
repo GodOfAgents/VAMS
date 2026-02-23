@@ -13,11 +13,12 @@ interface IVAMSVesting {
     /// @notice Pre-defined vesting schedule types
     /// @notice Pre-defined vesting schedule types
     enum ScheduleType {
-        FOUNDER,        // 12mo cliff, 48mo vest, 0% cliff unlock
-        TEAM,           // 12mo cliff, 36mo vest, 0% cliff unlock
-        INVESTOR,       // 12mo cliff, 24mo vest, 0% cliff unlock (New v2)
-        FOUNDATION,     // 6mo cliff, 36mo vest, 0% cliff unlock (New v2)
-        COMMUNITY       // 0 cliff, 60mo vest, 0% cliff unlock (linear)
+        FOUNDER,        // 12mo cliff, 48mo vest, 25% cliff unlock
+        TEAM,           // 12mo cliff, 36mo vest, 33.33% cliff unlock
+        EARLY_INVESTOR, // 6mo cliff, 18mo vest, 33.33% cliff unlock
+        REG_INVESTOR,   // 12mo cliff, 30mo vest, 40% cliff unlock
+        FOUNDATION,     // 6mo cliff, 48mo vest, 12.5% cliff unlock
+        COMMUNITY       // 0 cliff, 60mo vest, 0% cliff unlock
     }
 
     // ============ Structs ============

@@ -350,6 +350,44 @@ class PhalaTEE:
                 execution_time_ms=(time.time() - start) * 1000,
                 error=str(e)
             )
+
+    def execute_python_in_enclave(self, script_code: str, args: Dict[str, Any] = None) -> PhatContractResult:
+        """
+        Deploy and execute an arbitrary Python script inside a Phala SGX Enclave.
+
+        VAMS utilizes this to execute 'Immortal Agents' in a Confidential Compute 
+        environment where the hosting node operator cannot view the memory states.
+        
+        Args:
+            script_code: Raw Python code string to execute
+            args: kwargs to inject into the execution scope
+        """
+        # In a strict production environment, this wraps the script into a 
+        # WebAssembly-compiled execution runtime matching the Phat Contract specification.
+        # Here we bridge it via the existing call_phat_contract routing mechanisms.
+        
+        mock_mode = os.getenv("PHALA_MOCK_MODE", "true").lower() == "true"
+        if mock_mode:
+            time.sleep(1.8) # Simulate SGX init and execution
+            return PhatContractResult(
+                success=True,
+                output={"status": "executed", "mock_enclave": "sgx_v2_intel", "script_length": len(script_code)},
+                gas_used=150000,
+                execution_time_ms=1800.0
+            )
+            
+        # The true execution path invokes the 'run_python' method on the standard
+        # VAMS Python-Interpreter Phat Contract deployed on Phala Network.
+        contract_address = os.getenv("VAMS_PHAT_PYTHON_RUNTIME", "0x0000...")
+        
+        payload = {
+            "script": script_code,
+            "ctx": args or {}
+        }
+        
+        # Phat contracts require payloads encrypted with the cluster's public key.
+        # This is abstracted by the SDK via call_phat_contract handling the ECDH negotiation
+        return self.call_phat_contract(contract_address, "run_python", [json.dumps(payload)])
     
     def get_phat_contract_info(self, contract_address: str) -> Optional[dict]:
         """

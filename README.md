@@ -19,6 +19,8 @@
 ╚══════════════════════════════════════════════════════════════════════════════╝
 -->
 <div align="center">
+  <img src="./assets/vams-logo.png" alt="VAMS Logo" width="600" />
+  <br/>
 
 # VAMS
 ### The Operating System for the Agentic Economy
@@ -86,7 +88,7 @@ Building autonomous agents today means juggling **10+ wallets, 15+ protocols, an
 ### 🏗️ The 5 Core Pillars
 
 #### 1️⃣ **Unified DePIN Access**
-Single API for compute (io.net, Akash), storage (Arweave, Ceramic), and networking. No multi-wallet juggling.
+Single API for compute (io.net, Akash, Phala), storage (Iagon, Ceramic), and networking. No multi-wallet juggling.
 
 #### 2️⃣ **Intelligent Routing (CLR)**
 Conditional L1 Router auto-selects the optimal chain:
@@ -114,15 +116,15 @@ VAMS is not merely a tech stack; it is a **philosophical engine** that instantia
 
 | Field | The Breakthrough | Deep Dive |
 | :--- | :--- | :--- |
-| **Physics** | **It from Bit** (The Synthetic Observer) | [📜 Read Narrative](./docs/narrative/PHYSICS_IT_FROM_BIT.md) |
-| **Economics** | **Deterministic Agency** (Zero Agency Cost) | [📜 Read Narrative](./docs/narrative/ECONOMICS_DETERMINISTIC_AGENCY.md) |
-| **Law** | **Polycentric Sovereignty** (Algorithmic Jurisdiction) | [📜 Read Narrative](./docs/narrative/LAW_POLYCENTRIC_SOVEREIGNTY.md) |
-| **Biology** | **Digital Autopoiesis** (Synthetic Life) | [📜 Read Narrative](./docs/narrative/BIOLOGY_DIGITAL_AUTOPOIESIS.md) |
-| **AI** | **The Verifiable Mind** (Glass Box Intelligence) | [📜 Read Narrative](./docs/narrative/AI_VERIFIABLE_MIND.md) |
-| **Blockchain** | **The DePIN OS** (Planetary Computer) | [📜 Read Narrative](./docs/narrative/BLOCKCHAIN_DEPIN_OS.md) |
+| **Physics** | **It from Bit** (The Synthetic Observer) | [📜 Read Narrative](./docs/docs/narrative/PHYSICS_IT_FROM_BIT.md) |
+| **Economics** | **Deterministic Agency** (Zero Agency Cost) | [📜 Read Narrative](./docs/docs/narrative/ECONOMICS_DETERMINISTIC_AGENCY.md) |
+| **Law** | **Polycentric Sovereignty** (Algorithmic Jurisdiction) | [📜 Read Narrative](./docs/docs/narrative/LAW_POLYCENTRIC_SOVEREIGNTY.md) |
+| **Biology** | **Digital Autopoiesis** (Synthetic Life) | [📜 Read Narrative](./docs/docs/narrative/BIOLOGY_DIGITAL_AUTOPOIESIS.md) |
+| **AI** | **The Verifiable Mind** (Glass Box Intelligence) | [📜 Read Narrative](./docs/docs/narrative/AI_VERIFIABLE_MIND.md) |
+| **Blockchain** | **The DePIN OS** (Planetary Computer) | [📜 Read Narrative](./docs/docs/narrative/BLOCKCHAIN_DEPIN_OS.md) |
 
 > [!IMPORTANT]
-> **Must Read:** These documents contain the "Deep Lore" and theoretical innovations that differentiate VAMS from every other project. Start with the [**Master Index**](./docs/narrative/VAMS_BREAKTHROUGHS.md).
+> **Must Read:** These documents contain the "Deep Lore" and theoretical innovations that differentiate VAMS from every other project. Start with the [**Master Index**](./docs/docs/narrative/VAMS_BREAKTHROUGHS.md).
 
 ---
 
@@ -136,9 +138,9 @@ VAMS is not merely a tech stack; it is a **philosophical engine** that instantia
 ├──────────────────────────────────────────────────────────┤
 │  L3: LOGIC       DBOS • Kwil • WeaveDB • Glacier         │
 ├──────────────────────────────────────────────────────────┤
-│  L2: COMPUTE     io.net GPU • Akash CPU • Bittensor      │
+│  L2: COMPUTE     io.net GPU • Akash CPU • Phala AI • Bittensor   │
 ├──────────────────────────────────────────────────────────┤
-│  L1: FOUNDATION  Cardano (Brain) • Polygon CDK (Hands)   │
+│  L1: FOUNDATION  Cardano (Brain) • Polygon Hands • Iagon         │
 └──────────────────────────────────────────────────────────┘
 ```
 
@@ -287,12 +289,12 @@ We are committed to **radical transparency**:
 - **Join the build:** Phase 1 (Smart Contracts) is active
 
 ### For Investors
-- **7% token allocation** (70M $VAMS) available for strategic partners
+- **5% token allocation** (50M $VAMS) available for Strategic Ecosystem Partnership
 - See [PITCH_DECK.md](./docs/team/PITCH_DECK.md) for full proposal
 
 ### For Ecosystem Partners
 - Grant applications: [Ecosystem_Grants.md](./docs/team/Ecosystem_Grants.md)
-- Integration opportunities: Polygon, Avalanche, Celestia, io.net, Bittensor
+- Integration opportunities: Cardano, Polygon, Celestia, io.net, Bittensor
 
 ---
 
