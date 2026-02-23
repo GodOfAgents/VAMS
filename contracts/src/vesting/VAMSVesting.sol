@@ -15,13 +15,12 @@ import "./IVAMSVesting.sol";
  *
  * | Type       | Cliff  | Vest   | Cliff Unlock |
  * |------------|--------|--------|--------------|
- * | FOUNDER    | 12 mo  | 48 mo  | 25%          |
- * | TEAM       | 12 mo  | 36 mo  | 25%          |
- * | ALLIANCE   | 12 mo  | 36 mo  | 25%          |
- * | SEED       | 6 mo   | 24 mo  | 20%          |
- * | STRATEGIC  | 3 mo   | 18 mo  | 15%          |
- * | COMMUNITY  | 0      | 60 mo  | 0%           |
- * | FOUNDATION | 6 mo   | 48 mo  | 0% (Treasury)|
+ * | FOUNDER    | 12 mo  | 48 mo  | 0%           |
+ * | TEAM       | 12 mo  | 36 mo  | 0%           |
+ * | EARLY_INV  | 6 mo   | 18 mo  | 0%           |
+ * | REG_INV    | 12 mo  | 30 mo  | 0%           |
+ * | FOUNDATION | 6 mo   | 48 mo  | 0%           |
+ * | COMMUNITY  | 0 mo   | 60 mo  | 0%           |
  */
 contract VAMSVesting is IVAMSVesting, AccessControl, ReentrancyGuard {
     using SafeERC20 for IERC20;
@@ -42,22 +41,21 @@ contract VAMSVesting is IVAMSVesting, AccessControl, ReentrancyGuard {
     // Cliff durations in seconds
     uint256 private constant CLIFF_FOUNDER = 12 * ONE_MONTH;
     uint256 private constant CLIFF_TEAM = 12 * ONE_MONTH;
-    uint256 private constant CLIFF_INVESTOR = 12 * ONE_MONTH; // New v2
-    uint256 private constant CLIFF_FOUNDATION = 6 * ONE_MONTH; // New v2
+    uint256 private constant CLIFF_EARLY_INVESTOR = 6 * ONE_MONTH;
+    uint256 private constant CLIFF_REG_INVESTOR = 12 * ONE_MONTH;
+    uint256 private constant CLIFF_FOUNDATION = 6 * ONE_MONTH;
     uint256 private constant CLIFF_COMMUNITY = 0;
 
     // Vesting durations in seconds
     uint256 private constant VEST_FOUNDER = 48 * ONE_MONTH;
     uint256 private constant VEST_TEAM = 36 * ONE_MONTH;
-    uint256 private constant VEST_INVESTOR = 24 * ONE_MONTH; // New v2
-    uint256 private constant VEST_FOUNDATION = 48 * ONE_MONTH; // Updated v2.1 (Treasury 48mo)
+    uint256 private constant VEST_EARLY_INVESTOR = 18 * ONE_MONTH;
+    uint256 private constant VEST_REG_INVESTOR = 30 * ONE_MONTH;
+    uint256 private constant VEST_FOUNDATION = 48 * ONE_MONTH;
     uint256 private constant VEST_COMMUNITY = 60 * ONE_MONTH;
 
     // Cliff unlock percentages in basis points
-    uint16 private constant UNLOCK_NONE = 0;      // 0%
-    uint16 private constant UNLOCK_LOW = 1500;    // 15%
-    uint16 private constant UNLOCK_MEDIUM = 2000; // 20%
-    uint16 private constant UNLOCK_HIGH = 2500;   // 25%
+    uint16 private constant UNLOCK_NONE = 0;        // 0%
 
     // ============ State Variables ============
 
@@ -395,15 +393,17 @@ contract VAMSVesting is IVAMSVesting, AccessControl, ReentrancyGuard {
         returns (uint256 cliff, uint256 vest, uint16 unlock) 
     {
         if (scheduleType == ScheduleType.FOUNDER) {
-            return (CLIFF_FOUNDER, VEST_FOUNDER, UNLOCK_HIGH); // 25%
+            return (CLIFF_FOUNDER, VEST_FOUNDER, UNLOCK_NONE);
         } else if (scheduleType == ScheduleType.TEAM) {
-            return (CLIFF_TEAM, VEST_TEAM, UNLOCK_HIGH); // 25%
-        } else if (scheduleType == ScheduleType.INVESTOR) {
-            return (CLIFF_INVESTOR, VEST_INVESTOR, UNLOCK_MEDIUM); // 20%
+            return (CLIFF_TEAM, VEST_TEAM, UNLOCK_NONE);
+        } else if (scheduleType == ScheduleType.EARLY_INVESTOR) {
+            return (CLIFF_EARLY_INVESTOR, VEST_EARLY_INVESTOR, UNLOCK_NONE);
+        } else if (scheduleType == ScheduleType.REG_INVESTOR) {
+            return (CLIFF_REG_INVESTOR, VEST_REG_INVESTOR, UNLOCK_NONE);
         } else if (scheduleType == ScheduleType.FOUNDATION) {
-            return (CLIFF_FOUNDATION, VEST_FOUNDATION, UNLOCK_NONE); // 0%
+            return (CLIFF_FOUNDATION, VEST_FOUNDATION, UNLOCK_NONE);
         } else if (scheduleType == ScheduleType.COMMUNITY) {
-            return (CLIFF_COMMUNITY, VEST_COMMUNITY, UNLOCK_NONE); // 0%
+            return (CLIFF_COMMUNITY, VEST_COMMUNITY, UNLOCK_NONE);
         } else {
             revert("Invalid Schedule Type");
         }

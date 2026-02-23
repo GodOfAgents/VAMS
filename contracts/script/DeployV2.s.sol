@@ -165,56 +165,66 @@ contract DeployV2 is Script {
         uint256 totalVestingAmount = 900_000_000 * 1e18;
         token.approve(address(vesting), totalVestingAmount);
 
-        // A. Community Ecosystem (50% = 500M)
+        // A. Community Ecosystem (40% = 400M)
         // Beneficiary: DAO Timelock (The DAO controls the ecosystem fund)
         vesting.createVestingSchedule(
             address(timelock), 
-            500_000_000 * 1e18, 
+            400_000_000 * 1e18, 
             IVAMSVesting.ScheduleType.COMMUNITY, 
             true
         );
-        console.log("Created Community Schedule (500M) -> Timelock");
+        console.log("Created Community Schedule (400M) -> Timelock");
         
-        // B. DAO Treasury (10% = 100M)
+        // B. DAO Treasury (12% = 120M)
         // Beneficiary: DAO Timelock (The DAO controls its own treasury)
         // Using FOUNDATION type (48 months vesting)
         vesting.createVestingSchedule(
             address(timelock), 
-            100_000_000 * 1e18, 
+            120_000_000 * 1e18, 
             IVAMSVesting.ScheduleType.FOUNDATION, 
             true
         );
-        console.log("Created DAO Treasury Schedule (100M) -> Timelock");
+        console.log("Created DAO Treasury Schedule (120M) -> Timelock");
         
-        // C. Founder (10% = 100M)
+        // C. Founder (12% = 120M)
         // Beneficiary: Deployer (Simulating Founder Wallet)
         vesting.createVestingSchedule(
             deployer, 
-            100_000_000 * 1e18, 
+            120_000_000 * 1e18, 
             IVAMSVesting.ScheduleType.FOUNDER, 
             true
         );
-        console.log("Created Founder Schedule (100M) -> Deployer");
+        console.log("Created Founder Schedule (120M) -> Deployer");
         
-        // D. Team/Future Hires (10% = 100M)
+        // D. Team/Future Hires (13% = 130M)
         // Beneficiary: Deployer (Simulating Team Reserve Wallet)
         vesting.createVestingSchedule(
             deployer, 
-            100_000_000 * 1e18, 
+            130_000_000 * 1e18, 
             IVAMSVesting.ScheduleType.TEAM, 
             true
         );
-        console.log("Created Team Reserve Schedule (100M) -> Deployer");
+        console.log("Created Team Reserve Schedule (130M) -> Deployer");
         
-        // E. Investors (10% = 100M)
+        // E. Early Investors (5% = 50M)
         // Beneficiary: Deployer (Simulating Investor Custodian)
         vesting.createVestingSchedule(
             deployer, 
-            100_000_000 * 1e18, 
-            IVAMSVesting.ScheduleType.INVESTOR, 
+            50_000_000 * 1e18, 
+            IVAMSVesting.ScheduleType.EARLY_INVESTOR, 
             true
         );
-        console.log("Created Investor Schedule (100M) -> Deployer");
+        console.log("Created Early Investor Schedule (50M) -> Deployer");
+
+        // F. Regular Investors (8% = 80M)
+        // Beneficiary: Deployer (Simulating Investor Custodian)
+        vesting.createVestingSchedule(
+            deployer, 
+            80_000_000 * 1e18, 
+            IVAMSVesting.ScheduleType.REG_INVESTOR, 
+            true
+        );
+        console.log("Created Regular Investor Schedule (80M) -> Deployer");
 
         console.log("Deployment V2 Complete. 1B Supply distributed.");
         

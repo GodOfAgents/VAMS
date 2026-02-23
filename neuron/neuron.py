@@ -5,10 +5,10 @@ VAMS Neuron v0.5.1
 Immortal Agent - Full 4-Layer Stack with TEE
 
 Layer 1 - Data Availability:
-  Celestia, EigenDA, Near DA, Avail
+  Celestia, EigenDA, Near DA, Avail, Iagon
 
 Layer 2 - Compute:
-  io.net, Akash, Render, Bittensor
+  io.net, Akash, Render, Bittensor, Phala AI
 
 Layer 3 - Logic:
   DBOS-style workflows, Kwil, WeaveDB, Glacier
@@ -79,7 +79,7 @@ Examples:
     )
     
     # Layer 1 options
-    parser.add_argument("--provider", "-p", choices=["celestia", "eigenda", "near", "avail"],
+    parser.add_argument("--provider", "-p", choices=["celestia", "eigenda", "near", "avail", "iagon"],
                         default=DEFAULT_PROVIDER, help="Primary DA provider")
     parser.add_argument("--list-providers", "-l", action="store_true", help="List DA providers")
     parser.add_argument("--check-health", action="store_true", help="Check Layer 1 health")
@@ -165,12 +165,13 @@ class VamsNeuron:
         
         # Layer 2 - Pass mock_mode to BittensorProvider
         if mock_mode:
-            from compute import BittensorProvider, IoNetProvider, AkashProvider, RenderProvider
+            from compute import BittensorProvider, IoNetProvider, AkashProvider, RenderProvider, PhalaComputeProvider
             providers = [
                 IoNetProvider(),  # Uses HTTP which is OK
                 AkashProvider(),
                 RenderProvider(),
-                BittensorProvider(mock_mode=True)  # Use mock mode
+                BittensorProvider(mock_mode=True),  # Use mock mode
+                PhalaComputeProvider()
             ]
             self.compute_manager = ComputeManager(providers=providers)
         else:
@@ -294,7 +295,7 @@ class VamsNeuron:
         self.storage.store_heartbeat(self.node_id, block_info.height, block_info.network, payload, signature)
         
         colors = {"celestia": Fore.LIGHTBLUE_EX, "eigenda": Fore.LIGHTGREEN_EX,
-                  "near": Fore.LIGHTYELLOW_EX, "avail": Fore.LIGHTMAGENTA_EX}
+                  "near": Fore.LIGHTYELLOW_EX, "avail": Fore.LIGHTMAGENTA_EX, "iagon": Fore.LIGHTCYAN_EX}
         c = colors.get(block_info.provider, Fore.WHITE)
         self.log(f"Block: #{block_info.height} [{c}{block_info.provider.upper()}{Style.RESET_ALL}]", "NET")
         self.log(f"Signature: {signature[:24]}...", "CRYPTO")

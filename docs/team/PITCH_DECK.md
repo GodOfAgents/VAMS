@@ -46,9 +46,9 @@ AI Agents are becoming economic actors, but they cannot effectively use decentra
 
 ### The Developer Nightmare
 To build a truly sovereign agent today, a developer must integrate:
-1.  **Celestia** (Data Availability)
+1.  **Iagon & Celestia** (eUTXO Storage & Data Availability)
 2.  **io.net** (GPU Compute)
-3.  **Phala** (TEE Witness)
+3.  **Phala Network** (AI Coprocessor)
 4.  **Akash** (Hosting)
 5.  **ICB-SDK** (Verification Layer)
 
@@ -94,7 +94,7 @@ Agent Request ──► [VAMS CLR] ──► Auto-routes to Best Chain
                       │
                       ├── Value > $10k? ───► Ethereum (Asset Safety)
                       ├── Need Privacy? ───► Phala TEE (Confidentiality)
-                      ├── Sovereignty? ────► Avalanche L1 (Compliance)
+                      ├── Sovereignty? ────► Polygon Validium (Compliance)
                       ├── Velocity < 500ms? ► Solana/SEI (Speed)
                       └── Default ─────────► Polygon CDK (Primary L3)
 ```
@@ -119,10 +119,10 @@ We don't just aggregate; we vertically integrate the essential primitives.
 │  DBOS (Crash-proof workflows) • Kwil (Relational SQL)                   │
 ├─────────────────────────────────────────────────────────────────────────┤
 │  LAYER 2: COMPUTE (The Muscle)                                          │
-│  io.net (GPU) • Akash (CPU) • Render (3D) • Bittensor (Models)          │
+│  io.net (GPU) • Akash (CPU) • Phala (AI) • Bittensor (Models)           │
 ├─────────────────────────────────────────────────────────────────────────┤
 │  LAYER 1: FOUNDATION (The Ledger)                                       │
-│  Celestia • Near DA • Cardano (Brain) • Polygon CDK (Hands)             │
+│  Celestia • Iagon • Near DA • Cardano (Brain) • Polygon Hands           │
 └─────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -143,6 +143,10 @@ We don't just aggregate; we vertically integrate the essential primitives.
 3.  **Brain-Hands Architecture (Cardano + Polygon)**
     *   **The Innovation:** We use Polygon CDK (Hands) for broad liquidity/velocity and Cardano (Brain) for high-value intent generation.
     *   **The Moat:** Chain-agnostic execution that no single-chain protocol can match.
+
+4.  **Absolute AI Confidentiality (Midnight + Phala)**
+    *   **The Innovation:** Phala AI Coprocessors execute within TEEs, while Midnight provides ZK-SD (Selective Disclosure) compliance bounding. Storage is natively partitioned on Iagon.
+    *   **The Moat:** We provide a mathematically impenetrable compliance bounding box for enterprise agents that wholly obscures proprietary LLM weights from node operators.
 
 ---
 
@@ -333,7 +337,7 @@ We don't sell to end-users; we sell to the builders. Does your agent framework w
 
 **Phase 2: Vertical Expansion**
 *   **DeFAI:** High-frequency trading agents (Sub-second routing).
-*   **Gaming:** Permanent NPCs for Avalanche L1 games.
+*   **Gaming:** Permanent NPCs for Polygon games.
 
 ---
 
@@ -387,13 +391,13 @@ We have a detailed 8-Phase Execution Plan: **24-week MVP** followed by **post-MV
 
 *   **Phase 1 (Weeks 1-8): Economic Foundation** *("The Blood")*
     *   Deploy $VAMS Token, Staking, Vesting, and FeeCollector Contracts.
-    *   Deploy to Sepolia, then Avalanche Fuji C-Chain.
+    *   Deploy to Cardano Pre-Prod and Polygon Amoy Testnet.
 *   **Phase 2 (Weeks 9-12): Polygon CDK Integration**
     *   Deploy VAMS L3 Validium stack (AggLayer).
     *   Setup unified liquidity bridge.
 *   **Phase 3 (Weeks 13-16): CLR & Dual-Host**
     *   Launch Conditional L1 Router (CLR).
-    *   Spin up secondary Avalanche Sovereign L1 (ACP-77).
+    *   Launch Production Polygon Validium L3.
     *   $VAMS as custom gas token on both chains.
 *   **Phase 4 (Weeks 17-24): Dashboard & Docs**
     *   Launch "AWS-style" Console (Next.js + RainbowKit).

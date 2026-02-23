@@ -17,8 +17,7 @@ import "../token/IVAMSToken.sol"; // Import IVAMSToken for minting
  * @dev Implements staking tiers from TOKENOMICS.md:
  *
  * Tiers:
- * - Bronze (1K-1K): 6% APY
- * - Silver (10K-100K): 8% APY + priority support
+ * - Silver (50K-100K): 8% APY + priority support
  * - Gold (100K-1M): 10% APY + 1.5x governance weight
  * - Platinum (1M+): 12% APY + CLR operator eligible
  *
@@ -37,7 +36,7 @@ contract VAMSStaking is IVAMSStaking, AccessControl, Pausable, ReentrancyGuard {
     bytes32 public constant EMISSION_ADMIN_ROLE = keccak256("EMISSION_ADMIN_ROLE");
 
     /// @notice Unbonding period duration
-    uint256 public constant UNBONDING_PERIOD = 7 days;
+    uint256 public constant UNBONDING_PERIOD = 14 days;
 
     /// @notice Precision for reward calculations
     uint256 public constant PRECISION = 1e18;
@@ -50,19 +49,17 @@ contract VAMSStaking is IVAMSStaking, AccessControl, Pausable, ReentrancyGuard {
 
     // ============ Minimum Stake ============
 
-    /// @notice Minimum stake amount (1,000 VAMS)
-    uint256 public constant MIN_STAKE = 1_000 * 1e18;
+    /// @notice Minimum stake amount (50,000 VAMS)
+    uint256 public constant MIN_STAKE = 50_000 * 1e18;
 
     // ============ Tier Thresholds ============
 
-    uint256 public constant TIER_BRONZE_MIN = 1_000 * 1e18;
-    uint256 public constant TIER_SILVER_MIN = 10_001 * 1e18;
-    uint256 public constant TIER_GOLD_MIN = 100_001 * 1e18;
-    uint256 public constant TIER_PLATINUM_MIN = 1_000_001 * 1e18;
+    uint256 public constant TIER_SILVER_MIN = 50_000 * 1e18;
+    uint256 public constant TIER_GOLD_MIN = 100_000 * 1e18;
+    uint256 public constant TIER_PLATINUM_MIN = 1_000_000 * 1e18;
 
     // ============ Base APYs (in basis points) ============
 
-    uint256 public constant APY_BRONZE = 600;     // 6%
     uint256 public constant APY_SILVER = 800;     // 8%
     uint256 public constant APY_GOLD = 1000;      // 10%
     uint256 public constant APY_PLATINUM = 1200;  // 12%
@@ -340,7 +337,7 @@ contract VAMSStaking is IVAMSStaking, AccessControl, Pausable, ReentrancyGuard {
         uint256 lockMult = _getLockMultiplier(info.lockPeriod);
         
         // Adjust pending by effective multiplier (simplified)
-        pending = (pending * apyBps * lockMult) / (APY_BRONZE * BPS_DENOMINATOR);
+        pending = (pending * apyBps * lockMult) / (APY_SILVER * BPS_DENOMINATOR);
 
         return info.pendingRewards + pending;
     }
@@ -387,9 +384,9 @@ contract VAMSStaking is IVAMSStaking, AccessControl, Pausable, ReentrancyGuard {
 
     // ============ Admin Functions ============
 
-    /// @notice Maximum emission rate (2% per year of 1B initial supply)
-    /// 20,000,000 * 1e18 / 365 days / 86400 = ~0.634 VAMS/sec
-    uint256 public constant MAX_EMISSION_RATE = 634195839675291; // ~0.634 * 1e18
+    /// @notice Maximum emission rate (2.5% per year of 1B initial supply)
+    /// 25,000,000 * 1e18 / 365 days / 86400 = ~0.792 VAMS/sec
+    uint256 public constant MAX_EMISSION_RATE = 792744799594115; // ~0.792 * 1e18
 
     /// @inheritdoc IVAMSStaking
     function updateEmissionRate(uint256 newRate) external override onlyRole(EMISSION_ADMIN_ROLE) {
@@ -484,7 +481,7 @@ contract VAMSStaking is IVAMSStaking, AccessControl, Pausable, ReentrancyGuard {
         uint256 apyBps = _getBaseAPY(tier);
         uint256 lockMult = _getLockMultiplier(info.lockPeriod);
         
-        pending = (pending * apyBps * lockMult) / (APY_BRONZE * BPS_DENOMINATOR);
+        pending = (pending * apyBps * lockMult) / (APY_SILVER * BPS_DENOMINATOR);
 
         harvested = info.pendingRewards + pending;
         info.pendingRewards = 0;
@@ -498,7 +495,6 @@ contract VAMSStaking is IVAMSStaking, AccessControl, Pausable, ReentrancyGuard {
         if (amount >= TIER_PLATINUM_MIN) return StakingTier.Platinum;
         if (amount >= TIER_GOLD_MIN) return StakingTier.Gold;
         if (amount >= TIER_SILVER_MIN) return StakingTier.Silver;
-        if (amount >= TIER_BRONZE_MIN) return StakingTier.Bronze;
         return StakingTier.None;
     }
 
@@ -509,7 +505,6 @@ contract VAMSStaking is IVAMSStaking, AccessControl, Pausable, ReentrancyGuard {
         if (tier == StakingTier.Platinum) return APY_PLATINUM;
         if (tier == StakingTier.Gold) return APY_GOLD;
         if (tier == StakingTier.Silver) return APY_SILVER;
-        if (tier == StakingTier.Bronze) return APY_BRONZE;
         return 0;
     }
 

@@ -32,7 +32,7 @@ contract SlashingOracleTest is BaseTest {
     uint256 public testSlashAmount = 1000 ether;
     
     // Constants
-    uint256 constant MIN_STAKE = 1000 ether;
+    uint256 constant MIN_STAKE = 50_000 ether;
     uint256 constant PROPOSAL_STAKE = 10_000 ether;
     
     // Events

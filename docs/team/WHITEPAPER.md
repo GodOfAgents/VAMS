@@ -87,11 +87,11 @@ The result is a platform where autonomous agents can consume infrastructure, pro
 
 ### 1.4 The Ontological Breakthrough: Bit from Bit
 
-The VAMS architecture formally implements the **"Bit from Bit"** theoretical framework (see [`docs/narrative/BIT_FROM_BIT.md`](../docs/narrative/BIT_FROM_BIT.md)), which advances John Wheeler’s "It from Bit" hypothesis for the agentic era.
+The VAMS architecture formally implements the **"Bit from Bit"** theoretical framework (see [`docs/docs/narrative/BIT_FROM_BIT.md`](../docs/docs/narrative/BIT_FROM_BIT.md)), which advances John Wheeler’s "It from Bit" hypothesis for the agentic era.
 
 In Wheeler’s original formulation, a biological observer was required to collapse probability into reality. VAMS demonstrates that this function can be performed by software.
 
-1.  **The Information (Bit)**: The fragmented, probabilistic state of liquidity and execution paths across multiple chains (Ethereum, Solana, Avalanche).
+1.  **The Information (Bit)**: The fragmented, probabilistic state of liquidity and execution paths across multiple chains (Ethereum, Solana, Polygon, Cardano).
 2.  **The Observer (Collapse Function)**: The **Conditional L1 Router (CLR)**, which measures latency, cost, and finality constraints to deterministically select a single execution path.
 3.  **The Reality (It)**: The finalized transaction hash and state root, now a historical fact.
 
@@ -228,8 +228,6 @@ Transaction Intake
         │
         ├── Value > $10,000? ───────► Route to Ethereum (via AggLayer)
         │
-        ├── Sovereignty/Custom VM? ─► Route to Avalanche L1 (Elastic/Evergreen)
-        │
         ├── Formal Verification? ───► Route to Cardano (Ouroboros)
         │
         ├── Latency < 500ms? ───────► Route to Solana/SEI
@@ -249,13 +247,12 @@ VAMS maintains connectivity across multiple settlement layers:
 | **VAMS L3 (Polygon CDK)** | Other CDK Chains | AggLayer | ~1min | Unified Bridge / Pessimistic Proofs |
 | VAMS L3 | Solana | ICB-SDK | ~400ms | Decentralized Validation |
 | VAMS L3 | SEI | LayerZero v2 | ~380ms | DVN consensus |
-| VAMS L3 | Avalanche L1s (Secondary) | AWM/Teleporter | ~250ms | BLS multi-sig |
 | VAMS L3 | Cardano | Rosen Bridge | ~2min | Ouroboros finality |
 | VAMS L3 | Midnight | ICB-SDK (ZK-Verified) | ~1min | ZK-SD proofs |
 
 **Bridge Security**: To mitigate single-vendor bridge risk, VAMS implements the Interchain Communication Backbone SDK (ICB-SDK) with decentralized validation layers.
 
-> **Note**: Comprehensive failure recovery procedures for all settlement layers, including Avalanche P-Chain halt scenarios, are specified in [ARCHITECTURE_v0-3-0.md §21.1.10](./ARCHITECTURE_v0-3-0.md). This includes locked fund recovery, queue processing priority, and compensation mechanisms.
+> **Note**: Comprehensive failure recovery procedures for all settlement layers, including Cardano and Polygon halt scenarios, are specified in [ARCHITECTURE_v0-3-0.md §21](./ARCHITECTURE_v0-3-0.md). This includes locked fund recovery, queue processing priority, and compensation mechanisms.
 
 ---
 
@@ -265,7 +262,7 @@ VAMS maintains connectivity across multiple settlement layers:
 
 | Domain | Technology | Rationale |
 |--------|-----------|-----------|
-| **Smart Contracts** | Solidity (EVM), Rust (Solana/Avalanche) | Ecosystem compatibility |
+| **Smart Contracts** | Solidity (EVM), Rust (Solana), Plutus (Cardano) | Ecosystem compatibility |
 | **Networking** | libp2p, NATS, WebRTC | P2P mesh, Pub/Sub patterns |
 | **Decentralized RPC** | Lava, Pocket, DRPC | 50+ chain coverage |
 | **Agent Runtime** | DBOS with Python/TypeScript SDKs | Developer familiarity |
@@ -534,7 +531,7 @@ VAMS positions itself as the "Sovereign Brain" for the agentic web—a meta-laye
 3. Phala Network Technical Specification. https://docs.phala.network/
 4. Bittensor Protocol Documentation. https://docs.bittensor.com/
 5. Polygon AggLayer. https://docs.polygon.technology/agg-layer/
-6. Avalanche ACP-77: Reinventing Subnets. https://github.com/avalanche-foundation/ACPs/
+6. Plutus Core Documentation. https://plutus.readthedocs.io/
 7. Model Context Protocol. https://modelcontextprotocol.io/
 8. x402 Payment Protocol. https://build.avax.network/academy/blockchain/x402-payment-infrastructure
 9. EZKL: Easy Zero-Knowledge Machine Learning. https://docs.ezkl.xyz/

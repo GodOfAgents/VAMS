@@ -70,6 +70,11 @@ DA_PROVIDERS = {
         "rpc": os.getenv("AVAIL_RPC", "https://avail-turing.api.onfinality.io/public"),
         "network": "turing",
         "description": "ZK/Validium - KZG commitments"
+    },
+    "iagon": {
+        "rpc": os.getenv("IAGON_RPC", "https://api.iagon.com"),
+        "network": "cardano-mainnet",
+        "description": "Cardano-Native eUTXO Storage"
     }
 }
 
@@ -95,6 +100,10 @@ COMPUTE_PROVIDERS = {
     "bittensor": {
         "endpoint": os.getenv("BITTENSOR_API", "https://bittensor.org"),
         "description": "Intelligence-as-a-Service (AI Subnets)"
+    },
+    "phala_cp": {
+        "endpoint": os.getenv("PHALA_CP_API", "https://phala.network"),
+        "description": "AI Coprocessor in TEE (Confidential Compute)"
     }
 }
 

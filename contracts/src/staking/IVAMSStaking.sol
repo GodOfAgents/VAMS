@@ -9,9 +9,8 @@ pragma solidity ^0.8.20;
  *
  * | Tier     | Amount       | Base APY | Benefits                    |
  * |----------|--------------|----------|-----------------------------|
- * | Bronze   | 1K - 10K     | 6%       | Basic rewards               |
- * | Silver   | 10K - 100K   | 8%       | Priority support            |
- * | Gold     | 100K - 1M    | 10%      | 1.5x governance weight      |
+ * | Silver   | 50K - 99.9K  | 8%       | Priority support            |
+ * | Gold     | 100K - 999.9K| 10%      | 1.5x governance weight      |
  * | Platinum | 1M+          | 12%      | CLR operator eligible       |
  */
 interface IVAMSStaking {
@@ -19,11 +18,10 @@ interface IVAMSStaking {
 
     /// @notice Staking tier based on amount
     enum StakingTier {
-        None,       // < 1,000 VAMS
-        Bronze,     // 1,000 - 10,000
-        Silver,     // 10,001 - 100,000
-        Gold,       // 100,001 - 1,000,000
-        Platinum    // 1,000,001+
+        None,       // < 50,000 VAMS
+        Silver,     // 50,000 - 99,999
+        Gold,       // 100,000 - 999,999
+        Platinum    // 1,000,000+
     }
 
     /// @notice Lock period options

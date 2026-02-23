@@ -16,14 +16,13 @@ contract StakingGovernanceIntegration is BaseTest {
     VAMSToken public vamsToken;
     
     // Constants
-    uint256 constant EMISSION_RATE = 100 ether;
+    uint256 constant EMISSION_RATE = 0.2 ether;
     uint256 constant MIN_STAKE = 1000 ether;
     
     // Tier thresholds
-    uint256 constant BRONZE_THRESHOLD = 1000 ether;
-    uint256 constant SILVER_THRESHOLD = 10_001 ether;
-    uint256 constant GOLD_THRESHOLD = 100_001 ether;
-    uint256 constant PLATINUM_THRESHOLD = 1_000_001 ether;
+    uint256 constant SILVER_THRESHOLD = 50_000 ether;
+    uint256 constant GOLD_THRESHOLD = 100_000 ether;
+    uint256 constant PLATINUM_THRESHOLD = 1_000_000 ether;
     
     function setUp() public override {
         super.setUp();
@@ -67,14 +66,14 @@ contract StakingGovernanceIntegration is BaseTest {
     
     // ============ Tier Progression Tests ============
     
-    function test_TierProgression_BronzeToPlat() public {
-        // Start with Bronze tier
+    function test_TierProgression_NoneToPlat() public {
+        // Start with None tier
         _fundUserFromTreasury(user1, PLATINUM_THRESHOLD);
         
         vm.prank(user1);
         staking.stake(MIN_STAKE, IVAMSStaking.LockPeriod.SevenDays);
         
-        assertEq(uint(staking.getTier(user1)), uint(IVAMSStaking.StakingTier.Bronze));
+        assertEq(uint(staking.getTier(user1)), uint(IVAMSStaking.StakingTier.None));
         assertFalse(staking.isCLROperatorEligible(user1));
         
         // Add to Silver
@@ -188,10 +187,10 @@ contract StakingGovernanceIntegration is BaseTest {
     }
     
     function test_CLROperator_RequiresPlatinum() public {
-        // Bronze user
-        _fundUserFromTreasury(user1, BRONZE_THRESHOLD);
+        // None user
+        _fundUserFromTreasury(user1, MIN_STAKE);
         vm.prank(user1);
-        staking.stake(BRONZE_THRESHOLD, IVAMSStaking.LockPeriod.SevenDays);
+        staking.stake(MIN_STAKE, IVAMSStaking.LockPeriod.SevenDays);
         assertFalse(staking.isCLROperatorEligible(user1));
         
         // Silver user
@@ -251,8 +250,8 @@ contract StakingGovernanceIntegration is BaseTest {
     
     function test_APY_Calculation() public {
         // Check APY for different tiers and lock periods
-        uint256 apyBronze7d = staking.getAPY(
-            IVAMSStaking.StakingTier.Bronze, 
+        uint256 apySilver7d = staking.getAPY(
+            IVAMSStaking.StakingTier.Silver, 
             IVAMSStaking.LockPeriod.SevenDays
         );
         uint256 apyPlatinum180d = staking.getAPY(
@@ -260,8 +259,8 @@ contract StakingGovernanceIntegration is BaseTest {
             IVAMSStaking.LockPeriod.OneEightyDays
         );
         
-        assertTrue(apyBronze7d > 0, "Bronze APY should be positive");
-        assertTrue(apyPlatinum180d > apyBronze7d, "Platinum+180d should have higher APY");
+        assertTrue(apySilver7d > 0, "Silver APY should be positive");
+        assertTrue(apyPlatinum180d > apySilver7d, "Platinum+180d should have higher APY");
     }
     
     function test_EmissionRateUpdate_AffectsRewards() public {

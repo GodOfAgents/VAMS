@@ -11,8 +11,8 @@ library TestConstants {
     uint256 constant INITIAL_BALANCE = 1_000_000 ether;
     
     // ============ Staking Constants ============
-    uint256 constant MIN_STAKE = 1000 ether;
-    uint256 constant UNBONDING_PERIOD = 7 days;
+    uint256 constant MIN_STAKE = 50_000 ether;
+    uint256 constant UNBONDING_PERIOD = 14 days;
     
     // ============ Vesting Constants ============
     uint256 constant CLIFF_DURATION = 180 days;

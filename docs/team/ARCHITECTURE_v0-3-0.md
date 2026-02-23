@@ -54,7 +54,6 @@
    - [Agent Economy (x402 & AP2)](#13-agent-economy)
 7. [Core Infrastructure](#core-infrastructure)
    - [Conditional L1 Router (CLR)](#14-conditional-l1-router-clr)
-   - [Avalanche Network (Optional Routing Target)](#15b-avalanche-network)
    - [Cross-Chain Infrastructure](#16-cross-chain-infrastructure)
    - [VAMS Gateway](#17-vams-gateway)
 8. [Decentralization & Mitigation Strategies](#18-decentralization--mitigation-strategies)
@@ -154,12 +153,12 @@ VAMS addresses these through a modular stack that outsources functions to specia
 │                                                                          │
 │  ┌─────────────────────────────────────────────────────────────────────┐│
 │  │  LAYER 2: COMPUTE                                                    ││
-│  │  io.net GPU • Akash Supercloud • Render Network • Bittensor         ││
+│  │  io.net GPU • Akash • Bittensor • Phala AI Coprocessor              ││
 │  └─────────────────────────────────────────────────────────────────────┘│
 │                                                                          │
 │  ┌─────────────────────────────────────────────────────────────────────┐│
 │  │  LAYER 1: FOUNDATIONAL                                               ││
-│  │  Celestia DA • EigenDA • Near DA • Avail Validity Proofs            ││
+│  │  Celestia DA • EigenDA • Iagon (eUTXO Storage) • Avail              ││
 │  └─────────────────────────────────────────────────────────────────────┘│
 │                                                                          │
 └─────────────────────────────────────────────────────────────────────────┘
@@ -196,6 +195,12 @@ The bedrock of VAMS, handling transaction ordering, state management, and **Data
 - **Verification**: KZG Polynomial Commitments.
 - **Benefit**: Mathematical guarantee of availability for ZK rollups.
 
+#### 3.1.6 eUTXO Storage Sovereignty (Iagon)
+- **Role**: Decentralized Storage for Agent Memory & ZK-State Roots
+- **Mechanism**: **Cardano-Native Storage Network**
+- **Verification**: Sharded, encrypted persistence distributed across Iagon nodes via eUTXO contracts.
+- **Benefit**: Allows storage persistence to share identical security bounds with the Hydra/Midnight execution layer without atomic cross-chain bridge latency. Storage provisioning costs are seamlessly managed using $VAMS abstracted by the VAMS Gateway (paying underlying providers via ADA/native tokens).
+
 ---
 
 ### 3.2 Layer 2: Compute Layer
@@ -206,6 +211,7 @@ The engine sourcing computational power for AI inference and training.
 |----------|------|------------|----------|
 | **io.net** | GPU Clusters | Ray framework, H100/A100 | High-intensity inference |
 | **Akash** | Supercloud | Kubernetes, Docker | Persistent agents, SaaS backends |
+| **Phala Network** | AI Coprocessor | SGX/TDX TEEs, AI Agent Contracts | Confidential VMs (CVMs), heavy data pipelines |
 | **Render** | Visual AI | GPU rendering | Metaverse, 3D assets |
 | **Bittensor** | Global Brain | Yuma Consensus, Subnets | Intelligence-as-a-Service |
 
@@ -1831,18 +1837,17 @@ class CLRouter_V3:  # Updated for Dual-Host + Cardano/Midnight
 Polygon CDK provides the **primary execution layer** for VAMS L3, leveraging Validium mode for cost-effective operations with Ethereum-grade security via validity proofs.
 
 > [!NOTE]
-> VAMS L3 operates on **Polygon CDK Validium** by default. Agents requiring custom VMs or sovereign validator sets are routed to **Avalanche Elastic L1s** (Section 15B).
+> VAMS L3 operates on **Polygon CDK Validium** by default. Agents requiring formal verification or compliance-grade privacy are routed to **Cardano L1** or **Midnight** (Section 15C).
 
 ### 15.1 Why Polygon CDK for Primary Execution?
 
-| Criteria | Polygon CDK | Avalanche L1 | Winner |
-|----------|-------------|--------------|--------|
-| **Liquidity Access** | AggLayer ($50B+ unified) | Isolated liquidity | Polygon |
-| **Ethereum Security** | ZK validity proofs to L1 | Independent consensus | Polygon |
-| **Ecosystem Grants** | Breakout, Village, ESP-eligible | infraBUIDL | Polygon |
-| **Custom Gas Token** | ✅ Native $VAMS | ✅ Native $VAMS | Tie |
-| **Custom VM** | ❌ EVM-only | ✅ HyperSDK | Avalanche |
-| **Configuration Cost** | Ultra-low (Validium) | Low (pay-as-you-go) | Polygon |
+| Criteria | Polygon CDK | Characteristic |
+|----------|-------------|----------------|
+| **Liquidity Access** | AggLayer ($50B+ unified) | Deep Ecosystem Liquidity |
+| **Ethereum Security**| ZK validity proofs to L1 | Maximum Cryptographic Security |
+| **Ecosystem Grants** | Breakout, Village, ESP-eligible | Strong Developer Incentives |
+| **Custom Gas Token** | ✅ Native $VAMS | Aligned Economic Utility |
+| **Configuration Cost**| Ultra-low (Validium) | Ideal for High-Volume Agents |
 
 ### 15.2 Polygon CDK Architecture
 
@@ -1883,79 +1888,7 @@ Polygon CDK provides the **primary execution layer** for VAMS L3, leveraging Val
 - Agents prioritizing cost over sovereignty
 - Any workload where EVM is sufficient
 
----
 
-## 15B. Avalanche Network (Optional Routing Target)
-
-> [!NOTE]
-> Avalanche is an **optional CLR routing target**, not a host domain. VAMS agents are not deployed on Avalanche; the CLR can route transactions to Avalanche C-Chain or Elastic L1s when enterprise clients specifically request Avalanche infrastructure.
-
-| Capability | How VAMS Uses It |
-|------------|-----------------|
-| **C-Chain (EVM)** | Backup gateway for cross-chain if primary bridges are congested |
-| **Elastic L1s** | Optional sovereign execution for enterprises choosing Avalanche |
-| **AWM/Teleporter** | Intra-Avalanche routing for agents operating on Avalanche L1s |
-
-> **Key Distinction**: Sovereign execution needs (custom VMs, confidential compute, compliance) are primarily served by **Phala TEE** (Layer 4) and **Midnight ZK-SD** (Section 15C). Avalanche remains available for enterprise clients with existing Avalanche infrastructure commitments.
-
-------------|-------------|--------------|
-| **Custom VM** | ❌ EVM only | ✅ HyperSDK (any VM) |
-| **Validator Control** | ❌ Shared sequencer | ✅ Sovereign validator sets |
-| **State Isolation** | Shared with other CDK chains | ✅ Dedicated blockspace |
-| **Enterprise Compliance** | Standard | ✅ Evergreen (permissioned) |
-| **Time to Finality** | ~5-12min (to Eth L1) | ~800ms-2s |
-| **TPS (Per Agent)** | Shared | ✅ ~4,500 dedicated |
-
-> **Key Insight**: While Solana wins on raw latency, Avalanche wins on **predictability and control**. An agent on Avalanche L1 is the network—no competition with global traffic.
-
-### 15B.2 ACP-77: The Sovereignty Catalyst
-
-ACP-77 fundamentally changes the Avalanche economic model:
-
-| Pre-ACP-77 | Post-ACP-77 |
-|------------|-------------|
-| 2,000 AVAX stake required | Pay-as-you-go dynamic fee |
-| Must validate Primary Network | Decoupled validation |
-| Heavy CapEx | Manageable OpEx (SaaS model) |
-| Enterprise-only | Accessible to all agents |
-
-### 15B.3 HyperSDK: Custom Agent VMs
-
-HyperSDK enables purpose-built Virtual Machines optimized for agent workloads:
-
-- **Tensor-Optimized VMs**: Native tensor operations for AI agents
-- **Inference-Native Transactions**: "InferenceRequest" as first-class tx type
-- **Proof of Inference Consensus**: Custom consensus for compute verification
-- **Sub-second finality**: Stripped-down, lean execution environments
-
-### 15B.4 Avalanche Warp Messaging (AWM) & Teleporter
-
-```
-┌─────────────────────────────────────────────────────────────────────────┐
-│                    AVALANCHE INTEROPERABILITY                            │
-├─────────────────────────────────────────────────────────────────────────┤
-│                                                                          │
-│  ┌─────────────┐    AWM (BLS Multi-sig)    ┌─────────────┐             │
-│  │ Agent L1 A  │◄──────────────────────────►│ Agent L1 B  │             │
-│  └─────────────┘                            └─────────────┘             │
-│         │                                          │                     │
-│         │              Teleporter                  │                     │
-│         └──────────────────┬───────────────────────┘                     │
-│                            │                                             │
-│                    ┌───────▼───────┐                                    │
-│                    │   C-Chain     │                                    │
-│                    │   (Gateway)   │                                    │
-│                    └───────┬───────┘                                    │
-│                            │                                             │
-│              ┌─────────────┼─────────────┐                              │
-│              │             │             │                               │
-│        Hyperlane      LayerZero     Union Labs                          │
-│              │             │             │                               │
-│              ▼             ▼             ▼                               │
-│          Solana         Ethereum      Cosmos                            │
-│                                                                          │
-└─────────────────────────────────────────────────────────────────────────┘
-```
 
 ### 15C. Cardano Ecosystem (Routing Targets)
 
@@ -2065,7 +1998,6 @@ $t_{Cardano} > t_{Polygon} + \text{Max\_Reorg}_{Cardano} + \delta_{network}$
 | VAMS L3 | Solana | Hyperlane | ~400ms | ISM verification |
 | VAMS L3 | SEI | LayerZero v2 | ~380ms | DVN consensus |
 | VAMS L3 | Cosmos | Union Labs | ~1s | IBC |
-| VAMS L3 | Avalanche C-Chain | Hyperlane | ~800ms | ISM verification |
 | VAMS L3 | Cardano | Rosen Bridge | ~2min | Ouroboros finality |
 | VAMS L3 | Midnight | Hyperlane (ZK-ISM) | ~1min | ZK-SD proofs |
 
@@ -2214,7 +2146,7 @@ export class ClientSideRouter {
     // Deterministic rule evaluation (same as CLR)
     if (metadata.requiresPrivacy) return CHAINS.PHALA_TEE;
     if (metadata.valueUSD > 10_000) return CHAINS.ETHEREUM;
-    if (metadata.requiresIsolatedThroughput) return CHAINS.AVALANCHE_L1;
+    if (metadata.requiresVerifiedSettlement) return CHAINS.CARDANO;
     if (metadata.maxLatencyMs < 1000) return CHAINS.SOLANA;
     return CHAINS.VAMS_L3;
   }
@@ -2959,17 +2891,17 @@ class MultiTEEVerifier:
 > [!IMPORTANT]
 > VAMS L3 serves as the default routing destination. This section specifies its security model.
 
-**VAMS L3 runs on Avalanche Elastic L1 infrastructure with the following consensus parameters:**
+**VAMS L3 runs on Polygon CDK Validium infrastructure with the following consensus parameters:**
 
 | Parameter | Value | Rationale |
 |-----------|-------|-----------|
-| Consensus Protocol | Snowman++ (linearized DAG) | Avalanche-native, sub-second finality |
-| Minimum Validators | 8 | Byzantine tolerance (f=2) |
-| Stake Requirement | 50,000 $VAMS per validator | Economic security threshold |
-| Validation Reward | 8% APY (dynamic adjustment) | Competitive with Avalanche C-Chain |
+| Consensus Protocol | Polygon CDK zkEVM | Ethereum-equivalent zk-rollup |
+| Minimum Validators | 8 (DAC members) | Byzantine tolerance for Validium |
+| Stake Requirement | 50,000 $VAMS per DAC node | Economic security threshold |
+| Validation Reward | 8% APY (dynamic adjustment) | Sustainable yield |
 | Slashing Rate | 10-50% depending on severity | Aligned with CLR slashing |
-| Block Time | ~500ms | Agent latency requirements |
-| Finality | ~800ms (probabilistic 99.9%) | Transaction confirmation speed |
+| Block Time | ~1-2s | Polygon CDK default target |
+| Finality | ~1-2s (Local L3), ~5min (L1) | ZK-proofs settled to Ethereum |
 
 **Validator Requirements:**
 
@@ -4178,15 +4110,13 @@ class AgentStateRecovery:
 
 | Settlement/Bridge | Affected Operations | Detection | Primary Fallback | Secondary Fallback | Emergency Procedure |
 |-------------------|---------------------|-----------|------------------|--------------------|--------------------|
-| **Ethereum halt** | High-value settlement | No new blocks 15+ mins | Delay settlement | Route to Avalanche C-Chain | Emergency multisig on Avalanche |
-| **Solana halt** | Velocity routing | Slot production stalls | Route to SEI | Route to Avalanche L1 | Automatic CLR reroute |
-| **SEI halt** | Fast EVM execution | Twin-Turbo consensus stall | Route to Solana | Route to Avalanche L1 | Accept latency increase |
-| **Avalanche P-Chain halt** | ALL Avalanche L1 interop | Validator sampling fails | CRITICAL | Hyperlane-only cross-chain | Direct settlement to Ethereum |
-| **Avalanche C-Chain halt** | VAMS Gateway | EVM execution halts | Ethereum backup Gateway | Direct L1↔external bridge | DAO activates backup Gateway |
-| **VAMS L3 halt** | Default routing destination | Snowman consensus fails | Route to Avalanche C-Chain | Route to SEI | Queue + migrate to backup L3 |
+| **Ethereum halt** | High-value settlement | No new blocks 15+ mins | Delay settlement | Route to Cardano | Emergency multisig on Cardano |
+| **Solana halt** | Velocity routing | Slot production stalls | Route to SEI | Route to Polygon L2 | Automatic CLR reroute |
+| **SEI halt** | Fast EVM execution | Twin-Turbo consensus stall | Route to Solana | Route to Polygon L2 | Accept latency increase |
+| **Cardano halt** | Formally verified settlement| Ouroboros stalls | CRITICAL | Delay settlement | Fallback to Ethereum L1 mainnet |
+| **VAMS L3 halt** | Default routing destination | CDK sequencer fails | Route to Base / L2s | Route to SEI | Queue + use L1 escape hatch |
 | **Hyperlane halt** | Solana/multi-chain bridge | ISM verification timeout | Route via LayerZero | Use Wormhole | Extend settlement timeouts |
-| **LayerZero halt** | SEI bridge, backup routes | DVN consensus fails | Route via Hyperlane | Use Teleporter where applicable | Direct L1 settlement |
-| **Teleporter/AWM halt** | Avalanche L1 interop | BLS multi-sig fails | Use Hyperlane to C-Chain | External bridge roundtrip | Pause Avalanche L1 operations |
+| **LayerZero halt** | SEI bridge, backup routes | DVN consensus fails | Route via Hyperlane | Use Axelar | Direct L1 settlement |
 | **AggLayer halt** | Polygon unified bridge | Pessimistic proof fails | L1 Escape Hatch (Forced Ethereum Batches) | Use Hyperlane | Accept L1 fallback gas costs |
 
 #### 21.1.6 Economic & Oracle Failures

@@ -219,7 +219,6 @@ python neuron.py --demo-workflow
 |----------|---------|
 | `ORACLE_CACHE_TTL` | 30 (seconds) |
 | `ETHEREUM_RPC` | https://ethereum-rpc.publicnode.com |
-| `AVALANCHE_RPC` | https://api.avax.network/ext/bc/C/rpc |
 | `SOLANA_RPC` | https://api.mainnet-beta.solana.com |
 | `POLYGON_RPC` | https://polygon-rpc.com |
 | `ARBITRUM_RPC` | https://arb1.arbitrum.io/rpc |

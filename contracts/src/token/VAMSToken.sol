@@ -25,7 +25,7 @@ import "./IVAMSToken.sol";
  * Token Specifications (from TOKENOMICS.md):
  * - Total Supply: 1,000,000,000 (1 billion)
  * - Decimals: 18
- * - Initial Circulating: 150,000,000 (15%) at TGE
+ * - Initial Circulating: 100,000,000 (10%) at TGE
  */
 contract VAMSToken is 
     ERC20,

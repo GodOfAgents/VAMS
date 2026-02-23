@@ -8,6 +8,7 @@ Supported Providers:
 - Akash - Supercloud (Kubernetes/Docker) - public REST API
 - Render - Visual AI / GPU Rendering - requires auth
 - Bittensor - Intelligence-as-a-Service (Subnets) - TaoStats API
+- Phala - AI Coprocessor (Confidential Compute)
 """
 
 import time
@@ -428,6 +429,50 @@ class BittensorProvider(ComputeProvider):
         self._wallet = wallet
 
 
+class PhalaComputeProvider(ComputeProvider):
+    """
+    Phala Network - AI Coprocessor
+    """
+    
+    name = "phala_cp"
+    description = "AI Coprocessor in TEE (Confidential Compute)"
+    
+    def __init__(self, endpoint: str = "https://phala.network", timeout: int = 15):
+        super().__init__(endpoint, timeout)
+    
+    def get_status(self) -> ComputeInfo:
+        """Check Phala Coprocessor reachability."""
+        start = time.time()
+        try:
+            response = self.session.get(
+                self.endpoint,
+                timeout=self.timeout
+            )
+            latency = (time.time() - start) * 1000
+            
+            if response.status_code == 200:
+                return ComputeInfo(
+                    provider=self.name,
+                    status=ComputeStatus.HEALTHY,
+                    capacity={"note": "TEE Enclaves active"},
+                    latency_ms=latency
+                )
+            else:
+                return ComputeInfo(
+                    provider=self.name,
+                    status=ComputeStatus.DEGRADED,
+                    latency_ms=latency,
+                    error=f"Status {response.status_code}"
+                )
+                
+        except requests.exceptions.RequestException as e:
+            latency = (time.time() - start) * 1000
+            return ComputeInfo(
+                provider=self.name,
+                status=ComputeStatus.OFFLINE,
+                latency_ms=latency,
+                error=str(e)[:50]
+            )
 
 
 class ComputeManager:
@@ -439,7 +484,8 @@ class ComputeManager:
                 IoNetProvider(),
                 AkashProvider(),
                 RenderProvider(),
-                BittensorProvider()
+                BittensorProvider(),
+                PhalaComputeProvider()
             ]
         
         self.providers: Dict[str, ComputeProvider] = {p.name: p for p in providers}
