@@ -110,24 +110,6 @@ VAMS is the "Meta-Layer" for trust, aggregating proofs from **10 protocols** (Ph
 
 ---
 
-## 🌌 The 6 Ontological Breakthroughs
-
-VAMS is not merely a tech stack; it is a **philosophical engine** that instantiates theoretical concepts into verifiable code. We have solved 6 fundamental problems in computer science and social coordination.
-
-| Field | The Breakthrough | Deep Dive |
-| :--- | :--- | :--- |
-| **Physics** | **It from Bit** (The Synthetic Observer) | [📜 Read Narrative](./docs/docs/narrative/PHYSICS_IT_FROM_BIT.md) |
-| **Economics** | **Deterministic Agency** (Zero Agency Cost) | [📜 Read Narrative](./docs/docs/narrative/ECONOMICS_DETERMINISTIC_AGENCY.md) |
-| **Law** | **Polycentric Sovereignty** (Algorithmic Jurisdiction) | [📜 Read Narrative](./docs/docs/narrative/LAW_POLYCENTRIC_SOVEREIGNTY.md) |
-| **Biology** | **Digital Autopoiesis** (Synthetic Life) | [📜 Read Narrative](./docs/docs/narrative/BIOLOGY_DIGITAL_AUTOPOIESIS.md) |
-| **AI** | **The Verifiable Mind** (Glass Box Intelligence) | [📜 Read Narrative](./docs/docs/narrative/AI_VERIFIABLE_MIND.md) |
-| **Blockchain** | **The DePIN OS** (Planetary Computer) | [📜 Read Narrative](./docs/docs/narrative/BLOCKCHAIN_DEPIN_OS.md) |
-
-> [!IMPORTANT]
-> **Must Read:** These documents contain the "Deep Lore" and theoretical innovations that differentiate VAMS from every other project. Start with the [**Master Index**](./docs/docs/narrative/VAMS_BREAKTHROUGHS.md).
-
----
-
 ## 🏛️ Architecture
 
 ```
