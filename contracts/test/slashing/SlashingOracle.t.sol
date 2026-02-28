@@ -72,14 +72,14 @@ contract SlashingOracleTest is BaseTest {
         
         vm.label(address(oracle), "SlashingOracle");
         
-        // Fund and stake voters
-        _setupVoter(voter1, PROPOSAL_STAKE * 2);
+        // Fund and stake voters (all must be >= MIN_STAKE)
+        _setupVoter(voter1, MIN_STAKE);
         _setupVoter(voter2, MIN_STAKE * 5);
         _setupVoter(voter3, MIN_STAKE * 10);
         _setupVoter(voter4, MIN_STAKE * 50);
         
         // Fund admin for proposals
-        _setupVoter(admin, PROPOSAL_STAKE * 2);
+        _setupVoter(admin, MIN_STAKE);
         
         // IMPORTANT: Advance time past MIN_STAKE_AGE (7 days) so staking is valid for voting
         // This is required after HIGH-2 security fix for flash loan attack prevention
@@ -460,18 +460,18 @@ contract SlashingOracleTest is BaseTest {
     }
     
     function test_StakeWeight_SquareRoot() public view {
-        // voter1 has 20,000, voter4 has 50,000
-        // weight ratio should be sqrt(50000)/sqrt(20000) ≈ 1.58 (not 2.5x)
+        // voter1 has 50,000, voter4 has 2,500,000
+        // weight ratio should be sqrt(2500000)/sqrt(50000) ≈ 7.07 (not 50x)
         
         uint256 weight1 = oracle.getVoterStakeWeight(voter1);
         uint256 weight4 = oracle.getVoterStakeWeight(voter4);
         
-        // With sqrt weighting, 2.5x stake should give ~1.58x voting power
+        // With sqrt weighting, 50x stake should give ~7.07x voting power
         uint256 actualRatio = (weight4 * 100) / weight1;
         
         // Allow some tolerance due to integer math
-        assertGt(actualRatio, 150);
-        assertLt(actualRatio, 165);
+        assertGt(actualRatio, 680);
+        assertLt(actualRatio, 730);
     }
     
     // ============ View Function Tests ============

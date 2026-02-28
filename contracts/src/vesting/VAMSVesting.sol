@@ -57,6 +57,23 @@ contract VAMSVesting is IVAMSVesting, AccessControl, ReentrancyGuard {
     // Cliff unlock percentages in basis points
     uint16 private constant UNLOCK_NONE = 0;        // 0%
 
+    // ============ GMV-Gated Vesting ============
+
+    /// @notice Required Gross Market Volume threshold (in USD, 18 decimals) for TEAM/FOUNDATION unlocks
+    uint256 public gmvThreshold;
+
+    /// @notice GMV oracle address that reports protocol volume
+    address public gmvOracle;
+
+    /// @notice Emitted when GMV threshold is updated
+    event GmvThresholdUpdated(uint256 oldThreshold, uint256 newThreshold);
+
+    /// @notice Emitted when GMV oracle is updated
+    event GmvOracleUpdated(address oldOracle, address newOracle);
+
+    /// @notice Thrown when GMV gate prevents release
+    error GmvGateNotMet(uint256 currentGmv, uint256 requiredGmv);
+
     // ============ State Variables ============
 
     /// @notice The VAMS token contract
@@ -76,6 +93,9 @@ contract VAMSVesting is IVAMSVesting, AccessControl, ReentrancyGuard {
 
     /// @notice Total tokens currently locked in vesting
     uint256 private _totalLocked;
+
+    /// @notice Schedule type tracking for GMV-gated unlocks
+    mapping(bytes32 scheduleId => ScheduleType) private _scheduleTypes;
 
     // ============ Constructor ============
 
@@ -171,6 +191,25 @@ contract VAMSVesting is IVAMSVesting, AccessControl, ReentrancyGuard {
         released = _releasableAmount(schedule);
         if (released == 0) revert NothingToRelease(scheduleId);
 
+        // GMV gate: TEAM and FOUNDATION schedules require protocol usage
+        ScheduleType sType = _scheduleTypes[scheduleId];
+        if (
+            (sType == ScheduleType.TEAM || 
+             sType == ScheduleType.FOUNDATION) &&
+            gmvOracle != address(0) && gmvThreshold > 0
+        ) {
+            // Read current GMV from oracle (expected: function currentGmv() returns (uint256))
+            (bool success, bytes memory data) = gmvOracle.staticcall(
+                abi.encodeWithSignature("currentGmv()")
+            );
+            if (success && data.length >= 32) {
+                uint256 currentGmv = abi.decode(data, (uint256));
+                if (currentGmv < gmvThreshold) {
+                    revert GmvGateNotMet(currentGmv, gmvThreshold);
+                }
+            }
+        }
+
         schedule.releasedAmount += released;
         _totalLocked -= released;
 
@@ -227,6 +266,22 @@ contract VAMSVesting is IVAMSVesting, AccessControl, ReentrancyGuard {
         if (totalReleased > 0) {
             token.safeTransfer(msg.sender, totalReleased);
         }
+    }
+
+    // ============ GMV Configuration ============
+
+    /// @notice Set the GMV oracle address
+    /// @param _gmvOracle Address of the GMV oracle contract
+    function setGmvOracle(address _gmvOracle) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        emit GmvOracleUpdated(gmvOracle, _gmvOracle);
+        gmvOracle = _gmvOracle;
+    }
+
+    /// @notice Set the GMV threshold for TEAM/FOUNDATION unlocks
+    /// @param _gmvThreshold GMV in USD (18 decimals) required for insider unlocks
+    function setGmvThreshold(uint256 _gmvThreshold) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        emit GmvThresholdUpdated(gmvThreshold, _gmvThreshold);
+        gmvThreshold = _gmvThreshold;
     }
 
     // ============ Revocation ============
@@ -368,6 +423,7 @@ contract VAMSVesting is IVAMSVesting, AccessControl, ReentrancyGuard {
 
         // Track beneficiary schedules
         _beneficiarySchedules[beneficiary].push(scheduleId);
+        _scheduleTypes[scheduleId] = scheduleType;
         _scheduleCount++;
         _totalLocked += amount;
 

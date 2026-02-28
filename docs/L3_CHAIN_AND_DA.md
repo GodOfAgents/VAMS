@@ -1,4 +1,4 @@
-# VAMS L3 Chain & Data Availability
+     # VAMS L3 Chain & Data Availability
 
 ## Overview
 VAMS (Verifiable Agentic Model Systems) operates its own Layer 3 (L3) chain using **Polygon CDK**. This L3 is configured as a **Validium**, meaning it posts validity proofs to the L2 (Polygon Amoy/Mainnet) but keeps data off-chain for cost efficiency and scalability.

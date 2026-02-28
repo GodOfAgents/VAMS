@@ -42,6 +42,9 @@ interface IVAMSToken {
     /// @notice Thrown when address is zero
     error ZeroAddress();
 
+    /// @notice Thrown when annual mint cap would be exceeded
+    error AnnualMintCapExceeded(uint256 attempted, uint256 cap);
+
     // ============ View Functions ============
 
     /// @notice Check if anti-whale protection is enabled

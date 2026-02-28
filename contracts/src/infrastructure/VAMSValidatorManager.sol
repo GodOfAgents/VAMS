@@ -6,15 +6,16 @@ import "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "./interfaces/IVAMSValidatorManager.sol";
-import "./interfaces/IPChainBridge.sol";
 import "../staking/IVAMSStaking.sol";
 import "../economic/IVAMSFeeCollector.sol";
 
 /**
  * @title VAMSValidatorManager
  * @author VAMS Protocol
- * @notice Manages deposits for Avalanche L1 validators with Bounded DAO governance
+ * @notice Manages $VAMS ERC-20 deposits for VAMS L3 Validium validators on Polygon CDK
  * @dev DAO sets parameters (bounds, base rate, tiers), algorithm calculates per-deposit markup
  * 
  * ## Bounded DAO Model
@@ -33,6 +34,8 @@ contract VAMSValidatorManager is
     UUPSUpgradeable,
     IVAMSValidatorManager 
 {
+    using SafeERC20 for IERC20;
+
     // ============ Roles ============
     
     /// @notice Role for governance actions (parameter updates)
@@ -85,14 +88,14 @@ contract VAMSValidatorManager is
     
     // ============ External Contracts ============
     
+    /// @notice $VAMS ERC-20 token for deposits
+    IERC20 public vamsToken;
+    
     /// @notice Reference to VAMS staking contract for loyalty lookups
     IVAMSStaking public stakingContract;
     
     /// @notice Reference to VAMS fee collector for markup collection
     IVAMSFeeCollector public feeCollector;
-    
-    /// @notice Reference to P-Chain Bridge
-    IPChainBridge public pChainBridge;
     
     // ============ Constants ============
     
@@ -117,16 +120,18 @@ contract VAMSValidatorManager is
     /**
      * @notice Initialize the validator manager
      * @param _admin Admin address with all roles initially
+     * @param _vamsToken Address of $VAMS ERC-20 token
      * @param _stakingContract Address of VAMS staking contract
      * @param _feeCollector Address of VAMS fee collector
      */
     function initialize(
         address _admin,
+        address _vamsToken,
         address _stakingContract,
-        address _feeCollector,
-        address _pChainBridge
+        address _feeCollector
     ) external initializer {
         if (_admin == address(0)) revert ZeroAddress();
+        if (_vamsToken == address(0)) revert ZeroAddress();
         if (_stakingContract == address(0)) revert ZeroAddress();
         if (_feeCollector == address(0)) revert ZeroAddress();
         
@@ -139,11 +144,9 @@ contract VAMSValidatorManager is
         _grantRole(EMERGENCY_ROLE, _admin);
         _grantRole(UPGRADER_ROLE, _admin);
         
+        vamsToken = IERC20(_vamsToken);
         stakingContract = IVAMSStaking(_stakingContract);
         feeCollector = IVAMSFeeCollector(_feeCollector);
-        if (_pChainBridge != address(0)) {
-            pChainBridge = IPChainBridge(_pChainBridge);
-        }
         
         // Default DAO parameters
         minMarkupBps = 100;      // 1%
@@ -201,30 +204,24 @@ contract VAMSValidatorManager is
     }
     
     /// @inheritdoc IVAMSValidatorManager
-    function deposit(bytes32 subnetId) external payable override nonReentrant whenNotPaused {
+    function deposit(bytes32 subnetId, uint256 amount) external override nonReentrant whenNotPaused {
         ManagedSubnet storage subnet = _subnets[subnetId];
         if (!subnet.active) revert SubnetNotRegistered();
-        if (msg.value == 0) revert ZeroAmount();
+        if (amount == 0) revert ZeroAmount();
         
-        uint256 amount = msg.value;
         uint256 markupBps = calculateMarkup(msg.sender);
         uint256 markupAmount = (amount * markupBps) / BPS_DENOMINATOR;
         uint256 netAmount = amount - markupAmount;
         
-        // Update subnet stats
+        // Effects — update subnet stats first (CEI pattern)
         subnet.totalDeposited += netAmount;
         
-        // Collect markup via fee collector
-        if (markupAmount > 0) {
-            (bool success, ) = address(feeCollector).call{value: markupAmount}("");
-            require(success, "Markup transfer failed");
-        }
+        // Interactions — transfer $VAMS from depositor
+        vamsToken.safeTransferFrom(msg.sender, address(this), amount);
         
-        // Route to P-Chain (via AWM/Teleporter) - currently holds for manual bridging
-        // TODO: Implement AWM/Teleporter integration
-        // Route to P-Chain via Bridge contract
-        if (address(pChainBridge) != address(0)) {
-            _routeToPChain(subnetId, netAmount);
+        // Route markup to fee collector
+        if (markupAmount > 0) {
+            vamsToken.safeTransfer(address(feeCollector), markupAmount);
         }
         
         emit Deposit(msg.sender, subnetId, amount, markupBps, netAmount);
@@ -432,6 +429,15 @@ contract VAMSValidatorManager is
     // ============ Admin Functions ============
     
     /**
+     * @notice Update the $VAMS token reference
+     * @param _vamsToken New $VAMS token address
+     */
+    function setVamsToken(address _vamsToken) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        if (_vamsToken == address(0)) revert ZeroAddress();
+        vamsToken = IERC20(_vamsToken);
+    }
+    
+    /**
      * @notice Update staking contract reference
      * @param _stakingContract New staking contract address
      */
@@ -449,43 +455,9 @@ contract VAMSValidatorManager is
         feeCollector = IVAMSFeeCollector(_feeCollector);
     }
     
-    /**
-     * @notice Update P-Chain bridge reference
-     * @param _pChainBridge New bridge address
-     */
-    function setPChainBridge(address _pChainBridge) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        if (_pChainBridge == address(0)) revert ZeroAddress();
-        pChainBridge = IPChainBridge(_pChainBridge);
-    }
-    
-    /**
-     * @notice Withdraw accumulated funds for P-Chain bridging
-     * @param to Recipient address
-     * @param amount Amount to withdraw
-     */
-    function withdrawForBridging(
-        address payable to, 
-        uint256 amount
-    ) external onlyRole(GOVERNANCE_ROLE) nonReentrant {
-        if (to == address(0)) revert ZeroAddress();
-        (bool success, ) = to.call{value: amount}("");
-        require(success, "Withdrawal failed");
-    }
-    
     // ============ Internal Functions ============
     
     function _authorizeUpgrade(address) internal override onlyRole(UPGRADER_ROLE) {}
-    
-    function _routeToPChain(bytes32 subnetId, uint256 amount) internal {
-        // Approve bridge to spend tokens? No, we transfer ETH/AVAX
-        // The bridge deposit function needs to be payable
-        // pChainBridge.routeToPChain{value: amount}(subnetId, msg.sender);
-        // Note: Requires ValidatorRegistration struct. For now, we rely on manual withdrawal + bridge.
-    }
-    
-    // ============ Receive ============
-    
-    receive() external payable {}
     
     // ============ Storage Gap ============
     

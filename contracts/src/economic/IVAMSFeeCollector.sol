@@ -13,7 +13,6 @@ interface IVAMSFeeCollector {
     enum DistributionPhase {
         PHASE_1,  // 100% burn
         PHASE_2,  // 40% burn, 30% staking, 20% treasury, 10% insurance
-        PHASE_3,  // 30% burn, 35% staking, 25% treasury, 10% insurance
         CUSTOM    // Custom allocation
     }
 

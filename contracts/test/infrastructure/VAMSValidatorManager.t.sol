@@ -6,8 +6,22 @@ import "../../src/infrastructure/VAMSValidatorManager.sol";
 import "../../src/infrastructure/interfaces/IVAMSValidatorManager.sol";
 import "../../src/staking/IVAMSStaking.sol";
 import "../../src/economic/IVAMSFeeCollector.sol";
-import "../../src/infrastructure/interfaces/IPChainBridge.sol";
 import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+
+/**
+ * @title Mock VAMS Token (ERC-20)
+ * @notice Simple mock for testing $VAMS deposits
+ */
+contract MockVAMSTokenForVM is ERC20 {
+    constructor() ERC20("MockVAMS", "mVAMS") {
+        _mint(msg.sender, 1_000_000_000 ether);
+    }
+    
+    function mint(address to, uint256 amount) external {
+        _mint(to, amount);
+    }
+}
 
 /**
  * @title Mock Staking Contract
@@ -100,37 +114,17 @@ contract MockFeeCollector is IVAMSFeeCollector {
 }
 
 /**
- * @title Mock P-Chain Bridge
- * @notice Mock for testing P-Chain routing
- */
-contract MockPChainBridge is IPChainBridge {
-    event RouteToPChainCalled(bytes32 subnetId, address pChainAddr, uint256 amount);
-    
-    function routeToPChain(ValidatorRegistration calldata) external payable override returns (bytes32) {
-        emit RouteToPChainCalled(bytes32(0), address(0), msg.value);
-        return bytes32(0);
-    }
-    
-    function increaseStake(bytes32, bytes32) external payable override returns (bytes32) { return bytes32(0); }
-    function initiateValidatorExit(bytes32, bytes32) external override returns (bytes32) { return bytes32(0); }
-    function receivePChainResponse(bytes32, BridgeResult calldata) external override {}
-    function isSupportedSubnet(bytes32) external pure override returns (bool) { return true; }
-    function getMinimumStake(bytes32) external pure override returns (uint256) { return 0; }
-    function getMessageStatus(bytes32) external pure override returns (bool, uint256) { return (false, 0); }
-    function getTeleporterMessenger() external pure override returns (address) { return address(0); }
-}
-
-/**
  * @title VAMSValidatorManagerTest
  * @notice Comprehensive unit tests for VAMSValidatorManager
  * @dev Tests markup calculation, governance, emergency functions, and subnet management
+ *      Updated for $VAMS ERC-20 deposits (Polygon CDK, no Avalanche)
  */
 contract VAMSValidatorManagerTest is BaseTest {
     VAMSValidatorManager public implementation;
     VAMSValidatorManager public validatorManager;
     MockStaking public mockStaking;
     MockFeeCollector public mockFeeCollector;
-    MockPChainBridge public mockBridge;
+    MockVAMSTokenForVM public mockToken;
     
     // Constants from contract
     bytes32 public constant GOVERNANCE_ROLE = keccak256("GOVERNANCE_ROLE");
@@ -155,24 +149,22 @@ contract VAMSValidatorManagerTest is BaseTest {
         // Deploy mocks
         mockStaking = new MockStaking();
         mockFeeCollector = new MockFeeCollector();
+        mockToken = new MockVAMSTokenForVM();
         
-        vm.label(address(mockStaking), "MockStaking");
         vm.label(address(mockStaking), "MockStaking");
         vm.label(address(mockFeeCollector), "MockFeeCollector");
-        
-        mockBridge = new MockPChainBridge();
-        vm.label(address(mockBridge), "MockPChainBridge");
+        vm.label(address(mockToken), "MockVAMSToken");
         
         // Deploy implementation
         implementation = new VAMSValidatorManager();
         
-        // Deploy proxy
+        // Deploy proxy with new initialize signature (no PChainBridge)
         bytes memory initData = abi.encodeWithSelector(
             VAMSValidatorManager.initialize.selector,
             admin,
+            address(mockToken),
             address(mockStaking),
-            address(mockFeeCollector),
-            address(mockBridge)
+            address(mockFeeCollector)
         );
         
         ERC1967Proxy proxy = new ERC1967Proxy(address(implementation), initData);
@@ -180,13 +172,20 @@ contract VAMSValidatorManagerTest is BaseTest {
         
         vm.label(address(validatorManager), "VAMSValidatorManager");
         
-        // Fund enterprises with ETH for deposits
-        vm.deal(enterprise1, 100 ether);
-        vm.deal(enterprise1, 100 ether);
-        vm.deal(enterprise2, 100 ether);
+        // Fund enterprises with $VAMS tokens for deposits
+        mockToken.mint(enterprise1, 1_000_000 ether);
+        mockToken.mint(enterprise2, 1_000_000 ether);
         
         // Advance time to allow for past timestamps in tests
         vm.warp(3650 days); // 10 years in future
+    }
+    
+    /// @dev Helper: enterprise approves + deposits $VAMS
+    function _depositVAMS(address enterprise, bytes32 subnetId, uint256 amount) internal {
+        vm.startPrank(enterprise);
+        mockToken.approve(address(validatorManager), amount);
+        validatorManager.deposit(subnetId, amount);
+        vm.stopPrank();
     }
     
     // ============ Initialization Tests ============
@@ -227,6 +226,7 @@ contract VAMSValidatorManagerTest is BaseTest {
         bytes memory initData = abi.encodeWithSelector(
             VAMSValidatorManager.initialize.selector,
             address(0),
+            address(mockToken),
             address(mockStaking),
             address(mockFeeCollector)
         );
@@ -270,7 +270,6 @@ contract VAMSValidatorManagerTest is BaseTest {
         validatorManager.registerSubnet(subnetId1, 10);
         
         // Lower max bound to 200 bps (2%)
-        // This implicitly clamps base rate to 200 too
         vm.prank(admin);
         validatorManager.updateBounds(50, 200); 
         
@@ -551,7 +550,6 @@ contract VAMSValidatorManagerTest is BaseTest {
         assertFalse(validatorManager.isFrozen());
         
         // Should resume normal calculation
-        // Should resume normal calculation
         uint256 markup = validatorManager.calculateMarkup(enterprise1);
         assertEq(markup, 200, "Should return to normal rate (base - low util)");
     }
@@ -576,9 +574,11 @@ contract VAMSValidatorManagerTest is BaseTest {
         vm.prank(admin);
         validatorManager.pause();
         
-        vm.prank(enterprise1);
+        vm.startPrank(enterprise1);
+        mockToken.approve(address(validatorManager), 10 ether);
         vm.expectRevert();
-        validatorManager.deposit{value: 10 ether}(subnetId1);
+        validatorManager.deposit(subnetId1, 10 ether);
+        vm.stopPrank();
     }
     
     function test_Unpause_AllowsDeposits() public {
@@ -591,9 +591,8 @@ contract VAMSValidatorManagerTest is BaseTest {
         vm.prank(admin);
         validatorManager.unpause();
         
-        // Should now work (will call fee collector)
-        vm.prank(enterprise1);
-        validatorManager.deposit{value: 10 ether}(subnetId1);
+        // Should now work
+        _depositVAMS(enterprise1, subnetId1, 10 ether);
     }
     
     // ============ Deposit Tests ============
@@ -603,8 +602,12 @@ contract VAMSValidatorManagerTest is BaseTest {
         validatorManager.registerSubnet(subnetId1, 100);
         
         uint256 depositAmount = 10 ether;
-        uint256 expectedMarkup = (depositAmount * 300) / BPS_DENOMINATOR; // 3%
         
+        // Approve FIRST (emits Approval event)
+        vm.prank(enterprise1);
+        mockToken.approve(address(validatorManager), depositAmount);
+        
+        // Now expect the Deposit event (after approve is done)
         vm.expectEmit(true, true, false, true);
         emit IVAMSValidatorManager.Deposit(
             enterprise1,
@@ -615,22 +618,26 @@ contract VAMSValidatorManagerTest is BaseTest {
         );
         
         vm.prank(enterprise1);
-        validatorManager.deposit{value: depositAmount}(subnetId1);
+        validatorManager.deposit(subnetId1, depositAmount);
     }
     
     function test_Deposit_RevertsOnZeroValue() public {
         vm.prank(admin);
         validatorManager.registerSubnet(subnetId1, 100);
         
-        vm.prank(enterprise1);
+        vm.startPrank(enterprise1);
+        mockToken.approve(address(validatorManager), 0);
         vm.expectRevert(IVAMSValidatorManager.ZeroAmount.selector);
-        validatorManager.deposit{value: 0}(subnetId1);
+        validatorManager.deposit(subnetId1, 0);
+        vm.stopPrank();
     }
     
     function test_Deposit_RevertsOnUnregisteredSubnet() public {
-        vm.prank(enterprise1);
+        vm.startPrank(enterprise1);
+        mockToken.approve(address(validatorManager), 10 ether);
         vm.expectRevert(IVAMSValidatorManager.SubnetNotRegistered.selector);
-        validatorManager.deposit{value: 10 ether}(subnetId1);
+        validatorManager.deposit(subnetId1, 10 ether);
+        vm.stopPrank();
     }
     
     // ============ Fuzz Tests ============
@@ -664,7 +671,7 @@ contract VAMSValidatorManagerTest is BaseTest {
         minBps = bound(minBps, 0, 10000);
         maxBps = bound(maxBps, 0, 10000);
         
-        if (minBps > maxBps || minBps < 50 || maxBps > 1000) {
+        if (minBps >= maxBps || minBps < 50 || maxBps > 1000) {
             vm.prank(admin);
             vm.expectRevert(IVAMSValidatorManager.InvalidBounds.selector);
             validatorManager.updateBounds(minBps, maxBps);
@@ -684,19 +691,18 @@ contract VAMSValidatorManagerTest is BaseTest {
         vm.prank(admin);
         validatorManager.registerSubnet(subnetId1, 100);
         
-        vm.deal(enterprise1, depositAmount);
+        // Mint enough tokens for the deposit
+        mockToken.mint(enterprise1, depositAmount);
         
         uint256 markup = validatorManager.calculateMarkup(enterprise1);
         uint256 expectedFee = (depositAmount * markup) / BPS_DENOMINATOR;
         
-        vm.prank(enterprise1);
-        validatorManager.deposit{value: depositAmount}(subnetId1);
+        _depositVAMS(enterprise1, subnetId1, depositAmount);
         
-        // Verify fee was collected
-        // Verify fee was collected (allow error margin for rounding or low deposit)
-        // If expectedFee is > 0, totalCollected should be > 0.
+        // Verify fee collector received the markup tokens
         if (expectedFee > 0) {
-            assertGt(mockFeeCollector.totalCollected(), 0, "Should collect fees");
+            uint256 feeCollectorBalance = mockToken.balanceOf(address(mockFeeCollector));
+            assertGt(feeCollectorBalance, 0, "Should collect fees via ERC20 transfer");
         }
     }
     

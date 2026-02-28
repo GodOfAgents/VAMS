@@ -35,8 +35,14 @@ contract VAMSStaking is IVAMSStaking, AccessControl, Pausable, ReentrancyGuard {
     /// @notice Role for updating emission rate
     bytes32 public constant EMISSION_ADMIN_ROLE = keccak256("EMISSION_ADMIN_ROLE");
 
-    /// @notice Unbonding period duration
-    uint256 public constant UNBONDING_PERIOD = 14 days;
+    /// @notice Unbonding period duration (normal)
+    uint256 public constant UNBONDING_PERIOD_NORMAL = 14 days;
+
+    /// @notice Unbonding period duration (crisis — bank-run prevention)
+    uint256 public constant UNBONDING_PERIOD_CRISIS = 30 days;
+
+    /// @notice Role for Sentinel to activate crisis mode
+    bytes32 public constant SENTINEL_ROLE = keccak256("SENTINEL_ROLE");
 
     /// @notice Precision for reward calculations
     uint256 public constant PRECISION = 1e18;
@@ -108,6 +114,12 @@ contract VAMSStaking is IVAMSStaking, AccessControl, Pausable, ReentrancyGuard {
 
     /// @notice Unbonding requests per user
     mapping(address user => UnbondingRequest request) private _unbonding;
+
+    /// @notice Crisis mode flag — doubles unbonding to 30d to prevent bank runs
+    bool public crisisMode;
+
+    /// @notice Emitted when crisis mode is toggled
+    event CrisisModeToggled(bool enabled);
 
     // ============ Constructor ============
 
@@ -211,10 +223,11 @@ contract VAMSStaking is IVAMSStaking, AccessControl, Pausable, ReentrancyGuard {
         // Update reward debt
         info.rewardDebt = (info.amount * accRewardPerShare) / PRECISION;
 
-        // Create unbonding request
+        // Create unbonding request (dynamic period based on crisis mode)
+        uint256 unbondingPeriod = crisisMode ? UNBONDING_PERIOD_CRISIS : UNBONDING_PERIOD_NORMAL;
         _unbonding[msg.sender] = UnbondingRequest({
             amount: _unbonding[msg.sender].amount + amount,
-            unbondingEnd: block.timestamp + UNBONDING_PERIOD
+            unbondingEnd: block.timestamp + unbondingPeriod
         });
 
         StakingTier newTier = _getTier(info.amount);
@@ -222,7 +235,7 @@ contract VAMSStaking is IVAMSStaking, AccessControl, Pausable, ReentrancyGuard {
             emit TierChanged(msg.sender, oldTier, newTier);
         }
 
-        emit Unstaked(msg.sender, amount, block.timestamp + UNBONDING_PERIOD);
+        emit Unstaked(msg.sender, amount, block.timestamp + unbondingPeriod);
     }
 
     /// @inheritdoc IVAMSStaking
@@ -404,6 +417,16 @@ contract VAMSStaking is IVAMSStaking, AccessControl, Pausable, ReentrancyGuard {
     /// @inheritdoc IVAMSStaking
     function unpause() external override onlyRole(DEFAULT_ADMIN_ROLE) {
         _unpause();
+    }
+
+    /// @notice Toggle crisis mode (extends unbonding to 30 days)
+    /// @param enabled True to activate crisis mode
+    function setCrisisMode(bool enabled) external {
+        if (!hasRole(SENTINEL_ROLE, msg.sender) && !hasRole(DEFAULT_ADMIN_ROLE, msg.sender)) {
+            revert("Unauthorized: SENTINEL or ADMIN only");
+        }
+        crisisMode = enabled;
+        emit CrisisModeToggled(enabled);
     }
 
     // ============ Internal Functions ============

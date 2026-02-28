@@ -10,19 +10,22 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
  * @author VAMS Protocol
  * @notice Emergency pause mechanism that bypasses timelock for critical security
  * @dev 
- * - Guardian Committee (2/3): Can pause immediately, auto-expires after 48h
- * - Multisig (3/5): Can extend pause, execute emergency upgrades
- * - DAO: Must ratify emergency actions within 7 days
+ * - VAMSSentinel (Primary): Autonomous on-chain anomaly detector, sub-second pause
+ * - Guardian Committee (Fallback): Dormant multi-sig, only if Sentinel is compromised
+ * - DAO: Must approve resume after any emergency pause
  */
 abstract contract VAMSEmergencyPausable is 
     Initializable, 
     PausableUpgradeable, 
     AccessControlUpgradeable 
 {
-    /// @notice Role for Guardian Committee members (2/3 threshold)
+    /// @notice Role for VAMSSentinel autonomous anomaly detector (primary guardian)
+    bytes32 public constant SENTINEL_ROLE = keccak256("SENTINEL_ROLE");
+
+    /// @notice Role for Guardian Committee members (dormant fallback)
     bytes32 public constant GUARDIAN_ROLE = keccak256("GUARDIAN_ROLE");
     
-    /// @notice Role for pause/unpause authority (Multisig or DAO)
+    /// @notice Role for pause/unpause authority (DAO via ICB relay)
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
     
     /// @notice Default emergency pause duration (48 hours)
@@ -91,16 +94,18 @@ abstract contract VAMSEmergencyPausable is
     // ============ Emergency Pause Functions ============
     
     /**
-     * @notice Activate emergency pause (Guardian 2/3 or Pauser)
+     * @notice Activate emergency pause (Sentinel, Guardian fallback, or Pauser)
      * @param _reason Reason for the pause
      * @dev Auto-expires after EMERGENCY_PAUSE_DURATION (48h)
      */
     function emergencyPause(string calldata _reason) external {
         if (paused()) revert AlreadyPaused();
         
-        // Either Guardian or Pauser can initiate
+        // Sentinel (primary), Guardian (fallback), or Pauser can initiate
         require(
-            hasRole(GUARDIAN_ROLE, msg.sender) || hasRole(PAUSER_ROLE, msg.sender),
+            hasRole(SENTINEL_ROLE, msg.sender) ||
+            hasRole(GUARDIAN_ROLE, msg.sender) ||
+            hasRole(PAUSER_ROLE, msg.sender),
             "Not authorized to pause"
         );
         

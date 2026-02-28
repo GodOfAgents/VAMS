@@ -640,7 +640,8 @@ Users top-up their VAMS account with any token. Protocol auto-converts to $VAMS 
 
 | Parameter | Value |
 |-----------|-------|
-| **Total Supply** | 1,000,000,000 $VAMS (1 billion, fixed cap) |
+| **Total Supply** | 1,000,000,000 $VAMS (1 billion initial supply) |
+| **Inflation Cap** | Max 2.5% annual mint cap (25,000,000 $VAMS/yr) |
 | **Initial Circulating** | 100,000,000 $VAMS (10%) |
 | **Token Standard** | ERC-20 (Polygon MVP -> Multi-chain) |
 
@@ -718,10 +719,13 @@ class DynamicEmissionController:
     """
     RL-based emission adjustment with bounds and circuit breakers.
     """
-    # Hard bounds to prevent runaway scenarios
+    # Hard bounds to prevent runaway scenarios (Absolute limits)
     MIN_EMISSION_RATE = 0.001  # 0.1% minimum annual inflation
-    MAX_EMISSION_RATE = 0.05   # 5% maximum annual inflation
+    MAX_EMISSION_RATE = 0.025  # 2.5% maximum annual inflation
     MAX_FEE_ADJUSTMENT = 0.10  # 10% max fee change per epoch
+    
+    # Authorized AI Model Signers (3-of-5 ensemble)
+    MODEL_SIGNER_QUORUM = 3
     
     def adjust_economics(self, network_metrics: NetworkMetrics) -> Adjustment:
         # Calculate demand-supply balance
@@ -2212,7 +2216,7 @@ export class ClientSideRouter {
 | **Protocol Fees** | `VAMSFeeCollector` | **DAO (via Timelock)** | 1 Day |
 | **Slashing Logic** | `VAMSSlasher` | **DAO (via Timelock)** | 1 Day |
 | **Upgrades** | `ProxyAdmin` | **DAO (via Timelock)** | 1 Day |
-| **Emergency Pause** | `Guardian Multisig` | **Security Committee** | Immediate |
+| **Emergency Pause** | `VAMSSentinel (Autonomous)` | **Security Keepers** | Immediate |
 
 **Progressive Decentralization Timeline:**
 
@@ -2235,7 +2239,7 @@ export class ClientSideRouter {
 │  PHASE 3: FULL SOVEREIGNTY (Month 24+)                                  │
 │  ├── Admins: ALL system roles held ONLY by Timelock                     │
 │  ├── Upgrades: Hard-fork only (optional immutability)                   │
-│  └── Security: Multi-sig guardians rotated to elected community peers   │
+│  └── Security: VAMSSentinel autonomous actor with keeper consensus      │
 │                                                                          │
 └─────────────────────────────────────────────────────────────────────────┘
 ```
