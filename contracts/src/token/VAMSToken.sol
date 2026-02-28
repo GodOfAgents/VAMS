@@ -59,6 +59,12 @@ contract VAMSToken is
     /// @notice Maximum setting for dailyTransferLimitBps (5%)
     uint256 public constant DAILY_LIMIT_BPS_LIMIT = 500;
 
+    /// @notice Annual mint cap: 2.5% of initial supply (25M $VAMS per year)
+    uint256 public constant ANNUAL_MINT_CAP = 25_000_000 * 1e18;
+
+    /// @notice Seconds per year (365.25 days)
+    uint256 public constant SECONDS_PER_YEAR = 365.25 days;
+
     // ============ State Variables ============
 
     /// @inheritdoc IVAMSToken
@@ -81,6 +87,12 @@ contract VAMSToken is
 
     /// @notice Mapping of last transfer day per address (day number since TGE)
     mapping(address account => uint256 day) private _lastTransferDay;
+
+    /// @notice Minted amount in the current year
+    uint256 public mintedThisYear;
+
+    /// @notice Start timestamp of current minting year
+    uint256 public currentMintYearStart;
 
     /// @notice TGE timestamp (for calculating day number)
     uint256 public immutable tgeTimestamp;
@@ -117,6 +129,9 @@ contract VAMSToken is
         _exemptFromLimits[address(0)] = true; // Burn address
         _exemptFromLimits[address(this)] = true;
 
+        // Initialize mint tracking
+        currentMintYearStart = block.timestamp;
+
         // Mint initial supply to treasury
         _mint(treasury, INITIAL_SUPPLY);
     }
@@ -128,8 +143,18 @@ contract VAMSToken is
         if (to == address(0)) revert ZeroAddress();
         if (amount == 0) revert ZeroAmount();
         
-        // No hard cap check - inflationary model managed by Staking/Governance
+        // Rotate year if needed
+        if (block.timestamp >= currentMintYearStart + SECONDS_PER_YEAR) {
+            currentMintYearStart = block.timestamp;
+            mintedThisYear = 0;
+        }
         
+        // Enforce annual mint cap (2.5% = 25M $VAMS/year)
+        if (mintedThisYear + amount > ANNUAL_MINT_CAP) {
+            revert AnnualMintCapExceeded(mintedThisYear + amount, ANNUAL_MINT_CAP);
+        }
+        
+        mintedThisYear += amount;
         _mint(to, amount);
     }
 

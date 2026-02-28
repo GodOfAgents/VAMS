@@ -277,13 +277,6 @@ contract VAMSFeeCollector is
                 treasuryBps: 2_000,
                 insuranceBps: 1_000
             });
-        } else if (phase == DistributionPhase.PHASE_3) {
-            distribution = Distribution({
-                burnBps: 3_000,
-                stakingBps: 3_500,
-                treasuryBps: 2_500,
-                insuranceBps: 1_000
-            });
         }
 
         emit DistributionUpdated(

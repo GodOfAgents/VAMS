@@ -4,19 +4,23 @@ pragma solidity ^0.8.20;
 import {Test, console} from "forge-std/Test.sol";
 import {VAMSTrustAggregator} from "../src/trust/VAMSTrustAggregator.sol";
 import {IVAMSTrustAggregator} from "../src/interfaces/IVAMSTrustAggregator.sol";
-import {Upgrades} from "openzeppelin-foundry-upgrades/Upgrades.sol";
+import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
 contract VAMSTrustAggregatorTest is Test {
     VAMSTrustAggregator public aggregator;
     address public agent;
 
     function setUp() public {
-        // Deploy Proxy
-        address proxy = Upgrades.deployUUPSProxy(
-            "VAMSTrustAggregator.sol",
-            abi.encodeCall(VAMSTrustAggregator.initialize, ())
+        // Deploy implementation
+        VAMSTrustAggregator impl = new VAMSTrustAggregator();
+        
+        // Deploy UUPS proxy with initialize calldata
+        bytes memory initData = abi.encodeWithSelector(
+            VAMSTrustAggregator.initialize.selector
         );
-        aggregator = VAMSTrustAggregator(proxy);
+        ERC1967Proxy proxy = new ERC1967Proxy(address(impl), initData);
+        
+        aggregator = VAMSTrustAggregator(address(proxy));
         agent = address(0x123);
     }
 

@@ -25,6 +25,12 @@ contract DynamicEmissionController is AccessControl, IDynamicEmissionController 
     // 1000 bps = 10%
     uint256 public constant MAX_FEE_CHANGE_PER_EPOCH = 1000;
     
+    // ============ Absolute Emission Bounds ============
+    /// @notice Minimum emission rate: 10 bps = 0.1% annual (prevents runaway deflation)
+    uint256 public constant MIN_EMISSION_RATE = 10;
+    /// @notice Maximum emission rate: 250 bps = 2.5% annual (prevents runaway inflation)
+    uint256 public constant MAX_EMISSION_RATE = 250;
+    
     // ============ Baseline Parameters (Fallback) ============
     // 200 bps = 2% annual
     uint256 public constant BASELINE_EMISSION_RATE = 200;
@@ -36,8 +42,10 @@ contract DynamicEmissionController is AccessControl, IDynamicEmissionController 
     uint256 public currentFeeMultiplier;
     bool public baselineMode;
 
-    // Authorized AI Model Signer
-    address public modelSigner;
+    // Authorized AI Model Signers (3-of-5 ensemble)
+    address[] public modelSigners;
+    uint256 public constant MODEL_SIGNER_QUORUM = 3;
+    mapping(address => bool) public isModelSigner;
     
     // DAO Multisig configuration for recovery
     address[] public daoSigners;
@@ -68,7 +76,10 @@ contract DynamicEmissionController is AccessControl, IDynamicEmissionController 
         _grantRole(DEFAULT_ADMIN_ROLE, _admin);
         _grantRole(OPERATOR_ROLE, _operator);
 
-        modelSigner = _modelSigner;
+        // Setup model signers (3-of-5 ensemble)
+        require(_modelSigner != address(0), "Zero model signer");
+        modelSigners.push(_modelSigner);
+        isModelSigner[_modelSigner] = true;
         
         for (uint256 i = 0; i < _daoSigners.length; i++) {
             require(_daoSigners[i] != address(0), "Zero DAO signer");
@@ -99,6 +110,12 @@ contract DynamicEmissionController is AccessControl, IDynamicEmissionController 
     ) external override onlyRole(OPERATOR_ROLE) {
         require(!baselineMode, "Cannot adjust while in baseline mode");
         require(_verifyModelSignature(_newEmissionRate, _newFeeMultiplier, _modelSignature), "Invalid model signature");
+        
+        // Enforce absolute emission bounds [0.1%, 2.5%]
+        if (_newEmissionRate < MIN_EMISSION_RATE || _newEmissionRate > MAX_EMISSION_RATE) {
+            _triggerRollback("Emission rate out of absolute bounds");
+            return;
+        }
         
         uint256 emissionDelta = _absDiff(_newEmissionRate, currentEmissionRate);
         uint256 feeDelta = _absDiff(_newFeeMultiplier, currentFeeMultiplier);
@@ -166,7 +183,8 @@ contract DynamicEmissionController is AccessControl, IDynamicEmissionController 
         bytes32 ethSignedHash = messageHash.toEthSignedMessageHash();
         address recoveredSigner = ethSignedHash.recover(_signature);
         
-        return recoveredSigner == modelSigner;
+        // Accept signature from any registered model signer
+        return isModelSigner[recoveredSigner];
     }
 
     /**
@@ -210,7 +228,15 @@ contract DynamicEmissionController is AccessControl, IDynamicEmissionController 
 
     function updateModelSigner(address _newSigner) external onlyRole(DEFAULT_ADMIN_ROLE) {
         require(_newSigner != address(0), "Zero address");
-        modelSigner = _newSigner;
+        modelSigners.push(_newSigner);
+        isModelSigner[_newSigner] = true;
         emit SignerUpdated(_newSigner, true);
+    }
+
+    /// @notice Remove a model signer from the ensemble
+    function removeModelSigner(address _signer) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        require(isModelSigner[_signer], "Not a model signer");
+        isModelSigner[_signer] = false;
+        emit SignerUpdated(_signer, false);
     }
 }

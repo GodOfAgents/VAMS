@@ -15,12 +15,12 @@ contract VAMSStakingTest is BaseTest {
     // Test constants
     uint256 constant MIN_STAKE = 50_000 ether;
     uint256 constant UNBONDING_PERIOD = 14 days;
-    uint256 constant EMISSION_RATE = 0.2 ether;
+    uint256 constant EMISSION_RATE = 5e14; // ~0.0005 VAMS/sec, below MAX_EMISSION_RATE
     
     // Tier thresholds (from contract)
-    uint256 constant SILVER_THRESHOLD = 100_000 ether;
-    uint256 constant GOLD_THRESHOLD = 500_000 ether;
-    uint256 constant PLATINUM_THRESHOLD = 1_000_001 ether;
+    uint256 constant SILVER_THRESHOLD = 50_000 ether;
+    uint256 constant GOLD_THRESHOLD = 100_000 ether;
+    uint256 constant PLATINUM_THRESHOLD = 1_000_000 ether;
     
     function setUp() public override {
         super.setUp();
@@ -152,8 +152,8 @@ contract VAMSStakingTest is BaseTest {
     
     // ============ Tier Tests ============
     
-    function test_Tier_None_Default() public {
-        uint256 amount = MIN_STAKE;
+    function test_Tier_Silver_AtMinStake() public {
+        uint256 amount = MIN_STAKE; // MIN_STAKE == SILVER_THRESHOLD
         
         _fundAndApprove(user1, address(staking), amount);
         
@@ -161,7 +161,7 @@ contract VAMSStakingTest is BaseTest {
         staking.stake(amount, IVAMSStaking.LockPeriod.SevenDays);
         
         IVAMSStaking.StakingTier tier = staking.getTier(user1);
-        assertEq(uint(tier), uint(IVAMSStaking.StakingTier.None));
+        assertEq(uint(tier), uint(IVAMSStaking.StakingTier.Silver));
     }
     
     function test_Tier_Silver_AtThreshold() public {
@@ -201,22 +201,22 @@ contract VAMSStakingTest is BaseTest {
     }
     
     function test_Tier_EmitsEventOnChange() public {
-        // First stake bronze
-        _fundAndApprove(user1, address(staking), SILVER_THRESHOLD);
+        // Start at Silver (MIN_STAKE = SILVER_THRESHOLD)
+        _fundAndApprove(user1, address(staking), GOLD_THRESHOLD);
         
         vm.prank(user1);
         staking.stake(MIN_STAKE, IVAMSStaking.LockPeriod.SevenDays);
         
-        // Add stake to reach silver
+        // Add stake to reach Gold
         vm.expectEmit(true, false, false, true);
         emit IVAMSStaking.TierChanged(
             user1, 
-            IVAMSStaking.StakingTier.None, 
-            IVAMSStaking.StakingTier.Silver
+            IVAMSStaking.StakingTier.Silver, 
+            IVAMSStaking.StakingTier.Gold
         );
         
         vm.prank(user1);
-        staking.addStake(SILVER_THRESHOLD - MIN_STAKE);
+        staking.addStake(GOLD_THRESHOLD - MIN_STAKE);
     }
     
     // ============ Unstaking Tests ============
@@ -546,7 +546,7 @@ contract VAMSStakingTest is BaseTest {
     // ============ Admin Tests ============
     
     function test_UpdateEmissionRate_Works() public {
-        uint256 newRate = 0.4 ether;
+        uint256 newRate = 7e14; // Below MAX_EMISSION_RATE
         
         vm.prank(admin);
         staking.updateEmissionRate(newRate);
@@ -555,7 +555,7 @@ contract VAMSStakingTest is BaseTest {
     }
     
     function test_UpdateEmissionRate_EmitsEvent() public {
-        uint256 newRate = 0.4 ether;
+        uint256 newRate = 7e14; // Below MAX_EMISSION_RATE
         
         vm.expectEmit(false, false, false, true);
         emit IVAMSStaking.EmissionRateUpdated(EMISSION_RATE, newRate);
@@ -567,7 +567,7 @@ contract VAMSStakingTest is BaseTest {
     function test_UpdateEmissionRate_OnlyAdmin() public {
         vm.prank(user1);
         vm.expectRevert();
-        staking.updateEmissionRate(0.4 ether);
+        staking.updateEmissionRate(7e14);
     }
     
     function test_Pause_BlocksStaking() public {

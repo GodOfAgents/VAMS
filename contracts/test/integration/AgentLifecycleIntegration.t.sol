@@ -21,7 +21,7 @@ contract AgentLifecycleIntegration is BaseTest {
     uint256 constant CHALLENGE_WINDOW = 7 days;
     
     // Staking constants
-    uint256 constant EMISSION_RATE = 0.2 ether;
+    uint256 constant EMISSION_RATE = 5e14; // ~0.0005 VAMS/sec, below MAX_EMISSION_RATE
     uint256 constant MIN_STAKE = 50_000 ether;
     
     function setUp() public override {

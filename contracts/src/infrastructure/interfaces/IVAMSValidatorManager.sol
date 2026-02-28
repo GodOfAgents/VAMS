@@ -4,7 +4,7 @@ pragma solidity ^0.8.20;
 /**
  * @title IVAMSValidatorManager
  * @notice Interface for the VAMS Validator Manager with Bounded DAO governance
- * @dev Manages deposits for Avalanche L1 validators with dynamic markup
+ * @dev Manages $VAMS ERC-20 deposits for VAMS L3 Validium validators with dynamic markup
  */
 interface IVAMSValidatorManager {
     // ============ Structs ============
@@ -67,10 +67,11 @@ interface IVAMSValidatorManager {
     function calculateMarkup(address enterprise) external view returns (uint256 markupBps);
     
     /**
-     * @notice Deposit funds for a managed L1 validator
+     * @notice Deposit $VAMS tokens for a managed L1 validator
      * @param subnetId The subnet identifier
+     * @param amount Amount of $VAMS to deposit
      */
-    function deposit(bytes32 subnetId) external payable;
+    function deposit(bytes32 subnetId, uint256 amount) external;
     
     /**
      * @notice Register a new managed subnet

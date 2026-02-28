@@ -256,11 +256,11 @@ contract VAMSFeeCollectorTest is BaseTest {
         assertEq(dist.insuranceBps, 1000); // 10%
     }
     
-    function test_TransitionToPhase3() public {
+    function test_TransitionToCustomPhase() public {
         vm.prank(admin);
-        feeCollector.transitionToPhase(IVAMSFeeCollector.DistributionPhase.PHASE_3);
+        feeCollector.updateDistribution(3000, 3500, 2500, 1000);
         
-        assertEq(uint256(feeCollector.currentPhase()), uint256(IVAMSFeeCollector.DistributionPhase.PHASE_3));
+        assertEq(uint256(feeCollector.currentPhase()), uint256(IVAMSFeeCollector.DistributionPhase.CUSTOM));
         
         IVAMSFeeCollector.Distribution memory dist = feeCollector.getDistribution();
         
