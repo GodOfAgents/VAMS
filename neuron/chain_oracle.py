@@ -505,6 +505,69 @@ class MidnightOracle(ChainOracle):
             )
 
 
+class SEIOracle(ChainOracle):
+    """SEI: Twin-Turbo Consensus, Parallelized EVM (Section 16.4)."""
+    name = "SEI"
+    chain_type = "Fast Lane EVM"
+
+    def __init__(self, rpc_url: str = None, timeout: int = 10):
+        url = rpc_url or os.getenv("SEI_RPC", "https://evm-rpc.sei-apis.com")
+        super().__init__(url, timeout)
+
+    def fetch_metrics(self) -> ChainMetrics:
+        return self._eth_gas_and_block()
+
+    def _default_block_time_ms(self) -> int:
+        return 380  # Twin-Turbo consensus
+
+    def _default_finality_ms(self) -> int:
+        return 380  # Instant finality
+
+    def _baseline_gas_gwei(self) -> float:
+        return 0.01
+
+
+class HydraOracle(ChainOracle):
+    """Cardano Hydra State Channels (Section 15C.1)."""
+    name = "Hydra"
+    chain_type = "State Channel"
+
+    def __init__(self, rpc_url: str = None, timeout: int = 10):
+        url = rpc_url or os.getenv("HYDRA_RPC", "http://localhost:4001")
+        super().__init__(url, timeout)
+
+    def fetch_metrics(self) -> ChainMetrics:
+        """Hydra is a state channel — return spec defaults.
+        In production: connect to Hydra Head WebSocket API."""
+        try:
+            # Attempt Hydra API query
+            resp = requests.get(
+                f"{self.rpc_url}/protocol-parameters",
+                timeout=self.timeout,
+            )
+            resp.raise_for_status()
+            return ChainMetrics(
+                chain=self.name,
+                gas_price_gwei=0.001,
+                block_time_ms=50,         # Sub-second
+                last_block=0,
+                congestion_pct=0.0,
+                finality_ms=50,           # Near-instant in state channel
+                timestamp=time.time(),
+            )
+        except Exception:
+            return ChainMetrics(
+                chain=self.name,
+                gas_price_gwei=0.001,
+                block_time_ms=50,
+                last_block=0,
+                congestion_pct=0.0,
+                finality_ms=50,
+                timestamp=time.time(),
+                stale=True,
+                error="Hydra Head not connected — using spec defaults",
+            )
+
 # =============================================================================
 # ORACLE MANAGER
 # =============================================================================
@@ -548,6 +611,8 @@ class OracleManager:
                 OasisOracle(),
                 CardanoOracle(),
                 MidnightOracle(),
+                SEIOracle(),
+                HydraOracle(),
             ]
             for o in default_oracles:
                 self._oracles[o.name] = o

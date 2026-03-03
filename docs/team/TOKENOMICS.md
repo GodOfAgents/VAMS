@@ -191,6 +191,10 @@ To prevent whale dominance, VAMS employs **Quadratic Voting (QV)** for crucial g
 
 This protects the "Sovereign Brain" from being controlled by a single large entity.
 
+**Dual-Chain Governance (Implemented):** Quadratic voting is implemented on both chains:
+- **Polygon (Solidity):** `VAMSGovernor` contract with `VAMSTimelockController`
+- **Cardano (Aiken):** `governor.ak` validator with eUTXO-native quadratic voting and per-UTXO proposal state
+
 ---
 
 ## 8. Staking Mechanics & Validator Tiers
@@ -235,4 +239,4 @@ To prevent flash-collusion attacks and ensure network stability during market vo
 
 ## Disclaimer
 
-This document is a technical specification for the VAMS Protocol v2.0.0. Token allocations and economic parameters are subject to governance changes. Not financial advice.
+This document is a technical specification for the VAMS Protocol v2.1.0 (Dual-Chain). Token allocations and economic parameters are subject to governance changes. Not financial advice.

@@ -63,6 +63,16 @@ try:
 except ImportError:
     SDK_AVAILABLE = False
 
+# AgentOS Cognitive Runtime (optional - graceful degradation)
+try:
+    from sdk.semantic_checkpoint import SemanticCheckpointManager, CheckpointTrigger
+    from sdk.semantic_mmu import SemanticMMU, MemoryTier
+    from sdk.interrupt_handler import InterruptVectorTable, InterruptSignal
+    from sdk.cognitive_drift import CognitiveDriftDetector
+    AGENTOS_AVAILABLE = True
+except ImportError:
+    AGENTOS_AVAILABLE = False
+
 
 def parse_args():
     """Parse command line arguments."""
@@ -206,6 +216,41 @@ class VamsNeuron:
 
         # Layer 4
         self.trust_manager = TrustManager(mock_mode=mock_mode)
+        
+        # AgentOS Cognitive Runtime (Layer 3 Enhancement)
+        self.agentos_enabled = False
+        if AGENTOS_AVAILABLE:
+            try:
+                from config import (
+                    CID_EPSILON, CID_MIN_INTERVAL, CID_MAX_INTERVAL,
+                    SMMU_L1_CAPACITY, SMMU_L2_PROVIDER, SMMU_L3_PROVIDER,
+                    IVT_TIMEOUT_MS, IVT_MAX_RETRIES, IVT_MOCK_MODE,
+                    DRIFT_THETA, DRIFT_GAMMA
+                )
+                self.semantic_manager = SemanticCheckpointManager(
+                    epsilon=CID_EPSILON,
+                    min_interval=CID_MIN_INTERVAL,
+                    max_interval=CID_MAX_INTERVAL
+                )
+                self.memory = SemanticMMU(
+                    l1_capacity=SMMU_L1_CAPACITY,
+                    l2_provider=SMMU_L2_PROVIDER,
+                    l3_provider=SMMU_L3_PROVIDER
+                )
+                self.ivt = InterruptVectorTable(
+                    agent_id=self.node_id or "initializing",
+                    mock_mode=IVT_MOCK_MODE or mock_mode,
+                    timeout_ms=IVT_TIMEOUT_MS,
+                    max_retries=IVT_MAX_RETRIES
+                )
+                self.drift_detector = CognitiveDriftDetector(
+                    theta=DRIFT_THETA,
+                    gamma=DRIFT_GAMMA
+                )
+                self.agentos_enabled = True
+                self.log("AgentOS Cognitive Runtime initialized", "INFO")
+            except Exception as e:
+                self.log(f"AgentOS init skipped: {e}", "WARN")
         
         signal.signal(signal.SIGINT, self._signal_handler)
         signal.signal(signal.SIGTERM, self._signal_handler)
@@ -459,6 +504,37 @@ class VamsNeuron:
         print()
         self.log("DBOS-Style Crash-Proof Workflow Demo", "WORKFLOW")
         run_demo_workflow(lambda m: print(f"  {m}"))
+        print()
+    
+    def check_cognitive_health(self):
+        """Check AgentOS Cognitive Runtime status."""
+        print()
+        self.log("AGENTOS COGNITIVE RUNTIME", "L3")
+        print()
+        
+        if not self.agentos_enabled:
+            print(f"  {Fore.YELLOW}[--]{Style.RESET_ALL} AgentOS not enabled")
+            print(f"       Install: sdk/semantic_checkpoint.py, sdk/interrupt_handler.py")
+            print()
+            return
+        
+        # Semantic Checkpoint Manager
+        cp_stats = self.semantic_manager.get_stats()
+        print(f"  {Fore.GREEN}[OK]{Style.RESET_ALL} CID Checkpoint  eps={cp_stats['epsilon']} | {cp_stats['efficiency']}")
+        
+        # S-MMU Memory Hierarchy
+        mmu_stats = self.memory.get_stats()
+        print(f"  {Fore.GREEN}[OK]{Style.RESET_ALL} S-MMU Memory    L1={mmu_stats['l1_pages']}/{mmu_stats['l1_capacity']} | Hit: {mmu_stats['hit_rate']}")
+        
+        # Interrupt Vector Table
+        ivt_stats = self.ivt.get_stats()
+        mode = "MOCK" if ivt_stats['mock_mode'] else "LIVE"
+        print(f"  {Fore.GREEN}[OK]{Style.RESET_ALL} IVT ({mode:4})     IRQs={ivt_stats['total_interrupts']} | Cost={ivt_stats['total_cost_vams']:.3f} VAMS")
+        
+        # Cognitive Drift Detector
+        drift_stats = self.drift_detector.get_stats()
+        print(f"  {Fore.GREEN}[OK]{Style.RESET_ALL} Drift Detector  theta={drift_stats['theta']} | CSPs={drift_stats['csp_triggered']} | Agents={drift_stats['tracked_agents']}")
+        
         print()
     
     def run(self, heartbeat_interval: int = HEARTBEAT_INTERVAL):

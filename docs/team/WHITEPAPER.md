@@ -2,7 +2,7 @@
 ╔══════════════════════════════════════════════════════════════════════════════╗
 ║                         INTELLECTUAL PROPERTY NOTICE                          ║
 ╠══════════════════════════════════════════════════════════════════════════════╣
-║  Document: VAMS Technical Whitepaper v1.0.0                                   ║
+║  Document: VAMS Technical Whitepaper v1.1.0                                   ║
 ║  Author: Aseem Chishti                                                        ║
 ║  Email: aseeminksa@gmail.com                                                  ║
 ║  LinkedIn: https://www.linkedin.com/in/aseemchishti                           ║
@@ -23,8 +23,8 @@
 
 ## A Unified Infrastructure Layer for Sovereign AI Agents in the Decentralized Economy
 
-**Version:** 1.0.0  
-**Date:** January 2026  
+**Version:** 1.1.0  
+**Date:** March 2026  
 **Status:** Technical Whitepaper
 
 ---
@@ -130,7 +130,7 @@ VAMS organizes decentralized infrastructure into five logical layers, each addre
 │  io.net GPU • Akash Supercloud • Render Network • Bittensor             │
 ├─────────────────────────────────────────────────────────────────────────┤
 │  LAYER 1: FOUNDATIONAL                                                   │
-│  Celestia DA • EigenDA • Near DA • Avail Validity Proofs               │
+│  Polygon DA • Celestia DA • EigenDA • Near DA • Avail • Iagon          │
 └─────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -140,10 +140,12 @@ The bedrock layer handles transaction ordering, state management, and data avail
 
 | Provider | Technology | Use Case | Cost Profile |
 |----------|-----------|----------|--------------|
+| **Polygon DA (DAC)** | Data Availability Committee | **Primary VAMS L3 state data** | Native CDK integration |
 | **Celestia** | Data Availability Sampling (DAS) | Default DA for most transactions | ~95% cheaper than Ethereum calldata |
 | **EigenDA** | EigenLayer restaking | High-value enterprise transactions | Ethereum economic security |
 | **Near DA** | NEAR Protocol sharding | High-frequency, low-value (gaming, IoT) | Up to 85,000x cheaper than Ethereum |
 | **Avail** | KZG polynomial commitments | Validium operations | Native ZK compatibility |
+| **Iagon** | Cardano-native storage (eUTXO) | Decentralized storage for agent memory & DBOS backups | Cardano Brain Layer integration |
 
 Celestia's 2D Reed-Solomon encoding enables light nodes to verify block availability by randomly sampling chunks, achieving 99.9% confidence without downloading entire blocks.
 
@@ -157,6 +159,7 @@ The compute layer sources GPU and CPU resources from decentralized providers:
 | **Akash** | Kubernetes/Docker | Persistent agents, SaaS backends |
 | **Render** | GPU rendering | Visual AI, 3D asset generation |
 | **Bittensor** | Subnet-based intelligence | Intelligence-as-a-Service |
+| **Phala Network** | SGX/TDX TEE Coprocessors | AI Agent Contracts, privacy-preserving compute |
 
 **Bittensor Integration**: VAMS leverages Bittensor's subnet architecture to access specialized AI capabilities:
 - **SN1**: Text generation for agent reasoning
@@ -175,6 +178,8 @@ The logic layer ensures crash-proof workflows and persistent state through:
 - **Kwil**: Permissionless SQL with BFT consensus (relational backbone)
 - **WeaveDB**: NoSQL on Arweave (immutable audit trails)
 - **Glacier Network**: Vector database for semantic search (long-term memory)
+
+**Parallel Web Systems (Perception Engine)**: VAMS agents access real-world data through the Parallel Web — a curated set of verified API integrations (weather, news, financial data, social signals) that serves as the agent's perception layer. Parallel Web data feeds into the Trust Score as "Proof of Research," enabling agents to demonstrate evidence-based decision-making.
 
 #### Layer 4: Trust (The Verification Aggregator)
 
@@ -222,17 +227,21 @@ The CLR is VAMS's intelligent transaction routing engine, eliminating developer 
 ```
 Transaction Intake
         │
-        ├── Compliance Privacy? ────► Route to Midnight (ZK-SD)
+        ├── Compliance Privacy? ─────► Route to Midnight (ZK-SD)
         │
-        ├── Privacy Required? ──────► Route to TEE (Phala/Marlin)
+        ├── Privacy/Compute? ────────► Route to TEE (Phala/Marlin)
         │
-        ├── Value > $10,000? ───────► Route to Ethereum (via AggLayer)
+        ├── Value > $10,000? ────────► Route to Ethereum (via AggLayer)
         │
-        ├── Formal Verification? ───► Route to Cardano (Ouroboros)
+        ├── Institutional Compliance?► Route to Polygon CDK KYC Layer
         │
-        ├── Latency < 500ms? ───────► Route to Solana/SEI
+        ├── Formal Verification? ────► Route to Cardano (Ouroboros)
         │
-        └── Default ────────────────► Route to Polygon CDK (Primary VAMS L3)
+        ├── Latency < 1s? ──────────► Sub-second? → Cardano Hydra State Channels
+        │                              EVM Compatible? → SEI (Twin-Turbo 380ms)
+        │                              Non-EVM Fallback? → Solana (~400ms)
+        │
+        └── Default ─────────────────► Route to Polygon CDK Validium (Primary VAMS L3)
 ```
 
 **Routing Proof Verification**: To ensure routing integrity, CLR decisions are accompanied by ZK-proofs verifying that the routing followed on-chain committed rules. Any party can challenge a routing decision, triggering stake slashing if fraud is proven.
@@ -245,12 +254,22 @@ VAMS maintains connectivity across multiple settlement layers:
 |--------|-------------|-----------|---------|----------------|
 | **VAMS L3 (Polygon CDK)** | Ethereum | AggLayer | ~5min | Validity Proofs |
 | **VAMS L3 (Polygon CDK)** | Other CDK Chains | AggLayer | ~1min | Unified Bridge / Pessimistic Proofs |
-| VAMS L3 | Solana | ICB-SDK | ~400ms | Decentralized Validation |
+| VAMS L3 | Solana | Hyperlane (ICB-SDK) | ~400ms | ISM verification |
 | VAMS L3 | SEI | LayerZero v2 | ~380ms | DVN consensus |
-| VAMS L3 | Cardano | Rosen Bridge | ~2min | Ouroboros finality |
-| VAMS L3 | Midnight | ICB-SDK (ZK-Verified) | ~1min | ZK-SD proofs |
+| VAMS L3 | Cosmos | Union Labs | ~1s | IBC |
+| VAMS L3 | Cardano | Rosen Bridge (ICB-SDK) + Mithril | ~2min | Ouroboros finality + bridge validators |
+| VAMS L3 | Midnight | Hyperlane ZK-ISM (ICB-SDK) | ~1min | ZK-SD proofs + ISM verification |
+| VAMS L3 | Avalanche | Hyperlane (ICB-SDK) | ~2s | Snowman++ finality |
+| VAMS L3 | Hydra | Direct State Channel | ~50ms | Off-chain, no bridge needed |
 
-**Bridge Security**: To mitigate single-vendor bridge risk, VAMS implements the Interchain Communication Backbone SDK (ICB-SDK) with decentralized validation layers.
+**Bridge Security**: To mitigate single-vendor bridge risk, VAMS wraps heterogeneous bridge technologies under the **Interchain Communication Backbone SDK (ICB-SDK)** — a unified abstraction that routes through Hyperlane, Rosen Bridge, LayerZero, or Union Labs depending on the destination chain. Multi-ISM verification (2/3 consensus across TEE, Oracle, and Multisig ISMs) provides defense-in-depth for all cross-chain messages.
+
+> **Implementation Status (v0.6.0)**: The CLR v3.1 decision tree, MEV protection (encrypted mempool + batch auctions), and cross-chain bridge executor (ICB Python SDK + Multi-ISM verification + timeout fallback cascade) are implemented in the Neuron client. See `neuron/clr_router.py`, `neuron/mev_protection.py`, and `neuron/bridge_executor.py`. 12 chain oracles (including SEI and Hydra) provide live routing metrics.
+
+**Dual-Host Architecture (Implemented)**: VAMS operates a novel dual-chain governance model:
+- **Polygon ("The Hands")**: Fast EVM execution — token, staking, fee collection, autonomous Sentinel guardian
+- **Cardano ("The Brain")**: eUTXO governance — quadratic voting, timelock intents, agent DID registry, insurance custody
+- **ICB Bridge**: Mithril-verified cross-chain intent relay between Cardano proposals and Polygon execution
 
 > **Note**: Comprehensive failure recovery procedures for all settlement layers, including Cardano and Polygon halt scenarios, are specified in [ARCHITECTURE_v0-3-0.md §21](./ARCHITECTURE_v0-3-0.md). This includes locked fund recovery, queue processing priority, and compensation mechanisms.
 
@@ -262,7 +281,7 @@ VAMS maintains connectivity across multiple settlement layers:
 
 | Domain | Technology | Rationale |
 |--------|-----------|-----------|
-| **Smart Contracts** | Solidity (EVM), Rust (Solana), Plutus (Cardano) | Ecosystem compatibility |
+| **Smart Contracts** | Solidity (EVM), Aiken (Cardano Plutus V3), Rust (Solana) | Ecosystem compatibility, dual-host governance |
 | **Networking** | libp2p, NATS, WebRTC | P2P mesh, Pub/Sub patterns |
 | **Decentralized RPC** | Lava, Pocket, DRPC | 50+ chain coverage |
 | **Agent Runtime** | DBOS with Python/TypeScript SDKs | Developer familiarity |
@@ -283,7 +302,22 @@ Agents operate within the DBOS runtime, which provides:
 
 > **Note**: DBOS checkpoint operators follow a progressive decentralization path from Phase 1 multisig to fully permissionless validators. A fraud-proof challenge mechanism ensures agents are protected even under centralized operation. See [ARCHITECTURE_v0-3-0.md §20.8](./ARCHITECTURE_v0-3-0.md) for complete DBOS State Anchoring specification including operator bonding, 7-day challenge windows, and slashing conditions.
 
-### 3.3 AI Inference Pipeline
+### 3.3 VAMS Roaming Protocol (VRP)
+
+VAMS enables **agent portability** across competing infrastructure stacks via the VAMS Roaming Protocol — modeled on the "Open Airport" paradigm:
+
+| Phase | Action | Description |
+|-------|--------|-------------|
+| **Departure** | Agent requests exit | Export state hash, lock Good Behavior Bond |
+| **Roaming** | Agent operates on foreign stack | Maintains VAMS DID, accrues foreign reputation |
+| **Re-Entry** | Agent returns to VAMS | Import foreign attestations, merge reputation |
+| **Adjudication** | Dispute resolution | Cross-protocol slashing via bridge proofs |
+
+Roaming agents must stake a **Good Behavior Bond** (denominated in $VAMS) to maintain their Verified status. If an agent misbehaves on a foreign protocol and proof is submitted back to VAMS, the bond is slashed. This creates a portable trust layer that follows agents across ecosystems.
+
+> See [ARCHITECTURE_v0-3-0.md §3.4.2](./ARCHITECTURE_v0-3-0.md) for the complete VRP specification.
+
+### 3.4 AI Inference Pipeline
 
 VAMS supports multiple inference modes optimized for different trust/performance tradeoffs:
 
@@ -294,7 +328,7 @@ VAMS supports multiple inference modes optimized for different trust/performance
 | ZKML | Maximum | ZK-proof | ~10s | Regulatory, high-stakes |
 | MPC | Maximum | Collaborative | ~5s | Multi-party secrets |
 
-### 3.4 Data Sovereignty Framework
+### 3.5 Data Sovereignty Framework
 
 VAMS implements four principles for data sovereignty:
 
@@ -311,7 +345,7 @@ VAMS implements four principles for data sovereignty:
 
 | Parameter | Value |
 |-----------|-------|
-| **Total Supply** | 1,000,000,000 $VAMS (fixed cap) |
+| **Initial Supply** | 1,000,000,000 $VAMS (with max 2.5% annual inflation for staking rewards) |
 | **Initial Circulating** | 100,000,000 $VAMS (10%) |
 | **Token Standard** | ERC-20 (Polygon MVP -> Multi-chain) |
 
@@ -348,17 +382,23 @@ Terminal Rate: 500,000 $VAMS/year
 
 | Mechanism | Rate | Distribution |
 |-----------|------|--------------|
-| Protocol Fees | 0.1-1.0% | 100% Buyback & burn (Phase 1) → 40% (Phase 2) |
+| Protocol Fees | 0.1-0.5% | 100% Buyback & burn (Phase 1) → Phase 2 split below |
 | Gas Abstraction Premium | 2-7% markup | Treasury revenue |
 | Staking Rewards | 8-12% target APY | L3 Sequencer & CLR validators |
 | x402 Settlement Fees | 0.05% | LP rewards |
 | Bridge Fees | 0.25% | Insurance fund + LP |
 
+**Phase 2 Fee Distribution (Post Month 60):** When emissions reach terminal rate (500K $VAMS/yr), protocol fee revenue shifts to a sustainable yield model:
+- **40% Buyback & Burn** — Continued deflationary pressure
+- **30% Staking Rewards** — Yield for L3 Sequencer and CLR validators
+- **20% DAO Treasury** — Ongoing decentralized operations funding
+- **10% Insurance Fund** — Capitalizing bridge/execution failure coverage
+
 ### 4.5 Dynamic Emission Controller (DEC)
 
 VAMS employs reinforcement learning for economic parameter adjustment:
 
-- **Bounded Adjustments**: Emission rates constrained between 0.1% and 5% annual
+- **Bounded Adjustments**: Emission rates constrained between 0.1% and 2.5% annual (hard cap enforced on-chain)
 - **Fee Adjustment Limits**: Maximum 10% fee change per epoch
 - **Circuit Breakers**: Automatic override if parameters approach dangerous bounds
 
@@ -384,7 +424,7 @@ This creates a self-adjusting economic system that responds to network demand wh
 
 ### 5.2 Defense in Depth
 
-VAMS implements seven defense layers:
+VAMS implements eight defense layers:
 
 1. **Perimeter**: DDoS protection + Rate limiting
 2. **Authentication**: EIP-4361 SIWE + Agent DIDs
@@ -392,7 +432,8 @@ VAMS implements seven defense layers:
 4. **Transport**: TLS 1.3 + Message signing + Replay protection
 5. **Execution**: TEE isolation + WASM sandboxing
 6. **Economic**: Staking + Slashing + Insurance fund
-7. **Recovery**: Circuit breakers + Emergency governance + L1 fallbacks
+7. **Automated**: VAMSSentinel (autonomous on-chain anomaly detection — L1 invariant checks, L2 keeper consensus, L3 price circuit breaker)
+8. **Recovery**: Circuit breakers + Emergency governance + L1 fallbacks
 
 ### 5.3 Multi-TEE Active Verification
 
@@ -495,7 +536,7 @@ Client-side SDKs enable agents to compute routing decisions locally, verify agai
 
 1. **Homomorphic Encryption Integration**: Zama fhEVM for compute on encrypted data without TEE dependency
 2. **Agent Identity Standards**: Enhanced DID frameworks for agent-to-agent authentication
-3. **Cross-Ecosystem Bridges**: Cardano (eUTXO) and Midnight (ZK-SD) integration complete; extending connectivity to Cosmos and Polkadot
+3. **Cross-Ecosystem Bridges**: Cardano (eUTXO) Brain Layer implemented with 4 Aiken validators and ICB-Mithril bridge; extending connectivity to Cosmos and Polkadot
 4. **Model Marketplace**: Decentralized registry for verified, privacy-preserving AI models
 5. **Autonomous Governance**: AI-assisted DAO operations for parameter optimization
 6. **The Quantum Horizon**: Integrating Quantum DePIN to solve the CLR's global routing optimization problem (Traveling Salesman) as the network scales to millions of nodes.
@@ -541,8 +582,8 @@ VAMS positions itself as the "Sovereign Brain" for the agentic web—a meta-laye
 
 ---
 
-**Document Version:** 1.0.0  
-**Last Updated:** January 2026  
+**Document Version:** 1.1.0  
+**Last Updated:** March 2026  
 **Maintainer:** Aseem Chishti   
 **Contact:** aseeminksa@gmail.com
 **LinkedIn:** https://www.linkedin.com/in/aseemchishti 
