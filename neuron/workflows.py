@@ -8,16 +8,31 @@ Features:
 - Crash recovery from last checkpoint
 - Exactly-once execution semantics
 - Local SQLite persistence
+- AgentOS CID-based semantic boundary detection (v1.1)
+- S-MMU memory hierarchy integration (v1.1)
 """
 
 import time
 import json
 import sqlite3
+import logging
 import functools
 from dataclasses import dataclass, field
 from typing import Optional, List, Dict, Any, Callable
 from enum import Enum
 from datetime import datetime
+
+# AgentOS Cognitive Runtime (optional - graceful degradation)
+try:
+    from sdk.semantic_checkpoint import (
+        SemanticCheckpointManager, CheckpointTrigger, SemanticPage
+    )
+    from sdk.semantic_mmu import SemanticMMU, MemoryTier
+    AGENTOS_AVAILABLE = True
+except ImportError:
+    AGENTOS_AVAILABLE = False
+
+logger = logging.getLogger("vams.workflows")
 
 
 class WorkflowStatus(Enum):
@@ -212,6 +227,9 @@ class VamsWorkflow:
     """
     Base class for VAMS workflows with automatic checkpointing.
     
+    v1.1: Now supports AgentOS CID-based semantic checkpointing
+    and S-MMU memory hierarchy integration.
+    
     Example usage:
         class MyWorkflow(VamsWorkflow):
             @checkpoint("gather")
@@ -223,13 +241,42 @@ class VamsWorkflow:
                 return process(data)
     """
     
-    def __init__(self, workflow_id: Optional[str] = None):
+    def __init__(self, workflow_id: Optional[str] = None, enable_semantic: bool = True):
         self._workflow_id = workflow_id or f"wf_{int(time.time() * 1000)}"
         self._checkpoint_store = CheckpointStore()
         self._current_step = 0
         self._steps: List[str] = []
         self._recovered = False
         self._recovery_step: Optional[str] = None
+        
+        # AgentOS Cognitive Runtime integration
+        self._semantic_enabled = enable_semantic and AGENTOS_AVAILABLE
+        self._semantic_manager = None
+        self._memory = None
+        
+        if self._semantic_enabled:
+            try:
+                from config import (
+                    CID_EPSILON, CID_MIN_INTERVAL, CID_MAX_INTERVAL,
+                    SMMU_L1_CAPACITY, SMMU_L2_PROVIDER, SMMU_L3_PROVIDER
+                )
+                self._semantic_manager = SemanticCheckpointManager(
+                    epsilon=CID_EPSILON,
+                    min_interval=CID_MIN_INTERVAL,
+                    max_interval=CID_MAX_INTERVAL
+                )
+                self._memory = SemanticMMU(
+                    l1_capacity=SMMU_L1_CAPACITY,
+                    l2_provider=SMMU_L2_PROVIDER,
+                    l3_provider=SMMU_L3_PROVIDER
+                )
+                logger.info(
+                    f"AgentOS cognitive runtime enabled for {self._workflow_id} "
+                    f"(eps={CID_EPSILON}, L1={SMMU_L1_CAPACITY})"
+                )
+            except Exception as e:
+                logger.warning(f"AgentOS init failed, using fixed checkpoints: {e}")
+                self._semantic_enabled = False
     
     def _get_steps(self) -> List[str]:
         """Get all checkpoint-decorated methods in order."""

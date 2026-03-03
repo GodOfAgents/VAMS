@@ -16,7 +16,7 @@ forge install OpenZeppelin/openzeppelin-contracts-upgradeable
 # Build
 forge build
 
-# Test (375 tests)
+# Test (469 tests across 19 suites)
 forge test
 
 # Static Analysis
@@ -32,13 +32,14 @@ contracts/
 │   ├── base/           # UUPS + Emergency Pause (2 contracts)
 │   ├── token/          # VAMSToken (ERC-20 + Burnable + Permit + Votes)
 │   ├── staking/        # VAMSStaking (Tiered APY, Lock Periods)
-│   ├── vesting/        # VAMSVesting (7 schedule types)
+│   ├── vesting/        # VAMSVesting (7 schedule types, GMV-gated unlocks)
 │   ├── routing/        # VAMSRouter (CLR implementation)
 │   ├── slashing/       # SlashingOracle, VAMSSlasher
 │   ├── registry/       # VAMSAgentRegistry
-│   ├── economic/       # FeeCollector, Insurance, Payment, 2PC, Compensation
-│   └── governance/     # VAMSTimelockController
-├── test/               # 375 tests (Unit, Integration, Fuzz, Governance)
+│   ├── economic/       # FeeCollector, Insurance, Payment, Compensation
+│   ├── infrastructure/ # VAMSSentinel (autonomous on-chain guardian)
+│   └── governance/     # VAMSTimelockController, GovernorExecutor
+├── test/               # 469 tests (Unit, Integration, Fuzz, Governance)
 ├── script/             # Deployment scripts
 └── slither.config.json # Static analysis config
 ```
@@ -70,9 +71,12 @@ contracts/
 
 ### Emergency Pause
 
-- **Guardians (2/3)**: Pause immediately, 48h auto-expiry
-- **Multisig (3/5)**: Extend pause, execute emergency upgrades
-- **DAO**: Ratify emergency actions within 7 days
+- **VAMSSentinel (Autonomous)**: On-chain anomaly detection with 3 layers:
+  - L1: Invariant checks (sub-second pause)
+  - L2: Keeper consensus (staked keepers, 2-of-3 agreement)
+  - L3: Price circuit breaker (Chainlink-verified)
+- **DAO**: Ratifies emergency actions and resumes operations
+- Auto-expiry: 48h max pause duration
 
 ## Usage
 
@@ -95,11 +99,13 @@ contract MyContract is VAMSCombinedBase {
 }
 ```
 
-## Integration with Neuron
+## Integration with Neuron (v0.6.0)
 
 These contracts are designed to be consumed by the **VAMS Neuron** client (`neuron/`).
 - **Registration**: Agents use `VAMSAgentRegistry.register()`
-- **Routing**: `neuron/clr_router.py` mirrors `VAMSRouter.sol` logic off-chain for pre-validation.
+- **Routing**: `neuron/clr_router.py` (CLR v3.1) mirrors `VAMSRouter.sol` logic off-chain with a 7-priority decision tree.
+- **MEV Protection**: `neuron/mev_protection.py` implements encrypted mempool + batch auctions (Architecture §20.4.3).
+- **Bridge Execution**: `neuron/bridge_executor.py` provides Python SDK for ICB bridge verification (mirrors `cardano/lib/vams/icb.ak`).
 - **Payments**: `neuron/payments/x402.py` interacts with `VAMSPaymentHandler`.
 
 ## Documentation

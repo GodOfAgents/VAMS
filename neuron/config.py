@@ -228,7 +228,51 @@ BREAKER_ORACLE_TIMEOUT_MS = int(os.getenv("BREAKER_ORACLE_TIMEOUT", "60000"))
 BREAKER_COOLDOWN_SEC = int(os.getenv("BREAKER_COOLDOWN", "300")) # 5 min auto-reset
 
 # =============================================================================
-# DISPLAY CONFIGURATION
+# AGENTOS COGNITIVE RUNTIME CONFIGURATION
+# =============================================================================
+# Maps AgentOS preprint concepts onto VAMS infrastructure.
+# See docs/team/AGENTOS_INTEGRATION.md for full specification.
+
+# Semantic Checkpoint Manager (CID-based boundary detection)
+CID_EPSILON = float(os.getenv("VAMS_CID_EPSILON", "0.15"))           # dD/dt threshold
+CID_MIN_INTERVAL = int(os.getenv("VAMS_CID_MIN_INTERVAL", "3"))      # Min steps between checkpoints
+CID_MAX_INTERVAL = int(os.getenv("VAMS_CID_MAX_INTERVAL", "50"))     # Max steps (safety fallback)
+ENABLE_SEMANTIC_CHECKPOINTS = os.getenv("VAMS_SEMANTIC_CHECKPOINTS", "true").lower() == "true"
+
+# S-MMU Memory Hierarchy
+SMMU_L1_CAPACITY = int(os.getenv("VAMS_SMMU_L1_CAPACITY", "128"))    # L1 cache page limit
+SMMU_L2_PROVIDER = os.getenv("VAMS_SMMU_L2_PROVIDER", "near")        # Near DA for L2
+SMMU_L3_PROVIDER = os.getenv("VAMS_SMMU_L3_PROVIDER", "glacier")     # Glacier for L3
+ENABLE_ACCESS_LOG = os.getenv("VAMS_SMMU_ACCESS_LOG", "true").lower() == "true"
+
+# Interrupt Vector Table (x402 Interrupt Handler)
+IVT_TIMEOUT_MS = int(os.getenv("VAMS_IVT_TIMEOUT", "30000"))         # HTLC timelock
+IVT_MAX_RETRIES = int(os.getenv("VAMS_IVT_MAX_RETRIES", "2"))        # Provider failover attempts
+IVT_MOCK_MODE = os.getenv("VAMS_IVT_MOCK", "true").lower() == "true" # Mock x402 payments
+
+# Cognitive Drift Detection & Sync Pulses  
+DRIFT_THETA = float(os.getenv("VAMS_DRIFT_THETA", "0.3"))            # CSP trigger threshold
+DRIFT_GAMMA = float(os.getenv("VAMS_DRIFT_GAMMA", "1.5"))            # Oracle reputation exponent
+DRIFT_MAX_ORACLE_INFLUENCE = float(os.getenv("VAMS_DRIFT_MAX_INFLUENCE", "0.15"))  # 15% cap
+DRIFT_MIN_ORACLE_PARTICIPANTS = int(os.getenv("VAMS_DRIFT_MIN_ORACLES", "3"))
+DRIFT_REPUTATION_DECAY = float(os.getenv("VAMS_DRIFT_REP_DECAY", "0.05"))  # 5% per epoch
+
+# =============================================================================
+# CLR v3.1 ENHANCED ROUTING CONFIGURATION
+# =============================================================================
+# Architecture Section 14, 16, 20.4.3, 20.5
+
+# Routing Thresholds
+CLR_SECURITY_THRESHOLD = int(os.getenv("VAMS_CLR_SECURITY_THRESHOLD", "10000"))   # USD
+CLR_VELOCITY_THRESHOLD = int(os.getenv("VAMS_CLR_VELOCITY_THRESHOLD", "1000"))    # ms
+
+# Bridge Executor (Section 16, 20.5)
+BRIDGE_PRIMARY_TIMEOUT_MS = int(os.getenv("VAMS_BRIDGE_PRIMARY_TIMEOUT", "30000"))
+BRIDGE_SECONDARY_TIMEOUT_MS = int(os.getenv("VAMS_BRIDGE_SECONDARY_TIMEOUT", "60000"))
+
+# MEV Protection (Section 20.4.3)
+MEV_BATCH_WINDOW_MS = int(os.getenv("VAMS_MEV_BATCH_WINDOW", "500"))              # Batch auction window
+
 # =============================================================================
 
 BANNER = r"""

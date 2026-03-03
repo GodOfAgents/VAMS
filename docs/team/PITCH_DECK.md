@@ -2,9 +2,9 @@
 ## Strategic Partnership Proposal: The Sovereign Brain
 ### Infrastructure for the Agentic Economy
 
-**Version:** 4.0 (V2 Release)  
-**Date:** February 2026  
-**Stage:** Testnet Candidate (V2)
+**Version:** 4.1 (V2.1 Dual-Chain Release)  
+**Date:** March 2026  
+**Stage:** Testnet Candidate (V2.1 — Dual-Chain)
 
 ---
 
@@ -363,21 +363,24 @@ We are the only protocol with a **Black Swan Recovery Matrix** (defined in Archi
 
 We have upgraded our entire stack to V2 Architecture.
 
-*   ✅ **Architecture Specification:** 100% Complete (`v0.3.0` Spec)
+*   ✅ **Architecture Specification:** 100% Complete (`v0.3.0` Spec + Dual-Host Model)
 *   ✅ **Token Economic Model:** 100% Complete (V2.0.0 Tokenomics)
-*   ✅ **Smart Contracts:** 100% Complete (Full Governance + Economic Suite)
-    *   `VAMSTimelock`, `VAMSGovernor` (Day 1 DAO)
+*   ✅ **Solidity Contracts (Polygon):** 100% Complete — **469 Tests Passing**
+    *   `VAMSTimelock`, `VAMSGovernorExecutor` (Day 1 DAO)
     *   `VAMSFeeCollector`, `VAMSInsuranceFund`, `VAMSStaking` (V2)
-*   🚀 **Testnet Deployment:** Pending (Polygon Amoy)
-    *   **Previous V1:** Deprecated due to key rotation.
-    *   **V2 Launch:** Scheduled for immediate release.
+    *   `VAMSSentinel` (Autonomous on-chain guardian — replaces multisig)
+*   ✅ **Aiken Contracts (Cardano Brain):** 100% Complete — **37 Tests Passing**
+    *   `governor.ak` (Quadratic Voting), `timelock.ak` (48h/24h delay)
+    *   `insurance_fund.ak` (Capital custody), `agent_registry.ak` (Agent DID + NFT)
+    *   `plutus.json` blueprint generated
+*   🚀 **Testnet Deployment:** Pending (Polygon Amoy + Cardano Pre-Prod)
 *   ✅ **Agent Runtime (Neuron):** 95% Complete (79 tests passing)
-    *   Full SDK: Celestia DA, Bittensor, Phala TEE integrations
+    *   Full SDK: Celestia DA, Bittensor, Phala TEE, Iagon Storage integrations
     *   **Live CLR:** Production Multi-Chain Router Active
 *   ✅ **Gateway Server:** 100% Complete (FastAPI + Rate Limiting + Auth)
 *   🧪 **Frontend:** 95% Complete (Vite + React 19 landing page)
 
-**Status:** V2 Contracts compiled & verified. Ready for deployment.
+**Status:** 506 total tests passing. V2.1 Dual-Chain contracts ready for deployment.
 
 ---
 
@@ -389,9 +392,14 @@ We have a detailed 8-Phase Execution Plan: **24-week MVP** followed by **post-MV
 
 ### **MVP Phase (24 Weeks)**
 
-*   **Phase 1 (Weeks 1-8): Economic Foundation** *("The Blood")*
-    *   Deploy $VAMS Token, Staking, Vesting, and FeeCollector Contracts.
-    *   Deploy to Cardano Pre-Prod and Polygon Amoy Testnet.
+*   **Phase 1 (Weeks 1-8): Economic Foundation** *("The Blood")* — ✅ **COMPLETE**
+    *   Deployed $VAMS Token, Staking, Vesting, FeeCollector, VAMSSentinel.
+    *   469 Solidity tests passing. Slither clean.
+*   **Phase 1.5 (Weeks 8-9): Cardano Brain Layer** — ✅ **COMPLETE**
+    *   4 Aiken validators: Governor, Timelock, InsuranceFund, AgentRegistry.
+    *   37 Aiken tests passing. `plutus.json` generated.
+*   **Phase 2 (Weeks 9-12): Testnet Deployment** — *CURRENT*
+    *   Deploy to Polygon Amoy + Cardano Pre-Prod.
 *   **Phase 2 (Weeks 9-12): Polygon CDK Integration**
     *   Deploy VAMS L3 Validium stack (AggLayer).
     *   Setup unified liquidity bridge.
@@ -502,4 +510,4 @@ They will use verifiable, decentralized, sovereign infrastructure.
 *   **GitHub:** github.com/GodOfAgents
 *   **Telegram:** @AseemChishti
 *   **Twitter:** @aseemchishti
-*Deck Version 3.3 (Strategic Partners) • Confidential*
+*Deck Version 4.1 (Strategic Partners — Dual-Chain Update) • Confidential*

@@ -104,12 +104,22 @@ python neuron.py --dry-run --full-health
 
 | Chain | Type | Privacy | Finality | Bridge | Best For |
 |-------|------|---------|----------|--------|----------|
-| **Cardano** | eUTXO (Ouroboros) | Public | ~12 min | Rosen Bridge | Formally verified settlement |
+| **Ethereum** | Account L1 | Public | ~13 min | AggLayer | High-value settlement |
+| **Polygon** | L2 Rollup | Public | ~4 min | AggLayer | Default execution (VAMS L3) |
+| **Arbitrum** | L2 Rollup | Public | 7 day | AggLayer | Optimistic rollup |
+| **Base** | L2 Rollup | Public | 7 day | AggLayer | Coinbase ecosystem |
+| **Solana** | Account L1 | Public | ~6s | Hyperlane | Non-EVM velocity |
+| **SEI** | Fast EVM | Public | 380ms | LayerZero | EVM fast-lane (Twin-Turbo) |
+| **Avalanche** | Account L1 | Public | ~2s | Hyperlane | Snowman++ finality |
+| **Phala** | Privacy (TEE) | TEE | ~3s | Hyperlane | Confidential compute |
+| **Oasis** | Privacy (ZK) | ZK | ~6s | Hyperlane | Privacy-preserving |
+| **Cardano** | eUTXO (Ouroboros) | Public | ~12 min | Rosen Bridge + ICB | Formally verified settlement |
 | **Midnight** | Cardano Sidechain | ZK-SD | ~1 min | Hyperlane (ZK-ISM) | Compliance-grade privacy |
+| **Hydra** | State Channel | Public | ~50ms | Direct | Sub-second HFT |
 
 ### Chain Oracle Layer
 
-The oracle sits between agents and the CLR, fetching **live metrics** from all 10 execution chains:
+The oracle sits between agents and the CLR, fetching **live metrics** from all 12 execution chains:
 
 ```python
 from neuron.chain_oracle import OracleManager
@@ -133,7 +143,7 @@ oracle.print_metrics_table()
 
 **Standalone:**
 ```bash
-python -m neuron.chain_oracle    # Prints live metrics for all 10 chains
+python -m neuron.chain_oracle    # Prints live metrics for all 12 chains
 ```
 
 **Metrics returned per chain:** `gas_price_gwei`, `block_time_ms`, `last_block`, `congestion_pct`, `finality_ms`, `stale` flag
@@ -226,6 +236,18 @@ python neuron.py --demo-workflow
 | `PHALA_RPC` | https://phala.api.onfinality.io/public |
 | `OASIS_RPC` | https://emerald.oasis.io |
 | `BLOCKFROST_API_KEY` | (empty — required for Cardano live data) |
+| `SEI_RPC` | https://evm-rpc.sei-apis.com |
+| `HYDRA_RPC` | http://localhost:4001 |
+
+### CLR v3.1 Routing
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `VAMS_CLR_SECURITY_THRESHOLD` | 10000 | USD threshold for P2 Ethereum routing |
+| `VAMS_CLR_VELOCITY_THRESHOLD` | 1000 | ms threshold for P5 velocity routing |
+| `VAMS_BRIDGE_PRIMARY_TIMEOUT` | 30000 | Primary bridge timeout (ms) |
+| `VAMS_BRIDGE_SECONDARY_TIMEOUT` | 60000 | Secondary fallback timeout (ms) |
+| `VAMS_MEV_BATCH_WINDOW` | 500 | MEV batch auction window (ms) |
 
 ### Example
 ```bash
@@ -460,6 +482,74 @@ client.close_channel(channel.id)
 
 ---
 
+## CLR v3.1 Router
+
+The Conditional L1 Router uses a 7-priority decision tree to route transactions:
+
+```python
+from clr_router import CLRouter, TransactionIntent, TrustTier
+
+router = CLRouter()
+
+# Route a compliance-privacy transaction
+intent = TransactionIntent(
+    value_usd=5000, max_latency_ms=60000,
+    requires_privacy=True,
+    requires_compliance_privacy=True,  # -> Midnight
+)
+decision = router.route(intent, TrustTier.SILVER)
+print(f"Chain: {decision.chain}")        # Midnight
+print(f"Bridge: {decision.target_bridge}")  # HyperlaneZKISM
+print(f"Hash: {decision.routing_hash}")   # For ZK proof verification
+```
+
+**Priority Order:** P0 Compliance Privacy (Midnight) > P1 Confidential Compute (Phala) > P2 High Value $10K+ (Ethereum) > P3 KYC (Polygon CDK) > P4 Formal Verification (Cardano) > P5 Velocity: Hydra/SEI/Solana > P6 Default (utility-scored)
+
+**Standalone:**
+```bash
+python clr_router.py   # Runs 7-scenario CLR demo
+```
+
+## MEV Protection
+
+Multi-layered MEV prevention (Architecture Section 20.4.3):
+
+```python
+from mev_protection import MEVProtection, BatchPayment
+
+mev = MEVProtection()
+
+# Submit transaction with encrypted mempool
+tx = mev.submit_protected_transaction_sync(
+    tx_data=b"swap BTC/USDT", value_usd=10000
+)
+# tx.commitment_hash proves commitment without revealing content
+
+# Batch settle x402 payments at uniform price (no sandwiching)
+result = mev.settle_x402_batch_sync(payments)
+print(f"Clearing price: {result.clearing_price} VAMS")
+```
+
+## Cross-Chain Bridge Executor
+
+ICB-integrated bridge with Multi-ISM verification and timeout fallback:
+
+```python
+from bridge_executor import BridgeExecutor, BridgeFallbackHandler
+
+# Direct execution
+executor = BridgeExecutor(mock_mode=True)
+result = executor.execute("Cardano", b"payload")
+# result.icb_message contains the ICB BridgeMessage (mirrors icb.ak)
+# result.ism_verified True if Multi-ISM 2/3 passed
+
+# With fallback cascade (Primary -> Secondary -> Manual queue)
+handler = BridgeFallbackHandler()
+result = handler.bridge_with_fallback("Solana", b"fast_tx")
+```
+
+---
+
 ## Web3 Integration
 
 On-chain agent registration with the VAMSAgentRegistry contract.
@@ -590,7 +680,8 @@ python -m pytest tests/test_workflows.py -v
 | `test_neuron.py` | 16 | BittensorProvider, ComputeManager, TrustManager |
 | `test_sdk.py` | 29 | CelestiaDA, BittensorSubnet, PhalaTEE, MarlinOyster, Automata |
 | `test_workflows.py` | 15 | CheckpointStore, DemoWorkflow, crash recovery |
-| **Total** | **60** | **All pass** |
+| `test_clr_v3.py` | 19 | CLR v3.1 routing, MEV protection, Bridge + ICB |
+| **Total** | **79+** | **All pass** |
 
 ---
 
@@ -642,7 +733,8 @@ If you see `[WARN] Running in DRY-RUN mode`, this is expected when using `--dry-
 | v0.4.0 | Jan 2026 | 4-layer stack (Compute, Logic, Trust), TEE monitoring |
 | v0.5.0 | Jan 2026 | DBOS-style workflows, crash-proof checkpoints |
 | v0.5.1 | Jan 2026 | Bittensor SDK integration, mock mode, 60 tests |
-| v0.5.2 | Jan 2026 | Request Queue (Pillar 4), L1 State Anchoring (Pillar 2), x402 payments |
+| v0.5.2 | Jan 2026 | Request Queue, L1 State Anchoring, x402 payments |
+| v0.6.0 | Mar 2026 | CLR v3.1 (7-priority routing), MEV Protection, Bridge Executor (ICB), 12 chain oracles |
 
 ---
 

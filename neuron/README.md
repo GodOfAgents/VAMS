@@ -1,6 +1,6 @@
-# VAMS Neuron v0.5.2
+# VAMS Neuron v0.6.0
 
-**Immortal Agent** – Full 4-Layer Stack with TEE
+**Immortal Agent** — Full 5-Layer Stack with CLR v3.1 + MEV Protection + ICB Bridge
 
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](../LICENSE)
@@ -16,7 +16,9 @@ VAMS Neuron is a **real infrastructure client** that connects to decentralized n
 - **TEE Attestation** - Trusted execution environment support
 - **Request Guarantee** - Durable queue with retry and webhooks
 - **L1 State Anchoring** - Merkle root submission to Polygon CDK
-- **Chain Oracle** - Live metrics from 10 execution chains for CLR routing
+- **Chain Oracle** - Live metrics from 12 execution chains for CLR routing
+- **MEV Protection** - Encrypted mempool + batch auction settlement
+- **Cross-Chain Bridge** - ICB-verified transport with Multi-ISM + fallback cascade
 
 ## Architecture
 
@@ -26,7 +28,7 @@ VAMS Neuron is a **real infrastructure client** that connects to decentralized n
 | **L2 Compute** | io.net, Akash, Render, Bittensor, Phala | 5/5 ✅ |
 | **L3 Logic** | Kwil, WeaveDB, Glacier + DBOS Workflows | 3/3 ✅ |
 | **L4 Trust** | Phala (SGX), Marlin (Nitro), Automata | 3/3 ✅ |
-| **L5 Execution Chains** | Cardano (eUTXO), Midnight (ZK-SD) | 2/2 ✅ |
+| **L5 Execution Chains** | Cardano, Midnight, SEI, Hydra + 8 more | 12/12 ✅ |
 
 ## Quick Start
 
@@ -121,8 +123,10 @@ neuron/
 ├── trust.py           # Layer 4: TEE providers
 ├── anchoring.py       # L1 State Anchoring (Merkle roots)
 ├── request_queue.py   # Request Guarantee (retry + webhooks)
-├── chain_oracle.py    # Chain Oracle (live metrics for 10 CLR chains)
-├── clr_router.py      # Conditional L1 Router (Smart Routing)
+├── chain_oracle.py    # Chain Oracle (live metrics for 12 CLR chains)
+├── clr_router.py      # CLR v3.1 — 7-Priority Decision Tree Router
+├── mev_protection.py  # MEV Protection (encrypted mempool + batch auctions)
+├── bridge_executor.py # Cross-Chain Bridge (ICB SDK + Multi-ISM + fallback)
 ├── agent_comms.py     # Agent-to-Agent Communication (Signed Messages)
 ├── demo_cli.py        # Interactive CLI demo
 ├── sdk/               # Real protocol SDKs
@@ -144,7 +148,8 @@ neuron/
 │   ├── test_workflows.py  # 15 tests (checkpoints, recovery)
 │   ├── test_gateway.py    # API server tests
 │   ├── test_oracle.py     # Oracle & Cache tests
-│   ├── test_clr_router.py # Router logic tests
+│   ├── test_clr_router.py # Legacy router tests
+│   ├── test_clr_v3.py     # CLR v3.1 + MEV + Bridge tests (19 tests)
 │   ├── test_comms.py      # Messaging signature tests
 │   └── test_economics.py  # Circuit breaker tests
 ├── README.md
@@ -159,7 +164,7 @@ neuron/
 python -m pytest tests/ -v
 
 # Expected output
-============================= 60 passed in 44.29s =============================
+============================= 79 passed in 52.18s =============================
 ```
 
 ## Documentation
