@@ -292,7 +292,7 @@ contract VAMSSentinel is AccessControl, ReentrancyGuard, IVAMSSentinel {
      * @notice Update the hourly price anchor from oracle
      * @dev Called by keepers or automation. Sets the baseline for crash detection.
      */
-    function updatePriceAnchor() external {
+    function updatePriceAnchor() external onlyRole(KEEPER_ROLE) {
         require(priceOracle != address(0), "No oracle set");
 
         uint256 newPrice = ISentinelPriceOracle(priceOracle).getVAMSPrice();
@@ -380,6 +380,7 @@ contract VAMSSentinel is AccessControl, ReentrancyGuard, IVAMSSentinel {
      */
     function addPausableTarget(address target) external onlyRole(DEFAULT_ADMIN_ROLE) {
         require(target != address(0), "Zero address");
+        require(pausableTargets.length < 20, "Max pausable targets reached");
         pausableTargets.push(target);
         emit PausableTargetAdded(target);
     }

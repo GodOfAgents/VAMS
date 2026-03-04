@@ -96,6 +96,9 @@ contract X402EscrowManager is
     /// @notice Claim timestamps (for dispute window)
     mapping(bytes32 => uint256) private _claimTimestamps;
     
+    /// @notice Service proofs approved by VERIFIER_ROLE
+    mapping(bytes32 => bool) public verifiedProofs;
+    
     /// @notice Total escrowed value
     uint256 public totalEscrowed;
     
@@ -308,7 +311,8 @@ contract X402EscrowManager is
     /// @inheritdoc IX402EscrowManager
     function extendEscrow(bytes32 escrowId, uint256 additionalSeconds) 
         external 
-        override 
+        override
+        nonReentrant
     {
         Escrow storage escrow = _escrows[escrowId];
         
@@ -367,8 +371,8 @@ contract X402EscrowManager is
             }
         }
         
-        // Verify service proof
-        if (!_verifyServiceProof(escrowId, serviceProof)) {
+        // Verify service proof was approved by a trusted verifier
+        if (!verifiedProofs[escrowId]) {
             revert InvalidServiceProof();
         }
         
@@ -519,42 +523,22 @@ contract X402EscrowManager is
     }
     
     /**
-     * @dev Verify service delivery proof
-     * @param escrowId Escrow ID
-     * @param proof Service proof
-     * @return True if proof is valid
-     * 
-     * Note: This is a simplified implementation. Production should:
-     * - For TEE: Verify enclave signature against known measurement
-     * - For ZKML: Verify ZK proof on-chain
-     * - For Deterministic: Verify hash matches expected output
+     * @notice Approve a service proof for a given escrow (off-chain verification)
+     * @dev Called by trusted verifier nodes after validating TEE/ZK/deterministic proofs off-chain.
+     *      The verifier is responsible for actual proof validation (enclave signatures,
+     *      ZK proof checks, output hash matching). This function records the approval on-chain.
+     * @param escrowId The escrow ID whose service proof has been verified
      */
-    function _verifyServiceProof(
-        bytes32 escrowId,
-        ServiceProof calldata proof
-    ) internal view returns (bool) {
-        // Basic validation
-        if (proof.requestHash == bytes32(0)) return false;
-        if (proof.responseHash == bytes32(0)) return false;
-        
-        // For now, accept any non-empty attestation
-        // In production, this would verify:
-        // - TEE attestation signature and measurements
-        // - ZKML proof verification
-        // - Deterministic output hash matching
-        
-        if (proof.proofType == ProofType.TEE) {
-            // Would verify TEE signature
-            return proof.attestation.length > 0;
-        } else if (proof.proofType == ProofType.DETERMINISTIC) {
-            // Would verify output hash
-            return true;
-        } else if (proof.proofType == ProofType.ZKML) {
-            // Would verify ZK proof
-            return proof.attestation.length > 0;
+    function approveServiceProof(
+        bytes32 escrowId
+    ) external onlyRole(VERIFIER_ROLE) {
+        Escrow storage escrow = _escrows[escrowId];
+        if (escrow.agent == address(0)) revert EscrowNotFound(escrowId);
+        if (escrow.status != EscrowStatus.LOCKED) {
+            revert EscrowNotClaimable(escrowId, escrow.status);
         }
-        
-        return false;
+        verifiedProofs[escrowId] = true;
+        emit ServiceProofApproved(escrowId, msg.sender);
     }
     
     // ============ Admin Functions ============

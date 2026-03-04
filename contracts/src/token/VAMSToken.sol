@@ -143,9 +143,10 @@ contract VAMSToken is
         if (to == address(0)) revert ZeroAddress();
         if (amount == 0) revert ZeroAmount();
         
-        // Rotate year if needed
+        // Rotate year if needed — advance by SECONDS_PER_YEAR, not block.timestamp
+        // to prevent gap-gaming (skipping years compresses the cap window)
         if (block.timestamp >= currentMintYearStart + SECONDS_PER_YEAR) {
-            currentMintYearStart = block.timestamp;
+            currentMintYearStart += SECONDS_PER_YEAR;
             mintedThisYear = 0;
         }
         

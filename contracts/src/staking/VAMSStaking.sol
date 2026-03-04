@@ -295,6 +295,9 @@ contract VAMSStaking is IVAMSStaking, AccessControl, Pausable, ReentrancyGuard {
         StakeInfo storage info = _stakes[msg.sender];
         StakingTier oldTier = _getTier(info.amount);
 
+        // Mint reward tokens INTO the contract so totalStaked stays backed by real tokens
+        IVAMSToken(address(rewardToken)).mint(address(this), amount);
+
         info.amount += amount;
         totalStaked += amount;
         info.rewardDebt = (info.amount * accRewardPerShare) / PRECISION;

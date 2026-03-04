@@ -203,7 +203,7 @@ contract GovernorExecutor is
      * @notice Execute a queued intent after timelock expires
      * @param intentId Intent identifier
      */
-    function executeIntent(bytes32 intentId) external nonReentrant whenNotPaused {
+    function executeIntent(bytes32 intentId) external onlyRole(RELAY_ROLE) nonReentrant whenNotPaused {
         GovernanceIntent storage intent = intents[intentId];
 
         if (intent.status != IntentStatus.QUEUED) {
