@@ -3,9 +3,12 @@
 import { ethers } from 'ethers';
 
 // --- Configuration ---
-const RPC_URL = "https://polygon-amoy.infura.io/v3/726db297eb03483ea9ed9f3c76ca1087";
-// VAMS Node Wallet Private Key
-const PRIVATE_KEY = "ROTATED_KEY_PLACEHOLDER";
+const RPC_URL = process.env.POLYGON_AMOY_RPC_URL;
+const PRIVATE_KEY = process.env.PRIVATE_KEY;
+if (!RPC_URL || !PRIVATE_KEY) {
+    console.error("❌ Missing required env vars: POLYGON_AMOY_RPC_URL, PRIVATE_KEY");
+    process.exit(1);
+}
 const VAMS_TOKEN_ADDRESS = "0x62a705eD1cAbBBafFCd99e9b2497024031329fd4";
 const ESCROW_MANAGER_ADDRESS = "0xfC58658fA08102612c78166374854fE31cCFBb58";
 // Use the Proxy address for Provider Bond Registry!
@@ -46,46 +49,46 @@ const BOND_ABI = [
 
 async function main() {
     console.log("🚀 Simulating VAMS Service Request (X402 Protocol)...");
-    
+
     const provider = new ethers.JsonRpcProvider(RPC_URL);
     const wallet = new ethers.Wallet(PRIVATE_KEY, provider);
     console.log(`👤 Agent/Provider: ${wallet.address}`);
-    
+
     const tokenContract = new ethers.Contract(VAMS_TOKEN_ADDRESS, TOKEN_ABI, wallet);
     const escrowContract = new ethers.Contract(ESCROW_MANAGER_ADDRESS, ESCROW_ABI, wallet);
     const bondContract = new ethers.Contract(PROVIDER_BOND_REGISTRY, BOND_ABI, wallet);
-    
+
     // 1. Check Bond Status
     console.log("\nChecking Bond Status...");
     try {
         const bond = await bondContract.getBond(wallet.address);
-        
+
         if (bond.registeredAt === 0n) {
             console.log("📝 Registering as Provider...");
-            
+
             // Get MIN_BOND
             const minBond = await bondContract.MIN_BOND();
             console.log(`   Min Bond Required: ${ethers.formatEther(minBond)} VAMS`);
-            
+
             // Ensure we have enough tokens
             const balance = await tokenContract.balanceOf(wallet.address);
             if (balance < minBond) {
                 throw new Error(`Insufficient VAMS balance. Have ${ethers.formatEther(balance)}, Need ${ethers.formatEther(minBond)}`);
             }
-            
+
             // Approve Bond Registry
             const allowance = await tokenContract.allowance(wallet.address, PROVIDER_BOND_REGISTRY);
             if (allowance < minBond) {
-                 console.log("   Approving Bond...");
-                 const tx = await tokenContract.approve(PROVIDER_BOND_REGISTRY, minBond);
-                 await tx.wait();
-                 console.log("   ✅ Bond Approved.");
+                console.log("   Approving Bond...");
+                const tx = await tokenContract.approve(PROVIDER_BOND_REGISTRY, minBond);
+                await tx.wait();
+                console.log("   ✅ Bond Approved.");
             }
-            
+
             // Register (Bond = Min, MaxRequest = 100 VAMS)
             // Coverage Ratio is 10x, so MaxRequest <= Bond / 10
             const maxRequest = minBond / 10n;
-            
+
             const regTx = await bondContract.registerProvider(minBond, maxRequest);
             console.log(`   Registering... Tx: ${regTx.hash}`);
             await regTx.wait();
@@ -99,7 +102,7 @@ async function main() {
         console.error("❌ Bond Check Failed:", error);
         return;
     }
-    
+
     // 2. Approve Escrow Manager
     console.log("\nChecking Escrow Allowance...");
     const escrowAllowance = await tokenContract.allowance(wallet.address, ESCROW_MANAGER_ADDRESS);
@@ -109,48 +112,48 @@ async function main() {
         await tx.wait();
         console.log("✅ Escrow Approved.");
     }
-    
+
     // 3. Create Service Request (Lock Escrow)
     console.log(`\n🔒 Locking Escrow for Service...`);
     console.log(`   - Provider: ${wallet.address}`);
     console.log(`   - Amount: ${ethers.formatEther(SERVICE_COST)} VAMS`);
     console.log(`   - Service: COMPUTE_GPU_A100`);
     console.log(`   - Hashlock: ${HASHLOCK}`);
-    
+
     try {
         const escrowId = await escrowContract.lockEscrow.staticCall(
-            wallet.address, 
-            SERVICE_COST, 
-            NONCE, 
-            VALIDITY_SECONDS, 
-            HASHLOCK, 
+            wallet.address,
+            SERVICE_COST,
+            NONCE,
+            VALIDITY_SECONDS,
+            HASHLOCK,
             SERVICE_TYPE
         );
-        
+
         const tx = await escrowContract.lockEscrow(
-            wallet.address, 
-            SERVICE_COST, 
-            NONCE, 
-            VALIDITY_SECONDS, 
-            HASHLOCK, 
+            wallet.address,
+            SERVICE_COST,
+            NONCE,
+            VALIDITY_SECONDS,
+            HASHLOCK,
             SERVICE_TYPE
         );
         console.log(`   Tx Hash: ${tx.hash}`);
         await tx.wait();
-        
+
         console.log(`✅ Escrow Locked! ID: ${escrowId}`);
-        
+
         // 4. Verify State
         const escrow = await escrowContract.getEscrow(escrowId);
         console.log("\n🔍 Verified Escrow State:");
         console.log(`   - Status: ${escrow.status === 0n ? "LOCKED" : "UNKNOWN"}`);
         console.log(`   - Expires: ${new Date(Number(escrow.expiresAt) * 1000).toISOString()}`);
-        
+
     } catch (error) {
         // Decode error if possible
         console.error("❌ Escrow Lock Failed:", error);
         if (error.data) {
-             console.error("   Error Data:", error.data);
+            console.error("   Error Data:", error.data);
         }
     }
 }

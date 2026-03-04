@@ -239,8 +239,26 @@ async def receive_heartbeat(request: HeartbeatRequest):
         node_id = payload.get("node_id", "unknown")
         block_height = payload.get("block_height", 0)
         
-        # TODO: Verify signature with node's public key
-        # For MVP, we accept all heartbeats
+        # Verify signature with node's public key
+        if ECDSA_AVAILABLE:
+            try:
+                # The node's public key should be registered on first heartbeat
+                if node_id in nodes and nodes[node_id].public_key:
+                    vk = VerifyingKey.from_string(
+                        bytes.fromhex(nodes[node_id].public_key),
+                        curve=SECP256k1
+                    )
+                    vk.verify(
+                        bytes.fromhex(request.signature),
+                        request.payload.encode()
+                    )
+                elif "public_key" not in payload:
+                    raise HTTPException(
+                        status_code=403,
+                        detail="First heartbeat must include public_key in payload"
+                    )
+            except BadSignatureError:
+                raise HTTPException(status_code=403, detail="Invalid heartbeat signature")
         
         # Update or create node entry
         if node_id not in nodes:
@@ -252,6 +270,10 @@ async def receive_heartbeat(request: HeartbeatRequest):
         node.heartbeat_count += 1
         node.network = "mocha-4"  # From Celestia
         
+        # Store public key on first heartbeat
+        if not node.public_key and "public_key" in payload:
+            node.public_key = payload["public_key"]
+        
         print(f"[{datetime.now().strftime('%H:%M:%S')}] Heartbeat from {node_id}: Block #{block_height}")
         
         return {
@@ -262,6 +284,8 @@ async def receive_heartbeat(request: HeartbeatRequest):
         
     except json.JSONDecodeError:
         raise HTTPException(status_code=400, detail="Invalid payload JSON")
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

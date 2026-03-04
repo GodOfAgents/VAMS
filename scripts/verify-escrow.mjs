@@ -3,9 +3,12 @@
 import { ethers } from 'ethers';
 
 // --- Configuration ---
-const RPC_URL = "https://polygon-amoy.infura.io/v3/726db297eb03483ea9ed9f3c76ca1087";
-// VAMS Node Wallet Private Key
-const PRIVATE_KEY = "ROTATED_KEY_PLACEHOLDER";
+const RPC_URL = process.env.POLYGON_AMOY_RPC_URL;
+const PRIVATE_KEY = process.env.PRIVATE_KEY;
+if (!RPC_URL || !PRIVATE_KEY) {
+    console.error("❌ Missing required env vars: POLYGON_AMOY_RPC_URL, PRIVATE_KEY");
+    process.exit(1);
+}
 const VAMS_TOKEN_ADDRESS = "0x62a705eD1cAbBBafFCd99e9b2497024031329fd4";
 const ESCROW_MANAGER_ADDRESS = "0xfC58658fA08102612c78166374854fE31cCFBb58";
 // Use the Proxy address for Provider Bond Registry!
@@ -40,25 +43,25 @@ const BOND_ABI = [
 
 async function main() {
     console.log("🚀 Simulating VAMS Service Request (X402 Protocol)...");
-    
+
     const provider = new ethers.JsonRpcProvider(RPC_URL);
     const wallet = new ethers.Wallet(PRIVATE_KEY, provider);
     console.log(`👤 Agent/Provider: ${wallet.address}`);
-    
+
     const tokenContract = new ethers.Contract(VAMS_TOKEN_ADDRESS, TOKEN_ABI, wallet);
     const escrowContract = new ethers.Contract(ESCROW_MANAGER_ADDRESS, ESCROW_ABI, wallet);
     const bondContract = new ethers.Contract(PROVIDER_BOND_REGISTRY, BOND_ABI, wallet);
-    
+
     // 4. Verify State (Fixed display logic)
     const escrowId = "0x9ab8eeccdf56c97a82c0d38af73d5cabae37c3dc90230c8cadabf1a8da49004d"; // Hardcoded from previous success
     console.log(`\n🔍 Verifying Escrow: ${escrowId}`);
-    
+
     const escrow = await escrowContract.getEscrow(escrowId);
     console.log("   Escrow Data:", escrow);
-    
+
     // Check status enum: LOCKED=0, REFUNDED=1, CLAIMED=2, DISPUTED=3, RESOLVED=4
     const statusMap = ["LOCKED", "REFUNDED", "CLAIMED", "DISPUTED", "RESOLVED"];
-    
+
     console.log(`   - Status: ${statusMap[Number(escrow.status)]}`);
     console.log(`   - Created: ${new Date(Number(escrow.createdAt) * 1000).toISOString()}`);
     console.log(`   - Expires: ${new Date(Number(escrow.expiresAt) * 1000).toISOString()}`);

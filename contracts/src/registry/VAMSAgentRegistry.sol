@@ -280,7 +280,7 @@ contract VAMSAgentRegistry is
         agent.stake = 0;
         
         // Return stake to owner
-        IERC20(vamsToken).transfer(msg.sender, stakeToReturn);
+        IERC20(vamsToken).safeTransfer(msg.sender, stakeToReturn);
         
         emit AgentDeregistered(_agentId, msg.sender);
     }
@@ -295,7 +295,7 @@ contract VAMSAgentRegistry is
     function submitMerkleRoot(
         bytes32 _agentId,
         bytes32 _merkleRoot
-    ) external {
+    ) external nonReentrant {
         Agent storage agent = agents[_agentId];
         
         if (agent.owner != msg.sender) revert NotAgentOwner();
@@ -324,7 +324,7 @@ contract VAMSAgentRegistry is
     function updateTEEAttestation(
         bytes32 _agentId,
         bytes32 _attestation
-    ) external {
+    ) external nonReentrant {
         Agent storage agent = agents[_agentId];
         
         if (agent.owner != msg.sender && !hasRole(VERIFIER_ROLE, msg.sender)) revert NotAgentOwner();
@@ -408,10 +408,10 @@ contract VAMSAgentRegistry is
             slashAmount = (agent.stake * CHALLENGER_REWARD_BPS) / BPS_DENOMINATOR;
             
             // Transfer reward to challenger: 50% of slashed stake
-            IERC20(vamsToken).transfer(challenge.challenger, slashAmount);
+            IERC20(vamsToken).safeTransfer(challenge.challenger, slashAmount);
             
             // Return challenger's original stake
-            IERC20(vamsToken).transfer(challenge.challenger, challenge.challengerStake);
+            IERC20(vamsToken).safeTransfer(challenge.challenger, challenge.challengerStake);
             
             // Remaining 50% stays in contract (effectively burned or sent to insurance in future)
             // agent.stake was total, so we reduce it

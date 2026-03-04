@@ -144,6 +144,11 @@ interface IX402EscrowManager {
         uint256 newExpiry
     );
     
+    event ServiceProofApproved(
+        bytes32 indexed escrowId,
+        address indexed verifier
+    );
+    
     // ============ Errors ============
     
     /// @notice Escrow not found
