@@ -21,8 +21,6 @@
 <div align="center">
   <img src="./VAMS_logo.png" alt="VAMS Logo" width="600" />
   <br/>
-
-# VAMS
 ### The Operating System for the Agentic Economy
 
 **Unified Infrastructure Layer | Autonomous AI Agents | Zero Friction**
