@@ -123,7 +123,7 @@ contract DeployV2 is Script {
 
         // VAMS Slasher (Operators)
         slasher = new VAMSSlasher();
-        slasher.initialize(deployer, address(insurance));
+        slasher.initialize(deployer, address(insurance), address(token));
         console.log("VAMSSlasher deployed to:", address(slasher));
 
         // VAMS Agent Registry (Agents)

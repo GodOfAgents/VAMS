@@ -44,13 +44,26 @@ contract CommitRevealOracle is AccessControl {
     uint256 public constant COMMIT_PHASE_DURATION = 1 hours;
     uint256 public constant REVEAL_PHASE_DURATION = 1 hours;
 
+    // ============ Custom Errors ============
+    error ZeroAddress();
+    error NotAuthorizedOracle();
+    error RequestDoesNotExist();
+    error RequestAlreadyResolved();
+    error CommitPhaseOver();
+    error CommitPhaseNotOver();
+    error RevealPhaseOver();
+    error AlreadyCommitted();
+    error DidNotCommit();
+    error AlreadyRevealed();
+    error HashMismatch();
+
     event RequestCreated(uint256 indexed requestId, uint256 expectedResolvesAt);
     event Committed(uint256 indexed requestId, address indexed oracle);
     event Revealed(uint256 indexed requestId, address indexed oracle, bytes32 value);
     event RequestResolved(uint256 indexed requestId, bytes32 finalValue);
 
     constructor(address _admin, address _registry, IOracleRegistry.Category _category) {
-        require(_admin != address(0) && _registry != address(0), "Zero address");
+        if (_admin == address(0) || _registry == address(0)) revert ZeroAddress();
         _grantRole(DEFAULT_ADMIN_ROLE, _admin);
 
         registry = IOracleRegistry(_registry);
@@ -79,13 +92,13 @@ contract CommitRevealOracle is AccessControl {
      * @param commitHash keccak256(abi.encodePacked(value, salt))
      */
     function commit(uint256 requestId, bytes32 commitHash) external {
-        require(registry.isAuthorizedOracle(msg.sender, category), "Not authorized oracle for category");
+        if (!registry.isAuthorizedOracle(msg.sender, category)) revert NotAuthorizedOracle();
         
         Request storage req = requests[requestId];
-        require(req.id != 0, "Request does not exist");
-        require(!req.resolved, "Request already resolved");
-        require(block.timestamp <= req.expectedResolvesAt - REVEAL_PHASE_DURATION, "Commit phase over");
-        require(commits[requestId][msg.sender].committedAt == 0, "Already committed");
+        if (req.id == 0) revert RequestDoesNotExist();
+        if (req.resolved) revert RequestAlreadyResolved();
+        if (block.timestamp > req.expectedResolvesAt - REVEAL_PHASE_DURATION) revert CommitPhaseOver();
+        if (commits[requestId][msg.sender].committedAt != 0) revert AlreadyCommitted();
 
         commits[requestId][msg.sender] = Commit({
             commitHash: commitHash,
@@ -104,19 +117,19 @@ contract CommitRevealOracle is AccessControl {
      */
     function reveal(uint256 requestId, bytes32 value, bytes32 salt) external {
         Request storage req = requests[requestId];
-        require(req.id != 0, "Request does not exist");
-        require(!req.resolved, "Request already resolved");
+        if (req.id == 0) revert RequestDoesNotExist();
+        if (req.resolved) revert RequestAlreadyResolved();
 
         uint256 commitEnd = req.expectedResolvesAt - REVEAL_PHASE_DURATION;
-        require(block.timestamp > commitEnd, "Commit phase not yet over");
-        require(block.timestamp <= req.expectedResolvesAt, "Reveal phase over");
+        if (block.timestamp <= commitEnd) revert CommitPhaseNotOver();
+        if (block.timestamp > req.expectedResolvesAt) revert RevealPhaseOver();
 
         Commit storage c = commits[requestId][msg.sender];
-        require(c.committedAt > 0, "Did not commit");
-        require(!c.revealed, "Already revealed");
+        if (c.committedAt == 0) revert DidNotCommit();
+        if (c.revealed) revert AlreadyRevealed();
 
         bytes32 expectedHash = keccak256(abi.encodePacked(value, salt));
-        require(expectedHash == c.commitHash, "Hash mismatch");
+        if (expectedHash != c.commitHash) revert HashMismatch();
 
         c.revealed = true;
         revealedValues[requestId].push(value);

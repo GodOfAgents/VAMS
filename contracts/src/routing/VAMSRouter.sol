@@ -110,7 +110,7 @@ contract VAMSRouter is VAMSUpgradeableBase {
     
     function initialize(
         address _admin,
-        address[] memory _guardians
+        address[] memory /* _guardians */
     ) public initializer {
         __VAMSUpgradeableBase_init(_admin);
         
@@ -318,7 +318,7 @@ contract VAMSRouter is VAMSUpgradeableBase {
     /**
      * @notice Preview routing decision without executing
      */
-    function previewRoute(TransactionMetadata calldata _meta) external view returns (ChainId) {
+    function previewRoute(TransactionMetadata calldata _meta) external pure returns (ChainId) {
         return _applyRoutingRules(_meta);
     }
     

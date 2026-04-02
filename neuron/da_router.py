@@ -5,6 +5,14 @@ from enum import Enum
 from neuron.verifiers.celestia_light_client import CelestiaLightClient
 from neuron.verifiers.polygon_dac_client import PolygonDACClient
 
+try:
+    from neuron.config import MOCK_MODE
+except ImportError:
+    try:
+        from config import MOCK_MODE
+    except ImportError:
+        MOCK_MODE = True
+
 # --- DA Providers ---
 class DAProvider(Enum):
     POLYGON = "polygon"
@@ -72,8 +80,9 @@ class DARouter:
         # Simulate Network Call
         # In production this calls specific clients in `neuron/verifiers/`
         
-        # Simulate Random Failure for fallback testing
-        # if random.random() < 0.1: raise Exception("Network Timeout")
+        # Simulate Random Failure for fallback testing if MOCK_MODE is enabled
+        if MOCK_MODE and random.random() < 0.1:
+            raise Exception("Network Timeout (Simulated via MOCK_MODE)")
         
         tx_hash = hashlib.sha256(data + str(time.time()).encode()).hexdigest()
         

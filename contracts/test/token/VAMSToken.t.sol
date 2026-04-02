@@ -83,7 +83,8 @@ contract VAMSTokenTest is BaseTest {
         
         // Transfer from treasury to user1 (treasury is exempt)
         vm.prank(treasury);
-        bool success = vamsToken.transfer(user1, amount);
+        bool success = // forge-lint: disable-next-line(erc20-unchecked-transfer)
+        vamsToken.transfer(user1, amount);
         assertTrue(success, "Transfer failed");
         
         assertEq(vamsToken.balanceOf(user1), amount);
@@ -97,6 +98,7 @@ contract VAMSTokenTest is BaseTest {
         emit IERC20.Transfer(treasury, user1, amount);
         
         vm.prank(treasury);
+        // forge-lint: disable-next-line(erc20-unchecked-transfer)
         vamsToken.transfer(user1, amount);
     }
     
@@ -105,6 +107,7 @@ contract VAMSTokenTest is BaseTest {
         
         vm.prank(user1);
         vm.expectRevert();
+        // forge-lint: disable-next-line(erc20-unchecked-transfer)
         vamsToken.transfer(user2, amount);
     }
     
@@ -132,7 +135,8 @@ contract VAMSTokenTest is BaseTest {
         
         // Treasury transfers to user1
         vm.prank(treasury);
-        bool success = vamsToken.transfer(user1, amount);
+        bool success = // forge-lint: disable-next-line(erc20-unchecked-transfer)
+        vamsToken.transfer(user1, amount);
         assertTrue(success, "Treasury transfer failed");
         
         // Exempt user1 from limits for testing
@@ -145,6 +149,7 @@ contract VAMSTokenTest is BaseTest {
         
         // user2 transfers from user1
         vm.prank(user2);
+        // forge-lint: disable-next-line(erc20-unchecked-transfer)
         vamsToken.transferFrom(user1, user3, amount / 2);
         
         assertEq(vamsToken.balanceOf(user3), amount / 2);
@@ -156,11 +161,13 @@ contract VAMSTokenTest is BaseTest {
         
         vm.prank(treasury);
         // We verify success here to silence warning, though main test is expectation below
-        assertTrue(vamsToken.transfer(user1, amount));
+        assertTrue(// forge-lint: disable-next-line(erc20-unchecked-transfer)
+        vamsToken.transfer(user1, amount));
         
         // No approval
         vm.prank(user2);
         vm.expectRevert();
+        // forge-lint: disable-next-line(erc20-unchecked-transfer)
         vamsToken.transferFrom(user1, user3, amount);
     }
     
@@ -178,7 +185,8 @@ contract VAMSTokenTest is BaseTest {
         
         // Transfer some tokens to user1 and burn them
         vm.prank(treasury);
-        bool success = vamsToken.transfer(user1, 1000 ether);
+        bool success = // forge-lint: disable-next-line(erc20-unchecked-transfer)
+        vamsToken.transfer(user1, 1000 ether);
         assertTrue(success);
         
         vm.prank(user1);
@@ -204,7 +212,8 @@ contract VAMSTokenTest is BaseTest {
         uint256 burnAmount = 100 ether;
         
         vm.prank(treasury);
-        bool success = vamsToken.transfer(user1, amount);
+        bool success = // forge-lint: disable-next-line(erc20-unchecked-transfer)
+        vamsToken.transfer(user1, amount);
         assertTrue(success);
         
         vm.prank(user1);
@@ -219,7 +228,8 @@ contract VAMSTokenTest is BaseTest {
         uint256 burnAmount = 100 ether;
         
         vm.prank(treasury);
-        bool success = vamsToken.transfer(user1, amount);
+        bool success = // forge-lint: disable-next-line(erc20-unchecked-transfer)
+        vamsToken.transfer(user1, amount);
         assertTrue(success);
         
         vm.expectEmit(true, true, false, true);
@@ -234,7 +244,8 @@ contract VAMSTokenTest is BaseTest {
         uint256 burnAmount = 100 ether;
         
         vm.prank(treasury);
-        assertTrue(vamsToken.transfer(user1, amount));
+        assertTrue(// forge-lint: disable-next-line(erc20-unchecked-transfer)
+        vamsToken.transfer(user1, amount));
         
         vm.prank(user1);
         vamsToken.approve(user2, burnAmount);
@@ -251,13 +262,15 @@ contract VAMSTokenTest is BaseTest {
         uint256 amount = 1000 ether;
         
         vm.prank(treasury);
-        assertTrue(vamsToken.transfer(user1, amount));
+        assertTrue(// forge-lint: disable-next-line(erc20-unchecked-transfer)
+        vamsToken.transfer(user1, amount));
         
         vm.prank(admin);
         vamsToken.pause();
         
         vm.prank(user1);
         vm.expectRevert();
+        // forge-lint: disable-next-line(erc20-unchecked-transfer)
         vamsToken.transfer(user2, 100 ether);
     }
     
@@ -271,7 +284,8 @@ contract VAMSTokenTest is BaseTest {
         uint256 amount = 1000 ether;
         
         vm.prank(treasury);
-        assertTrue(vamsToken.transfer(user1, amount));
+        assertTrue(// forge-lint: disable-next-line(erc20-unchecked-transfer)
+        vamsToken.transfer(user1, amount));
         
         // Exempt user1 for this test
         vm.prank(admin);
@@ -284,7 +298,8 @@ contract VAMSTokenTest is BaseTest {
         vamsToken.unpause();
         
         vm.prank(user1);
-        assertTrue(vamsToken.transfer(user2, 100 ether));
+        assertTrue(// forge-lint: disable-next-line(erc20-unchecked-transfer)
+        vamsToken.transfer(user2, 100 ether));
         
         assertEq(vamsToken.balanceOf(user2), 100 ether);
     }
@@ -297,12 +312,14 @@ contract VAMSTokenTest is BaseTest {
         
         // First transfer some tokens from treasury to user2 (user2 will be our tester)
         vm.prank(treasury);
-        assertTrue(vamsToken.transfer(user2, maxWallet + 10 ether));
+        assertTrue(// forge-lint: disable-next-line(erc20-unchecked-transfer)
+        vamsToken.transfer(user2, maxWallet + 10 ether));
         
         // Now user2 (not exempt) tries to send to user1
         // This should fail because user1 would exceed max wallet
         vm.prank(user2);
         vm.expectRevert();
+        // forge-lint: disable-next-line(erc20-unchecked-transfer)
         vamsToken.transfer(user1, maxWallet + 1 ether);
     }
     
@@ -312,11 +329,13 @@ contract VAMSTokenTest is BaseTest {
         
         // Transfer from treasury to user2 first  
         vm.prank(treasury);
-        assertTrue(vamsToken.transfer(user2, transferAmount));
+        assertTrue(// forge-lint: disable-next-line(erc20-unchecked-transfer)
+        vamsToken.transfer(user2, transferAmount));
         
         // User2 (non-exempt) transfers to user1 within both wallet and daily limits
         vm.prank(user2);
-        assertTrue(vamsToken.transfer(user1, transferAmount / 2));
+        assertTrue(// forge-lint: disable-next-line(erc20-unchecked-transfer)
+        vamsToken.transfer(user1, transferAmount / 2));
         
         assertEq(vamsToken.balanceOf(user1), transferAmount / 2);
     }
@@ -326,7 +345,8 @@ contract VAMSTokenTest is BaseTest {
         
         // Treasury is already exempt, so it can transfer any amount
         vm.prank(treasury);
-        assertTrue(vamsToken.transfer(user1, overLimit));
+        assertTrue(// forge-lint: disable-next-line(erc20-unchecked-transfer)
+        vamsToken.transfer(user1, overLimit));
         
         assertEq(vamsToken.balanceOf(user1), overLimit);
     }
@@ -335,7 +355,8 @@ contract VAMSTokenTest is BaseTest {
         // Transfer some tokens to user1 (within limits)
         uint256 amount = 20_000_000 ether; // 2% of supply, within max wallet
         vm.prank(treasury);
-        assertTrue(vamsToken.transfer(user1, amount));
+        assertTrue(// forge-lint: disable-next-line(erc20-unchecked-transfer)
+        vamsToken.transfer(user1, amount));
         
         // Daily limit is 1% = 10M tokens
         uint256 dailyLimit = vamsToken.dailyTransferLimit();
@@ -343,11 +364,13 @@ contract VAMSTokenTest is BaseTest {
         // First transfer should work (if within daily limit)
         uint256 firstTransfer = dailyLimit / 2;
         vm.prank(user1);
-        assertTrue(vamsToken.transfer(user2, firstTransfer));
+        assertTrue(// forge-lint: disable-next-line(erc20-unchecked-transfer)
+        vamsToken.transfer(user2, firstTransfer));
         
         // Second transfer exceeding daily limit should fail
         vm.prank(user1);
         vm.expectRevert();
+        // forge-lint: disable-next-line(erc20-unchecked-transfer)
         vamsToken.transfer(user2, dailyLimit); // Would exceed daily limit
     }
     
@@ -359,7 +382,8 @@ contract VAMSTokenTest is BaseTest {
         vamsToken.addExemptAddress(user1);
         
         vm.prank(treasury);
-        assertTrue(vamsToken.transfer(user1, amount * 3));
+        assertTrue(// forge-lint: disable-next-line(erc20-unchecked-transfer)
+        vamsToken.transfer(user1, amount * 3));
         
         // Remove exemption to test daily limits on transfers
         vm.prank(admin);
@@ -367,14 +391,16 @@ contract VAMSTokenTest is BaseTest {
         
         // First day transfer
         vm.prank(user1);
-        assertTrue(vamsToken.transfer(user2, amount / 2));
+        assertTrue(// forge-lint: disable-next-line(erc20-unchecked-transfer)
+        vamsToken.transfer(user2, amount / 2));
         
         // Advance to next day
         _advanceTime(1 days + 1);
         
         // Should be able to transfer again
         vm.prank(user1);
-        assertTrue(vamsToken.transfer(user3, amount / 2));
+        assertTrue(// forge-lint: disable-next-line(erc20-unchecked-transfer)
+        vamsToken.transfer(user3, amount / 2));
         
         assertEq(vamsToken.balanceOf(user3), amount / 2);
     }
@@ -385,7 +411,8 @@ contract VAMSTokenTest is BaseTest {
         
         // Should be able to receive unlimited tokens
         vm.prank(treasury);
-        assertTrue(vamsToken.transfer(user1, 100_000_000 ether));
+        assertTrue(// forge-lint: disable-next-line(erc20-unchecked-transfer)
+        vamsToken.transfer(user1, 100_000_000 ether));
         
         assertEq(vamsToken.balanceOf(user1), 100_000_000 ether);
     }
@@ -398,7 +425,8 @@ contract VAMSTokenTest is BaseTest {
         
         // Should now bypass limits
         vm.prank(treasury);
-        assertTrue(vamsToken.transfer(user1, 100_000_000 ether));
+        assertTrue(// forge-lint: disable-next-line(erc20-unchecked-transfer)
+        vamsToken.transfer(user1, 100_000_000 ether));
         
         assertEq(vamsToken.balanceOf(user1), 100_000_000 ether);
     }
@@ -483,7 +511,8 @@ contract VAMSTokenTest is BaseTest {
         amount = bound(amount, 1, vamsToken.maxWalletAmount());
         
         vm.prank(treasury);
-        assertTrue(vamsToken.transfer(to, amount));
+        assertTrue(// forge-lint: disable-next-line(erc20-unchecked-transfer)
+        vamsToken.transfer(to, amount));
         
         assertEq(vamsToken.balanceOf(to), amount);
     }
@@ -502,7 +531,8 @@ contract VAMSTokenTest is BaseTest {
         burnAmount = bound(burnAmount, 1, userBalance);
         
         vm.prank(treasury);
-        assertTrue(vamsToken.transfer(user1, userBalance));
+        assertTrue(// forge-lint: disable-next-line(erc20-unchecked-transfer)
+        vamsToken.transfer(user1, userBalance));
         
         uint256 supplyBefore = vamsToken.totalSupply();
         
@@ -513,3 +543,4 @@ contract VAMSTokenTest is BaseTest {
         assertEq(vamsToken.balanceOf(user1), userBalance - burnAmount);
     }
 }
+

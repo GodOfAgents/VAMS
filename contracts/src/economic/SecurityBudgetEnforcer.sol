@@ -77,7 +77,7 @@ contract SecurityBudgetEnforcer is AccessControl, ISecurityBudgetEnforcer {
 
         // 1. Calculate Required Security Budget
         uint256 tvlRequirement = metrics.totalValueLocked / TVL_SECURITY_RATIO;
-        uint256 mevRequirement = (metrics.dailyVolume7DayAvg / 100) * MEV_DAYS_COVERAGE;
+        uint256 mevRequirement = (metrics.dailyVolume7DayAvg * MEV_DAYS_COVERAGE) / 100;
         requiredSecurityBudgetUSD = _max3(tvlRequirement, mevRequirement, MIN_SECURITY_BUDGET_USD);
 
         // 2. Calculate Current Security Budget (Attack Cost)

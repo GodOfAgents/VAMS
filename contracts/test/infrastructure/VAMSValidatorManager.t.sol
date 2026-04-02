@@ -70,6 +70,10 @@ contract MockStaking is IVAMSStaking {
     function updateEmissionRate(uint256) external override {}
     function pause() external override {}
     function unpause() external override {}
+    function annualEmissionBudget() external pure override returns (uint256) { return 0; }
+    function annualMintedTokens() external pure override returns (uint256) { return 0; }
+    function currentMintYearStart() external pure override returns (uint256) { return 0; }
+    function updateEmissionBudget(uint256) external override {}
 }
 
 

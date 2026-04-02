@@ -15,8 +15,10 @@ from typing import Dict, List, Optional
 from dataclasses import dataclass, field, asdict
 
 try:
-    from fastapi import FastAPI, HTTPException
+    from fastapi import FastAPI, HTTPException, Depends
     from fastapi.responses import HTMLResponse
+    from fastapi.security import HTTPBasic, HTTPBasicCredentials
+    from starlette.status import HTTP_401_UNAUTHORIZED
     from pydantic import BaseModel
     import uvicorn
 except ImportError:
@@ -37,6 +39,8 @@ except ImportError:
 # --- CONFIGURATION ---
 VERSION = "v0.1.0-alpha"
 NODE_TIMEOUT = 120  # Seconds before node is considered offline
+MAX_NODES = 5000
+CLEANUP_INTERVAL = 3600 # 1 hour
 
 
 # --- DATA MODELS ---
@@ -88,9 +92,38 @@ app = FastAPI(
 # In-memory node registry
 nodes: Dict[str, NodeInfo] = {}
 
+import os
+import secrets
+import asyncio
+
+security = HTTPBasic()
+
+def get_current_username(credentials: HTTPBasicCredentials = Depends(security)):
+    correct_username = secrets.compare_digest(credentials.username, os.getenv("GATEWAY_ADMIN_USER", "admin"))
+    correct_password = secrets.compare_digest(credentials.password, os.getenv("GATEWAY_ADMIN_PASSWORD", "vams2026"))
+    if not (correct_username and correct_password):
+        raise HTTPException(
+            status_code=HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Basic"},
+        )
+    return credentials.username
+
+async def cleanup_offline_nodes():
+    while True:
+        await asyncio.sleep(CLEANUP_INTERVAL)
+        current_time = time.time()
+        # Remove nodes offline for > 1 hour
+        offline_keys = [k for k, v in nodes.items() if (current_time - v.last_seen) > 3600]
+        for k in offline_keys:
+            del nodes[k]
+
+@app.on_event("startup")
+async def startup_event():
+    asyncio.create_task(cleanup_offline_nodes())
 
 @app.get("/", response_class=HTMLResponse)
-async def dashboard():
+async def dashboard(username: str = Depends(get_current_username)):
     """Simple HTML dashboard showing connected nodes."""
     online_nodes = [n for n in nodes.values() if n.is_online]
     offline_nodes = [n for n in nodes.values() if not n.is_online]
@@ -262,6 +295,14 @@ async def receive_heartbeat(request: HeartbeatRequest):
         
         # Update or create node entry
         if node_id not in nodes:
+            if len(nodes) >= MAX_NODES:
+                # Evict oldest offline node if full
+                offline_nodes = [n for n in nodes.values() if not n.is_online]
+                if offline_nodes:
+                    oldest = min(offline_nodes, key=lambda n: n.last_seen)
+                    del nodes[oldest.node_id]
+                else:
+                    raise HTTPException(status_code=429, detail="Max capacity reached")
             nodes[node_id] = NodeInfo(node_id=node_id)
         
         node = nodes[node_id]
