@@ -47,6 +47,11 @@ interface ISentinelPriceOracle {
 
 contract VAMSSentinel is AccessControl, ReentrancyGuard, IVAMSSentinel {
     using SafeERC20 for IERC20;
+    // ============ Custom Errors ============
+    error ZeroAddress();
+    error NoOracleSet();
+    error MaxPausableTargetsReached();
+    error IndexOutOfBounds();
 
     // ═══════════════════ Roles ═══════════════════
 
@@ -146,9 +151,9 @@ contract VAMSSentinel is AccessControl, ReentrancyGuard, IVAMSSentinel {
         address _dao,
         address _fallbackMultisig
     ) {
-        require(_admin != address(0), "Zero admin");
-        require(_vamsToken != address(0), "Zero token");
-        require(_dao != address(0), "Zero DAO");
+        if (_admin == address(0)) revert ZeroAddress();
+        if (_vamsToken == address(0)) revert ZeroAddress();
+        if (_dao == address(0)) revert ZeroAddress();
 
         vamsToken = IERC20(_vamsToken);
 
@@ -293,7 +298,7 @@ contract VAMSSentinel is AccessControl, ReentrancyGuard, IVAMSSentinel {
      * @dev Called by keepers or automation. Sets the baseline for crash detection.
      */
     function updatePriceAnchor() external onlyRole(KEEPER_ROLE) {
-        require(priceOracle != address(0), "No oracle set");
+        if (priceOracle == address(0)) revert NoOracleSet();
 
         uint256 newPrice = ISentinelPriceOracle(priceOracle).getVAMSPrice();
         priceAnchor = newPrice;
@@ -379,8 +384,8 @@ contract VAMSSentinel is AccessControl, ReentrancyGuard, IVAMSSentinel {
      * @param target Contract address that implements IPausableTarget
      */
     function addPausableTarget(address target) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        require(target != address(0), "Zero address");
-        require(pausableTargets.length < 20, "Max pausable targets reached");
+        if (target == address(0)) revert ZeroAddress();
+        if (pausableTargets.length >= 20) revert MaxPausableTargetsReached();
         pausableTargets.push(target);
         emit PausableTargetAdded(target);
     }
@@ -390,7 +395,7 @@ contract VAMSSentinel is AccessControl, ReentrancyGuard, IVAMSSentinel {
      * @param index Index in the pausableTargets array
      */
     function removePausableTarget(uint256 index) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        require(index < pausableTargets.length, "Index out of bounds");
+        if (index >= pausableTargets.length) revert IndexOutOfBounds();
         address removed = pausableTargets[index];
 
         // Swap with last element and pop
@@ -405,7 +410,7 @@ contract VAMSSentinel is AccessControl, ReentrancyGuard, IVAMSSentinel {
      * @param _tvlProvider Address of the TVL provider
      */
     function setTVLProvider(address _tvlProvider) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        require(_tvlProvider != address(0), "Zero address");
+        if (_tvlProvider == address(0)) revert ZeroAddress();
         tvlProvider = _tvlProvider;
     }
 
@@ -414,7 +419,7 @@ contract VAMSSentinel is AccessControl, ReentrancyGuard, IVAMSSentinel {
      * @param _priceOracle Address of the price oracle
      */
     function setPriceOracle(address _priceOracle) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        require(_priceOracle != address(0), "Zero address");
+        if (_priceOracle == address(0)) revert ZeroAddress();
         priceOracle = _priceOracle;
     }
 

@@ -2,6 +2,7 @@ import json
 import time
 import logging
 import os
+import hashlib
 from typing import Dict, Optional, Any
 from dataclasses import dataclass, asdict
 from ecdsa import SigningKey, VerifyingKey, SECP256k1
@@ -35,7 +36,7 @@ class AuditLogger:
             "verified": verified,
             "sender": message.sender_id,
             "recipient": message.recipient_id,
-            "payload_hash": str(hash(message.payload)), # Don't log full sensitive payloads if large
+            "payload_hash": hashlib.sha256(message.payload.encode()).hexdigest()[:16], # Deterministic audit hash
             "signature": message.signature[:16] + "..."
         }
         with open(self.log_file, "a") as f:

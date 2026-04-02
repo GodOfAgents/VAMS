@@ -87,10 +87,16 @@ interface IVAMSStaking {
     /// @notice Emitted when emission rate is updated
     event EmissionRateUpdated(uint256 oldRate, uint256 newRate);
 
+    /// @notice Emitted when emission budget is updated
+    event EmissionBudgetUpdated(uint256 oldBudget, uint256 newBudget);
+
     /// @notice Emitted when auto-compound is toggled
     event AutoCompoundToggled(address indexed user, bool enabled);
 
     // ============ Errors ============
+
+    /// @notice Thrown when emission budget would be exceeded
+    error EmissionBudgetExceeded(uint256 requested, uint256 remaining);
 
     /// @notice Thrown when amount is zero
     error ZeroAmount();
@@ -226,11 +232,24 @@ interface IVAMSStaking {
     /// @return rate Tokens per second
     function rewardPerSecond() external view returns (uint256 rate);
 
+    /// @notice Get total annual emission budget
+    function annualEmissionBudget() external view returns (uint256);
+
+    /// @notice Get total minted tokens this year
+    function annualMintedTokens() external view returns (uint256);
+
+    /// @notice Get the start timestamp of the current mint year
+    function currentMintYearStart() external view returns (uint256);
+
     // ============ Admin Functions ============
 
     /// @notice Update emission rate (governance only)
     /// @param newRate New tokens per second
     function updateEmissionRate(uint256 newRate) external;
+
+    /// @notice Update emission budget (governance only)
+    /// @param newBudget New annual budget
+    function updateEmissionBudget(uint256 newBudget) external;
 
     /// @notice Pause staking (emergency)
     function pause() external;

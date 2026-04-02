@@ -65,6 +65,9 @@ contract VAMSToken is
     /// @notice Seconds per year (365.25 days)
     uint256 public constant SECONDS_PER_YEAR = 365.25 days;
 
+    // ============ Custom Errors ============
+    error TokenPaused();
+    
     // ============ State Variables ============
 
     /// @inheritdoc IVAMSToken
@@ -254,6 +257,9 @@ contract VAMSToken is
 
     /**
      * @notice Check and enforce anti-whale restrictions
+     * @dev KNOWN LIMITATION (M-07): Sybil attackers can bypass the daily transfer limit
+     *      by splitting tokens across multiple wallets. This is acknowledged and
+     *      accepted risk to maintain composability of a base ERC20 token.
      * @param from Sender address
      * @param to Recipient address
      * @param amount Transfer amount
@@ -315,7 +321,7 @@ contract VAMSToken is
         if (paused()) {
             // Allow minting even when paused (for staking rewards)
             if (from != address(0)) {
-                revert("Pausable: paused");
+                revert TokenPaused();
             }
         }
 

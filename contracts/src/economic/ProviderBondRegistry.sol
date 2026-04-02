@@ -62,6 +62,9 @@ contract ProviderBondRegistry is
     /// @notice Role for protocol administration
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
     
+    /// @notice Role for hardware commitments locking up bonds
+    bytes32 public constant HARDWARE_COMMITMENT_ROLE = keccak256("HARDWARE_COMMITMENT_ROLE");
+    
     /// @notice Role for emergency pause
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
     
@@ -220,7 +223,8 @@ contract ProviderBondRegistry is
             totalSlashed: 0,
             isActive: true,
             withdrawalUnlockTime: 0,
-            pendingWithdrawal: 0
+            pendingWithdrawal: 0,
+            hardwareCollateralLocked: 0
         });
         
         totalBonded += bondAmount;
@@ -315,6 +319,11 @@ contract ProviderBondRegistry is
                 bond.maxRequestValue, 
                 BOND_COVERAGE_RATIO
             );
+        }
+
+        // Hardware Commitment check
+        if (remainingBond < bond.hardwareCollateralLocked) {
+            revert("Withdrawal cuts into locked hardware collateral");
         }
         
         bond.pendingWithdrawal = amount;
@@ -579,6 +588,27 @@ contract ProviderBondRegistry is
         bond.isActive = false;
         
         emit ProviderDeactivated(provider, reason);
+    }
+    
+    /**
+     * @notice Lock hardware collateral for a commitment
+     */
+    function lockHardwareCollateral(address provider, uint256 amount) external onlyRole(HARDWARE_COMMITMENT_ROLE) {
+        ProviderBond storage bond = _bonds[provider];
+        if (bond.registeredAt == 0) revert ProviderNotFound(provider);
+        
+        bond.hardwareCollateralLocked += amount;
+        require(bond.hardwareCollateralLocked <= bond.bondedAmount, "Lock exceeds bond");
+    }
+    
+    /**
+     * @notice Unlock hardware collateral when a commitment ends
+     */
+    function unlockHardwareCollateral(address provider, uint256 amount) external onlyRole(HARDWARE_COMMITMENT_ROLE) {
+        ProviderBond storage bond = _bonds[provider];
+        if (bond.registeredAt == 0) revert ProviderNotFound(provider);
+        
+        bond.hardwareCollateralLocked -= amount;
     }
     
     // ============ Storage Gap ============

@@ -25,6 +25,7 @@ WORKFLOW_DB_PATH = os.getenv("VAMS_WORKFLOW_DB", "workflow_checkpoints.db")
 REQUEST_TIMEOUT = 10  # seconds
 MAX_RETRY_ATTEMPTS = 3
 RETRY_BACKOFF = 2
+MOCK_MODE = os.getenv("VAMS_MOCK_MODE", "true").lower() == "true"
 
 # =============================================================================
 # LAYER 0: POLYGON AMOY (ECONOMIC LAYER)

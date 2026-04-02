@@ -137,14 +137,13 @@ class EncryptedMempool:
         # Commitment hash: H(tx_data) — proves we committed without revealing
         commitment = hashlib.sha256(tx_data).hexdigest()
 
-        # Mock encryption: XOR with key derived from target block
+        # Robust Mock encryption: AES-256-GCM with key derived from target block
         # Production: threshold encryption with validator DKG
-        key = hashlib.sha256(
-            f"threshold_key_{target_block}".encode()
-        ).digest()
-        encrypted = bytes(a ^ b for a, b in zip(
-            tx_data.ljust(len(key), b'\x00')[:len(key)], key
-        ))
+        from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+        key_material = hashlib.sha256(f"threshold_key_{target_block}".encode()).digest()
+        aesgcm = AESGCM(key_material)
+        nonce = os.urandom(12)
+        encrypted = nonce + aesgcm.encrypt(nonce, tx_data, None)
 
         tx_id = f"etx_{commitment[:12]}_{target_block}"
         enc_tx = EncryptedTransaction(

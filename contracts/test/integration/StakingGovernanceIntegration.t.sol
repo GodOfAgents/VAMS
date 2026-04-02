@@ -42,6 +42,7 @@ contract StakingGovernanceIntegration is BaseTest {
         
         // Fund staking contract for rewards from treasury
         vm.startPrank(treasury);
+        // forge-lint: disable-next-line(erc20-unchecked-transfer)
         vamsToken.transfer(address(staking), 10_000_000 ether);
         vm.stopPrank();
         
@@ -58,6 +59,7 @@ contract StakingGovernanceIntegration is BaseTest {
         vamsToken.addExemptAddress(user);
         
         vm.prank(treasury);
+        // forge-lint: disable-next-line(erc20-unchecked-transfer)
         vamsToken.transfer(user, amount);
         
         vm.prank(user);
@@ -347,3 +349,4 @@ contract StakingGovernanceIntegration is BaseTest {
         return 7 days;
     }
 }
+

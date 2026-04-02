@@ -42,7 +42,9 @@ contract GovernorTest is Test {
         token.grantRole(token.DEFAULT_ADMIN_ROLE(), address(timelock));
 
         // 5. Distribute Tokens for Voting
+        // forge-lint: disable-next-line(erc20-unchecked-transfer)
         token.transfer(voter1, 100_000_000 * 1e18); // 10%
+        // forge-lint: disable-next-line(erc20-unchecked-transfer)
         token.transfer(voter2, 100_000_000 * 1e18); // 10%
 
         vm.stopPrank();
@@ -96,3 +98,4 @@ contract GovernorTest is Test {
         assertTrue(token.hasRole(keccak256("MINTER_ROLE"), address(0x4)));
     }
 }
+

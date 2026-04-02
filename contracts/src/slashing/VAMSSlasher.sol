@@ -4,6 +4,8 @@ pragma solidity ^0.8.20;
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 import "./SlashingParameters.sol";
@@ -20,6 +22,7 @@ contract VAMSSlasher is
     ReentrancyGuardUpgradeable 
 {
     using SlashingParameters for *;
+    using SafeERC20 for IERC20;
     
     // ============ Roles ============
     
@@ -32,7 +35,10 @@ contract VAMSSlasher is
         LIVENESS_MINOR,
         LIVENESS_MEDIUM,
         EQUIVOCATION,
-        MALICIOUS_INPUT
+        MALICIOUS_INPUT,
+        SLA_CAPACITY,
+        SLA_OFFLINE,
+        SLA_FRAUD
     }
     
     enum OperatorStatus {
@@ -74,6 +80,9 @@ contract VAMSSlasher is
     /// @notice Insurance fund address
     address public insuranceFund;
     
+    /// @notice Token used for staking
+    address public vamsToken;
+    
     // ============ Events ============
     
     event OperatorSlashed(
@@ -101,7 +110,8 @@ contract VAMSSlasher is
     
     function initialize(
         address _admin,
-        address _insuranceFund
+        address _insuranceFund,
+        address _vamsToken
     ) public initializer {
         __AccessControl_init();
         __ReentrancyGuard_init();
@@ -111,6 +121,7 @@ contract VAMSSlasher is
         _grantRole(JAIL_MANAGER_ROLE, _admin);
         
         insuranceFund = _insuranceFund;
+        vamsToken = _vamsToken;
     }
     
     // ============ Operator Management ============
@@ -123,6 +134,8 @@ contract VAMSSlasher is
             revert InsufficientStake(SlashingParameters.MIN_OPERATOR_STAKE, _stake);
         }
         
+        IERC20(vamsToken).safeTransferFrom(msg.sender, address(this), _stake);
+        
         operators[_operator] = OperatorRecord({
             stake: _stake,
             status: OperatorStatus.ACTIVE,
@@ -131,6 +144,24 @@ contract VAMSSlasher is
             equivocationOffenses: 0,
             totalSlashed: 0
         });
+    }
+
+    /**
+     * @notice Withdraw operator stake
+     */
+    function withdrawStake(address _operator) external onlyRole(DEFAULT_ADMIN_ROLE) nonReentrant {
+        OperatorRecord storage op = operators[_operator];
+        
+        if (op.status == OperatorStatus.TOMBSTONED) revert OperatorAlreadyTombstoned();
+        if (op.status == OperatorStatus.JAILED && block.timestamp < op.jailedUntil) revert OperatorStillJailed(op.jailedUntil);
+        
+        uint256 amount = op.stake;
+        if (amount == 0) revert OperatorNotFound();
+        
+        op.stake = 0;
+        op.status = OperatorStatus.TOMBSTONED; // Effectively deregistered
+        
+        IERC20(vamsToken).safeTransfer(_operator, amount);
     }
     
     // ============ Slashing Functions ============
@@ -219,6 +250,7 @@ contract VAMSSlasher is
         // Compensate victim
         if (result.victimCompensation > 0 && _victim != address(0)) {
             // Transfer compensation (assumes this contract holds slashed tokens)
+            IERC20(vamsToken).safeTransfer(_victim, result.victimCompensation);
             emit VictimCompensated(_victim, result.victimCompensation);
         }
         
@@ -226,6 +258,46 @@ contract VAMSSlasher is
         op.status = OperatorStatus.TOMBSTONED;
         emit OperatorTombstoned(_operator, "Malicious input");
         emit OperatorSlashed(_operator, OffenseType.MALICIOUS_INPUT, result.slashAmount, 0);
+    }
+    
+    /**
+     * @notice Slash for SLA violation reported by Sentinel network
+     * @param _operator Operator address
+     * @param _offenseType The specific SLA offense
+     * @param _customBps Optional custom slash bps if overriding standard penalty
+     */
+    function slashSLA(
+        address _operator,
+        OffenseType _offenseType,
+        uint256 _customBps
+    ) external onlyRole(SLASHER_ROLE) nonReentrant returns (SlashResult memory result) {
+        OperatorRecord storage op = operators[_operator];
+        _validateOperator(op);
+        
+        uint256 penaltyBps = _customBps;
+        if (penaltyBps == 0) {
+            if (_offenseType == OffenseType.SLA_CAPACITY) penaltyBps = SlashingParameters.SLA_CAPACITY_PENALTY_BPS;
+            else if (_offenseType == OffenseType.SLA_OFFLINE) penaltyBps = SlashingParameters.SLA_OFFLINE_PENALTY_BPS;
+            else if (_offenseType == OffenseType.SLA_FRAUD) penaltyBps = SlashingParameters.SLA_FRAUD_PENALTY_BPS;
+        }
+
+        result.slashAmount = (op.stake * penaltyBps) / SlashingParameters.BPS_DENOMINATOR;
+        result.burnAmount = result.slashAmount; // SLA penalties are burned
+        result.jailDuration = 1 days; // default jail for SLA
+        
+        if (_offenseType == OffenseType.SLA_FRAUD) {
+            result.tombstone = true;
+            result.jailDuration = type(uint256).max;
+        }
+
+        _executeSlash(_operator, op, result);
+        
+        if (result.tombstone) {
+            op.status = OperatorStatus.TOMBSTONED;
+            emit OperatorTombstoned(_operator, "SLA Fraud");
+        }
+        
+        emit OperatorSlashed(_operator, _offenseType, result.slashAmount, result.jailDuration);
     }
     
     // ============ Jail Management ============
@@ -264,9 +336,10 @@ contract VAMSSlasher is
             return result; // No slash
         }
         
-        // Escalation: 1.5^n capped at 5x
+        // Escalation: 1.5^n capped at 5x (Max 10 iterations to prevent gas DoS)
         uint256 multiplier = SlashingParameters.BPS_DENOMINATOR;
-        for (uint256 i = 0; i < _priorOffenses; i++) {
+        uint256 maxIters = _priorOffenses > 10 ? 10 : _priorOffenses;
+        for (uint256 i = 0; i < maxIters; i++) {
             multiplier = (multiplier * SlashingParameters.SLASH_REPEAT_MULTIPLIER_BPS) / SlashingParameters.BPS_DENOMINATOR;
             if (multiplier >= SlashingParameters.SLASH_MAX_MULTIPLIER_BPS) {
                 multiplier = SlashingParameters.SLASH_MAX_MULTIPLIER_BPS;
@@ -338,8 +411,9 @@ contract VAMSSlasher is
             emit OperatorJailed(_operator, _op.jailedUntil);
         }
         
-        // Handle burns (in real impl, transfer tokens)
+        // Handle burns
         if (_result.burnAmount > 0) {
+            IERC20(vamsToken).safeTransfer(BURN_ADDRESS, _result.burnAmount);
             emit TokensBurned(_result.burnAmount);
         }
     }
@@ -374,21 +448,22 @@ contract VAMSSlasher is
     
     /**
      * @notice Verify equivocation proof (double-signing)
-     * @dev Proof format: [32 bytes msgHash1][65 bytes sig1][32 bytes msgHash2][65 bytes sig2]
+     * @dev Proof format: [8 bytes blockInfo][32 bytes msgHash1][65 bytes sig1][32 bytes msgHash2][65 bytes sig2]
      * Both signatures must be from the same operator but on different data at same height
      */
     function _verifyEquivocationProof(
         address _operator,
         bytes calldata _proof
     ) internal pure returns (bool) {
-        // Minimum proof length: 2 x (32 bytes hash + 65 bytes signature) = 194 bytes
-        if (_proof.length < 194) return false;
+        // Minimum proof length: 8 + 2 x (32 bytes hash + 65 bytes signature) = 202 bytes
+        if (_proof.length < 202) return false;
         
-        // Extract messages and signatures
-        bytes32 msgHash1 = bytes32(_proof[0:32]);
-        bytes memory sig1 = _proof[32:97];
-        bytes32 msgHash2 = bytes32(_proof[97:129]);
-        bytes memory sig2 = _proof[129:194];
+        // Extract height and messages
+        // blockInfo not explicitly used here but enforces length for format validation
+        bytes32 msgHash1 = bytes32(_proof[8:40]);
+        bytes memory sig1 = _proof[40:105];
+        bytes32 msgHash2 = bytes32(_proof[105:137]);
+        bytes memory sig2 = _proof[137:202];
         
         // Messages must be different (proof of double-sign)
         if (msgHash1 == msgHash2) return false;
@@ -451,6 +526,10 @@ contract VAMSSlasher is
             
             // Victim must have signed the evidence
             if (recovered != _victim) return false;
+        } else {
+            // M-02: Explicitly reject address(0) for victim when evidence requires validation
+            // to prevent bypassing signature check.
+            return false;
         }
         
         return true;

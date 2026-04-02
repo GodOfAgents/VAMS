@@ -195,11 +195,15 @@ contract VAMSValidatorManager is
         uint256 loyaltyDiscount = getLoyaltyDiscount(enterprise);
         
         // Calculate: Base + Demand - Loyalty
+        // forge-lint: disable-next-line(unsafe-typecast)
         int256 rawMarkup = int256(baseRateBps) + demandMod - int256(loyaltyDiscount);
         
         // Clamp to DAO-set [min, max]
+        // forge-lint: disable-next-line(unsafe-typecast)
         if (rawMarkup < int256(minMarkupBps)) return minMarkupBps;
+        // forge-lint: disable-next-line(unsafe-typecast)
         if (rawMarkup > int256(maxMarkupBps)) return maxMarkupBps;
+        // forge-lint: disable-next-line(unsafe-typecast)
         return uint256(rawMarkup);
     }
     

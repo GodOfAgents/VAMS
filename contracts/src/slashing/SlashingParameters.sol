@@ -47,6 +47,17 @@ library SlashingParameters {
     /// @notice Share of slash going to victim (50%)
     uint256 internal constant SLASH_MALICIOUS_VICTIM_SHARE_BPS = 5000;
     
+    // ============ SLA ENFORCEMENT ============
+    
+    /// @notice Penalty for capacity breach (5.0%)
+    uint256 internal constant SLA_CAPACITY_PENALTY_BPS = 500;
+    
+    /// @notice Penalty for offline status (1.0%)
+    uint256 internal constant SLA_OFFLINE_PENALTY_BPS = 100;
+    
+    /// @notice Penalty for fraud (50.0%)
+    uint256 internal constant SLA_FRAUD_PENALTY_BPS = 5000;
+    
     // ============ ESCALATION MULTIPLIERS ============
     
     /// @notice Multiplier per repeat offense (1.5x)

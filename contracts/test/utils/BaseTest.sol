@@ -70,6 +70,7 @@ abstract contract BaseTest is Test {
      */
     function _fundAccount(address account, uint256 amount) internal {
         vm.prank(admin);
+        // forge-lint: disable-next-line(erc20-unchecked-transfer)
         token.transfer(account, amount);
     }
     
@@ -240,8 +241,10 @@ abstract contract BaseTest is Test {
         uint256 balanceAfter = token.balanceOf(account);
         
         if (expectedChange >= 0) {
+            // forge-lint: disable-next-line(unsafe-typecast)
             assertEq(balanceAfter, balanceBefore + uint256(expectedChange), "Balance did not increase as expected");
         } else {
+            // forge-lint: disable-next-line(unsafe-typecast)
             assertEq(balanceAfter, balanceBefore - uint256(-expectedChange), "Balance did not decrease as expected");
         }
     }
@@ -275,3 +278,4 @@ abstract contract BaseTest is Test {
         return bound(bps, 0, 10000);
     }
 }
+

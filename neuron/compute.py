@@ -106,18 +106,48 @@ class IoNetProvider(ComputeProvider):
         """Check io.net reachability (API requires auth)."""
         start = time.time()
         try:
-            # Just check if the main site is reachable
+            import os
+            api_key = os.getenv("IONET_API_KEY")
+            
+            if not api_key:
+                # Just check if the main site is reachable
+                response = self.session.get(
+                    self.endpoint,
+                    timeout=self.timeout
+                )
+                latency = (time.time() - start) * 1000
+                
+                if response.status_code == 200:
+                    return ComputeInfo(
+                        provider=self.name,
+                        status=ComputeStatus.HEALTHY,
+                        capacity={"note": "API requires authentication. Using site ping fallback."},
+                        latency_ms=latency
+                    )
+                else:
+                    return ComputeInfo(
+                        provider=self.name,
+                        status=ComputeStatus.DEGRADED,
+                        latency_ms=latency,
+                        error=f"Status {response.status_code}"
+                    )
+            
+            # Real API Check with Key
+            headers = {"Authorization": f"Bearer {api_key}"}
             response = self.session.get(
-                self.endpoint,
+                f"{self.endpoint}/api/v1/clusters",
+                headers=headers,
                 timeout=self.timeout
             )
             latency = (time.time() - start) * 1000
             
             if response.status_code == 200:
+                data = response.json()
+                clusters = len(data.get("clusters", [])) if isinstance(data, dict) else 0
                 return ComputeInfo(
                     provider=self.name,
                     status=ComputeStatus.HEALTHY,
-                    capacity={"note": "API requires authentication"},
+                    capacity={"clusters_online": clusters, "note": "Authenticated API"},
                     latency_ms=latency
                 )
             else:

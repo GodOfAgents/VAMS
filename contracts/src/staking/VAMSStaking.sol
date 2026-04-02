@@ -89,6 +89,10 @@ contract VAMSStaking is IVAMSStaking, AccessControl, Pausable, ReentrancyGuard {
     uint256 public constant GOV_MULT_GOLD = 15_000;     // 1.5x for Gold
     uint256 public constant GOV_MULT_PLATINUM = 20_000; // 2.0x for Platinum
 
+    // ============ Custom Errors ============
+    error RateExceedsMaximum(uint256 requested, uint256 maximum);
+    error UnauthorizedCaller();
+
     // ============ State Variables ============
 
     /// @notice The VAMS token contract
@@ -96,6 +100,17 @@ contract VAMSStaking is IVAMSStaking, AccessControl, Pausable, ReentrancyGuard {
 
     /// @notice Token used for rewards (same as staking token)
     IERC20 public immutable rewardToken;
+
+    // ============ Emission Limits ============
+
+    /// @inheritdoc IVAMSStaking
+    uint256 public override annualEmissionBudget;
+
+    /// @inheritdoc IVAMSStaking
+    uint256 public override annualMintedTokens;
+
+    /// @inheritdoc IVAMSStaking
+    uint256 public override currentMintYearStart;
 
     /// @inheritdoc IVAMSStaking
     uint256 public override totalStaked;
@@ -144,6 +159,9 @@ contract VAMSStaking is IVAMSStaking, AccessControl, Pausable, ReentrancyGuard {
         rewardToken = IERC20(_rewardToken);
         rewardPerSecond = _rewardPerSecond;
         lastRewardTime = block.timestamp;
+
+        currentMintYearStart = block.timestamp;
+        annualEmissionBudget = 25_000_000 * 1e18; // Default 2.5% of 1B
 
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
         _grantRole(EMISSION_ADMIN_ROLE, admin);
@@ -280,7 +298,7 @@ contract VAMSStaking is IVAMSStaking, AccessControl, Pausable, ReentrancyGuard {
         if (amount == 0) revert NothingToClaim();
 
         // MINT rewards instead of transferring
-        IVAMSToken(address(rewardToken)).mint(msg.sender, amount);
+        _mintRewards_internal(msg.sender, amount);
 
         emit RewardsClaimed(msg.sender, amount);
     }
@@ -296,7 +314,7 @@ contract VAMSStaking is IVAMSStaking, AccessControl, Pausable, ReentrancyGuard {
         StakingTier oldTier = _getTier(info.amount);
 
         // Mint reward tokens INTO the contract so totalStaked stays backed by real tokens
-        IVAMSToken(address(rewardToken)).mint(address(this), amount);
+        _mintRewards_internal(address(this), amount);
 
         info.amount += amount;
         totalStaked += amount;
@@ -406,10 +424,16 @@ contract VAMSStaking is IVAMSStaking, AccessControl, Pausable, ReentrancyGuard {
 
     /// @inheritdoc IVAMSStaking
     function updateEmissionRate(uint256 newRate) external override onlyRole(EMISSION_ADMIN_ROLE) {
-        if (newRate > MAX_EMISSION_RATE) revert("Rate exceeds 2% annual cap");
+        if (newRate > MAX_EMISSION_RATE) revert RateExceedsMaximum(newRate, MAX_EMISSION_RATE);
         _updatePool();
         emit EmissionRateUpdated(rewardPerSecond, newRate);
         rewardPerSecond = newRate;
+    }
+
+    /// @inheritdoc IVAMSStaking
+    function updateEmissionBudget(uint256 newBudget) external override onlyRole(EMISSION_ADMIN_ROLE) {
+        emit EmissionBudgetUpdated(annualEmissionBudget, newBudget);
+        annualEmissionBudget = newBudget;
     }
 
     /// @inheritdoc IVAMSStaking
@@ -426,7 +450,7 @@ contract VAMSStaking is IVAMSStaking, AccessControl, Pausable, ReentrancyGuard {
     /// @param enabled True to activate crisis mode
     function setCrisisMode(bool enabled) external {
         if (!hasRole(SENTINEL_ROLE, msg.sender) && !hasRole(DEFAULT_ADMIN_ROLE, msg.sender)) {
-            revert("Unauthorized: SENTINEL or ADMIN only");
+            revert UnauthorizedCaller();
         }
         crisisMode = enabled;
         emit CrisisModeToggled(enabled);
@@ -512,6 +536,26 @@ contract VAMSStaking is IVAMSStaking, AccessControl, Pausable, ReentrancyGuard {
         harvested = info.pendingRewards + pending;
         info.pendingRewards = 0;
         info.rewardDebt = (info.amount * accRewardPerShare) / PRECISION;
+    }
+
+    /**
+     * @notice Mints reward tokens checking annual budget
+     */
+    function _mintRewards_internal(address to, uint256 amount) internal {
+        if (amount == 0) return;
+        
+        // Year rotation
+        if (block.timestamp >= currentMintYearStart + SECONDS_PER_YEAR) {
+            currentMintYearStart = block.timestamp;
+            annualMintedTokens = 0;
+        }
+
+        if (annualMintedTokens + amount > annualEmissionBudget) {
+            revert IVAMSStaking.EmissionBudgetExceeded(amount, annualEmissionBudget >= annualMintedTokens ? annualEmissionBudget - annualMintedTokens : 0);
+        }
+
+        annualMintedTokens += amount;
+        IVAMSToken(address(rewardToken)).mint(to, amount);
     }
 
     /**

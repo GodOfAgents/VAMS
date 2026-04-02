@@ -46,6 +46,7 @@ interface IProviderBondRegistry {
         bool isActive;
         uint256 withdrawalUnlockTime;
         uint256 pendingWithdrawal;
+        uint256 hardwareCollateralLocked; // Append for Sprint 4 collateralization
     }
     
     /**
@@ -263,6 +264,16 @@ interface IProviderBondRegistry {
      */
     function reactivate() external;
     
+    /**
+     * @notice Lock hardware collateral for a commitment
+     */
+    function lockHardwareCollateral(address provider, uint256 amount) external;
+    
+    /**
+     * @notice Unlock hardware collateral when a commitment ends
+     */
+    function unlockHardwareCollateral(address provider, uint256 amount) external;
+
     // ============ Settlement Functions (Authorized Only) ============
     
     /**
