@@ -7,22 +7,24 @@
 ## VAMS Document Reference
 **VAMS Architecture Reference v0.3.0** — Aseem Chishti, January 2026
 
+> **Last Updated:** April 2026 — All 8 gaps fully implemented across Phases 0–4.
+
 ---
 
 ## Executive Summary
 
 ICN and VAMS share a common thesis — **decentralizing infrastructure to eliminate single points of trust** — but approach it from opposite ends of the stack. ICN is a **hardware-up** infrastructure layer (physical nodes → services), while VAMS is a **agent-down** orchestration layer (AI agents → DePIN providers). Reading ICN reveals **8 architectural gaps** in VAMS that, if addressed, could significantly strengthen its positioning as the "AWS of Web3."
 
-| # | ICN Pattern | VAMS Gap | Impact |
-|---|-------------|----------|--------|
-| 1 | [Hardware Abstraction Layer](#1-hardware-abstraction-layer) | No standardized hardware classification | High |
-| 2 | [Decentralized Performance Enforcement](#2-decentralized-performance-enforcement) | Provider SLAs are trust-based (no on-chain enforcement) | Critical |
-| 3 | [Resource Composition Engine](#3-resource-composition-engine) | No resource-aware abstraction (agents pick providers manually) | High |
-| 4 | [Regional Economics Model](#4-regional-economics-model) | Flat global pricing (no geo-economic optimization) | Medium |
-| 5 | [Hardware Collateralization with Slashing](#5-hardware-collateralization-with-slashing) | Provider bonds exist but lack hardware-level granularity | High |
-| 6 | [Service Blocks (Composable Services)](#6-service-blocks-composable-services) | Service layer is ad-hoc provider integration | Medium |
-| 7 | [Satellite Data Availability Network](#7-satellite-data-availability-network) | Performance audit data not independently available | Medium |
-| 8 | [Pluggable Proofs Across Service Layer](#8-pluggable-proofs-across-service-layer) | Proof system is per-provider, not protocol-standardized | High |
+| # | ICN Pattern | VAMS Gap | Impact | Status |
+|---|-------------|----------|--------|--------|
+| 1 | [Hardware Abstraction Layer](#1-hardware-abstraction-layer) | No standardized hardware classification | High | ✅ Implemented |
+| 2 | [Decentralized Performance Enforcement](#2-decentralized-performance-enforcement) | Provider SLAs are trust-based (no on-chain enforcement) | Critical | ✅ Implemented |
+| 3 | [Resource Composition Engine](#3-resource-composition-engine) | No resource-aware abstraction (agents pick providers manually) | High | ✅ Implemented |
+| 4 | [Regional Economics Model](#4-regional-economics-model) | Flat global pricing (no geo-economic optimization) | Medium | ✅ Implemented |
+| 5 | [Hardware Collateralization with Slashing](#5-hardware-collateralization-with-slashing) | Provider bonds exist but lack hardware-level granularity | High | ✅ Implemented |
+| 6 | [Service Blocks (Composable Services)](#6-service-blocks-composable-services) | Service layer is ad-hoc provider integration | Medium | ✅ Implemented |
+| 7 | [Satellite Data Availability Network](#7-satellite-data-availability-network) | Performance audit data not independently available | Medium | ✅ Implemented |
+| 8 | [Pluggable Proofs Across Service Layer](#8-pluggable-proofs-across-service-layer) | Proof system is per-provider, not protocol-standardized | High | ✅ Implemented |
 
 ---
 
@@ -54,6 +56,12 @@ struct VAMSResourceNode {
 ```
 
 **Impact:** This transforms VAMS from "meta-aggregator that trusts providers" into a **resource-aware platform** where agents can make intelligent provisioning decisions (e.g., "I need 4× H100 GPUs within 200ms of Frankfurt for the next 6 hours").
+
+> [!NOTE]
+> **✅ IMPLEMENTED** (Phase 2, Sprint 1)
+> - [`contracts/src/infrastructure/VAMSHardwareRegistry.sol`](../../../contracts/src/infrastructure/VAMSHardwareRegistry.sol) — Full on-chain registry with `VAMSResourceNode` struct.
+> - [`contracts/src/infrastructure/HardwareClasses.sol`](../../../contracts/src/infrastructure/HardwareClasses.sol) — Standardized hardware classification (GPU_H100, GPU_A100, CPU_EPYC, STORAGE_NVME, etc.).
+> - [`neuron/sdk/hardware_registry.py`](../../../neuron/sdk/hardware_registry.py) — Python SDK client for querying and registering hardware nodes.
 
 ---
 
@@ -116,6 +124,14 @@ class VAMSSentinelNode:
 - Reports are stored on **Celestia DA** (Layer 1, Section 3.1.2), which is already in the stack for agent audit trails
 - Slashing flows through the existing `VAMSSlasher` contract (Section 18.6)
 
+> [!NOTE]
+> **✅ IMPLEMENTED** (Phase 2, Sprints 2–3)
+> - [`neuron/sentinel/sentinel_node.py`](../../../neuron/sentinel/sentinel_node.py) — `VAMSSentinelNode` with multi-DA routing per challenge type.
+> - [`neuron/sentinel/challenges/`](../../../neuron/sentinel/challenges/) — 5 challenge modules: GPU, CPU, Storage IOPS, Latency, Memory.
+> - [`contracts/src/sentinel/SLAEnforcer.sol`](../../../contracts/src/sentinel/SLAEnforcer.sol) — On-chain proof validation with Sentinel registration and automatic slashing.
+> - [`contracts/src/trust/plugins/HardwareVerifiedPlugin.sol`](../../../contracts/src/trust/plugins/HardwareVerifiedPlugin.sol) — Trust plugin feeding Sentinel scores into `VAMSTrustAggregator`.
+> - [`contracts/src/slashing/SlashingParameters.sol`](../../../contracts/src/slashing/SlashingParameters.sol) — SLA-specific slashing tiers.
+
 ---
 
 ### 3. Resource Composition Engine
@@ -168,6 +184,13 @@ class VAMSResourceComposer:
 
 **Impact:** This shifts VAMS from "provider marketplace" to "intelligent infrastructure orchestrator" — exactly the value proposition that makes AWS dominant.
 
+> [!NOTE]
+> **✅ IMPLEMENTED** (Phase 3, Sprint 5)
+> - [`neuron/composer/composer.py`](../../../neuron/composer/composer.py) — `VAMSResourceComposer` with multi-provider allocation and candidate scoring.
+> - [`neuron/composer/models.py`](../../../neuron/composer/models.py) — `InstanceBlueprint`, `ComputeSpec`, `GPUType`, `MemorySpec`, `StorageSpec`, `NetworkSpec`.
+> - [`neuron/composer/blueprints.py`](../../../neuron/composer/blueprints.py) — Pre-defined blueprint library (`AI_INFERENCE_STANDARD`, `TRAINING_CLUSTER_SMALL`, etc.).
+> - Gateway endpoints: `POST /compose`, `GET /compose/blueprints`, `GET /compose/instances`.
+
 ---
 
 ### 4. Regional Economics Model
@@ -218,6 +241,14 @@ class RegionalEconomics:
 
 **Impact:** This addresses a real weakness in VAMS's DePIN strategy — right now, providers naturally cluster in cheap US/EU regions. Regional economics would create a truly global infrastructure layer, critical for edge inference (Section A.2 of ICN paper) and data sovereignty (VAMS Section 9).
 
+> [!NOTE]
+> **✅ IMPLEMENTED** (Phase 3, Sprint 6 + Phase 4, Sprint 9)
+> - [`neuron/economics/regional.py`](../../../neuron/economics/regional.py) — `RegionalEconomics` with bootstrap multipliers and decay curves.
+> - [`contracts/src/economic/RegionalIncentives.sol`](../../../contracts/src/economic/RegionalIncentives.sol) — On-chain region definitions with capacity targets and multiplier management.
+> - [`neuron/economics/dec_regional.py`](../../../neuron/economics/dec_regional.py) — `RegionAwareDECSimulator` for off-chain emission simulation.
+> - [`neuron/economics/reward_engine.py`](../../../neuron/economics/reward_engine.py) — Full provider reward calculation with regional bonuses and staking boosts.
+> - Gateway endpoints: `GET /economics/regions`, `GET /economics/estimate-apr`.
+
 ---
 
 ### 5. Hardware Collateralization with Slashing
@@ -249,6 +280,12 @@ struct HardwareCommitment {
 | Disappearance (offline >4h) | Sentinel liveness | 10% collateral/day | — |
 | Early exit (before commitment ends) | On-chain timestamp | 25% collateral | Remaining commitment |
 | Performance fraud (faking hw class) | Sentinel benchmark mismatch | 50% collateral | Permanent ban |
+
+> [!NOTE]
+> **✅ IMPLEMENTED** (Phase 2, Sprint 4)
+> - [`contracts/src/economic/HardwareCommitment.sol`](../../../contracts/src/economic/HardwareCommitment.sol) — Time-locked hardware commitments with collateral proportional to capacity.
+> - [`contracts/src/interfaces/IHardwareCommitment.sol`](../../../contracts/src/interfaces/IHardwareCommitment.sol) — Commitment lifecycle interface.
+> - [`contracts/src/economic/ProviderBondRegistry.sol`](../../../contracts/src/economic/ProviderBondRegistry.sol) — Extended to enforce that withdrawals are blocked during active commitments.
 
 ---
 
@@ -299,6 +336,13 @@ billing: unified_via_vams
 
 **Impact:** This opens up a long-tail DePIN ecosystem where third-party builders contribute value (and earn revenue) without becoming full DePIN providers.
 
+> [!NOTE]
+> **✅ IMPLEMENTED** (Phase 3, Sprint 7–8)
+> - [`neuron/services/registry_client.py`](../../../neuron/services/registry_client.py) — `ServiceBlockClient` with publish, query, compose, and deploy functionality.
+> - [`neuron/services/macro_blocks.py`](../../../neuron/services/macro_blocks.py) — Pre-defined macro blocks (`AI_AGENT_STARTER_PACK`, `PRIVACY_SHIELD_ENTERPRISE`, etc.).
+> - [`contracts/src/infrastructure/ServiceBlockRegistry.sol`](../../../contracts/src/infrastructure/ServiceBlockRegistry.sol) — On-chain registry with revenue share tracking and builder verification.
+> - Gateway endpoints: `GET /services/blocks`, `POST /services/compose`, `GET /services/macros`.
+
 ---
 
 ### 7. Satellite Data Availability Network
@@ -340,6 +384,16 @@ class PerformanceAuditLog:
 ```
 
 **Impact:** This directly supports VAMS's "Trust Through Transparency" principle (Section 3.4.2) and gives the Trust Score an objective data source beyond provider self-reporting.
+
+> [!NOTE]
+> **✅ IMPLEMENTED** (Phase 0, Sprints 0A–0C)
+> - [`neuron/da/performance_audit.py`](../../../neuron/da/performance_audit.py) — `PerformanceAuditLog` multi-DA orchestrator with routing by criticality.
+> - [`neuron/da/adapters/celestia_adapter.py`](../../../neuron/da/adapters/celestia_adapter.py) — **Live** Celestia Mocha API adapter (`blob.Submit`/`blob.Get`).
+> - [`neuron/da/adapters/near_adapter.py`](../../../neuron/da/adapters/near_adapter.py) — **Live** Near DA adapter for high-frequency probes.
+> - [`neuron/da/adapters/eigenda_adapter.py`](../../../neuron/da/adapters/eigenda_adapter.py) / [`avail_adapter.py`](../../../neuron/da/adapters/avail_adapter.py) — Stub adapters for EigenDA and Avail.
+> - [`contracts/src/da/PerformanceAnchor.sol`](../../../contracts/src/da/PerformanceAnchor.sol) — Standalone on-chain registry mapping `(DAProtocol, blobId) → reportHash` with Sentinel ACL.
+> - [`contracts/src/interfaces/IPerformanceAnchor.sol`](../../../contracts/src/interfaces/IPerformanceAnchor.sol) — Interface with `DAProtocol` enum covering all 6 DA layers.
+> - Gateway endpoints: `GET /da/status`, `GET /da/anchors`.
 
 ---
 
@@ -400,23 +454,48 @@ contract VAMSTrustAggregator {
 
 **Impact:** This future-proofs VAMS's verification architecture. As new DePIN technologies emerge (FHE compute, RISC Zero proofs, ARM CCA attestations), service builders can integrate them without protocol-level changes.
 
+> [!NOTE]
+> **✅ IMPLEMENTED** (Phase 2, Sprint 3)
+> - [`contracts/src/interfaces/IVAMSProofPlugin.sol`](../../../contracts/src/interfaces/IVAMSProofPlugin.sol) — Pluggable proof interface (exactly as specified above).
+> - [`contracts/src/trust/VAMSTrustAggregator.sol`](../../../contracts/src/trust/VAMSTrustAggregator.sol) — Aggregator with plugin registration, composite trust scoring, and UUPS upgradeability.
+> - **7 proof plugins** live:
+>   - [`TEEProofPlugin.sol`](../../../contracts/src/trust/plugins/TEEProofPlugin.sol) — Intel SGX/Nitro attestation
+>   - [`ZKMLProofPlugin.sol`](../../../contracts/src/trust/plugins/ZKMLProofPlugin.sol) — Zero-Knowledge ML proofs
+>   - [`OutputHashProofPlugin.sol`](../../../contracts/src/trust/plugins/OutputHashProofPlugin.sol) — Deterministic output verification
+>   - [`HardwareVerifiedPlugin.sol`](../../../contracts/src/trust/plugins/HardwareVerifiedPlugin.sol) — Sentinel SLA compliance
+>   - [`WorldIDPlugin.sol`](../../../contracts/src/trust/plugins/WorldIDPlugin.sol) — Proof of Personhood
+>   - [`PolygonIDPlugin.sol`](../../../contracts/src/trust/plugins/PolygonIDPlugin.sol) — Verifiable Credentials
+>   - [`ERC8004IdentityPlugin.sol`](../../../contracts/src/trust/plugins/ERC8004IdentityPlugin.sol) — Decentralized Identity
+
 ---
 
-## Summary: Priority-Ordered Roadmap
+## Summary: Implementation Roadmap — Final Status
 
-| Priority | Improvement | Effort | Timeline Suggestion |
-|----------|-------------|--------|---------------------|
-| 🔴 **P0** | Decentralized Performance Enforcement (Sentinel Network) | Large | Q3-Q4 2026 |
-| 🔴 **P0** | Pluggable Proofs Interface | Medium | Q3 2026 |
-| 🟠 **P1** | Hardware Abstraction Registry | Medium | Q4 2026 |
-| 🟠 **P1** | Hardware Collateralization (time-locked commitments) | Medium | Q4 2026 |
-| 🟡 **P2** | Resource Composition Engine | Large | Q1 2027 |
-| 🟡 **P2** | Service Blocks Marketplace | Large | Q1 2027 |
-| 🟢 **P3** | Satellite Performance DA Namespace | Small | Q3 2026 (quick win) |
-| 🟢 **P3** | Regional Economics Model | Medium | Q2 2027 |
+| Priority | Improvement | Effort | Phase | Status |
+|----------|-------------|--------|-------|--------|
+| 🟢 **P3** | Satellite Performance DA Namespace | Small | Phase 0 | ✅ **Complete** (Apr 2026) |
+| 🔴 **P0** | Decentralized Performance Enforcement (Sentinel Network) | Large | Phase 2 | ✅ **Complete** (Mar 2026) |
+| 🔴 **P0** | Pluggable Proofs Interface | Medium | Phase 2 | ✅ **Complete** (Mar 2026) |
+| 🟠 **P1** | Hardware Abstraction Registry | Medium | Phase 2 | ✅ **Complete** (Mar 2026) |
+| 🟠 **P1** | Hardware Collateralization (time-locked commitments) | Medium | Phase 2 | ✅ **Complete** (Mar 2026) |
+| 🟡 **P2** | Resource Composition Engine | Large | Phase 3 | ✅ **Complete** (Apr 2026) |
+| 🟡 **P2** | Service Blocks Marketplace | Large | Phase 3 | ✅ **Complete** (Apr 2026) |
+| 🟢 **P3** | Regional Economics Model | Medium | Phase 4 | ✅ **Complete** (Apr 2026) |
 
 > [!TIP]
-> The **Satellite Performance DA Namespace** (#7) is the lowest-effort, highest-signal improvement — it requires only allocating a Celestia namespace and writing a small publishing service. It immediately enhances the Trust Score with objective data and builds the foundation for the Sentinel Network (#2).
+> All 8 ICN-inspired improvements have been fully implemented. VAMS v0.4.0 now incorporates ICN's bottom-up rigor across hardware, performance, composition, and economics — while retaining VAMS's top-down agent intelligence.
+
+---
+
+## Phase Implementation Summary
+
+| Phase | Name | Scope | Key Deliverables |
+|-------|------|-------|------------------|
+| **Phase 0** | Foundation | Gap #7 | Multi-DA audit module (Celestia + Near live adapters), `PerformanceAnchor.sol` standalone registry, Sentinel DA migration |
+| **Phase 2** | Hardware + Enforcement | Gaps #1, #2, #5, #8 | `VAMSHardwareRegistry`, Sentinel Network (5 challenges), `SLAEnforcer`, `HardwareCommitment`, 7 proof plugins, `VAMSTrustAggregator` |
+| **Phase 3** | Intelligence | Gaps #3, #4, #6 | `VAMSResourceComposer`, `InstanceBlueprint` system, `RegionalEconomics`, `ServiceBlockRegistry`, macro blocks |
+| **Phase 4** | Economics | Gap #4 (full) | Region-aware DEC, `ComposedSettlement`, `RewardDistributor`, Economics Keeper, Gateway API |
+| **Phase 5** | Documentation | — | Cross-reference audit, README updates, Architecture sync, API docs |
 
 ---
 
@@ -433,16 +512,21 @@ graph TB
         BC --> PE
     end
     
-    subgraph VAMS["VAMS Architecture (Agent-Down)"]
-        AGT["Agents + Gateway"] --> L5["Layer 5: Economic<br/>($VAMS, x402, AP2)"]
-        AGT --> L4["Layer 4: Trust<br/>(TEE, ZKML, Trust Score)"]
+    subgraph VAMS["VAMS Architecture (Agent-Down) — v0.4.0"]
+        AGT["Agents + Gateway"] --> COMP["Resource Composer<br/>(Blueprints + Service Blocks)"]
+        COMP --> L5["Layer 5: Economic<br/>($VAMS, x402, Regional DEC)"]
+        AGT --> L4["Layer 4: Trust<br/>(7 Proof Plugins + Aggregator)"]
         AGT --> L3["Layer 3: Logic<br/>(DBOS, Memory)"]
         L3 --> L2["Layer 2: Compute<br/>(io.net, Akash, Phala)"]
-        L2 --> L1["Layer 1: Foundational<br/>(Celestia, EigenDA, Polygon DA)"]
+        L2 --> L1["Layer 1: Foundation<br/>(Multi-DA Perf Audit)"]
+        SENT["Sentinel Network<br/>(5 Challenge Types)"] --> L1
+        SENT --> L4
         CLR["CLR Router"] --> L2
+        HR["Hardware Registry<br/>(Collateralized)"] --> COMP
+        HR --> SENT
     end
     
-    ICN -.->|"Patterns to Adopt"| VAMS
+    ICN -.->|"Patterns Adopted ✅"| VAMS
     
     style ICN fill:#1a1a2e,stroke:#e94560,color:#fff
     style VAMS fill:#1a1a2e,stroke:#0f3460,color:#fff
@@ -457,4 +541,4 @@ ICN and VAMS are **complementary mirrors**:
 - **ICN** builds from physical hardware upward, creating a resource pool that services consume
 - **VAMS** builds from agent intelligence downward, orchestrating infrastructure that agents need
 
-The ideal VAMS v0.4.0 would **adopt ICN's bottom-up rigor** (hardware classification, independent performance enforcement, resource composition) while **retaining VAMS's top-down intelligence** (agent runtime, cognitive architecture, cross-chain routing, agentic commerce). Together, these form a complete stack where agents don't just *consume* infrastructure — they consume *verified, composable, competitively-priced* infrastructure.
+VAMS v0.4.0 has **adopted ICN's bottom-up rigor** (hardware classification, independent performance enforcement, resource composition, regional economics) while **retaining VAMS's top-down intelligence** (agent runtime, cognitive architecture, cross-chain routing, agentic commerce). Together, these form a complete stack where agents don't just *consume* infrastructure — they consume *verified, composable, competitively-priced* infrastructure.

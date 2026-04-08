@@ -1,4 +1,4 @@
-﻿<!--
+<!--
 ╔══════════════════════════════════════════════════════════════════════════════╗
 ║                         INTELLECTUAL PROPERTY NOTICE                          ║
 ╠══════════════════════════════════════════════════════════════════════════════╣
@@ -25,7 +25,12 @@
 
 **Version:** 0.3.0   
 **Date:** January 2026  
-**Status:** Mainnet Specification  
+**Status:** Mainnet Specification (Partially Deprecated)
+
+> [!WARNING]
+> **Architecture Superseded**
+> Several components in this document have been explicitly deprecated as part of the ICN-inspired modular upgrades.
+> Please refer to the **[ARCHITECTURE_v0-4-0.md](ARCHITECTURE_v0-4-0.md)** addendum for the new sources of truth regarding Escrow & Settlement, Emission & Tokenomics, Slashing & Compliance, Agent Orchestration, and Governance.
 
 ---
 

@@ -27,10 +27,10 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Status](https://img.shields.io/badge/Status-Testnet--Live-brightgreen.svg)](./REPO_STATUS_REPORT.md)
-[![Architecture](https://img.shields.io/badge/Architecture-v0.3.0-blue.svg)](./docs/team/ARCHITECTURE_v0-3-0.md)
+[![Architecture](https://img.shields.io/badge/Architecture-v0.4.0-blue.svg)](./docs/team/ARCHITECTURE_v0-4-0.md)
 [![Market](https://img.shields.io/badge/TAM-$507B-green.svg)](./docs/team/MARKET_ANALYSIS.md)
 
-**[Documentation](./REPO_STATUS_REPORT.md)** • **[Architecture](./docs/team/ARCHITECTURE_v0-3-0.md)** • **[Whitepaper](./docs/team/WHITEPAPER.md)** • **[Roadmap](./REPO_STATUS_REPORT.md#6-development-roadmap)**
+**[Documentation](./REPO_STATUS_REPORT.md)** • **[Architecture](./docs/team/ARCHITECTURE_v0-4-0.md)** • **[Developer Guide](./docs/DEVELOPER_GUIDE.md)** • **[Whitepaper](./docs/team/WHITEPAPER.md)** • **[Roadmap](./REPO_STATUS_REPORT.md#6-development-roadmap)**
 
 </div>
 
@@ -152,7 +152,7 @@ VAMS is not merely a tech stack; it is a **philosophical engine** that instantia
 ```
 
 > [!TIP]
-> **Deep Dive:** See [ARCHITECTURE_v0-3-0.md](./docs/team/ARCHITECTURE_v0-3-0.md) for 4,550+ lines of technical specs including CLR v3.1 routing logic, MEV protection, multi-TEE verification, and failover matrices.
+> **Deep Dive:** See [ARCHITECTURE_v0-4-0.md](./docs/team/ARCHITECTURE_v0-4-0.md) (and [v0.3.0](./docs/team/ARCHITECTURE_v0-3-0.md) for legacy specs) for technical specs including composed settlements, regional DEC systems, and the multi-DA performance anchor.
 
 ---
 
@@ -170,14 +170,14 @@ VAMS is not merely a tech stack; it is a **philosophical engine** that instantia
 
 ## 📊 Current Status
 
-**Stage:** Pre-Mainnet | **Architecture:** v0.3.0 | **Neuron:** v0.6.0
+**Stage:** Pre-Mainnet | **Architecture:** v0.4.0 | **Neuron:** v1.0.0-icn | **Docs:** [Changelog](./docs/CHANGELOG.md)
 
 | Component | Progress | Description |
 |-----------|----------|-------------|
-| 📋 **Specs** | 🟢 100% | Architecture v0.3.0, Tokenomics v2.0.0, Market Analysis |
+| 📋 **Specs** | 🟢 100% | Architecture v0.4.0, Tokenomics v2.0.0, Market Analysis |
 | 📜 **Solidity Contracts** | 🟢 100% | Full V2 Suite + VAMSSentinel + Bridge contracts. **469 tests passing.** |
 | 🧠 **Cardano Contracts** | 🟢 100% | 4 Aiken validators + ICB bridge. **37 tests passing.** |
-| 🤖 **Agent Runtime** | 🟢 100% | Neuron v0.6.0: CLR v3.1, MEV Protection, Bridge Executor, 12-chain oracle |
+| 🤖 **Agent Runtime** | 🟢 100% | Neuron v1.0.0-icn: Multi-DA Anchor, Service Blocks, Master Escrow |
 | 🎨 **Frontend** | 🟢 95% | React 19 + Vite, 3D animations, Sub-1s load time |
 | 🌐 **Gateway** | 🟢 100% | FastAPI server with rate-limiting, auth, and dashboard |
 | ✅ **Tests** | 🟢 100% | **585 total tests: 469 Solidity + 37 Aiken + 79 Python** |
@@ -195,9 +195,12 @@ Full roadmap: [REPO_STATUS_REPORT.md](./REPO_STATUS_REPORT.md)
 | Document | Purpose |
 |----------|---------|
 | **[📋 REPO STATUS](./REPO_STATUS_REPORT.md)** | **👈 Start here.** Current stage, 24-week MVP roadmap |
+| **[🏗️ DEVELOPER GUIDE](./docs/DEVELOPER_GUIDE.md)** | Quickstart for Agent Consumers and Infra Builders |
 | **[📖 Whitepaper](./docs/team/WHITEPAPER.md)** | Academic technical overview |
-| **[🏗️ Architecture v0.3.0](./docs/team/ARCHITECTURE_v0-3-0.md)** | Deep specs: CLR, TEEs, Failover Matrix |
+| **[🏗️ Architecture v0.4.0](./docs/team/ARCHITECTURE_v0-4-0.md)** | Deep specs: Composer, Regional DEC, Multi-DA Anchor |
 | **[💰 Tokenomics](./docs/team/TOKENOMICS.md)** | $VAMS utility, burns, vesting, emissions |
+| **[🔌 API Reference](./docs/API_REFERENCE.md)** | Full Gateway REST documentation for Consumers |
+| **[📝 Changelog](./docs/CHANGELOG.md)** | Log of recent protocol upgrades (including ICN logic) |
 | **[📈 Market Analysis](./docs/team/MARKET_ANALYSIS.md)** | $507B TAM, competitor analysis |
 | **[🎤 Pitch Deck](./docs/team/PITCH_DECK.md)** | Strategic partnership proposal |
 
@@ -233,24 +236,27 @@ VAMS-main/
 │   ├── src/              # App, components, 3D scenes
 │   └── dist/             # Production build
 │
-├── neuron/          # "Immortal Agent" runtime v0.6.0
+├── neuron/          # "Immortal Agent" runtime v1.0.0-icn
+│   ├── da/               # Celestia & Polygon DAC anchoring
+│   ├── composer/         # Matchmaking & blueprint routing
+│   ├── economics/        # Master Hybrid Escrow & Regional DEC
+│   ├── services/         # Verified Service Blocks sandbox
+│   ├── sentinel/         # Verifiable SLA enforcer loop
 │   ├── neuron.py         # Orchestration loop
 │   ├── clr_router.py     # CLR v3.1 — 7-Priority Decision Tree
-│   ├── mev_protection.py # Encrypted mempool + batch auctions
-│   ├── bridge_executor.py# ICB SDK + Multi-ISM + fallback cascade
-│   ├── chain_oracle.py   # Live metrics from 12 chains
-│   ├── workflows.py      # DBOS durable execution
-│   ├── compute.py        # Akash, io.net providers
-│   ├── trust.py          # Phala, Marlin TEE integration
-│   ├── sdk/              # Celestia, Bittensor, Phala, Iagon SDKs
-│   ├── storage/          # Arweave, Kwil, Iagon clients
 │   └── tests/            # 79+ passing tests
 │
 ├── gateway/         # FastAPI server (100% complete)
+│   └── server.py         # Exposes API_REFERENCE.md endpoints
 │
-└── docs/team/       # All documentation
-    ├── ARCHITECTURE_v0-3-0.md
-    ├── WHITEPAPER.md
+└── docs/            # All documentation
+    ├── CHANGELOG.md
+    ├── DEVELOPER_GUIDE.md
+    ├── API_REFERENCE.md
+    └── team/
+        ├── ARCHITECTURE_v0-4-0.md
+        ├── ARCHITECTURE_v0-3-0.md
+        ├── WHITEPAPER.md
     └── TOKENOMICS.md
 ```
 
@@ -302,7 +308,7 @@ python demo_cli.py  # Interactive demo
 
 We are committed to **radical transparency**:
 
-- 📝 **Every design decision** documented in [ARCHITECTURE_v0-3-0.md](./docs/team/ARCHITECTURE_v0-3-0.md)
+- 📝 **Every design decision** documented in [ARCHITECTURE_v0-4-0.md](./docs/team/ARCHITECTURE_v0-4-0.md)
 - 💰 **Every token allocation** specified in [TOKENOMICS.md](./docs/team/TOKENOMICS.md)
 - 🔍 **Every gap** tracked in [REPO_STATUS_REPORT.md](./REPO_STATUS_REPORT.md)
 

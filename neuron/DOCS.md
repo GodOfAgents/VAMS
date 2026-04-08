@@ -1,4 +1,4 @@
-# VAMS Neuron Documentation v0.5.2
+# VAMS Neuron Documentation v1.0.0-icn
 
 ## Overview
 
@@ -550,6 +550,72 @@ result = handler.bridge_with_fallback("Solana", b"fast_tx")
 
 ---
 
+## ICN Modular Infrastructure (Phase 0-4)
+
+The "ICN-Inspired" integration adds robust bottom-up infrastructure abstraction to VAMS:
+
+### Multi-DA Performance Audit (Phase 0)
+Routes performance reports (like SLA checks) to appropriate DA configurations based on criticality:
+```python
+from da.performance_audit import PerformanceAuditLog, LogCriticality
+
+audit = PerformanceAuditLog(mock_mode=False)
+receipt = await audit.publish_report(report_data, LogCriticality.P2_MODERATE)
+print(f"Anchored to {receipt.provider} - Blob ID: {receipt.blob_id}")
+```
+*Adapters*: Celestia (Mocha), Near DA (Testnet), plus stubs for Avail and EigenDA. The `PerformanceAnchor.sol` contract enforces immutability.
+
+### Sentinel Network (Phase 2)
+Decentralized SLA enforcement via randomized challenge-response.
+```python
+from sentinel.sentinel_node import VAMSSentinelNode
+from sentinel.challenges.gpu_challenge import GPUChallenge
+
+node = VAMSSentinelNode(wallet="0x...")
+result = await node.run_challenge(GPUChallenge(), "0xprovider...")
+print(f"Trust Score Update: {result.trust_update}")
+```
+*Challenge Types*: CPU, GPU, Memory, Storage IOPS, Latency. Slashes misbehaving providers via `SLAEnforcer.sol`.
+
+### Resource Composition Engine (Phase 3)
+Intelligent multi-provider instance deployment using standardized blueprints:
+```python
+from composer.composer import VAMSResourceComposer
+from composer.blueprints import AI_INFERENCE_STANDARD
+
+composer = VAMSResourceComposer()
+plan = await composer.compose_instance(AI_INFERENCE_STANDARD)
+print(f"Selected Candidate: {plan.selected_candidate.provider_name} (Score: {plan.selected_candidate.final_score})")
+```
+Agent simply requests an `InstanceBlueprint` and the Composer scores and provisions the best combination.
+
+### Service Blocks & Macro Blocks (Phase 3)
+Builder marketplace for composite capabilities:
+```python
+from services.registry_client import ServiceBlockClient
+from services.macro_blocks import PRIVACY_SHIELD_ENTERPRISE
+
+client = ServiceBlockClient()
+deployment = await client.deploy_macro_block(PRIVACY_SHIELD_ENTERPRISE, "0xMyAgent")
+```
+Connects `ServiceBlockRegistry.sol` to execution nodes, enabling revenue-shared architecture.
+
+### Regional Economics & Composed Settlement (Phase 4)
+Dynamic DePIN incentives and cross-provider escrows:
+```python
+from economics.regional import RegionalEconomics
+from economics.composed_settlement import ComposedSettlementClient
+
+econ = RegionalEconomics()
+multiplier = econ.get_current_multiplier("eu-central-1", active_nodes=800)
+
+escrow = ComposedSettlementClient()
+await escrow.create_composed_escrow(providers=["0x...", "0x..."], total_amount=1000)
+```
+Emissions run via `RegionAwareDEC.sol` to bootstrap infrastructure in underrepresented regions.
+
+---
+
 ## Web3 Integration
 
 On-chain agent registration with the VAMSAgentRegistry contract.
@@ -734,7 +800,8 @@ If you see `[WARN] Running in DRY-RUN mode`, this is expected when using `--dry-
 | v0.5.0 | Jan 2026 | DBOS-style workflows, crash-proof checkpoints |
 | v0.5.1 | Jan 2026 | Bittensor SDK integration, mock mode, 60 tests |
 | v0.5.2 | Jan 2026 | Request Queue, L1 State Anchoring, x402 payments |
-| v0.6.0 | Mar 2026 | CLR v3.1 (7-priority routing), MEV Protection, Bridge Executor (ICB), 12 chain oracles |
+| v0.6.0 | Mar 2026 | CLR v3.1 (7-priority routing), MEV Protection, Bridge Exec, Chain Oracle |
+| v1.0.0 | Apr 2026 | ICN Integration: Sentinel, Composer, Service Blocks, Multi-DA, Regional Econ |
 
 ---
 

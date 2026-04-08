@@ -1,11 +1,16 @@
-#!/usr/bin/env python3
 """
-VAMS Gateway Server v0.1.0
-==========================
-Simple FastAPI server to receive and display neuron heartbeats.
+VAMS Gateway Server v1.0.0-icn
+==============================
+FastAPI server for neuron heartbeats, resource composition,
+performance auditing, and economics.
 
-This is OPTIONAL - neurons work in standalone mode without it.
-The gateway provides a central view of all running nodes.
+Endpoints:
+  - /heartbeat               — Neuron heartbeat submission
+  - /nodes                   — List connected nodes
+  - /compose/*               — Resource Composition Engine (Phase 3)
+  - /services/*              — Service Block Registry (Phase 3)
+  - /da/*                    — DA Performance Audit (Phase 0)
+  - /economics/*             — Economics & Rewards (Phase 4)
 """
 
 import time
@@ -37,7 +42,7 @@ except ImportError:
 
 
 # --- CONFIGURATION ---
-VERSION = "v0.1.0-alpha"
+VERSION = "v0.2.0-alpha"
 NODE_TIMEOUT = 120  # Seconds before node is considered offline
 MAX_NODES = 5000
 CLEANUP_INTERVAL = 3600 # 1 hour
@@ -91,6 +96,48 @@ app = FastAPI(
 
 # In-memory node registry
 nodes: Dict[str, NodeInfo] = {}
+
+# --- RESOURCE COMPOSER (Phase 3) ---
+try:
+    from neuron.composer.composer import VAMSResourceComposer, ComposerError
+    from neuron.composer.blueprints import list_blueprints, get_blueprint
+    from neuron.composer.models import InstanceBlueprint, ComputeSpec, GPUType, MemorySpec, StorageSpec, StorageType, NetworkSpec
+    from neuron.services.registry_client import ServiceBlockClient
+    from neuron.services.macro_blocks import list_macros
+    composer = VAMSResourceComposer()
+    service_client = ServiceBlockClient()
+    COMPOSER_AVAILABLE = True
+except ImportError:
+    COMPOSER_AVAILABLE = False
+    composer = None
+    print("\u26a0\ufe0f Resource Composer not available — Phase 3 endpoints disabled")
+
+# --- ECONOMIC LAYER (Phase 4) ---
+try:
+    from neuron.economics.keeper import EconomicsKeeper
+    from neuron.economics.reward_engine import RewardEngine
+    from neuron.economics.regional import RegionalEconomics
+    
+    econ_engine = RewardEngine(regional_economics=RegionalEconomics())
+    keeper = EconomicsKeeper(reward_engine=econ_engine)
+    keeper.start()
+    ECONOMICS_AVAILABLE = True
+except ImportError:
+    ECONOMICS_AVAILABLE = False
+    keeper = None
+    econ_engine = None
+    print("\u26a0\ufe0f Economics Layer not available — Phase 4 endpoints disabled")
+
+# --- DA PERFORMANCE AUDIT (Phase 0 Foundation) ---
+try:
+    from neuron.da.performance_audit import PerformanceAuditLog
+    from neuron.da.models import DAProtocol
+    da_audit_log = PerformanceAuditLog(mock_mode=True)
+    DA_AUDIT_AVAILABLE = True
+except ImportError:
+    DA_AUDIT_AVAILABLE = False
+    da_audit_log = None
+    print("\u26a0\ufe0f DA Audit Layer not available — Phase 0 endpoints disabled")
 
 import os
 import secrets
@@ -344,7 +391,216 @@ async def list_nodes():
 @app.get("/health")
 async def health_check():
     """Health check endpoint."""
-    return {"status": "healthy", "version": VERSION}
+    return {"status": "healthy", "version": VERSION, "composer_available": COMPOSER_AVAILABLE}
+
+
+# ═══════════════════════════════════════════════════════════════
+# RESOURCE COMPOSITION ENDPOINTS (Phase 3)
+# ═══════════════════════════════════════════════════════════════
+
+class ComposeRequest(BaseModel):
+    """Request body for blueprint-based provisioning."""
+    blueprint_name: Optional[str] = None  # Use pre-defined blueprint
+    service_block_name: Optional[str] = None # Use registered service block
+    macro_block_name: Optional[str] = None # Use composite macro block
+    # OR custom blueprint fields:
+    name: Optional[str] = None
+    gpu_type: Optional[str] = None
+    gpu_count: int = 0
+    vcpu: int = 4
+    ram_gb: int = 16
+    storage_gb: int = 100
+    region: Optional[str] = None
+    max_cost_per_hour: float = 0.0
+    elastic: bool = False
+    min_replicas: int = 1
+    max_replicas: int = 1
+
+
+@app.post("/compose")
+async def compose_resources(request: ComposeRequest, username: str = Depends(get_current_username)):
+    """Submit a blueprint to provision resources."""
+    if not COMPOSER_AVAILABLE:
+        raise HTTPException(status_code=503, detail="Resource Composer not available")
+
+    try:
+        if request.blueprint_name:
+            instance = composer.provision_blueprint(request.blueprint_name)
+        elif request.service_block_name:
+            instance = composer.provision_service_block(request.service_block_name)
+        elif request.macro_block_name:
+            instances = composer.provision_macro_block(request.macro_block_name)
+            return {"status": "provisioned", "instances": [i.to_dict() for i in instances]}
+        elif request.name:
+            bp = InstanceBlueprint(
+                name=request.name,
+                compute=ComputeSpec(
+                    gpu_type=GPUType(request.gpu_type) if request.gpu_type else GPUType.ANY,
+                    gpu_count=request.gpu_count,
+                    vcpu=request.vcpu,
+                ),
+                memory=MemorySpec(ram_gb=request.ram_gb),
+                storage=StorageSpec(capacity_gb=request.storage_gb),
+                networking=NetworkSpec(region=request.region or ""),
+                max_cost_per_hour=request.max_cost_per_hour,
+                elastic=request.elastic,
+                min_replicas=request.min_replicas,
+                max_replicas=request.max_replicas,
+            )
+            instance = composer.provision(bp)
+        else:
+            raise HTTPException(status_code=400, detail="Provide blueprint_name or custom blueprint fields")
+
+        return {"status": "provisioned", "instance": instance.to_dict()}
+
+    except (ComposerError, KeyError) as e:
+        raise HTTPException(status_code=422, detail=str(e))
+
+
+@app.delete("/compose/{instance_id}")
+async def deprovision_resources(instance_id: str, username: str = Depends(get_current_username)):
+    """Deprovision an active composed instance."""
+    if not COMPOSER_AVAILABLE:
+        raise HTTPException(status_code=503, detail="Resource Composer not available")
+
+    success = composer.deprovision(instance_id)
+    if not success:
+        raise HTTPException(status_code=404, detail=f"Instance {instance_id} not found")
+    return {"status": "deprovisioned", "instance_id": instance_id}
+
+
+@app.get("/compose/instances")
+async def list_composed_instances(username: str = Depends(get_current_username)):
+    """List all active composed instances."""
+    if not COMPOSER_AVAILABLE:
+        raise HTTPException(status_code=503, detail="Resource Composer not available")
+
+    instances = composer.list_active_instances()
+    return {
+        "total": len(instances),
+        "instances": [i.to_dict() for i in instances],
+        "stats": composer.get_stats(),
+    }
+
+
+@app.get("/compose/blueprints")
+async def list_available_blueprints():
+    """List pre-defined blueprints (no auth required)."""
+    if not COMPOSER_AVAILABLE:
+        raise HTTPException(status_code=503, detail="Resource Composer not available")
+
+    return {"blueprints": list_blueprints()}
+
+
+@app.get("/services/blocks")
+async def list_service_blocks(category: Optional[str] = None):
+    """List available service blocks from the registry."""
+    if not COMPOSER_AVAILABLE:
+        raise HTTPException(status_code=503, detail="Resource Composer not available")
+    return {"blocks": service_client.list_blocks(category=category)}
+
+
+@app.get("/services/macros")
+async def list_macro_blocks():
+    """List pre-defined macro composite blocks."""
+    if not COMPOSER_AVAILABLE:
+        raise HTTPException(status_code=503, detail="Resource Composer not available")
+    return {"macros": list_macros()}
+
+
+# ═══════════════════════════════════════════════════════════════
+# ECONOMICS ENDPOINTS (Phase 4)
+# ═══════════════════════════════════════════════════════════════
+
+@app.get("/economics/status")
+async def get_economics_status():
+    """Get the current running status of the Economics Keeper."""
+    if not ECONOMICS_AVAILABLE:
+        raise HTTPException(status_code=503, detail="Economics Layer not available")
+    return keeper.get_status()
+
+@app.get("/economics/epochs")
+async def list_epochs():
+    """List all completed reward epochs."""
+    if not ECONOMICS_AVAILABLE:
+        raise HTTPException(status_code=503, detail="Economics Layer not available")
+    
+    summaries = keeper.get_all_summaries()
+    return {
+        "total_epochs": len(summaries),
+        "epochs": summaries
+    }
+
+@app.get("/economics/epochs/{epoch_id}")
+async def get_epoch(epoch_id: int):
+    """Get details for a specific reward epoch."""
+    if not ECONOMICS_AVAILABLE:
+        raise HTTPException(status_code=503, detail="Economics Layer not available")
+    
+    summary = keeper.get_epoch_summary(epoch_id)
+    if not summary:
+        raise HTTPException(status_code=404, detail=f"Epoch {epoch_id} not found")
+        
+    return summary
+
+@app.get("/economics/estimate-apr")
+async def estimate_apr(
+    region_id: str = "us-east-1",
+    capacity_contribution: int = 10,
+    staked_amount: float = 0.0,
+    epoch_emission_budget: float = 383000.0,
+    total_region_capacity: int = 100
+):
+    """Estimate APR and weekly rewards for a provider."""
+    if not ECONOMICS_AVAILABLE:
+        raise HTTPException(status_code=503, detail="Economics Layer not available")
+    
+    return econ_engine.estimate_provider_apr(
+        region_id=region_id,
+        capacity_contribution=capacity_contribution,
+        staked_amount=staked_amount,
+        epoch_emission_budget=epoch_emission_budget,
+        total_region_capacity=total_region_capacity
+    )
+
+
+# ============================================================
+#            DA PERFORMANCE AUDIT ENDPOINTS (Phase 0)
+# ============================================================
+
+@app.get("/da/status")
+async def da_status():
+    """Get live connectivity status for all DA layer adapters."""
+    if not DA_AUDIT_AVAILABLE:
+        raise HTTPException(status_code=503, detail="DA Audit Layer not available")
+    
+    status = await da_audit_log.get_adapter_status()
+    return {
+        "version": VERSION,
+        "da_layer": "Phase 0 Foundation",
+        "adapters": status,
+    }
+
+@app.get("/da/anchors")
+async def da_anchors(
+    protocol: Optional[str] = None,
+    limit: int = 50,
+):
+    """Query anchored performance audit records."""
+    if not DA_AUDIT_AVAILABLE:
+        raise HTTPException(status_code=503, detail="DA Audit Layer not available")
+    
+    history = da_audit_log.get_audit_history(limit=limit)
+    
+    # Optional filter by protocol
+    if protocol:
+        history = [h for h in history if h.get("protocol") == protocol]
+    
+    return {
+        "total": len(history),
+        "protocol_filter": protocol,
+        "anchors": history,
+    }
 
 
 def main():
