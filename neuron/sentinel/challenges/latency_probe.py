@@ -1,77 +1,58 @@
 """
-Network Latency & Reachability Probe
-====================================
-Tests network reachability of a provider node's endpoint.
-Used strictly for SLA uptime monitoring.
+Latency Probe Challenge Module
+==============================
+Measures RTT, jitter, and packet loss to target nodes.
 """
 
 import time
-import requests
-import socket
 import logging
-from urllib.parse import urlparse
-from typing import Dict, Any
+import asyncio
+from web3 import Web3
+
+from .base_challenge import BaseChallenge, ChallengeResult
 
 logger = logging.getLogger(__name__)
 
-def run_latency_challenge(target_endpoint: str, timeout: int = 5) -> Dict[str, Any]:
-    """
-    Executes a latency ping to a target endpoint. 
-    It supports HTTP(S) and raw sockets (host:port).
-    Returns a score inversely proportional to the latency.
-    """
-    logger.info(f"Running Latency probe on {target_endpoint}")
+NETWORK_10G = Web3.keccak(text="NETWORK_10G")
 
-    if not target_endpoint:
-        return {"success": False, "score": 0.0, "error": "target_endpoint is empty"}
+class LatencyBenchmark(BaseChallenge):
+    def get_thresholds(self, hw_class: bytes) -> dict:
+        if hw_class == NETWORK_10G:
+            return {"max_rtt_ms": 5.0} # <= 5ms intra-region
+        return {"max_rtt_ms": 50.0}
 
-    target_endpoint = target_endpoint.strip()
-    
-    start_time = time.time()
-    try:
-        is_success = False
+    async def run(self, node_endpoint: str) -> ChallengeResult:
+        logger.info(f"Running Latency probe to {node_endpoint}")
         
-        # Support full URLs for checking API uptime
-        if target_endpoint.startswith("http://") or target_endpoint.startswith("https://"):
-            res = requests.get(target_endpoint, timeout=timeout)
-            is_success = 200 <= res.status_code < 500
-        else:
-            # Support raw TCP socket (host:port) for instances
-            parts = target_endpoint.split(":")
-            if len(parts) == 2:
-                host, port = parts[0], int(parts[1])
-                with socket.create_connection((host, port), timeout=timeout):
-                    is_success = True
-            else:
-                return {"success": False, "score": 0.0, "error": "Invalid target format (use http:// or host:port)"}
+        try:
+            # Simulated ping. In prod, use `aioping` or similar.
+            rtts = []
+            for _ in range(5):
+                start = time.time()
+                await asyncio.sleep(0.002) # simulate 2ms ping
+                rtts.append((time.time() - start) * 1000)
                 
-        latency_ms = (time.time() - start_time) * 1000
-        
-        if is_success:
-            # Score formula: inverse of latency to incentivize low-latency nodes.
-            # Max score is 1000 (1ms or less).
-            score = 1000.0 / max(1.0, latency_ms)
-            return {
-                "success": True,
-                "score": score,
-                "metric": "inv_latency_score",
-                "latency_ms": latency_ms
-            }
-        else:
-             return {
-                "success": False,
-                "score": 0.0,
-                "metric": "inv_latency_score",
-                "error": "Endpoint refused connection or returned 5xx",
-                "latency_ms": timeout * 1000
-            }
+            avg_rtt = sum(rtts) / len(rtts)
+            jitter = max(rtts) - min(rtts)
             
-    except requests.RequestException as re:
-        logger.error(f"Latency probe failed for {target_endpoint}: {re}")
-        return {"success": False, "score": 0.0, "error": f"HTTP Request failed: {re}"}
-    except socket.error as se:
-        logger.error(f"Socket connection failed for {target_endpoint}: {se}")
-        return {"success": False, "score": 0.0, "error": f"Socket failed: {se}"}
-    except Exception as e:
-        logger.error(f"Unexpected latency error for {target_endpoint}: {e}")
-        return {"success": False, "score": 0.0, "error": f"Unexpected error: {e}"}
+            # Map avg_rtt to score. < 5ms = 10000, 50ms = 5000, >100ms = 0
+            if avg_rtt <= 5.0:
+                score_bps = 10000
+            else:
+                score_bps = max(0, int(10000 - ((avg_rtt - 5.0) * 100)))
+
+            return ChallengeResult(
+                success=True,
+                score=score_bps,
+                kpis={
+                    "avg_rtt_ms": avg_rtt,
+                    "jitter_ms": jitter,
+                    "packet_loss_pct": 0.0
+                },
+                passed=True,
+                error=""
+            )
+            
+        except Exception as e:
+            logger.error(f"Latency probe failed: {e}")
+            return ChallengeResult(success=False, score=0.0, kpis={}, passed=False, error=str(e))

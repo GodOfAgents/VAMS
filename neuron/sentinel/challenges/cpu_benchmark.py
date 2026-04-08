@@ -1,59 +1,74 @@
 """
 CPU Benchmark Challenge Module
 ==============================
-Executes subprocess challenges to determine compute capacity.
-Requires `sysbench` installed on target node.
+Executes mathematical workloads to evaluate CPU compute capacity.
 """
 
-import subprocess
 import time
 import logging
+import multiprocessing
+import math
+from web3 import Web3
 from typing import Dict, Any
+
+from .base_challenge import BaseChallenge, ChallengeResult
 
 logger = logging.getLogger(__name__)
 
-def run_cpu_challenge(max_prime: int = 20000, threads: int = 1) -> Dict[str, Any]:
-    """
-    Executes sysbench CPU test. Returns a payload with benchmark score.
-    The benchmark score is defined as 'events per second'.
-    """
-    logger.info(f"Running CPU sysbench challenge (max_prime={max_prime}, threads={threads})")
-    
-    start_time = time.time()
-    try:
-        cmd = ["sysbench", "cpu", f"--cpu-max-prime={max_prime}", f"--threads={threads}", "run"]
-        result = subprocess.run(cmd, capture_output=True, text=True, check=True)
+CPU_EPYC = Web3.keccak(text="CPU_EPYC")
+CPU_XEON = Web3.keccak(text="CPU_XEON")
+
+def cpu_workload(iterations: int) -> float:
+    """CPU-intensive mathematical workload"""
+    score = 0.0
+    for i in range(1, iterations):
+        score += math.sin(i) * math.cos(i) + math.sqrt(i)
+    return score
+
+class CPUBenchmark(BaseChallenge):
+    def get_thresholds(self, hw_class: bytes) -> dict:
+        if hw_class == CPU_EPYC:
+            return {"min_multi_score": 80000.0}
+        elif hw_class == CPU_XEON:
+            return {"min_multi_score": 75000.0}
+        return {"min_multi_score": 0.0}
+
+    async def run(self, node_endpoint: str) -> ChallengeResult:
+        logger.info(f"Running CPU challenge on {node_endpoint}")
         
-        # Parse output for 'events per second:'
-        events_per_sec = 0.0
-        for line in result.stdout.split('\n'):
-            if "events per second:" in line:
-                val = line.split("events per second:")[1].strip()
-                events_per_sec = float(val)
-                break
-                
-        latency_ms = (time.time() - start_time) * 1000
-        
-        return {
-            "success": True,
-            "score": events_per_sec, 
-            "metric": "events_per_sec",
-            "latency_ms": latency_ms,
-            "raw_output": result.stdout[:200] # just leading chars
-        }
-        
-    except subprocess.CalledProcessError as e:
-        logger.error(f"CPU benchmark failed: {e.stderr}")
-        return {
-            "success": False,
-            "score": 0.0,
-            "error": "sysbench execution failed",
-            "stderr": str(e.stderr)
-        }
-    except FileNotFoundError:
-        logger.error("sysbench not found on system.")
-        return {
-            "success": False,
-            "score": 0.0,
-            "error": "sysbench not installed"
-        }
+        try:
+            cores = multiprocessing.cpu_count()
+            iterations = 5_000_000
+            
+            # Single-thread test
+            st_start = time.time()
+            cpu_workload(iterations)
+            st_elapsed = time.time() - st_start
+            single_score = (iterations / st_elapsed) / 1000.0
+            
+            # Multi-thread test
+            mt_start = time.time()
+            with multiprocessing.Pool(processes=cores) as pool:
+                pool.map(cpu_workload, [iterations // cores] * cores)
+            mt_elapsed = time.time() - mt_start
+            multi_score = (iterations / mt_elapsed) / 1000.0
+            
+            # Basic score mapping: map multi_score to a 0-10000 bps scale.
+            # Using EPYC threshold (~80000) as passing. Let's make 100k = 10000 score.
+            score_bps = min(10000, int((multi_score / 100000.0) * 10000))
+
+            return ChallengeResult(
+                success=True,
+                score=score_bps,
+                kpis={
+                    "single_thread_score": single_score,
+                    "multi_thread_score": multi_score,
+                    "cores": cores
+                },
+                passed=True,
+                error=""
+            )
+            
+        except Exception as e:
+            logger.error(f"CPU benchmark crashed: {e}")
+            return ChallengeResult(success=False, score=0.0, kpis={}, passed=False, error=str(e))

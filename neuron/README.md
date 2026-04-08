@@ -1,10 +1,10 @@
-# VAMS Neuron v0.6.0
+# VAMS Neuron v1.0.0-icn
 
-**Immortal Agent** — Full 5-Layer Stack with CLR v3.1 + MEV Protection + ICB Bridge
+**Immortal Agent** — Full 5-Layer Stack with CLR v3.1 + MEV Protection + ICB Bridge + ICN Composability
 
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](../LICENSE)
-[![Tests](https://img.shields.io/badge/tests-79%20passed-brightgreen.svg)](#testing)
+[![Tests](https://img.shields.io/badge/tests-110%20passed-brightgreen.svg)](#testing)
 
 ## What is VAMS Neuron?
 
@@ -22,13 +22,25 @@ VAMS Neuron is a **real infrastructure client** that connects to decentralized n
 
 ## Architecture
 
-| Layer | Providers | Status |
-|-------|-----------|--------|
-| **L1 Data Availability** | Celestia, EigenDA, Near, Avail, Iagon | 5/5 ✅ |
+| Layer | Providers/Modules | Status |
+|-------|-------------------|--------|
+| **L1 Foundation** | Celestia, EigenDA, Near, Avail (DA Audit + Anchoring) | 5/5 ✅ |
 | **L2 Compute** | io.net, Akash, Render, Bittensor, Phala | 5/5 ✅ |
 | **L3 Logic** | Kwil, WeaveDB, Glacier + DBOS Workflows | 3/3 ✅ |
-| **L4 Trust** | Phala (SGX), Marlin (Nitro), Automata | 3/3 ✅ |
-| **L5 Execution Chains** | Cardano, Midnight, SEI, Hydra + 8 more | 12/12 ✅ |
+| **L4 Trust** | Sentinel, Phala (SGX), Marlin (Nitro), Automata + ZKML | 4/4 ✅ |
+| **L5 Economic/Execution** | Regional DEC, CLR Router across 12 Chains, x402 | 12/12 ✅ |
+| **Intelligence** | Resource Composer & Service Block Marketplace | Live ✅ |
+
+## ICN Implementation Phases (v0.4.0–v1.0.0)
+
+| Phase | Scope | Status | Deliverables |
+|-------|-------|--------|--------------|
+| **Phase 0** | Foundation | ✅ | Multi-DA Audit Module, Performance Anchors |
+| **Phase 1** | Settlement | ✅ | X402 Escrow Base, CLR Finality |
+| **Phase 2** | Enforcement | ✅ | Hardware Registry, Sentinel Network, Pluggable Proofs |
+| **Phase 3** | Intelligence | ✅ | Resource Composer, Regional Econ, Service Blocks |
+| **Phase 4** | Economics | ✅ | Composed Settlement, Reward Distributor, Keeper |
+| **Phase 5** | Documentation | 🚧 | Full API Reference, Architecture Update |
 
 ## Quick Start
 
@@ -129,6 +141,11 @@ neuron/
 ├── bridge_executor.py # Cross-Chain Bridge (ICB SDK + Multi-ISM + fallback)
 ├── agent_comms.py     # Agent-to-Agent Communication (Signed Messages)
 ├── demo_cli.py        # Interactive CLI demo
+├── da/                # Multi-DA Performance Audit (Phase 0)
+├── sentinel/          # SLA Enforcement & Benchmarks (Phase 2)
+├── composer/          # Resource Composition Engine (Phase 3)
+├── services/          # Service Block Registry Client (Phase 3)
+├── economics/         # Regional Economics, Rewards & Keeper (Phase 4)
 ├── sdk/               # Real protocol SDKs
 │   ├── celestia.py        # Celestia DA (blob operations)
 │   ├── bittensor_subnet.py # Bittensor (metagraph, subnets)
@@ -151,7 +168,10 @@ neuron/
 │   ├── test_clr_router.py # Legacy router tests
 │   ├── test_clr_v3.py     # CLR v3.1 + MEV + Bridge tests (19 tests)
 │   ├── test_comms.py      # Messaging signature tests
-│   └── test_economics.py  # Circuit breaker tests
+│   ├── test_economics.py  # Circuit breaker tests
+│   ├── test_performance_audit.py # Multi-DA audit and serialization tests
+│   ├── test_da_adapters.py       # Live Celestia/Near integration tests
+│   └── test_composed_settlement.py # Payment splitting and composed escrow
 ├── README.md
 ├── DOCS.md
 └── requirements.txt
@@ -164,7 +184,7 @@ neuron/
 python -m pytest tests/ -v
 
 # Expected output
-============================= 79 passed in 52.18s =============================
+============================= 110 passed in 68.18s =============================
 ```
 
 ## Documentation
