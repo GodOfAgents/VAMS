@@ -19,7 +19,7 @@
 
 VAMS is not merely a technical stack; it is a **philosophical engine** that instantiates theoretical concepts into verifiable code. This document presents the six primary fields where VAMS represents a fundamental paradigm shift.
 
-> **Technical depth**: For implementation details, see [ARCHITECTURE_v0-3-0.md](../team/ARCHITECTURE_v0-3-0.md) and [WHITEPAPER.md](../team/WHITEPAPER.md).
+> **Technical depth**: For implementation details, see the [Legacy Architecture (v0.3.0)](https://github.com/GodOfAgents/VAMS/blob/main/docs/team/ARCHITECTURE_v0-3-0.md), the [ICN Modular Addendum (v0.4.0)](https://github.com/GodOfAgents/VAMS/blob/main/docs/team/ARCHITECTURE_v0-4-0.md), and [WHITEPAPER.md](https://github.com/GodOfAgents/VAMS/blob/main/docs/team/WHITEPAPER.md).
 
 ---
 
@@ -45,7 +45,7 @@ VAMS replaces the biological observer with a **cryptographic one**. The CLR v3.1
 - **"Fluid Bits"** — Software that observes and routes across frozen bits. The CLR acts as the synthetic measurement operator.
 - **Recursive Autopoiesis** — A closed-loop system where software observes software to generate economic reality, independent of biological intervention.
 
-> **Implementation**: The CLR v3.1 decision tree is implemented in `neuron/clr_router.py`. Each routing decision produces a cryptographic routing hash for ZK proof verification (see [Architecture §14.3](../team/ARCHITECTURE_v0-3-0.md) and [Architecture §18.1](../team/ARCHITECTURE_v0-3-0.md)).
+> **Implementation**: The CLR v3.1 decision tree is implemented in [neuron/clr_router.py](https://github.com/GodOfAgents/VAMS/blob/main/neuron/clr_router.py). Each routing decision produces a `routing_hash` (H(metadata + decision)) for ZK proof verification (see [Legacy Architecture §14.3](https://github.com/GodOfAgents/VAMS/blob/main/docs/team/ARCHITECTURE_v0-3-0.md)). The Sentinel Enforcer Loop anchors proof submissions on-chain via [contracts/src/da/PerformanceAnchor.sol](https://github.com/GodOfAgents/VAMS/blob/main/contracts/src/da/PerformanceAnchor.sol) (see [ICN Addendum §4](https://github.com/GodOfAgents/VAMS/blob/main/docs/team/ARCHITECTURE_v0-4-0.md)).
 
 ---
 
@@ -73,10 +73,10 @@ This eliminates the need for:
 ### Key Concepts
 
 - **The Autonomous Firm** — Zero-employee corporations where agents execute all operations. The "CEO" is a governance proposal; the "employee" is a TEE-attested agent.
-- **Trust Score as Credit Rating** — Agents build reputation through verified execution history (see Trust Decagon in [Architecture §8](../team/ARCHITECTURE_v0-3-0.md)), enabling progressive access to higher-value operations.
+- **Trust Score as Credit Rating** — Agents build reputation through verified execution history (see Trust Decagon in [Architecture §8](https://github.com/GodOfAgents/VAMS/blob/main/docs/team/ARCHITECTURE_v0-3-0.md)), enabling progressive access to higher-value operations.
 - **x402 Machine Economy** — Agents pay agents directly via HTTP 402 micropayments, eliminating human payment intermediaries entirely.
 
-> **Implementation**: Multi-TEE verification (2/3 consensus across Phala SGX, Marlin Nitro, Automata) is implemented in `neuron/trust.py`. Agent registration and staking in `contracts/src/registry/`.
+> **Implementation**: Multi-TEE verification (3/3 providers: Phala SGX, Marlin Nitro, Automata 1RPC) is implemented via the TEE abstraction layer in [neuron/trust.py](https://github.com/GodOfAgents/VAMS/blob/main/neuron/trust.py) (provider classes) and [neuron/trust_plugins/tee_plugin.py](https://github.com/GodOfAgents/VAMS/blob/main/neuron/trust_plugins/tee_plugin.py) (pluggable proof generation). Trust score aggregation in [neuron/sdk/trust_aggregator.py](https://github.com/GodOfAgents/VAMS/blob/main/neuron/sdk/trust_aggregator.py). Agent registration, staking (1,000 VAMS minimum), and 7-day fraud-proof challenge windows are enforced on-chain in [contracts/src/registry/VAMSAgentRegistry.sol](https://github.com/GodOfAgents/VAMS/blob/main/contracts/src/registry/VAMSAgentRegistry.sol). The `ComposedSettlement` contract ([contracts/src/economic/ComposedSettlement.sol](https://github.com/GodOfAgents/VAMS/blob/main/contracts/src/economic/ComposedSettlement.sol)) acts as the atomic economic enforcement layer — a direct realization of Zero Agency Cost.
 
 ---
 
@@ -115,7 +115,7 @@ Agents carry their identity (ERC-8004 DID) across all jurisdictions via the **Ro
 - **Sovereign Diplomatic Immunity** — Good Behavior Bond acts as a portable trust anchor, similar to diplomatic immunity but backed by economic stake rather than political power.
 - **The Roaming Protocol** — Agents are not "locked in" to VAMS; they are "anchored." Free to roam, required to prove.
 
-> **Implementation**: VRP specification in [Architecture §3.4.2](../team/ARCHITECTURE_v0-3-0.md). Compliance routing in `neuron/clr_router.py` (P0: Midnight, P3: Polygon KYC).
+> **Implementation**: VRP specification in [Architecture §3.4.2](https://github.com/GodOfAgents/VAMS/blob/main/docs/team/ARCHITECTURE_v0-3-0.md). The VRP is physically anchored by the new Composer mapping and Celestia/Polygon DA state anchoring across chains via [neuron/clr_router.py](https://github.com/GodOfAgents/VAMS/blob/main/neuron/clr_router.py) (P0: Midnight/ZK-SD, P3: Polygon CDK KYC Layer, P4: Cardano Ouroboros). Agent identity is maintained across borders via [contracts/src/registry/VAMSAgentRegistry.sol](https://github.com/GodOfAgents/VAMS/blob/main/contracts/src/registry/VAMSAgentRegistry.sol) (Merkle root submissions + TEE attestation hashes).
 
 ---
 
@@ -135,7 +135,9 @@ Traditional software is **Allopoietic** — dependent on human maintainers to pa
 |---|---|
 | **Metabolism** | $VAMS tokens as ATP — agents earn, spend, and conserve energy |
 | **Body** | DePIN infrastructure (io.net GPU, Akash CPU, Phala TEE) as physical substrate |
-| **Immune System** | Dynamic Emission Controller (DEC) — RL model adjusting economic parameters to maintain homeostasis |
+| **Immune System** | Triple-layer enforcement: [DynamicEmissionController.sol](https://github.com/GodOfAgents/VAMS/blob/main/contracts/src/governance/DynamicEmissionController.sol) (inflation bounds), [RegionAwareDEC.sol](https://github.com/GodOfAgents/VAMS/blob/main/contracts/src/economic/RegionAwareDEC.sol) (30% regional caps), [SLAEnforcer.sol](https://github.com/GodOfAgents/VAMS/blob/main/contracts/src/sentinel/SLAEnforcer.sol) (auto-slashing on SLA breach) — maintaining economic homeostasis |
+| **Organs** | [ComposedSettlement.sol](https://github.com/GodOfAgents/VAMS/blob/main/contracts/src/economic/ComposedSettlement.sol) — atomic multi-party metabolism: fund, claim, refund lifecycle for up to 20 providers per intent |
+| **Genome / Blueprint** | [ServiceBlockRegistry.sol](https://github.com/GodOfAgents/VAMS/blob/main/contracts/src/registry/ServiceBlockRegistry.sol) — Builders encode reproducible deployment patterns (`blueprintHash`) that agents inherit |
 | **Memory** | DBOS checkpoints + L1 State Anchoring — persistent state survives crashes |
 | **Reproduction** | Agent spawning with inherited Trust Score and skill profile |
 | **Death** | Slashing + stake depletion — agents that fail to maintain fitness are recycled |
@@ -149,7 +151,7 @@ The critical insight: VAMS agents don't just *use* infrastructure — they **met
 - **Immortal Agents** — DBOS-style durable execution means agents survive crashes, network failures, and hardware replacement. The agent's identity (DID) and state (Merkle root) persist across physical substrates.
 - **Economic Natural Selection** — Agents compete for tasks, earn or lose reputation, and face slashing for misbehavior. Fitness is measured by Trust Score, not by human preference.
 
-> **Implementation**: DBOS workflows in `neuron/workflows.py`. State anchoring in `neuron/anchoring.py`. Economics in `contracts/src/economic/`.
+> **Implementation**: DBOS-style durable workflows in [neuron/workflows.py](https://github.com/GodOfAgents/VAMS/blob/main/neuron/workflows.py). L1 state anchoring in [neuron/anchoring.py](https://github.com/GodOfAgents/VAMS/blob/main/neuron/anchoring.py). Multi-DA proof submissions via [neuron/da/](https://github.com/GodOfAgents/VAMS/blob/main/neuron/da/) (Celestia, EigenDA, Avail adapters). Economic lifecycle: [contracts/src/economic/ComposedSettlement.sol](https://github.com/GodOfAgents/VAMS/blob/main/contracts/src/economic/ComposedSettlement.sol) (escrow), [contracts/src/economic/RewardDistributor.sol](https://github.com/GodOfAgents/VAMS/blob/main/contracts/src/economic/RewardDistributor.sol) (payouts), [contracts/src/economic/RegionAwareDEC.sol](https://github.com/GodOfAgents/VAMS/blob/main/contracts/src/economic/RegionAwareDEC.sol) (homeostasis), [contracts/src/sentinel/SLAEnforcer.sol](https://github.com/GodOfAgents/VAMS/blob/main/contracts/src/sentinel/SLAEnforcer.sol) (immune response).
 
 ---
 
@@ -184,7 +186,7 @@ The result: **"I thought X because of data Y using model Z"** — and here is th
 - **Proof of Research** — Agents demonstrate evidence-based decision-making through Parallel Web data feeds (weather, financial, news), verified and scored as part of the Trust Score.
 - **Glass Box Intelligence** — Every inference is auditable. Regulators, users, and counterparties can verify AI decisions without accessing proprietary model weights.
 
-> **Implementation**: Multi-TEE verification in `neuron/trust.py` and `neuron/sdk/phala_tee.py`. Trust Score aggregation in `contracts/src/registry/VAMSAgentRegistry.sol`. ZKML is planned for Phase 6.
+> **Implementation**: Multi-TEE verification in [neuron/trust.py](https://github.com/GodOfAgents/VAMS/blob/main/neuron/trust.py) (Phala SGX, Marlin Nitro, Automata) and [neuron/sdk/phala_tee.py](https://github.com/GodOfAgents/VAMS/blob/main/neuron/sdk/phala_tee.py). ZKML proof plugin (`ZKMLProofPlugin`) in [neuron/trust_plugins/zkml_plugin.py](https://github.com/GodOfAgents/VAMS/blob/main/neuron/trust_plugins/zkml_plugin.py) — integrates EZKL/Groth16 mock, production call wired for Phase 6. Trust score aggregation via [neuron/sdk/trust_aggregator.py](https://github.com/GodOfAgents/VAMS/blob/main/neuron/sdk/trust_aggregator.py). On-chain agent record with `teeAttestation` hash stored in [contracts/src/registry/VAMSAgentRegistry.sol](https://github.com/GodOfAgents/VAMS/blob/main/contracts/src/registry/VAMSAgentRegistry.sol).
 
 ---
 
@@ -215,6 +217,8 @@ This is the Web3 equivalent of manually installing device drivers in DOS. No ope
 ├──────────────────────────────────────────────────────────────────┤
 │  VAMS KERNEL                                                      │
 │  ├── CLR v3.1 (Process Scheduler — routes to optimal chain)       │
+│  ├── Resource Composer (neuron/composer/ — orchestration)         │
+│  ├── Service Block Registry (contracts/src/registry/ — app store) │
 │  ├── $VAMS Token (Unified Payment — one token, all resources)     │
 │  ├── Trust Decagon (Security — aggregated verification)           │
 │  └── DBOS (File System — persistent, crash-proof state)           │
@@ -235,7 +239,7 @@ This is the Web3 equivalent of manually installing device drivers in DOS. No ope
 - **The Windows of Web3** — Just as Windows abstracted hardware drivers into a unified API (DirectX, Win32), VAMS abstracts DePIN protocols into a unified SDK (`neuron/`).
 - **Planetary Computer** — The aggregate of all DePIN hardware, accessed through a single entry point, forming a decentralized supercomputer that no single entity controls.
 
-> **Implementation**: The Neuron client (`neuron/`) provides the unified SDK. 17 providers across 5 layers. $VAMS token economics in `contracts/src/token/` and [TOKENOMICS.md](../team/TOKENOMICS.md).
+> **Implementation**: The Neuron SDK is structured into 6 decoupled packages: [da/](https://github.com/GodOfAgents/VAMS/blob/main/neuron/da/) (multi-DA adapters: Celestia, EigenDA, Avail, NEAR), [composer/](https://github.com/GodOfAgents/VAMS/blob/main/neuron/composer/) (Resource Composition Engine), [economics/](https://github.com/GodOfAgents/VAMS/blob/main/neuron/economics/) (keeper bots, reward engine), [services/](https://github.com/GodOfAgents/VAMS/blob/main/neuron/services/) (Service Block execution), [sentinel/](https://github.com/GodOfAgents/VAMS/blob/main/neuron/sentinel/) (hardware benchmark challenges), [gateway/](https://github.com/GodOfAgents/VAMS/blob/main/neuron/gateway/) (REST API). 17+ providers across 5 hardware layers. $VAMS token economics in [contracts/src/token/](https://github.com/GodOfAgents/VAMS/blob/main/contracts/src/token/) and [TOKENOMICS.md](https://github.com/GodOfAgents/VAMS/blob/main/docs/team/TOKENOMICS.md).
 
 ---
 
