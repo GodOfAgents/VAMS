@@ -147,6 +147,11 @@ contract RewardDistributor is
         // Total for this accumulation
         uint256 totalReward = baseReward + regionalBonus + stakingBoost;
 
+        // AUDIT FIX ECON03: Require actual token deposit to back the reward.
+        // The caller (settlement contract / emission controller) must have approved
+        // this contract and must deposit the exact totalReward amount.
+        vamsToken.safeTransferFrom(msg.sender, address(this), totalReward);
+
         // Update provider breakdown
         ProviderReward storage breakdown = _rewardBreakdowns[provider];
         breakdown.baseReward += baseReward;

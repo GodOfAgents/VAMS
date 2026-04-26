@@ -7,7 +7,7 @@ import "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 
 import "../interfaces/IHardwareCommitment.sol";
-import "../interfaces/IProviderBondRegistry.sol";
+import "./IProviderBondRegistry.sol";
 import "../interfaces/IVAMSHardwareRegistry.sol";
 import "../interfaces/ISLAEnforcer.sol";
 

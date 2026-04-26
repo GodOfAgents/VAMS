@@ -53,20 +53,25 @@ contract TEEProofPlugin is IVAMSProofPlugin {
     ) external view override returns (bool valid) {
         if (proofData.length == 0) return false;
 
-        // Decode the TEE attestation
-        TEEAttestation memory attestation = abi.decode(proofData, (TEEAttestation));
+        // Decode the TEE attestation elements individually
+        (
+            bytes memory sgxQuote,
+            bytes32 mrenclave,
+            bytes32 mrsigner,
+            address attestedAgent
+        ) = abi.decode(proofData, (bytes, bytes32, bytes32, address));
 
         // 1. Verify sgxQuote is non-empty
-        if (attestation.sgxQuote.length == 0) return false;
+        if (sgxQuote.length == 0) return false;
 
         // 2. Verify mrenclave is in the allowlist
-        if (!allowedEnclaves[attestation.mrenclave]) return false;
+        if (!allowedEnclaves[mrenclave]) return false;
 
         // 3. Verify the quote binds to the service + delivery hashes
         //    In production: Automata DCAP verification of the raw quote
         //    For now: verify the quote contains the expected binding
         bytes32 expectedBinding = keccak256(abi.encodePacked(serviceHash, deliveryHash));
-        bytes32 quoteBinding = keccak256(attestation.sgxQuote);
+        bytes32 quoteBinding = keccak256(sgxQuote);
         
         // Quote must be deterministically linked to the service/delivery
         // In production, this extracts report_data from the quote and compares

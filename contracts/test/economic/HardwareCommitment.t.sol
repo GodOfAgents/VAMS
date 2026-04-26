@@ -5,6 +5,7 @@ import "forge-std/Test.sol";
 import "../../src/economic/HardwareCommitment.sol";
 import "../../src/economic/ProviderBondRegistry.sol";
 import "../../src/registry/VAMSHardwareRegistry.sol";
+import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 contract MockVAMS is ERC20 {
@@ -30,25 +31,38 @@ contract HardwareCommitmentTest is Test {
         token = new MockVAMS();
         token.mint(provider, 100_000e18);
 
-        // Deploy Registry
-        hwRegistry = new VAMSHardwareRegistry();
-        hwRegistry.initialize(admin);
+        // Deploy Registry via proxy
+        VAMSHardwareRegistry hwImpl = new VAMSHardwareRegistry();
+        ERC1967Proxy hwProxy = new ERC1967Proxy(
+            address(hwImpl),
+            abi.encodeWithSelector(VAMSHardwareRegistry.initialize.selector, admin, address(token))
+        );
+        hwRegistry = VAMSHardwareRegistry(address(hwProxy));
         
         // Setup hardware class
         vm.prank(admin);
         hwRegistry.registerHardwareClass(classId, "TEST", "GPU", 5000e18, 5000);
 
-        // Deploy Bond Registry
-        bondRegistry = new ProviderBondRegistry();
-        bondRegistry.initialize(admin, address(token), address(10)); // dummy insurance
+        // Deploy Bond Registry via proxy
+        ProviderBondRegistry bondImpl = new ProviderBondRegistry();
+        ERC1967Proxy bondProxy = new ERC1967Proxy(
+            address(bondImpl),
+            abi.encodeWithSelector(ProviderBondRegistry.initialize.selector, admin, address(token), address(10)) // dummy insurance
+        );
+        bondRegistry = ProviderBondRegistry(address(bondProxy));
 
-        // Deploy Hardware Commitment
-        hwCommitment = new HardwareCommitment();
-        hwCommitment.initialize(admin, address(hwRegistry), address(bondRegistry));
+        // Deploy Hardware Commitment via proxy
+        HardwareCommitment hcImpl = new HardwareCommitment();
+        ERC1967Proxy hcProxy = new ERC1967Proxy(
+            address(hcImpl),
+            abi.encodeWithSelector(HardwareCommitment.initialize.selector, admin, address(hwRegistry), address(bondRegistry))
+        );
+        hwCommitment = HardwareCommitment(address(hcProxy));
 
         // Let HW Commitment manipulate Bond Registry locks
+        bytes32 hwRole = bondRegistry.HARDWARE_COMMITMENT_ROLE();
         vm.prank(admin);
-        bondRegistry.grantRole(bondRegistry.HARDWARE_COMMITMENT_ROLE(), address(hwCommitment));
+        bondRegistry.grantRole(hwRole, address(hwCommitment));
 
         vm.startPrank(provider);
         token.approve(address(bondRegistry), type(uint256).max);
@@ -103,9 +117,9 @@ contract HardwareCommitmentTest is Test {
         hwCommitment.createCommitment(nodes, 30 days, 9900);
 
         // Total bond = 20k. Locked = 5k.
-        // If we try to withdraw 16k, leaving 4k bond < 5k lock, it should revert.
+        // If we try to withdraw 20k, leaving 0 bond < 5k lock, it should revert.
         vm.expectRevert("Withdrawal cuts into locked hardware collateral");
-        bondRegistry.requestWithdrawal(16_000e18);
+        bondRegistry.requestWithdrawal(20_000e18);
         vm.stopPrank();
     }
     

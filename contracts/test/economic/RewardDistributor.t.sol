@@ -76,8 +76,14 @@ contract RewardDistributorTest is Test {
         ri.updateCapacity(AF_SOUTH, 10); // 20% → full 3.0x bootstrap
         vm.stopPrank();
 
-        // Fund distributor
+        // Fund distributor (for claim payouts)
         token.mint(address(distributor), 10_000_000 ether);
+
+        // ECON03 fix: accumulateReward now requires msg.sender to deposit tokens.
+        // Fund the keeper so it can deposit rewards via safeTransferFrom.
+        token.mint(keeper, 10_000_000 ether);
+        vm.prank(keeper);
+        token.approve(address(distributor), type(uint256).max);
 
         // Set up staking tiers
         staking.setStake(provider1, 100_000 ether); // SILVER tier (+5%)

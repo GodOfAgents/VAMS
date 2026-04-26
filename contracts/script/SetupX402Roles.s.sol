@@ -6,11 +6,15 @@ import "../src/economic/X402EscrowManager.sol";
 import "../src/economic/ProviderBondRegistry.sol";
 
 contract SetupX402Roles is Script {
-    address constant ESCROW_MANAGER = 0xfC58658fA08102612c78166374854fE31cCFBb58;
-    address constant BOND_REGISTRY = 0xC00d6C3CA385D1fAcbB23b9B2d6dceE6A120cd0c;
+    address ESCROW_MANAGER;
+    address BOND_REGISTRY;
 
     function run() external {
-        vm.startBroadcast();
+        ESCROW_MANAGER = vm.envAddress("X402_ESCROW");
+        BOND_REGISTRY = vm.envAddress("PROVIDER_BOND");
+        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
+
+        vm.startBroadcast(deployerPrivateKey);
 
         address deployer = msg.sender;
         console.log("Setting up X402 Roles from:", deployer);

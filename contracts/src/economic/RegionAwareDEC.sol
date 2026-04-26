@@ -187,10 +187,9 @@ contract RegionAwareDEC is IRegionAwareDEC, AccessControl {
         }
 
         // annualEmission = totalSupply × annualRateBps / BPS_DENOMINATOR
-        uint256 annualEmission = (totalSupplyForEmission * annualRateBps) / BPS_DENOMINATOR;
-
         // epochBudget = annualEmission × epochDuration / 365.25 days
-        uint256 epochBudget = (annualEmission * epochDuration) / 365.25 days;
+        // FIX M15: Multiply before divide to prevent truncation to zero
+        uint256 epochBudget = (totalSupplyForEmission * annualRateBps * epochDuration) / (BPS_DENOMINATOR * 365.25 days);
 
         return epochBudget;
     }
@@ -287,10 +286,24 @@ contract RegionAwareDEC is IRegionAwareDEC, AccessControl {
             }
 
             if (uncappedWeightedTotal > 0) {
+                uint256 distributedBps = 0;
+                uint256 lastUncappedIndex = activeCount;
+                
                 for (uint256 i = 0; i < activeCount; i++) {
                     if (allocations[i].allocationBps < regionCapBps) {
-                        allocations[i].allocationBps =
+                        uint256 redistributedBps =
                             (allocations[i].weightedCapacity * remainingBps) / uncappedWeightedTotal;
+                        allocations[i].allocationBps = redistributedBps > regionCapBps ? regionCapBps : redistributedBps;
+                        distributedBps += allocations[i].allocationBps;
+                        lastUncappedIndex = i;
+                    }
+                }
+                
+                // ECON07: Distribute remaining precision remainder to the last uncapped region
+                if (lastUncappedIndex < activeCount && distributedBps < remainingBps) {
+                    uint256 remainder = remainingBps - distributedBps;
+                    if (allocations[lastUncappedIndex].allocationBps + remainder <= regionCapBps) {
+                        allocations[lastUncappedIndex].allocationBps += remainder;
                     }
                 }
             }

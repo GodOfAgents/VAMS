@@ -108,6 +108,11 @@ contract VAMSSlasher is
     
     // ============ Initializer ============
     
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
+    }
+    
     function initialize(
         address _admin,
         address _insuranceFund,
@@ -454,12 +459,14 @@ contract VAMSSlasher is
     function _verifyEquivocationProof(
         address _operator,
         bytes calldata _proof
-    ) internal pure returns (bool) {
+    ) internal view returns (bool) {
         // Minimum proof length: 8 + 2 x (32 bytes hash + 65 bytes signature) = 202 bytes
         if (_proof.length < 202) return false;
         
         // Extract height and messages
-        // blockInfo not explicitly used here but enforces length for format validation
+        uint64 blockHeight = uint64(bytes8(_proof[0:8]));
+        if (blockHeight > block.number) return false;
+        
         bytes32 msgHash1 = bytes32(_proof[8:40]);
         bytes memory sig1 = _proof[40:105];
         bytes32 msgHash2 = bytes32(_proof[105:137]);

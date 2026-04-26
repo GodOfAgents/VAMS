@@ -111,9 +111,14 @@ class EncryptedMempool:
     Current: Mock encryption using SHA-256 commitment scheme.
     """
 
-    def __init__(self):
+    def __init__(self, mock_mode: bool = None):
         self._pool: Dict[str, EncryptedTransaction] = {}
         self._block_counter = 0
+        # AUDIT FIX OFC01: Explicit mock mode flag with env override
+        if mock_mode is None:
+            self._mock_mode = os.environ.get("VAMS_MOCK_MODE", "true").lower() == "true"
+        else:
+            self._mock_mode = mock_mode
         self._stats = {
             "submitted": 0,
             "committed": 0,
@@ -137,7 +142,17 @@ class EncryptedMempool:
         # Commitment hash: H(tx_data) — proves we committed without revealing
         commitment = hashlib.sha256(tx_data).hexdigest()
 
-        # Robust Mock encryption: AES-256-GCM with key derived from target block
+        # AUDIT FIX OFC01: Guard against using mock encryption in production.
+        # The SHA256-based key derivation is trivially reversible since block
+        # numbers are public. In production, use real threshold encryption.
+        if not self._mock_mode:
+            raise RuntimeError(
+                "EncryptedMempool: Mock encryption MUST NOT be used in production. "
+                "Set VAMS_MOCK_MODE=true for testing, or integrate real threshold "
+                "encryption (DKG) for production deployment."
+            )
+        
+        # Mock encryption: AES-256-GCM with key derived from target block
         # Production: threshold encryption with validator DKG
         from cryptography.hazmat.primitives.ciphers.aead import AESGCM
         key_material = hashlib.sha256(f"threshold_key_{target_block}".encode()).digest()

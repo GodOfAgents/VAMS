@@ -10,11 +10,13 @@ import "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.so
 import "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
 
 contract DeployX402 is Script {
-    address constant TOKEN_ADDRESS = 0x62a705eD1cAbBBafFCd99e9b2497024031329fd4;
-    address constant REGISTRY_ADDRESS = 0x7e290350448cDC8A22e4cF4Ad377B1E595CDd347;
+    address TOKEN_ADDRESS;
+    address REGISTRY_ADDRESS;
 
     function run() external {
-        vm.startBroadcast();
+        TOKEN_ADDRESS = vm.envAddress("VAMS_TOKEN");
+        REGISTRY_ADDRESS = vm.envAddress("AGENT_REGISTRY");
+        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
 
         address deployer = msg.sender;
         console.log("Deploying X402 Stack from:", deployer);

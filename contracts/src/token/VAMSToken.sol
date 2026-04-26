@@ -21,6 +21,8 @@ import "./IVAMSToken.sol";
  * - AccessControl: Role-based permissions
  * - Pausable: Emergency pause capability
  * - Anti-whale: Max wallet and daily transfer limits
+ *   Note: Anti-whale limits act as soft deterrents. Sybil-bypasses 
+ *   (via multiple wallets) are documented as accepted risks for testnet.
  *
  * Token Specifications (from TOKENOMICS.md):
  * - Total Supply: 1,000,000,000 (1 billion)

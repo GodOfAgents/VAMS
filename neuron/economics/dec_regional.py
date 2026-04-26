@@ -137,26 +137,35 @@ class RegionAwareDECSimulator:
             )
 
         # Phase 2: proportional BPS allocation with cap enforcement
-        capped_total_bps = 0
-        uncapped_indices = []
+        for alloc in raw_allocations:
+            alloc.allocation_bps = int((alloc.weighted_capacity * 10_000) / total_weighted_cap)
 
-        for i, alloc in enumerate(raw_allocations):
-            raw_bps = int((alloc.weighted_capacity * 10_000) / total_weighted_cap)
+        uncapped_indices = list(range(len(raw_allocations)))
+        capped_indices = set()
 
-            if raw_bps > self.region_cap_bps:
-                alloc.allocation_bps = self.region_cap_bps
-                capped_total_bps += self.region_cap_bps
-            else:
-                alloc.allocation_bps = raw_bps  # preliminary
-                uncapped_indices.append(i)
+        while True:
+            newly_capped = False
+            for i in uncapped_indices:
+                if raw_allocations[i].allocation_bps > self.region_cap_bps:
+                    raw_allocations[i].allocation_bps = self.region_cap_bps
+                    capped_indices.add(i)
+                    newly_capped = True
+            
+            if not newly_capped:
+                break
+                
+            uncapped_indices = [i for i in range(len(raw_allocations)) if i not in capped_indices]
+            
+            if not uncapped_indices:
+                break
 
-        # Redistribute capped surplus
-        if capped_total_bps > 0 and len(uncapped_indices) > 0:
+            capped_total_bps = sum(raw_allocations[i].allocation_bps for i in capped_indices)
             remaining_bps = 10_000 - capped_total_bps
+            
             uncapped_weighted_total = sum(
                 raw_allocations[i].weighted_capacity for i in uncapped_indices
             )
-
+            
             if uncapped_weighted_total > 0:
                 for i in uncapped_indices:
                     raw_allocations[i].allocation_bps = int(

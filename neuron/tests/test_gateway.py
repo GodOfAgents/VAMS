@@ -17,8 +17,9 @@ class TestGatewayServer(unittest.TestCase):
         AGENTS.clear()
         
     def test_register_agent(self):
+        valid_node_id = "0x" + "1" * 64
         payload = {
-            "node_id": "test_agent_007",
+            "node_id": valid_node_id,
             "public_key": "0xPub123",
             "stake_amount": 500.0,
             "capabilities": {"ai": "gpt4"}
@@ -26,7 +27,7 @@ class TestGatewayServer(unittest.TestCase):
         response = self.client.post("/agents/register", json=payload)
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response.json()["success"])
-        self.assertIn("test_agent_007", AGENTS)
+        self.assertIn(valid_node_id, AGENTS)
 
     def test_heartbeat_unknown_agent(self):
         payload = {
@@ -38,14 +39,15 @@ class TestGatewayServer(unittest.TestCase):
         self.assertFalse(response.json()["success"]) # Should fail logic, but 200 OK HTTP
 
     def test_heartbeat_success(self):
+        valid_node_id = "0x" + "2" * 64
         # 1. Register
         self.client.post("/agents/register", json={
-            "node_id": "agent_x", "public_key": "x", "stake_amount": 100
+            "node_id": valid_node_id, "public_key": "x", "stake_amount": 100
         })
         
         # 2. Heartbeat
         payload = {
-            "payload": f"{time.time()}|active|agent_x",
+            "payload": f"{time.time()}|active|{valid_node_id}",
             "signature": "0xSig"
         }
         response = self.client.post("/heartbeat", json=payload)

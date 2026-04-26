@@ -69,11 +69,7 @@ class AgentRegistryClient:
             'gasPrice': self.w3.eth.gas_price
         })
         
-        signed_tx = self.w3.eth.account.sign_transaction(tx, self.private_key)
-        tx_hash = self.w3.eth.send_raw_transaction(signed_tx.rawTransaction)
-        
-        logger.info(f"Registration TX sent: {tx_hash.hex()}")
-        return tx_hash.hex()
+        return self._submit_tx(tx)
 
     def submit_checkpoint(self, merkle_root: bytes, agent_id: bytes) -> str:
         """Submit a state checkpoint (Merkle root)."""
@@ -92,10 +88,20 @@ class AgentRegistryClient:
             'gasPrice': self.w3.eth.gas_price
         })
         
+        return self._submit_tx(tx)
+
+    def _submit_tx(self, tx) -> str:
+        """Standardized transaction submission with receipt waiting."""
         signed_tx = self.w3.eth.account.sign_transaction(tx, self.private_key)
         tx_hash = self.w3.eth.send_raw_transaction(signed_tx.rawTransaction)
         
-        logger.info(f"Checkpoint TX: {tx_hash.hex()}")
+        logger.info(f"TX sent: {tx_hash.hex()}, waiting for receipt...")
+        receipt = self.w3.eth.wait_for_transaction_receipt(tx_hash)
+        
+        if receipt.status != 1:
+            raise Exception(f"Transaction failed! Hash: {tx_hash.hex()}")
+            
+        logger.info(f"TX confirmed in block {receipt.blockNumber}")
         return tx_hash.hex()
 
     def get_agent_status(self, agent_id: bytes):

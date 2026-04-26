@@ -156,9 +156,11 @@ contract VAMSTrustAggregatorTest is Test {
             agent
         );
 
+        // Cache proofType before prank to avoid prank being consumed by proofType() call
+        bytes32 pType = teePlugin.proofType();
         vm.prank(agent);
         aggregator.submitPluginProof(
-            teePlugin.proofType(),
+            pType,
             serviceHash,
             deliveryHash,
             proofData

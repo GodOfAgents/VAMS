@@ -21,6 +21,8 @@ import {IProviderBondRegistry} from "./IProviderBondRegistry.sol";
  *      - Unclaimed portions refundable after expiry
  *
  *      Architecture Reference: Phase 4 (Economic Layer), Sprint 10
+ *
+ *      // TODO [v1.1]: Refactor to UUPS upgradeable pattern (L-02 accepted risk)
  */
 contract ComposedSettlement is
     IComposedSettlement,
@@ -34,6 +36,7 @@ contract ComposedSettlement is
 
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
+    bytes32 public constant VERIFIER_ROLE = keccak256("VERIFIER_ROLE");
 
     /// @notice Settlement fee: 0.05% (5 basis points)
     uint256 public constant SETTLEMENT_FEE_BPS = 5;
@@ -83,6 +86,9 @@ contract ComposedSettlement is
     /// @notice Agent's allocation IDs
     mapping(address => bytes32[]) private _agentAllocations;
 
+    /// @notice Verified ZK proofs for provider claims (allocationId => providerIndex => isVerified)
+    mapping(bytes32 => mapping(uint256 => bool)) public verifiedProviderProofs;
+
     // ═══════════════════ Constructor ═══════════════════
 
     /// @notice Initialize the ComposedSettlement contract
@@ -98,6 +104,8 @@ contract ComposedSettlement is
     ) {
         require(admin != address(0), "Zero admin");
         require(_vamsToken != address(0), "Zero token");
+        require(_bondRegistry != address(0), "Zero bondRegistry");
+        require(_treasury != address(0), "Zero treasury");
 
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
         _grantRole(ADMIN_ROLE, admin);
@@ -214,6 +222,9 @@ contract ComposedSettlement is
 
         // Check not already claimed
         if (pAlloc.claimed) revert ProviderAlreadyClaimed(allocationId, providerIndex);
+
+        // Require ZK proof verification before claiming
+        require(verifiedProviderProofs[allocationId][providerIndex], "Proof not verified");
 
         // Must be the correct provider
         if (msg.sender != pAlloc.provider) {
@@ -360,5 +371,15 @@ contract ComposedSettlement is
     /// @notice Unpause composed escrows
     function unpause() external onlyRole(PAUSER_ROLE) {
         _unpause();
+    }
+
+    /// @notice Verify a provider's ZK proof (called by off-chain verification nodes)
+    /// @param allocationId The composed allocation ID
+    /// @param providerIndex The index of the provider
+    function verifyProviderProof(bytes32 allocationId, uint256 providerIndex) external onlyRole(VERIFIER_ROLE) {
+        ComposedAllocation storage alloc = _allocations[allocationId];
+        require(alloc.agent != address(0), "AllocationNotFound");
+        require(providerIndex < alloc.providerCount, "InvalidProviderIndex");
+        verifiedProviderProofs[allocationId][providerIndex] = true;
     }
 }

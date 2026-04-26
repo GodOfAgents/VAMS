@@ -10,7 +10,7 @@ class AgentStatus(str, Enum):
     SLASHED = "slashed"
 
 class RegisterRequest(BaseModel):
-    node_id: str = Field(..., description="Unique identifier for the agent node")
+    node_id: str = Field(..., description="Unique identifier for the agent node (bytes32 hex)", pattern=r"^0x[a-fA-F0-9]{64}$")
     public_key: str = Field(..., description="Agent's public signing key")
     stake_amount: float = Field(0.0, description="Amount of VAMS staked")
     capabilities: Dict[str, Any] = Field(default_factory=dict, description="Compute/Storage capabilities")

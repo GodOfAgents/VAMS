@@ -55,18 +55,21 @@ contract ProviderBondRegistry is
     
     /// @notice Role for escrow contracts that can manage requests
     bytes32 public constant ESCROW_ROLE = keccak256("ESCROW_ROLE");
-    
+
     /// @notice Role for slashing operations
     bytes32 public constant SLASHER_ROLE = keccak256("SLASHER_ROLE");
-    
+
     /// @notice Role for protocol administration
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
-    
+
     /// @notice Role for hardware commitments locking up bonds
     bytes32 public constant HARDWARE_COMMITMENT_ROLE = keccak256("HARDWARE_COMMITMENT_ROLE");
-    
+
     /// @notice Role for emergency pause
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
+
+    /// @notice INTG01: Role for VAMSSentinel autonomous emergency pause
+    bytes32 public constant SENTINEL_ROLE = keccak256("SENTINEL_ROLE");
     
     // ============ Storage ============
     
@@ -107,7 +110,9 @@ contract ProviderBondRegistry is
         address _vamsToken,
         address _insuranceFund
     ) external initializer {
-        if (admin == address(0) || _vamsToken == address(0)) revert ZeroAddress();
+        if (admin == address(0)) revert ZeroAddress();
+        if (_vamsToken == address(0)) revert ZeroAddress();
+        if (_insuranceFund == address(0)) revert ZeroAddress();
         
         __AccessControl_init();
         __Pausable_init();
@@ -557,16 +562,32 @@ contract ProviderBondRegistry is
     }
     
     /**
+     * @notice INTG01: Sentinel-callable emergency pause (implements IPausableTarget)
+     * @param reason Human-readable reason for the pause
+     */
+    function emergencyPause(string calldata reason) external onlyRole(SENTINEL_ROLE) {
+        emit EmergencyPauseActivated(msg.sender, reason);
+        _pause();
+    }
+
+    /// @dev Emitted when Sentinel triggers an emergency pause
+    event EmergencyPauseActivated(address indexed sentinel, string reason);
+
+    /**
      * @notice Pause the registry
      */
     function pause() external onlyRole(PAUSER_ROLE) {
         _pause();
     }
-    
+
     /**
-     * @notice Unpause the registry
+     * @notice Unpause the registry (PAUSER_ROLE or SENTINEL_ROLE)
      */
-    function unpause() external onlyRole(PAUSER_ROLE) {
+    function unpause() external {
+        require(
+            hasRole(PAUSER_ROLE, msg.sender) || hasRole(SENTINEL_ROLE, msg.sender),
+            "ProviderBondRegistry: not authorized"
+        );
         _unpause();
     }
     
@@ -607,6 +628,7 @@ contract ProviderBondRegistry is
     function unlockHardwareCollateral(address provider, uint256 amount) external onlyRole(HARDWARE_COMMITMENT_ROLE) {
         ProviderBond storage bond = _bonds[provider];
         if (bond.registeredAt == 0) revert ProviderNotFound(provider);
+        require(amount <= bond.hardwareCollateralLocked, "Unlock exceeds locked");
         
         bond.hardwareCollateralLocked -= amount;
     }

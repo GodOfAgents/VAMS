@@ -57,15 +57,18 @@ contract X402EscrowManager is
     
     /// @notice Role for dispute resolution
     bytes32 public constant RESOLVER_ROLE = keccak256("RESOLVER_ROLE");
-    
+
     /// @notice Role for protocol administration
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
-    
+
     /// @notice Role for emergency pause
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
-    
+
     /// @notice Role for TEE attestation verification
     bytes32 public constant VERIFIER_ROLE = keccak256("VERIFIER_ROLE");
+
+    /// @notice INTG01: Role for VAMSSentinel autonomous emergency pause
+    bytes32 public constant SENTINEL_ROLE = keccak256("SENTINEL_ROLE");
     
     // ============ Storage ============
     
@@ -108,7 +111,21 @@ contract X402EscrowManager is
     /// @notice Total escrows created
     uint256 public escrowCount;
     
+    /// @notice AUDIT FIX H02: Pending withdrawals held during dispute window
+    struct PendingWithdrawal {
+        uint256 providerPayout;
+        uint256 fee;
+        uint256 claimTimestamp;
+        bool withdrawn;
+    }
+    mapping(bytes32 => PendingWithdrawal) private _pendingWithdrawals;
+    
     // ============ Initializer ============
+    
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
+    }
     
     /**
      * @notice Initialize the escrow manager
@@ -125,7 +142,11 @@ contract X402EscrowManager is
         address _bondRegistry,
         address _treasury
     ) external initializer {
-        if (admin == address(0) || _vamsToken == address(0)) revert ZeroAddress();
+        if (admin == address(0)) revert ZeroAddress();
+        if (_vamsToken == address(0)) revert ZeroAddress();
+        if (_nonceRegistry == address(0)) revert ZeroAddress();
+        if (_bondRegistry == address(0)) revert ZeroAddress();
+        if (_treasury == address(0)) revert ZeroAddress();
         
         __AccessControl_init();
         __Pausable_init();
@@ -405,15 +426,47 @@ contract X402EscrowManager is
         // Complete request in bond registry
         bondRegistry.completeRequest(escrow.provider, escrowId);
         
+        // AUDIT FIX H02: Hold funds locally during the dispute window.
+        // Funds are NOT transferred immediately — provider must call
+        // withdrawClaimed() after the 72-hour dispute window closes.
+        _pendingWithdrawals[escrowId] = PendingWithdrawal({
+            providerPayout: providerPayout,
+            fee: fee,
+            claimTimestamp: block.timestamp,
+            withdrawn: false
+        });
+        
+        emit EscrowClaimed(escrowId, escrow.provider, providerPayout, serviceProof.proofType);
+    }
+    
+    /**
+     * @notice Withdraw claimed escrow funds after dispute window
+     * @dev AUDIT FIX H02: Separates claim state from payout. Claimed funds
+     *      are held for DISPUTE_WINDOW (72h) before the provider can withdraw.
+     * @param escrowId The escrow to withdraw
+     */
+    function withdrawClaimed(bytes32 escrowId) external nonReentrant {
+        PendingWithdrawal storage pw = _pendingWithdrawals[escrowId];
+        Escrow storage escrow = _escrows[escrowId];
+        
+        require(pw.providerPayout > 0, "No pending withdrawal");
+        require(!pw.withdrawn, "Already withdrawn");
+        require(escrow.status == EscrowStatus.CLAIMED, "Escrow not in claimed state");
+        require(
+            block.timestamp > pw.claimTimestamp + DISPUTE_WINDOW,
+            "Dispute window still active"
+        );
+        require(msg.sender == escrow.provider, "Not provider");
+        
+        pw.withdrawn = true;
+        
         // Transfer fee to treasury
-        if (fee > 0 && treasury != address(0)) {
-            vamsToken.safeTransfer(treasury, fee);
+        if (pw.fee > 0 && treasury != address(0)) {
+            vamsToken.safeTransfer(treasury, pw.fee);
         }
         
         // Transfer payout to provider
-        vamsToken.safeTransfer(escrow.provider, providerPayout);
-        
-        emit EscrowClaimed(escrowId, escrow.provider, providerPayout, serviceProof.proofType);
+        vamsToken.safeTransfer(escrow.provider, pw.providerPayout);
     }
     
     // ============ Dispute Functions ============
@@ -568,19 +621,35 @@ contract X402EscrowManager is
     }
     
     /**
+     * @notice INTG01: Sentinel-callable emergency pause (implements IPausableTarget)
+     * @param reason Human-readable reason for the pause
+     */
+    function emergencyPause(string calldata reason) external onlyRole(SENTINEL_ROLE) {
+        emit EmergencyPauseActivated(msg.sender, reason);
+        _pause();
+    }
+
+    /// @dev Emitted when Sentinel triggers an emergency pause
+    event EmergencyPauseActivated(address indexed sentinel, string reason);
+
+    /**
      * @notice Pause the contract
      */
     function pause() external onlyRole(PAUSER_ROLE) {
         _pause();
     }
-    
+
     /**
-     * @notice Unpause the contract
+     * @notice Unpause the contract (PAUSER_ROLE or SENTINEL_ROLE)
      */
-    function unpause() external onlyRole(PAUSER_ROLE) {
+    function unpause() external {
+        require(
+            hasRole(PAUSER_ROLE, msg.sender) || hasRole(SENTINEL_ROLE, msg.sender),
+            "X402EscrowManager: not authorized"
+        );
         _unpause();
     }
-    
+
     // ============ Storage Gap ============
     
     /// @dev Reserved storage space for future upgrades

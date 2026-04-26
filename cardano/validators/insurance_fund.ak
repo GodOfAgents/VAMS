@@ -12,9 +12,13 @@
 
 use aiken/collection/list
 use aiken/primitive/bytearray
+use cardano/assets
 use cardano/transaction.{OutputReference, Transaction}
-use vams/types.{ApproveClaim, Deposit, FundDatum, InsuranceFundRedeemer, PayoutClaim, SubmitClaim}
 use vams/icb.{verify_bridge_proof}
+use vams/types.{
+  ApproveClaim, Deposit, FundDatum, InsuranceFundRedeemer, PayoutClaim,
+  SubmitClaim,
+}
 use vams/utils.{apply_bps, count_signatures}
 
 // ═══════════════════ Constants ═══════════════════
@@ -34,19 +38,24 @@ validator insurance_fund {
   spend(
     datum_opt: Option<FundDatum>,
     redeemer: InsuranceFundRedeemer,
-    _own_ref: OutputReference,
+    own_ref: OutputReference,
     tx: Transaction,
   ) {
     expect Some(datum) = datum_opt
 
     when redeemer is {
       // ── Deposit from bridge ──
-      Deposit { amount, bridge_proof } -> {
+      // AUDIT FIX: AK02 — Separated bridge_proof from payload_hash to
+      // eliminate tautological proof verification.
+      Deposit { amount, bridge_proof, payload_hash } -> {
         // Amount must be positive
         expect amount > 0
 
-        // Verify bridge proof from Polygon InsuranceFundProxy
-        expect verify_bridge_proof(bridge_proof, bridge_proof)
+        // Payload hash must be a proper 32-byte SHA-256 digest
+        expect bytearray.length(payload_hash) == 32
+
+        // Verify bridge proof against the expected payload hash
+        expect verify_bridge_proof(bridge_proof, payload_hash)
 
         True
       }
@@ -66,18 +75,36 @@ validator insurance_fund {
         // Evidence must be provided
         expect bytearray.length(evidence_hash) > 0
 
+        // ── AUDIT FIX: AK12 ──
+        // Verify the actual UTXO value >= datum.total_balance to prevent
+        // an attacker from passing an inflated datum and extracting more.
+        expect Some(own_input) =
+          list.find(tx.inputs, fn(input) { input.output_reference == own_ref })
+        let actual_lovelace = assets.lovelace_of(own_input.output.value)
+        expect actual_lovelace >= datum.total_balance
+
         True
       }
 
       // ── Guardian approves a claim ──
+      // AUDIT FIX: AK06 — Deduplicate guardian approvals.
+      // The FundDatum.guardians list is the authoritative set of approvers.
+      // We allow exactly 1 guardian signature per ApproveClaim transaction to
+      // force individual approvals that the off-chain indexer can track and
+      // deduplicate by (claim_id, guardian_vkh).  Allowing multiple signatures
+      // per TX would let the off-chain submitter batch-replay approvals.
       ApproveClaim { claim_id } -> {
-        // At least one guardian must have signed
-        let guardian_sigs =
-          count_signatures(tx.extra_signatories, datum.guardians)
-        expect guardian_sigs >= 1
-
         // Claim ID must be valid
         expect claim_id > 0
+
+        // Count how many authorized guardians signed this TX
+        let guardian_sigs =
+          count_signatures(tx.extra_signatories, datum.guardians)
+
+        // AK06: Require exactly 1 guardian per TX so approvals can be
+        // individually de-duplicated by (claim_id, signer) on-chain observers.
+        expect guardian_sigs >= 1
+        expect guardian_sigs <= 1
 
         True
       }

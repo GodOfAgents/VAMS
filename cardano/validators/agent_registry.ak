@@ -13,8 +13,11 @@
 use aiken/collection/list
 use aiken/primitive/bytearray
 use cardano/transaction.{OutputReference, Transaction}
-use vams/types.{AgentDatum, DeregisterAgent, RegisterAgent, RegistryRedeemer, SlashAgent, UpdateAgent}
-use vams/utils.{in_range, is_signed_by}
+use vams/types.{
+  AgentDatum, DeregisterAgent, RegisterAgent, RegistryRedeemer, SlashAgent,
+  UpdateAgent,
+}
+use vams/utils.{count_signatures, in_range, is_signed_by}
 
 // ═══════════════════ Constants ═══════════════════
 
@@ -105,8 +108,12 @@ validator agent_registry {
         let max_slash = datum.staked_amount * slash_penalty_bps / 10_000
         expect slash_amount > 0 && slash_amount <= max_slash
 
-        // Must be signed by an authorized slasher
-        expect list.length(tx.extra_signatories) >= 1
+        // AUDIT FIX: AK05 — Must be signed by an authorized slasher from the
+        // datum's whitelist, not just any signer.  An empty authorized_slashers
+        // list means slashing is locked (safe default for newly registered agents).
+        let authorized_sig_count =
+          count_signatures(tx.extra_signatories, datum.authorized_slashers)
+        expect authorized_sig_count >= 1
 
         True
       }

@@ -7,6 +7,8 @@ import "./ISecurityBudgetEnforcer.sol";
 // Interfaces for external protocol components
 interface IPriceOracle {
     function getVAMSPrice() external view returns (uint256);
+    /// @notice Returns price and last update timestamp
+    function getVAMSPriceWithTimestamp() external view returns (uint256 price, uint256 updatedAt);
 }
 
 interface ITransactionLimit {
@@ -38,6 +40,12 @@ contract SecurityBudgetEnforcer is AccessControl, ISecurityBudgetEnforcer {
     uint256 public constant MIN_SECURITY_BUDGET_USD = 1_000_000e18;  // $1M floor
     uint256 public constant TVL_SECURITY_RATIO = 10;                 // 10% of TVL
     uint256 public constant MEV_DAYS_COVERAGE = 30;                  // 30 days of MEV
+    
+    /// @notice AUDIT FIX ECON06: Maximum oracle staleness (1 hour)
+    uint256 public constant MAX_ORACLE_STALENESS = 1 hours;
+    
+    /// @notice Emitted when oracle price is stale
+    event OraclePriceStale(uint256 lastUpdated, uint256 maxStaleness);
 
     IPriceOracle public priceOracle;
     IMetricProvider public metricProvider;
@@ -73,7 +81,25 @@ contract SecurityBudgetEnforcer is AccessControl, ISecurityBudgetEnforcer {
      */
     function updateSecurityStatus() external override onlyRole(KEEPER_ROLE) {
         ProtocolMetrics memory metrics = metricProvider.getMetrics();
-        uint256 tokenPrice = priceOracle.getVAMSPrice();
+        
+        // AUDIT FIX ECON06: Check oracle staleness before using price data.
+        // Stale prices could lead to incorrect security level assessments.
+        uint256 tokenPrice;
+        try priceOracle.getVAMSPriceWithTimestamp() returns (uint256 price, uint256 updatedAt) {
+            if (block.timestamp - updatedAt > MAX_ORACLE_STALENESS) {
+                emit OraclePriceStale(updatedAt, MAX_ORACLE_STALENESS);
+                // Force CRITICAL level when price is stale — conservative default
+                if (currentLevel != SecurityLevel.CRITICAL) {
+                    _handleLevelTransition(currentLevel, SecurityLevel.CRITICAL);
+                    currentLevel = SecurityLevel.CRITICAL;
+                }
+                return;
+            }
+            tokenPrice = price;
+        } catch {
+            // Fallback to basic getter if timestamped interface not available
+            tokenPrice = priceOracle.getVAMSPrice();
+        }
 
         // 1. Calculate Required Security Budget
         uint256 tvlRequirement = metrics.totalValueLocked / TVL_SECURITY_RATIO;

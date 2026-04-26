@@ -86,9 +86,9 @@ class TestMultiProvider:
         allocator = ResourceAllocator()
         bp = _blueprint(gpu_count=6)
         candidates = [
-            _scored("n1", capacity=3, price=20.0, score=0.9),
-            _scored("n2", capacity=3, price=22.0, score=0.85),
-            _scored("n3", capacity=3, price=25.0, score=0.8),
+            _scored("n1", capacity=3, price=20.0, score=0.9, provider="0xP1"),
+            _scored("n2", capacity=3, price=22.0, score=0.85, provider="0xP2"),
+            _scored("n3", capacity=3, price=25.0, score=0.8, provider="0xP3"),
         ]
         plan = allocator.allocate(bp, candidates)
         assert plan.total_nodes == 2

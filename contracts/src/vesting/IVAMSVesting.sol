@@ -18,7 +18,9 @@ interface IVAMSVesting {
         EARLY_INVESTOR, // 6mo cliff, 18mo vest, 33.33% cliff unlock
         REG_INVESTOR,   // 12mo cliff, 30mo vest, 40% cliff unlock
         FOUNDATION,     // 6mo cliff, 48mo vest, 12.5% cliff unlock
-        COMMUNITY       // 0 cliff, 60mo vest, 0% cliff unlock
+        COMMUNITY,      // 0 cliff, 60mo vest, 0% cliff unlock
+        LIQUIDITY,      // 0 cliff, 12mo vest, 0% cliff unlock
+        CUSTOM          // Custom dynamically created schedule
     }
 
     // ============ Structs ============

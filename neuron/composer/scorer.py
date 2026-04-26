@@ -249,10 +249,7 @@ class CandidateScorer:
         """Compute (min, max) for normalization. Handles edge cases."""
         if not values:
             return (0.0, 1.0)
-        mn, mx = min(values), max(values)
-        if mn == mx:
-            return (mn, mn + 1.0)  # Avoid division by zero
-        return (mn, mx)
+        return (min(values), max(values))
 
     @staticmethod
     def _normalize(value: float, value_range: Tuple[float, float]) -> float:
