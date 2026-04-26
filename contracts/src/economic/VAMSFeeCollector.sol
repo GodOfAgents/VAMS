@@ -42,6 +42,9 @@ contract VAMSFeeCollector is
     /// @notice Role for distributing fees
     bytes32 public constant FEE_DISTRIBUTOR_ROLE = keccak256("FEE_DISTRIBUTOR_ROLE");
 
+    /// @notice INTG01: Role for VAMSSentinel autonomous emergency pause
+    bytes32 public constant SENTINEL_ROLE = keccak256("SENTINEL_ROLE");
+
     /// @notice Basis points denominator
     uint256 public constant BPS_DENOMINATOR = 10_000;
 
@@ -344,6 +347,18 @@ contract VAMSFeeCollector is
     }
 
     /**
+     * @notice INTG01: Sentinel-callable emergency pause (implements IPausableTarget)
+     * @param reason Human-readable reason for the pause
+     */
+    function emergencyPause(string calldata reason) external onlyRole(SENTINEL_ROLE) {
+        emit EmergencyPauseActivated(msg.sender, reason);
+        _pause();
+    }
+
+    /// @dev Emitted when Sentinel triggers an emergency pause
+    event EmergencyPauseActivated(address indexed sentinel, string reason);
+
+    /**
      * @notice Pause fee distribution
      */
     function pause() external onlyRole(DEFAULT_ADMIN_ROLE) {
@@ -351,9 +366,13 @@ contract VAMSFeeCollector is
     }
 
     /**
-     * @notice Unpause fee distribution
+     * @notice Unpause fee distribution (admin or sentinel)
      */
-    function unpause() external onlyRole(DEFAULT_ADMIN_ROLE) {
+    function unpause() external {
+        require(
+            hasRole(DEFAULT_ADMIN_ROLE, msg.sender) || hasRole(SENTINEL_ROLE, msg.sender),
+            "VAMSFeeCollector: not authorized"
+        );
         _unpause();
     }
 
@@ -369,7 +388,30 @@ contract VAMSFeeCollector is
         uint256 amount
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
         if (to == address(0)) revert ZeroAddress();
+        // AUDIT FIX: Deduct from tokenFees accounting
+        if (tokenFees[token] >= amount) {
+            tokenFees[token] -= amount;
+        } else {
+            tokenFees[token] = 0;
+        }
         IERC20(token).safeTransfer(to, amount);
+    }
+    
+    /**
+     * @notice AUDIT FIX INTG03: Reconcile tokenFees with actual contract balance.
+     * @dev Tokens can arrive via direct transfer (not collectFees), leaving
+     *      tokenFees out of sync. This captures the difference as tracked fees.
+     * @param token Token to synchronize
+     */
+    function syncBalance(address token) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        require(supportedTokens[token], "Token not supported");
+        uint256 actualBalance = IERC20(token).balanceOf(address(this));
+        uint256 trackedBalance = tokenFees[token];
+        if (actualBalance > trackedBalance) {
+            uint256 untracked = actualBalance - trackedBalance;
+            tokenFees[token] = actualBalance;
+            emit FeesCollected(address(this), token, untracked);
+        }
     }
 
     // ============ View Functions ============

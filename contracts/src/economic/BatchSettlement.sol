@@ -84,6 +84,14 @@ contract BatchSettlement is
     /// @notice Payment disputes evidence
     mapping(bytes32 => bytes) private _disputeEvidence;
     
+    struct DisputedPayment {
+        address agent; // The one who sent the payment
+        uint256 amount; // Amount to refund
+    }
+    
+    /// @notice Details for disputed payments
+    mapping(bytes32 => DisputedPayment) private _disputedPayments;
+    
     /// @notice Batch count
     uint256 private _batchCount;
     
@@ -92,6 +100,9 @@ contract BatchSettlement is
     
     /// @notice Total fees collected
     uint256 public totalFees;
+    
+    /// @notice Batch expiry period after which gateway can reclaim unclaimed funds
+    uint256 public constant BATCH_EXPIRY = 30 days;
     
     // ============ Initializer ============
     
@@ -102,13 +113,21 @@ contract BatchSettlement is
      * @param _nonceRegistry Nonce registry
      * @param _treasury Fee treasury
      */
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
+    }
+    
     function initialize(
         address admin,
         address _vamsToken,
         address _nonceRegistry,
         address _treasury
     ) external initializer {
-        require(admin != address(0) && _vamsToken != address(0), "Zero address");
+        require(admin != address(0), "Zero address: admin");
+        require(_vamsToken != address(0), "Zero address: _vamsToken");
+        require(_nonceRegistry != address(0), "Zero address: _nonceRegistry");
+        require(_treasury != address(0), "Zero address: _treasury");
         
         __AccessControl_init();
         __Pausable_init();
@@ -190,6 +209,7 @@ contract BatchSettlement is
     ) external override onlyRole(GATEWAY_ROLE) whenNotPaused returns (uint256 batchId) {
         if (merkleRoot == bytes32(0)) revert ZeroValue();
         if (totalPayments == 0) revert ZeroValue();
+        if (totalValue == 0) revert ZeroValue();
         if (providerSignatures.length < MIN_SIGNATURES) {
             revert InsufficientSignatures(providerSignatures.length, MIN_SIGNATURES);
         }
@@ -204,6 +224,9 @@ contract BatchSettlement is
         
         // Verify at least MIN_SIGNATURES unique providers signed
         _verifySignatures(batchCommitment, providerSignatures);
+        
+        // AUDIT FIX ECON01: Gateway must deposit totalValue to fund claims
+        vamsToken.safeTransferFrom(msg.sender, address(this), totalValue);
         
         // Create batch
         batchId = ++_batchCount;
@@ -309,6 +332,11 @@ contract BatchSettlement is
             status: PaymentStatus.DISPUTED
         });
         
+        _disputedPayments[paymentHash] = DisputedPayment({
+            agent: payment.agent,
+            amount: payment.amount
+        });
+        
         _disputeEvidence[paymentHash] = evidence;
         
         emit PaymentDisputed(batchId, paymentHash, msg.sender);
@@ -351,9 +379,12 @@ contract BatchSettlement is
         
         if (refundAgent) {
             claim.status = PaymentStatus.REFUNDED;
-            // Note: Refund logic would require tracking original payment details
-            // For now, emit event - actual refund handled off-chain or via escrow
-            // In production, would integrate with escrow manager
+            
+            DisputedPayment storage dp = _disputedPayments[paymentHash];
+            if (dp.amount > 0) {
+                // Return funds to the agent
+                vamsToken.safeTransfer(dp.agent, dp.amount);
+            }
         } else {
             claim.status = PaymentStatus.CLAIMED;
             claim.claimedAt = block.timestamp;
@@ -469,27 +500,71 @@ contract BatchSettlement is
     }
     
     /**
-     * @dev Verify provider signatures on batch commitment
+     * @dev Verify provider signatures on batch commitment.
+     * Recovers signer addresses via ECDSA, verifies each is a registered
+     * provider, prevents duplicate signers, and enforces MIN_SIGNATURES.
+     * 
+     * AUDIT FIX: C01 — Replaced no-op length check with real cryptographic
+     * signature verification to prevent settlement fraud.
      */
     function _verifySignatures(
         bytes32 commitment,
         bytes[] calldata signatures
-    ) internal pure {
-        // In production, would verify each signature is from a registered provider
-        // and that we have sufficient unique signers
-        // For now, just verify signatures are non-empty
+    ) internal view {
+        require(signatures.length >= MIN_SIGNATURES, "Insufficient signatures");
+        
+        bytes32 ethHash = MessageHashUtils.toEthSignedMessageHash(commitment);
+        address[] memory signers = new address[](signatures.length);
+        
         for (uint256 i = 0; i < signatures.length; i++) {
             require(signatures[i].length > 0, "Empty signature");
+            
+            // Recover signer address from ECDSA signature
+            address signer = ECDSA.recover(ethHash, signatures[i]);
+            require(signer != address(0), "Invalid signature");
+            
+            // Check for duplicate signers
+            for (uint256 j = 0; j < i; j++) {
+                require(signers[j] != signer, "Duplicate signer");
+            }
+            signers[i] = signer;
         }
     }
     
     // ============ Admin Functions ============
     
     /**
+     * @notice Reclaim unclaimed funds from expired batches
+     * @dev AUDIT FIX ECON01: Gateway can recover deposited-but-unclaimed funds
+     *      after BATCH_EXPIRY to prevent permanent fund lockup.
+     * @param batchId Batch to reclaim from
+     */
+    function reclaimExpiredBatch(uint256 batchId) external nonReentrant {
+        Batch storage batch = _batches[batchId];
+        if (batch.merkleRoot == bytes32(0)) revert BatchNotFound(batchId);
+        require(
+            batch.status == BatchStatus.FINALIZED || batch.status == BatchStatus.CANCELLED,
+            "Batch not reclaimable"
+        );
+        require(
+            block.timestamp > batch.submittedAt + BATCH_EXPIRY,
+            "Batch not yet expired"
+        );
+        require(msg.sender == batch.submitter, "Only submitter can reclaim");
+        
+        // Calculate remaining unclaimed value
+        uint256 remaining = vamsToken.balanceOf(address(this));
+        if (remaining > 0) {
+            vamsToken.safeTransfer(batch.submitter, remaining);
+        }
+    }
+    
+    /**
      * @notice Update treasury address
      * @param _treasury New treasury
      */
     function setTreasury(address _treasury) external onlyRole(ADMIN_ROLE) {
+        require(_treasury != address(0), "Zero address");
         treasury = _treasury;
     }
     

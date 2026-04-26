@@ -34,6 +34,27 @@ contract SLAEnforcer is Initializable, AccessControlUpgradeable, ReentrancyGuard
     /// @notice Standard minimum benchmark score mapping to percentage out of 10000 (75%)
     uint256 public constant MIN_SLA_SCORE_BPS = 7500; 
 
+    /// @notice AUDIT FIX INTG04: Emitted when an SLA slash fails
+    event SlashFailed(bytes32 indexed nodeId, address provider, VAMSSlasher.OffenseType offense, string reason);
+    
+    /// @notice Event emitted if updating the benchmark fails silently
+    event BenchmarkUpdateFailed(bytes32 indexed nodeId, string reason);
+    
+    /// @notice AUDIT FIX INTG04: Pending slashes that failed initial execution
+    struct PendingSlash {
+        bytes32 nodeId;
+        address provider;
+        VAMSSlasher.OffenseType offense;
+        uint256 timestamp;
+        bool retried;
+    }
+    PendingSlash[] public pendingSlashes;
+
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
+    }
+
     function initialize(
         address _admin,
         address _registry,
@@ -95,7 +116,13 @@ contract SLAEnforcer is Initializable, AccessControlUpgradeable, ReentrancyGuard
         if (node.provider == address(0)) revert NodeNotRegistered();
 
         // 4. Update Registry with the latest Benchmark
-        try registry.updateBenchmark(report.nodeId, report.metricsScore, report.timestamp) {} catch {}
+        // M19: We intentionally swallow the error here so that a failure to update the benchmark 
+        // doesn't block the SLA slashing enforcement below. Node is safely initialized.
+        try registry.updateBenchmark(report.nodeId, report.metricsScore, report.timestamp) {} catch Error(string memory reason) {
+            emit BenchmarkUpdateFailed(report.nodeId, reason);
+        } catch {
+            emit BenchmarkUpdateFailed(report.nodeId, "Unknown error");
+        }
 
         // 5. Enforce SLA Rules (auto-slashing logic)
         if (report.metricsScore < MIN_SLA_SCORE_BPS) {
@@ -118,9 +145,49 @@ contract SLAEnforcer is Initializable, AccessControlUpgradeable, ReentrancyGuard
             // Execute programmable slash
             try slasher.slashSLA(node.provider, oType, penaltyBps) returns (VAMSSlasher.SlashResult memory res) {
                 emit SLAPenaltyEnforced(report.nodeId, node.provider, res.slashAmount);
+            } catch Error(string memory reason) {
+                // AUDIT FIX INTG04: Emit failure event and queue for retry
+                emit SlashFailed(report.nodeId, node.provider, oType, reason);
+                pendingSlashes.push(PendingSlash({
+                    nodeId: report.nodeId,
+                    provider: node.provider,
+                    offense: oType,
+                    timestamp: block.timestamp,
+                    retried: false
+                }));
             } catch {
-                // Continue execution. Real implementation would emit a SlasherReverted event.
+                emit SlashFailed(report.nodeId, node.provider, oType, "Unknown revert");
+                pendingSlashes.push(PendingSlash({
+                    nodeId: report.nodeId,
+                    provider: node.provider,
+                    offense: oType,
+                    timestamp: block.timestamp,
+                    retried: false
+                }));
             }
         }
+    }
+
+    /**
+     * @notice AUDIT FIX INTG04: Retry a pending slash that previously failed
+     * @param index Index into the pendingSlashes array
+     */
+    function retryPendingSlash(uint256 index) external onlyRole(ADMIN_ROLE) {
+        require(index < pendingSlashes.length, "Invalid index");
+        PendingSlash storage ps = pendingSlashes[index];
+        require(!ps.retried, "Already retried");
+        
+        ps.retried = true;
+        try slasher.slashSLA(ps.provider, ps.offense, 0) returns (VAMSSlasher.SlashResult memory res) {
+            emit SLAPenaltyEnforced(ps.nodeId, ps.provider, res.slashAmount);
+        } catch Error(string memory reason) {
+            emit SlashFailed(ps.nodeId, ps.provider, ps.offense, reason);
+            ps.retried = false; // Allow another retry
+        }
+    }
+    
+    /// @notice Get count of pending slashes
+    function pendingSlashCount() external view returns (uint256) {
+        return pendingSlashes.length;
     }
 }

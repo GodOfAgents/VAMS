@@ -89,6 +89,12 @@ contract TransactionCompensation is
     /// @notice Pending claim IDs
     uint256[] public pendingClaimIds;
 
+    // ============ Events ============
+
+    /// @notice Emitted when compensation pool is funded
+    /// @dev AUDIT FIX: C02 — Added to track pool funding by admin
+    event PoolFunded(address indexed funder, uint256 amount);
+
     // ============ Initializer ============
 
     /// @custom:oz-upgrades-unsafe-allow constructor
@@ -296,11 +302,16 @@ contract TransactionCompensation is
     // ============ Admin Functions ============
 
     /**
-     * @notice Fund the compensation pool from insurance
+     * @notice Fund the compensation pool
      * @param amount Amount to fund
+     * @dev AUDIT FIX: C02 — Changed from safeTransferFrom(insuranceFund) to
+     * safeTransferFrom(msg.sender) to prevent unauthorized insurance fund drainage.
+     * The caller must provide and approve the tokens themselves.
      */
     function fundPool(uint256 amount) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        vamsToken.safeTransferFrom(insuranceFund, address(this), amount);
+        require(amount > 0, "Zero amount");
+        vamsToken.safeTransferFrom(msg.sender, address(this), amount);
+        emit PoolFunded(msg.sender, amount);
     }
 
     /**

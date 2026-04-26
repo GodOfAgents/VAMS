@@ -65,7 +65,7 @@ contract VAMSSentinelTest is BaseTest {
     address public keeper2;
     address public keeper3;
 
-    uint256 public constant KEEPER_BOND = 10_000e18;
+    uint256 public constant KEEPER_BOND = 100_000e18;
 
     function setUp() public override {
         // Warp to a realistic timestamp so cooldown checks don't falsely trigger
@@ -114,6 +114,9 @@ contract VAMSSentinelTest is BaseTest {
 
         vm.prank(keeper3);
         sentinel.registerKeeper(KEEPER_BOND);
+
+        // Advance blocks past KEEPER_VOTING_DELAY to allow keepers to vote
+        vm.roll(block.number + 100);
     }
 
     // ═══════════════════ Initialization ═══════════════════
@@ -265,6 +268,7 @@ contract VAMSSentinelTest is BaseTest {
     function test_L3_PriceCrash_TriggersPause() public {
         // Set price anchor
         priceOracle.setPrice(1e18); // $1.00
+        vm.prank(keeper1);
         sentinel.updatePriceAnchor();
 
         // Crash to $0.40 (60% drop > 50% threshold)
@@ -277,6 +281,7 @@ contract VAMSSentinelTest is BaseTest {
 
     function test_L3_SmallDip_NoPause() public {
         priceOracle.setPrice(1e18);
+        vm.prank(keeper1);
         sentinel.updatePriceAnchor();
 
         // 20% dip — below 50% threshold

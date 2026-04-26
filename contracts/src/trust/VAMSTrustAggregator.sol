@@ -1,9 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import {VAMSUpgradeableBase} from "../base/VAMSUpgradeableBase.sol";
 import {IVAMSTrustAggregator} from "../interfaces/IVAMSTrustAggregator.sol";
 import {IVAMSProofPlugin} from "../interfaces/IVAMSProofPlugin.sol";
 
@@ -20,9 +18,7 @@ import {IVAMSProofPlugin} from "../interfaces/IVAMSProofPlugin.sol";
  *      - New plugin state is appended AFTER existing storage.
  */
 contract VAMSTrustAggregator is 
-    Initializable, 
-    OwnableUpgradeable, 
-    UUPSUpgradeable, 
+    VAMSUpgradeableBase, 
     IVAMSTrustAggregator 
 {
     // ============================================================
@@ -70,7 +66,7 @@ contract VAMSTrustAggregator is
     }
 
     function initialize() public initializer {
-        __Ownable_init(msg.sender);
+        __VAMSUpgradeableBase_init(msg.sender);
 
         // Initialize Default Legacy Weights
         
@@ -189,7 +185,7 @@ contract VAMSTrustAggregator is
      * @notice Register a new proof plugin.
      * @dev Only owner/DAO. Reverts if a plugin for this proof type is already registered.
      */
-    function registerProofPlugin(IVAMSProofPlugin plugin) external override onlyOwner {
+    function registerProofPlugin(IVAMSProofPlugin plugin) external override onlyRole(UPGRADER_ROLE) {
         bytes32 pType = plugin.proofType();
         require(address(_proofPlugins[pType]) == address(0), "Plugin type already registered");
         require(address(plugin) != address(0), "Invalid plugin address");
@@ -205,7 +201,7 @@ contract VAMSTrustAggregator is
      * @notice Deregister an existing proof plugin.
      * @dev Only owner/DAO. Existing proofs from this plugin remain valid (scores kept).
      */
-    function deregisterProofPlugin(bytes32 pluginProofType) external override onlyOwner {
+    function deregisterProofPlugin(bytes32 pluginProofType) external override onlyRole(UPGRADER_ROLE) {
         address pluginAddr = address(_proofPlugins[pluginProofType]);
         require(pluginAddr != address(0), "Plugin not registered");
 
@@ -318,9 +314,9 @@ contract VAMSTrustAggregator is
 
     // --- Admin ---
     
-    function setProofWeight(ProofType proofType, uint256 weight) external onlyOwner {
+    function setProofWeight(ProofType proofType, uint256 weight) external onlyRole(UPGRADER_ROLE) {
         proofWeights[proofType] = weight;
     }
 
-    function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
+    // _authorizeUpgrade is implemented in VAMSUpgradeableBase
 }

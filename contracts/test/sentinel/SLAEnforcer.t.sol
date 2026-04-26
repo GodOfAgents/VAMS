@@ -7,6 +7,7 @@ import "../../src/slashing/VAMSSlasher.sol";
 import "../../src/interfaces/IVAMSHardwareRegistry.sol";
 import "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
+import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
 contract MockHardwareRegistry is IVAMSHardwareRegistry {
     mapping(bytes32 => VAMSResourceNode) public nodes;
@@ -78,14 +79,13 @@ contract SLAEnforcerTest is Test {
         registry = new MockHardwareRegistry();
         slasher = new MockSlasher();
         
-        enforcer = new SLAEnforcer();
-        
-        // Let Enforcer initialize itself with mocks
-        enforcer.initialize(
-            admin,
-            address(registry),
-            address(slasher)
+        // Deploy SLAEnforcer behind proxy (AC01: _disableInitializers)
+        SLAEnforcer impl = new SLAEnforcer();
+        ERC1967Proxy proxy = new ERC1967Proxy(
+            address(impl),
+            abi.encodeCall(SLAEnforcer.initialize, (admin, address(registry), address(slasher)))
         );
+        enforcer = SLAEnforcer(address(proxy));
 
         // Prep the registry with our mock node
         registry.setNode(nodeId, provider);

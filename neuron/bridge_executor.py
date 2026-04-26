@@ -309,7 +309,13 @@ class MultiISMVerifier:
                 attestation=f"phala_att_{message_hash[:8]}",
             )
         # Production: call Phala TEE attestation API
-        raise NotImplementedError("Live Phala ISM not yet integrated")
+        self.logger.error("Live Phala ISM not yet integrated")
+        return ISMVerification(
+            ism_type=ISMType.TEE_PHALA,
+            verified=False,
+            latency_ms=0.0,
+            attestation="",
+        )
 
     def _verify_oracle(self, message_hash: str) -> ISMVerification:
         """Oracle-based verification via Chainlink CCIP."""
@@ -320,7 +326,13 @@ class MultiISMVerifier:
                 latency_ms=120.0,
                 attestation=f"ccip_att_{message_hash[:8]}",
             )
-        raise NotImplementedError("Live Chainlink CCIP ISM not yet integrated")
+        self.logger.error("Live Chainlink CCIP ISM not yet integrated")
+        return ISMVerification(
+            ism_type=ISMType.ORACLE_CHAINLINK,
+            verified=False,
+            latency_ms=0.0,
+            attestation="",
+        )
 
     def _verify_multisig(self, message_hash: str) -> ISMVerification:
         """Multisig verification via VAMS DAO signers (5/9 threshold)."""
@@ -331,7 +343,13 @@ class MultiISMVerifier:
                 latency_ms=200.0,
                 attestation=f"dao_att_{message_hash[:8]}",
             )
-        raise NotImplementedError("Live DAO multisig ISM not yet integrated")
+        self.logger.error("Live DAO multisig ISM not yet integrated")
+        return ISMVerification(
+            ism_type=ISMType.MULTISIG_DAO,
+            verified=False,
+            latency_ms=0.0,
+            attestation="",
+        )
 
     def get_stats(self) -> dict:
         return {**self._stats}
@@ -605,13 +623,29 @@ class BridgeFallbackHandler:
         if route and route.secondary_transport:
             logger.warning(
                 f"Primary bridge failed for {route_key}, "
-                f"trying {route.secondary_transport.value}"
+                f"trying secondary: {route.secondary_transport.value}"
             )
-            # Secondary attempt (use executor again, it will handle)
-            result2 = self.executor.execute(destination, payload, source)
+            
+            # AUDIT FIX OFC02: Actually use the secondary transport.
+            # Previously, this code re-called executor.execute() which just
+            # re-selected the same primary transport from the matrix.
+            # Create a temporary route override with the secondary as primary.
+            original_primary = route.primary_transport
+            try:
+                # Temporarily swap primary/secondary so executor uses the fallback
+                route.primary_transport = route.secondary_transport
+                route.secondary_transport = None
+                
+                result2 = self.executor.execute(destination, payload, source)
+            finally:
+                # Restore original route configuration
+                route.secondary_transport = route.primary_transport
+                route.primary_transport = original_primary
+            
             if result2.status == BridgeStatus.VERIFIED:
                 self._stats["secondary_success"] += 1
                 result2.status = BridgeStatus.FALLBACK
+                self.executor._stats["fallbacks_used"] = self.executor._stats.get("fallbacks_used", 0) + 1
                 return result2
 
         # Tertiary: manual queue

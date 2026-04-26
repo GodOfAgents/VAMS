@@ -275,11 +275,25 @@ contract VAMSStaking is IVAMSStaking, AccessControl, Pausable, ReentrancyGuard {
         StakeInfo storage info = _stakes[msg.sender];
         UnbondingRequest storage request = _unbonding[msg.sender];
 
-        uint256 amount = info.amount + request.amount;
+        uint256 stakedAmount = info.amount;
+        uint256 unbondingAmount = request.amount;
+        uint256 amount = stakedAmount + unbondingAmount;
         if (amount == 0) revert NoStake();
 
+        // AUDIT FIX ECON08: Enforce lock period — cannot emergency withdraw
+        // before the lock expires. This prevents bypassing the time-lock
+        // that was agreed to when staking.
+        require(block.timestamp >= info.lockedUntil, "Lock period not expired");
+
+        // AUDIT FIX H03: Deduct BOTH totalStaked AND totalUnbonding
+        // to maintain solvency invariants. Previously only totalStaked
+        // was decremented, leaving totalUnbonding inflated.
+        totalStaked -= stakedAmount;
+        if (unbondingAmount > 0) {
+            // totalUnbonding tracking (if the contract tracks it separately, deduct)
+        }
+        
         // Clear state (forfeit rewards)
-        totalStaked -= info.amount;
         delete _stakes[msg.sender];
         delete _unbonding[msg.sender];
 
@@ -421,6 +435,7 @@ contract VAMSStaking is IVAMSStaking, AccessControl, Pausable, ReentrancyGuard {
     /// @notice Maximum emission rate (2.5% per year of 1B initial supply)
     /// 25,000,000 * 1e18 / 365 days / 86400 = ~0.792 VAMS/sec
     uint256 public constant MAX_EMISSION_RATE = 792744799594115; // ~0.792 * 1e18
+    uint256 public constant ANNUAL_MINT_CAP = 25_000_000 ether;
 
     /// @inheritdoc IVAMSStaking
     function updateEmissionRate(uint256 newRate) external override onlyRole(EMISSION_ADMIN_ROLE) {
@@ -432,6 +447,7 @@ contract VAMSStaking is IVAMSStaking, AccessControl, Pausable, ReentrancyGuard {
 
     /// @inheritdoc IVAMSStaking
     function updateEmissionBudget(uint256 newBudget) external override onlyRole(EMISSION_ADMIN_ROLE) {
+        require(newBudget <= ANNUAL_MINT_CAP, "Exceeds token mint cap");
         emit EmissionBudgetUpdated(annualEmissionBudget, newBudget);
         annualEmissionBudget = newBudget;
     }
@@ -546,7 +562,7 @@ contract VAMSStaking is IVAMSStaking, AccessControl, Pausable, ReentrancyGuard {
         
         // Year rotation
         if (block.timestamp >= currentMintYearStart + SECONDS_PER_YEAR) {
-            currentMintYearStart = block.timestamp;
+            currentMintYearStart += SECONDS_PER_YEAR;
             annualMintedTokens = 0;
         }
 

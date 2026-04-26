@@ -38,8 +38,12 @@ class CircuitBreaker:
         if self.state == "TRIPPED":
             # Check for auto-recovery cooldown
             if time.time() - self.last_trip_time > BREAKER_COOLDOWN_SEC:
-                self._attempt_recovery()
-                return True
+                # OFC05: Enforce health check before auto-reset
+                if self._verify_health():
+                    self._attempt_recovery()
+                    return True
+                else:
+                    logger.warning("Breaker cooldown elapsed, but health check failed. Still tripped.")
             return False
             
         return True # RECOVERING acts as ARMED but logging is different
@@ -63,6 +67,10 @@ class CircuitBreaker:
 
     def check_market_conditions(self, vams_price_usd: float):
         """Verify market health."""
+        if vams_price_usd is None or vams_price_usd <= 0:
+            self.trip(f"Invalid market price data: {vams_price_usd}")
+            return
+            
         if vams_price_usd < BREAKER_PRICE_FLOOR:
             self.trip(f"Price crash protection: ${vams_price_usd} < floor ${BREAKER_PRICE_FLOOR}")
 
@@ -77,6 +85,24 @@ class CircuitBreaker:
         
         logger.critical(f"🛑 CIRCUIT BREAKER TRIPPED: {reason}")
         logger.critical(f"   System HALTED for {BREAKER_COOLDOWN_SEC}s")
+
+    def _verify_health(self) -> bool:
+        """Enforces operational and economic health before auto-reset (OFC05)."""
+        try:
+            # 1. Exposure must have dropped to safe levels (< 80% max)
+            if self.current_exposure > (BREAKER_MAX_EXPOSURE * 0.8):
+                logger.warning("Health check failed: Exposure still too high.")
+                return False
+                
+            # 2. Cannot auto-reset if previous failure was consecutive max-out
+            if self.consecutive_failures >= BREAKER_MAX_CONSECUTIVE_FAILURES:
+                logger.warning("Health check failed: System requires manual intervention due to consecutive failures.")
+                return False
+                
+            return True
+        except Exception as e:
+            logger.error(f"Health check execution failed: {e}")
+            return False
 
     def _attempt_recovery(self):
         """Try to auto-reset the breaker."""

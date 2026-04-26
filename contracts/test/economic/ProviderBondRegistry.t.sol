@@ -4,6 +4,7 @@ pragma solidity ^0.8.20;
 import "../utils/BaseTest.sol";
 import "../../src/economic/ProviderBondRegistry.sol";
 import "../../src/economic/VAMSInsuranceFund.sol";
+import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
 /**
  * @title ProviderBondRegistryTest
@@ -21,8 +22,8 @@ contract ProviderBondRegistryTest is BaseTest {
     function setUp() public override {
         super.setUp();
         
-        // Deploy insurance fund first (needed by registry)
-        insurance = new VAMSInsuranceFund();
+        // Deploy insurance fund behind proxy (AC01: _disableInitializers)
+        VAMSInsuranceFund insuranceImpl = new VAMSInsuranceFund();
         
         // Create guardians array for insurance fund initialization
         address[] memory guardians = new address[](3);
@@ -30,8 +31,11 @@ contract ProviderBondRegistryTest is BaseTest {
         guardians[1] = guardian2;
         guardians[2] = guardian3;
         
-        // Initialize with (admin, token, stakingContract, guardians)
-        insurance.initialize(admin, address(token), address(0), guardians);
+        ERC1967Proxy insuranceProxy = new ERC1967Proxy(
+            address(insuranceImpl),
+            abi.encodeCall(VAMSInsuranceFund.initialize, (admin, address(token), address(0), guardians))
+        );
+        insurance = VAMSInsuranceFund(address(insuranceProxy));
         vm.label(address(insurance), "InsuranceFund");
         
         // Deploy registry

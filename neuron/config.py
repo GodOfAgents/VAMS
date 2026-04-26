@@ -36,11 +36,11 @@ AMOY_CONFIG = {
     "rpc": os.getenv("POLYGON_AMOY_RPC_URL", "https://rpc-amoy.polygon.technology/"),
     "chain_id": 80002,
     "contracts": {
-        "token": "0x62a705eD1cAbBBafFCd99e9b2497024031329fd4",
-        "registry": "0x7e290350448cDC8A22e4cF4Ad377B1E595CDd347",
-        "staking": "0x0e6aE5B11b9a73A5671B5F8551c0cF3EB82186C2",
-        "vesting": "0x92d20dd7A48268Fef76bA14A4a9b6620d0179209",
-        "timelock": "0xabCC69eff15753B547E02AB56FC0aa62765fb768"
+        "token": os.getenv("VAMS_CONTRACT_TOKEN", "0x62a705eD1cAbBBafFCd99e9b2497024031329fd4"),
+        "registry": os.getenv("VAMS_CONTRACT_REGISTRY", "0x7e290350448cDC8A22e4cF4Ad377B1E595CDd347"),
+        "staking": os.getenv("VAMS_CONTRACT_STAKING", "0x0e6aE5B11b9a73A5671B5F8551c0cF3EB82186C2"),
+        "vesting": os.getenv("VAMS_CONTRACT_VESTING", "0x92d20dd7A48268Fef76bA14A4a9b6620d0179209"),
+        "timelock": os.getenv("VAMS_CONTRACT_TIMELOCK", "0xabCC69eff15753B547E02AB56FC0aa62765fb768")
     }
 }
 

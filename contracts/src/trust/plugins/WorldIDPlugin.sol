@@ -42,6 +42,7 @@ contract WorldIDPlugin is IVAMSProofPlugin {
         bytes32 /* deliveryHash */,
         bytes calldata proofData
     ) external view override returns (bool valid) {
+        require(worldIdVerifier != address(0), "WorldIDPlugin: not initialized");
         if (proofData.length == 0) return false;
 
         WorldIDProof memory worldProof = abi.decode(proofData, (WorldIDProof));

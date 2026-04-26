@@ -46,8 +46,9 @@ contract StakingGovernanceIntegration is BaseTest {
         vamsToken.transfer(address(staking), 10_000_000 ether);
         vm.stopPrank();
         
-        // Exempt staking contract from anti-whale limits
+        // Exempt staking contract from anti-whale limits and grant MINTER_ROLE
         vm.startPrank(admin);
+        vamsToken.grantRole(vamsToken.MINTER_ROLE(), address(staking));
         vamsToken.addExemptAddress(address(staking));
         vm.stopPrank();
     }

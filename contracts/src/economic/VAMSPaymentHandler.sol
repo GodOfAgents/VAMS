@@ -36,6 +36,9 @@ contract VAMSPaymentHandler is
     
     /// @notice Operator role for emergency functions
     bytes32 public constant OPERATOR_ROLE = keccak256("OPERATOR_ROLE");
+
+    /// @notice INTG01: Role for VAMSSentinel autonomous emergency pause
+    bytes32 public constant SENTINEL_ROLE = keccak256("SENTINEL_ROLE");
     
     /// @notice Dispute window duration (24 hours)
     uint256 public constant DISPUTE_WINDOW = 24 hours;
@@ -288,11 +291,9 @@ contract VAMSPaymentHandler is
         
         // Calculate fees
         uint256 totalSettlement = balanceA + balanceB;
-        uint256 fee = (totalSettlement * SETTLEMENT_FEE_BPS) / BPS_DENOMINATOR;
-        
-        // Deduct fees proportionally
-        uint256 feeA = (balanceA * fee) / totalSettlement;
-        uint256 feeB = fee - feeA;
+        uint256 feeA = (balanceA * SETTLEMENT_FEE_BPS) / BPS_DENOMINATOR;
+        uint256 feeB = (balanceB * SETTLEMENT_FEE_BPS) / BPS_DENOMINATOR;
+        uint256 fee = feeA + feeB;
         
         uint256 payoutA = balanceA - feeA;
         uint256 payoutB = balanceB - feeB;
@@ -351,16 +352,32 @@ contract VAMSPaymentHandler is
     }
     
     /**
+     * @notice INTG01: Sentinel-callable emergency pause (implements IPausableTarget)
+     * @param reason Human-readable reason for the pause
+     */
+    function emergencyPause(string calldata reason) external onlyRole(SENTINEL_ROLE) {
+        emit EmergencyPauseActivated(msg.sender, reason);
+        _pause();
+    }
+
+    /// @dev Emitted when Sentinel triggers an emergency pause
+    event EmergencyPauseActivated(address indexed sentinel, string reason);
+
+    /**
      * @notice Pause channel operations
      */
     function pause() external onlyRole(OPERATOR_ROLE) {
         _pause();
     }
-    
+
     /**
      * @notice Unpause channel operations
      */
-    function unpause() external onlyRole(OPERATOR_ROLE) {
+    function unpause() external {
+        require(
+            hasRole(OPERATOR_ROLE, msg.sender) || hasRole(SENTINEL_ROLE, msg.sender),
+            "VAMSPaymentHandler: not authorized"
+        );
         _unpause();
     }
     

@@ -56,7 +56,7 @@ except ImportError:
 
 VERSION = "1.0.0"
 DEMO_AGENT_NAME = "TradingBot"
-DEMO_AGENT_ID = "0x7a3f89c2e4b1d6a8f0c2e4b1d6a8f0c2"
+DEMO_AGENT_ID = "0x7a3f89c2e4b1d6a8f0c2e4b1d6a8f0c27a3f89c2e4b1d6a8f0c2e4b1d6a8f0c2"
 
 # Colors for different states (ANSI codes for fallback)
 COLORS = {

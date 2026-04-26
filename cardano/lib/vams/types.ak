@@ -131,7 +131,8 @@ pub type ClaimDatum {
 /// Redeemer actions for the InsuranceFund validator
 pub type InsuranceFundRedeemer {
   /// Deposit from bridge (ICB relay proof required)
-  Deposit { amount: Int, bridge_proof: ByteArray }
+  /// AUDIT FIX: AK02 — Added payload_hash field to separate proof from expected hash
+  Deposit { amount: Int, bridge_proof: ByteArray, payload_hash: ByteArray }
   /// Submit a new claim
   SubmitClaim { amount: Int, evidence_hash: ByteArray }
   /// Guardian approves a claim
@@ -158,6 +159,10 @@ pub type AgentDatum {
   is_active: Bool,
   /// Staked amount (in lovelace equivalent)
   staked_amount: Int,
+  /// AUDIT FIX: AK05 — List of authorized slasher verification key hashes.
+  /// Only these keys may sign SlashAgent transactions. An empty list means
+  /// slashing is disabled for this agent record (safe default).
+  authorized_slashers: List<ByteArray>,
 }
 
 /// Redeemer actions for the AgentRegistry validator

@@ -1,0 +1,1 @@
+    Compiling GodOfAgents/vams-cardano 0.1.0 (C:\Users\aseem\Desktop\VAMS-main\VAMS-main\cardano)

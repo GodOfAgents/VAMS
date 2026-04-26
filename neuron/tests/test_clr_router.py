@@ -46,7 +46,7 @@ class TestCLRouter(unittest.TestCase):
 
     def test_routing_privacy_sensitive(self):
         # User wants PRIVACY
-        intent = TransactionIntent(value_usd=100.0, max_latency_ms=60000, requires_privacy=True)
+        intent = TransactionIntent(value_usd=100.0, max_latency_ms=60000, requires_privacy=True, requires_compliance_privacy=True)
         decision = self.router.route(intent, TrustTier.SILVER)
         
         self.assertEqual(decision.chain, "Midnight")

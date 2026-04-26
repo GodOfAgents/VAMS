@@ -239,6 +239,7 @@ class CLRouter:
     def __init__(self, oracle: Optional[OracleManager] = None):
         self.oracle = oracle or OracleManager()
         self.eth_price = 3000.0  # Fallback USD price
+        self.MAX_ROUTING_LOG = 10_000
         self._routing_log: List[RoutingDecision] = []
         self._stats = {
             "total_routed": 0,
@@ -324,6 +325,8 @@ class CLRouter:
             self._stats["by_chain"].get(decision.chain, 0) + 1
         )
         self._routing_log.append(decision)
+        if len(self._routing_log) > self.MAX_ROUTING_LOG:
+            self._routing_log = self._routing_log[-self.MAX_ROUTING_LOG:]
 
         logger.info(
             f"Routed tx ({metadata.use_case_id or 'unknown'}) -> {decision.chain} "
@@ -626,7 +629,6 @@ class CLRouter:
     ) -> float:
         """
         Stage 1: Utility Score (lower is better for sort).
-        U = -(w_lat * log(lat) + w_cost * congestion/20)
         """
         lat = max(1.0, float(metrics.block_time_ms))
         congestion = max(1.0, float(metrics.congestion_pct))
@@ -634,7 +636,14 @@ class CLRouter:
         w_lat = 2.0 if metadata.max_latency_ms < 5000 else 0.5
         w_cost = 2.0 if metadata.value_usd < 100 else 0.5
 
-        return -(w_lat * math.log(lat)) - (w_cost * congestion / 20.0)
+        base_utility = (w_lat * math.log(lat)) + (w_cost * congestion / 20.0)
+        
+        penalty = 0.0
+        if getattr(metrics, 'stale', False):
+            # Penalty for stale metrics
+            penalty += max(5.0, metrics.age_seconds / 10.0)
+            
+        return base_utility + penalty
 
     # ─────────────────────────────────────────────────────────────
     # HELPERS

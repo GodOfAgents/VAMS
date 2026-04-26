@@ -51,6 +51,8 @@ contract VAMSAgentRegistry is
     bytes32 public constant CHALLENGER_ROLE = keccak256("CHALLENGER_ROLE");
     bytes32 public constant GUARDIAN_ROLE = keccak256("GUARDIAN_ROLE");
     bytes32 public constant VERIFIER_ROLE = keccak256("VERIFIER_ROLE");
+    /// @notice INTG01: Role for VAMSSentinel autonomous emergency pause
+    bytes32 public constant SENTINEL_ROLE = keccak256("SENTINEL_ROLE");
     
     // ============ Enums ============
     
@@ -506,16 +508,32 @@ contract VAMSAgentRegistry is
     }
     
     /**
-     * @notice Emergency pause
+     * @notice INTG01: Sentinel-callable emergency pause (implements IPausableTarget)
+     * @param reason Human-readable reason for the pause
+     */
+    function emergencyPause(string calldata reason) external onlyRole(SENTINEL_ROLE) {
+        emit EmergencyPauseActivated(msg.sender, reason);
+        _pause();
+    }
+
+    /// @dev Emitted when Sentinel triggers an emergency pause
+    event EmergencyPauseActivated(address indexed sentinel, string reason);
+
+    /**
+     * @notice Emergency pause (guardian fallback)
      */
     function pause() external onlyRole(GUARDIAN_ROLE) {
         _pause();
     }
-    
+
     /**
-     * @notice Unpause
+     * @notice Unpause (admin or sentinel)
      */
-    function unpause() external onlyRole(DEFAULT_ADMIN_ROLE) {
+    function unpause() external {
+        require(
+            hasRole(DEFAULT_ADMIN_ROLE, msg.sender) || hasRole(SENTINEL_ROLE, msg.sender),
+            "VAMSAgentRegistry: not authorized"
+        );
         _unpause();
     }
     

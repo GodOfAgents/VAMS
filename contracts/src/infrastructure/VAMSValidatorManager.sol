@@ -139,6 +139,11 @@ contract VAMSValidatorManager is
         __Pausable_init();
         __ReentrancyGuard_init();
         
+        // AC02: Set DEFAULT_ADMIN_ROLE as the admin for all operational roles
+        _setRoleAdmin(UPGRADER_ROLE, DEFAULT_ADMIN_ROLE);
+        _setRoleAdmin(GOVERNANCE_ROLE, DEFAULT_ADMIN_ROLE);
+        _setRoleAdmin(EMERGENCY_ROLE, DEFAULT_ADMIN_ROLE);
+        
         _grantRole(DEFAULT_ADMIN_ROLE, _admin);
         _grantRole(GOVERNANCE_ROLE, _admin);
         _grantRole(EMERGENCY_ROLE, _admin);

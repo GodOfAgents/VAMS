@@ -56,6 +56,9 @@ abstract contract VAMSUpgradeableBase is
         
         if (_admin == address(0)) revert InvalidAddress();
         
+        // AC02: Set DEFAULT_ADMIN_ROLE as the admin of UPGRADER_ROLE
+        _setRoleAdmin(UPGRADER_ROLE, DEFAULT_ADMIN_ROLE);
+        
         _grantRole(DEFAULT_ADMIN_ROLE, _admin);
         _grantRole(UPGRADER_ROLE, _admin);
         governancePhase = 1;

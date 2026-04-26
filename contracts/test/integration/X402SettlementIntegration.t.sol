@@ -6,6 +6,7 @@ import "../../src/economic/X402EscrowManager.sol";
 import "../../src/economic/X402NonceRegistry.sol";
 import "../../src/economic/ProviderBondRegistry.sol";
 import "../../src/economic/VAMSInsuranceFund.sol";
+import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
 /**
  * @title X402SettlementIntegration
@@ -27,13 +28,17 @@ contract X402SettlementIntegration is BaseTest {
     function setUp() public override {
         super.setUp();
         
-        // Deploy insurance fund
-        insurance = new VAMSInsuranceFund();
+        // Deploy insurance fund behind proxy (AC01: _disableInitializers)
+        VAMSInsuranceFund insuranceImpl = new VAMSInsuranceFund();
         address[] memory guardians = new address[](3);
         guardians[0] = guardian1;
         guardians[1] = guardian2;
         guardians[2] = guardian3;
-        insurance.initialize(admin, address(token), address(0), guardians);
+        ERC1967Proxy insuranceProxy = new ERC1967Proxy(
+            address(insuranceImpl),
+            abi.encodeCall(VAMSInsuranceFund.initialize, (admin, address(token), address(0), guardians))
+        );
+        insurance = VAMSInsuranceFund(address(insuranceProxy));
         
         // Deploy nonce registry
         nonceRegistry = new X402NonceRegistry();
@@ -43,20 +48,19 @@ contract X402SettlementIntegration is BaseTest {
         bondRegistry = new ProviderBondRegistry();
         bondRegistry.initialize(admin, address(token), address(insurance));
         
-        // Deploy escrow manager
-        escrow = new X402EscrowManager();
-        escrow.initialize(
-            admin,
-            address(token),
-            address(nonceRegistry),
-            address(bondRegistry),
-            treasury
+        // Deploy escrow manager behind proxy (AC01: _disableInitializers)
+        X402EscrowManager escrowImpl = new X402EscrowManager();
+        ERC1967Proxy escrowProxy = new ERC1967Proxy(
+            address(escrowImpl),
+            abi.encodeCall(X402EscrowManager.initialize, (admin, address(token), address(nonceRegistry), address(bondRegistry), treasury))
         );
+        escrow = X402EscrowManager(address(escrowProxy));
         
         // Setup roles
         vm.startPrank(admin);
         nonceRegistry.authorizeSettler(address(escrow));
         bondRegistry.grantRole(bondRegistry.ESCROW_ROLE(), address(escrow));
+        escrow.grantRole(escrow.VERIFIER_ROLE(), address(this));
         vm.stopPrank();
     }
     
@@ -121,6 +125,7 @@ contract X402SettlementIntegration is BaseTest {
         
         IX402EscrowManager.ServiceProof memory proof = _createServiceProof();
         
+        escrow.approveServiceProof(escrowId);
         vm.prank(provider1);
         escrow.claimEscrow(escrowId, proof, bytes32(0));
         
@@ -135,6 +140,11 @@ contract X402SettlementIntegration is BaseTest {
         IProviderBondRegistry.ProviderBond memory bondAfter = bondRegistry.getBond(provider1);
         assertEq(bondAfter.pendingSettlements, 0);
         assertEq(bondAfter.activeRequests, 0);
+        
+        // H02: Funds are held for 72h dispute window. Warp past it and withdraw.
+        vm.warp(block.timestamp + 72 hours + 1);
+        vm.prank(provider1);
+        escrow.withdrawClaimed(escrowId);
         
         // Verify fee distribution (0.05% = 5 bps)
         uint256 expectedFee = (paymentAmount * 5) / 10000;
@@ -204,6 +214,7 @@ contract X402SettlementIntegration is BaseTest {
         
         IX402EscrowManager.ServiceProof memory proof = _createServiceProof();
         
+        escrow.approveServiceProof(escrowId);
         vm.prank(provider1);
         escrow.claimEscrow(escrowId, proof, bytes32(0));
         
@@ -255,11 +266,11 @@ contract X402SettlementIntegration is BaseTest {
         // Claim all
         IX402EscrowManager.ServiceProof memory proof = _createServiceProof();
         
-        vm.startPrank(provider1);
         for (uint256 i = 0; i < 3; i++) {
+            escrow.approveServiceProof(escrowIds[i]);
+            vm.prank(provider1);
             escrow.claimEscrow(escrowIds[i], proof, bytes32(0));
         }
-        vm.stopPrank();
         
         // Verify all cleared
         bond = bondRegistry.getBond(provider1);
@@ -328,6 +339,7 @@ contract X402SettlementIntegration is BaseTest {
         // Provider cannot claim with wrong preimage
         IX402EscrowManager.ServiceProof memory proof = _createServiceProof();
         
+        escrow.approveServiceProof(escrowId);
         vm.prank(provider1);
         vm.expectRevert();
         escrow.claimEscrow(escrowId, proof, keccak256("wrong preimage"));
@@ -385,8 +397,14 @@ contract X402SettlementIntegration is BaseTest {
         
         IX402EscrowManager.ServiceProof memory proof = _createServiceProof();
         
+        escrow.approveServiceProof(escrowId);
         vm.prank(provider1);
         escrow.claimEscrow(escrowId, proof, bytes32(0));
+        
+        // H02: Warp past 72h dispute window and withdraw
+        vm.warp(block.timestamp + 72 hours + 1);
+        vm.prank(provider1);
+        escrow.withdrawClaimed(escrowId);
         
         // Verify exact fee calculation
         uint256 expectedFee = (amount * 5) / 10000;

@@ -35,4 +35,10 @@ interface IDynamicEmissionController {
      * @param _daoSignatures Signatures from DAO multisig for recovery
      */
     function restoreNormalMode(bytes[] calldata _daoSignatures) external;
+
+    /**
+     * @notice Get the current emission rate in BPS
+     * @return The current emission rate (e.g. 200 = 2%)
+     */
+    function currentEmissionRate() external view returns (uint256);
 }

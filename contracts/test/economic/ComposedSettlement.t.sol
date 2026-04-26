@@ -60,11 +60,11 @@ contract ComposedSettlementTest is Test {
 
     address public admin = address(0xAD);
     address public agent = address(0xAA);
-    address public provider1 = address(0xP1);
-    address public provider2 = address(0xP2);
-    address public provider3 = address(0xP3);
+    address public provider1 = address(0xA1);
+    address public provider2 = address(0xA2);
+    address public provider3 = address(0xA3);
     address public builder = address(0xBB);
-    address public treasuryAddr = address(0xTT);
+    address public treasuryAddr = address(0xCC);
 
     function setUp() public {
         token = new MockToken();
@@ -76,6 +76,10 @@ contract ComposedSettlementTest is Test {
             address(bondRegistry),
             treasuryAddr
         );
+
+        vm.startPrank(admin);
+        settlement.grantRole(settlement.VERIFIER_ROLE(), admin);
+        vm.stopPrank();
 
         // Bond providers
         bondRegistry.setBonded(provider1, true);
@@ -193,6 +197,9 @@ contract ComposedSettlementTest is Test {
     function test_claimProviderShare_success() public {
         bytes32 allocId = _createAllocation2Providers();
 
+        vm.prank(admin);
+        settlement.verifyProviderProof(allocId, 0);
+
         // Provider 1 claims
         vm.prank(provider1);
         settlement.claimProviderShare(allocId, 0);
@@ -215,9 +222,13 @@ contract ComposedSettlementTest is Test {
     function test_claimProviderShare_allClaimed() public {
         bytes32 allocId = _createAllocation2Providers();
 
+        vm.prank(admin);
+        settlement.verifyProviderProof(allocId, 0);
         vm.prank(provider1);
         settlement.claimProviderShare(allocId, 0);
 
+        vm.prank(admin);
+        settlement.verifyProviderProof(allocId, 1);
         vm.prank(provider2);
         settlement.claimProviderShare(allocId, 1);
 
@@ -229,6 +240,8 @@ contract ComposedSettlementTest is Test {
     function test_claimProviderShare_independentClaims() public {
         bytes32 allocId = _createAllocation2Providers();
 
+        vm.prank(admin);
+        settlement.verifyProviderProof(allocId, 1);
         // Provider 2 claims first (order doesn't matter)
         vm.prank(provider2);
         settlement.claimProviderShare(allocId, 1);
@@ -244,6 +257,8 @@ contract ComposedSettlementTest is Test {
     function test_claimProviderShare_reverts_wrongProvider() public {
         bytes32 allocId = _createAllocation2Providers();
 
+        vm.prank(admin);
+        settlement.verifyProviderProof(allocId, 0);
         vm.prank(provider2); // Wrong provider for index 0
         vm.expectRevert(
             abi.encodeWithSelector(IComposedSettlement.ProviderMismatch.selector, provider1, provider2)
@@ -254,6 +269,8 @@ contract ComposedSettlementTest is Test {
     function test_claimProviderShare_reverts_alreadyClaimed() public {
         bytes32 allocId = _createAllocation2Providers();
 
+        vm.prank(admin);
+        settlement.verifyProviderProof(allocId, 0);
         vm.prank(provider1);
         settlement.claimProviderShare(allocId, 0);
 
@@ -269,6 +286,8 @@ contract ComposedSettlementTest is Test {
     function test_claimProviderShare_withBuilderRevenue() public {
         bytes32 allocId = _createAllocationWithBuilder();
 
+        vm.prank(admin);
+        settlement.verifyProviderProof(allocId, 0);
         vm.prank(provider1);
         settlement.claimProviderShare(allocId, 0);
 
@@ -307,6 +326,8 @@ contract ComposedSettlementTest is Test {
     function test_refundExpiredComposed_partialRefund() public {
         bytes32 allocId = _createAllocation2Providers();
 
+        vm.prank(admin);
+        settlement.verifyProviderProof(allocId, 0);
         // Provider 1 claims before expiry
         vm.prank(provider1);
         settlement.claimProviderShare(allocId, 0);

@@ -125,7 +125,7 @@ class L1StateAnchor:
 
         # Try real Web3 submission
         try:
-            from neuron.web3.registration import (
+            from neuron.eth_client.registration import (
                 AgentRegistryClient,
             )
             client = AgentRegistryClient()
@@ -247,6 +247,8 @@ def get_anchor() -> L1StateAnchor:
     """Get the singleton L1StateAnchor instance (thread-safe)."""
     global _anchor_instance
     if _anchor_instance is None:
+        # NOTE: GIL-dependent double-check pattern
+        # Safe in CPython, but requires review if porting to PyPy or Cython
         with _anchor_lock:
             if _anchor_instance is None:
                 _anchor_instance = L1StateAnchor()

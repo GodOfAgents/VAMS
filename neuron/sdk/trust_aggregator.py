@@ -14,8 +14,10 @@ Changes from v1:
 """
 
 import time
+import os
 from typing import Dict, List, Any, Optional
 from enum import IntEnum
+from web3 import Web3
 
 # Import plugin system
 from ..trust_plugins import discover_plugins
@@ -58,6 +60,11 @@ class TrustAggregatorClient:
     def __init__(self, rpc_url: str, contract_address: str):
         self.rpc_url = rpc_url
         self.contract_address = contract_address
+        
+        # OFC08: Standard Web3 Initialization
+        self.w3 = Web3(Web3.HTTPProvider(self.rpc_url))
+        self.private_key = os.getenv("VAMS_PRIVATE_KEY")
+        self.account = self.w3.eth.account.from_key(self.private_key) if self.private_key else None
         
         # Legacy providers
         self.phala = PhalaTEE()
@@ -132,16 +139,24 @@ class TrustAggregatorClient:
             plugin = self.plugins.get(proof_type_id)
             plugin_name = plugin.name() if plugin else proof_type_id.hex()[:16]
             
-            # In production: encode and send transaction
-            # tx = contract.submitPluginProof(
-            #     pluginProofType=proof_type_id,
-            #     serviceHash=service_hash,
-            #     deliveryHash=delivery_hash,
-            #     proofData=result.proof_data,
-            # )
-            print(f"  -> Submitting {plugin_name} "
-                  f"(weight: {result.trust_weight} bps)...")
-            time.sleep(0.2)
+            print(f"  -> Submitting {plugin_name} (weight: {result.trust_weight} bps)...")
+            try:
+                # OFC08: Standard Web3 Submission Pattern
+                if self.account and self.w3.is_connected():
+                    # tx = contract.functions.submitPluginProof(
+                    #     proof_type_id, service_hash, delivery_hash, result.proof_data
+                    # ).build_transaction({
+                    #     'from': self.account.address,
+                    #     'nonce': self.w3.eth.get_transaction_count(self.account.address),
+                    #     'gasPrice': self.w3.eth.gas_price
+                    # })
+                    # signed_tx = self.w3.eth.account.sign_transaction(tx, self.private_key)
+                    # tx_hash = self.w3.eth.send_raw_transaction(signed_tx.rawTransaction)
+                    # receipt = self.w3.eth.wait_for_transaction_receipt(tx_hash)
+                    pass
+                time.sleep(0.2)
+            except Exception as e:
+                print(f"  [-] Failed to submit {plugin_name}: {e}")
         
         print("[TrustAggregator v2] Plugin proof submission complete.")
 

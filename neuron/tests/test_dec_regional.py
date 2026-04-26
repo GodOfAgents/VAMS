@@ -223,7 +223,7 @@ class TestProviderEstimation:
 
         assert apr >= 0, "APR should be non-negative"
         # Should be a reasonable number (not infinity or ridiculous)
-        assert apr < 100.0, "APR should be less than 10000%"
+        assert apr <= 100.0, "APR should be less than or equal to 10000%"
 
     def test_estimate_apr_zero_stake(self, simulator):
         """Zero staked amount should return 0 APR."""

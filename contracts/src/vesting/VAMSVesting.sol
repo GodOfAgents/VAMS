@@ -45,6 +45,7 @@ contract VAMSVesting is IVAMSVesting, AccessControl, ReentrancyGuard {
     uint256 private constant CLIFF_REG_INVESTOR = 12 * ONE_MONTH;
     uint256 private constant CLIFF_FOUNDATION = 6 * ONE_MONTH;
     uint256 private constant CLIFF_COMMUNITY = 0;
+    uint256 private constant CLIFF_LIQUIDITY = 0;
 
     // Vesting durations in seconds
     uint256 private constant VEST_FOUNDER = 48 * ONE_MONTH;
@@ -53,6 +54,7 @@ contract VAMSVesting is IVAMSVesting, AccessControl, ReentrancyGuard {
     uint256 private constant VEST_REG_INVESTOR = 30 * ONE_MONTH;
     uint256 private constant VEST_FOUNDATION = 48 * ONE_MONTH;
     uint256 private constant VEST_COMMUNITY = 60 * ONE_MONTH;
+    uint256 private constant VEST_LIQUIDITY = 12 * ONE_MONTH;
 
     // Cliff unlock percentages in basis points
     uint16 private constant UNLOCK_NONE = 0;        // 0%
@@ -150,7 +152,7 @@ contract VAMSVesting is IVAMSVesting, AccessControl, ReentrancyGuard {
             vestingDuration, 
             cliffUnlockBps, 
             revocable,
-            ScheduleType.FOUNDER // Custom uses FOUNDER as placeholder
+            ScheduleType.CUSTOM // Custom uses CUSTOM placeholder
         );
     }
 
@@ -280,6 +282,7 @@ contract VAMSVesting is IVAMSVesting, AccessControl, ReentrancyGuard {
     /// @notice Set the GMV threshold for TEAM/FOUNDATION unlocks
     /// @param _gmvThreshold GMV in USD (18 decimals) required for insider unlocks
     function setGmvThreshold(uint256 _gmvThreshold) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        require(_gmvThreshold >= gmvThreshold, "Threshold can only be raised");
         emit GmvThresholdUpdated(gmvThreshold, _gmvThreshold);
         gmvThreshold = _gmvThreshold;
     }
@@ -460,6 +463,10 @@ contract VAMSVesting is IVAMSVesting, AccessControl, ReentrancyGuard {
             return (CLIFF_FOUNDATION, VEST_FOUNDATION, UNLOCK_NONE);
         } else if (scheduleType == ScheduleType.COMMUNITY) {
             return (CLIFF_COMMUNITY, VEST_COMMUNITY, UNLOCK_NONE);
+        } else if (scheduleType == ScheduleType.LIQUIDITY) {
+            return (CLIFF_LIQUIDITY, VEST_LIQUIDITY, UNLOCK_NONE);
+        } else if (scheduleType == ScheduleType.CUSTOM) {
+            revert("VAMSVesting: no predefined params");
         } else {
             revert("Invalid Schedule Type");
         }

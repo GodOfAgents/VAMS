@@ -6,6 +6,7 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import "./IVAMSInsuranceFund.sol";
 import "../base/VAMSUpgradeableBase.sol";
 
@@ -23,6 +24,7 @@ contract VAMSInsuranceFund is
     Initializable, 
     AccessControlUpgradeable,
     ReentrancyGuardUpgradeable,
+    PausableUpgradeable,
     IVAMSInsuranceFund 
 {
     using SafeERC20 for IERC20;
@@ -31,9 +33,12 @@ contract VAMSInsuranceFund is
     
     /// @notice Guardian role for claim approval (Phase 1-2)
     bytes32 public constant GUARDIAN_ROLE = keccak256("GUARDIAN_ROLE");
-    
+
     /// @notice Slasher role (can deposit slashed funds)
     bytes32 public constant SLASHER_ROLE = keccak256("SLASHER_ROLE");
+
+    /// @notice INTG01: Role for VAMSSentinel autonomous emergency pause
+    bytes32 public constant SENTINEL_ROLE = keccak256("SENTINEL_ROLE");
     
     /// @notice Claim review window (7 days)
     uint256 public constant CLAIM_WINDOW = 7 days;
@@ -88,6 +93,11 @@ contract VAMSInsuranceFund is
      * @param _stakingContract Staking contract for tier lookup
      * @param _guardians Guardian addresses (should be 3)
      */
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
+    }
+    
     function initialize(
         address _admin,
         address _vamsToken,
@@ -98,6 +108,7 @@ contract VAMSInsuranceFund is
         
         __AccessControl_init();
         __ReentrancyGuard_init();
+        __Pausable_init();
         
         _grantRole(DEFAULT_ADMIN_ROLE, _admin);
         
@@ -303,19 +314,34 @@ contract VAMSInsuranceFund is
             return CoverageTier.NONE;
         }
         
-        // Query staking contract for stake amount
-        // Note: This assumes staking contract has getStakeInfo that returns stake amount
-        // Simplified check - in production, would call staking contract
-        // For now, return AGENT tier if caller has any VAMS balance
-        uint256 balance = vamsToken.balanceOf(account);
+        // AUDIT FIX ECON02: Query actual staked amount from staking contract
+        // instead of raw balanceOf to prevent flash-loan tier manipulation.
+        uint256 stakedAmount = _getStakedAmount(account);
         
-        if (balance >= OPERATOR_TIER_STAKE) {
+        if (stakedAmount >= OPERATOR_TIER_STAKE) {
             return CoverageTier.OPERATOR;
-        } else if (balance >= AGENT_TIER_STAKE) {
+        } else if (stakedAmount >= AGENT_TIER_STAKE) {
             return CoverageTier.AGENT;
         }
         
         return CoverageTier.NONE;
+    }
+    
+    /**
+     * @dev Query the staking contract for locked stake amount
+     * @param account The account to query
+     * @return The staked amount (0 if call fails)
+     */
+    function _getStakedAmount(address account) internal view returns (uint256) {
+        // Call staking contract's getStakeInfo to get locked stake
+        // Uses staticcall to safely handle interface mismatches
+        (bool success, bytes memory data) = stakingContract.staticcall(
+            abi.encodeWithSignature("getStakeInfo(address)", account)
+        );
+        if (!success || data.length < 32) return 0;
+        
+        // getStakeInfo returns a StakeInfo struct, first field is amount
+        return abi.decode(data, (uint256));
     }
     
     /// @inheritdoc IVAMSInsuranceFund
@@ -348,6 +374,34 @@ contract VAMSInsuranceFund is
                block.timestamp <= claim.submittedAt + CLAIM_WINDOW;
     }
     
+    // ============ Emergency Pause — INTG01 ============
+
+    /**
+     * @notice INTG01: Sentinel-callable emergency pause (implements IPausableTarget)
+     * @param reason Human-readable reason for the pause
+     */
+    function emergencyPause(string calldata reason) external onlyRole(SENTINEL_ROLE) {
+        emit EmergencyPauseActivated(msg.sender, reason);
+        _pause();
+    }
+
+    /// @dev Emitted when Sentinel triggers an emergency pause
+    event EmergencyPauseActivated(address indexed sentinel, string reason);
+
+    /// @notice Guardian fallback pause
+    function pause() external onlyRole(GUARDIAN_ROLE) {
+        _pause();
+    }
+
+    /// @notice Unpause (admin or sentinel)
+    function unpause() external {
+        require(
+            hasRole(DEFAULT_ADMIN_ROLE, msg.sender) || hasRole(SENTINEL_ROLE, msg.sender),
+            "VAMSInsuranceFund: not authorized"
+        );
+        _unpause();
+    }
+
     // ============ Storage Gap ============
     
     /// @dev Reserved storage space for future upgrades

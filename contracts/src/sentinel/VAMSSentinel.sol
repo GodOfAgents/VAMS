@@ -66,20 +66,18 @@ contract VAMSSentinel is AccessControl, ReentrancyGuard, IVAMSSentinel {
 
     // ═══════════════════ Constants ═══════════════════
 
-    /// @notice Minimum bond for keeper registration
-    uint256 public constant MIN_KEEPER_BOND = 10_000e18; // 10,000 $VAMS
-
+    uint256 public constant KEEPER_SCORE_THRESHOLD = 80;
+    uint256 public constant MIN_KEEPER_BOND = 100_000e18; // 100,000 $VAMS
+    uint8 public constant MAX_ANOMALY_SCORE = 100;
+    
+    // Delay before a new keeper can vote/submit reports
+    uint256 public constant KEEPER_VOTING_DELAY = 100;
+    
     /// @notice Slash rate for false alarm (5%)
     uint16 public constant FALSE_ALARM_SLASH_BPS = 500;
 
     /// @notice Maximum age of a keeper report (2 minutes)
     uint256 public constant MAX_REPORT_AGE = 2 minutes;
-
-    /// @notice Maximum anomaly score
-    uint8 public constant MAX_ANOMALY_SCORE = 100;
-
-    /// @notice Threshold score for keeper reports to count toward consensus
-    uint8 public constant KEEPER_SCORE_THRESHOLD = 80;
 
     /// @notice Epoch duration for keeper reporting (1 block window)
     uint256 public constant REPORT_EPOCH_BLOCKS = 1;
@@ -103,10 +101,13 @@ contract VAMSSentinel is AccessControl, ReentrancyGuard, IVAMSSentinel {
     /// @notice Contracts the Sentinel can pause
     address[] public pausableTargets;
 
-    /// @notice Keeper bond balances
-    mapping(address keeper => uint256 bondBalance) public keeperBonds;
+    /// @notice Keeper bonds ($VAMS amount)
+    mapping(address => uint256) public keeperBonds;
 
-    /// @notice Keeper report tracking per epoch (block number => reports)
+    /// @notice Block number when a keeper registered
+    mapping(address => uint256) public keeperRegistrationBlock;
+
+    /// @notice Active incident tracking per epoch (block number => reports)
     mapping(uint256 blockNumber => KeeperReport[]) public epochReports;
 
     /// @notice Number of high-score reports in current epoch
@@ -242,6 +243,7 @@ contract VAMSSentinel is AccessControl, ReentrancyGuard, IVAMSSentinel {
 
         // Effects
         keeperBonds[msg.sender] = bondAmount;
+        keeperRegistrationBlock[msg.sender] = block.number;
 
         // Interactions
         vamsToken.safeTransferFrom(msg.sender, address(this), bondAmount);
@@ -261,6 +263,9 @@ contract VAMSSentinel is AccessControl, ReentrancyGuard, IVAMSSentinel {
     ) external nonReentrant onlyRole(KEEPER_ROLE) {
         if (protocolMode == ProtocolMode.PAUSED) revert ProtocolAlreadyPaused();
         if (anomalyScore > MAX_ANOMALY_SCORE) revert InvalidAnomalyScore(anomalyScore);
+        
+        // Anti-flash-loan / sybil delay
+        require(block.number >= keeperRegistrationBlock[msg.sender] + KEEPER_VOTING_DELAY, "Keeper voting delay active");
 
         // Record the report
         KeeperReport memory report = KeeperReport({
@@ -318,7 +323,9 @@ contract VAMSSentinel is AccessControl, ReentrancyGuard, IVAMSSentinel {
         protocolMode = ProtocolMode.NORMAL;
 
         // Interactions — unpause all targets
+        uint256 gasPerTarget = 100_000;
         for (uint256 i = 0; i < pausableTargets.length; i++) {
+            if (gasleft() < gasPerTarget) break; // L-03: Prevent OOM
             address target = pausableTargets[i];
             if (IPausableTarget(target).paused()) {
                 IPausableTarget(target).unpause();

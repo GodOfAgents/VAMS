@@ -23,7 +23,8 @@ pub type BridgeMessage {
 
 /// Verify that a bridge proof is well-formed
 /// In production, this would verify a Mithril certificate or
-/// Rosen Bridge proof. For testnet, we verify structure only.
+/// Rosen Bridge proof. 
+/// TODO [Testnet]: For testnet, we verify structure only. Replace with full verification before mainnet.
 pub fn verify_bridge_proof(
   proof: ByteArray,
   expected_payload_hash: ByteArray,
@@ -37,9 +38,9 @@ pub fn verify_bridge_proof(
 
 /// Verify that a Mithril finality proof is valid
 /// Mithril provides lightweight proofs of Cardano chain state
+/// TODO [Testnet]: Production will verify Mithril certificate chain
+/// Testnet only verifies proof is non-empty and well-structured
 pub fn verify_mithril_proof(proof: ByteArray) -> Bool {
-  // Production: verify Mithril certificate chain
-  // Testnet: verify proof is non-empty and well-structured
   bytearray.length(proof) >= 32
 }
 

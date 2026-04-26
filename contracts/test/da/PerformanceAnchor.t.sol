@@ -4,6 +4,7 @@ pragma solidity ^0.8.20;
 import "forge-std/Test.sol";
 import "../../src/da/PerformanceAnchor.sol";
 import "../../src/interfaces/IPerformanceAnchor.sol";
+import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
 /**
  * @title MockSLAEnforcerForAnchor
@@ -37,9 +38,13 @@ contract PerformanceAnchorTest is Test {
         mockEnforcer = new MockSLAEnforcerForAnchor();
         mockEnforcer.setSentinel(sentinel, true);
 
-        // Deploy PerformanceAnchor
-        anchor = new PerformanceAnchor();
-        anchor.initialize(admin, address(mockEnforcer));
+        // Deploy PerformanceAnchor behind proxy (AC01: _disableInitializers)
+        PerformanceAnchor impl = new PerformanceAnchor();
+        ERC1967Proxy proxy = new ERC1967Proxy(
+            address(impl),
+            abi.encodeCall(PerformanceAnchor.initialize, (admin, address(mockEnforcer)))
+        );
+        anchor = PerformanceAnchor(address(proxy));
     }
 
     // ============================================================

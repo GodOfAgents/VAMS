@@ -14,6 +14,7 @@ import "../src/economic/VAMSPaymentHandler.sol";
 import "../src/routing/VAMSRouter.sol";
 import "../src/registry/VAMSAgentRegistry.sol";
 import "../src/slashing/VAMSSlasher.sol";
+import "../src/sentinel/VAMSSentinel.sol";
 
 contract DeployV2 is Script {
     // State variables to avoid stack-too-deep
@@ -227,7 +228,85 @@ contract DeployV2 is Script {
         console.log("Created Regular Investor Schedule (80M) -> Deployer");
 
         console.log("Deployment V2 Complete. 1B Supply distributed.");
-        
+
+        // =========================================================================
+        // 7. INTG02: Integration Wiring — Missing Role Grants
+        // =========================================================================
+
+        // ── Deploy VAMSSentinel ──
+        // Needed before wiring SENTINEL_ROLE grants.
+        // Using deployer as DAO (testnet only) and no fallback multisig.
+        VAMSSentinel sentinel = new VAMSSentinel(
+            deployer,       // admin
+            address(token), // vamsToken for keeper bonds
+            deployer,       // dao (testnet placeholder)
+            address(0)      // no fallback multisig on testnet
+        );
+        console.log("VAMSSentinel deployed to:", address(sentinel));
+
+        // ── (1-2) Slasher wiring to InsuranceFund ──
+        // VAMSSlasher must be able to receive slashed funds into InsuranceFund.
+        bytes32 SLASHER_ROLE = keccak256("SLASHER_ROLE");
+        insurance.grantRole(SLASHER_ROLE, address(slasher));
+        console.log("INTG02.1: Granted SLASHER_ROLE to Slasher on InsuranceFund");
+
+        // ── (3) Slasher authorized on AgentRegistry ──
+        // AgentRegistry.slasher field set at init, but SLASHER_ROLE also needed
+        // for future direct slash calls routed through access control.
+        registry.grantRole(SLASHER_ROLE, address(slasher));
+        console.log("INTG02.3: Granted SLASHER_ROLE to Slasher on AgentRegistry");
+
+        // ── (4-9) INTG01: SENTINEL_ROLE on all 6 pausable contracts ──
+        bytes32 SENTINEL_ROLE = keccak256("SENTINEL_ROLE");
+
+        // 4. VAMSFeeCollector
+        feeCollector.grantRole(SENTINEL_ROLE, address(sentinel));
+        sentinel.addPausableTarget(address(feeCollector));
+        console.log("INTG02.4: SENTINEL_ROLE + addPausableTarget FeeCollector");
+
+        // 5. VAMSPaymentHandler
+        paymentHandler.grantRole(SENTINEL_ROLE, address(sentinel));
+        sentinel.addPausableTarget(address(paymentHandler));
+        console.log("INTG02.5: SENTINEL_ROLE + addPausableTarget PaymentHandler");
+
+        // 6. VAMSAgentRegistry
+        registry.grantRole(SENTINEL_ROLE, address(sentinel));
+        sentinel.addPausableTarget(address(registry));
+        console.log("INTG02.6: SENTINEL_ROLE + addPausableTarget AgentRegistry");
+
+        // 7. VAMSInsuranceFund
+        insurance.grantRole(SENTINEL_ROLE, address(sentinel));
+        sentinel.addPausableTarget(address(insurance));
+        console.log("INTG02.7: SENTINEL_ROLE + addPausableTarget InsuranceFund");
+
+        // 8. VAMSRouter (no emergencyPause yet — future sprint; register for
+        //    monitoring only when that function is added)
+        console.log("INTG02.8: VAMSRouter emergencyPause pending Sprint-2");
+
+        // ── (10) InsuranceFund address set on FeeCollector (was missing) ──
+        // FeeCollector already received insurance address in initialize() above.
+        // No separate call needed.
+
+        // ── (11) Grant FeeCollector permissions on Router ──
+        // Router must accept fee routing calls from the FeeCollector.
+        bytes32 FEE_COLLECTOR_ROLE = keccak256("FEE_COLLECTOR_ROLE");
+        router.grantRole(FEE_COLLECTOR_ROLE, address(feeCollector));
+        console.log("INTG02.11: Granted FEE_COLLECTOR_ROLE to FeeCollector on Router");
+
+        // ── (12) Slashing: Slasher needs SLASHER_ROLE on Staking ──
+        staking.grantRole(SLASHER_ROLE, address(slasher));
+        console.log("INTG02.12: Granted SLASHER_ROLE to Slasher on Staking");
+
+        // ── (13-14) Keeper setup for Sentinel ──
+        // The Sentinel needs at least one keeper to be useful on testnet.
+        // The deployer self-bonds 10,000 VAMS as keeper (testnet only).
+        uint256 keeperBond = 10_000e18;
+        token.approve(address(sentinel), keeperBond);
+        sentinel.registerKeeper(keeperBond);
+        console.log("INTG02.13-14: Deployer self-bonded as Sentinel keeper (testnet)");
+
+        console.log("INTG02: All missing role grants applied.");
+
         vm.stopBroadcast();
     }
 }

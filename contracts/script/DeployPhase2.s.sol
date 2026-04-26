@@ -6,6 +6,7 @@ import "../src/registry/VAMSHardwareRegistry.sol";
 import "../src/sentinel/SLAEnforcer.sol";
 import "../src/trust/plugins/HardwareVerifiedPlugin.sol";
 import "../src/economic/HardwareCommitment.sol";
+import "@openzeppelin/contracts/access/IAccessControl.sol";
 
 contract DeployPhase2 is Script {
     function run() external {
@@ -15,11 +16,13 @@ contract DeployPhase2 is Script {
         address providerBondRegistry = vm.envAddress("PROVIDER_BOND_REGISTRY");
         address vamsSlasher = vm.envAddress("VAMS_SLASHER");
         
+        address vamsToken = vm.envAddress("VAMS_TOKEN");
+        
         vm.startBroadcast(deployerPrivateKey);
 
         // 1. Deploy Hardware Registry (Phase 2, Sprint 1)
         VAMSHardwareRegistry registry = new VAMSHardwareRegistry();
-        registry.initialize(admin);
+        registry.initialize(admin, vamsToken);
 
         // 2. Deploy SLA Enforcer (Phase 2, Sprint 3)
         SLAEnforcer enforcer = new SLAEnforcer();
@@ -32,10 +35,10 @@ contract DeployPhase2 is Script {
         HardwareCommitment commitment = new HardwareCommitment();
         commitment.initialize(admin, address(registry), providerBondRegistry);
 
-        // In a real execution environment with proxies, the roles would be distributed here:
-        // registry.grantRole(registry.SENTINEL_ROLE(), address(enforcer));
-        // ProviderBondRegistry(providerBondRegistry).grantRole(HARDWARE_COMMITMENT_ROLE, address(commitment));
-        // VAMSSlasher(vamsSlasher).grantRole(SLASHER_ROLE, address(enforcer));
+        // Grant roles to connect modules
+        IAccessControl(address(registry)).grantRole(registry.SENTINEL_ROLE(), address(enforcer));
+        IAccessControl(providerBondRegistry).grantRole(keccak256("HARDWARE_COMMITMENT_ROLE"), address(commitment));
+        IAccessControl(vamsSlasher).grantRole(keccak256("SLASHER_ROLE"), address(enforcer));
 
         vm.stopBroadcast();
     }

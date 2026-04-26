@@ -24,7 +24,7 @@ pub fn isqrt(n: Int) -> Int {
 
 /// Newton's method iteration for integer square root
 fn isqrt_iterate(n: Int, guess: Int) -> Int {
-  let next = (guess + n / guess) / 2
+  let next = ( guess + n / guess ) / 2
   if next >= guess {
     guess
   } else {
@@ -40,10 +40,7 @@ pub fn apply_bps(value: Int, bps: Int) -> Int {
 // ═══════════════════ Validation Helpers ═══════════════════
 
 /// Check if a verification key hash is in a list of signatories
-pub fn is_signed_by(
-  signatories: List<ByteArray>,
-  vkh: ByteArray,
-) -> Bool {
+pub fn is_signed_by(signatories: List<ByteArray>, vkh: ByteArray) -> Bool {
   list.has(signatories, vkh)
 }
 

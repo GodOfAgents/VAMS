@@ -546,11 +546,11 @@ contract SlashingOracleTest is BaseTest {
         address insuranceFund = makeAddr("insuranceFund");
         
         VAMSSlasher slasherImpl = new VAMSSlasher();
-        
         bytes memory initData = abi.encodeWithSelector(
             VAMSSlasher.initialize.selector,
             admin,
-            insuranceFund
+            insuranceFund,
+            address(token)
         );
         
         ERC1967Proxy proxy = new ERC1967Proxy(address(slasherImpl), initData);

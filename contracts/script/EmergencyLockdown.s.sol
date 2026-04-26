@@ -19,14 +19,14 @@ contract EmergencyLockdown is Script {
 
     // ============ Deployed Contract Addresses (Polygon Amoy) ============
 
-    address constant VAMS_TOKEN      = 0x62a705eD1cAbBBafFCd99e9b2497024031329fd4;
-    address constant TIMELOCK        = 0xabCC69eff15753B547E02AB56FC0aa62765fb768;
-    // address constant STAKING         = 0x0e6aE5B11b9a73A5671B5F8551c0cF3EB82186C2; // Skipped - Unauthorized
-    // address constant VESTING         = 0x92d20dd7A48268Fef76bA14A4a9b6620d0179209; // Skipped - Unauthorized
-    address constant AGENT_REGISTRY  = 0x7e290350448cDC8A22e4cF4Ad377B1E595CDd347;
-    address constant X402_ESCROW     = 0xfC58658fA08102612c78166374854fE31cCFBb58;
-    // address constant NONCE_REGISTRY  = 0x7e0E0eD29D8d01c5CFc591d14F3d53F44D9D3865; // Skipped - Unauthorized
-    address constant PROVIDER_BOND   = 0xC00d6C3CA385D1fAcbB23b9B2d6dceE6A120cd0c;
+    address VAMS_TOKEN;
+    address TIMELOCK;
+    // address STAKING; // Skipped - Unauthorized
+    // address VESTING; // Skipped - Unauthorized
+    address AGENT_REGISTRY;
+    address X402_ESCROW;
+    // address NONCE_REGISTRY; // Skipped - Unauthorized
+    address PROVIDER_BOND;
 
     // ============ Role Hashes ============
 
@@ -47,6 +47,14 @@ contract EmergencyLockdown is Script {
     bytes32 constant CANCELLER_ROLE         = keccak256("CANCELLER_ROLE");
 
     function run() external {
+        VAMS_TOKEN = vm.envAddress("VAMS_TOKEN");
+        TIMELOCK = vm.envAddress("TIMELOCK");
+        AGENT_REGISTRY = vm.envAddress("AGENT_REGISTRY");
+        X402_ESCROW = vm.envAddress("X402_ESCROW");
+        PROVIDER_BOND = vm.envAddress("PROVIDER_BOND");
+        
+        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
+
         vm.startBroadcast();
 
         address compromised = msg.sender;

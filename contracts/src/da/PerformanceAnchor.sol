@@ -56,6 +56,11 @@ contract PerformanceAnchor is
     //                     INITIALIZER
     // ============================================================
 
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
+    }
+    
     /// @notice Initialize the PerformanceAnchor contract.
     /// @param _admin Address with admin rights to upgrade and manage configuration.
     /// @param _slaEnforcer Address of the SLAEnforcer contract for Sentinel ACL.

@@ -86,7 +86,7 @@ class RegionalEconomics:
         regions: Optional[Dict[str, RegionConfig]] = None,
     ):
         self._regions = {}
-        source = regions or DEFAULT_REGIONS
+        source = regions if regions is not None else DEFAULT_REGIONS
         for k, v in source.items():
             self._regions[k] = RegionConfig(
                 region_id=v.region_id,
