@@ -1,6 +1,6 @@
 # VAMS Developer Onboarding Guide
 
-Welcome to the Verifiable and Agentic Modular Stack (VAMS). This guide will help you navigate the v1.0.0-icn release, which introduces major infrastructure upgrades.
+Welcome to the Verifiable and Agentic Modular Stack (VAMS). This guide covers the v1.2.0-autoskill release, which adds the AUTOSKILL Intelligence Layer on top of the v1.0.0-icn modular stack.
 
 ## What is VAMS?
 VAMS is the "Sovereign Brain" for the Agentic Web. Instead of running your AI agents on centralized AWS servers where they can be de-platformed, or on slow blockchains where they can't afford gas, VAMS provides a verifiable, fast, and multi-provider computation layer.
@@ -13,7 +13,7 @@ If you are building an AI agent (e.g., a DeFi trading bot, a research assistant)
 
 ### Step 1: Install the SDK
 ```bash
-pip install vams-sdk==1.0.0-icn
+pip install vams-sdk==1.2.0-autoskill
 ```
 
 ### Step 2: Define your Intent
@@ -27,10 +27,13 @@ auth = VAMSAgentProtocol(api_key="your_key")
 composer = VAMSComposer(auth)
 
 # Define your infrastructure needs
+# Optional: include skill_vector to match nodes proficient in a specific task type.
+# Omit it entirely for standard 4-axis scoring (backward compatible with v1.0.0-icn).
 blueprint = composer.request_blueprint(
     target_region="us-east",
     requirements=["gpu:a100", "memory:64gb"],
-    max_cost_vams="100.0" # Max 100 $VAMS per hour
+    max_cost_vams="100.0",  # Max 100 $VAMS per hour
+    skill_vector=[0.92, -0.12, 0.34, 0.05, -0.21, 0.0, 0.0, 0.0, 0.0, 0.0]  # Optional
 )
 
 print(f"Got Blueprint -> {blueprint.id}")
@@ -81,4 +84,70 @@ Whenever an Agent Developer's Resource Composer selects your Service Block, the 
 
 ## 3. Operating as a Node Provider (Supplier)
 
-If you own GPUs or server racks, you are a **Supplier**. Check out the `docs/NODE_OPERATORS.md` (coming soon) for instructions on installing the VAMS Sentinel node client and capturing Regional DEC emissions!
+If you own GPUs or server racks, you are a **Supplier**. See **[NODE_OPERATORS.md](./NODE_OPERATORS.md)**
+for full instructions on installing the VAMS Sentinel node client, enabling the Intelligence Layer,
+captaining Regional DEC emissions, and understanding the Mahalanobis anomaly scoring system.
+
+---
+
+## 4. Working with the Intelligence Layer (v1.2.0+)
+
+The Intelligence Layer is relevant to all three personas above:
+- **Consumers** can filter nodes by skill alignment when creating blueprints
+- **Builders** can package skill-optimized Service Blocks (targeting specific PC skill axes)
+- **Suppliers** must configure activation capture correctly to build skill profiles
+
+### Quick-start: Discovering Skill Axes
+
+```python
+from neuron.intelligence.activation_cache import ActivationCache, ActivationMetadata
+from neuron.intelligence.skill_discovery import SkillDiscovery
+from neuron.intelligence.anomaly_detector import ActivationAnomalyDetector
+from neuron.intelligence.steering_engine import SteeringEngine
+import numpy as np
+
+# Step 1 — Capture activations from your model's inference loop
+#            (replace with your actual forward hook output)
+cache = ActivationCache(buffer_size=5000, hidden_dim=4096)
+for activation in your_inference_activations:  # numpy arrays
+    cache.append(activation, ActivationMetadata(node_id="my-node", task_type="security"))
+
+# Step 2 — Discover skill directions
+discovery = SkillDiscovery(n_components=10)
+discovery.fit(cache.get_activations(n=2000))
+discovery.save("models/skill_discovery.pkl")
+
+print("Top variance per skill axis:", discovery.get_explained_variance()[:3])
+# e.g., [0.32, 0.18, 0.12]
+
+# Step 3 — Set up anomaly detection
+detector = ActivationAnomalyDetector(discovery, default_threshold=3.0)
+detector.fit_baseline(cache.get_activations(n=1000))
+
+# Step 4 — Score a new activation
+new_act = np.random.randn(4096).astype(np.float32)
+report = detector.get_anomaly_report(new_act)
+print(f"Anomaly score: {report.mahalanobis_distance:.2f} — adversarial: {report.is_adversarial}")
+
+# Step 5 — Steer a model response toward a known skill direction
+engine = SteeringEngine(discovery, max_alpha=0.3)
+steered_activation = engine.steer(new_act, skill_index=0, alpha=0.2)
+```
+
+For the full API reference, see **[INTELLIGENCE_LAYER.md](./INTELLIGENCE_LAYER.md)**.
+
+### Integrating Skill Vectors into Blueprints
+
+To request nodes with a specific skill profile, compute a reference skill vector first:
+
+```python
+# Compute a reference skill vector from audited high-quality responses
+reference_activations = cache.get_activations(n=500)  # from known-good responses
+profile = discovery.compute_skill_profile(reference_activations, node_id="reference")
+
+# Use this vector when creating blueprints
+blueprint = composer.request_blueprint(
+    ...
+    skill_vector=profile.coordinates.tolist()
+)
+```
