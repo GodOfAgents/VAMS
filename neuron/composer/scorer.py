@@ -47,14 +47,16 @@ class ScorerWeights:
     sla: float = 0.30
     latency: float = 0.20
     regional: float = 0.15
+    skill_alignment: float = 0.0  # AUTOSKILL Phase 3b: Cosine similarity to requested skill vector
 
     def validate(self) -> None:
-        total = self.price + self.sla + self.latency + self.regional
+        total = self.price + self.sla + self.latency + self.regional + self.skill_alignment
         if abs(total - 1.0) > 0.001:
             raise ValueError(
                 f"Scorer weights must sum to 1.0, got {total:.3f}. "
                 f"Adjust weights: price={self.price}, sla={self.sla}, "
-                f"latency={self.latency}, regional={self.regional}"
+                f"latency={self.latency}, regional={self.regional}, "
+                f"skill_alignment={self.skill_alignment}"
             )
 
 
@@ -80,6 +82,7 @@ class RawNodeData:
     benchmark_score_bps: int = 0    # 0-10000 from Sentinel
     latency_ms: float = 0.0        # From latency_probe
     last_benchmark_at: float = 0.0  # Unix timestamp
+    skill_profile: Optional[List[float]] = None  # AUTOSKILL Phase 3b: extracted skill vector
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -155,12 +158,28 @@ class CandidateScorer:
             sla_score = self._normalize(node.benchmark_score_bps, sla_range)
             latency_score = self._normalize_inverse(node.latency_ms, latency_range)
             regional_score = self._compute_regional_score(node.region)
+            
+            # AUTOSKILL Phase 3b: Compute skill alignment score using Cosine Similarity
+            skill_score = 0.0
+            if blueprint.skill_vector and node.skill_profile:
+                import math
+                v1 = blueprint.skill_vector
+                v2 = node.skill_profile
+                if len(v1) == len(v2):
+                    dot_product = sum(a * b for a, b in zip(v1, v2))
+                    norm1 = math.sqrt(sum(a * a for a in v1))
+                    norm2 = math.sqrt(sum(b * b for b in v2))
+                    if norm1 > 0 and norm2 > 0:
+                        cos_sim = dot_product / (norm1 * norm2)
+                        # Normalize cosine similarity from [-1, 1] to [0, 1]
+                        skill_score = (cos_sim + 1.0) / 2.0
 
             total = (
                 self.weights.price * price_score
                 + self.weights.sla * sla_score
                 + self.weights.latency * latency_score
                 + self.weights.regional * regional_score
+                + self.weights.skill_alignment * skill_score
             )
 
             scored.append(ScoredCandidate(
@@ -175,6 +194,7 @@ class CandidateScorer:
                 sla_score=sla_score,
                 latency_score=latency_score,
                 regional_score=regional_score,
+                skill_alignment_score=skill_score,
                 total_score=total,
                 benchmark_score_bps=node.benchmark_score_bps,
                 latency_ms=node.latency_ms,

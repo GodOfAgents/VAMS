@@ -160,6 +160,9 @@ class InstanceBlueprint:
     min_sla_score_bps: int = 7500         # Minimum Sentinel SLA score (75%)
     min_trust_tier: str = "bronze"        # "bronze", "silver", "gold", "platinum"
 
+    # AUTOSKILL Phase 3b: Skill alignment requirements
+    skill_vector: Optional[List[float]] = None  # Desired skill profile coordinates
+
     def blueprint_hash(self) -> str:
         """Deterministic hash for deduplication and caching."""
         payload = (
@@ -203,6 +206,7 @@ class InstanceBlueprint:
             "max_cost_per_hour": self.max_cost_per_hour,
             "elastic": self.elastic,
             "min_sla_score_bps": self.min_sla_score_bps,
+            "skill_vector": self.skill_vector,
         }
 
 
@@ -229,6 +233,7 @@ class ScoredCandidate:
     sla_score: float = 0.0
     latency_score: float = 0.0
     regional_score: float = 0.0
+    skill_alignment_score: float = 0.0  # AUTOSKILL Phase 3b
 
     # Composite
     total_score: float = 0.0
@@ -249,6 +254,7 @@ class ScoredCandidate:
             "sla_score": round(self.sla_score, 4),
             "latency_score": round(self.latency_score, 4),
             "regional_score": round(self.regional_score, 4),
+            "skill_alignment_score": round(self.skill_alignment_score, 4),
             "benchmark_score_bps": self.benchmark_score_bps,
         }
 

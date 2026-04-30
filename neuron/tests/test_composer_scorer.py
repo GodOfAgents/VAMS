@@ -448,5 +448,88 @@ class TestWeightConfiguration:
         assert candidates[0].node_id == "expensive_good"
 
 
+# ═══════════════════════════════════════════════════════════════
+# Tests: Skill Alignment Scoring
+# ═══════════════════════════════════════════════════════════════
+
+class TestSkillAlignmentScoring:
+    """Test AUTOSKILL Phase 3b: Cosine similarity-based skill alignment."""
+
+    def test_high_alignment_wins(self):
+        scorer = CandidateScorer(weights=ScorerWeights(
+            price=0.20, sla=0.20, latency=0.20, regional=0.20, skill_alignment=0.20
+        ))
+        
+        # Two nodes with same metrics but different skill profiles
+        nodes = [
+            RawNodeData(
+                node_id="aligned", provider="0x1", hw_class="GPU_A100",
+                region="us-east-1", capacity_units=4,
+                reservation_price=25.0, collateral_staked=2000.0,
+                benchmark_score_bps=9000, latency_ms=20.0,
+                skill_profile=[0.9, 0.1, 0.0]  # Very aligned with blueprint
+            ),
+            RawNodeData(
+                node_id="misaligned", provider="0x2", hw_class="GPU_A100",
+                region="us-east-1", capacity_units=4,
+                reservation_price=25.0, collateral_staked=2000.0,
+                benchmark_score_bps=9000, latency_ms=20.0,
+                skill_profile=[-0.9, 0.1, 0.0]  # Misaligned
+            ),
+        ]
+        
+        bp = _standard_blueprint()
+        bp.skill_vector = [1.0, 0.0, 0.0]  # Requesting skill dimension 0
+        
+        candidates = scorer.score(bp, nodes)
+        aligned = next(c for c in candidates if c.node_id == "aligned")
+        misaligned = next(c for c in candidates if c.node_id == "misaligned")
+        
+        assert aligned.skill_alignment_score > misaligned.skill_alignment_score
+        assert aligned.total_score > misaligned.total_score
+
+    def test_missing_skill_profile_neutral_score(self):
+        scorer = CandidateScorer(weights=ScorerWeights(
+            price=0.20, sla=0.20, latency=0.20, regional=0.20, skill_alignment=0.20
+        ))
+        
+        nodes = [
+            RawNodeData(
+                node_id="no_profile", provider="0x1", hw_class="GPU_A100",
+                region="us-east-1", capacity_units=4,
+                reservation_price=25.0, collateral_staked=2000.0,
+                benchmark_score_bps=9000, latency_ms=20.0,
+                skill_profile=None
+            )
+        ]
+        
+        bp = _standard_blueprint()
+        bp.skill_vector = [1.0, 0.0, 0.0]
+        
+        candidates = scorer.score(bp, nodes)
+        assert candidates[0].skill_alignment_score == 0.0
+        
+    def test_no_blueprint_skill_vector_neutral_score(self):
+        scorer = CandidateScorer(weights=ScorerWeights(
+            price=0.20, sla=0.20, latency=0.20, regional=0.20, skill_alignment=0.20
+        ))
+        
+        nodes = [
+            RawNodeData(
+                node_id="has_profile", provider="0x1", hw_class="GPU_A100",
+                region="us-east-1", capacity_units=4,
+                reservation_price=25.0, collateral_staked=2000.0,
+                benchmark_score_bps=9000, latency_ms=20.0,
+                skill_profile=[1.0, 0.0, 0.0]
+            )
+        ]
+        
+        bp = _standard_blueprint()
+        bp.skill_vector = None
+        
+        candidates = scorer.score(bp, nodes)
+        assert candidates[0].skill_alignment_score == 0.0
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

@@ -1,3 +1,9 @@
+> [!WARNING]
+> **This document covers v0.4.0 and is superseded for Intelligence Layer details.**
+> For the current architecture including the AUTOSKILL Intelligence Layer (v0.5.0),
+> see **[ARCHITECTURE_v0-5-0.md](./ARCHITECTURE_v0-5-0.md)**. The v0.4.0 sections
+> below remain valid for the Escrow, DEC, Sentinel, Composer, and Timelock subsystems.
+
 # VAMS Architecture Addendum: v0.4.0 (ICN-Inspired Modular Stack)
 
 **Status:** Deployed (Sprint 13-16)

@@ -41,13 +41,22 @@ CHALLENGE_DA_MAP: Dict[str, DAProtocol] = {
 
 
 class VAMSSentinelNode:
-    def __init__(self, private_key: str = None, registry_addr: str = None, rpc_url: str = None, mock_mode: bool = True):
+    def __init__(self, private_key: str = None, registry_addr: str = None, rpc_url: str = None, mock_mode: bool = True,
+                 anomaly_detector=None):
         self.registry = HardwareRegistryClient(registry_addr, rpc_url, private_key)
         self.da = PerformanceAuditLog(mock_mode=mock_mode)
         self.private_key = private_key
         self.operator_address = self.registry.web3.eth.default_account if private_key else "0x0000000000000000000000000000000000000000"
         self.sla_enforcer_address = os.getenv("SLA_ENFORCER_ADDRESS")
-        
+
+        # AUTOSKILL Phase 3a: Optional activation-space anomaly detector
+        # When provided, audit reports are enriched with activation_anomaly_score
+        # and adversarial_flag based on PCA-projected Mahalanobis distance.
+        self.anomaly_detector = anomaly_detector
+
+        # AUTOSKILL Phase 5: Per-node skill gap tracking for informed challenge selection
+        self._node_skill_gaps: Dict[str, Dict[str, float]] = {}
+
         self.challenges = {
             "gpu": GPUBenchmark(),
             "cpu": CPUBenchmark(),
@@ -88,7 +97,26 @@ class VAMSSentinelNode:
             
             if not report.get("passed", False):
                 logger.warning(f"Probe failed for Node {node_id.hex()[:8]}")
-                
+
+            # AUTOSKILL Phase 3a: Activation-space anomaly detection
+            # Enriches the audit report with latent-space analysis when
+            # an anomaly detector is configured and activation data is available.
+            if self.anomaly_detector and report.get("activation_vector") is not None:
+                try:
+                    import numpy as np
+                    activation = np.asarray(report["activation_vector"], dtype=np.float32)
+                    anomaly_score = self.anomaly_detector.score_anomaly(activation)
+                    is_adv = self.anomaly_detector.is_adversarial(activation)
+                    report["activation_anomaly_score"] = round(anomaly_score, 6)
+                    report["adversarial_flag"] = is_adv
+                    if is_adv:
+                        logger.warning(
+                            f"AUTOSKILL: Adversarial activation detected for Node {node_id.hex()[:8]} "
+                            f"(anomaly_score={anomaly_score:.4f})"
+                        )
+                except Exception as e:
+                    logger.debug(f"AUTOSKILL anomaly detection skipped: {e}")
+
             # Route to optimal DA layer based on challenge type
             da_target = CHALLENGE_DA_MAP.get(challenge_type, DAProtocol.CELESTIA)
             
@@ -131,6 +159,34 @@ class VAMSSentinelNode:
         except Exception as e:
             logger.error(f"Failed to submit on-chain SLA report: {e}")
 
+    def _compute_challenge_weights(self, node_id_hex: str) -> List[float]:
+        """
+        AUTOSKILL Phase 5: Compute informed challenge selection weights.
+
+        Nodes with known skill gaps in certain dimensions get weighted
+        more heavily toward challenges that probe those weaknesses.
+        Falls back to uniform weights if no gap data is available.
+        """
+        challenge_types = list(self.challenges.keys())
+        n = len(challenge_types)
+        uniform = [1.0 / n] * n
+
+        gaps = self._node_skill_gaps.get(node_id_hex)
+        if not gaps:
+            return uniform
+
+        # Boost weight for challenge types where the node has higher gap scores
+        weights = []
+        for ct in challenge_types:
+            gap_score = gaps.get(ct, 0.0)
+            weights.append(1.0 + gap_score)  # Baseline 1.0 + gap bonus
+
+        total = sum(weights)
+        if total < 1e-8:
+            return uniform
+
+        return [w / total for w in weights]
+
     async def run_scheduler(self, interval_seconds: int = 300):
         """Randomized VRF-style scheduling for continuous challenging"""
         logger.info(f"Starting Sentinel Scheduler. Interval: {interval_seconds}s")
@@ -142,11 +198,21 @@ class VAMSSentinelNode:
                 hw_class = b"GPU_H100" + b"\x00"*24
                 endpoint = "http://localhost:8080"
                 
-                # 2. Pick a random challenge using cryptographic randomness
+                # 2. Pick challenge type
                 challenge_types = list(self.challenges.keys())
-                # AUDIT FIX OFC03: Use secrets.choice for cryptographic randomness
-                # to prevent validators from predicting upcoming challenges
-                challenge_type = secrets.choice(challenge_types)
+
+                # AUTOSKILL Phase 5: Informed challenge selection
+                # When skill gap data is available, weight challenges toward
+                # areas where the target node shows historical weakness.
+                node_id_hex = node_id.hex()
+                if self.anomaly_detector and self._node_skill_gaps.get(node_id_hex):
+                    weights = self._compute_challenge_weights(node_id_hex)
+                    challenge_type = random.choices(challenge_types, weights=weights, k=1)[0]
+                    logger.debug(f"AUTOSKILL: Informed challenge selection for {node_id_hex[:8]}: {challenge_type}")
+                else:
+                    # AUDIT FIX OFC03: Use secrets.choice for cryptographic randomness
+                    # to prevent validators from predicting upcoming challenges
+                    challenge_type = secrets.choice(challenge_types)
                 
                 # 3. Audit
                 asyncio.create_task(self.audit_node(node_id, endpoint, challenge_type, hw_class))
