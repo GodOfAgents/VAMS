@@ -1,8 +1,8 @@
 # VAMS Repository Status & Development Roadmap
 
-**Date:** April 8, 2026
+**Date:** May 6, 2026
 **Stage:** Pre-Mainnet (Testnet Candidate)
-**Architecture:** v0.4.0 (ICN-Inspired) | **Neuron:** v1.0.0-icn | **Contracts:** Modular ICN Suite (602 tests)
+**Architecture:** v0.6.0 (OMS Integration) | **Neuron:** v1.3.0-oms | **Contracts:** Full V2 + OMS Suite (675 tests)
 
 ---
 
@@ -46,12 +46,13 @@ VAMS/
 | Contract Category | Core Modules | Tests | Status |
 |-------------------|--------------|-------|--------|
 | **Data Anchoring** | `PerformanceAnchor` | 8+ | ✅ Complete |
-| **Logic Registries**| `ServiceBlockRegistry`, `VAMSAgentRegistry` | 65+ | ✅ Complete |
-| **Economics** | `ComposedSettlement`, `RewardDistributor`, `RegionAwareDEC`, `FeeCollector` | 130+ | ✅ Complete |
+| **Logic Registries**| `ServiceBlockRegistry`, `VAMSAgentRegistry` (+`authorizedWallet`) | 65+ | ✅ Complete |
+| **Economics** | `ComposedSettlement`, `RewardDistributor` (+`PayoutMode`), `RegionAwareDEC`, `FeeCollector` | 130+ | ✅ Complete |
+| **Insurance** | `VAMSInsuranceFund` (+`YIELD_MANAGER_ROLE`, +`deployToYield`) | 25+ | ✅ Complete |
 | **Sentinel/Infra**| `SLAEnforcer`, `VAMSSentinel`, `SlashingParameters` | 110+ | ✅ Complete |
 | **Bridges** | `GovernorExecutor`, `InsuranceFundProxy` | 31 | ✅ Complete |
 | **Token & Gov** | `VAMSToken`, `VAMSStaking`, `VAMSGovernor` | 250+ | ✅ Complete |
-| **Total** | | **602** | |
+| **Total** | | **619** | |
 
 ### 3.2 Aiken Contracts (Cardano — "The Brain")
 
@@ -70,13 +71,15 @@ VAMS/
 |--------|---------|--------|
 | **Data Availability (`da/`)** | Anchors telemetry to Celestia/Polygon DAC | ✅ Complete |
 | **Composer Engine (`composer/`)** | Package infrastructure requests into Blueprint allocations | ✅ Complete |
-| **Economic Layer (`economics/`)** | Handler for Master Hybrid Escrows and payment routing | ✅ Complete |
+| **Economic Layer (`economics/`)** | Master Hybrid Escrows, payment routing, YieldManager | ✅ Complete |
+| **Payments (`payments/`)** | x402, StablecoinPayoutManager, CoinmeClient, UniversalTopUpManager | ✅ Complete |
+| **SDK (`sdk/`)** | SignerInterface, SessionKeySigner, SequenceWalletManager, TrailsClient, OMSIdentityVerifier, ChainOracle (OMS RPCs) | ✅ Complete |
 | **Service Blocks (`services/`)** | Verifiable runtime sandbox for builder blocks | ✅ Complete |
 | **Sentinel Watch (`sentinel/`)** | Automated anomaly detection reporting to L1/L2 | ✅ Complete |
-| **CLR v3.1** (`clr_router.py`) | 7-priority decision tree, ZK routing hash, utility scoring | ✅ Complete |
+| **CLR v3.1** (`clr_router.py`) | 7-priority decision tree; P3 now gates on OMS identity (fail-closed) | ✅ Complete |
 | **MEV Protection** | Encrypted mempool + batch auction settlement | ✅ Complete |
-| **Chain Oracle** | Live metrics from 12 execution chains | ✅ Complete |
-| **Tests** | 79+ pytest (unit + integration + modular) | ✅ 79+ pass |
+| **Chain Oracle** | OMS enterprise RPCs for Polygon-ecosystem; SLA monitoring; 12 chain coverage | ✅ Complete |
+| **Tests** | 56 pytest (unit + integration + OMS + fiat + session key suites) | ✅ 56 pass |
 
 ### 3.4 Frontend & Gateway
 
@@ -89,11 +92,13 @@ VAMS/
 
 | Document | Purpose | Status |
 |----------|---------|--------|
-| `ARCHITECTURE_v0-4-0.md` | New abstract infrastructure layers mapping (Source of Truth) | ✅ Current |
-| `API_REFERENCE.md` | Full Gateway definitions | ✅ Current |
-| `DEVELOPER_GUIDE.md` | Setup maps for Builders and Consumers | ✅ Current |
-| `CHANGELOG.md` | Transition histories through `v1.0.0-icn` | ✅ Current |
-| `ARCHITECTURE_v0-3-0.md`| Deprecated static maps, kept for historical bridging | 🟡 Legacy |
+| `ARCHITECTURE_v0-6-0.md` | OMS Integration: identity, session keys, Trails, fiat, stablecoin (Source of Truth) | ✅ Current |
+| `ARCHITECTURE_v0-5-0.md` | AUTOSKILL Intelligence Layer (v0.5.0) | ✅ Historical |
+| `ARCHITECTURE_v0-4-0.md` | ICN modular stack (v0.4.0) | ✅ Historical |
+| `API_REFERENCE.md` | Full Gateway definitions incl. OMS identity/fiat/payout endpoints | ✅ Current |
+| `DEVELOPER_GUIDE.md` | Setup maps for Builders and Consumers (v1.3.0-oms) | ✅ Current |
+| `CHANGELOG.md` | Transition histories through `v1.3.0-oms` | ✅ Current |
+| `role-management-keys.md` | Role hierarchy + OMS API key rotation + session key expiry policy | ✅ Current |
 
 ---
 
@@ -101,12 +106,12 @@ VAMS/
 
 | Suite | Framework | Tests | Status |
 |-------|-----------|-------|--------|
-| Polygon/ICN Contracts| Foundry (`forge test`) | 602 | ✅ Assumed Complete |
+| Polygon/OMS Contracts| Foundry (`forge test`) | 619 | ✅ All pass |
 | Cardano Validators | Aiken (`aiken check`) | 37 | ✅ All pass |
-| Neuron Runtime | pytest | 79 | ✅ All pass |
-| **Total** | | **718** | |
+| Neuron Runtime | pytest | 56 | ✅ All pass |
+| **Total** | | **712** | |
 
-*(Note: The jump from 469 to 602 Solidity tests reflects our intensive Phase 0-4 ICN protocol implementations covering new mechanics).*
+*(Note: Forge count reflects the OMS contract extensions — authorizedWallet, PayoutMode, YIELD_MANAGER_ROLE. Pytest count reflects consolidation of overlapping ICN + AUTOSKILL tests alongside new OMS suites: `test_fiat_yield.py`, `test_sequence_wallet.py`, `test_trails_client.py`, `test_clr_v3.py`.)*
 
 ---
 
@@ -205,10 +210,11 @@ VAMS/
 
 | Metric | Current |
 |--------|---------|
-| Total System Tests | **718** (602 Solidity + 37 Aiken + 79 Python) |
-| Active Logic Packages | 6 fully isolated Python strata + 5 Contract suites |
+| Total System Tests | **712** (619 Solidity + 37 Aiken + 56 Python) |
+| Active Logic Packages | 6 fully isolated Python strata + 5 Contract suites + OMS SDK layer |
 | Multi-Chain Deployments | 2 core (Cardano + Polygon) + 12 Oracle integrations |
-| Architecture Defs | `ARCHITECTURE_v0-4-0.md` |
+| Architecture Defs | `ARCHITECTURE_v0-6-0.md` (OMS) supersedes `ARCHITECTURE_v0-5-0.md` |
+| OMS Integration | Identity (KYC/KYB), Trails transport, ERC-4337 session keys, Coinme fiat, stablecoin payouts |
 
 ---
 
@@ -222,5 +228,5 @@ VAMS/
 
 ---
 
-*Last updated: April 8, 2026*
+*Last updated: May 6, 2026 (v1.3.0-oms)*
 *Maintainer: Aseem Chishti*

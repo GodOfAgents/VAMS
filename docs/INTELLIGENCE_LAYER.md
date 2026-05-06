@@ -2,7 +2,7 @@
 
 **Module:** `neuron/intelligence/`  
 **Version:** 0.1.0  
-**Status:** Stable (v1.2.0-autoskill)  
+**Status:** Stable (v1.3.0-oms)  
 **Paper Reference:** [AUTOSKILL: Characterizing Model-Native Skills](./papers/Characterizing%20Model-Native%20Skills.pdf)
 
 ---

@@ -1,9 +1,14 @@
 # VAMS Node Operator Guide
 
-**Audience:** Suppliers — GPU / bare-metal node operators  
-**Version:** v1.3.0-oms  
+**Audience:** Suppliers — GPU / bare-metal node operators
+**Version:** v1.3.0-oms
 **Prerequisites:** Familiarity with the [Developer Guide](./DEVELOPER_GUIDE.md) and
 [Architecture v0.6.0](./team/ARCHITECTURE_v0-6-0.md)
+
+> [!NOTE]
+> This guide covers both the v1.2.0-autoskill Intelligence Layer (Sections 1–5) **and** the
+> new v1.3.0-oms OMS integration (Sections 6–10: stablecoin payouts, enterprise RPCs, session
+> keys, OMS identity). If you are upgrading from v1.2.0, jump directly to **Section 6**.
 
 ---
 
@@ -37,7 +42,7 @@ consumers specify skill vectors in blueprints, leading to more consistent alloca
 | Python | ≥ 3.10 |
 | numpy | ≥ 1.24 |
 | scikit-learn | ≥ 1.3 |
-| VAMS Neuron | v1.2.0-autoskill |
+| VAMS Neuron | v1.3.0-oms |
 
 ```bash
 pip install vams-neuron==1.3.0-oms
@@ -362,54 +367,262 @@ print(f'Baseline fitted: {detector.is_baseline_fitted}')
 
 ---
 
-## 11. Enterprise RPC & OMS (v1.3.0+)
+## 11. Related Documentation
 
-The v1.3.0-oms release introduces enterprise-grade connectivity and integration with the Polygon Open Money Stack.
-
-### 11.1 Enterprise RPC Configuration
-VAMS now utilizes an enhanced `ChainOracle` that supports enterprise RPC endpoints. This improves reliability and provides SLA-monitored connection stability.
-
-Configure the following in your environment or `node_config.py`:
-
-```python
-# .env or os.environ
-VAMS_ENTERPRISE_RPC="https://enterprise.rpc.polygon.technology/v1/..."
-VAMS_RPC_FAILOVER_TIMEOUT=5.0  # seconds
-```
-
-The `ChainOracle` automatically falls back to secondary endpoints if the enterprise RPC exceeds the latency threshold or fails its periodic health check.
-
-### 11.2 OMS Identity & Compliance
-For operators providing high-trust (P3) institutional capacity, KYC verification via the OMS Identity API is required.
-
-**Configuration:**
-```bash
-export OMS_IDENTITY_API="https://api.oms.polygon.technology/identity"
-export OMS_API_KEY="your-oms-api-key"
-```
-
-The Sentinel node uses these credentials to verify client identities before accepting institutional tasks. Failure to configure these correctly will restrict your node to P1/P2 public routing paths.
-
-### 11.3 Stablecoin Payouts
-Node operators can choose to receive their rewards directly in stablecoins (USDC or USDT) to simplify OPEX management.
-
-**To opt-in:**
-Use the `StablecoinPayoutManager` in the VAMS SDK or the CLI command:
-
-```bash
-vams-node set-payout --mode STABLE_USDC --provider 0xYOUR_PROVIDER_ADDRESS
-```
-
-This updates your preference in the on-chain `RewardDistributor`, and the OMS settlement layer will handle the conversion and distribution.
+| Document | Description |
+|---|---|
+| [INTELLIGENCE_LAYER.md](./INTELLIGENCE_LAYER.md) | Full Intelligence Layer module API reference |
+| [DEVELOPER_GUIDE.md](./DEVELOPER_GUIDE.md) | Developer onboarding (all personas) |
+| [API_REFERENCE.md](./API_REFERENCE.md) | REST API including Intelligence Layer and OMS endpoints |
+| [team/ARCHITECTURE_v0-6-0.md](./team/ARCHITECTURE_v0-6-0.md) | OMS integration architecture — all 5 phases |
+| [role-management-keys.md](./role-management-keys.md) | YIELD_MANAGER_ROLE, OMS key rotation, session key expiry |
+| [CHANGELOG.md](./CHANGELOG.md) | Full release history |
 
 ---
 
-## 12. Related Documentation
+## 6. What Changed in v1.3.0-oms for Operators
+
+| Area | Before v1.3.0 | After v1.3.0 |
+|---|---|---|
+| Reward currency | $VAMS only | $VAMS, USDC, or USDT (operator choice) |
+| Chain RPC infrastructure | Public fallbacks | OMS enterprise RPCs for Polygon-ecosystem chains |
+| Agent signing | Raw EOA for all operations | Session keys for payment ops; EOA for registration |
+| Institutional routing (P3) | PLATINUM trust tier only | PLATINUM + OMS KYC/KYB (fail-closed) |
+| TEE attestation binding | EOA | Unchanged — session keys do **not** affect TEE attestation |
+
+**Required new environment variables:**
+
+```bash
+export OMS_API_KEY="<your_oms_api_key>"                      # OMS Console: polygon.technology/oms
+export OMS_IDENTITY_API="https://api.oms.polygon.technology/identity"
+export OMS_POLYGON_RPC_PRIMARY="https://oms.polygon.technology/rpc/polygon"
+export OMS_POLYGON_RPC_SECONDARY="https://rpc2.oms.polygon.technology/rpc/polygon"
+```
+
+> [!CAUTION]
+> Never commit `OMS_API_KEY` to version control. Use a secrets manager or
+> a `.env` file excluded by `.gitignore`.
+
+---
+
+## 7. Stablecoin Payout Setup
+
+By default, rewards are paid in `$VAMS`. You can opt-in to USDC/USDT at any time
+using the `StablecoinPayoutManager`. This is reversible and takes effect on the next
+`claimRewards()` call.
+
+### Payout Modes
+
+| Mode | Value | Description |
+|---|---|---|
+| `VAMS_ONLY` | 0 | 100% $VAMS (default) |
+| `STABLECOIN` | 1 | 100% USDC or USDT via OMS rails |
+| `HYBRID` | 2 | 50% $VAMS, 50% stablecoin |
+
+### Python SDK (recommended)
+
+```python
+from neuron.payments.stablecoin_payout import StablecoinPayoutManager, PayoutMode
+from web3 import Web3
+import os
+
+w3 = Web3(Web3.HTTPProvider(os.getenv("POLYGON_RPC")))
+
+manager = StablecoinPayoutManager(
+    web3=w3,
+    reward_distributor_address="0x<REWARD_DISTRIBUTOR_ADDRESS>",
+    private_key=os.getenv("OPERATOR_PRIVATE_KEY")
+)
+
+# Check current mode
+current = manager.get_preference(manager.account.address)
+mode_names = {0: "VAMS_ONLY", 1: "STABLECOIN", 2: "HYBRID"}
+print(f"Current payout mode: {mode_names[current]}")
+
+# Opt-in to 100% USDC/USDT
+tx = manager.opt_in_to_stablecoin()
+print(f"Set to STABLECOIN — tx: {tx}")
+
+# Or opt-in to 50/50 split
+tx = manager.opt_in_to_hybrid()
+print(f"Set to HYBRID — tx: {tx}")
+
+# Revert to $VAMS-only
+tx = manager.set_preference(PayoutMode.VAMS_ONLY)
+print(f"Reverted to VAMS_ONLY — tx: {tx}")
+```
+
+### REST API
+
+```bash
+curl -X POST https://<your-gateway>/api/v1/economics/payout-preference \
+  -H "Content-Type: application/json" \
+  -d '{
+    "provider_address": "0xYOUR_ADDRESS",
+    "mode": "STABLECOIN",
+    "signature": "0x<EIP-712_signed_request>"
+  }'
+```
+
+> **Note:** Stablecoin conversion uses OMS settlement rails. Output currency
+> (USDC or USDT) is determined by the OMS liquidity pool at claim time.
+> Both are ERC-20 on Polygon.
+
+---
+
+## 8. OMS Enterprise RPC Configuration
+
+The `ChainOracle` in `neuron/chain_oracle.py` reads RPC URLs from environment
+variables at startup. OMS enterprise endpoints for Polygon-ecosystem chains offer
+99.9% SLA-backed uptime with per-endpoint latency monitoring tracked in
+`ChainMetrics.rpc_latency_ms`.
+
+### RPC Endpoint Map (v1.3.0)
+
+| Chain | Env Variable | Default Value | OMS-Provided? |
+|---|---|---|---|
+| Polygon | `POLYGON_RPC` | `https://oms.polygon.technology/rpc/polygon` | ✅ Yes |
+| Ethereum | `ETHEREUM_RPC` | `https://oms.polygon.technology/rpc/ethereum` | ✅ Yes |
+| Arbitrum | `ARBITRUM_RPC` | `https://arb1.arbitrum.io/rpc` | ❌ Public |
+| Base | `BASE_RPC` | `https://mainnet.base.org` | ❌ Public |
+| Cardano | `CARDANO_RPC` | `https://cardano-mainnet.blockfrost.io/api/v0` | ❌ Blockfrost |
+| Solana | `SOLANA_RPC` | `https://api.mainnet-beta.solana.com` | ❌ Public |
+| SEI | `SEI_RPC` | `https://evm-rpc.sei-apis.com` | ❌ Public |
+| Phala | `PHALA_RPC` | `https://phala.api.onfinality.io/public` | ❌ Public |
+| Avalanche | `AVALANCHE_RPC` | `https://api.avax.network/ext/bc/C/rpc` | ❌ Public |
+
+### Recommended `.env` additions
+
+```env
+# Override public defaults with OMS enterprise endpoints
+POLYGON_RPC=https://oms.polygon.technology/rpc/polygon
+ETHEREUM_RPC=https://oms.polygon.technology/rpc/ethereum
+
+# Fallback (ChainOracle auto-uses cache if primary fails)
+OMS_POLYGON_RPC_SECONDARY=https://rpc2.oms.polygon.technology/rpc/polygon
+
+# Oracle cache TTL in seconds (default 30)
+ORACLE_CACHE_TTL=30
+```
+
+### Verifying oracle health
+
+```python
+from neuron.chain_oracle import OracleManager, OracleStatus
+
+oracle = OracleManager()
+oracle.print_metrics_table()  # Prints Gas/Block/Congestion/SLA% for all 12 chains
+
+# Per-chain status check
+statuses = oracle.get_status()
+for chain, status in statuses.items():
+    icon = {"live": "✅", "stale": "⚠️", "offline": "❌"}.get(status.value, "?")
+    m = oracle.get_metrics(chain)
+    sla = f"{m.uptime_pct:.1f}%" if m else "N/A"
+    print(f"{icon} {chain:12} SLA: {sla}")
+```
+
+A `stale=True` metric means the oracle returned cached data because the live RPC call
+failed. The neuron continues operating (graceful degradation). If SLA% drops below
+**95%** for an OMS enterprise endpoint, raise a ticket via the OMS Console.
+
+---
+
+## 9. Session Key Management
+
+Session keys (Sequence ERC-4337) are automatically provisioned when your node registers.
+You only need to understand scope limits and the revocation procedure.
+
+### Value caps per TrustTier
+
+| TrustTier | Max Value / Tx | Validity | Re-issue without root key? |
+|---|---|---|---|
+| BRONZE | 100 $VAMS | 24 h | Yes (up to 3 consecutive) |
+| SILVER | 1,000 $VAMS | 24 h | Yes (up to 5 consecutive) |
+| GOLD | 50,000 $VAMS | 24 h | Yes (with governance approval) |
+| PLATINUM | Unlimited | 24 h | Yes (with governance approval) |
+
+Value caps are enforced on-chain by the Sequence `EntryPoint` — a compromised session key
+**cannot** exceed its cap regardless of the attacker's intent.
+
+### Revoking a compromised session key (emergency)
+
+```bash
+# Must be signed by the root EOA (owner), not the session key itself
+cast send <AGENT_REGISTRY_ADDRESS> \
+  "setAuthorizedWallet(bytes32,address)" \
+  <YOUR_AGENT_ID> \
+  "0x0000000000000000000000000000000000000000" \
+  --private-key $OPERATOR_PRIVATE_KEY \
+  --rpc-url $POLYGON_RPC
+```
+
+> [!WARNING]
+> After calling `setAuthorizedWallet(..., address(0))`, payment operations will
+> fail until a new session key is provisioned. Restart the Neuron service to
+> auto-provision a fresh one.
+
+---
+
+## 10. OMS Identity Verification (P3 Routing)
+
+If your node handles **regulated or institutional payloads** via the P3 CLR path,
+your operator address must pass OMS KYC/KYB verification. Without it, P3 routes
+return `403` (fail-closed). Standard operators using P4–P6 routing are **not**
+affected.
+
+### Getting verified
+
+1. Go to [polygon.technology/oms](https://polygon.technology/oms)
+2. Complete the KYC/KYB flow for your operator address
+3. OMS issues a verifiable credential — no further VAMS configuration is required
+4. `OMSIdentityVerifier.is_verified(your_address)` returns `True` automatically
+
+### Checking status locally
+
+```python
+from neuron.sdk.oms_identity import OMSIdentityVerifier
+
+verifier = OMSIdentityVerifier()  # reads OMS_IDENTITY_API and OMS_API_KEY from env
+result = verifier.is_verified("0xYOUR_OPERATOR_ADDRESS")
+print(f"OMS verified: {result}")
+```
+
+> **Stub mode:** Until `OMS_API_KEY` is set to a real key from the OMS Console, the
+> verifier uses a stub (addresses starting with `0x99` auto-verify). Set the real key
+> before any production P3 routing.
+
+### OMS API key rotation
+
+Rotate `OMS_API_KEY` every **90 days**. See
+[role-management-keys.md §5](./role-management-keys.md) for the full procedure.
+
+Quick check after rotation:
+
+```python
+from neuron.sdk.oms_identity import OMSIdentityVerifier
+v = OMSIdentityVerifier()
+print('API URL:', v.api_url)
+print('Real key set:', v.api_key != 'demo-key')
+```
+
+### Troubleshooting (OMS)
+
+| Symptom | Likely Cause | Fix |
+|---|---|---|
+| P3 route returning `403` | `is_verified()` returning `False` | Check `OMS_API_KEY`; verify address at polygon.technology/oms |
+| `demo-key` in logs | `OMS_API_KEY` not set | Set env var; verifier is in stub mode |
+| `stale=True` for Polygon chain | OMS RPC unreachable | Check `OMS_POLYGON_RPC_PRIMARY`; oracle auto-falls-back to cache |
+| Session key rejected | Expired (>24 h) or over value cap | Restart Neuron — auto-provisions new session key |
+| `setAuthorizedWallet` tx fails | Caller is not agent owner | Use root EOA private key, not session key |
+| Stablecoin payout not converting | OMS rails unavailable | Check OMS Console; rewards remain as $VAMS until rails recover |
+| `payoutPreference` returns `0` | Not yet set | Call `opt_in_to_stablecoin()` or `opt_in_to_hybrid()` |
+
 
 | Document | Description |
 |---|---|
 | [INTELLIGENCE_LAYER.md](./INTELLIGENCE_LAYER.md) | Full module API reference |
 | [DEVELOPER_GUIDE.md](./DEVELOPER_GUIDE.md) | Developer onboarding (all personas) |
 | [API_REFERENCE.md](./API_REFERENCE.md) | REST API including Intelligence Layer endpoints |
-| [team/ARCHITECTURE_v0-6-0.md](./team/ARCHITECTURE_v0-6-0.md) | Architecture addendum with OMS data flows |
+| [team/ARCHITECTURE_v0-6-0.md](./team/ARCHITECTURE_v0-6-0.md) | Architecture addendum with data flow diagrams |
 | [CHANGELOG.md](./CHANGELOG.md) | Full release history |

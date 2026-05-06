@@ -1,128 +1,359 @@
-# VAMS Architecture Addendum: v0.6.0-OMS (Polygon Open Money Stack)
+# VAMS Architecture Addendum: v0.6.0 (Polygon OMS Integration)
 
-**Status:** Stable (v1.3.0-oms)  
-**Replaces:** No prior sections deprecated. This is a **purely additive** addendum to [ARCHITECTURE_v0-5-0.md](./ARCHITECTURE_v0-5-0.md).  
-**Objective:** Integrate the Polygon Open Money Stack (OMS) into the VAMS v0.5.0 stack to provide institutional-grade identity, fiat on-ramps, and cross-chain transport.
+**Status:** Stable (v1.3.0-oms)
+**Replaces:** No prior sections deprecated. This is a **purely additive** addendum to
+[ARCHITECTURE_v0-5-0.md](./ARCHITECTURE_v0-5-0.md) and [ARCHITECTURE_v0-4-0.md](./ARCHITECTURE_v0-4-0.md).
+**Objective:** Integrate Polygon's Open Money Stack (OMS) across 5 phases — covering identity
+abstraction, cross-chain routing via Trails, ERC-4337 account abstraction, fiat on-ramps,
+yield generation, and stablecoin payouts — without breaking TEE, DA, Sentinel, or non-EVM bridge
+subsystems.
 
 ---
 
-## 1. The OMS Integration Layer
+## 1. What Changed From v0.5.0
 
-The v0.6.0 upgrade introduces a unified infrastructure layer that standardizes how VAMS interacts with identities, payments, and cross-chain transport. This layer abstracts the complexity of working with multiple wallets and chains into a single, cohesive "stack."
+The v0.5.0 architecture added the AUTOSKILL Intelligence Layer, leaving nodes as verifiable but
+still using raw EOA signing and public RPC endpoints. **v0.6.0 integrates OMS to harden the
+economic and identity layers.**
 
-| Pillar | Subsystem | v1.3.0-oms Capability |
+| Subsystem | v0.5.0 Behavior | v0.6.0 Upgrade |
 |---|---|---|
-| **Identity** | `VAMSAgentRegistry` + `OMSIdentityVerifier` | Two-Layer Identity: EOA (Registry) + KYC status (OMS Identity API) |
-| **Payments** | `Coinme` + `StablecoinPayoutManager` | Direct fiat on-ramps and auto-settlement in USDC/USDT |
-| **Transport** | `CLRouter` v3.1 + `Trails` | Native AggLayer chain support via Trails transport orchestration |
-| **Auth** | `Sequence` | ERC-4337 Session Keys for non-custodial, high-frequency signing |
+| Signing | Raw `from_key()` EOA signing in all Python modules | `SignerInterface` abstraction; `SessionKeySigner` (ERC-4337) for operations |
+| Bridge Transport | AggLayer primary for Polygon/ETH/ARB/Base routes | OMS Trails as primary for AggLayer chains; existing transports unchanged for Cardano/Solana/SEI |
+| CLR P3 Route | PLATINUM trust tier only | PLATINUM + `OMSIdentityVerifier.is_verified()` (fail-closed) |
+| Fiat Entry | Not present | `CoinmeClient` + `UniversalTopupManager` — credit card / bank → $VAMS |
+| Insurance Yield | Idle capital earns no yield | `YieldManager` — up to 30% in OMS yield vaults (instant withdrawal) |
+| Provider Payouts | $VAMS only | `StablecoinPayoutManager` — opt-in USDC/USDT via OMS rails |
+| RPC Infrastructure | Public fallbacks | OMS enterprise RPCs for Polygon-ecosystem chains + SLA monitoring |
 
 ---
 
-## 2. Two-Layer Identity Model
+## 2. Phase 1 — Two-Layer Identity Model
 
-VAMS now distinguishes between the **Owner Wallet** (EOA) and the **Authorized/Session Wallet**. This enables agents to perform autonomous actions using session keys while the owner retains full control over the primary assets and identity.
+### 2.1 Problem
 
-### 2.1 Data Flow Diagram
+Prior to v0.6.0, every Python module signed transactions directly with the agent's root EOA
+private key (`Account.from_key(pk)`). This created two risks:
+1. A compromised session operation exposes the root key
+2. ERC-4337 smart wallet adoption would require a full refactor
 
-```mermaid
-graph TD
-    subgraph "On-Chain (Registry)"
-        R[VAMSAgentRegistry]
-        AW[authorizedWallet]
-        IS[isAuthorizedCaller]
-    end
+### 2.2 Solution: `SignerInterface` Abstraction
 
-    subgraph "Neuron (Auth)"
-        SI[SignerInterface]
-        EOA[EOASigner]
-        SK[SessionKeySigner]
-        SWM[SequenceWalletManager]
-    end
-
-    subgraph "OMS Identity (Compliance)"
-        OIV[OMSIdentityVerifier]
-        API[OMS Identity API]
-    end
-
-    U[User / Agent] -->|setAuthorizedWallet| R
-    U -->|Sign Transaction| SI
-    SI -->|Primary Auth| EOA
-    SI -->|Ephemeral Auth| SK
-    SK -->|Verify| SWM
-
-    EOA -->|Caller| IS
-    SK -->|Caller| IS
-    IS -->|Gate| AW
-
-    OIV -->|KYC Check| API
-    OIV -->|Verified| CLR[CLRouter P3 Path]
+```
+neuron/sdk/signer.py
+│
+├── SignerInterface (ABC)
+│   ├── sign(message: bytes) → bytes
+│   └── address: str
+│
+├── EOASigner(SignerInterface)
+│   └── Wraps Account.from_key() — existing behavior, no behavior change
+│
+├── SessionKeySigner(SignerInterface)
+│   └── Wraps Sequence SDK session key — used for ERC-4337 operations (Phase 3)
+│
+└── SignerFactory
+    └── .create(config) → EOASigner | SessionKeySigner
 ```
 
----
+### 2.3 `VAMSAgentRegistry.sol` Changes
 
-## 3. Trails Transport & AggLayer Routing
+```solidity
+struct Agent {
+    // ... existing fields ...
+    address authorizedWallet;   // NEW: Sequence smart wallet address (or zero = not set)
+}
 
-The `CLRouter` has been updated to v3.1 to support the **AggLayer** ecosystem via **Trails**. This allows VAMS agents to route messages and state across Polygon CDK chains with unified liquidity and transport guarantees.
+// NEW: Owner-only setter
+function setAuthorizedWallet(bytes32 agentId, address wallet) external;
 
-### 3.1 Trails Transport Decision Tree
+// NEW: View function for authorization checks
+function isAuthorizedCaller(bytes32 agentId, address caller) external view returns (bool);
 
-```mermaid
-graph TD
-    Start[Request Destination] --> IsAggLayer{Is AggLayer Chain?}
-    IsAggLayer -->|Yes| Trails[TrailsTransport]
-    IsAggLayer -->|No| Legacy[Legacy Bridge/Transport]
-
-    Trails --> IsInstitutional{P3 Institutional?}
-    IsInstitutional -->|Yes| OMSID{Verify OMS Identity}
-    IsInstitutional -->|No| Direct[Direct Execution]
-
-    OMSID -->|Success| Secure[Secure P3 Channel]
-    OMSID -->|Fail| Deny[Reject / Fallback to P2]
+// Modified: all existing ownership checks now accept authorized wallet
+// msg.sender == agent.owner || msg.sender == agent.authorizedWallet
 ```
 
+### 2.4 TEE Attestation Binding Preservation
+
+> [!IMPORTANT]
+> `tee_plugin.py → _abi_encode_attestation()` always binds to the **root EOA identity**, not
+> the session wallet. This is a hard invariant: TEE proofs must be tied to the original hardware
+> operator, not to ephemeral session keys.
+
 ---
 
-## 4. Economic Upgrades: Stablecoin Settlement
+## 3. Phase 2 — Trails Transport Integration (CLR v3.1)
 
-Node operators and providers can now opt-in to receive rewards in stablecoins (USDC/USDT) instead of $VAMS, leveraging the OMS settlement rails.
+### 3.1 Scope
 
-### 4.1 Payout Mode Configuration
+Trails is mapped as a **transport accelerator for AggLayer-connected chains only**. Non-EVM routes
+(Cardano, Midnight, Hydra, Solana, SEI) remain on their existing transports.
 
-| Mode | Token | Settlement Rail | Best For |
+| Route | Previous Transport | v0.6.0 Primary | v0.6.0 Fallback |
 |---|---|---|---|
-| `NATIVE` | $VAMS | VAMS RewardDistributor | Long-term stakers / Governance participants |
-| `STABLE_USDC` | USDC | OMS Settlement Service | Professional Node Operators (OPEX coverage) |
-| `STABLE_USDT` | USDT | OMS Settlement Service | Regional providers in USDT-dominant markets |
+| VAMS_L3 → Ethereum | AggLayer | **Trails** | AggLayer |
+| VAMS_L3 → Polygon | AggLayer | **Trails** | AggLayer |
+| VAMS_L3 → Arbitrum | AggLayer | **Trails** | AggLayer |
+| VAMS_L3 → Base | AggLayer | **Trails** | AggLayer |
+| VAMS_L3 → Cardano | RosenBridge | RosenBridge | — unchanged — |
+| VAMS_L3 → Solana | Hyperlane | Hyperlane | — unchanged — |
+| VAMS_L3 → SEI | LayerZero | LayerZero | — unchanged — |
+
+### 3.2 `TrailsClient` Interface
+
+```python
+# neuron/sdk/trails_client.py
+class TrailsClient:
+    def submit_intent(source, dest, payload, value) → TrailsReceipt
+    def get_status(intent_id) → TrailsStatus   # PENDING | SETTLED | FAILED
+    # Mock mode: TrailsClient(mock=True) for testing — no network calls
+```
+
+### 3.3 BridgeExecutor Integration
+
+`BridgeExecutor.execute()` now checks:
+```
+if transport == BridgeTransport.TRAILS:
+    → TrailsTransportHandler.execute_intent()
+    → on failure: cascade to BridgeFallbackHandler (AggLayer)
+```
 
 ---
 
-## 5. Verification & Test Results
+## 4. Phase 3 — Sequence ERC-4337 Session Keys
 
-The OMS integration was verified across the entire VAMS stack, ensuring zero regressions in core agentic logic.
+### 4.1 `SequenceWalletManager`
 
-- **Foundry (Solidity):** 619 tests passing.
-  - Verified `VAMSAgentRegistry` authorization logic.
-  - Verified `RewardDistributor` payout mode gating.
-  - Verified `CLRouter` v3.1 decision tree.
-- **Pytest (Python):** 56 tests passing.
-  - Verified `OMSIdentityVerifier` fail-closed security.
-  - Verified `SequenceWalletManager` session key lifecycle.
-  - Verified `ChainOracle` enterprise RPC failover.
-- **Aiken (Cardano):** 79 tests passing.
+```python
+# neuron/sdk/sequence_wallet.py
+class SequenceWalletManager:
+    """Creates and manages ERC-4337 smart wallets per agent."""
+    def create_wallet(agent_id) → SmartWallet
+    def get_wallet(agent_id) → SmartWallet
+
+class SessionKeyManager:
+    """Creates scoped session keys bound to TrustTier limits."""
+    def create_session_key(agent_id, tier) → SessionKey
+```
+
+### 4.2 TrustTier → Session Key Scope
+
+| TrustTier | `max_value_per_tx` | `validity_window` | Allowed Contracts |
+|---|---|---|---|
+| BRONZE | 100 $VAMS | 24h | VAMS core contracts only |
+| SILVER | 1,000 $VAMS | 24h | VAMS core + approved DEXes |
+| GOLD | 50,000 $VAMS | 24h | VAMS core + approved DEXes + bridge contracts |
+| PLATINUM | Unlimited | 24h | All VAMS contracts |
+
+### 4.3 Signing Flow
+
+```
+Agent Operation
+    │
+    ▼
+SignerFactory.create(config)
+    │
+    ├── config.use_session_key = False  →  EOASigner (channel creation, registration)
+    │
+    └── config.use_session_key = True   →  SessionKeySigner (payments, x402 tokens)
+                                               │
+                                               ▼
+                                        Sequence SDK → ERC-4337 UserOperation
+```
 
 ---
 
-## 6. Migration & Setup
+## 5. Phase 4 — Coinme Fiat Rails + Insurance Fund Yield
 
-### 6.1 Environment Variables
-Node operators must configure the following for OMS support:
-- `OMS_IDENTITY_API`: URL for the OMS Identity verification service.
-- `OMS_API_KEY`: API key for enterprise access.
-- `SEQUENCE_PROJECT_KEY`: Required for session key management.
+### 5.1 Universal Top-Up Flow
 
-### 6.2 Implementation Details
-For detailed API usage and code examples, refer to:
-- [DEVELOPER_GUIDE.md](../DEVELOPER_GUIDE.md)
-- [API_REFERENCE.md](../API_REFERENCE.md)
-- [NODE_OPERATORS.md](../NODE_OPERATORS.md)
+```
+User (credit card / bank transfer)
+    │
+    ▼
+CoinmeClient.create_checkout(amount_fiat, currency, dest_address)
+    │
+    ▼ (Coinme handles KYC + MTL compliance)
+Fiat → Crypto Conversion (Coinme)
+    │
+    ▼
+UniversalTopUpManager
+    ├── Applies gas abstraction premium: 2–7% (per TOKENOMICS.md)
+    └── Deposits $VAMS to agent's ComposedSettlement escrow
+```
+
+**Jurisdiction coverage:** All Coinme-supported regions (leverages Coinme's existing Money
+Transmitter Licenses — VAMS does not hold separate MTLs).
+
+### 5.2 Insurance Fund Yield (`VAMSInsuranceFund.sol` + `YieldManager`)
+
+New roles and functions:
+```solidity
+// New role
+bytes32 public constant YIELD_MANAGER_ROLE = keccak256("YIELD_MANAGER_ROLE");
+
+// Deploy idle capital — reverts if > 30% of totalFundBalance()
+function deployToYield(address vault, uint256 amount) external onlyRole(YIELD_MANAGER_ROLE);
+
+// Instant withdrawal — no delay
+function withdrawFromYield(address vault, uint256 amount) external onlyRole(YIELD_MANAGER_ROLE);
+
+// Updated view — now returns balanceOf + totalDeployedBalance
+function totalFundBalance() external view returns (uint256);
+```
+
+> [!WARNING]
+> The 30% deployment cap is enforced on-chain with a Solidity `require`. It cannot be bypassed
+> by a compromised `YIELD_MANAGER_ROLE` key — the cap is a mathematical invariant, not a
+> governance parameter.
+
+---
+
+## 6. Phase 5 — Stablecoin Payouts + Enterprise RPCs + OMS Identity
+
+### 6.1 Stablecoin Payout Flow
+
+```
+Provider claims rewards via RewardDistributor.claimRewards()
+    │
+    ├── payoutPreference[msg.sender] == VAMS_ONLY
+    │       → Transfer $VAMS directly (existing behavior)
+    │
+    ├── payoutPreference[msg.sender] == STABLECOIN
+    │       → Route through OMS conversion contract
+    │       → Provider receives USDC or USDT
+    │
+    └── payoutPreference[msg.sender] == HYBRID
+            → Split: 50% $VAMS direct, 50% via OMS conversion
+```
+
+To opt-in:
+```python
+# Python SDK
+manager = StablecoinPayoutManager(web3, reward_distributor_address, private_key)
+manager.opt_in_to_stablecoin()   # 100% USDC/USDT
+manager.opt_in_to_hybrid()        # 50/50 split
+```
+
+### 6.2 Enterprise RPC Configuration
+
+`ChainOracle` now uses OMS enterprise RPC endpoints for all Polygon-ecosystem chains with:
+- Per-endpoint latency tracking (rolling 60s window)
+- Uptime SLA monitoring (target: 99.9%)
+- Automatic failover to secondary endpoint on consecutive failures
+- Cache TTL: 30s (unchanged)
+
+Environment variables required:
+```
+OMS_POLYGON_RPC_PRIMARY=https://rpc.oms.polygon.technology/mainnet
+OMS_POLYGON_RPC_SECONDARY=https://rpc2.oms.polygon.technology/mainnet
+OMS_IDENTITY_API=https://api.oms.polygon.technology/identity
+OMS_API_KEY=<your_oms_api_key>
+```
+
+### 6.3 CLR v3.1 — P3 OMS Identity Gate
+
+The full CLR v3.1 decision tree (7 priorities):
+
+```
+CLRouter.route_v3(request, agent_id)
+    │
+    ├── P0: Privacy / TEE requirement?
+    │       → Midnight (privacy chain)
+    │
+    ├── P1: Confidential compute?
+    │       → Phala / Marlin TEE + Midnight
+    │
+    ├── P2: High-value (> $50K)?
+    │       → Trails → Ethereum (Multi-ISM bridge)
+    │
+    ├── P3: Institutional compliance?  ← UPDATED IN v0.6.0
+    │       → OMSIdentityVerifier.is_verified(agent_id)
+    │           ├── False → REJECT (fail-closed, 403)
+    │           └── True  → Polygon CDK (KYC Layer)
+    │
+    ├── P4: Formal verification required?
+    │       → Cardano / Aiken (EUTXO)
+    │
+    ├── P5: Velocity / micro-transactions?
+    │       → Hydra (off-chain) or SEI (parallel EVM)
+    │
+    └── P6: Default
+            → Polygon CDK (best cost/latency)
+```
+
+### 6.4 `OMSIdentityVerifier` — Fail-Closed Design
+
+```python
+def is_verified(self, address: str) -> bool:
+    if not address:
+        return False                    # No address → reject
+    try:
+        resp = requests.get(
+            f"{self.api_url}/v1/verification/{address}",
+            headers={"Authorization": f"Bearer {self.api_key}"},
+            timeout=5
+        )
+        if resp.status_code == 200:
+            return resp.json().get("is_verified", False)
+        return False                    # Non-200 → reject
+    except Exception:
+        return False                    # Any error → fail-closed, reject
+```
+
+---
+
+## 7. Security Boundaries
+
+| Boundary | Mechanism | Where Enforced |
+|---|---|---|
+| P3 route access | `OMSIdentityVerifier.is_verified()` fail-closed | `clr_router.py` |
+| Session key value limits | Per-TrustTier caps in `SessionKeyManager` | `sequence_wallet.py` |
+| Session key expiry | 24h validity window (configurable) | Sequence SDK on-chain |
+| TEE attestation root binding | `_abi_encode_attestation()` always uses EOA | `tee_plugin.py` |
+| Insurance yield cap | ≤30% `totalFundBalance()` — on-chain require | `VAMSInsuranceFund.sol` |
+| OMS API key exposure | Loaded from env var `OMS_API_KEY`, never hardcoded | `oms_identity.py` |
+| Non-EVM bridge isolation | Cardano/Solana/SEI routes untouched in `TRANSPORT_MATRIX` | `bridge_executor.py` |
+
+---
+
+## 8. Migration from v0.5.0
+
+**No breaking changes.** All v0.6.0 modifications are additive with safe defaults:
+
+- `OMSIdentityVerifier` is only invoked for P3 routes. All other CLR routes are unaffected.
+- `SessionKeySigner` is opt-in via `SignerFactory` config. Default `EOASigner` behavior unchanged.
+- `StablecoinPayoutManager.set_preference()` defaults to `VAMS_ONLY` (no action required from
+  providers who want to keep $VAMS payouts).
+- `VAMSInsuranceFund` yield functions are gated by `YIELD_MANAGER_ROLE` — contracts without this
+  role granted behave identically to v0.5.0.
+- `TrailsClient` mock mode (`TrailsClient(mock=True)`) is available for all test environments.
+
+The full test suite (**675 tests — 619 Forge + 56 Pytest**) passes with zero regressions.
+
+---
+
+## 9. Phase Dependency Graph
+
+```mermaid
+graph LR
+    P1[Phase 1: Identity Model] --> P3[Phase 3: Session Keys]
+    P1 --> P2[Phase 2: Trails Transport]
+    P2 --> P5[Phase 5: RPCs + Identity]
+    P3 --> P4[Phase 4: Fiat Rails + Yield]
+    P4 --> P5
+```
+
+---
+
+## 10. Related Documentation
+
+| Document | Description |
+|---|---|
+| [ARCHITECTURE_v0-5-0.md](./ARCHITECTURE_v0-5-0.md) | AUTOSKILL Intelligence Layer (v0.5.0) |
+| [ARCHITECTURE_v0-4-0.md](./ARCHITECTURE_v0-4-0.md) | ICN Modular Stack (v0.4.0) |
+| [../DEVELOPER_GUIDE.md](../DEVELOPER_GUIDE.md) | Developer onboarding — all personas |
+| [../API_REFERENCE.md](../API_REFERENCE.md) | REST API including OMS identity + payout endpoints |
+| [../NODE_OPERATORS.md](../NODE_OPERATORS.md) | Node operator guide — enterprise RPC + stablecoin setup |
+| [../CHANGELOG.md](../CHANGELOG.md) | Full release history |

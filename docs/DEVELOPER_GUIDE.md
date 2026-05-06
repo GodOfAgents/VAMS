@@ -1,6 +1,6 @@
 # VAMS Developer Onboarding Guide
 
-Welcome to the Verifiable and Agentic Modular Stack (VAMS). This guide covers the v1.3.0-oms release, which integrates the Polygon Open Money Stack (OMS) into the modular stack.
+Welcome to the Verifiable and Agentic Modular Stack (VAMS). This guide covers the **v1.3.0-oms** release, which integrates Polygon's Open Money Stack (OMS) — adding institutional identity routing, ERC-4337 session keys, Coinme fiat on-ramp, Insurance Fund yield, and stablecoin payouts — on top of the v1.2.0-autoskill Intelligence Layer.
 
 ## What is VAMS?
 VAMS is the "Sovereign Brain" for the Agentic Web. Instead of running your AI agents on centralized AWS servers where they can be de-platformed, or on slow blockchains where they can't afford gas, VAMS provides a verifiable, fast, and multi-provider computation layer.
@@ -13,7 +13,7 @@ If you are building an AI agent (e.g., a DeFi trading bot, a research assistant)
 
 ### Step 1: Install the SDK
 ```bash
-pip install vams-sdk==1.3.0-oms
+pip install vams-sdk==1.2.0-autoskill
 ```
 
 ### Step 2: Define your Intent
@@ -136,6 +136,142 @@ steered_activation = engine.steer(new_act, skill_index=0, alpha=0.2)
 
 For the full API reference, see **[INTELLIGENCE_LAYER.md](./INTELLIGENCE_LAYER.md)**.
 
+---
+
+## 5. OMS Identity Verification (v1.3.0+)
+
+The P3 Institutional Compliance routing path now requires verified KYC/KYB status via the
+OMS Compliance module. This is relevant to any consumer routing large-value or regulated
+transactions through the CLR.
+
+### How P3 Routing Works
+
+```
+CLRouter.route_v3(request, agent_id)
+    │
+    └── P3: Institutional compliance?
+            ↓
+        OMSIdentityVerifier.is_verified(agent_id)
+            ├── False → 403 Rejected (fail-closed)
+            └── True  → Polygon CDK KYC Layer
+```
+
+**Fail-closed guarantee:** If the OMS Identity API is unreachable, the verifier returns `False`.
+No request is silently passed to P3 routes without a confirmed identity check.
+
+### Obtaining OMS Identity Verification
+
+1. Complete KYC/KYB with Polygon OMS at [polygon.technology/oms](https://polygon.technology/oms)
+2. OMS issues a verifiable credential tied to your agent's wallet address
+3. Your address is now automatically approved by `OMSIdentityVerifier.is_verified()`
+
+### Environment Setup
+
+```bash
+# Required for P3 institutional routing
+export OMS_IDENTITY_API="https://api.oms.polygon.technology/identity"
+export OMS_API_KEY="<your_oms_api_key>"
+```
+
+> **Note:** Without these variables set, P3 routing will always return `False` (fail-closed).
+> All other CLR priority routes (P0, P1, P2, P4, P5, P6) are unaffected.
+
+---
+
+## 6. Stablecoin Payout Configuration (v1.3.0+ — Providers)
+
+As a **Supplier**, you can opt-in to receive your $VAMS rewards auto-converted to USDC or USDT
+at claim time via OMS stablecoin settlement rails.
+
+### Payout Modes
+
+| Mode | Behaviour |
+|---|---|
+| `VAMS_ONLY` (default) | Rewards paid in $VAMS — no change required |
+| `STABLECOIN` | 100% of rewards converted to USDC/USDT at claim time |
+| `HYBRID` | 50% $VAMS + 50% USDC/USDT |
+
+### Setting Your Preference
+
+```python
+from neuron.payments.stablecoin_payout import StablecoinPayoutManager, PayoutMode
+from web3 import Web3
+
+w3 = Web3(Web3.HTTPProvider("https://rpc.polygon.technology"))
+manager = StablecoinPayoutManager(
+    web3=w3,
+    reward_distributor_address="0x<REWARD_DISTRIBUTOR_ADDRESS>",
+    private_key="0x<YOUR_PRIVATE_KEY>"
+)
+
+# Opt-in to full stablecoin payouts
+tx_hash = manager.opt_in_to_stablecoin()
+print(f"Preference set: {tx_hash}")
+
+# Check current preference
+pref = manager.get_preference("0xYOUR_ADDRESS")
+print(f"Current mode: {['VAMS_ONLY', 'STABLECOIN', 'HYBRID'][pref]}")
+```
+
+Alternatively, call directly on the contract:
+```solidity
+RewardDistributor.setPayoutPreference(PayoutMode.STABLECOIN);
+```
+
+---
+
+## 7. Fiat Top-Up via Coinme (v1.3.0+ — Consumers)
+
+Consumers can now fund their agent escrow accounts using **credit card or bank transfer**
+via Coinme's regulated fiat-to-crypto rails. No crypto wallet pre-funding required.
+
+### Flow
+
+```
+You (credit card / bank) → Coinme Checkout → $VAMS → ComposedSettlement Escrow
+```
+
+Coinme handles all KYC and Money Transmitter License compliance across supported jurisdictions.
+VAMS applies a 2–7% gas abstraction premium for the conversion service.
+
+### Quick Start
+
+```python
+from neuron.payments.coinme_client import CoinmeClient
+from neuron.payments.universal_topup import UniversalTopUpManager
+
+coinme = CoinmeClient()  # Uses COINME_API_KEY env var
+topup = UniversalTopUpManager(coinme, escrow_manager)
+
+# Get current conversion rate
+rate = coinme.get_conversion_rate(from_currency="USD", to_token="VAMS")
+print(f"1 USD = {rate.rate} $VAMS (fee: {rate.fee_pct}%)")
+
+# Create a fiat checkout session
+session = coinme.create_checkout(
+    amount_fiat=100.0,
+    currency="USD",
+    dest_address="0xYOUR_AGENT_ADDRESS"
+)
+print(f"Complete payment at: {session.checkout_url}")
+print(f"Session expires: {session.expires_at}")
+
+# After payment confirmation, funds are automatically deposited
+# to your agent's ComposedSettlement escrow
+```
+
+### Supported Fiat Currencies
+
+All Coinme-supported currencies are accepted (varies by jurisdiction). Common options:
+`USD`, `EUR`, `GBP`, `CAD`, `AUD`. Check [coinme.com](https://coinme.com) for current coverage.
+
+---
+
+## 8. OMS Architecture Reference
+
+For the complete technical architecture of all 5 OMS integration phases, see:
+**[docs/team/ARCHITECTURE_v0-6-0.md](./team/ARCHITECTURE_v0-6-0.md)**
+
 ### Integrating Skill Vectors into Blueprints
 
 To request nodes with a specific skill profile, compute a reference skill vector first:
@@ -151,79 +287,3 @@ blueprint = composer.request_blueprint(
     skill_vector=profile.coordinates.tolist()
 )
 ```
----
- 
- ## 5. OMS Integration (v1.3.0+)
- 
- The Polygon Open Money Stack (OMS) integration provides institutional-grade identity, fiat on-ramps, and high-frequency signing capabilities.
- 
- ### Step 1: Use Sequence Session Keys
- For autonomous agents performing high-frequency actions, use a **Session Key**. This prevents the need for a primary EOA to be online for every transaction.
- 
- ```python
- from vams.sdk.signer import SessionKeySigner
- from vams.sdk.sequence_wallet import SequenceWalletManager
- 
- # 1. Initialize the wallet manager
- manager = SequenceWalletManager(project_key="your_project_key")
- 
- # 2. Create an ephemeral session key
- signer = SessionKeySigner(manager)
- session_key = signer.get_address()
- 
- # 3. Authorize the session key on-chain (one-time setup via EOA)
- # agent_registry.setAuthorizedWallet(session_key)
- 
- # 4. Sign transactions with the session key
- signature = signer.sign_message("Agent operation payload")
- ```
- 
- ### Step 2: Setting Payout Preferences (USDC/USDT)
- Node providers can opt-in to stablecoin rewards directly via the SDK.
- 
- ```python
- from vams.payments import StablecoinPayoutManager
- 
- payout_manager = StablecoinPayoutManager(auth)
- payout_manager.set_preference(
-     provider_id="0x123...",
-     mode="STABLE_USDC"  # Options: NATIVE, STABLE_USDC, STABLE_USDT
- )
- ```
- 
- ### Step 3: Institutional Routing (P3)
- To access high-security, compliant infrastructure (P3 routing), agents must pass an **OMS Identity** check.
- 
- ```python
- from vams.sdk.oms_identity import OMSIdentityVerifier
- 
- verifier = OMSIdentityVerifier(api_url="https://api.oms.polygon.technology/identity")
- if verifier.is_verified("0x123..."):
-     print("Address is KYC-verified. P3 routing enabled.")
- else:
-     print("Address requires KYC. Falling back to P2 routing.")
- ```
- 
- ### Step 4: Fiat Top-up via Coinme
- Fund your agent account using fiat (credit card/debit) via the integrated Coinme rails.
- 
- ```python
- from vams.payments import UniversalTopUp
- 
- topup = UniversalTopUp(auth)
- topup_link = topup.request_fiat_onramp(
-     amount_fiat=100.0,
-     currency="USD",
-     method="credit_card"
- )
- print(f"Complete top-up here: {topup_link}")
- ```
-
----
-
-## 6. Working with Durable Workflows (DBOS)
-
-The VAMS Neuron integrates the DBOS Python SDK to execute exactly-once, crash-safe workflows backed by PostgreSQL. This completely replaces the legacy SQLite checkpoint system.
-
-For complete documentation on setting up Postgres and writing durable steps, see:
-- **[WORKFLOW_ENGINE.md](../neuron/docs/WORKFLOW_ENGINE.md)**

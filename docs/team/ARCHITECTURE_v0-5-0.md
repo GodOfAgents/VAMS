@@ -1,3 +1,9 @@
+> [!WARNING]
+> **This document covers v0.5.0 (AUTOSKILL Intelligence Layer) and remains fully valid.**
+> For the OMS integration added in v0.6.0 (identity abstraction, Trails transport,
+> ERC-4337 session keys, Coinme fiat rails, stablecoin payouts), see
+> **[ARCHITECTURE_v0-6-0.md](./ARCHITECTURE_v0-6-0.md)**.
+
 # VAMS Architecture Addendum: v0.5.0 (AUTOSKILL Intelligence Layer)
 
 **Status:** Stable (v1.2.0-autoskill)  
