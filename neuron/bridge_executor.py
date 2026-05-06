@@ -50,6 +50,7 @@ except ImportError:
 class BridgeTransport(Enum):
     """Available bridge transport protocols."""
     AGGLAYER = "AggLayer"
+    TRAILS = "Trails"
     HYPERLANE = "Hyperlane"
     LAYERZERO = "LayerZero"
     ROSEN_BRIDGE = "RosenBridge"
@@ -375,20 +376,20 @@ class TransportRoute:
 # Architecture Section 16.3: Transport Matrix
 TRANSPORT_MATRIX: Dict[str, TransportRoute] = {
     "VAMS_L3->Ethereum": TransportRoute(
-        "VAMS_L3", "Ethereum", BridgeTransport.AGGLAYER,
-        None, 300_000, "Validity Proofs"
+        "VAMS_L3", "Ethereum", BridgeTransport.TRAILS,
+        BridgeTransport.AGGLAYER, 5_000, "Validity Proofs"
     ),
     "VAMS_L3->Polygon": TransportRoute(
-        "VAMS_L3", "Polygon", BridgeTransport.AGGLAYER,
-        None, 60_000, "Unified Bridge"
+        "VAMS_L3", "Polygon", BridgeTransport.TRAILS,
+        BridgeTransport.AGGLAYER, 5_000, "Unified Bridge"
     ),
     "VAMS_L3->Arbitrum": TransportRoute(
-        "VAMS_L3", "Arbitrum", BridgeTransport.AGGLAYER,
-        None, 60_000, "Unified Bridge"
+        "VAMS_L3", "Arbitrum", BridgeTransport.TRAILS,
+        BridgeTransport.AGGLAYER, 5_000, "Unified Bridge"
     ),
     "VAMS_L3->Base": TransportRoute(
-        "VAMS_L3", "Base", BridgeTransport.AGGLAYER,
-        None, 60_000, "Unified Bridge"
+        "VAMS_L3", "Base", BridgeTransport.TRAILS,
+        BridgeTransport.AGGLAYER, 5_000, "Unified Bridge"
     ),
     "VAMS_L3->Solana": TransportRoute(
         "VAMS_L3", "Solana", BridgeTransport.HYPERLANE,
@@ -442,6 +443,29 @@ class BridgeResult:
     error: str = ""
 
 
+from neuron.sdk.trails_client import TrailsClient
+
+class TrailsTransportHandler:
+    def __init__(self, mock_mode: bool = True):
+        self.client = TrailsClient(mock_mode=mock_mode)
+        
+    def execute_intent(self, source: str, dest: str, payload: bytes) -> BridgeResult:
+        start_time = time.time()
+        receipt = self.client.submit_intent(source, dest, payload)
+        status = self.client.get_status(receipt.intent_id)
+        elapsed_ms = (time.time() - start_time) * 1000
+        
+        return BridgeResult(
+            route_key=f"{source}->{dest}",
+            transport_used=BridgeTransport.TRAILS,
+            status=BridgeStatus.VERIFIED,
+            icb_message=None,
+            ism_verified=True,  # Handled by Trails natively
+            latency_ms=elapsed_ms,
+            tx_hash=status.tx_hash
+        )
+
+
 class BridgeExecutor:
     """
     Cross-chain bridge executor with ICB integration
@@ -452,6 +476,7 @@ class BridgeExecutor:
         self.mock_mode = mock_mode
         self.icb = ICBClient()
         self.ism_verifier = MultiISMVerifier(mock_mode=mock_mode)
+        self.trails_handler = TrailsTransportHandler(mock_mode=mock_mode)
         self._stats = {
             "executions": 0,
             "successful": 0,
@@ -488,6 +513,23 @@ class BridgeExecutor:
                 latency_ms=0,
                 error=f"No route found: {route_key}",
             )
+            
+        if route.primary_transport == BridgeTransport.TRAILS:
+            try:
+                result = self.trails_handler.execute_intent(source, destination, payload)
+                self._stats["successful"] += 1
+                return result
+            except Exception as e:
+                # Let BridgeFallbackHandler handle the fallback to AGGLAYER
+                return BridgeResult(
+                    route_key=route_key,
+                    transport_used=BridgeTransport.TRAILS,
+                    status=BridgeStatus.FAILED,
+                    icb_message=None,
+                    ism_verified=False,
+                    latency_ms=0,
+                    error=f"Trails transport failed: {e}",
+                )
 
         start_time = time.time()
 

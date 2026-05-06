@@ -46,6 +46,14 @@ except ImportError:
         CLR_SECURITY_THRESHOLD = 10_000
         CLR_VELOCITY_THRESHOLD = 1_000
 
+try:
+    from neuron.sdk.oms_identity import OMSIdentityVerifier
+except ImportError:
+    try:
+        from sdk.oms_identity import OMSIdentityVerifier
+    except ImportError:
+        pass # Will handle missing in runtime if needed
+
 
 logger = logging.getLogger("VAMS-CLR")
 
@@ -93,6 +101,7 @@ class VAMSTransactionMetadata:
     requires_formal_verification: bool = False     # Ouroboros proofs (-> Cardano)
     requires_sub_second_settle: bool = False       # Hydra state channels
     max_finality_ms: int = 0                       # Max economic irreversibility (0=don't care)
+    agent_address: str = ""                        # Agent EVM address for OMS Identity
 
 
 @dataclass
@@ -113,6 +122,7 @@ class TransactionIntent:
     max_finality_ms: int = 0
     min_security: float = 0.5
     use_case_id: str = ""
+    agent_address: str = ""
 
     def to_metadata(self) -> VAMSTransactionMetadata:
         """Convert to v3.1 metadata."""
@@ -127,6 +137,7 @@ class TransactionIntent:
             requires_formal_verification=self.requires_formal_verification,
             requires_sub_second_settle=self.requires_sub_second_settle,
             max_finality_ms=self.max_finality_ms,
+            agent_address=self.agent_address,
         )
 
 
@@ -187,16 +198,16 @@ STATIC_CHAINS = {
     # L2 Rollups
     "Polygon": ChainConfig(
         "Polygon", "Public", "Shared", 0.92, False,
-        "AggLayer", evm_compatible=True, chain_type="L2",
+        "Trails", evm_compatible=True, chain_type="L2",
         kyc_layer=True  # Polygon CDK KYC Layer
     ),
     "Arbitrum": ChainConfig(
         "Arbitrum", "Public", "Shared", 0.94, False,
-        "AggLayer", evm_compatible=True, chain_type="L2"
+        "Trails", evm_compatible=True, chain_type="L2"
     ),
     "Base": ChainConfig(
         "Base", "Public", "Shared", 0.91, False,
-        "AggLayer", evm_compatible=True, chain_type="L2"
+        "Trails", evm_compatible=True, chain_type="L2"
     ),
     # Privacy chains
     "Phala": ChainConfig(
@@ -247,6 +258,10 @@ class CLRouter:
             "by_chain": {},
             "denied": 0,
         }
+        try:
+            self.identity_verifier = OMSIdentityVerifier()
+        except NameError:
+            self.identity_verifier = None
 
     # ─────────────────────────────────────────────────────────────
     # PUBLIC API
@@ -452,6 +467,10 @@ class CLRouter:
         metrics: Dict[str, ChainMetrics]
     ) -> RoutingDecision:
         """P3: Route institutional compliance to Polygon CDK KYC Layer."""
+        if self.identity_verifier and not self.identity_verifier.is_verified(metadata.agent_address):
+            self._stats["denied"] += 1
+            raise PermissionError("Institutional compliance routing requires an OMS verified identity. Agent address not verified.")
+            
         m = metrics.get("Polygon")
         config = STATIC_CHAINS["Polygon"]
         return RoutingDecision(
@@ -630,7 +649,7 @@ class CLRouter:
         """
         Stage 1: Utility Score (lower is better for sort).
         """
-        lat = max(1.0, float(metrics.block_time_ms))
+        lat = max(1.0, float(metrics.trails_latency_ms or metrics.block_time_ms))
         congestion = max(1.0, float(metrics.congestion_pct))
 
         w_lat = 2.0 if metadata.max_latency_ms < 5000 else 0.5

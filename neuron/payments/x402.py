@@ -23,8 +23,10 @@ class X402Client:
     Handles HTTP 402 responses, channel management, and atomic payments.
     """
     
-    def __init__(self, private_key: Optional[str] = None, rpc_url: Optional[str] = None, circuit_breaker: Optional[Any] = None):
+    def __init__(self, private_key: Optional[str] = None, session_key: Optional[str] = None, smart_wallet_address: Optional[str] = None, rpc_url: Optional[str] = None, circuit_breaker: Optional[Any] = None):
         self.private_key = private_key
+        self.session_key = session_key
+        self.smart_wallet_address = smart_wallet_address
         self.rpc_url = rpc_url or "https://polygon-rpc.com"
         self.breaker = circuit_breaker
         
@@ -35,11 +37,29 @@ class X402Client:
         if Web3 is not None and rpc_url:
             try:
                 self.w3 = Web3(Web3.HTTPProvider(self.rpc_url))
-                if self.private_key:
-                    self.account = self.w3.eth.account.from_key(self.private_key)
-                    self.address = self.account.address
-                else:
-                    self.address = "0x0000000000000000000000000000000000000000"
+                try:
+                    from sdk.signer import SignerFactory
+                    if self.session_key and self.smart_wallet_address:
+                        self.signer = SignerFactory.create({
+                            "session_key": self.session_key,
+                            "smart_wallet_address": self.smart_wallet_address
+                        })
+                    elif self.private_key:
+                        self.signer = SignerFactory.create({"private_key": self.private_key})
+                    else:
+                        self.signer = None
+                        
+                    if self.signer:
+                        self.address = self.signer.address
+                    else:
+                        self.address = "0x0000000000000000000000000000000000000000"
+                except ImportError:
+                    self.signer = None
+                    if self.private_key:
+                        self.account = self.w3.eth.account.from_key(self.private_key)
+                        self.address = self.account.address
+                    else:
+                        self.address = "0x0000000000000000000000000000000000000000"
             except Exception as e:
                 logger.error(f"Web3 init failed: {e}")
                 self.w3 = None

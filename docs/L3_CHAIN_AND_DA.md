@@ -13,6 +13,12 @@ To ensure this off-chain data is safe, we use a **Multi-DA Router** with **Data 
 - **Gas Token**: $VAMS
 - **Throughput**: High (dedicated blockspace for agents)
 
+### Workflow Execution
+
+- **Engine**: DBOS SDK (PostgreSQL-backed)
+- **State Storage**: Workflow execution state is stored in PostgreSQL (Celestia/Arweave are used exclusively for state root anchoring, not active workflow state).
+- **Execution**: See [WORKFLOW_ENGINE.md](../neuron/docs/WORKFLOW_ENGINE.md) for details on crash-proof, exactly-once step execution.
+
 ### Data Availability Strategy
 We do not rely on a single DA provider. The `DARouter` dynamically routes data payloads.
 

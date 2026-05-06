@@ -115,7 +115,7 @@ class TEEProofPlugin(BaseProofPlugin):
             sgx_quote=sgx_quote,
             mrenclave=mrenclave,
             mrsigner=mrsigner,
-            attested_agent=kwargs.get("agent_address", b"\x00" * 20),
+            attested_agent=kwargs.get("root_address", kwargs.get("agent_address", b"\x00" * 20)),
         )
 
         return ProofResult(

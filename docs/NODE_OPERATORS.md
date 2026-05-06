@@ -1,9 +1,9 @@
 # VAMS Node Operator Guide
 
 **Audience:** Suppliers — GPU / bare-metal node operators  
-**Version:** v1.2.0-autoskill  
+**Version:** v1.3.0-oms  
 **Prerequisites:** Familiarity with the [Developer Guide](./DEVELOPER_GUIDE.md) and
-[Architecture v0.5.0](./team/ARCHITECTURE_v0-5-0.md)
+[Architecture v0.6.0](./team/ARCHITECTURE_v0-6-0.md)
 
 ---
 
@@ -40,7 +40,7 @@ consumers specify skill vectors in blueprints, leading to more consistent alloca
 | VAMS Neuron | v1.2.0-autoskill |
 
 ```bash
-pip install vams-neuron==1.2.0-autoskill
+pip install vams-neuron==1.3.0-oms
 ```
 
 ### Verify Installation
@@ -362,12 +362,54 @@ print(f'Baseline fitted: {detector.is_baseline_fitted}')
 
 ---
 
-## 10. Related Documentation
+## 11. Enterprise RPC & OMS (v1.3.0+)
+
+The v1.3.0-oms release introduces enterprise-grade connectivity and integration with the Polygon Open Money Stack.
+
+### 11.1 Enterprise RPC Configuration
+VAMS now utilizes an enhanced `ChainOracle` that supports enterprise RPC endpoints. This improves reliability and provides SLA-monitored connection stability.
+
+Configure the following in your environment or `node_config.py`:
+
+```python
+# .env or os.environ
+VAMS_ENTERPRISE_RPC="https://enterprise.rpc.polygon.technology/v1/..."
+VAMS_RPC_FAILOVER_TIMEOUT=5.0  # seconds
+```
+
+The `ChainOracle` automatically falls back to secondary endpoints if the enterprise RPC exceeds the latency threshold or fails its periodic health check.
+
+### 11.2 OMS Identity & Compliance
+For operators providing high-trust (P3) institutional capacity, KYC verification via the OMS Identity API is required.
+
+**Configuration:**
+```bash
+export OMS_IDENTITY_API="https://api.oms.polygon.technology/identity"
+export OMS_API_KEY="your-oms-api-key"
+```
+
+The Sentinel node uses these credentials to verify client identities before accepting institutional tasks. Failure to configure these correctly will restrict your node to P1/P2 public routing paths.
+
+### 11.3 Stablecoin Payouts
+Node operators can choose to receive their rewards directly in stablecoins (USDC or USDT) to simplify OPEX management.
+
+**To opt-in:**
+Use the `StablecoinPayoutManager` in the VAMS SDK or the CLI command:
+
+```bash
+vams-node set-payout --mode STABLE_USDC --provider 0xYOUR_PROVIDER_ADDRESS
+```
+
+This updates your preference in the on-chain `RewardDistributor`, and the OMS settlement layer will handle the conversion and distribution.
+
+---
+
+## 12. Related Documentation
 
 | Document | Description |
 |---|---|
 | [INTELLIGENCE_LAYER.md](./INTELLIGENCE_LAYER.md) | Full module API reference |
 | [DEVELOPER_GUIDE.md](./DEVELOPER_GUIDE.md) | Developer onboarding (all personas) |
 | [API_REFERENCE.md](./API_REFERENCE.md) | REST API including Intelligence Layer endpoints |
-| [team/ARCHITECTURE_v0-5-0.md](./team/ARCHITECTURE_v0-5-0.md) | Architecture addendum with data flow diagrams |
+| [team/ARCHITECTURE_v0-6-0.md](./team/ARCHITECTURE_v0-6-0.md) | Architecture addendum with OMS data flows |
 | [CHANGELOG.md](./CHANGELOG.md) | Full release history |

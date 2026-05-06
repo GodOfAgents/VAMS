@@ -27,10 +27,11 @@ class AgentRegistryClient:
         self.private_key = private_key or os.getenv("VAMS_PRIVATE_KEY")
         
         if self.private_key:
-            self.account = Account.from_key(self.private_key)
-            self.address = self.account.address
+            from neuron.sdk.signer import EOASigner
+            self.signer = EOASigner(self.private_key)
+            self.address = self.signer.address
         else:
-            self.account = None
+            self.signer = None
             self.address = None
 
         # Load ABI
@@ -49,8 +50,8 @@ class AgentRegistryClient:
 
     def register_agent(self, stake_amount: int, metadata_uri: str) -> str:
         """Register the agent on-chain."""
-        if not self.contract or not self.account:
-            raise ValueError("Contract or account not initialized")
+        if not self.contract or not self.signer:
+            raise ValueError("Contract or signer not initialized")
             
         logger.info(f"Registering agent with stake {stake_amount} VAMS...")
         
@@ -92,7 +93,7 @@ class AgentRegistryClient:
 
     def _submit_tx(self, tx) -> str:
         """Standardized transaction submission with receipt waiting."""
-        signed_tx = self.w3.eth.account.sign_transaction(tx, self.private_key)
+        signed_tx = self.signer.sign_transaction(tx)
         tx_hash = self.w3.eth.send_raw_transaction(signed_tx.rawTransaction)
         
         logger.info(f"TX sent: {tx_hash.hex()}, waiting for receipt...")

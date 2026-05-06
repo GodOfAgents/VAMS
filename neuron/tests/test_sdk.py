@@ -331,6 +331,58 @@ class TestSDKIntegration:
         assert callable(check_bittensor_health)
         assert callable(check_all_tee_health)
 
+# ============================================================================
+# Signer Tests
+# ============================================================================
+
+class TestSigner:
+    """Tests for Signer abstraction."""
+    
+    def test_eoa_signer_init(self):
+        from sdk.signer import EOASigner
+        # 64 char hex string
+        pk = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+        signer = EOASigner(pk)
+        assert signer.address is not None
+        assert signer.address.startswith("0x")
+
+    def test_signer_factory(self):
+        from sdk.signer import SignerFactory, EOASigner, SessionKeySigner
+        pk = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+        signer = SignerFactory.create({"private_key": pk})
+        assert isinstance(signer, EOASigner)
+        
+        session_signer = SignerFactory.create({
+            "smart_wallet_address": "0x1234567890123456789012345678901234567890",
+            "session_key": pk
+        })
+        assert isinstance(session_signer, SessionKeySigner)
+        assert session_signer.address == "0x1234567890123456789012345678901234567890"
+
+# ============================================================================
+# Trust Plugin Tests
+# ============================================================================
+
+class TestTrustPlugins:
+    def test_tee_attestation_root_binding(self):
+        import sys
+        import os
+        sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        from trust_plugins.tee_plugin import TEEProofPlugin
+        
+        plugin = TEEProofPlugin()
+        root_addr = b"\x01" * 20
+        session_addr = b"\x02" * 20
+        
+        result = plugin.generate_proof(
+            b"service", 
+            b"delivery", 
+            root_address=root_addr, 
+            agent_address=session_addr
+        )
+        # Verify the encoded proof data ends with the root address, not session address
+        assert result.proof_data.endswith(root_addr)
+        assert session_addr not in result.proof_data
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

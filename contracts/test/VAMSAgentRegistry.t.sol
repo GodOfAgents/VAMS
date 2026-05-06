@@ -108,7 +108,8 @@ contract VAMSAgentRegistryTest is Test {
         bytes32 agentId = registry.registerAgent(
             TEST_PUBLIC_KEY_HASH,
             1000 ether,
-            TEST_METADATA
+            TEST_METADATA,
+            address(0)
         );
         
         vm.stopPrank();
@@ -139,7 +140,7 @@ contract VAMSAgentRegistryTest is Test {
         
         vm.startPrank(agentOwner);
         token.approve(address(registry), 1000 ether);
-        registry.registerAgent(TEST_PUBLIC_KEY_HASH, 1000 ether, TEST_METADATA);
+        registry.registerAgent(TEST_PUBLIC_KEY_HASH, 1000 ether, TEST_METADATA, address(0));
         vm.stopPrank();
         
         assertEq(registry.totalAgents(), 1);
@@ -156,7 +157,7 @@ contract VAMSAgentRegistryTest is Test {
                 500 ether
             )
         );
-        registry.registerAgent(TEST_PUBLIC_KEY_HASH, 500 ether, TEST_METADATA);
+        registry.registerAgent(TEST_PUBLIC_KEY_HASH, 500 ether, TEST_METADATA, address(0));
         
         vm.stopPrank();
     }
@@ -168,12 +169,14 @@ contract VAMSAgentRegistryTest is Test {
         bytes32 agent1 = registry.registerAgent(
             keccak256("key1"),
             1000 ether,
-            TEST_METADATA
+            TEST_METADATA,
+            address(0)
         );
         bytes32 agent2 = registry.registerAgent(
             keccak256("key2"),
             1000 ether,
-            TEST_METADATA
+            TEST_METADATA,
+            address(0)
         );
         
         vm.stopPrank();
@@ -189,7 +192,7 @@ contract VAMSAgentRegistryTest is Test {
     function test_FinalizeAgent_AfterChallengeWindow() public {
         vm.startPrank(agentOwner);
         token.approve(address(registry), 1000 ether);
-        bytes32 agentId = registry.registerAgent(TEST_PUBLIC_KEY_HASH, 1000 ether, TEST_METADATA);
+        bytes32 agentId = registry.registerAgent(TEST_PUBLIC_KEY_HASH, 1000 ether, TEST_METADATA, address(0));
         vm.stopPrank();
         
         // Fast forward 7 days
@@ -204,7 +207,7 @@ contract VAMSAgentRegistryTest is Test {
     function test_FinalizeAgent_RevertBeforeChallengeWindow() public {
         vm.startPrank(agentOwner);
         token.approve(address(registry), 1000 ether);
-        bytes32 agentId = registry.registerAgent(TEST_PUBLIC_KEY_HASH, 1000 ether, TEST_METADATA);
+        bytes32 agentId = registry.registerAgent(TEST_PUBLIC_KEY_HASH, 1000 ether, TEST_METADATA, address(0));
         vm.stopPrank();
         
         // Only 3 days passed
@@ -222,7 +225,7 @@ contract VAMSAgentRegistryTest is Test {
     function test_IsChallengeWindowExpired() public {
         vm.startPrank(agentOwner);
         token.approve(address(registry), 1000 ether);
-        bytes32 agentId = registry.registerAgent(TEST_PUBLIC_KEY_HASH, 1000 ether, TEST_METADATA);
+        bytes32 agentId = registry.registerAgent(TEST_PUBLIC_KEY_HASH, 1000 ether, TEST_METADATA, address(0));
         vm.stopPrank();
         
         assertFalse(registry.isChallengeWindowExpired(agentId));
@@ -234,7 +237,7 @@ contract VAMSAgentRegistryTest is Test {
     function test_GetChallengeWindowRemaining() public {
         vm.startPrank(agentOwner);
         token.approve(address(registry), 1000 ether);
-        bytes32 agentId = registry.registerAgent(TEST_PUBLIC_KEY_HASH, 1000 ether, TEST_METADATA);
+        bytes32 agentId = registry.registerAgent(TEST_PUBLIC_KEY_HASH, 1000 ether, TEST_METADATA, address(0));
         vm.stopPrank();
         
         assertEq(registry.getChallengeWindowRemaining(agentId), 7 days);
@@ -251,7 +254,7 @@ contract VAMSAgentRegistryTest is Test {
     function test_SubmitMerkleRoot() public {
         vm.startPrank(agentOwner);
         token.approve(address(registry), 1000 ether);
-        bytes32 agentId = registry.registerAgent(TEST_PUBLIC_KEY_HASH, 1000 ether, TEST_METADATA);
+        bytes32 agentId = registry.registerAgent(TEST_PUBLIC_KEY_HASH, 1000 ether, TEST_METADATA, address(0));
         
         bytes32 merkleRoot = keccak256("state_root_1");
         registry.submitMerkleRoot(agentId, merkleRoot);
@@ -264,11 +267,11 @@ contract VAMSAgentRegistryTest is Test {
     function test_SubmitMerkleRoot_RevertNotOwner() public {
         vm.startPrank(agentOwner);
         token.approve(address(registry), 1000 ether);
-        bytes32 agentId = registry.registerAgent(TEST_PUBLIC_KEY_HASH, 1000 ether, TEST_METADATA);
+        bytes32 agentId = registry.registerAgent(TEST_PUBLIC_KEY_HASH, 1000 ether, TEST_METADATA, address(0));
         vm.stopPrank();
         
         vm.startPrank(challenger);
-        vm.expectRevert(VAMSAgentRegistry.NotAgentOwner.selector);
+        vm.expectRevert(VAMSAgentRegistry.NotAuthorizedCaller.selector);
         registry.submitMerkleRoot(agentId, keccak256("bad"));
         vm.stopPrank();
     }
@@ -276,7 +279,7 @@ contract VAMSAgentRegistryTest is Test {
     function test_MerkleHistory() public {
         vm.startPrank(agentOwner);
         token.approve(address(registry), 1000 ether);
-        bytes32 agentId = registry.registerAgent(TEST_PUBLIC_KEY_HASH, 1000 ether, TEST_METADATA);
+        bytes32 agentId = registry.registerAgent(TEST_PUBLIC_KEY_HASH, 1000 ether, TEST_METADATA, address(0));
         
         registry.submitMerkleRoot(agentId, keccak256("root1"));
         vm.warp(block.timestamp + 1 hours);
@@ -294,7 +297,7 @@ contract VAMSAgentRegistryTest is Test {
     function test_UpdateTEEAttestation() public {
         vm.startPrank(agentOwner);
         token.approve(address(registry), 1000 ether);
-        bytes32 agentId = registry.registerAgent(TEST_PUBLIC_KEY_HASH, 1000 ether, TEST_METADATA);
+        bytes32 agentId = registry.registerAgent(TEST_PUBLIC_KEY_HASH, 1000 ether, TEST_METADATA, address(0));
         
         bytes32 attestation = keccak256("sgx_attestation");
         registry.updateTEEAttestation(agentId, attestation);
@@ -309,7 +312,7 @@ contract VAMSAgentRegistryTest is Test {
     function test_SubmitChallenge() public {
         vm.startPrank(agentOwner);
         token.approve(address(registry), 1000 ether);
-        bytes32 agentId = registry.registerAgent(TEST_PUBLIC_KEY_HASH, 1000 ether, TEST_METADATA);
+        bytes32 agentId = registry.registerAgent(TEST_PUBLIC_KEY_HASH, 1000 ether, TEST_METADATA, address(0));
         vm.stopPrank();
         
         vm.startPrank(challenger);
@@ -332,7 +335,7 @@ contract VAMSAgentRegistryTest is Test {
     function test_SubmitChallenge_RevertInsufficientStake() public {
         vm.startPrank(agentOwner);
         token.approve(address(registry), 1000 ether);
-        bytes32 agentId = registry.registerAgent(TEST_PUBLIC_KEY_HASH, 1000 ether, TEST_METADATA);
+        bytes32 agentId = registry.registerAgent(TEST_PUBLIC_KEY_HASH, 1000 ether, TEST_METADATA, address(0));
         vm.stopPrank();
         
         vm.startPrank(challenger);
@@ -352,7 +355,7 @@ contract VAMSAgentRegistryTest is Test {
         // Register and challenge
         vm.startPrank(agentOwner);
         token.approve(address(registry), 1000 ether);
-        bytes32 agentId = registry.registerAgent(TEST_PUBLIC_KEY_HASH, 1000 ether, TEST_METADATA);
+        bytes32 agentId = registry.registerAgent(TEST_PUBLIC_KEY_HASH, 1000 ether, TEST_METADATA, address(0));
         vm.stopPrank();
         
         vm.startPrank(challenger);
@@ -383,7 +386,7 @@ contract VAMSAgentRegistryTest is Test {
         // Register and challenge
         vm.startPrank(agentOwner);
         token.approve(address(registry), 1000 ether);
-        bytes32 agentId = registry.registerAgent(TEST_PUBLIC_KEY_HASH, 1000 ether, TEST_METADATA);
+        bytes32 agentId = registry.registerAgent(TEST_PUBLIC_KEY_HASH, 1000 ether, TEST_METADATA, address(0));
         vm.stopPrank();
         
         vm.startPrank(challenger);
@@ -415,7 +418,7 @@ contract VAMSAgentRegistryTest is Test {
     function test_DeregisterAgent() public {
         vm.startPrank(agentOwner);
         token.approve(address(registry), 1000 ether);
-        bytes32 agentId = registry.registerAgent(TEST_PUBLIC_KEY_HASH, 1000 ether, TEST_METADATA);
+        bytes32 agentId = registry.registerAgent(TEST_PUBLIC_KEY_HASH, 1000 ether, TEST_METADATA, address(0));
         vm.stopPrank();
         
         // Finalize first
@@ -439,14 +442,14 @@ contract VAMSAgentRegistryTest is Test {
     function test_DeregisterAgent_RevertNotOwner() public {
         vm.startPrank(agentOwner);
         token.approve(address(registry), 1000 ether);
-        bytes32 agentId = registry.registerAgent(TEST_PUBLIC_KEY_HASH, 1000 ether, TEST_METADATA);
+        bytes32 agentId = registry.registerAgent(TEST_PUBLIC_KEY_HASH, 1000 ether, TEST_METADATA, address(0));
         vm.stopPrank();
         
         vm.warp(block.timestamp + 7 days);
         registry.finalizeAgent(agentId);
         
         vm.startPrank(challenger);
-        vm.expectRevert(VAMSAgentRegistry.NotAgentOwner.selector);
+        vm.expectRevert(VAMSAgentRegistry.NotAuthorizedCaller.selector);
         registry.deregisterAgent(agentId);
         vm.stopPrank();
     }
@@ -468,7 +471,7 @@ contract VAMSAgentRegistryTest is Test {
         vm.startPrank(agentOwner);
         token.approve(address(registry), 1000 ether);
         vm.expectRevert();
-        registry.registerAgent(TEST_PUBLIC_KEY_HASH, 1000 ether, TEST_METADATA);
+        registry.registerAgent(TEST_PUBLIC_KEY_HASH, 1000 ether, TEST_METADATA, address(0));
         vm.stopPrank();
     }
     
@@ -489,7 +492,7 @@ contract VAMSAgentRegistryTest is Test {
         vm.startPrank(agentOwner);
         token.mint(agentOwner, stake);
         token.approve(address(registry), stake);
-        bytes32 agentId = registry.registerAgent(TEST_PUBLIC_KEY_HASH, stake, TEST_METADATA);
+        bytes32 agentId = registry.registerAgent(TEST_PUBLIC_KEY_HASH, stake, TEST_METADATA, address(0));
         vm.stopPrank();
         
         (, , uint256 actualStake, , , , ) = registry.getAgent(agentId);
@@ -501,7 +504,7 @@ contract VAMSAgentRegistryTest is Test {
         
         vm.startPrank(agentOwner);
         token.approve(address(registry), 1000 ether);
-        bytes32 agentId = registry.registerAgent(TEST_PUBLIC_KEY_HASH, 1000 ether, TEST_METADATA);
+        bytes32 agentId = registry.registerAgent(TEST_PUBLIC_KEY_HASH, 1000 ether, TEST_METADATA, address(0));
         vm.stopPrank();
         
         vm.warp(block.timestamp + timePassed);

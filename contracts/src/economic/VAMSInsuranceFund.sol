@@ -39,6 +39,9 @@ contract VAMSInsuranceFund is
 
     /// @notice INTG01: Role for VAMSSentinel autonomous emergency pause
     bytes32 public constant SENTINEL_ROLE = keccak256("SENTINEL_ROLE");
+
+    /// @notice Role for Yield Manager (OMS Yield Vaults)
+    bytes32 public constant YIELD_MANAGER_ROLE = keccak256("YIELD_MANAGER_ROLE");
     
     /// @notice Claim review window (7 days)
     uint256 public constant CLAIM_WINDOW = 7 days;
@@ -74,6 +77,9 @@ contract VAMSInsuranceFund is
     
     /// @notice Total claims counter
     uint256 public totalClaims;
+
+    /// @notice Total capital deployed to yield vaults
+    uint256 public totalDeployedBalance;
     
     /// @notice Claims mapping
     mapping(bytes32 claimId => Claim claim) private _claims;
@@ -141,6 +147,52 @@ contract VAMSInsuranceFund is
         emit SlashingReceived(msg.sender, amount);
     }
     
+    // ============ Yield Functions (Phase 4) ============
+
+    event YieldDeployed(address indexed vault, uint256 amount);
+    event YieldWithdrawn(address indexed vault, uint256 amount);
+
+    /**
+     * @notice Deploy capital to a yield vault (max 30% of total fund)
+     * @param vault Yield vault address
+     * @param amount Amount to deploy
+     */
+    function deployToYield(address vault, uint256 amount) external onlyRole(YIELD_MANAGER_ROLE) nonReentrant whenNotPaused {
+        if (vault == address(0)) revert ZeroAddress();
+        if (amount == 0) revert ZeroAmount();
+
+        uint256 currentFundBalance = totalFundBalance();
+        uint256 maxDeployable = (currentFundBalance * 3000) / BPS_DENOMINATOR; // 30%
+        
+        if (totalDeployedBalance + amount > maxDeployable) {
+            revert("VAMSInsuranceFund: Max yield allocation exceeded");
+        }
+
+        totalDeployedBalance += amount;
+        vamsToken.safeTransfer(vault, amount);
+        
+        emit YieldDeployed(vault, amount);
+    }
+
+    /**
+     * @notice Withdraw capital from a yield vault
+     * @param vault Yield vault address
+     * @param amount Amount to withdraw
+     */
+    function withdrawFromYield(address vault, uint256 amount) external onlyRole(YIELD_MANAGER_ROLE) nonReentrant {
+        if (vault == address(0)) revert ZeroAddress();
+        if (amount == 0) revert ZeroAmount();
+
+        if (amount > totalDeployedBalance) {
+            revert("VAMSInsuranceFund: Insufficient deployed balance");
+        }
+
+        totalDeployedBalance -= amount;
+        vamsToken.safeTransferFrom(msg.sender, address(this), amount);
+
+        emit YieldWithdrawn(vault, amount);
+    }
+
     // ============ Claim Functions ============
     
     /// @inheritdoc IVAMSInsuranceFund
@@ -346,7 +398,7 @@ contract VAMSInsuranceFund is
     
     /// @inheritdoc IVAMSInsuranceFund
     function totalFundBalance() public view override returns (uint256) {
-        return vamsToken.balanceOf(address(this));
+        return vamsToken.balanceOf(address(this)) + totalDeployedBalance;
     }
     
     /// @inheritdoc IVAMSInsuranceFund

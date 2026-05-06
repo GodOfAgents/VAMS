@@ -1,6 +1,6 @@
 # VAMS Developer Onboarding Guide
 
-Welcome to the Verifiable and Agentic Modular Stack (VAMS). This guide covers the v1.2.0-autoskill release, which adds the AUTOSKILL Intelligence Layer on top of the v1.0.0-icn modular stack.
+Welcome to the Verifiable and Agentic Modular Stack (VAMS). This guide covers the v1.3.0-oms release, which integrates the Polygon Open Money Stack (OMS) into the modular stack.
 
 ## What is VAMS?
 VAMS is the "Sovereign Brain" for the Agentic Web. Instead of running your AI agents on centralized AWS servers where they can be de-platformed, or on slow blockchains where they can't afford gas, VAMS provides a verifiable, fast, and multi-provider computation layer.
@@ -13,7 +13,7 @@ If you are building an AI agent (e.g., a DeFi trading bot, a research assistant)
 
 ### Step 1: Install the SDK
 ```bash
-pip install vams-sdk==1.2.0-autoskill
+pip install vams-sdk==1.3.0-oms
 ```
 
 ### Step 2: Define your Intent
@@ -151,3 +151,79 @@ blueprint = composer.request_blueprint(
     skill_vector=profile.coordinates.tolist()
 )
 ```
+---
+ 
+ ## 5. OMS Integration (v1.3.0+)
+ 
+ The Polygon Open Money Stack (OMS) integration provides institutional-grade identity, fiat on-ramps, and high-frequency signing capabilities.
+ 
+ ### Step 1: Use Sequence Session Keys
+ For autonomous agents performing high-frequency actions, use a **Session Key**. This prevents the need for a primary EOA to be online for every transaction.
+ 
+ ```python
+ from vams.sdk.signer import SessionKeySigner
+ from vams.sdk.sequence_wallet import SequenceWalletManager
+ 
+ # 1. Initialize the wallet manager
+ manager = SequenceWalletManager(project_key="your_project_key")
+ 
+ # 2. Create an ephemeral session key
+ signer = SessionKeySigner(manager)
+ session_key = signer.get_address()
+ 
+ # 3. Authorize the session key on-chain (one-time setup via EOA)
+ # agent_registry.setAuthorizedWallet(session_key)
+ 
+ # 4. Sign transactions with the session key
+ signature = signer.sign_message("Agent operation payload")
+ ```
+ 
+ ### Step 2: Setting Payout Preferences (USDC/USDT)
+ Node providers can opt-in to stablecoin rewards directly via the SDK.
+ 
+ ```python
+ from vams.payments import StablecoinPayoutManager
+ 
+ payout_manager = StablecoinPayoutManager(auth)
+ payout_manager.set_preference(
+     provider_id="0x123...",
+     mode="STABLE_USDC"  # Options: NATIVE, STABLE_USDC, STABLE_USDT
+ )
+ ```
+ 
+ ### Step 3: Institutional Routing (P3)
+ To access high-security, compliant infrastructure (P3 routing), agents must pass an **OMS Identity** check.
+ 
+ ```python
+ from vams.sdk.oms_identity import OMSIdentityVerifier
+ 
+ verifier = OMSIdentityVerifier(api_url="https://api.oms.polygon.technology/identity")
+ if verifier.is_verified("0x123..."):
+     print("Address is KYC-verified. P3 routing enabled.")
+ else:
+     print("Address requires KYC. Falling back to P2 routing.")
+ ```
+ 
+ ### Step 4: Fiat Top-up via Coinme
+ Fund your agent account using fiat (credit card/debit) via the integrated Coinme rails.
+ 
+ ```python
+ from vams.payments import UniversalTopUp
+ 
+ topup = UniversalTopUp(auth)
+ topup_link = topup.request_fiat_onramp(
+     amount_fiat=100.0,
+     currency="USD",
+     method="credit_card"
+ )
+ print(f"Complete top-up here: {topup_link}")
+ ```
+
+---
+
+## 6. Working with Durable Workflows (DBOS)
+
+The VAMS Neuron integrates the DBOS Python SDK to execute exactly-once, crash-safe workflows backed by PostgreSQL. This completely replaces the legacy SQLite checkpoint system.
+
+For complete documentation on setting up Postgres and writing durable steps, see:
+- **[WORKFLOW_ENGINE.md](../neuron/docs/WORKFLOW_ENGINE.md)**

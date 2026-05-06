@@ -6,7 +6,11 @@ ecdsa>=0.18.0         # ECDSA cryptography (Secp256k1)
 colorama>=0.4.6       # Terminal colors (cross-platform)
 web3>=6.0.0           # Ethereum interaction (Polygon CDK, x402)
 python-dotenv>=1.0.0
-cryptography>=41.0.0         # Testing framework
+cryptography>=41.0.0  # Cryptographic primitives
+
+# Layer 3: DBOS Durable Workflow Engine (real SDK — replaces custom SQLite engine)
+dbos>=0.29.0           # Durable execution, crash recovery, exactly-once steps
+psycopg2-binary>=2.9.9 # PostgreSQL driver (binary wheel, no build tools needed)
 
 # Optional Dependencies (install manually if needed):
 # bittensor           # For Bittensor SDK integration

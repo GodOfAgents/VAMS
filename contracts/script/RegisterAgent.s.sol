@@ -41,7 +41,7 @@ contract RegisterAgent is Script {
         console.log("Registering Agent with PK Hash:");
         console.logBytes32(publicKeyHash);
 
-        try registry.registerAgent(publicKeyHash, stakeAmount, METADATA_URI) {
+        try registry.registerAgent(publicKeyHash, stakeAmount, METADATA_URI, address(0)) {
             console.log("Agent Registered Successfully!");
         } catch Error(string memory reason) {
             console.log("Registration Failed:", reason);

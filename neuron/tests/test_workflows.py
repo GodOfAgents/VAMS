@@ -1,282 +1,227 @@
 """
-VAMS Neuron - Workflow Integration Tests
-=========================================
-Tests for the crash-proof workflow engine (Layer 3).
+VAMS Neuron - Workflow Tests (DBOS)
+=====================================
+Tests for the DBOS-native durable workflow engine (Layer 3).
+
+Test strategy
+-------------
+- Unit-test each @DBOS.step() individually — fast, no Postgres needed
+  when using DBOS TestClient which provides an in-memory Postgres via
+  pytest-dbos / dbos.testing.
+- Integration-test the full @DBOS.workflow() pipeline end-to-end.
+- Verify idempotency via SetWorkflowID.
+- Verify LogicLayerMonitor HTTP health checks (unchanged component).
+
+Run with:
+    cd neuron
+    pip install dbos psycopg2-binary pytest pytest-asyncio
+    python -m pytest tests/test_workflows.py -v
 """
 
 import sys
 import os
-import pytest
-import sqlite3
-import tempfile
-import shutil
 import time
+import pytest
+import asyncio
 
-# Add parent directory to path for imports
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+
+# ─── DBOS test harness ────────────────────────────────────────────────────────
+# TestClient spins up a temporary Postgres schema and tears it down after
+# the test session. It wires up DBOS automatically so you don't need a
+# real DBOS_SYSTEM_DATABASE_URL in CI.
+try:
+    from dbos.testing import TestClient as DBOSTestClient
+    _DBOS_TESTING_AVAILABLE = True
+except ImportError:
+    _DBOS_TESTING_AVAILABLE = False
+
 from workflows import (
-    CheckpointStore,
-    Checkpoint,
-    WorkflowStatus,
-    WorkflowResult,
-    VamsWorkflow,
-    DemoWorkflow,
-    checkpoint,
+    step_gather_data,
+    step_run_inference,
+    step_execute_action,
+    step_report_result,
+    vams_data_pipeline,
     run_demo_workflow,
-    LogicLayerMonitor
+    LogicLayerMonitor,
 )
 
 
-class TestCheckpointStore:
-    """Tests for the CheckpointStore SQLite-based persistence."""
-    
-    @pytest.fixture
-    def temp_db(self):
-        """Create a temporary database for testing."""
-        temp_dir = tempfile.mkdtemp()
-        db_path = os.path.join(temp_dir, "test_checkpoints.db")
-        yield db_path
-        shutil.rmtree(temp_dir, ignore_errors=True)
-    
-    @pytest.fixture
-    def store(self, temp_db):
-        """Create a checkpoint store with temp database."""
-        return CheckpointStore(db_path=temp_db)
-    
-    def test_store_initialization(self, store):
-        """Test that store initializes correctly."""
-        assert store is not None
-        assert os.path.exists(store.db_path)
-    
-    def test_save_checkpoint(self, store):
-        """Test saving a checkpoint."""
-        cp = Checkpoint(
-            workflow_id="wf_test",
-            step_name="step1",
-            step_index=0,
-            data={"key": "value"}
+# ─── Fixtures ─────────────────────────────────────────────────────────────────
+
+@pytest.fixture(scope="session")
+def dbos_client():
+    """
+    Session-scoped DBOS test client.
+
+    Provisions a temporary Postgres schema before the test session and
+    drops it after. All workflow/step tests must use this fixture to
+    ensure DBOS is initialised before decorated functions are called.
+    """
+    if not _DBOS_TESTING_AVAILABLE:
+        pytest.skip(
+            "dbos.testing.TestClient not available. "
+            "Install with: pip install dbos psycopg2-binary"
         )
-        
-        # Should not raise
-        store.save_checkpoint(cp)
-    
-    def test_get_last_checkpoint(self, store):
-        """Test retrieving the last checkpoint."""
-        # Save two checkpoints
-        cp1 = Checkpoint(
-            workflow_id="wf_test",
-            step_name="step1",
-            step_index=0,
-            data={"stage": "first"}
-        )
-        cp2 = Checkpoint(
-            workflow_id="wf_test",
-            step_name="step2",
-            step_index=1,
-            data={"stage": "second"}
-        )
-        
-        store.save_checkpoint(cp1)
-        store.save_checkpoint(cp2)
-        
-        last = store.get_last_checkpoint("wf_test")
-        
-        assert last is not None
-        assert last.step_name == "step2"
-        assert last.step_index == 1
-        assert last.data["stage"] == "second"
-    
-    def test_get_last_checkpoint_nonexistent(self, store):
-        """Test getting checkpoint for nonexistent workflow."""
-        result = store.get_last_checkpoint("nonexistent")
-        assert result is None
-    
-    def test_clear_checkpoints(self, store):
-        """Test clearing checkpoints."""
-        cp = Checkpoint(
-            workflow_id="wf_test",
-            step_name="step1",
-            step_index=0,
-            data={"key": "value"}
-        )
-        store.save_checkpoint(cp)
-        
-        store.clear_checkpoints("wf_test")
-        
-        result = store.get_last_checkpoint("wf_test")
-        assert result is None
+    with DBOSTestClient() as client:
+        yield client
 
 
-class TestCheckpoint:
-    """Tests for the Checkpoint dataclass."""
-    
-    def test_to_dict(self):
-        """Test Checkpoint.to_dict() method."""
-        cp = Checkpoint(
-            workflow_id="wf_123",
-            step_name="test_step",
-            step_index=5,
-            data={"foo": "bar"},
-            timestamp=1234567890.0
-        )
-        
-        d = cp.to_dict()
-        
-        assert d["workflow_id"] == "wf_123"
-        assert d["step_name"] == "test_step"
-        assert d["step_index"] == 5
-        assert d["data"] == {"foo": "bar"}
-        assert d["timestamp"] == 1234567890.0
+# ─── Step unit tests ──────────────────────────────────────────────────────────
 
+class TestSteps:
+    """Unit tests for individual @DBOS.step() functions."""
 
-class TestDemoWorkflow:
-    """Tests for the DemoWorkflow crash-proof execution."""
-    
-    @pytest.fixture
-    def temp_db(self):
-        """Create a temporary database for testing."""
-        temp_dir = tempfile.mkdtemp()
-        db_path = os.path.join(temp_dir, "workflow_checkpoints.db")
-        yield db_path, temp_dir
-        shutil.rmtree(temp_dir, ignore_errors=True)
-    
-    def test_workflow_without_crash(self):
-        """Test workflow runs to completion without crash simulation."""
-        workflow_id = f"test_{int(time.time() * 1000)}"
-        wf = DemoWorkflow(workflow_id=workflow_id, simulate_crash=False)
-        
-        logs = []
-        result = wf.run(log_fn=logs.append)
-        
-        assert result.status == WorkflowStatus.COMPLETED
-        assert result.steps_completed == result.total_steps
-        assert result.error is None
-    
-    def test_workflow_crash_simulation(self):
-        """Test that crash simulation works."""
-        workflow_id = f"crash_test_{int(time.time() * 1000)}"
-        wf = DemoWorkflow(workflow_id=workflow_id, simulate_crash=True)
-        
-        logs = []
-        result = wf.run(log_fn=logs.append)
-        
-        assert result.status == WorkflowStatus.FAILED
-        assert "Simulated crash" in result.error
-        assert result.steps_completed == 2  # Crashes after step 2
-    
-    def test_workflow_recovery(self):
-        """Test workflow recovery after crash."""
-        workflow_id = f"recovery_{int(time.time() * 1000)}"
-        
-        # First run - will crash
-        wf1 = DemoWorkflow(workflow_id=workflow_id, simulate_crash=True)
-        logs1 = []
-        result1 = wf1.run(log_fn=logs1.append)
-        
-        assert result1.status == WorkflowStatus.FAILED
-        
-        # Second run - should recover
-        wf2 = DemoWorkflow(workflow_id=workflow_id, simulate_crash=False)
-        logs2 = []
-        result2 = wf2.run(log_fn=logs2.append)
-        
-        assert result2.status == WorkflowStatus.COMPLETED
-        assert result2.recovered is True
-        assert result2.recovery_step is not None
-
-
-class TestCrashRecovery:
-    """Tests for crash-proof recovery behavior."""
-    
-    @pytest.fixture
-    def temp_db(self):
-        """Create a temporary database for testing."""
-        temp_dir = tempfile.mkdtemp()
-        db_path = os.path.join(temp_dir, "test_recovery.db")
-        yield db_path
-        shutil.rmtree(temp_dir, ignore_errors=True)
-    
-    def test_checkpoint_persists_across_store_restart(self, temp_db):
-        """Test that checkpoint data persists when store restarts."""
-        # Create checkpoint with first store
-        store1 = CheckpointStore(db_path=temp_db)
-        cp = Checkpoint(
-            workflow_id="persist_test",
-            step_name="step1",
-            step_index=0,
-            data={"key": "value"}
-        )
-        store1.save_checkpoint(cp)
-        
-        # Create new store instance (simulates restart)
-        store2 = CheckpointStore(db_path=temp_db)
-        
-        # Should be able to retrieve checkpoint
-        last = store2.get_last_checkpoint("persist_test")
-        
-        assert last is not None
-        assert last.workflow_id == "persist_test"
-        assert last.data["key"] == "value"
-
-
-class TestLogicLayerMonitor:
-    """Tests for the LogicLayerMonitor."""
-    
-    def test_check_all_returns_dict(self):
-        """Test that check_all returns a dictionary."""
-        monitor = LogicLayerMonitor()
-        result = monitor.check_all()
-        
+    def test_gather_data_returns_required_keys(self, dbos_client):
+        """step_gather_data() must return source, block, and timestamp."""
+        result = asyncio.run(step_gather_data())
         assert isinstance(result, dict)
+        assert "source" in result
+        assert "block" in result
+        assert "timestamp" in result
+
+    def test_gather_data_source_is_celestia(self, dbos_client):
+        """Default data source should be celestia (placeholder)."""
+        result = asyncio.run(step_gather_data())
+        assert result["source"] == "celestia"
+
+    def test_run_inference_returns_prediction(self, dbos_client):
+        """step_run_inference() must return prediction and confidence."""
+        data = {"source": "celestia", "block": 1234, "timestamp": 0.0}
+        result = asyncio.run(step_run_inference(data))
+        assert "prediction" in result
+        assert "confidence" in result
+        assert isinstance(result["confidence"], float)
+        assert 0.0 <= result["confidence"] <= 1.0
+
+    def test_run_inference_has_model_field(self, dbos_client):
+        """Inference result must identify which model was used."""
+        data = {"source": "celestia", "block": 1234, "timestamp": 0.0}
+        result = asyncio.run(step_run_inference(data))
+        assert "model" in result
+        assert len(result["model"]) > 0
+
+    def test_execute_action_returns_success(self, dbos_client):
+        """step_execute_action() must report a status and tx_hash."""
+        inference = {"prediction": "bullish", "confidence": 0.9, "model": "sn1"}
+        result = asyncio.run(step_execute_action(inference))
+        assert "status" in result
+        assert result["status"] == "success"
+        assert "tx_hash" in result
+
+    def test_report_result_returns_string(self, dbos_client):
+        """step_report_result() must return a non-empty string."""
+        action = {"action": "log_prediction", "status": "success", "tx_hash": "0x"}
+        result = asyncio.run(step_report_result(action))
+        assert isinstance(result, str)
         assert len(result) > 0
-    
-    def test_expected_providers(self):
-        """Test that expected providers are present."""
-        monitor = LogicLayerMonitor()
-        result = monitor.check_all()
-        
-        # Check for known logic providers
-        expected = ["kwil", "weavedb", "glacier"]
-        for name in expected:
-            assert name in result, f"Missing provider: {name}"
-    
-    def test_provider_status_structure(self):
-        """Test that provider status has expected structure."""
-        monitor = LogicLayerMonitor()
-        result = monitor.check_all()
-        
-        for name, info in result.items():
-            assert "status" in info
-            assert "latency_ms" in info
-            assert "description" in info
+        assert "success" in result
 
 
-class TestRunDemoWorkflow:
-    """Tests for the run_demo_workflow function."""
-    
-    def test_demo_workflow_completes(self):
-        """Test that demo workflow eventually completes."""
+# ─── Full pipeline integration tests ─────────────────────────────────────────
+
+class TestVamsDataPipeline:
+    """Integration tests for the full @DBOS.workflow() pipeline."""
+
+    def test_pipeline_completes_and_returns_string(self, dbos_client):
+        """Full pipeline should run all 4 steps and return a result string."""
+        result = asyncio.run(vams_data_pipeline())
+        assert isinstance(result, str)
+        assert "complete" in result.lower() or "success" in result.lower()
+
+    def test_pipeline_result_contains_status(self, dbos_client):
+        """Pipeline result string should include the action status."""
+        result = asyncio.run(vams_data_pipeline())
+        assert "success" in result
+
+    def test_run_demo_workflow_public_api(self, dbos_client):
+        """run_demo_workflow() public entry-point returns a result string."""
         logs = []
         result = run_demo_workflow(log_fn=logs.append)
-        
-        # Should complete (after recovery from simulated crash)
-        assert result.status == WorkflowStatus.COMPLETED
-        assert result.recovered is True
-    
-    def test_demo_workflow_logs(self):
-        """Test that demo workflow produces logs."""
+        assert isinstance(result, str)
+        assert len(result) > 0
+
+    def test_run_demo_workflow_emits_logs(self, dbos_client):
+        """run_demo_workflow() should emit at least a start and complete log."""
         logs = []
         run_demo_workflow(log_fn=logs.append)
-        
-        # Should have produced some log output
-        assert len(logs) > 0
-        
-        # Should mention crash and recovery
+        assert len(logs) >= 2
         log_text = " ".join(logs)
-        assert "crash" in log_text.lower() or "RECOVERY" in log_text
+        assert "WORKFLOW" in log_text
+        assert "Complete" in log_text or "complete" in log_text
 
 
-# Run with: python -m pytest tests/test_workflows.py -v
+# ─── Idempotency tests ────────────────────────────────────────────────────────
+
+class TestWorkflowIdempotency:
+    """Verify DBOS workflow ID idempotency guarantees."""
+
+    def test_same_workflow_id_executes_once(self, dbos_client):
+        """
+        Calling vams_data_pipeline() twice with the same SetWorkflowID
+        should return identical results (the second call is a no-op).
+        """
+        from dbos import SetWorkflowID
+
+        async def run_with_id(wf_id: str) -> str:
+            with SetWorkflowID(wf_id):
+                return await vams_data_pipeline()
+
+        wf_id = f"idempotent-test-{int(time.time() * 1000)}"
+        r1 = asyncio.run(run_with_id(wf_id))
+        r2 = asyncio.run(run_with_id(wf_id))
+        # Both calls should produce the same result string
+        assert r1 == r2
+
+    def test_different_workflow_ids_are_independent(self, dbos_client):
+        """Two different workflow IDs are independent executions."""
+        from dbos import SetWorkflowID
+
+        async def run_with_id(wf_id: str) -> str:
+            with SetWorkflowID(wf_id):
+                return await vams_data_pipeline()
+
+        ts = int(time.time() * 1000)
+        r1 = asyncio.run(run_with_id(f"wf-a-{ts}"))
+        r2 = asyncio.run(run_with_id(f"wf-b-{ts}"))
+        # Both succeed independently
+        assert r1 is not None
+        assert r2 is not None
+
+
+# ─── LogicLayerMonitor tests (unchanged component) ───────────────────────────
+
+class TestLogicLayerMonitor:
+    """
+    Tests for LogicLayerMonitor — pure HTTP health checks, no DBOS dependency.
+    These tests do NOT require dbos_client.
+    """
+
+    def test_check_all_returns_dict(self):
+        monitor = LogicLayerMonitor()
+        result = monitor.check_all()
+        assert isinstance(result, dict)
+        assert len(result) > 0
+
+    def test_expected_providers_present(self):
+        monitor = LogicLayerMonitor()
+        result = monitor.check_all()
+        for provider in ("kwil", "weavedb", "glacier"):
+            assert provider in result, f"Missing provider: {provider}"
+
+    def test_provider_status_structure(self):
+        monitor = LogicLayerMonitor()
+        result = monitor.check_all()
+        for name, info in result.items():
+            assert "status" in info, f"{name}: missing 'status'"
+            assert "latency_ms" in info, f"{name}: missing 'latency_ms'"
+            assert "description" in info, f"{name}: missing 'description'"
+            assert info["status"] in ("healthy", "degraded", "offline"), (
+                f"{name}: unexpected status '{info['status']}'"
+            )
+
+
+# Run directly: python tests/test_workflows.py
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

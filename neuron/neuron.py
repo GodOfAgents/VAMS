@@ -30,6 +30,21 @@ from typing import Optional, Tuple
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
+# Load .env file if present (DBOS_SYSTEM_DATABASE_URL, VAMS_PRIVATE_KEY, etc.)
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass  # python-dotenv not installed — env vars must be set manually
+
+# DBOS durable workflow engine (optional — degrades gracefully if Postgres not configured)
+try:
+    from dbos_config import init_dbos, destroy_dbos
+    from dbos import DBOS
+    _DBOS_AVAILABLE = True
+except ImportError:
+    _DBOS_AVAILABLE = False
+
 # --- DEPENDENCY CHECK ---
 try:
     import requests
@@ -202,6 +217,15 @@ class VamsNeuron:
             self.log("Storage/Queue modules missing or failed to load", "WARN")
             self.queue = None
 
+        # Sequence Wallet Manager
+        try:
+            from sdk.sequence_wallet import SequenceWalletManager
+            self.sequence_wallet_manager = SequenceWalletManager(mock_mode=mock_mode)
+            self.log("Sequence Wallet Manager initialized", "INFO")
+        except ImportError:
+            self.sequence_wallet_manager = None
+            self.log("Sequence Wallet module not found", "WARN")
+
         # Phase E: Gateway & Economics
         try:
             from gateway.client import GatewayClient
@@ -209,7 +233,12 @@ class VamsNeuron:
             from economic.circuit_breaker import CircuitBreaker
             self.gateway = GatewayClient(base_url=VAMS_GATEWAY)
             self.breaker = CircuitBreaker()
-            self.x402 = X402Client(private_key=os.getenv("VAMS_PRIVATE_KEY"), circuit_breaker=self.breaker)
+            self.x402 = X402Client(
+                private_key=os.getenv("VAMS_PRIVATE_KEY"),
+                session_key=os.getenv("VAMS_SESSION_KEY"),
+                smart_wallet_address=os.getenv("VAMS_SMART_WALLET_ADDRESS"),
+                circuit_breaker=self.breaker
+            )
             self.log("Gateway & Economic Layer 5 initialized", "INFO")
         except ImportError as e:
             self.log(f"Economic modules failed: {e}", "WARN")
@@ -254,10 +283,29 @@ class VamsNeuron:
         
         signal.signal(signal.SIGINT, self._signal_handler)
         signal.signal(signal.SIGTERM, self._signal_handler)
+
+        # ── DBOS durable workflow engine ──────────────────────────────────────
+        self._dbos_active = False
+        if _DBOS_AVAILABLE and os.environ.get("DBOS_SYSTEM_DATABASE_URL"):
+            try:
+                init_dbos()
+                DBOS.launch()
+                self._dbos_active = True
+                self.log("DBOS durable workflow engine: ACTIVE", "L3")
+            except Exception as _dbos_err:
+                self.log(f"DBOS init failed (workflows will be unavailable): {_dbos_err}", "WARN")
+        else:
+            self.log(
+                "DBOS_SYSTEM_DATABASE_URL not set — workflow engine disabled. "
+                "See neuron/.env.example to configure Postgres.",
+                "WARN"
+            )
     
     def _signal_handler(self, signum, frame):
         self.running = False
         self.log("Shutdown signal received...", "INFO")
+        if self._dbos_active and _DBOS_AVAILABLE:
+            destroy_dbos()
     
     def log(self, msg: str, level: str = "INFO"):
         timestamp = datetime.now().strftime("%H:%M:%S")

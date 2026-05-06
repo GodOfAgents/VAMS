@@ -1,4 +1,4 @@
-# VAMS API Reference (v1.2.0-autoskill)
+# VAMS API Reference (v1.3.0-oms)
 
 The VAMS Gateway Server provides a unified REST/WebSocket interface to the decentralized infrastructure stack. For intelligence layer internals see [INTELLIGENCE_LAYER.md](./INTELLIGENCE_LAYER.md).
 
@@ -149,6 +149,7 @@ Submit an SLA observation report.
   > **Note (`activation_vector`):** Optional. Final-layer hidden state from the challenge
   > response. When present, the Sentinel computes Mahalanobis anomaly score and returns
   > `activation_anomaly_score` and `adversarial_flag` in the response.
+  > **Note (v1.3.0+):** Reports are now verified against enterprise RPC SLAs for latency and uptime accuracy.
 - **Response (200 OK):**
   ```json
   {
@@ -213,3 +214,64 @@ Returns the current Intelligence Layer model metadata.
     "max_alpha": 0.3
   }
   ```
+---
+ 
+ ## 7. OMS Integration (v1.3.0+)
+ Endpoints for the Polygon Open Money Stack integration, covering identity and payments.
+ 
+ ### `POST /payments/payout-preference`
+ Sets the preferred token for reward settlement (Stablecoin opt-in).
+ 
+ - **Request Body:**
+   ```json
+   {
+     "provider_id": "0x123...",
+     "mode": "STABLE_USDC",
+     "signature": "0x..."
+   }
+   ```
+   > **Note (`mode`):** Options are `NATIVE` (default), `STABLE_USDC`, or `STABLE_USDT`.
+ - **Response (200 OK):**
+   ```json
+   {
+     "status": "updated",
+     "mode": "STABLE_USDC",
+     "effective_immediately": true
+   }
+   ```
+ 
+ ### `GET /identity/verify/{address}`
+ Checks the OMS Identity verification (KYC/AML) status of a wallet address.
+ 
+ - **Response (200 OK):**
+   ```json
+   {
+     "address": "0x123...",
+     "is_verified": true,
+     "provider": "OMS_IDENTITY",
+     "last_check": 1735689600
+   }
+   ```
+   > **Note:** Required for P3 Institutional Routing in the `CLRouter`.
+ 
+ ### `POST /payments/topup`
+ Initiates a fiat on-ramp top-up via Coinme.
+ 
+ - **Request Body:**
+   ```json
+   {
+     "address": "0x123...",
+     "amount_fiat": 100.0,
+     "currency": "USD",
+     "payment_method": "credit_card"
+   }
+   ```
+ - **Response (200 OK):**
+   ```json
+   {
+     "transaction_id": "coinme-9981",
+     "status": "pending",
+     "estimated_vams": 1250.5,
+     "checkout_url": "https://coinme.com/checkout/..."
+   }
+   ```

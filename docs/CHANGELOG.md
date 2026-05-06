@@ -5,6 +5,56 @@ All notable changes to the VAMS project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.1-dbos] - 2026-04-30
+
+### Changed
+- **Layer 3 Workflow Engine:** Replaced custom SQLite-based checkpoint engine
+  (`CheckpointStore`, `DemoWorkflow`, `@checkpoint`) with the official DBOS Python SDK.
+  - `neuron/workflows.py` fully rewritten using `@DBOS.step()` and `@DBOS.workflow()` decorators
+  - Steps are now async, exactly-once, and crash-safe via Postgres-backed state
+  - `run_demo_workflow()` now uses `SetWorkflowID` for idempotent execution
+
+### Added
+- `neuron/dbos_config.py` — singleton DBOS init with dual Postgres strategy (Docker / Neon)
+- `neuron/.env.example` — environment template with annotated Postgres connection options
+- `neuron/scripts/setup_dbos.sh` — one-command developer onboarding script
+- `neuron/docs/WORKFLOW_ENGINE.md` — operator reference for the durable workflow engine
+
+### Removed
+- Custom `CheckpointStore` (SQLite), `DemoWorkflow`, `VamsWorkflow`, `@checkpoint` decorator
+- `workflow_checkpoints.db` is no longer written (SQLite file is now obsolete)
+
+### Testing
+- `neuron/tests/test_workflows.py` fully rewritten (15 new tests, DBOS `TestClient` harness)
+
+---
+
+## [1.3.0-oms] - 2026-05-03
+
+### Added
+- **Polygon Open Money Stack (OMS) Integration:** Unified identity, payments, and transport layer for institutional-grade reliability.
+- **Two-Layer Identity Model:** Integrated `VAMSAgentRegistry.authorizedWallet` (on-chain) and `OMSIdentityVerifier` (off-chain) for multi-tiered compliance.
+  - Support for Session Keys and Authorized Signers via `SignerInterface`.
+- **Sequence ERC-4337 Session Keys:** Integrated `SequenceWalletManager` and `SessionKeySigner` for non-custodial, high-frequency agent operations.
+- **Trails Transport Integration:** Refactored `CLRouter` to v3.1, adding native support for AggLayer chains via `TrailsClient`.
+- **Coinme Fiat Rails:** Implemented `coinme_client.py` and `universal_topup.py` for compliant fiat-to-crypto on-ramps.
+- **Stablecoin Payouts:** Added `StablecoinPayoutManager` and updated `RewardDistributor` with `PayoutMode` preferences (USDC/USDT).
+- **Enterprise Infrastructure:** Enriched `ChainOracle` with enterprise RPC endpoints, SLA monitoring, and latency-aware failover.
+- **OMS Identity Gating:** P3 Institutional Routing in `CLRouter` is now strictly gated by `OMSIdentityVerifier` for KYC/compliance.
+
+### Changed
+- `VAMSAgentRegistry.sol`: Added `setAuthorizedWallet` and `isAuthorizedCaller` for session key compatibility.
+- `RewardDistributor.sol`: Added `PayoutMode` enum and updated `claimRewards` to support stablecoin settlement.
+- `CLRouter`: Decision tree logic updated to v3.1 with identity-aware routing paths.
+- `ChainOracle`: Caching layer now prioritizes enterprise endpoints with 30s TTL.
+
+### Testing
+- **Foundry:** 619 tests passing (covering v2 contract suite and OMS extensions).
+- **Pytest:** 56 tests passing (covering Neuron logic and OMS SDK integrations).
+- **Aiken:** 79 tests passing (Cardano integration).
+
+---
+
 ## [1.2.0-autoskill] - 2026-04-29
 
 ### Added
