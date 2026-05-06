@@ -198,16 +198,16 @@ STATIC_CHAINS = {
     # L2 Rollups
     "Polygon": ChainConfig(
         "Polygon", "Public", "Shared", 0.92, False,
-        "Trails", evm_compatible=True, chain_type="L2",
+        "AggLayer", evm_compatible=True, chain_type="L2",
         kyc_layer=True  # Polygon CDK KYC Layer
     ),
     "Arbitrum": ChainConfig(
         "Arbitrum", "Public", "Shared", 0.94, False,
-        "Trails", evm_compatible=True, chain_type="L2"
+        "AggLayer", evm_compatible=True, chain_type="L2"
     ),
     "Base": ChainConfig(
         "Base", "Public", "Shared", 0.91, False,
-        "Trails", evm_compatible=True, chain_type="L2"
+        "AggLayer", evm_compatible=True, chain_type="L2"
     ),
     # Privacy chains
     "Phala": ChainConfig(

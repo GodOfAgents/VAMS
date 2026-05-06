@@ -1,6 +1,6 @@
 # VAMS API Reference (v1.3.0-oms)
 
-The VAMS Gateway Server provides a unified REST/WebSocket interface to the decentralized infrastructure stack. For intelligence layer internals see [INTELLIGENCE_LAYER.md](./INTELLIGENCE_LAYER.md).
+The VAMS Gateway Server provides a unified REST/WebSocket interface to the decentralized infrastructure stack. For intelligence layer internals see [INTELLIGENCE_LAYER.md](./INTELLIGENCE_LAYER.md). For OMS integration architecture see [team/ARCHITECTURE_v0-6-0.md](./team/ARCHITECTURE_v0-6-0.md).
 
 ## Base URL
 `/api/v1`
@@ -149,7 +149,6 @@ Submit an SLA observation report.
   > **Note (`activation_vector`):** Optional. Final-layer hidden state from the challenge
   > response. When present, the Sentinel computes Mahalanobis anomaly score and returns
   > `activation_anomaly_score` and `adversarial_flag` in the response.
-  > **Note (v1.3.0+):** Reports are now verified against enterprise RPC SLAs for latency and uptime accuracy.
 - **Response (200 OK):**
   ```json
   {
@@ -214,64 +213,148 @@ Returns the current Intelligence Layer model metadata.
     "max_alpha": 0.3
   }
   ```
+
 ---
- 
- ## 7. OMS Integration (v1.3.0+)
- Endpoints for the Polygon Open Money Stack integration, covering identity and payments.
- 
- ### `POST /payments/payout-preference`
- Sets the preferred token for reward settlement (Stablecoin opt-in).
- 
- - **Request Body:**
-   ```json
-   {
-     "provider_id": "0x123...",
-     "mode": "STABLE_USDC",
-     "signature": "0x..."
-   }
-   ```
-   > **Note (`mode`):** Options are `NATIVE` (default), `STABLE_USDC`, or `STABLE_USDT`.
- - **Response (200 OK):**
-   ```json
-   {
-     "status": "updated",
-     "mode": "STABLE_USDC",
-     "effective_immediately": true
-   }
-   ```
- 
- ### `GET /identity/verify/{address}`
- Checks the OMS Identity verification (KYC/AML) status of a wallet address.
- 
- - **Response (200 OK):**
-   ```json
-   {
-     "address": "0x123...",
-     "is_verified": true,
-     "provider": "OMS_IDENTITY",
-     "last_check": 1735689600
-   }
-   ```
-   > **Note:** Required for P3 Institutional Routing in the `CLRouter`.
- 
- ### `POST /payments/topup`
- Initiates a fiat on-ramp top-up via Coinme.
- 
- - **Request Body:**
-   ```json
-   {
-     "address": "0x123...",
-     "amount_fiat": 100.0,
-     "currency": "USD",
-     "payment_method": "credit_card"
-   }
-   ```
- - **Response (200 OK):**
-   ```json
-   {
-     "transaction_id": "coinme-9981",
-     "status": "pending",
-     "estimated_vams": 1250.5,
-     "checkout_url": "https://coinme.com/checkout/..."
-   }
-   ```
+
+## 7. Identity & Compliance (v1.3.0+)
+
+Endpoints for OMS-based KYC/KYB institutional identity verification.
+Required for agents routing via the P3 Institutional Compliance CLR path.
+
+### `GET /identity/status/{agent_id}`
+Returns the OMS identity verification status for an agent address.
+
+- **Response (200 OK):**
+  ```json
+  {
+    "agent_id": "0x123...",
+    "is_verified": true,
+    "kyc_tier": "INSTITUTIONAL",
+    "verified_at": 1746547200,
+    "expires_at": 1778083200
+  }
+  ```
+- **Response (200 OK — unverified):**
+  ```json
+  {
+    "agent_id": "0x456...",
+    "is_verified": false,
+    "kyc_tier": null,
+    "verified_at": null,
+    "expires_at": null
+  }
+  ```
+
+### `POST /identity/verify`
+Triggers an OMS KYC credential check for an agent address.
+
+- **Request Body:**
+  ```json
+  {
+    "agent_id": "0x123...",
+    "credential_type": "KYB"
+  }
+  ```
+- **Response (202 Accepted):**
+  ```json
+  {
+    "status": "pending",
+    "verification_session_id": "vs-8821",
+    "redirect_url": "https://oms.polygon.technology/verify/vs-8821"
+  }
+  ```
+  > **Note:** Verification is asynchronous. Poll `GET /identity/status/{agent_id}` to check completion.
+
+---
+
+## 8. Fiat On-Ramp — Coinme (v1.3.0+)
+
+Endpoints for fiat-to-$VAMS conversion via the Coinme integration.
+Allows consumers to fund agent escrow accounts using credit card or bank transfer.
+
+### `POST /payments/topup/create`
+Creates a Coinme checkout session for fiat-to-$VAMS conversion.
+
+- **Request Body:**
+  ```json
+  {
+    "amount_fiat": 100.0,
+    "currency": "USD",
+    "dest_address": "0x123..."
+  }
+  ```
+- **Response (200 OK):**
+  ```json
+  {
+    "session_id": "cs-7712",
+    "checkout_url": "https://pay.coinme.com/checkout/cs-7712",
+    "estimated_vams": 423.5,
+    "fee_pct": 3.5,
+    "expires_at": 1746550800
+  }
+  ```
+
+### `GET /payments/topup/rate`
+Returns the current fiat-to-$VAMS conversion rate.
+
+- **Query Parameters:** `currency` (e.g., `USD`, `EUR`, `GBP`)
+- **Response (200 OK):**
+  ```json
+  {
+    "from_currency": "USD",
+    "to_token": "VAMS",
+    "rate": 4.235,
+    "fee_pct": 3.5,
+    "valid_for_seconds": 30
+  }
+  ```
+
+### `POST /payments/topup/webhook`
+Coinme payment confirmation webhook (called by Coinme upon successful payment).
+
+- **Request Body:** Coinme-signed webhook payload (HMAC-SHA256)
+- **Response (200 OK):**
+  ```json
+  { "status": "processed", "escrow_tx": "0xabc..." }
+  ```
+  > **Security:** Verify the `X-Coinme-Signature` header before processing. See [DEVELOPER_GUIDE.md](./DEVELOPER_GUIDE.md#7-fiat-top-up-via-coinme-v130--consumers) for webhook validation code.
+
+---
+
+## 9. Stablecoin Payouts (v1.3.0+)
+
+Endpoints for managing provider stablecoin payout preferences on the `RewardDistributor` contract.
+
+### `POST /economics/payout-preference`
+Sets the provider's payout preference. Signed by the provider's session key or EOA.
+
+- **Request Body:**
+  ```json
+  {
+    "provider_address": "0x123...",
+    "mode": "STABLECOIN",
+    "signature": "0x..."
+  }
+  ```
+  > **`mode` values:** `VAMS_ONLY` (default), `STABLECOIN` (100% USDC/USDT), `HYBRID` (50/50 split)
+- **Response (200 OK):**
+  ```json
+  {
+    "status": "set",
+    "tx_hash": "0xdef...",
+    "mode": "STABLECOIN"
+  }
+  ```
+
+### `GET /economics/payout-preference/{address}`
+Queries the current payout preference for a provider address.
+
+- **Response (200 OK):**
+  ```json
+  {
+    "provider_address": "0x123...",
+    "mode": "STABLECOIN",
+    "mode_int": 1,
+    "supported_tokens": ["USDC", "USDT"]
+  }
+  ```

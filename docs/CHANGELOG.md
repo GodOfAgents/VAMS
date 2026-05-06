@@ -5,53 +5,81 @@ All notable changes to the VAMS project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.3.1-dbos] - 2026-04-30
+## [1.3.0-oms] - 2026-05-06
+
+### Added — Phase 1: Two-Layer Identity Model
+- **`neuron/sdk/signer.py`**: `SignerInterface` (ABC), `EOASigner`, `SessionKeySigner`, and `SignerFactory`
+  — abstracts signing away from raw `from_key()` calls across all transactional Python modules.
+- **`VAMSAgentRegistry.sol`**: New `authorizedWallet` field on the `Agent` struct;
+  `setAuthorizedWallet(bytes32 agentId, address wallet)` owner-only setter;
+  `isAuthorizedCaller(bytes32 agentId, address caller)` view function;
+  `AuthorizedWalletSet` event.
+
+### Added — Phase 2: Trails Transport Integration
+- **`neuron/sdk/trails_client.py`**: Thin `TrailsClient` wrapper around OMS Trails API with
+  `submit_intent()`, `get_status()`, and mock mode for testing.
+- **`BridgeExecutor.py`**: `TRAILS` transport added to `BridgeTransport` enum;
+  `TRANSPORT_MATRIX` updated to prefer Trails for the 4 AggLayer routes (Ethereum, Polygon, Arbitrum, Base)
+  with AggLayer as fallback; `TrailsTransportHandler` class.
+
+### Added — Phase 3: Sequence ERC-4337 Session Keys
+- **`neuron/sdk/sequence_wallet.py`**: `SequenceWalletManager` (ERC-4337 smart wallet lifecycle)
+  and `SessionKeyManager` (scoped session keys with per-TrustTier value limits: BRONZE=100 $VAMS,
+  SILVER=1K, GOLD=50K, PLATINUM=unlimited; 24h validity window default).
+
+### Added — Phase 4: Coinme Fiat Rails + Insurance Fund Yield
+- **`neuron/payments/coinme_client.py`**: `CoinmeClient` — fiat-to-crypto on-ramp API wrapper
+  with `create_checkout()`, `get_conversion_rate()`, and webhook handler.
+- **`neuron/payments/universal_topup.py`**: `UniversalTopUpManager` — orchestrates fiat → $VAMS
+  conversion, applies gas abstraction premium (2–7%), deposits to agent `ComposedSettlement` escrow.
+- **`neuron/economics/yield_manager.py`**: `YieldManager` — manages Insurance Fund idle capital
+  in OMS yield vaults; enforces ≤30% allocation cap and instant-withdrawal requirement.
+
+### Added — Phase 5: Stablecoin Payouts + Enterprise RPCs + Identity
+- **`neuron/payments/stablecoin_payout.py`**: `StablecoinPayoutManager` — provider opt-in
+  to auto-convert $VAMS rewards to USDC or USDT via OMS stablecoin settlement rails.
+  Exposes `PayoutMode` enum: `VAMS_ONLY`, `STABLECOIN`, `HYBRID`.
+- **`neuron/sdk/oms_identity.py`**: `OMSIdentityVerifier` — institutional KYC/KYB verification
+  via OMS Compliance module. Fail-closed: returns `False` on any network or parse error.
+- **`docs/team/ARCHITECTURE_v0-6-0.md`**: New team architecture addendum covering all 5 OMS phases,
+  updated CLR v3.1 decision tree, and security boundary documentation.
 
 ### Changed
-- **Layer 3 Workflow Engine:** Replaced custom SQLite-based checkpoint engine
-  (`CheckpointStore`, `DemoWorkflow`, `@checkpoint`) with the official DBOS Python SDK.
-  - `neuron/workflows.py` fully rewritten using `@DBOS.step()` and `@DBOS.workflow()` decorators
-  - Steps are now async, exactly-once, and crash-safe via Postgres-backed state
-  - `run_demo_workflow()` now uses `SetWorkflowID` for idempotent execution
+- **`neuron/payments/x402.py`**: Default signer switched from `EOASigner` to `SessionKeySigner`
+  for payment operations; root EOA retained for channel creation only.
+- **`neuron/neuron.py`**: `SequenceWalletManager` initialised alongside existing components;
+  session signer passed to `X402Client` and `trust_aggregator`.
+- **`neuron/clr_router.py`**: P3 (`P3_INSTITUTIONAL_COMPLIANCE`) routing now gates on
+  `OMSIdentityVerifier.is_verified(agent_id)` in addition to the existing `PLATINUM` trust tier
+  check. Non-verified addresses are rejected fail-closed.
+- **`neuron/chain_oracle.py`**: OMS enterprise RPC endpoints replace public fallbacks for all
+  Polygon-ecosystem chains; SLA monitoring added with per-endpoint uptime/latency tracking.
+- **`contracts/src/economic/RewardDistributor.sol`**: `payoutPreference` mapping
+  (`address → PayoutMode`); `setPayoutPreference(PayoutMode)` function; `claimRewards()` now
+  routes through conversion contract when preference is `STABLECOIN` or `HYBRID`.
+- **`contracts/src/economic/VAMSInsuranceFund.sol`**: `YIELD_MANAGER_ROLE` added;
+  `deployToYield(address vault, uint256 amount)` — capped at 30% of `totalFundBalance()`;
+  `withdrawFromYield(address vault, uint256 amount)` — instant withdrawal path;
+  `totalFundBalance()` now includes deployed capital via `totalDeployedBalance()`.
+- **`contracts/src/registry/VAMSAgentRegistry.sol`**: `registerAgent()` sets `authorizedWallet`
+  to the Sequence smart wallet address; all `msg.sender` checks accept authorized wallet.
 
-### Added
-- `neuron/dbos_config.py` — singleton DBOS init with dual Postgres strategy (Docker / Neon)
-- `neuron/.env.example` — environment template with annotated Postgres connection options
-- `neuron/scripts/setup_dbos.sh` — one-command developer onboarding script
-- `neuron/docs/WORKFLOW_ENGINE.md` — operator reference for the durable workflow engine
-
-### Removed
-- Custom `CheckpointStore` (SQLite), `DemoWorkflow`, `VamsWorkflow`, `@checkpoint` decorator
-- `workflow_checkpoints.db` is no longer written (SQLite file is now obsolete)
-
-### Testing
-- `neuron/tests/test_workflows.py` fully rewritten (15 new tests, DBOS `TestClient` harness)
-
----
-
-## [1.3.0-oms] - 2026-05-03
-
-### Added
-- **Polygon Open Money Stack (OMS) Integration:** Unified identity, payments, and transport layer for institutional-grade reliability.
-- **Two-Layer Identity Model:** Integrated `VAMSAgentRegistry.authorizedWallet` (on-chain) and `OMSIdentityVerifier` (off-chain) for multi-tiered compliance.
-  - Support for Session Keys and Authorized Signers via `SignerInterface`.
-- **Sequence ERC-4337 Session Keys:** Integrated `SequenceWalletManager` and `SessionKeySigner` for non-custodial, high-frequency agent operations.
-- **Trails Transport Integration:** Refactored `CLRouter` to v3.1, adding native support for AggLayer chains via `TrailsClient`.
-- **Coinme Fiat Rails:** Implemented `coinme_client.py` and `universal_topup.py` for compliant fiat-to-crypto on-ramps.
-- **Stablecoin Payouts:** Added `StablecoinPayoutManager` and updated `RewardDistributor` with `PayoutMode` preferences (USDC/USDT).
-- **Enterprise Infrastructure:** Enriched `ChainOracle` with enterprise RPC endpoints, SLA monitoring, and latency-aware failover.
-- **OMS Identity Gating:** P3 Institutional Routing in `CLRouter` is now strictly gated by `OMSIdentityVerifier` for KYC/compliance.
-
-### Changed
-- `VAMSAgentRegistry.sol`: Added `setAuthorizedWallet` and `isAuthorizedCaller` for session key compatibility.
-- `RewardDistributor.sol`: Added `PayoutMode` enum and updated `claimRewards` to support stablecoin settlement.
-- `CLRouter`: Decision tree logic updated to v3.1 with identity-aware routing paths.
-- `ChainOracle`: Caching layer now prioritizes enterprise endpoints with 30s TTL.
+### Security
+- `OMSIdentityVerifier.is_verified()` is fail-closed: any exception (network, parse, timeout)
+  returns `False`, preventing unauthenticated access to P3 institutional routes.
+- Session keys are strictly scoped: value limit, allowed contract whitelist, and 24h validity
+  window enforced by `SessionKeyManager`; limits scale with TrustTier.
+- Insurance Fund yield deployment capped at ≤30% of `totalFundBalance()` to preserve solvency
+  for concurrent insurance claims.
+- TEE attestation binding preserved: `tee_plugin.py` always binds attestations to root EOA,
+  not to session wallet identity.
 
 ### Testing
-- **Foundry:** 619 tests passing (covering v2 contract suite and OMS extensions).
-- **Pytest:** 56 tests passing (covering Neuron logic and OMS SDK integrations).
-- **Aiken:** 79 tests passing (Cardano integration).
+- **675 total tests passing** (619 Forge + 56 Pytest — zero regressions).
+- New test coverage: `test_fiat_yield.py` (Coinme, UniversalTopup, YieldManager),
+  `test_sequence_wallet.py` (session keys, tier scopes, expiry),
+  `test_trails_client.py` (TrailsClient mock + fallback),
+  `test_clr_v3.py` (19 tests — CLR P3 OMS gate, all routing paths, bridge regression guards).
 
 ---
 

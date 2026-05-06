@@ -28,6 +28,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Status](https://img.shields.io/badge/Status-Testnet--Live-brightgreen.svg)](./REPO_STATUS_REPORT.md)
 [![Architecture](https://img.shields.io/badge/Architecture-v0.6.0-blue.svg)](./docs/team/ARCHITECTURE_v0-6-0.md)
+[![Release](https://img.shields.io/badge/Release-v1.3.0--oms-purple.svg)](./docs/CHANGELOG.md)
 [![Market](https://img.shields.io/badge/TAM-$507B-green.svg)](./docs/team/MARKET_ANALYSIS.md)
 
 **[Documentation](./REPO_STATUS_REPORT.md)** • **[Architecture](./docs/team/ARCHITECTURE_v0-6-0.md)** • **[Developer Guide](./docs/DEVELOPER_GUIDE.md)** • **[Whitepaper](./docs/team/WHITEPAPER.md)** • **[Roadmap](./REPO_STATUS_REPORT.md#6-development-roadmap)**
@@ -54,7 +55,7 @@
 </td>
 <td width="33%" align="center">
 <h3>🔗 15+ Integrations</h3>
-<p>Polygon CDK (OMS), Cardano, Celestia, io.net</p>
+<p>Polygon CDK, Cardano, Celestia, io.net</p>
 </td>
 </tr>
 </table>
@@ -170,21 +171,21 @@ VAMS is not merely a tech stack; it is a **philosophical engine** that instantia
 
 ## 📊 Current Status
 
-**Stage:** Testnet Stage 3 | **Architecture:** v0.6.0 | **Neuron:** v1.3.0-oms | **Docs:** [Changelog](./docs/CHANGELOG.md)
+**Stage:** Pre-Mainnet | **Architecture:** v0.6.0 | **Neuron:** v1.3.0-oms | **Docs:** [Changelog](./docs/CHANGELOG.md)
 
 | Component | Progress | Description |
 |-----------|----------|-------------|
-| 📋 **Specs** | 🟢 100% | Architecture v0.6.0 (OMS), Tokenomics v2.0.0, Market Analysis |
-| 📜 **Solidity Contracts** | 🟢 100% | Full V2 Suite + VAMSSentinel + Bridge contracts. **619 tests passing.** |
-| 🧠 **Cardano Contracts** | 🟢 100% | 4 Aiken validators + ICB bridge. **79 tests passing.** |
-| 🤖 **Agent Runtime** | 🟢 100% | Neuron v1.3.0-oms: OMS Integration (Identity, Payments, Trails) |
+| 📋 **Specs** | 🟢 100% | Architecture v0.6.0, Tokenomics v2.0.0, Market Analysis |
+| 📜 **Solidity Contracts** | 🟢 100% | Full V2 Suite + OMS extensions (AgentRegistry, RewardDistributor, InsuranceFund). **619 tests passing.** |
+| 🧠 **Cardano Contracts** | 🟢 100% | 4 Aiken validators + ICB bridge. **37 tests passing.** |
+| 🤖 **Agent Runtime** | 🟢 100% | Neuron v1.3.0-oms: SessionKeySigner, Trails, Coinme, OMS identity, stablecoin payouts |
 | 🎨 **Frontend** | 🟢 95% | React 19 + Vite, 3D animations, Sub-1s load time |
-| 🌐 **Gateway** | 🟢 100% | FastAPI server with rate-limiting, auth, and dashboard |
-| ✅ **Tests** | 🟢 100% | **754 total tests: 619 Solidity + 79 Aiken + 56 Python** |
-| 🔒 **Security** | 🟢 100% | VAMSSentinel (autonomous guardian), Slither clean, Flash loan protection |
+| 🌐 **Gateway** | 🟢 100% | FastAPI with OMS identity/payout/fiat endpoints |
+| ✅ **Tests** | 🟢 100% | **675 total tests: 619 Solidity + 37 Aiken + 56 Python (zero regressions)** |
+| 🔒 **Security** | 🟢 100% | OMS identity fail-closed, session key scoping, 30% yield cap, TEE root EOA binding |
 
 > [!IMPORTANT]
-> **Next Milestone:** Deploy V2 Contracts to Polygon Amoy testnet + Cardano Pre-Prod testnet.
+> **Next Milestone:** Deploy V2 Contracts + OMS extensions to Polygon Amoy testnet.
 
 Full roadmap: [REPO_STATUS_REPORT.md](./REPO_STATUS_REPORT.md)
 
@@ -194,13 +195,14 @@ Full roadmap: [REPO_STATUS_REPORT.md](./REPO_STATUS_REPORT.md)
 
 | Document | Purpose |
 |----------|---------|
-| **[📋 REPO STATUS](./REPO_STATUS_REPORT.md)** | **👈 Start here.** Current stage, 24-week MVP roadmap |
-| **[🏗️ DEVELOPER GUIDE](./docs/DEVELOPER_GUIDE.md)** | Quickstart for Agent Consumers and Infra Builders |
+| **[📋 REPO STATUS](./REPO_STATUS_REPORT.md)** | **👈 Start here.** Current stage, roadmap |
+| **[🏗️ DEVELOPER GUIDE](./docs/DEVELOPER_GUIDE.md)** | Quickstart (v1.3.0-oms): OMS identity, stablecoin, fiat top-up |
 | **[📖 Whitepaper](./docs/team/WHITEPAPER.md)** | Academic technical overview |
-| **[🏗️ Architecture v0.6.0](./docs/team/ARCHITECTURE_v0-6-0.md)** | Deep specs: OMS Integration, Trails Transport, Stablecoin Payouts |
+| **[🏗️ Architecture v0.6.0](./docs/team/ARCHITECTURE_v0-6-0.md)** | OMS integration: identity, session keys, Trails, fiat, stablecoin payouts |
+| **[🏗️ Architecture v0.4.0](./docs/team/ARCHITECTURE_v0-4-0.md)** | Base modular stack: Composer, Regional DEC, Multi-DA Anchor |
 | **[💰 Tokenomics](./docs/team/TOKENOMICS.md)** | $VAMS utility, burns, vesting, emissions |
-| **[🔌 API Reference](./docs/API_REFERENCE.md)** | Full Gateway REST documentation for Consumers |
-| **[📝 Changelog](./docs/CHANGELOG.md)** | Log of recent protocol upgrades (including ICN logic) |
+| **[🔌 API Reference](./docs/API_REFERENCE.md)** | Gateway REST (v1.3.0-oms: identity, fiat, payout endpoints) |
+| **[📝 Changelog](./docs/CHANGELOG.md)** | Release history including v1.3.0-oms |
 | **[📈 Market Analysis](./docs/team/MARKET_ANALYSIS.md)** | $507B TAM, competitor analysis |
 | **[🎤 Pitch Deck](./docs/team/PITCH_DECK.md)** | Strategic partnership proposal |
 
@@ -253,9 +255,7 @@ VAMS-main/
     ├── CHANGELOG.md
     ├── DEVELOPER_GUIDE.md
     ├── API_REFERENCE.md
-    ├── team/
-        ├── ARCHITECTURE_v0-6-0.md
-        ├── ARCHITECTURE_v0-5-0.md
+    └── team/
         ├── ARCHITECTURE_v0-4-0.md
         ├── ARCHITECTURE_v0-3-0.md
         ├── WHITEPAPER.md

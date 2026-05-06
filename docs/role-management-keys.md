@@ -47,3 +47,63 @@ VAMS uses a 4-phase rollout plan for progressively decentralizing these keys via
 2. **Phase 2 (Team Multisig)**: Recommended for early mainnet. Uses `transferToMultisig()` to migrate `DEFAULT_ADMIN_ROLE` and `UPGRADER_ROLE` securely to a 3-of-5 Safe multisig.
 3. **Phase 3 (DAO Governance)**: Uses `transferToDAO()` to shift authority to an on-chain Timelock controller governed by `$VAMS` token quadratic voting. 
 4. **Phase 4 (Immutable)**: Optional final phase. Invoking `renounceUpgradeability()` permanently deletes the `UPGRADER_ROLE`, sealing the protocol logic forever.
+
+---
+
+## 4. v0.6.0 Additions — OMS Integration Roles
+
+### `YIELD_MANAGER_ROLE` (Insurance Fund Yield)
+- **Permissions**: Can call `deployToYield(address vault, uint256 amount)` and
+  `withdrawFromYield(address vault, uint256 amount)` on `VAMSInsuranceFund.sol`.
+  Deployment is mathematically capped at ≤30% of `totalFundBalance()` — the cap is enforced
+  by a Solidity `require`, not by this role alone.
+- **Holder**: Initially the `GOVERNANCE_ROLE` multisig; intended to transfer to an automated
+  `YieldManager` smart contract once audited.
+- **Note**: This role does **not** grant access to insurance claim processing or fund withdrawals.
+
+---
+
+## 5. OMS API Key Rotation Procedure
+
+Two environment variables are introduced in v0.6.0 for the OMS Compliance and RPC integrations:
+
+| Variable | Purpose | Rotation Frequency |
+|---|---|---|
+| `OMS_API_KEY` | Authentication for `OMSIdentityVerifier` API calls | Every 90 days |
+| `OMS_IDENTITY_API` | Base URL for OMS Identity endpoint | Only on provider migration |
+| `OMS_POLYGON_RPC_PRIMARY` | Primary enterprise RPC for Polygon-ecosystem chains | As needed |
+| `OMS_POLYGON_RPC_SECONDARY` | Fallback enterprise RPC | As needed |
+
+**Rotation Steps (OMS_API_KEY):**
+1. Provision a new API key from the OMS Console (polygon.technology/oms)
+2. Update the key in your secrets manager (AWS Secrets Manager / HashiCorp Vault)
+3. Perform a rolling restart of Neuron services — old key remains valid during transition
+4. Revoke the old key in the OMS Console after confirming all services are running the new key
+5. Update `docs/role-management-keys.md` with the rotation date
+
+> [!CAUTION]
+> Never commit `OMS_API_KEY` or `OMS_IDENTITY_API` to version control. Load exclusively from
+> environment variables or a secrets manager. The `oms_identity.py` module falls back to
+> `"demo-key"` if `OMS_API_KEY` is unset — this is **not** safe for production use.
+
+---
+
+## 6. Session Key Expiry Policy
+
+Session keys created by `SessionKeyManager` in `neuron/sdk/sequence_wallet.py` carry the
+following expiry rules:
+
+| TrustTier | Default Validity | Maximum Validity | Can Re-issue Without Root? |
+|---|---|---|---|
+| BRONZE | 24h | 48h | Yes (up to 3 consecutive) |
+| SILVER | 24h | 72h | Yes (up to 5 consecutive) |
+| GOLD | 24h | 7 days | Yes, with governance approval |
+| PLATINUM | 24h | 30 days | Yes, with governance approval |
+
+**Expiry enforcement:** Session keys are validated on-chain by the Sequence ERC-4337
+`EntryPoint`. An expired key causes the `UserOperation` to be rejected at the paymaster stage —
+no on-chain state is mutated on rejection.
+
+**Key invalidation (emergency):** A compromised session key can be revoked by calling
+`VAMSAgentRegistry.setAuthorizedWallet(agentId, address(0))`, which clears the authorized wallet
+and immediately invalidates all associated session operations.
