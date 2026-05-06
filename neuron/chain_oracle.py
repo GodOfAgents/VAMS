@@ -46,6 +46,9 @@ class ChainMetrics:
     congestion_pct: float          # Estimated congestion 0-100%
     finality_ms: int               # Time to economic irreversibility (ms)
     timestamp: float               # When this snapshot was taken
+    trails_latency_ms: Optional[int] = None # OMS Trails API latency
+    rpc_latency_ms: float = 0.0    # SLA monitoring: RPC response time
+    uptime_pct: float = 100.0      # SLA monitoring: Up time percentage
     stale: bool = False            # True if fetched from cache after RPC failure
     error: Optional[str] = None    # Error message if fetch failed
 
@@ -61,6 +64,9 @@ class ChainMetrics:
             "last_block": self.last_block,
             "congestion_pct": round(self.congestion_pct, 1),
             "finality_ms": self.finality_ms,
+            "trails_latency_ms": self.trails_latency_ms,
+            "rpc_latency_ms": round(self.rpc_latency_ms, 2),
+            "uptime_pct": round(self.uptime_pct, 2),
             "age_s": round(self.age_seconds, 1),
             "stale": self.stale,
         }
@@ -85,6 +91,9 @@ class ChainOracle(ABC):
     def __init__(self, rpc_url: str, timeout: int = 10):
         self.rpc_url = rpc_url
         self.timeout = timeout
+        self.total_requests = 0
+        self.successful_requests = 0
+        self.last_latency_ms = 0.0
 
     @abstractmethod
     def fetch_metrics(self) -> ChainMetrics:
@@ -93,21 +102,42 @@ class ChainOracle(ABC):
 
     def _rpc_post(self, payload: dict) -> dict:
         """Send a JSON-RPC POST request."""
-        resp = requests.post(
-            self.rpc_url,
-            json=payload,
-            timeout=self.timeout,
-            headers={"Content-Type": "application/json"},
-        )
-        resp.raise_for_status()
-        return resp.json()
+        self.total_requests += 1
+        start = time.time()
+        try:
+            resp = requests.post(
+                self.rpc_url,
+                json=payload,
+                timeout=self.timeout,
+                headers={"Content-Type": "application/json"},
+            )
+            resp.raise_for_status()
+            self.last_latency_ms = (time.time() - start) * 1000.0
+            self.successful_requests += 1
+            return resp.json()
+        except Exception:
+            self.last_latency_ms = (time.time() - start) * 1000.0
+            raise
 
     def _rpc_get(self, path: str = "", params: dict = None) -> dict:
         """Send a GET request (for REST APIs like Blockfrost)."""
+        self.total_requests += 1
         url = f"{self.rpc_url}{path}"
-        resp = requests.get(url, params=params, timeout=self.timeout)
-        resp.raise_for_status()
-        return resp.json()
+        start = time.time()
+        try:
+            resp = requests.get(url, params=params, timeout=self.timeout)
+            resp.raise_for_status()
+            self.last_latency_ms = (time.time() - start) * 1000.0
+            self.successful_requests += 1
+            return resp.json()
+        except Exception:
+            self.last_latency_ms = (time.time() - start) * 1000.0
+            raise
+
+    def _get_uptime_pct(self) -> float:
+        if self.total_requests == 0:
+            return 100.0
+        return (self.successful_requests / self.total_requests) * 100.0
 
     def _eth_gas_and_block(self) -> ChainMetrics:
         """Standard EVM pattern: eth_gasPrice + eth_blockNumber."""
@@ -138,6 +168,9 @@ class ChainOracle(ABC):
                 congestion_pct=self._estimate_congestion(gas_gwei),
                 finality_ms=self._default_finality_ms(),
                 timestamp=time.time(),
+                trails_latency_ms=5000 if self.name in ("Ethereum", "Polygon", "Arbitrum", "Base") else None,
+                rpc_latency_ms=self.last_latency_ms,
+                uptime_pct=self._get_uptime_pct(),
             )
         except Exception as e:
             return ChainMetrics(
@@ -148,6 +181,8 @@ class ChainOracle(ABC):
                 congestion_pct=0.0,
                 finality_ms=self._default_finality_ms(),
                 timestamp=time.time(),
+                rpc_latency_ms=self.last_latency_ms,
+                uptime_pct=self._get_uptime_pct(),
                 stale=True,
                 error=str(e),
             )
@@ -179,7 +214,7 @@ class EthereumOracle(ChainOracle):
     chain_type = "Account-model L1"
 
     def __init__(self, rpc_url: str = None, timeout: int = 10):
-        url = rpc_url or os.getenv("ETHEREUM_RPC", "https://ethereum-rpc.publicnode.com")
+        url = rpc_url or os.getenv("ETHEREUM_RPC", "https://oms.polygon.technology/rpc/ethereum")
         super().__init__(url, timeout)
 
     def fetch_metrics(self) -> ChainMetrics:
@@ -254,13 +289,16 @@ class SolanaOracle(ChainOracle):
                 congestion_pct=min(100.0, avg_fee / 100.0),
                 finality_ms=6_400,
                 timestamp=time.time(),
+                rpc_latency_ms=self.last_latency_ms,
+                uptime_pct=self._get_uptime_pct(),
             )
         except Exception as e:
             return ChainMetrics(
                 chain=self.name, gas_price_gwei=0.0,
                 block_time_ms=400, last_block=0,
                 congestion_pct=0.0, finality_ms=6_400,
-                timestamp=time.time(), stale=True, error=str(e),
+                timestamp=time.time(), rpc_latency_ms=self.last_latency_ms,
+                uptime_pct=self._get_uptime_pct(), stale=True, error=str(e),
             )
 
 
@@ -273,7 +311,7 @@ class PolygonOracle(ChainOracle):
     chain_type = "L2 Rollup"
 
     def __init__(self, rpc_url: str = None, timeout: int = 10):
-        url = rpc_url or os.getenv("POLYGON_RPC", "https://polygon-rpc.com")
+        url = rpc_url or os.getenv("POLYGON_RPC", "https://oms.polygon.technology/rpc/polygon")
         super().__init__(url, timeout)
 
     def fetch_metrics(self) -> ChainMetrics:
@@ -361,13 +399,16 @@ class PhalaOracle(ChainOracle):
                 congestion_pct=0.0,
                 finality_ms=3_000,
                 timestamp=time.time(),
+                rpc_latency_ms=self.last_latency_ms,
+                uptime_pct=self._get_uptime_pct(),
             )
         except Exception as e:
             return ChainMetrics(
                 chain=self.name, gas_price_gwei=0.5,
                 block_time_ms=3_000, last_block=0,
                 congestion_pct=0.0, finality_ms=3_000,
-                timestamp=time.time(), stale=True, error=str(e),
+                timestamp=time.time(), rpc_latency_ms=self.last_latency_ms,
+                uptime_pct=self._get_uptime_pct(), stale=True, error=str(e),
             )
 
 
@@ -449,13 +490,16 @@ class CardanoOracle(ChainOracle):
                 congestion_pct=congestion,
                 finality_ms=720_000,  # ~12 min
                 timestamp=time.time(),
+                rpc_latency_ms=self.last_latency_ms,
+                uptime_pct=self._get_uptime_pct(),
             )
         except Exception as e:
             return ChainMetrics(
                 chain=self.name, gas_price_gwei=0.17,
                 block_time_ms=20_000, last_block=0,
                 congestion_pct=0.0, finality_ms=720_000,
-                timestamp=time.time(), stale=True, error=str(e),
+                timestamp=time.time(), rpc_latency_ms=self.last_latency_ms,
+                uptime_pct=self._get_uptime_pct(), stale=True, error=str(e),
             )
 
 
@@ -489,6 +533,8 @@ class MidnightOracle(ChainOracle):
                 congestion_pct=0.0,
                 finality_ms=60_000,
                 timestamp=time.time(),
+                rpc_latency_ms=self.last_latency_ms,
+                uptime_pct=self._get_uptime_pct(),
             )
         except Exception:
             # Expected: Midnight mainnet not yet live — use spec defaults
@@ -500,6 +546,8 @@ class MidnightOracle(ChainOracle):
                 congestion_pct=0.0,
                 finality_ms=60_000,
                 timestamp=time.time(),
+                rpc_latency_ms=self.last_latency_ms,
+                uptime_pct=self._get_uptime_pct(),
                 stale=True,
                 error="Midnight mainnet not yet live — using spec defaults",
             )
@@ -554,6 +602,8 @@ class HydraOracle(ChainOracle):
                 congestion_pct=0.0,
                 finality_ms=50,           # Near-instant in state channel
                 timestamp=time.time(),
+                rpc_latency_ms=self.last_latency_ms,
+                uptime_pct=self._get_uptime_pct(),
             )
         except Exception:
             return ChainMetrics(
@@ -564,6 +614,8 @@ class HydraOracle(ChainOracle):
                 congestion_pct=0.0,
                 finality_ms=50,
                 timestamp=time.time(),
+                rpc_latency_ms=self.last_latency_ms,
+                uptime_pct=self._get_uptime_pct(),
                 stale=True,
                 error="Hydra Head not connected — using spec defaults",
             )
@@ -646,7 +698,8 @@ class OracleManager:
                 chain=chain, gas_price_gwei=0.0,
                 block_time_ms=0, last_block=0,
                 congestion_pct=0.0, finality_ms=0,
-                timestamp=time.time(), stale=True, error=str(e),
+                timestamp=time.time(), rpc_latency_ms=oracle.last_latency_ms,
+                uptime_pct=oracle._get_uptime_pct(), stale=True, error=str(e),
             )
 
         with self._lock:
@@ -690,10 +743,10 @@ class OracleManager:
         print(f"  VAMS Chain Oracle — Live Metrics (TTL: {self.ttl}s)")
         print(f"{'=' * 95}")
         print(f"  {'Chain':<12} {'Type':<20} {'Gas (Gwei)':>12} "
-              f"{'Block Time':>12} {'Block #':>12} {'Cong%':>7} "
+              f"{'Block Time':>12} {'Block #':>12} {'Cong%':>7} {'SLA%':>6} "
               f"{'Status':>8}")
         print(f"  {'-' * 12} {'-' * 20} {'-' * 12} {'-' * 12} "
-              f"{'-' * 12} {'-' * 7} {'-' * 8}")
+              f"{'-' * 12} {'-' * 7} {'-' * 6} {'-' * 8}")
 
         for name, m in metrics.items():
             oracle = self._oracles.get(name)
@@ -703,7 +756,7 @@ class OracleManager:
 
             print(f"  {m.chain:<12} {chain_type:<20} {m.gas_price_gwei:>12.4f} "
                   f"{m.block_time_ms:>10}ms {m.last_block:>12,} "
-                  f"{m.congestion_pct:>6.1f}% {status_symbol} {status}")
+                  f"{m.congestion_pct:>6.1f}% {m.uptime_pct:>5.1f}% {status_symbol} {status}")
 
         print(f"{'=' * 95}")
         print(f"  Fetched at: {time.strftime('%Y-%m-%d %H:%M:%S')}")

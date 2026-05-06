@@ -27,10 +27,10 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Status](https://img.shields.io/badge/Status-Testnet--Live-brightgreen.svg)](./REPO_STATUS_REPORT.md)
-[![Architecture](https://img.shields.io/badge/Architecture-v0.4.0-blue.svg)](./docs/team/ARCHITECTURE_v0-4-0.md)
+[![Architecture](https://img.shields.io/badge/Architecture-v0.6.0-blue.svg)](./docs/team/ARCHITECTURE_v0-6-0.md)
 [![Market](https://img.shields.io/badge/TAM-$507B-green.svg)](./docs/team/MARKET_ANALYSIS.md)
 
-**[Documentation](./REPO_STATUS_REPORT.md)** • **[Architecture](./docs/team/ARCHITECTURE_v0-4-0.md)** • **[Developer Guide](./docs/DEVELOPER_GUIDE.md)** • **[Whitepaper](./docs/team/WHITEPAPER.md)** • **[Roadmap](./REPO_STATUS_REPORT.md#6-development-roadmap)**
+**[Documentation](./REPO_STATUS_REPORT.md)** • **[Architecture](./docs/team/ARCHITECTURE_v0-6-0.md)** • **[Developer Guide](./docs/DEVELOPER_GUIDE.md)** • **[Whitepaper](./docs/team/WHITEPAPER.md)** • **[Roadmap](./REPO_STATUS_REPORT.md#6-development-roadmap)**
 
 </div>
 
@@ -54,7 +54,7 @@
 </td>
 <td width="33%" align="center">
 <h3>🔗 15+ Integrations</h3>
-<p>Polygon CDK, Cardano, Celestia, io.net</p>
+<p>Polygon CDK (OMS), Cardano, Celestia, io.net</p>
 </td>
 </tr>
 </table>
@@ -170,17 +170,17 @@ VAMS is not merely a tech stack; it is a **philosophical engine** that instantia
 
 ## 📊 Current Status
 
-**Stage:** Pre-Mainnet | **Architecture:** v0.4.0 | **Neuron:** v1.0.0-icn | **Docs:** [Changelog](./docs/CHANGELOG.md)
+**Stage:** Testnet Stage 3 | **Architecture:** v0.6.0 | **Neuron:** v1.3.0-oms | **Docs:** [Changelog](./docs/CHANGELOG.md)
 
 | Component | Progress | Description |
 |-----------|----------|-------------|
-| 📋 **Specs** | 🟢 100% | Architecture v0.4.0, Tokenomics v2.0.0, Market Analysis |
-| 📜 **Solidity Contracts** | 🟢 100% | Full V2 Suite + VAMSSentinel + Bridge contracts. **469 tests passing.** |
-| 🧠 **Cardano Contracts** | 🟢 100% | 4 Aiken validators + ICB bridge. **37 tests passing.** |
-| 🤖 **Agent Runtime** | 🟢 100% | Neuron v1.0.0-icn: Multi-DA Anchor, Service Blocks, Master Escrow |
+| 📋 **Specs** | 🟢 100% | Architecture v0.6.0 (OMS), Tokenomics v2.0.0, Market Analysis |
+| 📜 **Solidity Contracts** | 🟢 100% | Full V2 Suite + VAMSSentinel + Bridge contracts. **619 tests passing.** |
+| 🧠 **Cardano Contracts** | 🟢 100% | 4 Aiken validators + ICB bridge. **79 tests passing.** |
+| 🤖 **Agent Runtime** | 🟢 100% | Neuron v1.3.0-oms: OMS Integration (Identity, Payments, Trails) |
 | 🎨 **Frontend** | 🟢 95% | React 19 + Vite, 3D animations, Sub-1s load time |
 | 🌐 **Gateway** | 🟢 100% | FastAPI server with rate-limiting, auth, and dashboard |
-| ✅ **Tests** | 🟢 100% | **585 total tests: 469 Solidity + 37 Aiken + 79 Python** |
+| ✅ **Tests** | 🟢 100% | **754 total tests: 619 Solidity + 79 Aiken + 56 Python** |
 | 🔒 **Security** | 🟢 100% | VAMSSentinel (autonomous guardian), Slither clean, Flash loan protection |
 
 > [!IMPORTANT]
@@ -197,7 +197,7 @@ Full roadmap: [REPO_STATUS_REPORT.md](./REPO_STATUS_REPORT.md)
 | **[📋 REPO STATUS](./REPO_STATUS_REPORT.md)** | **👈 Start here.** Current stage, 24-week MVP roadmap |
 | **[🏗️ DEVELOPER GUIDE](./docs/DEVELOPER_GUIDE.md)** | Quickstart for Agent Consumers and Infra Builders |
 | **[📖 Whitepaper](./docs/team/WHITEPAPER.md)** | Academic technical overview |
-| **[🏗️ Architecture v0.4.0](./docs/team/ARCHITECTURE_v0-4-0.md)** | Deep specs: Composer, Regional DEC, Multi-DA Anchor |
+| **[🏗️ Architecture v0.6.0](./docs/team/ARCHITECTURE_v0-6-0.md)** | Deep specs: OMS Integration, Trails Transport, Stablecoin Payouts |
 | **[💰 Tokenomics](./docs/team/TOKENOMICS.md)** | $VAMS utility, burns, vesting, emissions |
 | **[🔌 API Reference](./docs/API_REFERENCE.md)** | Full Gateway REST documentation for Consumers |
 | **[📝 Changelog](./docs/CHANGELOG.md)** | Log of recent protocol upgrades (including ICN logic) |
@@ -253,7 +253,9 @@ VAMS-main/
     ├── CHANGELOG.md
     ├── DEVELOPER_GUIDE.md
     ├── API_REFERENCE.md
-    └── team/
+    ├── team/
+        ├── ARCHITECTURE_v0-6-0.md
+        ├── ARCHITECTURE_v0-5-0.md
         ├── ARCHITECTURE_v0-4-0.md
         ├── ARCHITECTURE_v0-3-0.md
         ├── WHITEPAPER.md

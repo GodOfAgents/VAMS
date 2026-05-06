@@ -64,7 +64,13 @@ class TrustAggregatorClient:
         # OFC08: Standard Web3 Initialization
         self.w3 = Web3(Web3.HTTPProvider(self.rpc_url))
         self.private_key = os.getenv("VAMS_PRIVATE_KEY")
-        self.account = self.w3.eth.account.from_key(self.private_key) if self.private_key else None
+        
+        try:
+            from .signer import SignerFactory
+            self.signer = SignerFactory.create({"private_key": self.private_key}) if self.private_key else None
+        except ImportError:
+            self.signer = None
+            self.account = self.w3.eth.account.from_key(self.private_key) if self.private_key else None
         
         # Legacy providers
         self.phala = PhalaTEE()
@@ -142,15 +148,19 @@ class TrustAggregatorClient:
             print(f"  -> Submitting {plugin_name} (weight: {result.trust_weight} bps)...")
             try:
                 # OFC08: Standard Web3 Submission Pattern
-                if self.account and self.w3.is_connected():
+                signer_to_use = getattr(self, "signer", None) or getattr(self, "account", None)
+                if signer_to_use and self.w3.is_connected():
                     # tx = contract.functions.submitPluginProof(
                     #     proof_type_id, service_hash, delivery_hash, result.proof_data
                     # ).build_transaction({
-                    #     'from': self.account.address,
-                    #     'nonce': self.w3.eth.get_transaction_count(self.account.address),
+                    #     'from': signer_to_use.address,
+                    #     'nonce': self.w3.eth.get_transaction_count(signer_to_use.address),
                     #     'gasPrice': self.w3.eth.gas_price
                     # })
-                    # signed_tx = self.w3.eth.account.sign_transaction(tx, self.private_key)
+                    # if hasattr(signer_to_use, 'sign_transaction'):
+                    #     signed_tx = signer_to_use.sign_transaction(tx)
+                    # else:
+                    #     signed_tx = signer_to_use.signTransaction(tx)
                     # tx_hash = self.w3.eth.send_raw_transaction(signed_tx.rawTransaction)
                     # receipt = self.w3.eth.wait_for_transaction_receipt(tx_hash)
                     pass

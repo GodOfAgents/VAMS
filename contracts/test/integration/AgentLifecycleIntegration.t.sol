@@ -53,7 +53,7 @@ contract AgentLifecycleIntegration is BaseTest {
         _fundAndApprove(agentOwner, address(agentRegistry), stake);
         
         vm.prank(agentOwner);
-        agentId = agentRegistry.registerAgent(publicKeyHash, stake, metadata);
+        agentId = agentRegistry.registerAgent(publicKeyHash, stake, metadata, address(0));
     }
     
     // ============ Agent Lifecycle Tests ============
@@ -268,7 +268,7 @@ contract AgentLifecycleIntegration is BaseTest {
         agentRegistry.updateTEEAttestation(agentId, newAttestation);
         
         // Verify update via agents mapping (direct access to teeAttestation)
-        (address owner, bytes32 publicKeyHash, bytes32 teeAttestation,,,,,,,) = agentRegistry.agents(agentId);
+        (address owner, bytes32 publicKeyHash, bytes32 teeAttestation,,,,,,,,) = agentRegistry.agents(agentId);
         assertEq(teeAttestation, newAttestation);
     }
     

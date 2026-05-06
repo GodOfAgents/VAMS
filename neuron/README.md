@@ -45,6 +45,10 @@ VAMS Neuron is a **real infrastructure client** that connects to decentralized n
 ## Quick Start
 
 ```bash
+# Set up environment and Postgres
+cp .env.example .env
+# Set DBOS_DB_URL in .env (or run ./scripts/setup_dbos.sh for local Docker Postgres)
+
 # Install dependencies
 pip install -r requirements.txt
 
@@ -54,6 +58,18 @@ python neuron.py --full-health
 # Run crash-proof workflow demo
 python neuron.py --demo-workflow
 ```
+
+> **Note:** The legacy SQLite-based `workflow_checkpoints.db` is now obsolete. All durable execution runs through the official DBOS SDK backed by PostgreSQL.
+
+## Workflow Engine (DBOS)
+
+The VAMS Neuron uses the official DBOS Python SDK for exactly-once, crash-safe workflow execution.
+
+Two Postgres strategies are supported:
+1. **Local Docker (Development):** Run `./scripts/setup_dbos.sh` to spin up a local PostgreSQL container.
+2. **Neon Serverless (Production):** Get a connection string from [Neon.tech](https://neon.tech) and set `DBOS_DB_URL` in your `.env`.
+
+See [docs/WORKFLOW_ENGINE.md](docs/WORKFLOW_ENGINE.md) for full setup instructions, step reference, and testing strategies.
 
 ## CLI Commands
 
@@ -129,9 +145,10 @@ python neuron.py --use-sdk                # Enable SDK mode
 neuron/
 ├── neuron.py          # Main client entry point
 ├── config.py          # Configuration & provider endpoints
+├── dbos_config.py     # Singleton DBOS init with dual Postgres strategy
 ├── providers.py       # Layer 1: Data Availability
 ├── compute.py         # Layer 2: Compute (io.net, Akash, Bittensor)
-├── workflows.py       # Layer 3: Logic + DBOS-style checkpoints
+├── workflows.py       # Layer 3: Logic + DBOS SDK workflows
 ├── trust.py           # Layer 4: TEE providers
 ├── anchoring.py       # L1 State Anchoring (Merkle roots)
 ├── request_queue.py   # Request Guarantee (retry + webhooks)
@@ -141,6 +158,8 @@ neuron/
 ├── bridge_executor.py # Cross-Chain Bridge (ICB SDK + Multi-ISM + fallback)
 ├── agent_comms.py     # Agent-to-Agent Communication (Signed Messages)
 ├── demo_cli.py        # Interactive CLI demo
+├── scripts/           # Setup scripts
+│   └── setup_dbos.sh  # Developer onboarding script for DBOS/Postgres
 ├── da/                # Multi-DA Performance Audit (Phase 0)
 ├── sentinel/          # SLA Enforcement & Benchmarks (Phase 2)
 ├── composer/          # Resource Composition Engine (Phase 3)

@@ -84,6 +84,7 @@ contract VAMSAgentRegistry is
         bytes32 latestMerkleRoot;   // Latest state commitment
         uint256 lastHeartbeat;      // Last heartbeat timestamp
         string metadata;            // IPFS/Arweave URI for metadata
+        address authorizedWallet;   // Authorized operational wallet (e.g. Session Key)
     }
     
     struct Challenge {
@@ -141,6 +142,8 @@ contract VAMSAgentRegistry is
     
     event AgentDeregistered(bytes32 indexed agentId, address indexed owner);
     
+    event AuthorizedWalletSet(bytes32 indexed agentId, address indexed wallet);
+    
     event MerkleRootSubmitted(
         bytes32 indexed agentId,
         bytes32 merkleRoot,
@@ -174,7 +177,7 @@ contract VAMSAgentRegistry is
     error ChallengeWindowNotExpired(uint256 expiresAt);
     error ChallengeNotFound();
     error ChallengeAlreadyResolved();
-    error NotAgentOwner();
+    error NotAuthorizedCaller();
     error InvalidProof();
     error ZeroAddress();
     
@@ -211,7 +214,8 @@ contract VAMSAgentRegistry is
     function registerAgent(
         bytes32 _publicKeyHash,
         uint256 _stake,
-        string calldata _metadata
+        string calldata _metadata,
+        address _authorizedWallet
     ) external nonReentrant whenNotPaused returns (bytes32 agentId) {
         if (_stake < MIN_REGISTRATION_STAKE) {
             revert InsufficientStake(MIN_REGISTRATION_STAKE, _stake);
@@ -236,7 +240,8 @@ contract VAMSAgentRegistry is
             status: AgentStatus.PENDING,
             latestMerkleRoot: bytes32(0),
             lastHeartbeat: block.timestamp,
-            metadata: _metadata
+            metadata: _metadata,
+            authorizedWallet: _authorizedWallet
         });
         
         ownerAgents[msg.sender].push(agentId);
@@ -272,7 +277,10 @@ contract VAMSAgentRegistry is
     function deregisterAgent(bytes32 _agentId) external nonReentrant {
         Agent storage agent = agents[_agentId];
         
-        if (agent.owner != msg.sender) revert NotAgentOwner();
+        // SECURITY REVIEW: Only the true owner should be able to deregister an agent.
+        // An authorized wallet (session key) is meant for operational tasks (like Merkle submissions),
+        // not lifecycle management.
+        if (agent.owner != msg.sender) revert NotAuthorizedCaller();
         if (agent.status == AgentStatus.CHALLENGED) {
             revert AgentStillPending();
         }
@@ -282,9 +290,9 @@ contract VAMSAgentRegistry is
         agent.stake = 0;
         
         // Return stake to owner
-        IERC20(vamsToken).safeTransfer(msg.sender, stakeToReturn);
+        IERC20(vamsToken).safeTransfer(agent.owner, stakeToReturn);
         
-        emit AgentDeregistered(_agentId, msg.sender);
+        emit AgentDeregistered(_agentId, agent.owner);
     }
     
     // ============ State Commitments ============
@@ -300,7 +308,7 @@ contract VAMSAgentRegistry is
     ) external nonReentrant {
         Agent storage agent = agents[_agentId];
         
-        if (agent.owner != msg.sender) revert NotAgentOwner();
+        if (agent.owner != msg.sender && agent.authorizedWallet != msg.sender) revert NotAuthorizedCaller();
         if (agent.status != AgentStatus.ACTIVE && agent.status != AgentStatus.PENDING) {
             revert AgentNotActive();
         }
@@ -329,7 +337,7 @@ contract VAMSAgentRegistry is
     ) external nonReentrant {
         Agent storage agent = agents[_agentId];
         
-        if (agent.owner != msg.sender && !hasRole(VERIFIER_ROLE, msg.sender)) revert NotAgentOwner();
+        if (agent.owner != msg.sender && agent.authorizedWallet != msg.sender && !hasRole(VERIFIER_ROLE, msg.sender)) revert NotAuthorizedCaller();
         
         agent.teeAttestation = _attestation;
         
@@ -496,6 +504,30 @@ contract VAMSAgentRegistry is
         Agent storage agent = agents[_agentId];
         if (block.timestamp >= agent.finalizedAt) return 0;
         return agent.finalizedAt - block.timestamp;
+    }
+    
+    /**
+     * @notice Set an authorized operational wallet for an agent (e.g., Session Key)
+     * @param _agentId Agent ID
+     * @param _wallet Authorized wallet address
+     */
+    function setAuthorizedWallet(bytes32 _agentId, address _wallet) external nonReentrant {
+        Agent storage agent = agents[_agentId];
+        
+        // Only the true owner can set the authorized wallet
+        if (agent.owner != msg.sender) revert NotAuthorizedCaller();
+        
+        agent.authorizedWallet = _wallet;
+        
+        emit AuthorizedWalletSet(_agentId, _wallet);
+    }
+    
+    /**
+     * @notice Check if a caller is authorized for an agent (owner or authorized wallet)
+     */
+    function isAuthorizedCaller(bytes32 _agentId, address _caller) external view returns (bool) {
+        Agent storage agent = agents[_agentId];
+        return agent.owner == _caller || (agent.authorizedWallet != address(0) && agent.authorizedWallet == _caller);
     }
     
     // ============ Admin Functions ============

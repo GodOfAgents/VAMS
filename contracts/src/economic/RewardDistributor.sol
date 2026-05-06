@@ -58,6 +58,17 @@ contract RewardDistributor is
 
     // ═══════════════════ Storage ═══════════════════
 
+    enum PayoutMode { VAMS_ONLY, STABLECOIN, HYBRID }
+
+    /// @notice Provider's preferred payout mode
+    mapping(address => PayoutMode) public payoutPreference;
+
+    /// @notice OMS Stablecoin Conversion Contract address
+    address public omsConversionContract;
+
+    event PayoutPreferenceSet(address indexed provider, PayoutMode mode);
+    event ConversionRouted(address indexed provider, uint256 amount);
+
     /// @notice VAMS token
     IERC20 public vamsToken;
 
@@ -220,8 +231,27 @@ contract RewardDistributor is
         // Reset breakdown
         delete _rewardBreakdowns[msg.sender];
 
-        // Transfer
-        vamsToken.safeTransfer(msg.sender, claimable);
+        PayoutMode mode = payoutPreference[msg.sender];
+        if (mode == PayoutMode.STABLECOIN && omsConversionContract != address(0)) {
+            vamsToken.safeTransfer(omsConversionContract, claimable);
+            (bool success, ) = omsConversionContract.call(
+                abi.encodeWithSignature("convertAndPay(address,uint256)", msg.sender, claimable)
+            );
+            require(success, "OMS conversion failed");
+            emit ConversionRouted(msg.sender, claimable);
+        } else if (mode == PayoutMode.HYBRID && omsConversionContract != address(0)) {
+            uint256 half = claimable / 2;
+            vamsToken.safeTransfer(msg.sender, claimable - half);
+            vamsToken.safeTransfer(omsConversionContract, half);
+            (bool success, ) = omsConversionContract.call(
+                abi.encodeWithSignature("convertAndPay(address,uint256)", msg.sender, half)
+            );
+            require(success, "OMS conversion failed");
+            emit ConversionRouted(msg.sender, half);
+        } else {
+            // Transfer directly
+            vamsToken.safeTransfer(msg.sender, claimable);
+        }
 
         emit RewardsClaimed(msg.sender, claimable, currentEpoch);
     }
@@ -282,6 +312,19 @@ contract RewardDistributor is
     /// @param _staking New staking contract address
     function setStakingContract(address _staking) external onlyRole(DEFAULT_ADMIN_ROLE) {
         stakingContract = _staking;
+    }
+
+    /// @notice Update the OMS conversion contract
+    /// @param _contract New OMS conversion contract address
+    function setOMSConversionContract(address _contract) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        omsConversionContract = _contract;
+    }
+
+    /// @notice Set payout preference for the caller
+    /// @param mode Payout mode preference
+    function setPayoutPreference(PayoutMode mode) external {
+        payoutPreference[msg.sender] = mode;
+        emit PayoutPreferenceSet(msg.sender, mode);
     }
 
     /// @notice Emergency withdrawal of stuck tokens

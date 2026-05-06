@@ -4,7 +4,7 @@
 
 VAMS Neuron is a **real infrastructure client** for the Verifiable and Agentic Modular Stack. It monitors and connects to decentralized networks across four architectural layers to enable "Immortal Agents" - AI agents with:
 
-- **Crash-proof execution** via DBOS-style checkpointing
+- **Crash-proof execution** via DBOS SDK (PostgreSQL)
 - **Decentralized compute** from io.net, Akash, Render, Bittensor
 - **Persistent memory** on Arweave/WeaveDB
 - **TEE attestation** from Phala, Marlin, Automata
@@ -326,43 +326,52 @@ health = check_all_tee_health()
 
 ## Crash-Proof Workflows
 
-The neuron includes DBOS-style workflow checkpointing for crash-proof execution:
+The neuron integrates the official DBOS Python SDK to provide exactly-once, crash-safe workflow execution backed by PostgreSQL.
 
 ```python
-from workflows import VamsWorkflow, checkpoint
+from dbos import DBOS
+from workflows import step_gather_data, step_run_inference
 
-class MyWorkflow(VamsWorkflow):
-    @checkpoint("gather")
-    def step_gather(self):
-        return fetch_data()
+@DBOS.workflow()
+def vams_data_pipeline(workflow_id: str):
+    # Step 1: Gather data (exactly-once)
+    data = DBOS.step(step_gather_data)
     
-    @checkpoint("process")
-    def step_process(self, data):
-        return process(data)
+    # Step 2: Run inference (exactly-once)
+    result = DBOS.step(step_run_inference, data)
+    
+    return result
+
+# Execute idempotently
+DBOS.set_workflow_id(workflow_id)
+result = vams_data_pipeline(workflow_id)
 ```
+
+See [docs/WORKFLOW_ENGINE.md](docs/WORKFLOW_ENGINE.md) for complete details on setting up Postgres and writing durable steps.
 
 ### Demo
 ```bash
+# Setup Postgres first (see README)
 python neuron.py --demo-workflow
 ```
 
 Output:
 ```
-[WORKFLOW] Starting: DataPipeline (ID: demo_1706424025)
+[WORKFLOW] Starting: DataPipeline (ID: demo_workflow_id)
 
   [1/4] Gather Data......
-  [1/4] Gather Data...... [CHECKPOINT]
+  [1/4] Gather Data...... [DONE]
   [2/4] Run Inference......
-  [2/4] Run Inference...... [CHECKPOINT]
+  [2/4] Run Inference...... [DONE]
   -- Simulated crash! --
 
 [WORKFLOW] Restarting after crash...
 
   [RECOVERY] Resuming from step 3: run_inference
   [3/4] Execute Action......
-  [3/4] Execute Action...... [CHECKPOINT]
+  [3/4] Execute Action...... [DONE]
   [4/4] Report Result......
-  [4/4] Report Result...... [CHECKPOINT]
+  [4/4] Report Result...... [DONE]
   [COMPLETE] Workflow finished successfully!
 ```
 
@@ -651,7 +660,6 @@ tx_hash = client.submit_checkpoint(
 |------|-------------|
 | `node_identity.pem` | ECDSA private key (Secp256k1) - **Keep safe!** |
 | `neuron_data.db` | SQLite database with heartbeats and metrics |
-| `workflow_checkpoints.db` | Workflow checkpoint storage |
 
 ---
 
@@ -687,8 +695,8 @@ tx_hash = client.submit_checkpoint(
 │  ┌─────────────────────────────────────────────────────────────────┐│
 │  │                    LAYER 3: LOGIC                                ││
 │  │  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────────────┐    ││
-│  │  │   Kwil   │ │ WeaveDB  │ │ Glacier  │ │ DBOS Checkpoints │    ││
-│  │  │  (SQL)   │ │ (Arweave)│ │(Vector)  │ │ (Crash-Proof)    │    ││
+│  │  │   Kwil   │ │ WeaveDB  │ │ Glacier  │ │   DBOS SDK     │    │
+│  │  │  (SQL)   │ │ (Arweave)│ │(Vector)  │ │ (PostgreSQL)   │    ││
 │  │  └──────────┘ └──────────┘ └──────────┘ └──────────────────┘    ││
 │  └─────────────────────────────────────────────────────────────────┘│
 │                                                                       │

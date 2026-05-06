@@ -8,7 +8,7 @@ Updated 2026-02-07 - Bound to Polygon Amoy Testnet.
 import os
 
 # Version
-VERSION = "v1.0.0-amoy"
+VERSION = "v1.3.0-oms"
 
 # VAMS Gateway (Optional - for connected mode)
 VAMS_GATEWAY = os.getenv("VAMS_GATEWAY", "http://localhost:8000")
@@ -273,6 +273,25 @@ BRIDGE_SECONDARY_TIMEOUT_MS = int(os.getenv("VAMS_BRIDGE_SECONDARY_TIMEOUT", "60
 
 # MEV Protection (Section 20.4.3)
 MEV_BATCH_WINDOW_MS = int(os.getenv("VAMS_MEV_BATCH_WINDOW", "500"))              # Batch auction window
+
+# =============================================================================
+# POLYGON OPEN MONEY STACK (OMS) CONFIGURATION
+# =============================================================================
+# Architecture v0.6.0 - Institutional Identity & Stablecoin Payments
+
+OMS_IDENTITY_API = os.getenv("OMS_IDENTITY_API", "https://api.oms.polygon.technology/v1/identity")
+OMS_API_KEY = os.getenv("OMS_API_KEY", "")
+SEQUENCE_PROJECT_KEY = os.getenv("SEQUENCE_PROJECT_KEY", "")
+
+# Enterprise RPC (Section 2.1)
+VAMS_ENTERPRISE_RPC = os.getenv("VAMS_ENTERPRISE_RPC", AMOY_CONFIG["rpc"])
+VAMS_RPC_FAILOVER_TIMEOUT = int(os.getenv("VAMS_RPC_FAILOVER_TIMEOUT", "5000")) # ms
+
+# Stablecoin Payouts (Section 2.3)
+STABLECOIN_CONFIG = {
+    "USDC": os.getenv("VAMS_USDC_ADDRESS", "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174"), # Polygon USDC
+    "USDT": os.getenv("VAMS_USDT_ADDRESS", "0xc2132D05D31c914a87C6611C10748AEb04B58e8F")  # Polygon USDT
+}
 
 # =============================================================================
 
