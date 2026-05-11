@@ -298,25 +298,16 @@ contract VAMSTrustAggregator is
         bytes calldata proofData, 
         address /* agent */
     ) internal view returns (bool) {
-        if (proofData.length == 0) return false;
+        if (proofData.length < 64) return false;
 
-        // --- A. IDENTITY ---
-        if (proofType == ProofType.ERC8004_IDENTITY) return true;
-        if (proofType == ProofType.COINBASE_WALLET) return true;
-        if (proofType == ProofType.POLYGON_ID) return true;
+        bytes32 pTypeBytes = bytes32(uint256(proofType));
+        IVAMSProofPlugin plugin = _proofPlugins[pTypeBytes];
+        
+        if (address(plugin) == address(0)) {
+            return false;
+        }
 
-        // --- B. VERIFICATION ---
-        if (proofType == ProofType.PARALLEL_RESEARCH) return true;
-        if (proofType == ProofType.PHALA_EXECUTION) return true;
-        if (proofType == ProofType.SXT_SQL_PROOF) return true;
-        if (proofType == ProofType.MCP_CONNECTION) return true;
-
-        // --- C. REPUTATION ---
-        if (proofType == ProofType.SPECTRAL_CREDIT) return true;
-        if (proofType == ProofType.AUTONOLAS_CONSENSUS) return true;
-        if (proofType == ProofType.WORLD_ID_HUMAN) return true;
-
-        return true;
+        return plugin.verify(bytes32(0), bytes32(0), proofData);
     }
 
     // --- Admin ---

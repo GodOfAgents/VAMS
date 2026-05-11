@@ -10,6 +10,17 @@ import {OutputHashProofPlugin} from "../src/trust/plugins/OutputHashProofPlugin.
 import {ERC8004IdentityPlugin} from "../src/trust/plugins/ERC8004IdentityPlugin.sol";
 import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
+contract MockLegacyPlugin is IVAMSProofPlugin {
+    bytes32 private _type;
+    constructor(bytes32 t) { _type = t; }
+    function proofType() external view override returns (bytes32) { return _type; }
+    function verify(bytes32, bytes32, bytes calldata proofData) external pure override returns (bool) {
+        return proofData.length >= 64;
+    }
+    function trustWeight() external pure override returns (uint256) { return 1000; }
+    function name() external pure override returns (string memory) { return "Mock Legacy"; }
+}
+
 contract VAMSTrustAggregatorTest is Test {
     VAMSTrustAggregator public aggregator;
     TEEProofPlugin public teePlugin;
@@ -37,6 +48,12 @@ contract VAMSTrustAggregatorTest is Test {
         teePlugin = new TEEProofPlugin(owner);
         outputHashPlugin = new OutputHashProofPlugin(owner);
         identityPlugin = new ERC8004IdentityPlugin(address(0x789));
+
+        aggregator.registerProofPlugin(new MockLegacyPlugin(bytes32(uint256(IVAMSTrustAggregator.ProofType.ERC8004_IDENTITY))));
+        aggregator.registerProofPlugin(new MockLegacyPlugin(bytes32(uint256(IVAMSTrustAggregator.ProofType.POLYGON_ID))));
+        aggregator.registerProofPlugin(new MockLegacyPlugin(bytes32(uint256(IVAMSTrustAggregator.ProofType.COINBASE_WALLET))));
+        aggregator.registerProofPlugin(new MockLegacyPlugin(bytes32(uint256(IVAMSTrustAggregator.ProofType.PARALLEL_RESEARCH))));
+        aggregator.registerProofPlugin(new MockLegacyPlugin(bytes32(uint256(IVAMSTrustAggregator.ProofType.PHALA_EXECUTION))));
     }
 
     // ============================================================
@@ -50,7 +67,7 @@ contract VAMSTrustAggregatorTest is Test {
 
     function test_SubmitIdentityProof_UpdatesTier() public {
         vm.startPrank(agent);
-        aggregator.submitProof(IVAMSTrustAggregator.ProofType.ERC8004_IDENTITY, hex"1234");
+        aggregator.submitProof(IVAMSTrustAggregator.ProofType.ERC8004_IDENTITY, new bytes(64));
         IVAMSTrustAggregator.TrustTier tier = aggregator.getAgentTier(agent);
         assertEq(uint(tier), uint(IVAMSTrustAggregator.TrustTier.BRONZE));
         vm.stopPrank();
@@ -58,8 +75,8 @@ contract VAMSTrustAggregatorTest is Test {
 
     function test_AggregateProofs_ReachesSilver() public {
         vm.startPrank(agent);
-        aggregator.submitProof(IVAMSTrustAggregator.ProofType.ERC8004_IDENTITY, hex"11");
-        aggregator.submitProof(IVAMSTrustAggregator.ProofType.POLYGON_ID, hex"22");
+        aggregator.submitProof(IVAMSTrustAggregator.ProofType.ERC8004_IDENTITY, new bytes(64));
+        aggregator.submitProof(IVAMSTrustAggregator.ProofType.POLYGON_ID, new bytes(64));
         IVAMSTrustAggregator.TrustTier tier = aggregator.getAgentTier(agent);
         assertEq(uint(tier), uint(IVAMSTrustAggregator.TrustTier.SILVER));
         vm.stopPrank();
@@ -67,9 +84,9 @@ contract VAMSTrustAggregatorTest is Test {
 
     function test_AggregateProofs_ReachesGold() public {
         vm.startPrank(agent);
-        aggregator.submitProof(IVAMSTrustAggregator.ProofType.COINBASE_WALLET, hex"AA"); 
-        aggregator.submitProof(IVAMSTrustAggregator.ProofType.PARALLEL_RESEARCH, hex"BB");
-        aggregator.submitProof(IVAMSTrustAggregator.ProofType.PHALA_EXECUTION, hex"CC");
+        aggregator.submitProof(IVAMSTrustAggregator.ProofType.COINBASE_WALLET, new bytes(64)); 
+        aggregator.submitProof(IVAMSTrustAggregator.ProofType.PARALLEL_RESEARCH, new bytes(64));
+        aggregator.submitProof(IVAMSTrustAggregator.ProofType.PHALA_EXECUTION, new bytes(64));
         IVAMSTrustAggregator.TrustTier tier = aggregator.getAgentTier(agent);
         assertEq(uint(tier), uint(IVAMSTrustAggregator.TrustTier.GOLD));
         vm.stopPrank();
@@ -77,9 +94,9 @@ contract VAMSTrustAggregatorTest is Test {
 
     function test_CannotSubmitSameProofTwice() public {
         vm.startPrank(agent);
-        aggregator.submitProof(IVAMSTrustAggregator.ProofType.ERC8004_IDENTITY, hex"11");
+        aggregator.submitProof(IVAMSTrustAggregator.ProofType.ERC8004_IDENTITY, new bytes(64));
         uint256 score1 = aggregator.getAgentScore(agent);
-        aggregator.submitProof(IVAMSTrustAggregator.ProofType.ERC8004_IDENTITY, hex"11");
+        aggregator.submitProof(IVAMSTrustAggregator.ProofType.ERC8004_IDENTITY, new bytes(64));
         uint256 score2 = aggregator.getAgentScore(agent);
         assertEq(score1, score2);
         vm.stopPrank();
@@ -148,7 +165,7 @@ contract VAMSTrustAggregatorTest is Test {
         bytes32 deliveryHash = keccak256("delivery");
 
         // Create valid attestation proof data
-        bytes memory sgxQuote = hex"0300AABBCCDD";
+        bytes memory sgxQuote = abi.encodePacked(serviceHash, deliveryHash);
         bytes memory proofData = abi.encode(
             sgxQuote,
             testEnclave,
@@ -180,7 +197,7 @@ contract VAMSTrustAggregatorTest is Test {
         bytes32 deliveryHash = keccak256("delivery");
 
         bytes memory proofData = abi.encode(
-            hex"0300AABBCCDD",
+            abi.encodePacked(serviceHash, deliveryHash),
             testEnclave,
             bytes32(0),
             agent
@@ -205,7 +222,7 @@ contract VAMSTrustAggregatorTest is Test {
             fakeType,
             bytes32(0),
             bytes32(0),
-            hex"1234"
+            new bytes(64)
         );
     }
 
@@ -224,7 +241,7 @@ contract VAMSTrustAggregatorTest is Test {
 
         // Submit TEE proof (25 points)
         bytes memory teeProofData = abi.encode(
-            hex"0300AABB",
+            abi.encodePacked(serviceHash, deliveryHash),
             testEnclave,
             bytes32(0),
             agent
@@ -252,7 +269,7 @@ contract VAMSTrustAggregatorTest is Test {
         bytes32 deliveryHash = keccak256("delivery");
 
         bytes memory proofData = abi.encode(
-            hex"0300AABBCCDD",
+            abi.encodePacked(serviceHash, deliveryHash),
             testEnclave,
             bytes32(0),
             agent
@@ -278,13 +295,13 @@ contract VAMSTrustAggregatorTest is Test {
         vm.startPrank(agent);
 
         // Submit legacy proof (ERC8004 = 10 points)
-        aggregator.submitProof(IVAMSTrustAggregator.ProofType.ERC8004_IDENTITY, hex"1234");
+        aggregator.submitProof(IVAMSTrustAggregator.ProofType.ERC8004_IDENTITY, new bytes(64));
         uint256 score1 = aggregator.getAgentScore(agent);
         assertEq(score1, 10);
 
         // Submit plugin proof (TEE = 25 points)
         bytes memory proofData = abi.encode(
-            hex"0300AABB",
+            abi.encodePacked(keccak256("svc"), keccak256("dlv")),
             testEnclave,
             bytes32(0),
             agent
@@ -309,16 +326,16 @@ contract VAMSTrustAggregatorTest is Test {
     // ============================================================
 
     function test_GetRegisteredPluginCount() public {
-        assertEq(aggregator.getRegisteredPluginCount(), 0);
+        assertEq(aggregator.getRegisteredPluginCount(), 5);
         
         aggregator.registerProofPlugin(teePlugin);
-        assertEq(aggregator.getRegisteredPluginCount(), 1);
+        assertEq(aggregator.getRegisteredPluginCount(), 6);
         
         aggregator.registerProofPlugin(outputHashPlugin);
-        assertEq(aggregator.getRegisteredPluginCount(), 2);
+        assertEq(aggregator.getRegisteredPluginCount(), 7);
         
         aggregator.deregisterProofPlugin(teePlugin.proofType());
-        assertEq(aggregator.getRegisteredPluginCount(), 1);
+        assertEq(aggregator.getRegisteredPluginCount(), 6);
     }
 
     function test_HasPluginProof() public {
@@ -329,7 +346,7 @@ contract VAMSTrustAggregatorTest is Test {
         bytes32 pType = teePlugin.proofType();
         assertFalse(aggregator.hasPluginProof(agent, pType));
 
-        bytes memory proofData = abi.encode(hex"0300AA", testEnclave, bytes32(0), agent);
+        bytes memory proofData = abi.encode(abi.encodePacked(keccak256("s"), keccak256("d")), testEnclave, bytes32(0), agent);
         vm.prank(agent);
         aggregator.submitPluginProof(pType, keccak256("s"), keccak256("d"), proofData);
 

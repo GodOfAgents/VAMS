@@ -153,7 +153,7 @@ contract CommitRevealOracle is AccessControl {
         }
 
         // Check if any value has enough votes to pass the consensus threshold
-        uint256 requiredVotes = (totalReveals * config.consensusThreshold) / 10000;
+        uint256 requiredVotes = (totalReveals * config.consensusThreshold + 9999) / 10000;
         if (requiredVotes == 0) requiredVotes = 1;
 
         for (uint256 i = 0; i < totalReveals; i++) {
