@@ -126,7 +126,6 @@ contract SLAEnforcer is Initializable, AccessControlUpgradeable, ReentrancyGuard
 
         // 5. Enforce SLA Rules (auto-slashing logic)
         if (report.metricsScore < MIN_SLA_SCORE_BPS) {
-            uint256 penaltyBps = 0;
             VAMSSlasher.OffenseType oType;
             
             if (report.metricsScore == 0) {
@@ -143,7 +142,8 @@ contract SLAEnforcer is Initializable, AccessControlUpgradeable, ReentrancyGuard
             emit SLAViolationReported(report.nodeId, node.provider, report.challengeType, report.metricsScore);
             
             // Execute programmable slash
-            try slasher.slashSLA(node.provider, oType, penaltyBps) returns (VAMSSlasher.SlashResult memory res) {
+            // Pass 0 to delegate penalty BPS lookup to VAMSSlasher.SlashingParameters defaults
+            try slasher.slashSLA(node.provider, oType, 0) returns (VAMSSlasher.SlashResult memory res) {
                 emit SLAPenaltyEnforced(report.nodeId, node.provider, res.slashAmount);
             } catch Error(string memory reason) {
                 // AUDIT FIX INTG04: Emit failure event and queue for retry

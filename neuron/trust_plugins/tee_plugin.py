@@ -9,6 +9,8 @@ import time
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Optional, Dict, Any
+from web3 import Web3
+from eth_abi import encode
 
 
 @dataclass
@@ -68,7 +70,7 @@ class TEEProofPlugin(BaseProofPlugin):
     attestation into the standardized VAMS proof plugin format.
     """
 
-    PROOF_TYPE_ID = hashlib.sha3_256(b"PHALA_EXECUTION").digest()
+    PROOF_TYPE_ID = Web3.keccak(text="PHALA_EXECUTION")
 
     def __init__(self, tee_provider: str = "phala"):
         self.tee_provider = tee_provider
@@ -152,5 +154,6 @@ class TEEProofPlugin(BaseProofPlugin):
         attested_agent: bytes,
     ) -> bytes:
         """ABI-encode attestation data matching the Solidity TEEAttestation struct."""
-        # Simplified encoding — in production use eth_abi
-        return sgx_quote + mrenclave + mrsigner + attested_agent
+        # Using eth_abi for proper ABI encoding
+        return encode(['bytes', 'bytes32', 'bytes32', 'address'],
+                      [sgx_quote, mrenclave, mrsigner, attested_agent])

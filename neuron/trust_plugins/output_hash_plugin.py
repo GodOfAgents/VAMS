@@ -8,6 +8,8 @@ Lowest trust level — no execution guarantee.
 import hashlib
 import time
 from typing import Optional, Dict, Any
+from web3 import Web3
+from eth_abi import encode
 
 from .tee_plugin import BaseProofPlugin, ProofResult
 
@@ -20,7 +22,7 @@ class OutputHashProofPlugin(BaseProofPlugin):
     by signing it with their private key. Lowest-trust proof type.
     """
 
-    PROOF_TYPE_ID = hashlib.sha3_256(b"OUTPUT_HASH").digest()
+    PROOF_TYPE_ID = Web3.keccak(text="OUTPUT_HASH")
 
     def proof_type(self) -> bytes:
         return self.PROOF_TYPE_ID
@@ -85,4 +87,5 @@ class OutputHashProofPlugin(BaseProofPlugin):
         provider: bytes,
     ) -> bytes:
         """ABI-encode matching the Solidity OutputHashAttestation struct."""
-        return output_hash + signature + provider
+        return encode(['bytes32', 'bytes', 'address'],
+                      [output_hash, signature, provider])

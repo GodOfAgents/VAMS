@@ -8,6 +8,8 @@ import hashlib
 import time
 from dataclasses import dataclass
 from typing import Optional, Dict, Any
+from web3 import Web3
+from eth_abi import encode
 
 from .tee_plugin import BaseProofPlugin, ProofResult
 
@@ -20,7 +22,7 @@ class ZKMLProofPlugin(BaseProofPlugin):
     Integration points: EZKL, Modulus Labs, or custom ZK circuits.
     """
 
-    PROOF_TYPE_ID = hashlib.sha3_256(b"ZKML_VERIFICATION").digest()
+    PROOF_TYPE_ID = Web3.keccak(text="ZKML_VERIFICATION")
 
     def __init__(self, verifier_endpoint: Optional[str] = None):
         self.verifier_endpoint = verifier_endpoint
@@ -95,4 +97,5 @@ class ZKMLProofPlugin(BaseProofPlugin):
         public_inputs: bytes,
     ) -> bytes:
         """ABI-encode ZKML proof matching the Solidity ZKMLProof struct."""
-        return proof + model_hash + input_hash + output_hash + public_inputs
+        return encode(['bytes', 'bytes32', 'bytes32', 'bytes32', 'bytes'],
+                      [proof, model_hash, input_hash, output_hash, public_inputs])

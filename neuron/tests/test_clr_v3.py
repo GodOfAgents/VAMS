@@ -285,6 +285,111 @@ def test_multi_ism_threshold():
     print(f"  [PASS] Multi-ISM: {sum(1 for r in results if r.verified)}/3 verified")
 
 
+def test_bridge_executor_trails_polygon():
+    """Polygon route uses Trails as primary transport (v0.6.0)."""
+    from bridge_executor import BridgeExecutor, BridgeStatus, BridgeTransport, TRANSPORT_MATRIX
+    # Verify the route configuration first
+    route = TRANSPORT_MATRIX.get("VAMS_L3->Polygon")
+    assert route is not None, "VAMS_L3->Polygon route must exist"
+    assert route.primary_transport == BridgeTransport.TRAILS, (
+        f"Expected Trails as primary transport, got {route.primary_transport}"
+    )
+    assert route.secondary_transport == BridgeTransport.AGGLAYER, (
+        "Expected AggLayer as fallback transport"
+    )
+    # Execute and verify result
+    executor = BridgeExecutor(mock_mode=True)
+    result = executor.execute("Polygon", b"test_polygon_tx")
+    assert result.status == BridgeStatus.VERIFIED, f"Expected VERIFIED, got {result.status}"
+    assert result.transport_used == BridgeTransport.TRAILS
+    assert result.ism_verified == True  # Trails handles ISM natively
+    assert result.tx_hash.startswith("0x")
+    print(f"  [PASS] Bridge->Polygon: {result.transport_used.value}, tx={result.tx_hash}")
+
+
+# ─────────────────────────────────────────────────────────────────
+# 4. P3 OMS Institutional Compliance Gate (v0.6.0)
+# ─────────────────────────────────────────────────────────────────
+
+def test_p3_verified_address_passes():
+    """P3: OMS-verified address (0x99...) routes successfully to Polygon KYC."""
+    from clr_router import CLRouter, TransactionIntent, TrustTier, RoutingPriority
+    router = CLRouter()
+    # Address starting with 0x99 is treated as verified by OMSIdentityVerifier mock
+    verified_address = "0x99aabbccddeeff001122334455667788990011aa"
+    intent = TransactionIntent(
+        value_usd=5000, max_latency_ms=30000,
+        requires_privacy=False,
+        requires_institutional_compliance=True,
+        agent_address=verified_address,
+    )
+    d = router.route(intent, TrustTier.PLATINUM)
+    assert d.chain == "Polygon", f"Expected Polygon KYC, got {d.chain}"
+    assert d.priority == RoutingPriority.P3_INSTITUTIONAL_COMPLIANCE
+    assert "KYC" in d.reason
+    print(f"  [PASS] P3 Verified -> {d.chain} ({d.target_bridge})")
+
+
+def test_p3_unverified_address_blocked():
+    """P3 fail-closed: Unverified address raises PermissionError."""
+    from clr_router import CLRouter, TransactionIntent, TrustTier
+    router = CLRouter()
+    # Non-0x99 address: treated as unverified
+    unverified_address = "0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef"
+    intent = TransactionIntent(
+        value_usd=5000, max_latency_ms=30000,
+        requires_privacy=False,
+        requires_institutional_compliance=True,
+        agent_address=unverified_address,
+    )
+    try:
+        router.route(intent, TrustTier.PLATINUM)
+        assert False, "Should have raised PermissionError for unverified address"
+    except PermissionError as e:
+        assert "OMS verified identity" in str(e), f"Unexpected error: {e}"
+        print(f"  [PASS] P3 unverified blocked: {str(e)[:70]}...")
+
+
+def test_p3_missing_address_blocked():
+    """P3 fail-closed: Empty agent_address is rejected by the OMS identity gate."""
+    from clr_router import CLRouter, TransactionIntent, TrustTier
+    router = CLRouter()
+    # Must use PLATINUM tier to pass CLR Rule 4 and reach the OMS gate.
+    # TrustTier.GOLD would be rejected earlier by _check_permissions with a
+    # different error: "Institutional compliance routing requires PLATINUM Tier."
+    intent = TransactionIntent(
+        value_usd=1000, max_latency_ms=30000,
+        requires_privacy=False,
+        requires_institutional_compliance=True,
+        agent_address="",  # No address supplied — OMS.is_verified("") == False
+    )
+    try:
+        router.route(intent, TrustTier.PLATINUM)
+        assert False, "Should have raised PermissionError for empty agent_address"
+    except PermissionError as e:
+        assert "OMS verified identity" in str(e), f"Unexpected error: {e}"
+        print(f"  [PASS] P3 missing address blocked: {str(e)[:70]}...")
+
+
+def test_p3_stats_incremented_on_denial():
+    """P3 denial increments the 'denied' routing stat."""
+    from clr_router import CLRouter, TransactionIntent, TrustTier
+    router = CLRouter()
+    intent = TransactionIntent(
+        value_usd=1000, max_latency_ms=30000,
+        requires_privacy=False,
+        requires_institutional_compliance=True,
+        agent_address="0xbadaddress",
+    )
+    initial_denied = router.get_stats()["denied"]
+    try:
+        router.route(intent, TrustTier.GOLD)
+    except PermissionError:
+        pass
+    assert router.get_stats()["denied"] == initial_denied + 1
+    print(f"  [PASS] P3 denial increments stats (denied={router.get_stats()['denied']})")
+
+
 # ─────────────────────────────────────────────────────────────────
 # Runner
 # ─────────────────────────────────────────────────────────────────
@@ -318,8 +423,15 @@ def main():
             test_icb_nonce_replay,
             test_bridge_executor_cardano,
             test_bridge_executor_solana_ism,
+            test_bridge_executor_trails_polygon,
             test_bridge_fallback,
             test_multi_ism_threshold,
+        ]),
+        ("P3: OMS Institutional Compliance Gate (v0.6.0)", [
+            test_p3_verified_address_passes,
+            test_p3_unverified_address_blocked,
+            test_p3_missing_address_blocked,
+            test_p3_stats_incremented_on_denial,
         ]),
     ]
 

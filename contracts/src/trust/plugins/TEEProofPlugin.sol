@@ -73,9 +73,10 @@ contract TEEProofPlugin is IVAMSProofPlugin {
         bytes32 expectedBinding = keccak256(abi.encodePacked(serviceHash, deliveryHash));
         bytes32 quoteBinding = keccak256(sgxQuote);
         
-        // Quote must be deterministically linked to the service/delivery
-        // In production, this extracts report_data from the quote and compares
-        if (quoteBinding == bytes32(0)) return false;
+        // Commitment: the quote must have been generated FOR this specific service/delivery pair.
+        // Full Automata DCAP verification extracts report_data from the raw quote.
+        // For Phase 1: use a deterministic hash commitment.
+        if (quoteBinding != expectedBinding) return false;
 
         return true;
     }
