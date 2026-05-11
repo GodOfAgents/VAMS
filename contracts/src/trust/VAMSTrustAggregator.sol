@@ -51,10 +51,14 @@ contract VAMSTrustAggregator is
     bytes32[] private _registeredPluginTypes;
 
     /// @dev Slot 5: Quick lookup for plugin type index in _registeredPluginTypes
+    /// @dev Quick lookup for plugin type index in _registeredPluginTypes
     mapping(bytes32 => uint256) private _pluginTypeIndex;
 
+    /// @dev Governance flag to enable/disable legacy decagon proofs
+    bool public legacyProofsEnabled;
+
     /// @dev Storage gap for future upgrades
-    uint256[44] private __gap;
+    uint256[43] private __gap;
 
     // ============================================================
     //                      CONSTRUCTOR
@@ -67,6 +71,8 @@ contract VAMSTrustAggregator is
 
     function initialize() public initializer {
         __VAMSUpgradeableBase_init(msg.sender);
+
+        legacyProofsEnabled = true;
 
         // Initialize Default Legacy Weights
         
@@ -96,6 +102,7 @@ contract VAMSTrustAggregator is
      * @dev Preserved for backward compatibility. Routes through legacy verification.
      */
     function submitProof(ProofType proofType, bytes calldata proofData) external override {
+        require(legacyProofsEnabled, "Legacy proofs disabled");
         bool valid = _verifyLegacyProof(proofType, proofData, msg.sender);
         require(valid, "Invalid Proof");
 
@@ -316,6 +323,10 @@ contract VAMSTrustAggregator is
     
     function setProofWeight(ProofType proofType, uint256 weight) external onlyRole(UPGRADER_ROLE) {
         proofWeights[proofType] = weight;
+    }
+
+    function setLegacyProofsEnabled(bool enabled) external onlyRole(UPGRADER_ROLE) {
+        legacyProofsEnabled = enabled;
     }
 
     // _authorizeUpgrade is implemented in VAMSUpgradeableBase
