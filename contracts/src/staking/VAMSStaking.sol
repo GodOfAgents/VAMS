@@ -307,9 +307,12 @@ contract VAMSStaking is IVAMSStaking, AccessControl, Pausable, ReentrancyGuard {
     /// @inheritdoc IVAMSStaking
     function claimRewards() external override nonReentrant returns (uint256 amount) {
         _updatePool();
-        amount = _harvestRewards(msg.sender);
+        amount = _previewHarvest(msg.sender);
 
         if (amount == 0) revert NothingToClaim();
+        
+        _validateBudget(amount);
+        amount = _harvestRewards(msg.sender);
 
         // MINT rewards instead of transferring
         _mintRewards_internal(msg.sender, amount);
@@ -320,9 +323,12 @@ contract VAMSStaking is IVAMSStaking, AccessControl, Pausable, ReentrancyGuard {
     /// @inheritdoc IVAMSStaking
     function compoundRewards() external override nonReentrant whenNotPaused returns (uint256 amount) {
         _updatePool();
-        amount = _harvestRewards(msg.sender);
+        amount = _previewHarvest(msg.sender);
 
         if (amount == 0) revert NothingToClaim();
+        
+        _validateBudget(amount);
+        amount = _harvestRewards(msg.sender);
 
         StakeInfo storage info = _stakes[msg.sender];
         StakingTier oldTier = _getTier(info.amount);
@@ -552,6 +558,43 @@ contract VAMSStaking is IVAMSStaking, AccessControl, Pausable, ReentrancyGuard {
         harvested = info.pendingRewards + pending;
         info.pendingRewards = 0;
         info.rewardDebt = (info.amount * accRewardPerShare) / PRECISION;
+    }
+
+    /**
+     * @notice Preview harvest rewards for user without mutating state
+     */
+    function _previewHarvest(address user) internal view returns (uint256) {
+        StakeInfo storage info = _stakes[user];
+        if (info.amount == 0) return info.pendingRewards;
+
+        uint256 pending = (info.amount * accRewardPerShare) / PRECISION - info.rewardDebt;
+        
+        // Apply tier and lock multipliers
+        StakingTier tier = _getTier(info.amount);
+        uint256 apyBps = _getBaseAPY(tier);
+        uint256 lockMult = _getLockMultiplier(info.lockPeriod);
+        
+        pending = (pending * apyBps * lockMult) / (APY_SILVER * BPS_DENOMINATOR);
+
+        return info.pendingRewards + pending;
+    }
+
+    /**
+     * @notice Validates the emission budget without mutating state
+     */
+    function _validateBudget(uint256 amount) internal view {
+        if (amount == 0) return;
+        
+        uint256 currentMintYearStart_ = currentMintYearStart;
+        uint256 annualMintedTokens_ = annualMintedTokens;
+
+        if (block.timestamp >= currentMintYearStart_ + SECONDS_PER_YEAR) {
+            annualMintedTokens_ = 0;
+        }
+
+        if (annualMintedTokens_ + amount > annualEmissionBudget) {
+            revert IVAMSStaking.EmissionBudgetExceeded(amount, annualEmissionBudget >= annualMintedTokens_ ? annualEmissionBudget - annualMintedTokens_ : 0);
+        }
     }
 
     /**
