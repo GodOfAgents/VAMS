@@ -26,7 +26,7 @@
 **Unified Infrastructure Layer | Autonomous AI Agents | Zero Friction**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Status](https://img.shields.io/badge/Status-Testnet--Live-brightgreen.svg)](./REPO_STATUS_REPORT.md)
+[![Status](https://img.shields.io/badge/Status-PreTestnet--Hardning-orange.svg)](./REPO_STATUS_REPORT.md)
 [![Architecture](https://img.shields.io/badge/Architecture-v0.6.0-blue.svg)](./docs/team/ARCHITECTURE_v0-6-0.md)
 [![Release](https://img.shields.io/badge/Release-v1.3.0--oms-purple.svg)](./docs/CHANGELOG.md)
 [![Market](https://img.shields.io/badge/TAM-$507B-green.svg)](./docs/team/MARKET_ANALYSIS.md)
