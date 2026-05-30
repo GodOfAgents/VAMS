@@ -8,7 +8,7 @@
 ║  LinkedIn: https://www.linkedin.com/in/aseemchishti                           ║
 ║                                                                               ║
 ║  SHA-256 Fingerprint: E4B7A9...[UPDATED_BY_VAMS_PROTOCOL]...D2F8A7D9            ║
-║  Timestamp: 2026-02-17T00:00:26+05:30 (ISO 8601)                              ║
+║  Timestamp: 2026-05-27T13:35:51+05:30 (ISO 8601)                              ║
 ║                                                                               ║
 ║  Copyright (c) 2026 Aseem Chishti. All Rights Reserved.                       ║
 ║  Licensed under the MIT License - see LICENSE file for details.               ║
@@ -21,17 +21,17 @@
 <div align="center">
   <img src="./VAMS_logo.png" alt="VAMS Logo" width="600" />
   <br/>
-### The Operating System for the Agentic Economy
+  <h3>Multi-Layer Infrastructure for the Agentic Economy & Planetary Computer</h3>
 
-**Unified Infrastructure Layer | Autonomous AI Agents | Zero Friction**
+  **Unified Decentralized Substrate | Sovereign AI Agents | Verifiable Execution**
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Status](https://img.shields.io/badge/Status-PreTestnet--Hardning-orange.svg)](./REPO_STATUS_REPORT.md)
-[![Architecture](https://img.shields.io/badge/Architecture-v0.6.0-blue.svg)](./docs/team/ARCHITECTURE_v0-6-0.md)
-[![Release](https://img.shields.io/badge/Release-v1.3.0--oms-purple.svg)](./docs/CHANGELOG.md)
-[![Market](https://img.shields.io/badge/TAM-$507B-green.svg)](./docs/team/MARKET_ANALYSIS.md)
+  [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+  [![Status](https://img.shields.io/badge/Status-Pre--Testnet%20Candidate-orange.svg)](./REPO_STATUS_REPORT.md)
+  [![Architecture](https://img.shields.io/badge/Architecture-v0.6.0-blue.svg)](./docs/team/ARCHITECTURE_v0-6-0.md)
+  [![Release](https://img.shields.io/badge/Release-v1.3.0--oms-purple.svg)](./docs/CHANGELOG.md)
+  [![Build](https://img.shields.io/badge/Tests-712%20Passing-brightgreen.svg)](./audit.md#10-test-coverage--verification)
 
-**[Documentation](./REPO_STATUS_REPORT.md)** • **[Architecture](./docs/team/ARCHITECTURE_v0-6-0.md)** • **[Developer Guide](./docs/DEVELOPER_GUIDE.md)** • **[Whitepaper](./docs/team/WHITEPAPER.md)** • **[Roadmap](./REPO_STATUS_REPORT.md#6-development-roadmap)**
+  **[Documentation](./REPO_STATUS_REPORT.md)** • **[Architecture](./docs/team/ARCHITECTURE_v0-6-0.md)** • **[Developer Guide](./docs/DEVELOPER_GUIDE.md)** • **[Whitepaper](./docs/team/WHITEPAPER.md)** • **[Academic Audit](./audit.md)**
 
 </div>
 
@@ -39,23 +39,25 @@
 
 ## 💡 What is VAMS?
 
-**VAMS** (Verifiable and Agentic Modular Stack) is the **AWS of Web3** — a Layer 3 meta-architecture that unifies fragmented decentralized infrastructure (DePIN) into a single, consumable API.
+**VAMS** (Verifiable and Agentic Modular Stack) is a **multi-layer planetary infrastructure** designed to serve as the foundational compute, identity, and economic substrate for the **Agentic Economy**—the emerging paradigm where autonomous AI agents operate as first-class economic actors with sovereign identity, asset custody, and verifiable execution guarantees.
 
-**One API. One Token. Any Agent. Any Chain.**
+VAMS functions as the **operating system for the Planetary Computer**—a globally distributed, verifiable, and self-healing compute substrate. It aggregates fragmented physical infrastructure (DePIN) into a single, consumable API.
+
+> **One API. One Token. Any Agent. Any Chain.**
 
 <table>
 <tr>
 <td width="33%" align="center">
-<h3>🌐 $507B TAM</h3>
-<p>Cloud + AI infrastructure market</p>
+<h3>🌐 Web 4.0 Substrate</h3>
+<p>Infrastructure for a post-Web3 paradigm of autonomous agentic principals</p>
 </td>
 <td width="33%" align="center">
 <h3>⚡ 80% Cheaper</h3>
-<p>vs AWS/GCP (Akash: $0.02/hr)</p>
+<p>Datacenter cost-reduction via regionalized DePIN scheduling</p>
 </td>
 <td width="33%" align="center">
-<h3>🔗 15+ Integrations</h3>
-<p>Polygon CDK, Cardano, Celestia, io.net</p>
+<h3>🔗 Multi-Chain Routing</h3>
+<p>Polygon CDK Validium (L3), Cardano eUTXO (L1), Midnight (ZK-SD)</p>
 </td>
 </tr>
 </table>
@@ -68,17 +70,11 @@
 
 ## 🎯 The Problem
 
-Building autonomous agents today means juggling **10+ wallets, 15+ protocols, and complex DevOps**.
+Building autonomous agent workflows today requires juggling fragmented compute layers, multiple wallet architectures, and non-deterministic execution environments.
 
-**Web2 Developer Pain:**
-- 💸 **High Costs** — AWS EC2: $0.10/hr, Stripe: 2.9% + $0.30
-- 🔒 **Vendor Lock-in** — Censorship, downtime, arbitrary ToS changes
-- 🧩 **No Stateful Execution** — Agents can't survive crashes
-
-**Web3 Developer Pain:**
-- 🌀 **Fragmentation** — Different wallet for each chain/token
-- 🐌 **Latency** — 12+ second block times kill UX
-- 💥 **Complexity** — Manually integrating Akash, Celestia, Phala, etc.
+*   💸 **High Compute Costs:** Centralized providers (AWS/GCP) lock developers into expensive GPU contracts and arbitrary Term of Service changes.
+*   🔒 **Lack of Stateful Execution:** Off-chain agents cannot survive node crashes or network dropouts without manual state-recovery databases.
+*   🌀 **Multi-Chain Fragmentation:** Agents are forced to manage dozens of wallets, gas tokens, and cross-chain bridges to coordinate multi-chain services, introducing high latency and severe MEV exposure.
 
 ---
 
@@ -86,188 +82,100 @@ Building autonomous agents today means juggling **10+ wallets, 15+ protocols, an
 
 ### 🏗️ The 5 Core Pillars
 
-#### 1️⃣ **Unified DePIN Access**
-Single API for compute (io.net, Akash, Phala), storage (Iagon, Ceramic), and networking. No multi-wallet juggling.
+#### 1️⃣ Unified DePIN Compute Sourcing
+Provides a single, secure API for compute (io.net, Akash, Phala) and storage (Iagon, Celestia), abstracting multi-wallet complexity from agent creators. Grounded in [ServiceBlockRegistry.sol](file:///c:/Users/aseem/Desktop/VAMS-main/VAMS-main/contracts/src/registry/ServiceBlockRegistry.sol) and `neuron/services/`.
 
-#### 2️⃣ **Intelligent Routing (CLR v3.1)**
-Conditional L1 Router — 7-priority decision tree auto-selects the optimal chain:
-- 🏛️ **P0: Compliance Privacy** → Midnight (ZK-SD)
-- 🔐 **P1: Confidential Compute** → Phala TEE
-- 💰 **P2: High Value ($10K+)** → Ethereum (via AggLayer)
-- 📋 **P3: Institutional KYC** → Polygon CDK KYC Layer
-- ✅ **P4: Formal Verification** → Cardano (Ouroboros)
-- ⚡ **P5: Velocity (<1s)** → Hydra / SEI / Solana
-- 🎯 **P6: Default** → Polygon CDK Validium (VAMS L3)
+#### 2️⃣ Intelligent Multi-Chain Routing (CLR v3.1)
+The Conditional L1 Router implements a 7-priority decision tree to auto-route tasks to the optimal chain based on privacy, velocity, cost, and verification needs:
+*   🏛️ **P0: Compliance & ZK-Privacy** → Midnight (ZK-SD)
+*   🔐 **P1: Confidential Compute** → Phala TEE
+*   💰 **P2: High Value (>$50K)** → Trails → Ethereum (Multi-ISM)
+*   📋 **P3: Institutional KYC** → OMS Identity Gate (fail-closed) → Polygon CDK L3
+*   ✅ **P4: Formal Verification** → Cardano Pre-Prod (eUTXO)
+*   ⚡ **P5: Velocity & Micro-transactions** → Hydra or SEI
+*   🎯 **P6: Default Execution** → Polygon CDK Validium (VAMS L3)
 
-> Includes **MEV Protection** (encrypted mempool + batch auctions) and **ICB Bridge Executor** (Multi-ISM 2/3 verification + fallback cascade).
+Grounded in [clr_router.py](file:///c:/Users/aseem/Desktop/VAMS-main/VAMS-main/neuron/clr_router.py).
 
-#### 3️⃣ **Immortal Agents**
-DBOS-style durable execution. Agents checkpoint state to Arweave/Celestia and **survive crashes, network failures, even your laptop dying**.
+#### 3️⃣ Durable "Immortal" Execution
+VAMS integrates the DBOS (Database-Oriented Operating System) engine, writing agent execution states directly into transactional PostgreSQL datastores. In the event of a physical crash or network failure, the agent deterministically replays its workflow from the last verified checkpoint on Celestia. Grounded in `neuron/workflows.py` and `neuron/dbos_config.py`.
 
-#### 4️⃣ **Open Airport (Roaming Protocol)**
-Trust through Transparency. Agents can **"Roam"** to Solana, Base, or Ethereum to execute tasks, provided they submit cryptographic **Proof of Travel** logs upon return. You are not locked in; you are **anchored**.
+#### 4️⃣ Roaming Protocol & Cross-Chain Mobility
+Agents can "roam" to external EVM and non-EVM chains (Solana, Base, Ethereum) to execute tasks, provided they submit cryptographic **Proof of Travel** logs and SLA-conformant signatures upon re-entry. Grounded in `neuron/bridge_executor.py`.
 
-#### 5️⃣ **The Trust Decagon**
-VAMS is the "Meta-Layer" for trust, aggregating proofs from **10 protocols** (Phala, Parallel, World ID, etc.) to issue a unified **Trust Score**. We don't compete with identity standards; we unify them.
-
----
-
-## 🌌 The 6 Ontological Breakthroughs
-
-VAMS is not merely a tech stack; it is a **philosophical engine** that instantiates theoretical concepts into verifiable code. We have solved 6 fundamental problems in computer science and social coordination.
-
-| Field | The Breakthrough | Deep Dive |
-| :--- | :--- | :--- |
-| **Physics** | **It from Bit** (The Synthetic Observer) | [📜 Read](./docs/narrative/VAMS_BREAKTHROUGHS.md#%EF%B8%8F-1-physics-the-synthetic-observer--it-from-bit) |
-| **Economics** | **Deterministic Agency** (Zero Agency Cost) | [📜 Read](./docs/narrative/VAMS_BREAKTHROUGHS.md#-2-economics-deterministic-agency--zero-agency-cost) |
-| **Law** | **Polycentric Sovereignty** (Algorithmic Jurisdiction) | [📜 Read](./docs/narrative/VAMS_BREAKTHROUGHS.md#%EF%B8%8F-3-law-polycentric-sovereignty--algorithmic-jurisdiction) |
-| **Biology** | **Digital Autopoiesis** (Synthetic Life) | [📜 Read](./docs/narrative/VAMS_BREAKTHROUGHS.md#-4-biology-digital-autopoiesis--synthetic-life) |
-| **AI** | **The Verifiable Mind** (Glass Box Intelligence) | [📜 Read](./docs/narrative/VAMS_BREAKTHROUGHS.md#-5-ai-the-verifiable-mind--glass-box-intelligence) |
-| **Blockchain** | **The DePIN OS** (Planetary Computer) | [📜 Read](./docs/narrative/VAMS_BREAKTHROUGHS.md#-6-blockchain-the-depin-operating-system--planetary-computer) |
-
-> [!IMPORTANT]
-> **Must Read:** These narratives outline the theoretical innovations that differentiate VAMS. See the full [**Breakthroughs Document**](./docs/narrative/VAMS_BREAKTHROUGHS.md).
+#### 5️⃣ Consolidated Trust Decagon
+VAMS aggregates trust and reputation proofs across 10 security standards (TEE remote attestations, staked watchtower telemetry, and behavioral analysis) to issue a consolidated **Trust Score** for compute nodes. Grounded in [VAMSTrustAggregator.sol](file:///c:/Users/aseem/Desktop/VAMS-main/VAMS-main/contracts/src/trust/VAMSTrustAggregator.sol).
 
 ---
 
-## 🏛️ Architecture
+## 🏛️ Smart Contract Architecture
 
-### Dual-Host Model: Polygon "Hands" + Cardano "Brain"
+VAMS is built on a **Dual-Host Model** separating execution ("The Hands") from final governance and identity coordination ("The Brain").
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
-│  POLYGON AMOY ("The Hands") — EVM, Fast Execution           │
-│  Token, Staking, FeeCollector, Sentinel, GovernorExecutor   │
+│  POLYGON AMOY ("The Hands") — EVM, High-Velocity Execution  │
+│  Staking, Fee Collection, Slashings, Composed Escrows        │
 ├──────────────────────────────────────────────────────────────┤
-│  ICB BRIDGE (Rosen + Mithril)                               │
+│  Rosen Bridge & Mithril Inter-Chain Relays                   │
 ├──────────────────────────────────────────────────────────────┤
-│  CARDANO PRE-PROD ("The Brain") — eUTXO, Governance         │
-│  Governor (Quadratic), Timelock, InsuranceFund, AgentDID    │
-├──────────────────────────────────────────────────────────────┤
-│  L5: ECONOMIC    $VAMS Token • x402 Micropayments           │
-│  L4: TRUST       Agent Profile • TEE • ZK-Proofs • Sentinel│
-│  L3: LOGIC       DBOS • Kwil • WeaveDB • Glacier            │
-│  L2: COMPUTE     io.net GPU • Akash CPU • Phala AI          │
-│  L1: FOUNDATION  Celestia DA • Iagon Storage                │
+│  CARDANO PRE-PROD ("The Brain") — eUTXO, Safe Governance     │
+│  Quadratic Voting, Intent Timelocks, Agent DIDs (CIP-68)     │
 └──────────────────────────────────────────────────────────────┘
 ```
 
-> [!TIP]
-> **Deep Dive:** See [ARCHITECTURE_v0-4-0.md](./docs/team/ARCHITECTURE_v0-4-0.md) (and [v0.3.0](./docs/team/ARCHITECTURE_v0-3-0.md) for legacy specs) for technical specs including composed settlements, regional DEC systems, and the multi-DA performance anchor.
+### Smart Contract Modules
+*   **Polygon Layer (`contracts/src/`):**
+    *   `token/`: `VAMSToken.sol` (ERC-20 with Burnable + Permit + Votes).
+    *   `staking/`: `VAMSStaking.sol` (Tiered lock periods and yield weightings).
+    *   `economic/`: `ComposedSettlement.sol` (Asynchronous escrow settlement for up to 20 sub-providers), `RegionAwareDEC.sol` (Geospatial token emissions capping datacenter centralizations to 30% per region).
+    *   `sentinel/`: `SLAEnforcer.sol` (Oracle-mediated challenge slashing).
+    *   `registry/`: `VAMSAgentRegistry.sol` (Node capability register).
+    *   `oracle/`: `CommitRevealOracle.sol` (Optimized random beacon matching Commit-Reveal²).
+*   **Cardano Layer (`cardano/validators/`):**
+    *   `governor.ak`: eUTXO Quadratic governance validator.
+    *   `timelock.ak`: Multisig timelocks verifying cross-chain intent.
+    *   `insurance_fund.ak`: On-chain capital custody and multisig claim logic.
+    *   `agent_registry.ak`: CIP-68 NFT-backed Agent DID identities.
 
 ---
 
-## 🚀 Why VAMS Wins
+## 🔍 Implementation Reality Matrix
 
-| vs AWS/GCP | vs Akash | vs Bittensor | vs ICB-SDK Bridges |
-|------------|----------|--------------|--------------|
-| ✅ Decentralized | ✅ Full stack | ✅ Easier UX | ✅ Execution layer |
-| ✅ 80% cheaper | ✅ Payments | ✅ Unified infra | ✅ Not just bridges |
-| ✅ Censorship-resistant | ✅ Agent runtime | ✅ Production-ready | ✅ Multi-chain routing |
+In accordance with VAMS Core Operational Rules, we maintain strict transparency regarding which portions of the protocol are fully deployed, which are under testnet simulation, and which utilize integration mocks/stubs.
 
-**No other project combines**: Unified DePIN + Intelligent Routing + Immortal Agents + **Roaming Protocol** + Dual-Host Architecture.
-
----
-
-## 📊 Current Status
-
-**Stage:** Pre-Mainnet | **Architecture:** v0.6.0 | **Neuron:** v1.3.0-oms | **Docs:** [Changelog](./docs/CHANGELOG.md)
-
-| Component | Progress | Description |
-|-----------|----------|-------------|
-| 📋 **Specs** | 🟢 100% | Architecture v0.6.0, Tokenomics v2.0.0, Market Analysis |
-| 📜 **Solidity Contracts** | 🟢 100% | Full V2 Suite + OMS extensions (AgentRegistry, RewardDistributor, InsuranceFund). **619 tests passing.** |
-| 🧠 **Cardano Contracts** | 🟢 100% | 4 Aiken validators + ICB bridge. **37 tests passing.** |
-| 🤖 **Agent Runtime** | 🟢 100% | Neuron v1.3.0-oms: SessionKeySigner, Trails, Coinme, OMS identity, stablecoin payouts |
-| 🎨 **Frontend** | 🟢 95% | React 19 + Vite, 3D animations, Sub-1s load time |
-| 🌐 **Gateway** | 🟢 100% | FastAPI with OMS identity/payout/fiat endpoints |
-| ✅ **Tests** | 🟢 100% | **675 total tests: 619 Solidity + 37 Aiken + 56 Python (zero regressions)** |
-| 🔒 **Security** | 🟢 100% | OMS identity fail-closed, session key scoping, 30% yield cap, TEE root EOA binding |
-
-> [!IMPORTANT]
-> **Next Milestone:** Deploy V2 Contracts + OMS extensions to Polygon Amoy testnet.
-
-Full roadmap: [REPO_STATUS_REPORT.md](./REPO_STATUS_REPORT.md)
+| Subsystem | Source Code / Path | Status | Reality & Integration Details |
+|:---|:---|:---:|:---|
+| **Multi-DA Router** | [PerformanceAnchor.sol](file:///c:/Users/aseem/Desktop/VAMS-main/VAMS-main/contracts/src/da/PerformanceAnchor.sol) / `neuron/da/` | ✅ Operational | Fully implements data availability anchoring. Telemetry logs disperse to Celestia while state roots disperse to Polygon DAC. |
+| **Composed Settlement** | [ComposedSettlement.sol](file:///c:/Users/aseem/Desktop/VAMS-main/VAMS-main/contracts/src/economic/ComposedSettlement.sol) | ✅ Operational | Supports multi-provider escrows, fractional async claims, and auto-deducted protocol fees (capped mathematically at 5 bps). |
+| **Durable Execution** | [workflows.py](file:///c:/Users/aseem/Desktop/VAMS-main/VAMS-main/neuron/workflows.py) | ✅ Operational | Leverages the **DBOS Python SDK** to capture deterministic agent execution traces and PostgreSQL-backed state recovery. |
+| **Cardano Validators** | [validators/](file:///c:/Users/aseem/Desktop/VAMS-main/VAMS-main/cardano/validators/) | ✅ Operational | Aiken validators written and verified. Aiken test suite is 100% passing (37 check tests). |
+| **CLR Router (v3.1)** | [clr_router.py](file:///c:/Users/aseem/Desktop/VAMS-main/VAMS-main/neuron/clr_router.py) | ✅ Operational | Full 7-priority decision routing tree, verified by 19 dedicated unit tests. |
+| **OMS Identity Gate** | [oms_identity.py](file:///c:/Users/aseem/Desktop/VAMS-main/VAMS-main/neuron/sdk/oms_identity.py) | 🟡 Test Simulation | Production API calls are disabled. The verifier utilizes a simulation (addresses starting with the `0x99` prefix are verified). |
+| **Trails Transport** | [trails_client.py](file:///c:/Users/aseem/Desktop/VAMS-main/VAMS-main/neuron/sdk/trails_client.py) | 🟡 Test Simulation | Live Trails AggLayer integration is a stub. Operates in `mock_mode = True` returning signed receipt proofs; throws `NotImplementedError` otherwise. |
+| **Avail & EigenDA** | [avail_substrate.py](file:///c:/Users/aseem/Desktop/VAMS-main/VAMS-main/neuron/sdk/avail_substrate.py) / [eigenda_kzg.py](file:///c:/Users/aseem/Desktop/VAMS-main/VAMS-main/neuron/sdk/eigenda_kzg.py) | 🟡 Test Simulation | Substrate transactions and disperser uploads default to mock payloads (`mock_mode = True`). Direct live dispersals require external proxy configurations. |
+| **REST Gateway** | [server.py](file:///c:/Users/aseem/Desktop/VAMS-main/VAMS-main/gateway/server.py) | 🟡 Partially Implemented | Exposes heartbeats, node registers, and basic composer/da/economics status endpoints. Advanced KYC and top-up paths in `API_REFERENCE.md` are executed via edge SDKs or test mocks. |
 
 ---
 
-## 📚 Documentation
+## 📚 Academic Foundations
 
-| Document | Purpose |
-|----------|---------|
-| **[📋 REPO STATUS](./REPO_STATUS_REPORT.md)** | **👈 Start here.** Current stage, roadmap |
-| **[🏗️ DEVELOPER GUIDE](./docs/DEVELOPER_GUIDE.md)** | Quickstart (v1.3.0-oms): OMS identity, stablecoin, fiat top-up |
-| **[📖 Whitepaper](./docs/team/WHITEPAPER.md)** | Academic technical overview |
-| **[🏗️ Architecture v0.6.0](./docs/team/ARCHITECTURE_v0-6-0.md)** | OMS integration: identity, session keys, Trails, fiat, stablecoin payouts |
-| **[🏗️ Architecture v0.4.0](./docs/team/ARCHITECTURE_v0-4-0.md)** | Base modular stack: Composer, Regional DEC, Multi-DA Anchor |
-| **[💰 Tokenomics](./docs/team/TOKENOMICS.md)** | $VAMS utility, burns, vesting, emissions |
-| **[🔌 API Reference](./docs/API_REFERENCE.md)** | Gateway REST (v1.3.0-oms: identity, fiat, payout endpoints) |
-| **[📝 Changelog](./docs/CHANGELOG.md)** | Release history including v1.3.0-oms |
-| **[📈 Market Analysis](./docs/team/MARKET_ANALYSIS.md)** | $507B TAM, competitor analysis |
-| **[🎤 Pitch Deck](./docs/team/PITCH_DECK.md)** | Strategic partnership proposal |
+VAMS subsystems are systematically mapped to peer-reviewed publications and arXiv papers to ground development in formal computer science:
 
----
+*   **Intelligent AI Delegation [R1.1]:** CLR Router (v3.1) implements DeepMind's 5-pillar delegation framework (scoped authority, structural transparency, systemic resilience). Cite: *Tomašev et al., "Intelligent AI Delegation" (arXiv:2602.11865, 2026)*.
+*   **Commit-Reveal² [R2.1]:** direct theoretical basis for `CommitRevealOracle.sol`, utilizing randomized reveal orderings to prevent frontrunning and achieve an 80% gas reduction. Cite: *arXiv:2504.03936 (2025)*.
+*   **AutoSkill [R5.1]:** Guides the AUTOSKILL Intelligence Layer (`neuron/intelligence/`), enabling autonomous skill crystallization and non-destructive inference steering ($h \leftarrow h + \alpha \cdot v$). Cite: *arXiv (March 2026)*.
+*   **DeTEcT [R7.1]:** Informs the regional token emission model in `RegionAwareDEC.sol` to mathematically stabilize supply. Cite: *arXiv:2309.12330*.
+*   **DBOS [R9.1]:** Core substrate for Durable Execution, allowing transactional replay of non-deterministic workflows. Cite: *DBOS Core Research (2024–2026)*.
 
-## 🛠️ Repository Structure
-
-```bash
-VAMS-main/
-├── contracts/       # Polygon Solidity (469 tests passing)
-│   ├── src/
-│   │   ├── token/           # VAMSToken (ERC-20 + Burnable + Permit + Votes)
-│   │   ├── staking/         # VAMSStaking (Tiered APY, Lock Periods)
-│   │   ├── vesting/         # VAMSVesting (7 schedule types)
-│   │   ├── governance/      # VAMSTimelockController
-│   │   ├── economic/        # FeeCollector, Insurance, PaymentHandler
-│   │   ├── infrastructure/  # VAMSSentinel (autonomous guardian)
-│   │   ├── routing/         # VAMSRouter (CLR implementation)
-│   │   ├── slashing/        # VAMSSlasher, SlashingParameters
-│   │   ├── registry/        # VAMSAgentRegistry (Challenge system)
-│   │   └── base/            # VAMSUpgradeableBase, Emergency Pausable
-│   └── test/                # 469 tests (Unit, Integration, Fuzz, Governance)
-│
-├── cardano/         # Cardano Aiken Brain Layer (37 tests passing)
-│   ├── validators/
-│   │   ├── governor.ak      # Quadratic voting governance
-│   │   ├── timelock.ak      # Intent emission to Polygon
-│   │   ├── insurance_fund.ak # Capital custody + DAO claims
-│   │   └── agent_registry.ak # Agent DID + CIP-68 NFT
-│   └── lib/vams/            # Shared types, utils, ICB bridge
-│
-├── frontend-vite/   # React 19 + Vite (95% complete)
-│   ├── src/              # App, components, 3D scenes
-│   └── dist/             # Production build
-│
-├── neuron/          # "Immortal Agent" runtime v1.0.0-icn
-│   ├── da/               # Celestia & Polygon DAC anchoring
-│   ├── composer/         # Matchmaking & blueprint routing
-│   ├── economics/        # Master Hybrid Escrow & Regional DEC
-│   ├── services/         # Verified Service Blocks sandbox
-│   ├── sentinel/         # Verifiable SLA enforcer loop
-│   ├── neuron.py         # Orchestration loop
-│   ├── clr_router.py     # CLR v3.1 — 7-Priority Decision Tree
-│   └── tests/            # 79+ passing tests
-│
-├── gateway/         # FastAPI server (100% complete)
-│   └── server.py         # Exposes API_REFERENCE.md endpoints
-│
-└── docs/            # All documentation
-    ├── CHANGELOG.md
-    ├── DEVELOPER_GUIDE.md
-    ├── API_REFERENCE.md
-    └── team/
-        ├── ARCHITECTURE_v0-4-0.md
-        ├── ARCHITECTURE_v0-3-0.md
-        ├── WHITEPAPER.md
-    └── TOKENOMICS.md
-```
+For a full list of all 30 mapped academic publications, see the [Academic Foundations Audit](./audit.md#academic-references--research-foundations).
 
 ---
 
 ## 🔧 Quick Start
 
 > [!NOTE]
-> **Prerequisites:** Foundry (contracts), Node.js 18+ (frontend), Python 3.10+ (neuron)
+> **Prerequisites:** Foundry (Polygon contracts), Aiken (Cardano validators), Node.js 18+ (Vite frontend), Python 3.10+ (Neuron engine).
 
 ### 1️⃣ Clone the Repository
 ```bash
@@ -275,92 +183,61 @@ git clone https://github.com/GodOfAgents/VAMS-main.git
 cd VAMS-main
 ```
 
-### 2️⃣ Smart Contracts (Foundry — Polygon)
+### 2️⃣ Solidity Contracts (Polygon — "The Hands")
 ```bash
 cd contracts
 forge install
 forge build
-forge test  # 469 tests across 19 suites
+forge test  # Executes 619 unit, fuzz, and integration tests
 ```
 
-### 2.5️⃣ Cardano Contracts (Aiken)
+### 3️⃣ Cardano Contracts (Aiken — "The Brain")
 ```bash
 cd cardano
-aiken check   # 37 tests across 6 modules
-aiken build   # Generates plutus.json blueprint
+aiken check   # Executes 37 validator check tests
+aiken build   # Compiles Plutus blueprint (plutus.json)
 ```
 
-### 3️⃣ Frontend
+### 4️⃣ React Frontend (React 19 + Vite)
 ```bash
-cd frontend
+cd frontend-vite
 npm install
-npm run dev  # Opens on http://localhost:5173
+npm run dev   # Boots local hot-reloaded portal on http://localhost:5173
 ```
+*Note: The frontend source code resides under [frontend-vite/src/](file:///c:/Users/aseem/Desktop/VAMS-main/VAMS-main/frontend-vite/src/), with the main entry point located in `main.jsx` and UI components located in `App.jsx`.*
 
-### 4️⃣ Agent Runtime
+### 5️⃣ Neuron Agent Runtime
 ```bash
 cd neuron
 pip install -r requirements.txt
-python demo_cli.py  # Interactive demo
+python demo_cli.py  # Launches interactive edge-node CLI simulating CLR routing and DA anchoring
 ```
 
 ---
 
-## 🌐 Building in Public
+## 📊 Comprehensive Test Suite
 
-We are committed to **radical transparency**:
+VAMS maintains a robust testing environment split across contract compilers and python test suites:
 
-- 📝 **Every design decision** documented in [ARCHITECTURE_v0-4-0.md](./docs/team/ARCHITECTURE_v0-4-0.md)
-- 💰 **Every token allocation** specified in [TOKENOMICS.md](./docs/team/TOKENOMICS.md)
-- 🔍 **Every gap** tracked in [REPO_STATUS_REPORT.md](./REPO_STATUS_REPORT.md)
-
-**This repository is our single source of truth.**
-
----
-
-## 🤝 Contributing & Partnership
-
-### For Developers
-- **Contributions welcome!** See roadmap in [REPO_STATUS_REPORT.md](./REPO_STATUS_REPORT.md)
-- **Join the build:** Phase 3 (Testnet Deployment) is the current focus
-
-### For Investors
-- **5% token allocation** (50M $VAMS) available for Strategic Ecosystem Partnership
-- See [PITCH_DECK.md](./docs/team/PITCH_DECK.md) for full proposal
-
-### For Ecosystem Partners
-- Grant applications: [Ecosystem_Grants.md](./docs/team/Ecosystem_Grants.md)
-- Integration opportunities: Cardano, Polygon, Celestia, io.net, Bittensor
+*   **Polygon / OMS Smart Contracts:** `619` passing tests via `forge test` (spanning tiered staking, slashing logic, escrow settle, and role-guards).
+*   **Cardano Validators:** `37` passing validator tests via `aiken check` (covering CIP-68 NFT identity, quadratic governor, and bridge verification).
+*   **Python Neuron Engine:** `56` passing integration tests via `pytest` (testing CLR routing tree, DBOS durable checkpoints, and mock-mode compliance gates).
+*   **Total Checked Assertions:** **712 Passing Tests** with Zero Regressions.
 
 ---
 
-## 💸 Support the Mission
+## 🤝 Contributing & Licensing
 
-Our development is heavily supported by strategic ecosystem grants.
-If you represent an ecosystem (L1/L2, DA layer, TEE provider) interested in integrating with VAMS, please review our [Ecosystem Grants Strategy](./docs/team/Ecosystem_Grants.md) and open a dialogue.
+### Copyright & Authorship
+*   **Author:** Aseem Chishti
+*   **Email:** aseeminksa@gmail.com
+*   **LinkedIn:** [LinkedIn profile](https://www.linkedin.com/in/aseemchishti)
+*   **GitHub:** [GodOfAgents](https://github.com/GodOfAgents)
+*   **Proof of Authorship Details:** [PROOF_OF_AUTHORSHIP.md](./PROOF_OF_AUTHORSHIP.md)
 
----
-
-## 📄 License & Contact
-
-| | |
-|--|--|
-| **License** | MIT |
-| **Author** | Aseem Chishti |
-| **Email** | aseeminksa@gmail.com |
-| **LinkedIn** | [linkedin.com/in/aseemchishti](https://www.linkedin.com/in/aseemchishti) |
-| **GitHub** | [GodOfAgents](https://github.com/GodOfAgents) |
-
-**Proof of Authorship:** [PROOF_OF_AUTHORSHIP.md](./PROOF_OF_AUTHORSHIP.md)
+Licensed under the **MIT License**—see the [LICENSE](./LICENSE) file for details. Copyright (c) 2026 Aseem Chishti. All Rights Reserved.
 
 ---
-
 <div align="center">
-
-**VAMS: Any Agent. Any Chain. One Stack.** 🚀
-
-*The Operating System for the Agentic Economy*
-
-[![Star](https://img.shields.io/github/stars/GodOfAgents/VAMS-main?style=social)](https://github.com/GodOfAgents/VAMS)
-
+  <sub>VAMS: Any Agent. Any Chain. One Stack. 🚀</sub>
 </div>
