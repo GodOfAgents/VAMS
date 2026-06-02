@@ -2,6 +2,11 @@
 
 The VAMS Gateway Server provides a unified REST/WebSocket interface to the decentralized infrastructure stack. For intelligence layer internals see [INTELLIGENCE_LAYER.md](./INTELLIGENCE_LAYER.md). For OMS integration architecture see [team/ARCHITECTURE_v0-6-0.md](./team/ARCHITECTURE_v0-6-0.md).
 
+> [!WARNING]
+> **Implementation Status Disclosure:**
+> The REST Gateway Server (`gateway/server.py`) currently implements the core node registration, heartbeat monitoring, Resource Composer matchmaking, and basic economics/epoch endpoints.
+> Endpoints in this reference marked with **`v1.3.0+`** (including `/identity/` institutional compliance checks, `/payments/` Coinme fiat on-ramps, and stablecoin payout preference setters) are implemented client-side within the Neuron SDK (`neuron/sdk/`) or are simulated under test modes. Direct gateway HTTP routing for these endpoints is in deployment prep.
+
 ## Base URL
 `/api/v1`
 
