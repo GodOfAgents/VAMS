@@ -73,3 +73,15 @@ frontend-vite/
 # Confidential Partnership Docs
 docs/team/Ecosystem_Grants.md
 docs/team/meeting-transcript.doc
+
+# VAMS Local Maintainer Exclusions
+*_errors.txt
+pytest_*.txt
+cardano/err.txt
+cardano/out.txt
+cardano/aiken_check.log
+cardano/aiken_stderr.log
+cardano/aiken_output.txt
+audit/slither_report.json
+audit/slither_console.log
+aiken.exe
