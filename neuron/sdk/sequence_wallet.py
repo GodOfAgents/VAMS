@@ -1,6 +1,6 @@
 from enum import IntEnum
 from typing import Dict, List, Optional, Any
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from eth_account import Account
 import secrets
 
@@ -35,7 +35,7 @@ class SessionKeyManager:
             "session_key_address": account.address,
             "max_value_per_tx": max_value_map.get(trust_tier, 0),
             "allowed_contracts": allowed_contracts,
-            "expires_at": (datetime.utcnow() + timedelta(hours=validity_hours)).timestamp()
+            "expires_at": (datetime.now(timezone.utc) + timedelta(hours=validity_hours)).timestamp()
         }
         
         self.active_sessions[account.address] = session_data
@@ -47,7 +47,7 @@ class SessionKeyManager:
             
         session = self.active_sessions[session_address]
         
-        if datetime.utcnow().timestamp() > session["expires_at"]:
+        if datetime.now(timezone.utc).timestamp() > session["expires_at"]:
             return False
             
         if value > session["max_value_per_tx"]:

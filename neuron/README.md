@@ -4,7 +4,7 @@
 
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](../LICENSE)
-[![Tests](https://img.shields.io/badge/tests-110%20passed-brightgreen.svg)](#testing)
+[![Tests](https://img.shields.io/badge/tests-427%20passed-brightgreen.svg)](#testing)
 
 ## What is VAMS Neuron?
 
@@ -175,10 +175,10 @@ neuron/
 │   └── local.py           # Local SQLite fallback
 ├── payments/          # Payment protocols
 │   └── x402.py            # x402 micropayments
-├── web3/              # On-chain integration
+├── eth_client/        # On-chain integration
 │   ├── registration.py    # Agent registry client
 │   └── abi.json           # Contract ABIs
-├── tests/             # Unit & integration tests (100+ total)
+├── tests/             # Unit & integration tests (427 total)
 │   ├── test_neuron.py     # 16 tests (providers, managers)
 │   ├── test_sdk.py        # 29 tests (Celestia, Bittensor, Phala)
 │   ├── test_workflows.py  # 15 tests (checkpoints, recovery)
@@ -203,7 +203,7 @@ neuron/
 python -m pytest tests/ -v
 
 # Expected output
-============================= 110 passed in 68.18s =============================
+============================= 427 passed in 68.18s =============================
 ```
 
 ## Documentation

@@ -29,7 +29,7 @@
   [![Status](https://img.shields.io/badge/Status-Pre--Testnet%20Candidate-orange.svg)](./REPO_STATUS_REPORT.md)
   [![Architecture](https://img.shields.io/badge/Architecture-v0.6.0-blue.svg)](./docs/team/ARCHITECTURE_v0-6-0.md)
   [![Release](https://img.shields.io/badge/Release-v1.3.0--oms-purple.svg)](./docs/CHANGELOG.md)
-  [![Build](https://img.shields.io/badge/Tests-712%20Passing-brightgreen.svg)](./audit.md#10-test-coverage--verification)
+  [![Build](https://img.shields.io/badge/Tests-1,083%20Passing-brightgreen.svg)](./audit.md#10-test-coverage--verification)
 
   **[Documentation](./REPO_STATUS_REPORT.md)** • **[Architecture](./docs/team/ARCHITECTURE_v0-6-0.md)** • **[Developer Guide](./docs/DEVELOPER_GUIDE.md)** • **[Whitepaper](./docs/team/WHITEPAPER.md)** • **[Academic Audit](./audit.md)**
 
@@ -221,8 +221,8 @@ VAMS maintains a robust testing environment split across contract compilers and 
 
 *   **Polygon / OMS Smart Contracts:** `619` passing tests via `forge test` (spanning tiered staking, slashing logic, escrow settle, and role-guards).
 *   **Cardano Validators:** `37` passing validator tests via `aiken check` (covering CIP-68 NFT identity, quadratic governor, and bridge verification).
-*   **Python Neuron Engine:** `56` passing integration tests via `pytest` (testing CLR routing tree, DBOS durable checkpoints, and mock-mode compliance gates).
-*   **Total Checked Assertions:** **712 Passing Tests** with Zero Regressions.
+*   **Python Neuron Engine:** `427` passing integration tests via `pytest` (testing CLR routing tree, DBOS durable checkpoints, and mock-mode compliance gates).
+*   **Total Checked Assertions:** **1,083 Passing Tests** with Zero Regressions.
 
 ---
 

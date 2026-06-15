@@ -145,6 +145,7 @@ class InstanceBlueprint:
     storage: StorageSpec = field(default_factory=StorageSpec)
     networking: NetworkSpec = field(default_factory=NetworkSpec)
     tee: TEESpec = field(default_factory=TEESpec)
+    required_service_blocks: List[str] = field(default_factory=list)
 
     # Economic constraints
     max_cost_per_hour: float = 0.0       # Budget cap in $VAMS (0 = uncapped)
@@ -169,7 +170,8 @@ class InstanceBlueprint:
             f"{self.name}:{self.compute.gpu_type}:{self.compute.gpu_count}:"
             f"{self.compute.vcpu}:{self.memory.ram_gb}:"
             f"{self.storage.type}:{self.storage.capacity_gb}:"
-            f"{self.networking.region}:{self.max_cost_per_hour}"
+            f"{self.networking.region}:{self.max_cost_per_hour}:"
+            f"{','.join(self.required_service_blocks)}"
         )
         return hashlib.sha256(payload.encode()).hexdigest()[:16]
 
@@ -207,6 +209,7 @@ class InstanceBlueprint:
             "elastic": self.elastic,
             "min_sla_score_bps": self.min_sla_score_bps,
             "skill_vector": self.skill_vector,
+            "required_service_blocks": self.required_service_blocks,
         }
 
 

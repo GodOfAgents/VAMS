@@ -17,7 +17,7 @@ This document provides a unified view of the protocol's **architectural evolutio
 
 > [!IMPORTANT]
 > **Current Architecture Version:** v0.6.0 (v1.3.0-oms release)  
-> **Audit Verdict:** ✅ GO FOR TESTNET — 68/68 findings resolved, 675 tests passing (619 Forge + 56 Pytest)
+> **Audit Verdict:** ✅ GO FOR TESTNET — 68/68 findings resolved, 1,083 tests passing (619 Forge + 37 Aiken + 427 Pytest)
 
 ---
 
@@ -159,7 +159,7 @@ v0.3.0 (Jan 2026)     v0.4.0 (Apr 2026)      v0.5.0 (Apr 2026)       v0.6.0 (May
 | v0.3.0 | — | Monolithic Foundation | — | Baseline |
 | v0.4.0 | `1.0.0-icn` | Modular Decoupling | — | Yes (5 subsystems replaced) |
 | v0.5.0 | `1.2.0-autoskill` | Intelligence Layer | 373 | No (purely additive) |
-| v0.6.0 | `1.3.0-oms` | OMS Enterprise Integration | 675 | No (purely additive) |
+| v0.6.0 | `1.3.0-oms` | OMS Enterprise Integration | 1,083 | No (purely additive) |
 
 ---
 
@@ -515,8 +515,9 @@ contracts/src/
 | Suite | Count | Status |
 |-------|:-----:|:------:|
 | Forge (Solidity) | 619 | ✅ Passing |
-| Pytest (Python) | 56 | ✅ Passing |
-| **Total** | **675** | **✅ Zero Regressions** |
+| Aiken (Cardano) | 37 | ✅ Passing |
+| Pytest (Python) | 427 | ✅ Passing |
+| **Total** | **1,083** | **✅ Zero Regressions** |
 
 ### 10.2 Test Evolution
 
@@ -525,7 +526,7 @@ contracts/src/
 | v0.4.0 (`1.0.0-icn`) | — | Baseline |
 | v0.5.0 (`1.2.0-autoskill`) | 373 | 0 |
 | Post-Audit (`1.1.0-audit-remediated`) | 265 (Python) | 0 |
-| v0.6.0 (`1.3.0-oms`) | 675 | 0 |
+| v0.6.0 (`1.3.0-oms`) | 1,083 | 0 |
 
 ### 10.3 Key Test Files (v0.6.0)
 
@@ -567,7 +568,7 @@ contracts/src/
 ║   High:       21/21 RESOLVED                                         ║
 ║   Medium:     31/31 RESOLVED                                         ║
 ║   Low/QA:     12/12 RESOLVED                                         ║
-║   Tests:      675   PASSING (619 Forge + 56 Pytest)                  ║
+║   Tests:      1,083 PASSING (619 Forge + 37 Aiken + 427 Pytest)      ║
 ║   Regressions: 0                                                     ║
 ║   Academic Refs: 30 arXiv/peer-reviewed papers mapped to subsystems  ║
 ║                                                                      ║

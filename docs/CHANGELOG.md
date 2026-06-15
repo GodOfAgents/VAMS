@@ -75,7 +75,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   not to session wallet identity.
 
 ### Testing
-- **675 total tests passing** (619 Forge + 56 Pytest — zero regressions).
+- **1,083 total tests passing** (619 Forge + 37 Aiken + 427 Pytest — zero regressions).
 - New test coverage: `test_fiat_yield.py` (Coinme, UniversalTopup, YieldManager),
   `test_sequence_wallet.py` (session keys, tier scopes, expiry),
   `test_trails_client.py` (TrailsClient mock + fallback),

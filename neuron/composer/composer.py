@@ -33,6 +33,7 @@ from neuron.composer.models import (
 )
 from neuron.composer.scorer import CandidateScorer, RawNodeData, ScorerWeights
 from neuron.services.registry_client import ServiceBlockClient
+from neuron.economics.gas_premium import GasAbstractionPremiumCalculator
 
 logger = logging.getLogger("VAMS-Composer")
 
@@ -254,16 +255,27 @@ class VAMSResourceComposer:
             return []
 
         max_hourly = getattr(blueprint, "max_cost_per_hour", plan.total_hourly_cost)
+        if max_hourly == 0.0:
+            max_hourly = plan.total_hourly_cost
+
         splits = []
+        calculator = GasAbstractionPremiumCalculator()
 
         for node in plan.nodes:
             share = node.capacity_units / total_capacity
             amount = max_hourly * share
 
+            required_blocks = getattr(blueprint, "required_service_blocks", [])
+            premium_surcharge = calculator.calculate_premium_cost(amount, required_blocks)
+            total_cost = calculator.calculate_total_cost(amount, required_blocks)
+
             splits.append({
                 "provider": node.provider,
                 "node_id": node.node_id,
                 "amount": round(amount, 6),
+                "base_cost": round(amount, 6),
+                "premium_surcharge": round(premium_surcharge, 6),
+                "total_cost": round(total_cost, 6),
                 "share_pct": round(share * 100, 2),
                 "capacity_units": node.capacity_units,
             })
@@ -302,15 +314,34 @@ class VAMSResourceComposer:
             f"{blueprint.name}:{blueprint.compute.gpu_type.value}".encode()
         ).hexdigest()
 
+        service_block_id = ""
+        # Check if the blueprint name corresponds to a registered service block
+        from neuron.services.registry_client import _SERVICE_BLOCK_BLUEPRINTS
+        if blueprint.name in _SERVICE_BLOCK_BLUEPRINTS:
+            # Generate deterministic block ID using name
+            service_block_id = f"0x{hashlib.sha256(blueprint.name.encode()).hexdigest()}"
+
+        calculator = GasAbstractionPremiumCalculator()
+        required_blocks = getattr(blueprint, "required_service_blocks", [])
+        premium_rate = calculator.calculate_premium_rate(required_blocks)
+        gas_premium_bps = int(premium_rate * 10000)
+
+        # Scale hourly base cost by duration
+        total_base_hourly = sum(s["base_cost"] for s in splits)
+        total_hourly_with_premium = calculator.calculate_total_cost(total_base_hourly, required_blocks)
+        total_cost_with_premium = total_hourly_with_premium * (duration_seconds / 3600.0)
+
         return {
             "providers": providers,
             "amounts": amounts,
             "validForSeconds": duration_seconds,
             "blueprintHash": f"0x{blueprint_hash}",
-            "serviceBlockId": "",
+            "serviceBlockId": service_block_id,
             "builderRevShareBps": builder_rev_share_bps,
             "builderAddress": builder_address,
             "splits": splits,
+            "gasPremiumBps": gas_premium_bps,
+            "totalCostWithPremium": round(total_cost_with_premium, 6),
         }
 
     # ──────────────────────────────────────────────────

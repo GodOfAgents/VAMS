@@ -304,6 +304,115 @@ def is_verified(self, address: str) -> bool:
 
 ---
 
+## 6.5 Hybrid Payment Rail (End-to-End)
+
+The five OMS phases do not operate independently — they compose into a single **Hybrid Payment
+Rail** that covers the full lifecycle of agent capital: fiat in → on-chain escrow → micropayment
+delivery → stablecoin out. This section documents that unified flow and the on-chain contracts
+that enforce it.
+
+### 6.5.1 Capital Flow Diagram
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                       HYBRID PAYMENT RAIL (v0.6.0)                          │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                               │
+│  [FIAT IN]                                                                    │
+│  User: credit card / bank transfer                                            │
+│      │                                                                        │
+│      ▼                                                                        │
+│  CoinmeClient.create_checkout(amount_fiat, currency, dest_address)            │
+│  ← Coinme handles KYC + Money Transmitter License compliance →                │
+│      │                                                                        │
+│      ▼                                                                        │
+│  UniversalTopupManager                                                        │
+│  ├── Applies GasAbstractionPremium: 2–7% (per TOKENOMICS.md §4.3)            │
+│  └── Deposits net $VAMS to agent's smart wallet (Sequence ERC-4337)           │
+│      │                                                                        │
+│  ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ON-CHAIN BOUNDARY ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─         │
+│      │                                                                        │
+│  [x402 MICROPAYMENT CHANNEL]                                                  │
+│  Agent locks funds BEFORE service delivery:                                   │
+│      │                                                                        │
+│      ▼                                                                        │
+│  X402EscrowManager.lockEscrow(provider, amount, nonce, validFor, hashlock)    │
+│  ├── EscrowStatus: LOCKED (funds held, 5 min – 24 h window)                  │
+│  ├── X402NonceRegistry.isNonceValid() — prevents double-spend                │
+│  └── Optional HTLC hashlock for multi-hop atomicity                           │
+│      │                                                                        │
+│      ▼                                                                        │
+│  Provider delivers service                                                    │
+│      │                                                                        │
+│      ▼                                                                        │
+│  X402EscrowManager.claimEscrow(escrowId, serviceProof, preimage)              │
+│  ├── serviceProof.proofType: TEE | DETERMINISTIC | ZKML                       │
+│  ├── X402NonceRegistry.consumeNonce() — marks nonce spent on-chain            │
+│  ├── 0.05% settlement fee → protocol treasury                                 │
+│  └── 72 h dispute window (VAMSSentinel holds SENTINEL_ROLE for emergency      │
+│      pause via EmergencyLockdown.s.sol)                                       │
+│      │                                                                        │
+│  [REWARD ACCUMULATION]                                                        │
+│  Provider earns $VAMS in RewardDistributor over time                          │
+│      │                                                                        │
+│  [PAYOUT SELECTION — StablecoinPayoutManager]                                 │
+│      │                                                                        │
+│      ├── VAMS_ONLY  ─────────────────► Transfer $VAMS directly                │
+│      │                                                                        │
+│      ├── STABLECOIN ─────────────────► OMS conversion contract                │
+│      │                                  → Trails → Provider (USDC / USDT)     │
+│      │                                                                        │
+│      └── HYBRID (50/50) ────────────► 50% $VAMS direct                       │
+│                                        50% OMS → Trails → USDC / USDT        │
+│                                                                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+### 6.5.2 On-Chain Contract Roles
+
+| Contract | Role in Rail | Key Constants |
+|---|---|---|
+| `X402EscrowManager` | HTLC escrow — locks agent funds before service, releases after proof | `SETTLEMENT_FEE_BPS = 5` (0.05%), `DISPUTE_WINDOW = 72h` |
+| `X402NonceRegistry` | Double-spend prevention — each `(agent, nonce, receiptHash)` triple is unique and consumed on claim | monotonically increasing per-agent nonce |
+| `VAMSPaymentHandler` | Channel-style micropayment management, ECDSA signature verification, 24h dispute window | `SETTLEMENT_FEE_BPS = 5` |
+| `BatchSettlement` | Batches multiple nonce consumptions in a single tx — references `IX402NonceRegistry` | gas-efficient batch path |
+| `ComposedSettlement` | Multi-provider escrow with 48h validity (vs 24h for single x402) | used for composer-provisioned instances |
+| `RewardDistributor` | Accumulates provider $VAMS rewards and routes to `StablecoinPayoutManager` on claim | `VAMS_ONLY` \| `STABLECOIN` \| `HYBRID` |
+
+### 6.5.3 Session Key Authorization Path
+
+All x402 payment operations in v0.6.0 are authorized through the Phase 3 session key system,
+not raw EOA signing:
+
+```
+Agent requests service
+    │
+    ▼
+SignerFactory.create(config.use_session_key = True)
+    │
+    ▼
+SessionKeySigner  ──► Sequence SDK ERC-4337 UserOperation
+    │
+    ├── validates: TrustTier value cap (BRONZE: 100 $VAMS, SILVER: 1,000 $VAMS, ...)
+    ├── validates: 24h session key validity window
+    │
+    ▼
+X402EscrowManager.lockEscrow()   ← signed by session key, not root EOA
+```
+
+This means a compromised session key cannot drain the agent's full wallet balance —
+the on-chain cap enforced by the Sequence ERC-4337 contract is a hard invariant.
+
+### 6.5.4 Emergency Isolation
+
+The x402 stack is fully integrated into `EmergencyLockdown.s.sol`:
+- `X402EscrowManager` is paused (`_safePause(X402_ESCROW)`) as step 1d of the lockdown sequence
+- `ADMIN_ROLE`, `PAUSER_ROLE`, and `DEFAULT_ADMIN_ROLE` are revoked from the compromised key
+- `VAMSSentinel` holds `SENTINEL_ROLE` on `X402EscrowManager` for autonomous emergency pause
+  without waiting for the full governance lockdown sequence
+
+---
+
 ## 7. Security Boundaries
 
 | Boundary | Mechanism | Where Enforced |
@@ -315,6 +424,9 @@ def is_verified(self, address: str) -> bool:
 | Insurance yield cap | ≤30% `totalFundBalance()` — on-chain require | `VAMSInsuranceFund.sol` |
 | OMS API key exposure | Loaded from env var `OMS_API_KEY`, never hardcoded | `oms_identity.py` |
 | Non-EVM bridge isolation | Cardano/Solana/SEI routes untouched in `TRANSPORT_MATRIX` | `bridge_executor.py` |
+| x402 double-spend | Nonce + receipt hash consumed atomically on claim | `X402NonceRegistry.sol` |
+| x402 service non-delivery | HTLC refund after expiry; 72h dispute window | `X402EscrowManager.sol` |
+| x402 emergency isolation | `SENTINEL_ROLE` autonomous pause; lockdown script revokes all roles | `EmergencyLockdown.s.sol` |
 
 ---
 
@@ -330,7 +442,7 @@ def is_verified(self, address: str) -> bool:
   role granted behave identically to v0.5.0.
 - `TrailsClient` mock mode (`TrailsClient(mock=True)`) is available for all test environments.
 
-The full test suite (**675 tests — 619 Forge + 56 Pytest**) passes with zero regressions.
+The full test suite (**1,083 tests — 619 Forge + 37 Aiken + 427 Pytest**) passes with zero regressions.
 
 ---
 
@@ -343,6 +455,10 @@ graph LR
     P2 --> P5[Phase 5: RPCs + Identity]
     P3 --> P4[Phase 4: Fiat Rails + Yield]
     P4 --> P5
+    P3 --> PR["§6.5 Hybrid Payment Rail\n(x402 + HTLC + Stablecoin Out)"]
+    P4 --> PR
+    P2 --> PR
+    P5 --> PR
 ```
 
 ---

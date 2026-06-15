@@ -1,5 +1,5 @@
 import pytest
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from neuron.sdk.sequence_wallet import SequenceWalletManager, SessionKeyManager, TrustTier
 
 def test_wallet_creation():
@@ -22,7 +22,7 @@ def test_session_key_creation():
     assert "session_key_address" in session
     assert session["max_value_per_tx"] == 1000
     assert session["allowed_contracts"] == allowed
-    assert session["expires_at"] > datetime.utcnow().timestamp()
+    assert session["expires_at"] > datetime.now(timezone.utc).timestamp()
 
 def test_session_scope_verification():
     manager = SequenceWalletManager()

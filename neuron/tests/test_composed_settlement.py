@@ -211,3 +211,32 @@ class TestEscrowParams:
 
         with pytest.raises(ComposerError, match="No payment splits"):
             composer.get_escrow_params(empty_plan, blueprint)
+
+    def test_escrow_params_with_premium(self, composer, two_provider_plan):
+        """Escrow params should include gas premium fields when service block is present."""
+        class MockComputeSpecWithBlock:
+            class GpuType:
+                value = "A100"
+            gpu_type = GpuType()
+
+        class MockBlueprintWithBlock:
+            name = "ServiceBlock_OMS_v1"
+            max_cost_per_hour = 80.0
+            compute = MockComputeSpecWithBlock()
+            required_service_blocks = ["ServiceBlock_OMS_v1"]
+
+        bp = MockBlueprintWithBlock()
+        params = composer.get_escrow_params(two_provider_plan, bp)
+
+        # Base premium (2%) + OMS premium (5%) = 7% premium rate = 700 BPS
+        assert params["gasPremiumBps"] == 700
+        # totalCostWithPremium should be: (80.0 * 1.07) * (3600 / 3600) = 85.6
+        assert params["totalCostWithPremium"] == 85.6
+
+        # Check splits have correct fields
+        for split in params["splits"]:
+            assert "base_cost" in split
+            assert "premium_surcharge" in split
+            assert "total_cost" in split
+            assert split["amount"] == split["base_cost"]
+            assert round(split["base_cost"] + split["premium_surcharge"], 6) == split["total_cost"]

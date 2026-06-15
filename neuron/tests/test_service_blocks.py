@@ -151,6 +151,80 @@ class TestCategoryInference:
         client = ServiceBlockClient()
         assert client._infer_category("multi_chain_bridge") == "NETWORK"
         assert client._infer_category("x402_payments") == "NETWORK"
+        assert client._infer_category("ServiceBlock_OMS_v1") == "NETWORK"
+
+
+# ═══════════════════════════════════════════════════════════════
+# Tests: OMS Service Block & Required Service Blocks (Phase 2)
+# ═══════════════════════════════════════════════════════════════
+
+class TestOMSIntegrationPhase2:
+
+    def test_oms_service_block_exists(self):
+        client = ServiceBlockClient()
+        block = client.get_block("ServiceBlock_OMS_v1")
+        assert block is not None
+        assert block["name"] == "ServiceBlock_OMS_v1"
+        assert block["category"] == "NETWORK"
+        
+        bp = client.resolve_blueprint("ServiceBlock_OMS_v1")
+        assert bp.min_trust_tier == "silver"
+
+
+    def test_blueprint_required_service_blocks(self):
+        # Create blueprints that only differ in required service blocks
+        bp1 = InstanceBlueprint(name="test_bp", required_service_blocks=[])
+        bp2 = InstanceBlueprint(name="test_bp", required_service_blocks=["ServiceBlock_OMS_v1"])
+        
+        # Hashing should be different
+        assert bp1.blueprint_hash() != bp2.blueprint_hash()
+        
+        # to_dict should serialize the field
+        d1 = bp1.to_dict()
+        d2 = bp2.to_dict()
+        assert "required_service_blocks" in d1
+        assert d1["required_service_blocks"] == []
+        assert d2["required_service_blocks"] == ["ServiceBlock_OMS_v1"]
+
+    def test_get_escrow_params_service_block_id(self):
+        from neuron.composer.composer import VAMSResourceComposer
+        from neuron.composer.allocator import AllocationPlan
+        
+        composer = VAMSResourceComposer()
+        
+        # Create a mock allocation plan
+        class MockNode:
+            def __init__(self, node_id, provider, capacity_units):
+                self.node_id = node_id
+                self.provider = provider
+                self.capacity_units = capacity_units
+                self.reservation_price = 1.0
+
+        class MockAllocationPlan:
+            def __init__(self, nodes):
+                self.nodes = nodes
+                self.total_nodes = len(nodes)
+                self.total_hourly_cost = sum(n.reservation_price for n in nodes)
+
+        nodes = [MockNode("n1", "0xPROVIDER", 100)]
+        plan = MockAllocationPlan(nodes)
+        
+        # Test with a regular blueprint
+        bp_regular = InstanceBlueprint(name="regular_bp")
+        params_regular = composer.get_escrow_params(plan, bp_regular)
+        assert params_regular["serviceBlockId"] == ""
+        
+        # Test with a service block blueprint
+        bp_service = InstanceBlueprint(name="ServiceBlock_OMS_v1")
+        params_service = composer.get_escrow_params(plan, bp_service)
+        assert params_service["serviceBlockId"] != ""
+        assert params_service["serviceBlockId"].startswith("0x")
+        
+        # Determinism check
+        import hashlib
+        expected_id = f"0x{hashlib.sha256(b'ServiceBlock_OMS_v1').hexdigest()}"
+        assert params_service["serviceBlockId"] == expected_id
+
 
 
 if __name__ == "__main__":

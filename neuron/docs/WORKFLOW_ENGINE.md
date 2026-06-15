@@ -62,12 +62,12 @@ All durable functions in VAMS are decorated with `@DBOS.step()`.
 To run a workflow, set the workflow ID and call the function:
 
 ```python
-from dbos import DBOS
+from dbos import DBOS, SetWorkflowID
 from workflows import vams_data_pipeline
 
-# Set a deterministic workflow ID for idempotency
-DBOS.set_workflow_id("unique_run_123")
-result = vams_data_pipeline("unique_run_123")
+# Set a deterministic workflow ID for idempotency (prevents duplicate runs)
+with SetWorkflowID("unique_run_123"):
+    result = await vams_data_pipeline()
 ```
 
 Or run the interactive demo:

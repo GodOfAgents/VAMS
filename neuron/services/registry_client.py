@@ -156,6 +156,16 @@ _SERVICE_BLOCK_BLUEPRINTS: Dict[str, InstanceBlueprint] = {
         max_cost_per_hour=15.0,
         min_sla_score_bps=8000,
     ),
+    "ServiceBlock_OMS_v1": InstanceBlueprint(
+        name="ServiceBlock_OMS_v1",
+        compute=ComputeSpec(gpu_type=GPUType.ANY, gpu_count=0, vcpu=4),
+        memory=MemorySpec(ram_gb=8),
+        storage=StorageSpec(type=StorageType.NVME, capacity_gb=20),
+        networking=NetworkSpec(bandwidth_mbps=200, max_latency_ms=50),
+        max_cost_per_hour=3.5,
+        min_sla_score_bps=9000,
+        min_trust_tier="silver",
+    ),
 }
 
 
@@ -278,7 +288,7 @@ class ServiceBlockClient:
         ai_hints = ("llama", "inference", "vector", "compute")
         storage_hints = ("storage", "archive")
         security_hints = ("tee", "mev", "audit")
-        network_hints = ("bridge", "payments", "x402")
+        network_hints = ("bridge", "payments", "x402", "oms")
 
         name_lower = name.lower()
         if any(h in name_lower for h in ai_hints):

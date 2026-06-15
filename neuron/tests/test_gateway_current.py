@@ -19,8 +19,9 @@ class TestGatewayCurrent(unittest.TestCase):
         
     def test_register_agent(self):
         """Test agent registration adds the node to in-memory AGENTS state."""
+        node_id = "0x" + "01" * 32
         payload = {
-            "node_id": "test_agent_01",
+            "node_id": node_id,
             "public_key": "0xPub123",
             "stake_amount": 1000.0,
             "capabilities": {"compute": "gpu"},
@@ -29,13 +30,14 @@ class TestGatewayCurrent(unittest.TestCase):
         response = self.client.post("/agents/register", json=payload)
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response.json()["success"])
-        self.assertIn("test_agent_01", AGENTS)
-        self.assertEqual(AGENTS["test_agent_01"]["stake"], 1000.0)
+        self.assertIn(node_id, AGENTS)
+        self.assertEqual(AGENTS[node_id]["stake"], 1000.0)
 
     def test_heartbeat_unknown_agent(self):
         """Test heartbeat from unregistered agent returns success=False."""
+        unknown_id = "0x" + "ff" * 32
         payload = {
-            "payload": f"{time.time()}|active|unknown_agent",
+            "payload": f"{time.time()}|active|{unknown_id}",
             "signature": "0xSig"
         }
         response = self.client.post("/heartbeat", json=payload)
@@ -44,20 +46,21 @@ class TestGatewayCurrent(unittest.TestCase):
 
     def test_heartbeat_success(self):
         """Test heartbeat from registered agent returns success=True."""
+        node_id = "0x" + "02" * 32
         # 1. Register
         self.client.post("/agents/register", json={
-            "node_id": "test_agent_02", "public_key": "0xPub", "stake_amount": 500
+            "node_id": node_id, "public_key": "0xPub", "stake_amount": 500
         })
         
         # 2. Heartbeat
         payload = {
-            "payload": f"{time.time()}|active|test_agent_02",
+            "payload": f"{time.time()}|active|{node_id}",
             "signature": "0xSig"
         }
         response = self.client.post("/heartbeat", json=payload)
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response.json()["success"])
-        self.assertEqual(AGENTS["test_agent_02"]["status"], "active")
+        self.assertEqual(AGENTS[node_id]["status"], "active")
 
     def test_rate_limiter(self):
         """Test the gateway RateLimiter utility class limits requests properly."""

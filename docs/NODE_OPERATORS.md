@@ -45,7 +45,7 @@ consumers specify skill vectors in blueprints, leading to more consistent alloca
 | VAMS Neuron | v1.3.0-oms |
 
 ```bash
-pip install vams-neuron==1.3.0-oms
+pip install -r requirements.txt
 ```
 
 ### Verify Installation
@@ -68,14 +68,13 @@ import asyncio
 from neuron.sentinel.sentinel_node import VAMSSentinelNode
 
 node = VAMSSentinelNode(
-    node_id="0xYOUR_NODE_ADDRESS",
-    operator_key="0xYOUR_OPERATOR_PRIVATE_KEY",
-    da_endpoint="https://your-da-gateway.vams.network",
-    audit_interval_seconds=300,
-    # No anomaly_detector = standard v1.0.0-icn behavior
+    private_key="0xYOUR_OPERATOR_PRIVATE_KEY",
+    registry_addr="0xYOUR_REGISTRY_ADDRESS",
+    rpc_url="http://localhost:8545",
+    mock_mode=True,  # Set to False to interact with live contracts
 )
 
-asyncio.run(node.run_scheduler())
+asyncio.run(node.run_scheduler(interval_seconds=300))
 ```
 
 ---
@@ -202,14 +201,14 @@ discovery = SkillDiscovery.load("models/skill_discovery_llama3.pkl")
 detector = ActivationAnomalyDetector(discovery, default_threshold=3.0)
 
 node = VAMSSentinelNode(
-    node_id="0xYOUR_NODE_ADDRESS",
-    operator_key="0xYOUR_OPERATOR_PRIVATE_KEY",
-    da_endpoint="https://your-da-gateway.vams.network",
-    audit_interval_seconds=300,
+    private_key="0xYOUR_OPERATOR_PRIVATE_KEY",
+    registry_addr="0xYOUR_REGISTRY_ADDRESS",
+    rpc_url="http://localhost:8545",
+    mock_mode=True,  # Set to False to interact with live contracts
     anomaly_detector=detector,   # ← Enable Intelligence Layer
 )
 
-asyncio.run(node.run_scheduler())
+asyncio.run(node.run_scheduler(interval_seconds=300))
 ```
 
 ---

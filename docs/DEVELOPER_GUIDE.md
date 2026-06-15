@@ -11,43 +11,46 @@ VAMS is the "Sovereign Brain" for the Agentic Web. Instead of running your AI ag
 
 If you are building an AI agent (e.g., a DeFi trading bot, a research assistant), you are a **Consumer** of the VAMS network.
 
-### Step 1: Install the SDK
+### Step 1: Install the Neuron Package Dependencies
 ```bash
-pip install vams-sdk==1.2.0-autoskill
+pip install -r requirements.txt
 ```
 
 ### Step 2: Define your Intent
-Instead of manually renting GPUs on Akash or io.net, use the **Resource Composer**.
+from neuron.composer.composer import VAMSResourceComposer
+from neuron.composer.models import InstanceBlueprint, ComputeSpec, MemorySpec, StorageSpec, NetworkSpec, GPUType
 
-```python
-from vams.composer import VAMSComposer
-from vams.auth import VAMSAgentProtocol
-
-auth = VAMSAgentProtocol(api_key="your_key")
-composer = VAMSComposer(auth)
+composer = VAMSResourceComposer()
 
 # Define your infrastructure needs
-# Optional: include skill_vector to match nodes proficient in a specific task type.
-# Omit it entirely for standard 4-axis scoring (backward compatible with v1.0.0-icn).
-blueprint = composer.request_blueprint(
-    target_region="us-east",
-    requirements=["gpu:a100", "memory:64gb"],
-    max_cost_vams="100.0",  # Max 100 $VAMS per hour
-    skill_vector=[0.92, -0.12, 0.34, 0.05, -0.21, 0.0, 0.0, 0.0, 0.0, 0.0]  # Optional
+blueprint = InstanceBlueprint(
+    name="my-custom-blueprint",
+    compute=ComputeSpec(gpu_type=GPUType.A100, gpu_count=1, vcpu=4),
+    memory=MemorySpec(ram_gb=64),
+    storage=StorageSpec(capacity_gb=100),
+    networking=NetworkSpec(region="us-east"),
+    max_cost_per_hour=100.0,  # Max 100 $VAMS per hour
+    skill_vector=[0.92, -0.12, 0.34, 0.05, -0.21, 0.0, 0.0, 0.0, 0.0, 0.0]  # Optional PCA coordinates
 )
 
-print(f"Got Blueprint -> {blueprint.id}")
+# Provision the blueprint using the matchmaking composer
+instance = composer.provision(blueprint)
+
+print(f"Got Instance -> {instance.instance_id}")
+print(f"Total Hourly Cost -> {instance.allocation.total_hourly_cost} $VAMS")
 ```
 
 ### Step 3: Fund the Escrow
-Fund the Master Hybrid Escrow for your generated blueprint. This protects you: if the provider goes offline, the escrow refunds the unspent portion automatically.
+Fund the Master Hybrid Escrow for your generated allocation. This protects you: if the provider goes offline, the escrow refunds the unspent portion automatically. To do this, retrieve the structured parameters from the composer and submit them to the on-chain `ComposedSettlement` contract:
 
 ```python
-from vams.economics import EscrowManager
-
-escrow = EscrowManager(auth)
-allocation_id = escrow.lock_funds(blueprint.id, duration_hours=24)
-```
+# Generate the parameters required for a ComposedSettlement.createComposedEscrow() call
+escrow_params = composer.get_escrow_params(
+    plan=instance.allocation,
+    blueprint=blueprint,
+    duration_seconds=86400  # duration_hours=24
+)
+print("Escrow parameters for contract execution:", escrow_params)
 
 ### Step 4: Execute!
 Your agent is now live on the decentralized infrastructure stack. VAMS' Sentinel Network will constantly monitor the SLA of the provider.
@@ -243,18 +246,18 @@ from neuron.payments.universal_topup import UniversalTopUpManager
 coinme = CoinmeClient()  # Uses COINME_API_KEY env var
 topup = UniversalTopUpManager(coinme, escrow_manager)
 
-# Get current conversion rate
+# Get current conversion rate (returns float directly)
 rate = coinme.get_conversion_rate(from_currency="USD", to_token="VAMS")
-print(f"1 USD = {rate.rate} $VAMS (fee: {rate.fee_pct}%)")
+print(f"1 USD = {rate} $VAMS")
 
-# Create a fiat checkout session
+# Create a fiat checkout session (returns dict)
 session = coinme.create_checkout(
     amount_fiat=100.0,
     currency="USD",
     dest_address="0xYOUR_AGENT_ADDRESS"
 )
-print(f"Complete payment at: {session.checkout_url}")
-print(f"Session expires: {session.expires_at}")
+print(f"Complete payment at: {session['checkout_url']}")
+print(f"Session ID: {session['session_id']}")
 
 # After payment confirmation, funds are automatically deposited
 # to your agent's ComposedSettlement escrow
