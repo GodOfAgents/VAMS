@@ -28,14 +28,17 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 
 # ─── DBOS test harness ────────────────────────────────────────────────────────
-# TestClient spins up a temporary Postgres schema and tears it down after
-# the test session. It wires up DBOS automatically so you don't need a
-# real DBOS_SYSTEM_DATABASE_URL in CI.
-try:
-    from dbos.testing import TestClient as DBOSTestClient
-    _DBOS_TESTING_AVAILABLE = True
-except ImportError:
-    _DBOS_TESTING_AVAILABLE = False
+import os
+import sqlalchemy as sa
+from dbos import DBOS
+
+# Clean up any leftover database file
+DB_FILE = "dbos_test_workflows.db"
+if os.path.exists(DB_FILE):
+    try:
+        os.remove(DB_FILE)
+    except OSError:
+        pass
 
 from workflows import (
     step_gather_data,
@@ -50,22 +53,31 @@ from workflows import (
 
 # ─── Fixtures ─────────────────────────────────────────────────────────────────
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 def dbos_client():
     """
     Session-scoped DBOS test client.
-
-    Provisions a temporary Postgres schema before the test session and
-    drops it after. All workflow/step tests must use this fixture to
-    ensure DBOS is initialised before decorated functions are called.
+    Initialises file-based SQLite database with NullPool to run workflow tests.
     """
-    if not _DBOS_TESTING_AVAILABLE:
-        pytest.skip(
-            "dbos.testing.TestClient not available. "
-            "Install with: pip install dbos psycopg2-binary"
-        )
-    with DBOSTestClient() as client:
-        yield client
+    DBOS.destroy()
+    DBOS(config={
+        "name": "vams-test-app",
+        "system_database_url": f"sqlite:///{DB_FILE}",
+        "db_engine_kwargs": {
+            "poolclass": sa.NullPool
+        }
+    })
+    DBOS.reset_system_database()
+    DBOS.launch()
+    
+    yield None
+    
+    DBOS.destroy()
+    if os.path.exists(DB_FILE):
+        try:
+            os.remove(DB_FILE)
+        except OSError:
+            pass
 
 
 # ─── Step unit tests ──────────────────────────────────────────────────────────
@@ -164,13 +176,15 @@ class TestWorkflowIdempotency:
         """
         from dbos import SetWorkflowID
 
-        async def run_with_id(wf_id: str) -> str:
+        async def run_both():
+            wf_id = f"idempotent-test-{int(time.time() * 1000)}"
             with SetWorkflowID(wf_id):
-                return await vams_data_pipeline()
+                r1 = await vams_data_pipeline()
+            with SetWorkflowID(wf_id):
+                r2 = await vams_data_pipeline()
+            return r1, r2
 
-        wf_id = f"idempotent-test-{int(time.time() * 1000)}"
-        r1 = asyncio.run(run_with_id(wf_id))
-        r2 = asyncio.run(run_with_id(wf_id))
+        r1, r2 = asyncio.run(run_both())
         # Both calls should produce the same result string
         assert r1 == r2
 
@@ -178,13 +192,15 @@ class TestWorkflowIdempotency:
         """Two different workflow IDs are independent executions."""
         from dbos import SetWorkflowID
 
-        async def run_with_id(wf_id: str) -> str:
-            with SetWorkflowID(wf_id):
-                return await vams_data_pipeline()
+        async def run_both():
+            ts = int(time.time() * 1000)
+            with SetWorkflowID(f"wf-a-{ts}"):
+                r1 = await vams_data_pipeline()
+            with SetWorkflowID(f"wf-b-{ts}"):
+                r2 = await vams_data_pipeline()
+            return r1, r2
 
-        ts = int(time.time() * 1000)
-        r1 = asyncio.run(run_with_id(f"wf-a-{ts}"))
-        r2 = asyncio.run(run_with_id(f"wf-b-{ts}"))
+        r1, r2 = asyncio.run(run_both())
         # Both succeed independently
         assert r1 is not None
         assert r2 is not None

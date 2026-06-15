@@ -322,6 +322,7 @@ def test_p3_verified_address_passes():
         requires_privacy=False,
         requires_institutional_compliance=True,
         agent_address=verified_address,
+        loaded_service_blocks=["ServiceBlock_OMS_v1"],
     )
     d = router.route(intent, TrustTier.PLATINUM)
     assert d.chain == "Polygon", f"Expected Polygon KYC, got {d.chain}"
@@ -341,6 +342,7 @@ def test_p3_unverified_address_blocked():
         requires_privacy=False,
         requires_institutional_compliance=True,
         agent_address=unverified_address,
+        loaded_service_blocks=["ServiceBlock_OMS_v1"],
     )
     try:
         router.route(intent, TrustTier.PLATINUM)
@@ -362,6 +364,7 @@ def test_p3_missing_address_blocked():
         requires_privacy=False,
         requires_institutional_compliance=True,
         agent_address="",  # No address supplied — OMS.is_verified("") == False
+        loaded_service_blocks=["ServiceBlock_OMS_v1"],
     )
     try:
         router.route(intent, TrustTier.PLATINUM)
@@ -380,6 +383,7 @@ def test_p3_stats_incremented_on_denial():
         requires_privacy=False,
         requires_institutional_compliance=True,
         agent_address="0xbadaddress",
+        loaded_service_blocks=["ServiceBlock_OMS_v1"],
     )
     initial_denied = router.get_stats()["denied"]
     try:

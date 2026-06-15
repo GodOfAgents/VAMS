@@ -105,17 +105,63 @@ class SessionKeySigner(SignerInterface):
         # EIP-1271: The session key signs, and the smart wallet verifies it.
         return self.session_key_signer.sign_message(message)
 
+class OMSSigner(SignerInterface):
+    """
+    Signer implementation that wraps another signer and enforces OMS compliance
+    before signing transactions or messages.
+    """
+    
+    def __init__(self, inner_signer: SignerInterface, identity_verifier: Optional[Any] = None):
+        self.inner_signer = inner_signer
+        # Lazy import to avoid circular dependency
+        from neuron.sdk.oms_identity import OMSIdentityVerifier
+        self.identity_verifier = identity_verifier or OMSIdentityVerifier()
+        
+    @property
+    def address(self) -> str:
+        return self.inner_signer.address
+        
+    def sign_transaction(self, transaction: Dict[str, Any]) -> Any:
+        # Check compliance for recipient
+        to_address = transaction.get("to")
+        if to_address and not self.identity_verifier.is_verified(to_address):
+            # Also allow verifying sender (self.address)
+            if not self.identity_verifier.is_verified(self.address):
+                raise PermissionError(
+                    f"OMS Signer: Compliance check failed. Neither sender ({self.address}) "
+                    f"nor recipient ({to_address}) is OMS-verified."
+                )
+        return self.inner_signer.sign_transaction(transaction)
+        
+    def sign_message(self, message: Union[bytes, str]) -> Any:
+        # Check compliance for sender
+        if not self.identity_verifier.is_verified(self.address):
+            raise PermissionError(f"OMS Signer: Compliance check failed. Sender ({self.address}) is not OMS-verified.")
+        return self.inner_signer.sign_message(message)
+
 class SignerFactory:
     """Factory to create the appropriate signer based on configuration."""
     
     @staticmethod
     def create(config: Dict[str, Any]) -> SignerInterface:
         if "session_key" in config and "smart_wallet_address" in config:
-            return SessionKeySigner(
+            signer = SessionKeySigner(
                 smart_wallet_address=config["smart_wallet_address"],
                 session_key=config["session_key"]
             )
         elif "private_key" in config:
-            return EOASigner(private_key=config["private_key"])
+            signer = EOASigner(private_key=config["private_key"])
         else:
             raise ValueError("Invalid signer configuration. Must provide private_key OR (session_key AND smart_wallet_address).")
+            
+        if config.get("oms_compliance", False):
+            from neuron.sdk.oms_identity import OMSIdentityVerifier
+            verifier_config = config.get("oms_verifier_config", {})
+            verifier = OMSIdentityVerifier(
+                api_url=verifier_config.get("api_url"),
+                api_key=verifier_config.get("api_key")
+            )
+            signer = OMSSigner(inner_signer=signer, identity_verifier=verifier)
+            
+        return signer
+

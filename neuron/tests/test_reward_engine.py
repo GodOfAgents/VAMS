@@ -174,8 +174,29 @@ class TestEpochRewards:
         result = engine.calculate_epoch_rewards(sample_providers, epoch_emission_budget=10_000.0)
 
         for r in result.provider_rewards:
-            expected = r.base_reward + r.regional_bonus + r.staking_boost + r.builder_revenue
+            expected = max(0.0, r.base_reward + r.regional_bonus + r.staking_boost + r.builder_revenue - r.gas_premium_burn)
             assert abs(r.total_reward - expected) < 0.01
+
+    def test_epoch_rewards_with_gas_premium(self, engine):
+        """Epoch rewards should deduct gas premium burn when service blocks are specified."""
+        providers = [
+            {
+                "address": "0xP1",
+                "region_id": "us-east-1",
+                "capacity_contribution": 100,
+                "escrow_completions": 5000.0,
+                "staked_amount": 10_000.0,
+                "required_service_blocks": ["ServiceBlock_OMS_v1"],
+            }
+        ]
+        result = engine.calculate_epoch_rewards(providers, epoch_emission_budget=10_000.0)
+        p1 = result.provider_rewards[0]
+
+        # Base rate (2%) + OMS (5%) = 7% premium rate
+        # gas_premium_burn = base_reward * 0.07 = 10000.0 * 0.07 = 700.0
+        assert p1.gas_premium_burn == 700.0
+        # total_reward = base_reward (10000.0) + staking_boost (200.0) - gas_premium_burn (700.0) = 9500.0
+        assert p1.total_reward == 9500.0
 
     def test_empty_providers(self, engine):
         """Empty provider list returns empty summary."""

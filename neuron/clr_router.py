@@ -101,7 +101,8 @@ class VAMSTransactionMetadata:
     requires_formal_verification: bool = False     # Ouroboros proofs (-> Cardano)
     requires_sub_second_settle: bool = False       # Hydra state channels
     max_finality_ms: int = 0                       # Max economic irreversibility (0=don't care)
-    agent_address: str = ""                        # Agent EVM address for OMS Identity
+    agent_address: str = ""
+    loaded_service_blocks: List[str] = field(default_factory=list)                        # Agent EVM address for OMS Identity
 
 
 @dataclass
@@ -123,6 +124,7 @@ class TransactionIntent:
     min_security: float = 0.5
     use_case_id: str = ""
     agent_address: str = ""
+    loaded_service_blocks: List[str] = field(default_factory=list)
 
     def to_metadata(self) -> VAMSTransactionMetadata:
         """Convert to v3.1 metadata."""
@@ -138,6 +140,7 @@ class TransactionIntent:
             requires_sub_second_settle=self.requires_sub_second_settle,
             max_finality_ms=self.max_finality_ms,
             agent_address=self.agent_address,
+            loaded_service_blocks=self.loaded_service_blocks,
         )
 
 
@@ -467,6 +470,11 @@ class CLRouter:
         metrics: Dict[str, ChainMetrics]
     ) -> RoutingDecision:
         """P3: Route institutional compliance to Polygon CDK KYC Layer."""
+        # Enforce that the OMS block must be loaded for compliance routing (Hybrid Model)
+        if "ServiceBlock_OMS_v1" not in metadata.loaded_service_blocks:
+            self._stats["denied"] += 1
+            raise PermissionError("Institutional compliance routing requires the OMS service block (ServiceBlock_OMS_v1) to be loaded.")
+
         if self.identity_verifier and not self.identity_verifier.is_verified(metadata.agent_address):
             self._stats["denied"] += 1
             raise PermissionError("Institutional compliance routing requires an OMS verified identity. Agent address not verified.")

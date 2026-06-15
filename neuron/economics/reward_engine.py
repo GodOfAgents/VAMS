@@ -20,6 +20,7 @@ from enum import Enum
 from typing import Dict, List, Optional, Tuple
 
 from neuron.economics.regional import RegionalEconomics
+from neuron.economics.gas_premium import GasAbstractionPremiumCalculator
 
 logger = logging.getLogger("VAMS-RewardEngine")
 
@@ -72,16 +73,18 @@ class ProviderReward:
     regional_bonus: float
     staking_boost: float
     builder_revenue: float = 0.0
+    gas_premium_burn: float = 0.0
     total_reward: float = 0.0
     staking_tier: StakingTier = StakingTier.IRON
 
     def __post_init__(self):
-        self.total_reward = (
+        self.total_reward = max(0.0, (
             self.base_reward
             + self.regional_bonus
             + self.staking_boost
             + self.builder_revenue
-        )
+            - self.gas_premium_burn
+        ))
 
 
 @dataclass
@@ -160,6 +163,7 @@ class RewardEngine:
         # Step 1: Calculate base rewards proportional to escrow completions
         total_completions = sum(p.get("escrow_completions", 0.0) for p in providers)
         rewards: List[ProviderReward] = []
+        calculator = GasAbstractionPremiumCalculator()
 
         for prov in providers:
             address = prov["address"]
@@ -196,6 +200,11 @@ class RewardEngine:
             if builder_revenues and address in builder_revenues:
                 builder_rev = builder_revenues[address]
 
+            # Gas premium burn portion
+            required_blocks = prov.get("required_service_blocks", [])
+            premium_rate = calculator.calculate_premium_rate(required_blocks)
+            gas_premium_burn = base_reward * premium_rate
+
             reward = ProviderReward(
                 provider=address,
                 region_id=region_id,
@@ -203,6 +212,7 @@ class RewardEngine:
                 regional_bonus=round(regional_bonus, 6),
                 staking_boost=round(staking_boost, 6),
                 builder_revenue=round(builder_rev, 6),
+                gas_premium_burn=round(gas_premium_burn, 6),
                 staking_tier=tier,
             )
             rewards.append(reward)

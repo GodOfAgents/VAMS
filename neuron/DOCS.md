@@ -329,22 +329,21 @@ health = check_all_tee_health()
 The neuron integrates the official DBOS Python SDK to provide exactly-once, crash-safe workflow execution backed by PostgreSQL.
 
 ```python
-from dbos import DBOS
-from workflows import step_gather_data, step_run_inference
+from dbos import DBOS, SetWorkflowID
+from neuron.workflows import vams_data_pipeline
 
-@DBOS.workflow()
-def vams_data_pipeline(workflow_id: str):
-    # Step 1: Gather data (exactly-once)
-    data = DBOS.step(step_gather_data)
-    
-    # Step 2: Run inference (exactly-once)
-    result = DBOS.step(step_run_inference, data)
-    
-    return result
+# The actual workflow (defined in neuron/workflows.py):
+# @DBOS.workflow()
+# async def vams_data_pipeline() -> str:
+#     data      = await step_gather_data()
+#     inference = await step_run_inference(data)
+#     action    = await step_execute_action(inference)
+#     result    = await step_report_result(action)
+#     return result
 
-# Execute idempotently
-DBOS.set_workflow_id(workflow_id)
-result = vams_data_pipeline(workflow_id)
+# Execute idempotently with a deterministic workflow ID
+with SetWorkflowID("unique_run_123"):
+    result = await vams_data_pipeline()
 ```
 
 See [docs/WORKFLOW_ENGINE.md](docs/WORKFLOW_ENGINE.md) for complete details on setting up Postgres and writing durable steps.
@@ -577,10 +576,15 @@ print(f"Anchored to {receipt.provider} - Blob ID: {receipt.blob_id}")
 ### Sentinel Network (Phase 2)
 Decentralized SLA enforcement via randomized challenge-response.
 ```python
-from sentinel.sentinel_node import VAMSSentinelNode
-from sentinel.challenges.gpu_challenge import GPUChallenge
+from neuron.sentinel.sentinel_node import VAMSSentinelNode
+from neuron.sentinel.challenges.gpu_challenge import GPUChallenge
 
-node = VAMSSentinelNode(wallet="0x...")
+node = VAMSSentinelNode(
+    private_key="0x...",
+    registry_addr="0xSLAEnforcerAddress",
+    rpc_url="https://polygon-rpc.com",
+    mock_mode=True
+)
 result = await node.run_challenge(GPUChallenge(), "0xprovider...")
 print(f"Trust Score Update: {result.trust_update}")
 ```
@@ -612,14 +616,19 @@ Connects `ServiceBlockRegistry.sol` to execution nodes, enabling revenue-shared 
 ### Regional Economics & Composed Settlement (Phase 4)
 Dynamic DePIN incentives and cross-provider escrows:
 ```python
-from economics.regional import RegionalEconomics
-from economics.composed_settlement import ComposedSettlementClient
+from neuron.economics.regional import RegionalEconomics
+from neuron.composer.composer import VAMSResourceComposer
 
 econ = RegionalEconomics()
 multiplier = econ.get_current_multiplier("eu-central-1", active_nodes=800)
 
-escrow = ComposedSettlementClient()
-await escrow.create_composed_escrow(providers=["0x...", "0x..."], total_amount=1000)
+# Generate on-chain escrow parameters via the Composer (no separate client needed)
+composer = VAMSResourceComposer()
+escrow_params = composer.get_escrow_params(
+    providers=["0xProvider1", "0xProvider2"],
+    total_amount_wei=1000 * 10**18
+)
+# Submit escrow_params via your Web3 provider to ComposedSettlement.sol
 ```
 Emissions run via `RegionAwareDEC.sol` to bootstrap infrastructure in underrepresented regions.
 
@@ -630,7 +639,7 @@ Emissions run via `RegionAwareDEC.sol` to bootstrap infrastructure in underrepre
 On-chain agent registration with the VAMSAgentRegistry contract.
 
 ```python
-from web3.registration import AgentRegistryClient
+from neuron.eth_client.registration import AgentRegistryClient
 
 client = AgentRegistryClient(
     rpc_url="https://rpc.polygon.io",
@@ -638,11 +647,10 @@ client = AgentRegistryClient(
     registry_address="0x..."
 )
 
-# Register agent
+# Register agent (stake_amount, metadata_uri)
 tx_hash = client.register_agent(
-    agent_id=bytes.fromhex("..."),
-    metadata_uri="ipfs://...",
-    stake_amount=100 * 10**18  # 100 VAMS
+    stake_amount=100 * 10**18,  # 100 VAMS tokens
+    metadata_uri="ipfs://..."
 )
 
 # Submit checkpoint
@@ -755,7 +763,8 @@ python -m pytest tests/test_workflows.py -v
 | `test_sdk.py` | 29 | CelestiaDA, BittensorSubnet, PhalaTEE, MarlinOyster, Automata |
 | `test_workflows.py` | 15 | CheckpointStore, DemoWorkflow, crash recovery |
 | `test_clr_v3.py` | 19 | CLR v3.1 routing, MEV protection, Bridge + ICB |
-| **Total** | **79+** | **All pass** |
+| `test_composer.py`, `test_sentinel.py`, `test_economics.py`, et al. | 348 | ICN phases 0–4, DA routing, composer, sentinel, OMS integration |
+| **Total** | **427** | **All pass** |
 
 ---
 

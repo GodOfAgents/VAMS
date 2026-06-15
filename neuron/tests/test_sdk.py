@@ -380,8 +380,8 @@ class TestTrustPlugins:
             root_address=root_addr, 
             agent_address=session_addr
         )
-        # Verify the encoded proof data ends with the root address, not session address
-        assert result.proof_data.endswith(root_addr)
+        # Verify the encoded proof data contains the root address (left-padded to 32 bytes in ABI), not session address
+        assert (b"\x00" * 12 + root_addr) in result.proof_data
         assert session_addr not in result.proof_data
 
 if __name__ == "__main__":

@@ -2,7 +2,7 @@
 
 **Date:** May 6, 2026
 **Stage:** Pre-Mainnet (Testnet Candidate)
-**Architecture:** v0.6.0 (OMS Integration) | **Neuron:** v1.3.0-oms | **Contracts:** Full V2 + OMS Suite (675 tests)
+**Architecture:** v0.6.0 (OMS Integration) | **Neuron:** v1.3.0-oms | **Contracts:** Full V2 + OMS Suite (1,083 tests)
 
 ---
 
@@ -79,7 +79,7 @@ VAMS/
 | **CLR v3.1** (`clr_router.py`) | 7-priority decision tree; P3 now gates on OMS identity (fail-closed) | ✅ Complete |
 | **MEV Protection** | Encrypted mempool + batch auction settlement | ✅ Complete |
 | **Chain Oracle** | OMS enterprise RPCs for Polygon-ecosystem; SLA monitoring; 12 chain coverage | ✅ Complete |
-| **Tests** | 56 pytest (unit + integration + OMS + fiat + session key suites) | ✅ 56 pass |
+| **Tests** | 427 pytest (unit + integration + OMS + fiat + session key suites) | ✅ 427 pass |
 
 ### 3.4 Frontend & Gateway
 
@@ -108,8 +108,8 @@ VAMS/
 |-------|-----------|-------|--------|
 | Polygon/OMS Contracts| Foundry (`forge test`) | 619 | ✅ All pass |
 | Cardano Validators | Aiken (`aiken check`) | 37 | ✅ All pass |
-| Neuron Runtime | pytest | 56 | ✅ All pass |
-| **Total** | | **712** | |
+| Neuron Runtime | pytest | 427 | ✅ All pass |
+| **Total** | | **1,083** | |
 
 *(Note: Forge count reflects the OMS contract extensions — authorizedWallet, PayoutMode, YIELD_MANAGER_ROLE. Pytest count reflects consolidation of overlapping ICN + AUTOSKILL tests alongside new OMS suites: `test_fiat_yield.py`, `test_sequence_wallet.py`, `test_trails_client.py`, `test_clr_v3.py`.)*
 
@@ -210,7 +210,7 @@ VAMS/
 
 | Metric | Current |
 |--------|---------|
-| Total System Tests | **712** (619 Solidity + 37 Aiken + 56 Python) |
+| Total System Tests | **1,083** (619 Solidity + 37 Aiken + 427 Python) |
 | Active Logic Packages | 6 fully isolated Python strata + 5 Contract suites + OMS SDK layer |
 | Multi-Chain Deployments | 2 core (Cardano + Polygon) + 12 Oracle integrations |
 | Architecture Defs | `ARCHITECTURE_v0-6-0.md` (OMS) supersedes `ARCHITECTURE_v0-5-0.md` |

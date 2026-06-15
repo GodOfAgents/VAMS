@@ -18,25 +18,66 @@ VAMS requires bearer token authentication. Include the `Authorization` header co
 ---
 
 ## 1. Data Availability (DA) 
-Endpoints for interacting with the Multi-DA Performance Anchor.
+Endpoints for checking the status and history of the Multi-DA Performance Anchor.
 
-### `POST /da/anchor`
-Anchors a performance report to a selected DA layer.
+### `GET /da/status`
+Returns the connectivity and health status of all supported DA layer adapters.
 
-- **Request Body:**
-  ```json
-  {
-    "protocol": "celestia",
-    "blob": "e3b0...985",
-    "provider_id": "0x123..."
-  }
-  ```
 - **Response (200 OK):**
   ```json
   {
-    "status": "anchored",
-    "receipt": "0xabc...",
-    "transaction_hash": "0xdef..."
+    "version": "v0.2.0-alpha",
+    "da_layer": "Phase 0 Foundation",
+    "adapters": {
+      "celestia": {
+        "name": "CelestiaDAAdapter",
+        "rpc_url": "https://rpc-mocha.pops.one",
+        "mock_mode": true,
+        "healthy": true
+      },
+      "near": {
+        "name": "NearDAAdapter",
+        "rpc_url": "https://rpc.testnet.near.org",
+        "mock_mode": true,
+        "healthy": true
+      },
+      "eigenda": {
+        "name": "EigenDAAdapter",
+        "rpc_url": "https://holesky.drpc.org",
+        "mock_mode": true,
+        "healthy": true
+      },
+      "avail": {
+        "name": "AvailDAAdapter",
+        "rpc_url": "https://avail-turing.api.onfinality.io/public",
+        "mock_mode": true,
+        "healthy": true
+      }
+    }
+  }
+  ```
+
+### `GET /da/anchors`
+Queries anchored performance audit records that have been posted to the DA layers.
+
+- **Query Parameters:**
+  - `protocol` (optional, e.g. `celestia`, `near`)
+  - `limit` (optional, default: 50)
+- **Response (200 OK):**
+  ```json
+  {
+    "total": 1,
+    "protocol_filter": null,
+    "anchors": [
+      {
+        "node_id": "test_node_01",
+        "protocol": "celestia",
+        "blob_id": "blob_cel_12345",
+        "height": 9836950,
+        "report_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "timestamp": 1736703540.123
+      }
+    ]
   }
   ```
 

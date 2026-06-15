@@ -87,11 +87,20 @@ class NodeInfo:
         }
 
 
+from contextlib import asynccontextmanager
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup tasks
+    asyncio.create_task(cleanup_offline_nodes())
+    yield
+
 # --- APPLICATION ---
 app = FastAPI(
     title="VAMS Gateway",
     version=VERSION,
-    description="Central gateway for VAMS Neuron nodes"
+    description="Central gateway for VAMS Neuron nodes",
+    lifespan=lifespan
 )
 
 # In-memory node registry
@@ -165,9 +174,7 @@ async def cleanup_offline_nodes():
         for k in offline_keys:
             del nodes[k]
 
-@app.on_event("startup")
-async def startup_event():
-    asyncio.create_task(cleanup_offline_nodes())
+# Lifespan handles startup events.
 
 @app.get("/", response_class=HTMLResponse)
 async def dashboard(username: str = Depends(get_current_username)):
@@ -415,6 +422,7 @@ class ComposeRequest(BaseModel):
     elastic: bool = False
     min_replicas: int = 1
     max_replicas: int = 1
+    required_service_blocks: List[str] = []
 
 
 @app.post("/compose")
@@ -424,13 +432,31 @@ async def compose_resources(request: ComposeRequest, username: str = Depends(get
         raise HTTPException(status_code=503, detail="Resource Composer not available")
 
     try:
+        from neuron.economics.gas_premium import GasAbstractionPremiumCalculator
+        calculator = GasAbstractionPremiumCalculator()
+
         if request.blueprint_name:
             instance = composer.provision_blueprint(request.blueprint_name)
         elif request.service_block_name:
             instance = composer.provision_service_block(request.service_block_name)
         elif request.macro_block_name:
             instances = composer.provision_macro_block(request.macro_block_name)
-            return {"status": "provisioned", "instances": [i.to_dict() for i in instances]}
+            
+            total_base = sum(i.allocation.total_hourly_cost for i in instances)
+            total_premium = 0.0
+            for i in instances:
+                req_b = getattr(i.blueprint, "required_service_blocks", [])
+                total_premium += calculator.calculate_premium_cost(i.allocation.total_hourly_cost, req_b)
+            total_hourly = total_base + total_premium
+            
+            return {
+                "status": "provisioned",
+                "instances": [i.to_dict() for i in instances],
+                "base_hourly_cost": round(total_base, 6),
+                "premium_rate_bps": 0,
+                "premium_hourly_cost": round(total_premium, 6),
+                "total_hourly_cost": round(total_hourly, 6),
+            }
         elif request.name:
             bp = InstanceBlueprint(
                 name=request.name,
@@ -446,12 +472,30 @@ async def compose_resources(request: ComposeRequest, username: str = Depends(get
                 elastic=request.elastic,
                 min_replicas=request.min_replicas,
                 max_replicas=request.max_replicas,
+                required_service_blocks=request.required_service_blocks if hasattr(request, 'required_service_blocks') else []
             )
+            # Wait, ComposeRequest might not have required_service_blocks. Let's check ComposeRequest to be safe.
             instance = composer.provision(bp)
         else:
             raise HTTPException(status_code=400, detail="Provide blueprint_name or custom blueprint fields")
 
-        return {"status": "provisioned", "instance": instance.to_dict()}
+        bp = instance.blueprint
+        required_blocks = getattr(bp, "required_service_blocks", [])
+        premium_rate = calculator.calculate_premium_rate(required_blocks)
+        premium_rate_bps = int(premium_rate * 10000)
+        
+        base_hourly_cost = instance.allocation.total_hourly_cost
+        premium_hourly_cost = calculator.calculate_premium_cost(base_hourly_cost, required_blocks)
+        total_hourly_cost = calculator.calculate_total_cost(base_hourly_cost, required_blocks)
+
+        return {
+            "status": "provisioned",
+            "instance": instance.to_dict(),
+            "base_hourly_cost": round(base_hourly_cost, 6),
+            "premium_rate_bps": premium_rate_bps,
+            "premium_hourly_cost": round(premium_hourly_cost, 6),
+            "total_hourly_cost": round(total_hourly_cost, 6),
+        }
 
     except (ComposerError, KeyError) as e:
         raise HTTPException(status_code=422, detail=str(e))

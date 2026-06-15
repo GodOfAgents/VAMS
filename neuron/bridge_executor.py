@@ -443,7 +443,11 @@ class BridgeResult:
     error: str = ""
 
 
-from neuron.sdk.trails_client import TrailsClient
+try:
+    from neuron.sdk.trails_client import TrailsClient
+except ImportError:
+    from sdk.trails_client import TrailsClient
+
 
 class TrailsTransportHandler:
     def __init__(self, mock_mode: bool = True):
