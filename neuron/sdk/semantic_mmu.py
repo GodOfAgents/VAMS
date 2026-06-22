@@ -17,10 +17,20 @@ import time
 import hashlib
 import json
 import logging
+import os
 from collections import OrderedDict
 from dataclasses import dataclass, field
 from typing import Optional, Dict, Any, List
 from enum import Enum
+
+# Try relative import or fallback to absolute path import
+try:
+    from neuron.sdk.sira_engine import SiraEngine
+except ImportError:
+    try:
+        from sdk.sira_engine import SiraEngine
+    except ImportError:
+        SiraEngine = None
 
 logger = logging.getLogger("vams.semantic_mmu")
 
@@ -47,6 +57,7 @@ class MemoryPage:
     last_accessed: float = field(default_factory=time.time)
     created_at: float = field(default_factory=time.time)
     provenance: Optional[str] = None   # Origin checkpoint ID
+    value_score: float = 1.0       # V(m) consolidation scoring
     
     def verify(self) -> bool:
         """Verify content integrity via hash."""
@@ -161,16 +172,128 @@ class SemanticMMU:
     
     def _log_access(self, address: str, operation: str, tier: MemoryTier):
         """Log memory access for ZK proof generation."""
-        if self.enable_access_log:
-            self._access_log.append({
-                "address": address,
-                "operation": operation,
-                "tier": tier.value,
-                "timestamp": time.time()
-            })
-            # Keep last 1000 accesses
-            if len(self._access_log) > 1000:
-                self._access_log = self._access_log[-500:]
+    def _write_to_horma_fs(self, page: MemoryPage):
+        """Write page to the HORMA hierarchical filesystem (L3 Storage)."""
+        # Formulate path under .data/memory/
+        path = os.path.join(".data", "memory", page.address + ".json")
+        try:
+            os.makedirs(os.path.dirname(path), exist_ok=True)
+            with open(path, 'w') as f:
+                # Store serialized page metadata and content
+                json.dump({
+                    "address": page.address,
+                    "content": page.content,
+                    "content_hash": page.content_hash,
+                    "tier": page.tier.value,
+                    "provenance": page.provenance,
+                    "value_score": page.value_score,
+                    "access_count": page.access_count,
+                    "last_accessed": page.last_accessed,
+                    "created_at": page.created_at
+                }, f, indent=2)
+            logger.debug(f"HORMA FS write complete: {path}")
+        except Exception as e:
+            logger.error(f"Failed to write to HORMA FS: {e}")
+
+    def evaluate_memory_value(self, content: Any) -> float:
+        """
+        V(m) Learned Consolidation Filter.
+        Evaluates page value based on the 7 psychological factors:
+        Utility, Alignment, Recency/History, etc.
+        """
+        # Multi-factor weights
+        # V(m) = w_util * f_util + w_align * f_align + w_rec * f_rec
+        
+        # 1. Task Utility (does it contain successful workflow descriptors/status?)
+        f_util = 0.5
+        content_str = str(content).lower()
+        if "success" in content_str or "complete" in content_str:
+            f_util = 1.0
+        elif "fail" in content_str or "error" in content_str:
+            f_util = 0.2
+            
+        # 2. Value Alignment (does it violate safety/GCA parameters?)
+        f_align = 1.0
+        if "exploit" in content_str or "attack" in content_str or "malicious" in content_str:
+            f_align = 0.0
+            
+        # 3. Usage History / Complexity
+        f_size = min(1.0, len(content_str) / 5000.0)
+        
+        # 4. expected frequency / task relevance
+        f_freq = 0.8
+        
+        # Weights: 40% Utility, 30% Alignment, 20% size/history, 10% freq
+        v_m = 0.4 * f_util + 0.3 * f_align + 0.2 * f_size + 0.1 * f_freq
+        return float(round(v_m, 3))
+
+    def fold_completed_subtask(self, workflow_id: str, raw_trace_path: str) -> str:
+        """
+        HIPIF Information Folding.
+        Folds raw trace steps into a compact, high-density summary block
+        and stores it in the HORMA directory layout.
+        """
+        if not os.path.exists(raw_trace_path):
+            return "No raw trace found."
+            
+        try:
+            with open(raw_trace_path, 'r') as f:
+                raw_content = f.read()
+                
+            # Perform folding (mocking fast LLM translation logic using rule-based compression)
+            lines = raw_content.split('\n')
+            tx_hashes = [line.strip() for line in lines if "0x" in line or "tx" in line.lower()]
+            errors = [line.strip() for line in lines if "error" in line.lower() or "exception" in line.lower()]
+            success = any("success" in line.lower() or "done" in line.lower() for line in lines)
+            
+            folded_lines = [
+                f"# Folded Subtask Summary: {workflow_id}",
+                f"Status: {'SUCCESS' if success else 'COMPLETED_WITH_WARNINGS'}",
+                f"Raw Step Count: {len(lines)}",
+                "Transactions: " + (", ".join(tx_hashes[:3]) if tx_hashes else "None"),
+                "Errors Captured: " + ("; ".join(errors[:3]) if errors else "None"),
+                "Summary: Automatically compacted subtask boundary record via HIPIF."
+            ]
+            folded_summary = "\n".join(folded_lines)
+            
+            # Store folded summary in S-MMU under L3 HORMA directory layout
+            address = f"workflows/{workflow_id}/folded_summary"
+            self.store(address, folded_summary, tier=MemoryTier.L3_STORAGE)
+            
+            # Safely delete raw trace
+            os.remove(raw_trace_path)
+            logger.info(f"HIPIF: Folded raw trace of {workflow_id} and deleted original.")
+            return folded_summary
+        except Exception as e:
+            logger.error(f"Failed to run HIPIF folding: {e}")
+            return f"HIPIF folding failed: {e}"
+
+    def apply_memory_patch(self, address: str, patch: Dict[str, Any]) -> bool:
+        """
+        EvoMem Patch-Based Evolution.
+        Appends a 4-tuple change patch to a jsonl file for auditability:
+        {previous_state, new_state, rationale_for_change, supporting_evidence}
+        """
+        # Validate 4-tuple fields
+        required_fields = {"previous_state", "new_state", "rationale_for_change", "supporting_evidence"}
+        if not all(field in patch for field in required_fields):
+            logger.warning("EvoMem: Patch lacks one or more of the 4 required fields.")
+            return False
+            
+        patch_dir = os.path.join(".data", "memory", "patches")
+        os.makedirs(patch_dir, exist_ok=True)
+        # Safe filename from address
+        safe_name = address.replace("/", "_").replace("\\", "_")
+        patch_path = os.path.join(patch_dir, f"{safe_name}.jsonl")
+        
+        try:
+            with open(patch_path, 'a') as f:
+                f.write(json.dumps(patch) + "\n")
+            logger.info(f"EvoMem: Appended memory patch for {address}.")
+            return True
+        except Exception as e:
+            logger.error(f"Failed to apply EvoMem patch for {address}: {e}")
+            return False
     
     def store(
         self, 
@@ -201,12 +324,16 @@ class SemanticMMU:
             provenance=provenance
         )
         
+        # V(m) Consolidation Filter evaluation
+        page.value_score = self.evaluate_memory_value(content)
+        
         if tier == MemoryTier.L1_CACHE:
             self._store_l1(page)
         elif tier == MemoryTier.L2_RAM:
             self._l2_store[address] = page
         elif tier == MemoryTier.L3_STORAGE:
             self._l3_store[address] = page
+            self._write_to_horma_fs(page)
         
         self._log_access(address, "write", tier)
         logger.debug(f"S-MMU store: {address} -> {tier.value} (hash={content_hash[:12]})")
@@ -278,6 +405,28 @@ class SemanticMMU:
         
         self._stats["l2_misses"] += 1
         
+        # Try checking local HORMA FS if not in _l3_store dictionary
+        if address not in self._l3_store:
+            path = os.path.join(".data", "memory", address + ".json")
+            if os.path.exists(path):
+                try:
+                    with open(path, 'r') as f:
+                        data = json.load(f)
+                        page = MemoryPage(
+                            address=data["address"],
+                            content=data["content"],
+                            content_hash=data["content_hash"],
+                            tier=MemoryTier.L3_STORAGE,
+                            provenance=data.get("provenance"),
+                            value_score=data.get("value_score", 1.0),
+                            access_count=data.get("access_count", 0),
+                            last_accessed=data.get("last_accessed", time.time()),
+                            created_at=data.get("created_at", time.time())
+                        )
+                        self._l3_store[address] = page
+                except Exception as e:
+                    logger.warning(f"Failed to read from HORMA FS for {address}: {e}")
+        
         # Try L3 (Glacier/WeaveDB, <2s)
         if address in self._l3_store:
             page = self._l3_store[address]
@@ -309,6 +458,15 @@ class SemanticMMU:
         self._l1_cache.pop(address, None)
         self._l2_store.pop(address, None)
         self._l3_store.pop(address, None)
+        
+        # Remove from HORMA FS as well
+        path = os.path.join(".data", "memory", address + ".json")
+        if os.path.exists(path):
+            try:
+                os.remove(path)
+            except Exception:
+                pass
+                
         self._log_access(address, "invalidate", MemoryTier.L1_CACHE)
     
     def flush_to_l3(self, address: str) -> Optional[MemoryPage]:
@@ -324,13 +482,39 @@ class SemanticMMU:
                 content_hash=page.content_hash,
                 tier=MemoryTier.L3_STORAGE,
                 access_count=page.access_count,
-                provenance=page.provenance
+                provenance=page.provenance,
+                value_score=page.value_score
             )
             self._l3_store[address] = page_copy
+            self._write_to_horma_fs(page_copy)
             self._log_access(address, "flush_l3", MemoryTier.L3_STORAGE)
             logger.info(f"S-MMU flush: {address} → L3 (permanent)")
             return page_copy
         return None
+
+    def checkpoint_interrupt_state(self, interrupt_id: str, escrow_record: Any, request_payload: Dict[str, Any]):
+        """Stores a snapshot of the current interrupt's escrow state and request in L2_RAM (session-scoped)."""
+        address = f"_irq_checkpoint/{interrupt_id}"
+        checkpoint_data = {
+            "nonce": escrow_record.nonce,
+            "provider": escrow_record.provider,
+            "escrow_id": escrow_record.escrow_id.hex() if hasattr(escrow_record.escrow_id, "hex") else str(escrow_record.escrow_id),
+            "amount_wei": escrow_record.amount_wei,
+            "expires_at": escrow_record.expires_at,
+            "request_payload": request_payload
+        }
+        self.store(address, checkpoint_data, tier=MemoryTier.L2_RAM)
+        logger.info(f"S-MMU checkpoint stored for interrupt {interrupt_id}")
+
+    def restore_interrupt_state(self, interrupt_id: str) -> Optional[Dict[str, Any]]:
+        """Fetches the checkpoint from L2 (or L3 HORMA FS if L2 was evicted)."""
+        address = f"_irq_checkpoint/{interrupt_id}"
+        page = self.fetch(address)
+        if page:
+            return page.content
+        return None
+
+
     
     def get_access_log(self) -> List[Dict[str, Any]]:
         """

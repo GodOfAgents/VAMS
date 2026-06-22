@@ -27,11 +27,11 @@
 
   [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
   [![Status](https://img.shields.io/badge/Status-Pre--Testnet%20Candidate-orange.svg)](./REPO_STATUS_REPORT.md)
-  [![Architecture](https://img.shields.io/badge/Architecture-v0.6.0-blue.svg)](./docs/team/ARCHITECTURE_v0-6-0.md)
+  [![Architecture](https://img.shields.io/badge/Architecture-v0.7.0-blue.svg)](./docs/team/ARCHITECTURE_v0-7-0.md)
   [![Release](https://img.shields.io/badge/Release-v1.3.0--oms-purple.svg)](./docs/CHANGELOG.md)
   [![Build](https://img.shields.io/badge/Tests-1,083%20Passing-brightgreen.svg)](./audit.md#10-test-coverage--verification)
 
-  **[Documentation](./REPO_STATUS_REPORT.md)** • **[Architecture](./docs/team/ARCHITECTURE_v0-6-0.md)** • **[Developer Guide](./docs/DEVELOPER_GUIDE.md)** • **[Whitepaper](./docs/team/WHITEPAPER.md)** • **[Academic Audit](./audit.md)**
+  **[Documentation](./REPO_STATUS_REPORT.md)** • **[Architecture](./docs/team/ARCHITECTURE_v0-7-0.md)** • **[Developer Guide](./docs/DEVELOPER_GUIDE.md)** • **[Whitepaper](./docs/team/WHITEPAPER.md)** • **[Academic Audit](./audit.md)**
 
 </div>
 

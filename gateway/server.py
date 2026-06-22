@@ -15,6 +15,10 @@ Endpoints:
 
 import time
 import json
+import os
+import secrets
+import asyncio
+import threading
 from datetime import datetime
 from typing import Dict, List, Optional
 from dataclasses import dataclass, field, asdict
@@ -23,22 +27,16 @@ try:
     from fastapi import FastAPI, HTTPException, Depends
     from fastapi.responses import HTMLResponse
     from fastapi.security import HTTPBasic, HTTPBasicCredentials
-    from starlette.status import HTTP_401_UNAUTHORIZED
+    from starlette.status import HTTP_401_UNAUTHORIZED, HTTP_500_INTERNAL_SERVER_ERROR
     from pydantic import BaseModel
     import uvicorn
+    from ecdsa import VerifyingKey, SECP256k1, BadSignatureError
 except ImportError:
     print("❌ MISSING DEPENDENCIES")
     print("Please run: pip install -r requirements.txt")
-    print("Or: pip install fastapi uvicorn pydantic")
+    print("Or: pip install fastapi uvicorn pydantic ecdsa")
     import sys
     sys.exit(1)
-
-try:
-    from ecdsa import VerifyingKey, SECP256k1, BadSignatureError
-    ECDSA_AVAILABLE = True
-except ImportError:
-    ECDSA_AVAILABLE = False
-    print("⚠️ ECDSA not available - signature verification disabled")
 
 
 # --- CONFIGURATION ---
@@ -92,6 +90,12 @@ from contextlib import asynccontextmanager
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup tasks
+    admin_password = os.getenv("GATEWAY_ADMIN_PASSWORD")
+    if not admin_password:
+        raise RuntimeError("CRITICAL: GATEWAY_ADMIN_PASSWORD is not set in the environment.")
+    if admin_password == "vams2026":
+        raise RuntimeError("CRITICAL: GATEWAY_ADMIN_PASSWORD is set to the default insecure value 'vams2026'. Please change it.")
+        
     asyncio.create_task(cleanup_offline_nodes())
     yield
 
@@ -101,6 +105,93 @@ app = FastAPI(
     version=VERSION,
     description="Central gateway for VAMS Neuron nodes",
     lifespan=lifespan
+)
+
+# --- MIDDLEWARES ---
+from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.responses import JSONResponse
+from starlette.requests import Request
+
+class RateLimitMiddleware(BaseHTTPMiddleware):
+    def __init__(self, app, limit: int = 100, window_sec: int = 60):
+        super().__init__(app)
+        self.limit = limit
+        self.window_sec = window_sec
+        self.buckets = {}
+        self.lock = threading.Lock()
+
+    async def dispatch(self, request: Request, call_next):
+        client_ip = request.client.host if request.client else "unknown"
+        now = time.time()
+        
+        with self.lock:
+            if client_ip not in self.buckets:
+                self.buckets[client_ip] = {"tokens": float(self.limit), "last_refill": now}
+            
+            bucket = self.buckets[client_ip]
+            elapsed = now - bucket["last_refill"]
+            refill_amount = elapsed * (self.limit / self.window_sec)
+            bucket["tokens"] = min(float(self.limit), bucket["tokens"] + refill_amount)
+            bucket["last_refill"] = now
+            
+            if len(self.buckets) > 1000:
+                keys_to_remove = [k for k, v in self.buckets.items() if now - v["last_refill"] > self.window_sec * 2]
+                for k in keys_to_remove:
+                    del self.buckets[k]
+
+            if bucket["tokens"] >= 1.0:
+                bucket["tokens"] -= 1.0
+                allowed = True
+            else:
+                allowed = False
+
+        if not allowed:
+            return JSONResponse(
+                status_code=429,
+                content={"detail": "Too many requests. Rate limit exceeded."}
+            )
+
+        return await call_next(request)
+
+# Configure CORS
+allowed_origins_str = os.getenv("GATEWAY_ALLOWED_ORIGINS", "")
+if allowed_origins_str:
+    allowed_origins = [origin.strip() for origin in allowed_origins_str.split(",") if origin.strip()]
+else:
+    allowed_origins = [
+        "http://localhost:3000",
+        "http://localhost:5173",
+        "http://127.0.0.1:3000",
+        "http://127.0.0.1:5173"
+    ]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=allowed_origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Configure Rate Limiting
+rate_limit_env = os.getenv("GATEWAY_RATE_LIMIT", "100")
+try:
+    if "/" in rate_limit_env:
+        limit_str, window_str = rate_limit_env.split("/")
+        limit_val = int(limit_str)
+        window_val = int(window_str)
+    else:
+        limit_val = int(rate_limit_env)
+        window_val = 60
+except ValueError:
+    limit_val = 100
+    window_val = 60
+
+app.add_middleware(
+    RateLimitMiddleware,
+    limit=limit_val,
+    window_sec=window_val
 )
 
 # In-memory node registry
@@ -141,29 +232,83 @@ except ImportError:
 try:
     from neuron.da.performance_audit import PerformanceAuditLog
     from neuron.da.models import DAProtocol
-    da_audit_log = PerformanceAuditLog(mock_mode=True)
+    mock_mode_flag = os.getenv("VAMS_MOCK_MODE", "true").lower() == "true"
+    da_audit_log = PerformanceAuditLog(mock_mode=mock_mode_flag)
     DA_AUDIT_AVAILABLE = True
 except ImportError:
     DA_AUDIT_AVAILABLE = False
     da_audit_log = None
     print("\u26a0\ufe0f DA Audit Layer not available — Phase 0 endpoints disabled")
 
-import os
-import secrets
-import asyncio
+security = HTTPBasic(auto_error=False)
 
-security = HTTPBasic()
+def verify_did_signature(did: str, signature_hex: str, timestamp_str: str, method: str, path: str) -> bool:
+    try:
+        ts = float(timestamp_str)
+        if abs(time.time() - ts) > 300:  # 5 minutes window
+            return False
+            
+        pubkey_hex = did
+        if did.startswith("did:key:"):
+            pubkey_hex = did[len("did:key:"):]
+            
+        authorized_did = os.getenv("GATEWAY_ADMIN_DID")
+        if not authorized_did:
+            return False
+            
+        auth_pubkey = authorized_did[len("did:key:"):] if authorized_did.startswith("did:key:") else authorized_did
+        if pubkey_hex.lower() != auth_pubkey.lower():
+            return False
+            
+        message = f"VAMS_ADMIN_AUTH:{method}:{path}:{timestamp_str}"
+        vk = VerifyingKey.from_string(
+            bytes.fromhex(pubkey_hex),
+            curve=SECP256k1
+        )
+        return vk.verify(
+            bytes.fromhex(signature_hex),
+            message.encode()
+        )
+    except Exception:
+        return False
 
-def get_current_username(credentials: HTTPBasicCredentials = Depends(security)):
-    correct_username = secrets.compare_digest(credentials.username, os.getenv("GATEWAY_ADMIN_USER", "admin"))
-    correct_password = secrets.compare_digest(credentials.password, os.getenv("GATEWAY_ADMIN_PASSWORD", "vams2026"))
-    if not (correct_username and correct_password):
+from fastapi import Request
+
+def get_current_username(request: Request, credentials: Optional[HTTPBasicCredentials] = Depends(security)):
+    # Check headers for DID Auth first
+    did = request.headers.get("X-VAMS-DID")
+    signature = request.headers.get("X-VAMS-Signature")
+    timestamp = request.headers.get("X-VAMS-Timestamp")
+    
+    if did and signature and timestamp:
+        if verify_did_signature(did, signature, timestamp, request.method, request.url.path):
+            return did
         raise HTTPException(
             status_code=HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password",
+            detail="Invalid DID signature or timestamp expired",
             headers={"WWW-Authenticate": "Basic"},
         )
-    return credentials.username
+        
+    # Fallback to Basic Auth
+    if credentials:
+        admin_user = os.getenv("GATEWAY_ADMIN_USER", "admin")
+        admin_password = os.getenv("GATEWAY_ADMIN_PASSWORD")
+        if not admin_password:
+            raise HTTPException(
+                status_code=HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Server configuration error: Admin password not configured"
+            )
+        correct_username = secrets.compare_digest(credentials.username, admin_user)
+        correct_password = secrets.compare_digest(credentials.password, admin_password)
+        if correct_username and correct_password:
+            return credentials.username
+            
+    raise HTTPException(
+        status_code=HTTP_401_UNAUTHORIZED,
+        detail="Not authenticated. Provide DID headers or Basic Auth.",
+        headers={"WWW-Authenticate": "Basic"},
+    )
+
 
 async def cleanup_offline_nodes():
     while True:
@@ -327,25 +472,29 @@ async def receive_heartbeat(request: HeartbeatRequest):
         block_height = payload.get("block_height", 0)
         
         # Verify signature with node's public key
-        if ECDSA_AVAILABLE:
-            try:
-                # The node's public key should be registered on first heartbeat
-                if node_id in nodes and nodes[node_id].public_key:
-                    vk = VerifyingKey.from_string(
-                        bytes.fromhex(nodes[node_id].public_key),
-                        curve=SECP256k1
-                    )
-                    vk.verify(
-                        bytes.fromhex(request.signature),
-                        request.payload.encode()
-                    )
-                elif "public_key" not in payload:
-                    raise HTTPException(
-                        status_code=403,
-                        detail="First heartbeat must include public_key in payload"
-                    )
-            except BadSignatureError:
-                raise HTTPException(status_code=403, detail="Invalid heartbeat signature")
+        try:
+            pub_key_hex = ""
+            if node_id in nodes and nodes[node_id].public_key:
+                pub_key_hex = nodes[node_id].public_key
+            elif "public_key" in payload:
+                pub_key_hex = payload["public_key"]
+            else:
+                raise HTTPException(
+                    status_code=403,
+                    detail="First heartbeat must include public_key in payload"
+                )
+            
+            if pub_key_hex:
+                vk = VerifyingKey.from_string(
+                    bytes.fromhex(pub_key_hex),
+                    curve=SECP256k1
+                )
+                vk.verify(
+                    bytes.fromhex(request.signature),
+                    request.payload.encode()
+                )
+        except BadSignatureError:
+            raise HTTPException(status_code=403, detail="Invalid heartbeat signature")
         
         # Update or create node entry
         if node_id not in nodes:

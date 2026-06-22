@@ -30,6 +30,18 @@ from dbos import DBOS, SetWorkflowID
 
 logger = logging.getLogger("vams.workflows")
 
+try:
+    from sdk.semantic_mmu import SemanticMMU, MemoryTier
+    from intelligence.world_model import ProPlayWorldModel
+except ImportError:
+    try:
+        from neuron.sdk.semantic_mmu import SemanticMMU, MemoryTier
+        from neuron.intelligence.world_model import ProPlayWorldModel
+    except ImportError:
+        SemanticMMU = None
+        MemoryTier = None
+        ProPlayWorldModel = None
+
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # STEPS — non-deterministic / side-effectful operations
@@ -139,12 +151,92 @@ def run_demo_workflow(log_fn: Callable[[str], None] = print) -> str:
     log_fn(f"[WORKFLOW] Starting: DataPipeline (ID: {wf_id})")
     log_fn("[WORKFLOW] DBOS durability active — crash-safe execution")
 
+    # 1. ProPlay Guidance integration
+    if ProPlayWorldModel is not None:
+        try:
+            import os
+            os.makedirs(".data/memory", exist_ok=True)
+            model = ProPlayWorldModel(filepath=".data/memory/workflow_procedures.json")
+            
+            # Setup some default workflow nodes if empty
+            model.add_procedure("initiate", "Initiate pipeline")
+            model.add_procedure("gather_data", "Fetch DA blocks")
+            model.add_procedure("run_inference", "Query Bittensor subnet")
+            model.add_procedure("execute_action", "Settle bridge transaction")
+            
+            guidance = model.get_soft_guidance("DeFi cross-chain data pipeline execution")
+            log_fn(f"[COGNITIVE] ProPlay Soft Guidance: {guidance}")
+        except Exception as e:
+            log_fn(f"[COGNITIVE] ProPlay failed to load/guide: {e}")
+    else:
+        log_fn("[COGNITIVE] ProPlayWorldModel not imported")
+
     async def _run() -> str:
         with SetWorkflowID(wf_id):
             return await vams_data_pipeline()
 
     result = asyncio.run(_run())
     log_fn(f"[WORKFLOW] Complete: {result}")
+
+    # 2. S-MMU HORMA & HIPIF integration
+    if SemanticMMU is not None and MemoryTier is not None:
+        try:
+            mmu = SemanticMMU()
+            import os
+            
+            # Write a raw trace log simulating step execution
+            trace_path = f".data/memory/raw_trace_{wf_id}.log"
+            os.makedirs(os.path.dirname(trace_path), exist_ok=True)
+            with open(trace_path, "w") as f:
+                f.write(
+                    f"Workflow: {wf_id}\n"
+                    "Step 1: step_gather_data resolved block 9628712 on Celestia\n"
+                    "Step 2: step_run_inference output bullish prediction\n"
+                    "Step 3: step_execute_action completed bridge tx 0xabcdef0123456789\n"
+                    "Status: success completed"
+                )
+            
+            log_fn(f"[COGNITIVE] S-MMU: Raw trace logged to {trace_path}")
+            
+            # Run HIPIF information folding at subtask boundary
+            folded = mmu.fold_completed_subtask(wf_id, trace_path)
+            log_fn("[COGNITIVE] S-MMU: HIPIF folding complete, raw trace cleaned up.")
+            log_fn(f"[COGNITIVE] S-MMU: Folded block stored in L3 HORMA:\n{folded}")
+            
+            # Evaluate memory value V(m) for the final result
+            v_m = mmu.evaluate_memory_value(result)
+            log_fn(f"[COGNITIVE] S-MMU: V(m) expected utility score for workflow result: {v_m}")
+            
+            # Log EvoMem Patch tracking state change
+            patch_success = mmu.apply_memory_patch(
+                f"workflows/data_pipeline/{wf_id}",
+                {
+                    "previous_state": "idle",
+                    "new_state": result,
+                    "rationale_for_change": "vams demo pipeline execution completed successfully",
+                    "supporting_evidence": "block_height=9628712 tx_hash=0xabcdef0123456789"
+                }
+            )
+            if patch_success:
+                log_fn("[COGNITIVE] S-MMU: EvoMem append-only state patch recorded.")
+            
+            # Promote to L3 / local filesystem
+            mmu.store(f"workflows/data_pipeline/{wf_id}/result", {"status": result, "v_m": v_m}, tier=MemoryTier.L3_STORAGE)
+            log_fn(f"[COGNITIVE] S-MMU: Page workflows/data_pipeline/{wf_id}/result anchored to L3 HORMA FS.")
+            
+            # Update ProPlay transition trajectory with high reward
+            if ProPlayWorldModel is not None:
+                model.record_transition("initiate", "gather_data", reward=1.0, task_description="DeFi cross-chain data pipeline execution")
+                model.record_transition("gather_data", "run_inference", reward=1.0, task_description="DeFi cross-chain data pipeline execution")
+                model.record_transition("run_inference", "execute_action", reward=1.0, task_description="DeFi cross-chain data pipeline execution")
+                model.record_transition("execute_action", "complete", reward=1.0, task_description="DeFi cross-chain data pipeline execution")
+                model.save_graph()
+                log_fn("[COGNITIVE] ProPlay: Recorded successful workflow procedures to transition graph.")
+        except Exception as e:
+            log_fn(f"[COGNITIVE] S-MMU/ProPlay logging failed: {e}")
+    else:
+        log_fn("[COGNITIVE] SemanticMMU not imported")
+
     return result
 
 

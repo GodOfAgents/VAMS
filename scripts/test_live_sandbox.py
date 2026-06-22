@@ -38,7 +38,7 @@ def check_dns(url: str) -> bool:
         print(f"[-] DNS check failed for {url}: {e}")
         return False
 
-def test_endpoint_reachability(name: str, url: str, test_func) -> bool:
+def verify_endpoint_reachability(name: str, url: str, test_func) -> bool:
     """Run a test function and print detailed reachability statistics."""
     print(f"\n--- Testing reachability for: {name} ---")
     print(f"Endpoint: {url}")
@@ -100,7 +100,7 @@ def main():
         resp = requests.get(f"{identity_url}/v1/verification/0x0000000000000000000000000000000000000000", headers=headers, timeout=5)
         resp.raise_for_status()
         
-    results["OMS Identity API"] = test_endpoint_reachability("OMS Identity API", identity_url, test_identity)
+    results["OMS Identity API"] = verify_endpoint_reachability("OMS Identity API", identity_url, test_identity)
     
     # 2. Test Coinme Client
     # We call get_conversion_rate, which returns fallback if it fails, or raises in create_checkout.
@@ -108,14 +108,14 @@ def main():
     def test_coinme():
         coinme_client.create_checkout(100.0, "USD", "0x0000000000000000000000000000000000000000")
         
-    results["Coinme API"] = test_endpoint_reachability("Coinme API", coinme_url, test_coinme)
+    results["Coinme API"] = verify_endpoint_reachability("Coinme API", coinme_url, test_coinme)
     
     # 3. Test Trails Client
     # We call submit_intent, which throws HTTPError if the response code is not 200/201.
     def test_trails():
         trails_client.submit_intent("0xSOURCE", "0xDEST", b"payload")
         
-    results["Trails API"] = test_endpoint_reachability("Trails API", trails_url, test_trails)
+    results["Trails API"] = verify_endpoint_reachability("Trails API", trails_url, test_trails)
     
     print("\n================ Verification Summary ================")
     all_ok = True

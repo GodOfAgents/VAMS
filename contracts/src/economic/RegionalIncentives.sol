@@ -48,6 +48,14 @@ contract RegionalIncentives is IRegionalIncentives, AccessControl {
     /// @notice Tracks whether a regionId has been added to the list
     mapping(bytes32 => bool) private _regionExists;
 
+    /// @notice Hardware cost baseline index by regionId (in BPS or token units)
+    mapping(bytes32 => uint256) private _regionPHardware;
+
+    /// @notice Active unique provider count by regionId
+    mapping(bytes32 => uint256) private _regionProviderCount;
+
+    event EconomicParamsUpdated(bytes32 indexed regionId, uint256 pHardware, uint256 providerCount);
+
     // ═══════════════════ Constructor ═══════════════════
 
     constructor(address admin) {
@@ -212,5 +220,45 @@ contract RegionalIncentives is IRegionalIncentives, AccessControl {
     function regionIdAt(uint256 index) external view returns (bytes32) {
         require(index < _regionIds.length, "Index out of bounds");
         return _regionIds[index];
+    }
+
+    /// @notice Set hardware baseline and provider count for a region
+    function setEconomicParams(
+        bytes32 regionId,
+        uint256 pHardware,
+        uint256 providerCount
+    ) external onlyRole(REGION_ADMIN_ROLE) {
+        require(_regionExists[regionId], "Region not configured");
+        _regionPHardware[regionId] = pHardware;
+        _regionProviderCount[regionId] = providerCount;
+        emit EconomicParamsUpdated(regionId, pHardware, providerCount);
+    }
+
+    /// @notice Get the economic parameters configured for a region
+    function getEconomicParams(bytes32 regionId) external view returns (uint256 pHardware, uint256 providerCount) {
+        return (_regionPHardware[regionId], _regionProviderCount[regionId]);
+    }
+
+    /// @notice Get the hybrid price floor for a region
+    /// @param regionId The geographic region ID
+    /// @param bidMin The lowest cleared bid in the region
+    /// @return priceFloor The hybrid price floor calculation
+    function getPriceFloor(bytes32 regionId, uint256 bidMin) public view returns (uint256) {
+        if (!_regionExists[regionId]) {
+            return bidMin;
+        }
+
+        uint256 n = _regionProviderCount[regionId];
+        uint256 pHardware = _regionPHardware[regionId];
+
+        // alpha = min(10000, n * 1000) BPS
+        uint256 alphaBps = n * 1000;
+        if (alphaBps > 10_000) {
+            alphaBps = 10_000;
+        }
+
+        // P_floor = (alpha * bidMin + (10000 - alpha) * pHardware) / 10000
+        uint256 priceFloor = (alphaBps * bidMin + (10_000 - alphaBps) * pHardware) / 10_000;
+        return priceFloor;
     }
 }
