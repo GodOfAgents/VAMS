@@ -200,6 +200,92 @@ contract RegionalIncentivesTest is Test {
         assertEq(incentives.totalRegions(), 3);
     }
 
+    // ═══════════════════ Economic & Game-Theoretic Hardening ═══════════════════
+
+    function test_setEconomicParams() public {
+        _setupRegion(REGION_US_EAST, "US East", 500, 10_000);
+        
+        vm.prank(admin);
+        incentives.setEconomicParams(REGION_US_EAST, 1500, 5); // pHardware = 1500, providerCount = 5
+
+        (uint256 pHardware, uint256 providerCount) = incentives.getEconomicParams(REGION_US_EAST);
+        assertEq(pHardware, 1500);
+        assertEq(providerCount, 5);
+    }
+
+    function test_revert_setEconomicParams_unauthorized() public {
+        _setupRegion(REGION_US_EAST, "US East", 500, 10_000);
+        
+        vm.prank(stranger);
+        vm.expectRevert();
+        incentives.setEconomicParams(REGION_US_EAST, 1500, 5);
+    }
+
+    function test_getPriceFloor_sufficientLiquidity() public {
+        _setupRegion(REGION_US_EAST, "US East", 500, 10_000);
+        
+        // N = 10 providers -> alpha = 1.0 (10000 BPS), P_floor should match Bid_min (2000)
+        vm.prank(admin);
+        incentives.setEconomicParams(REGION_US_EAST, 1500, 10);
+
+        uint256 floor = incentives.getPriceFloor(REGION_US_EAST, 2000);
+        assertEq(floor, 2000);
+    }
+
+    function test_getPriceFloor_excessLiquidity() public {
+        _setupRegion(REGION_US_EAST, "US East", 500, 10_000);
+        
+        // N = 12 providers -> alpha = 1.0 (capped), P_floor should match Bid_min (2000)
+        vm.prank(admin);
+        incentives.setEconomicParams(REGION_US_EAST, 1500, 12);
+
+        uint256 floor = incentives.getPriceFloor(REGION_US_EAST, 2000);
+        assertEq(floor, 2000);
+    }
+
+    function test_getPriceFloor_thinLiquidity_half() public {
+        _setupRegion(REGION_US_EAST, "US East", 500, 10_000);
+        
+        // N = 5 providers -> alpha = 0.5 (5000 BPS)
+        // P_floor = 0.5 * Bid_min (2000) + 0.5 * P_hardware (1500) = 1750
+        vm.prank(admin);
+        incentives.setEconomicParams(REGION_US_EAST, 1500, 5);
+
+        uint256 floor = incentives.getPriceFloor(REGION_US_EAST, 2000);
+        assertEq(floor, 1750);
+    }
+
+    function test_getPriceFloor_thinLiquidity_extreme() public {
+        _setupRegion(REGION_US_EAST, "US East", 500, 10_000);
+        
+        // N = 2 providers -> alpha = 0.2 (2000 BPS)
+        // P_floor = 0.2 * Bid_min (2000) + 0.8 * P_hardware (1500) = 400 + 1200 = 1600
+        vm.prank(admin);
+        incentives.setEconomicParams(REGION_US_EAST, 1500, 2);
+
+        uint256 floor = incentives.getPriceFloor(REGION_US_EAST, 2000);
+        assertEq(floor, 1600);
+    }
+
+    function test_getPriceFloor_noLiquidity() public {
+        _setupRegion(REGION_US_EAST, "US East", 500, 10_000);
+        
+        // N = 0 providers -> alpha = 0.0 (0 BPS)
+        // P_floor = P_hardware (1500)
+        vm.prank(admin);
+        incentives.setEconomicParams(REGION_US_EAST, 1500, 0);
+
+        uint256 floor = incentives.getPriceFloor(REGION_US_EAST, 2000);
+        assertEq(floor, 1500);
+    }
+
+    function test_getPriceFloor_unconfiguredRegion() public view {
+        bytes32 unknownId = keccak256("mars-1");
+        // Unknown region -> fallback to raw Bid_min (2000)
+        uint256 floor = incentives.getPriceFloor(unknownId, 2000);
+        assertEq(floor, 2000);
+    }
+
     // ═══════════════════ Helpers ═══════════════════
 
     function _setupRegion(

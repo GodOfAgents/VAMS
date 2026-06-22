@@ -132,12 +132,14 @@ class InterruptVectorTable:
         agent_id: str = "local_agent",
         mock_mode: bool = True,
         timeout_ms: int = 30_000,
-        max_retries: int = 2
+        max_retries: int = 2,
+        x402_handler: Optional[Any] = None
     ):
         self.agent_id = agent_id
         self.mock_mode = mock_mode
         self.timeout_ms = timeout_ms
         self.max_retries = max_retries
+        self._x402_handler = x402_handler
         
         # Registered interrupt handlers (signal → callback)
         self._handlers: Dict[InterruptSignal, Callable] = {}
@@ -163,6 +165,11 @@ class InterruptVectorTable:
         
         # Register default handlers
         self._register_default_handlers()
+        
+        # Wire custom x402 handler if provided and not mock_mode
+        if not self.mock_mode and self._x402_handler is not None:
+            self.register_x402_handler(self._x402_handler)
+
     
     def _register_default_handlers(self):
         """Register mock handlers for all interrupt signals."""
@@ -185,6 +192,12 @@ class InterruptVectorTable:
         """
         self._handlers[signal] = handler
         logger.info(f"Custom handler registered for {signal.value}")
+
+    def register_x402_handler(self, handler: Any):
+        """Convenience method to register a custom x402 recovery interrupt handler."""
+        self._x402_handler = handler
+        self.register_handler(InterruptSignal.SIG_TOOL_INVOKE, handler.handle_tool_invoke)
+
     
     def raise_interrupt(
         self,

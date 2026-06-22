@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import hashlib
 import logging
+import math
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Dict, List, Optional, Tuple
@@ -74,6 +75,7 @@ class ProviderReward:
     staking_boost: float
     builder_revenue: float = 0.0
     gas_premium_burn: float = 0.0
+    symbiosis_decay_factor: float = 1.0
     total_reward: float = 0.0
     staking_tier: StakingTier = StakingTier.IRON
 
@@ -84,7 +86,7 @@ class ProviderReward:
             + self.staking_boost
             + self.builder_revenue
             - self.gas_premium_burn
-        ))
+        ) * self.symbiosis_decay_factor)
 
 
 @dataclass
@@ -205,6 +207,15 @@ class RewardEngine:
             premium_rate = calculator.calculate_premium_rate(required_blocks)
             gas_premium_burn = base_reward * premium_rate
 
+            # Calculate loopback/wash-trading decay factor: F = prod(1 - e^(-lambda * dt))
+            decay_factor = 1.0
+            decay_rate = 0.5 / 86400  # lambda = 0.5 per day
+            deltas = prov.get("loopback_deltas", [])
+            for dt in deltas:
+                # dt is time delta in seconds
+                event_decay = 1.0 - math.exp(-decay_rate * float(dt))
+                decay_factor *= event_decay
+
             reward = ProviderReward(
                 provider=address,
                 region_id=region_id,
@@ -213,6 +224,7 @@ class RewardEngine:
                 staking_boost=round(staking_boost, 6),
                 builder_revenue=round(builder_rev, 6),
                 gas_premium_burn=round(gas_premium_burn, 6),
+                symbiosis_decay_factor=round(decay_factor, 6),
                 staking_tier=tier,
             )
             rewards.append(reward)
@@ -307,7 +319,7 @@ class RewardEngine:
         # Create leaf hashes
         leaves = []
         for r in rewards:
-            leaf_data = f"{r.provider}:{r.total_reward}:{r.region_id}"
+            leaf_data = f"{r.provider}:{r.total_reward}:{r.region_id}:{r.symbiosis_decay_factor}"
             leaf_hash = hashlib.sha256(leaf_data.encode()).hexdigest()
             leaves.append(leaf_hash)
 

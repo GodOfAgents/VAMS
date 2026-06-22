@@ -59,8 +59,9 @@ class SessionKeyManager:
         return True
 
 class SequenceWalletManager:
-    def __init__(self, config: Optional[Dict] = None):
+    def __init__(self, config: Optional[Dict] = None, mock_mode: bool = False):
         self.config = config or {}
+        self.mock_mode = mock_mode
         self.session_manager = SessionKeyManager(self)
         self.wallets: Dict[str, str] = {}
         

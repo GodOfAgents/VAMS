@@ -16,6 +16,8 @@ for mod in list(sys.modules.keys()):
     if mod.startswith("gateway"):
         del sys.modules[mod]
 
+os.environ["GATEWAY_ADMIN_PASSWORD"] = "SecureTestPassword123!"
+
 from gateway.server import app
 
 class TestGatewayRoot(unittest.TestCase):
@@ -65,7 +67,7 @@ class TestGatewayRoot(unittest.TestCase):
         mock_composer.provision_blueprint.return_value = instance
 
         # Call the compose endpoint
-        auth = ("admin", "vams2026")
+        auth = ("admin", "SecureTestPassword123!")
         payload = {"blueprint_name": "ServiceBlock_OMS_v1"}
         response = self.client.post("/compose", json=payload, auth=auth)
 

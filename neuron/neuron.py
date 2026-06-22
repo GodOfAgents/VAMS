@@ -118,6 +118,7 @@ Examples:
     parser.add_argument("--check-logic", action="store_true", help="Check Layer 3 health")
     parser.add_argument("--list-logic", action="store_true", help="List logic providers")
     parser.add_argument("--demo-workflow", action="store_true", help="Run crash-proof workflow demo")
+    parser.add_argument("--check-cognitive", action="store_true", help="Check AgentOS Cognitive Runtime health")
     
     # Layer 4 options
     parser.add_argument("--check-trust", action="store_true", help="Check Layer 4 (TEE) health")
@@ -455,6 +456,8 @@ class VamsNeuron:
                 c, s = Fore.RED, "[XX]"
             print(f"  {c}{s}{Style.RESET_ALL} {name.upper():10} {info['latency_ms']:>6.0f}ms | {info['description']}")
         print()
+        if self.agentos_enabled:
+            self.check_cognitive_health()
     
     def check_l4_health(self):
         print()
@@ -551,7 +554,39 @@ class VamsNeuron:
     def run_workflow_demo(self):
         print()
         self.log("DBOS-Style Crash-Proof Workflow Demo", "WORKFLOW")
-        run_demo_workflow(lambda m: print(f"  {m}"))
+        
+        # Fallback to local SQLite system database if Postgres is not configured
+        local_dbos = False
+        if not self._dbos_active and _DBOS_AVAILABLE:
+            try:
+                self.log("Initializing local SQLite system database for demo...", "INFO")
+                import sqlalchemy as sa
+                DBOS.destroy()
+                DBOS(config={
+                    "name": "vams-demo-app",
+                    "system_database_url": "sqlite:///dbos_demo_workflows.db",
+                    "db_engine_kwargs": {
+                        "poolclass": sa.NullPool
+                    }
+                })
+                DBOS.reset_system_database()
+                DBOS.launch()
+                local_dbos = True
+                self._dbos_active = True
+            except Exception as e:
+                self.log(f"Failed to initialize local SQLite DBOS: {e}", "ERROR")
+        
+        try:
+            run_demo_workflow(lambda m: print(f"  {m}"))
+        finally:
+            if local_dbos:
+                try:
+                    DBOS.destroy()
+                    self._dbos_active = False
+                    if os.path.exists("dbos_demo_workflows.db"):
+                        os.remove("dbos_demo_workflows.db")
+                except Exception:
+                    pass
         print()
     
     def check_cognitive_health(self):
@@ -826,6 +861,7 @@ def main():
     if args.check_health: node.check_l1_health(); return
     if args.check_compute: node.check_l2_health(); return
     if args.check_logic: node.check_l3_health(); return
+    if args.check_cognitive: node.check_cognitive_health(); return
     if args.check_trust: node.check_l4_health(); return
     if args.demo_workflow: node.run_workflow_demo(); return
     

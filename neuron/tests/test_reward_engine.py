@@ -277,3 +277,91 @@ class TestMerkleRoot:
         """Empty rewards should produce zero root."""
         result = engine.calculate_epoch_rewards([], epoch_emission_budget=10_000.0)
         assert result.merkle_root == "0x" + "0" * 64
+
+
+# ═══════════════════════════════════════════════════════════════
+# Symbiosis Decay Tests
+# ═══════════════════════════════════════════════════════════════
+
+class TestSymbiosisDecay:
+    def test_no_loopbacks_default_decay(self, engine):
+        """If there are no loopback deltas, decay factor should be 1.0."""
+        providers = [
+            {
+                "address": "0xP1",
+                "region_id": "us-east-1",
+                "capacity_contribution": 100,
+                "escrow_completions": 5000.0,
+                "staked_amount": 10_000.0,
+            }
+        ]
+        result = engine.calculate_epoch_rewards(providers, epoch_emission_budget=10_000.0)
+        p1 = result.provider_rewards[0]
+        assert p1.symbiosis_decay_factor == 1.0
+        assert p1.total_reward == p1.base_reward + p1.staking_boost
+
+    def test_single_loopback_decay(self, engine):
+        """One loopback delta should apply decay factor based on duration."""
+        providers = [
+            {
+                "address": "0xP1",
+                "region_id": "us-east-1",
+                "capacity_contribution": 100,
+                "escrow_completions": 5000.0,
+                "staked_amount": 10_000.0,
+                "loopback_deltas": [86400],  # 1 day
+            }
+        ]
+        result = engine.calculate_epoch_rewards(providers, epoch_emission_budget=10_000.0)
+        p1 = result.provider_rewards[0]
+        # 1 - e^(-0.5 * 1) = 1 - e^-0.5 = 1 - 0.6065306597 = 0.393469
+        assert abs(p1.symbiosis_decay_factor - 0.393469) < 0.001
+        
+        expected_total = (p1.base_reward + p1.staking_boost) * 0.393469
+        assert abs(p1.total_reward - expected_total) < 0.1
+
+    def test_multiple_loopback_decay(self, engine):
+        """Multiple loopback deltas should multiply the decay factors."""
+        providers = [
+            {
+                "address": "0xP1",
+                "region_id": "us-east-1",
+                "capacity_contribution": 100,
+                "escrow_completions": 5000.0,
+                "staked_amount": 10_000.0,
+                "loopback_deltas": [86400, 604800],  # 1 day, 7 days
+            }
+        ]
+        result = engine.calculate_epoch_rewards(providers, epoch_emission_budget=10_000.0)
+        p1 = result.provider_rewards[0]
+        # F1 = 1 - e^-0.5 = 0.393469
+        # F2 = 1 - e^-3.5 = 1 - 0.030197 = 0.969803
+        # F = 0.393469 * 0.969803 = 0.381588
+        assert abs(p1.symbiosis_decay_factor - 0.381588) < 0.001
+
+    def test_merkle_root_incorporates_decay(self, engine):
+        """The Merkle root should change when decay is applied to provider rewards."""
+        providers_no_decay = [
+            {
+                "address": "0xP1",
+                "region_id": "us-east-1",
+                "capacity_contribution": 100,
+                "escrow_completions": 5000.0,
+                "staked_amount": 10_000.0,
+            }
+        ]
+        providers_decay = [
+            {
+                "address": "0xP1",
+                "region_id": "us-east-1",
+                "capacity_contribution": 100,
+                "escrow_completions": 5000.0,
+                "staked_amount": 10_000.0,
+                "loopback_deltas": [86400],
+            }
+        ]
+        
+        res1 = engine.calculate_epoch_rewards(providers_no_decay, epoch_emission_budget=10_000.0)
+        res2 = engine.calculate_epoch_rewards(providers_decay, epoch_emission_budget=10_000.0)
+        
+        assert res1.merkle_root != res2.merkle_root
