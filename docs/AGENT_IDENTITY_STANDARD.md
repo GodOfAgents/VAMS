@@ -52,6 +52,18 @@ The **VAMS Agent Identity** is a comprehensive JSON standard that defines an age
       "encryption": "enabled"
     }
   },
+  "cognitive_profile": {
+    "K": 0.85,
+    "RW": 0.90,
+    "M": 0.75,
+    "R": 0.80,
+    "WM": 0.85,
+    "MS": 0.95,
+    "MR": 0.90,
+    "V": 0.50,
+    "A": 0.30,
+    "S": 0.70
+  },
   "state": {
     "engine": "DBOS",
     "checkpoint_uri": "arweave://...",
@@ -76,5 +88,20 @@ Defines what the agent *can do*. Used by the **VAMS Gateway** for routing user i
 ### 4. Resources (Infrastructure)
 Defines where the agent lives (L1/L2). VAMS is infrastructure-agnostic.
 
-### 5. State (The "Soul")
+### 5. Cognitive Profile (The CHC Decagon)
+Defines the agent's psychometric benchmark capabilities across the 10 Cattell-Horn-Carroll (CHC) cognitive domains. Each value is a float between `0.0` and `1.0`.
+*   `K` (General Knowledge): Quality and depth of pre-trained parameters.
+*   `RW` (Reading/Writing): Syntax parsing, structured formats, translation.
+*   `M` (Math): Numeric reasoning, arithmetic operations, floating-point analysis.
+*   `R` (Fluid Reasoning): Multi-hop planning, out-of-distribution generalization.
+*   `WM` (Working Memory): Context window stability and attention retention.
+*   `MS` (Memory Storage): Semantic vector databases, long-term database checkpoints.
+*   `MR` (Memory Retrieval): Context recall, needle-in-a-haystack indexing efficiency.
+*   `V` (Visual): Multimodal image processing, OCR, spatial geometry.
+*   `A` (Auditory): Audio transcription, spectrogram analysis, text-to-speech.
+*   `S` (Speed): Execution throughput, tokens-per-second, hardware latency.
+
+Agents declare these values as **minimum cognitive requirements** inside their composed blueprints to filter matching DePIN nodes. Compute nodes report these as **capabilities** via their telemetry heartbeat payloads, which are verified by Sentinels.
+
+### 6. State (The "Soul")
 Defines how the agent remembers. ERC-8004 agents are stateless; VAMS agents use DBOS + Arweave to persist state across restarts.

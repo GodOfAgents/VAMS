@@ -1,0 +1,4 @@
+interface:
+  display_name: "VAMS Docs Reality Sync"
+  short_description: "Sync VAMS docs to source reality"
+  default_prompt: "Use $vams-docs-reality-sync to reconcile these VAMS docs with source reality."

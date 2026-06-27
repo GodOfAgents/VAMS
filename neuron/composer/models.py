@@ -163,15 +163,19 @@ class InstanceBlueprint:
 
     # AUTOSKILL Phase 3b: Skill alignment requirements
     skill_vector: Optional[List[float]] = None  # Desired skill profile coordinates
+    
+    # CHC Phase 7: Cognitive requirements
+    cognitive_requirements: Dict[str, float] = field(default_factory=dict)
 
     def blueprint_hash(self) -> str:
         """Deterministic hash for deduplication and caching."""
+        cog_reqs_str = ",".join(f"{k}:{v}" for k, v in sorted(self.cognitive_requirements.items())) if self.cognitive_requirements else ""
         payload = (
             f"{self.name}:{self.compute.gpu_type}:{self.compute.gpu_count}:"
             f"{self.compute.vcpu}:{self.memory.ram_gb}:"
             f"{self.storage.type}:{self.storage.capacity_gb}:"
             f"{self.networking.region}:{self.max_cost_per_hour}:"
-            f"{','.join(self.required_service_blocks)}"
+            f"{','.join(self.required_service_blocks)}:{cog_reqs_str}"
         )
         return hashlib.sha256(payload.encode()).hexdigest()[:16]
 
@@ -209,6 +213,7 @@ class InstanceBlueprint:
             "elastic": self.elastic,
             "min_sla_score_bps": self.min_sla_score_bps,
             "skill_vector": self.skill_vector,
+            "cognitive_requirements": self.cognitive_requirements,
             "required_service_blocks": self.required_service_blocks,
         }
 
@@ -237,6 +242,7 @@ class ScoredCandidate:
     latency_score: float = 0.0
     regional_score: float = 0.0
     skill_alignment_score: float = 0.0  # AUTOSKILL Phase 3b
+    cognitive_alignment_score: float = 0.0  # CHC Phase 7
 
     # Composite
     total_score: float = 0.0
@@ -258,6 +264,7 @@ class ScoredCandidate:
             "latency_score": round(self.latency_score, 4),
             "regional_score": round(self.regional_score, 4),
             "skill_alignment_score": round(self.skill_alignment_score, 4),
+            "cognitive_alignment_score": round(self.cognitive_alignment_score, 4),
             "benchmark_score_bps": self.benchmark_score_bps,
         }
 

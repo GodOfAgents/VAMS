@@ -5,6 +5,8 @@ import base64
 import requests
 from typing import Optional, Dict, Any
 
+from neuron.runtime_safety import require_not_live_mock
+
 class AvailDAError(Exception):
     pass
 
@@ -22,6 +24,7 @@ class AvailDASDK:
         self.seed_phrase = seed_phrase or os.getenv("AVAIL_SEED_PHRASE", "")
         self.timeout = timeout
         self.mock_mode = os.getenv("AVAIL_MOCK_MODE", "true").lower() == "true"
+        require_not_live_mock("AvailDASDK", self.mock_mode)
         
         if not self.seed_phrase and not self.mock_mode:
             raise AvailDAError("AVAIL_SEED_PHRASE must be provided or mock mode enabled")

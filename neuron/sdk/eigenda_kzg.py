@@ -5,6 +5,8 @@ import base64
 import requests
 from typing import Optional, Dict, Any
 
+from neuron.runtime_safety import require_not_live_mock
+
 class EigenDAError(Exception):
     pass
 
@@ -22,6 +24,7 @@ class EigenDASDK:
         self.private_key = private_key or os.getenv("EIGENDA_PRIVATE_KEY", "")
         self.timeout = timeout
         self.mock_mode = os.getenv("EIGENDA_MOCK_MODE", "true").lower() == "true"
+        require_not_live_mock("EigenDASDK", self.mock_mode)
         
     def submit_blob(self, payload: bytes) -> Dict[str, Any]:
         """

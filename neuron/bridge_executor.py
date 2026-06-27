@@ -29,6 +29,8 @@ from dataclasses import dataclass, field
 from typing import List, Optional, Dict, Tuple
 from enum import Enum
 
+from neuron.runtime_safety import require_not_live_mock
+
 logger = logging.getLogger("VAMS-Bridge")
 
 try:
@@ -258,6 +260,7 @@ class MultiISMVerifier:
     THRESHOLD = 2  # 2/3 ISMs must verify
 
     def __init__(self, mock_mode: bool = True):
+        require_not_live_mock("MultiISMVerifier", mock_mode)
         self.mock_mode = mock_mode
         self._stats = {
             "verifications": 0,
@@ -477,6 +480,7 @@ class BridgeExecutor:
     """
 
     def __init__(self, mock_mode: bool = True):
+        require_not_live_mock("BridgeExecutor", mock_mode)
         self.mock_mode = mock_mode
         self.icb = ICBClient()
         self.ism_verifier = MultiISMVerifier(mock_mode=mock_mode)

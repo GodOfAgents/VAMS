@@ -1,0 +1,4 @@
+interface:
+  display_name: "VAMS Protocol Hardening"
+  short_description: "Harden VAMS protocol changes"
+  default_prompt: "Use $vams-protocol-hardening to harden this VAMS subsystem for Phase 6."

@@ -404,3 +404,51 @@ Queries the current payout preference for a provider address.
     "supported_tokens": ["USDC", "USDT"]
   }
   ```
+
+---
+
+## 10. Nodes Registry & Telemetry (v0.8.0)
+
+Endpoints for querying the active DePIN compute nodes registry and telemetry status.
+
+### `GET /nodes`
+Returns a list of all registered nodes including their live telemetry data, cognitive profiles, and TEE remote attestations.
+
+- **Response (200 OK):**
+  ```json
+  {
+    "total": 1,
+    "online": 1,
+    "nodes": [
+      {
+        "node_id": "node_01",
+        "public_key": "0xabc...",
+        "last_block": 104230,
+        "network": "Amoy",
+        "last_seen": 1782212345.0,
+        "heartbeat_count": 42,
+        "first_seen": 1782210000.0,
+        "region": "us-east-1",
+        "cost_per_hour": 0.15,
+        "credit_score": 750,
+        "passports": "ERC-8004 Phala TEE",
+        "skills": ["llm-inference", "vector-db-ops"],
+        "cognitive_profile": {
+          "K": 0.85,
+          "RW": 0.90,
+          "M": 0.75,
+          "R": 0.80,
+          "WM": 0.85,
+          "MS": 0.95,
+          "MR": 0.90,
+          "V": 0.50,
+          "A": 0.30,
+          "S": 0.70
+        },
+        "is_online": true,
+        "uptime": "39m",
+        "last_seen_formatted": "16:43:11"
+      }
+    ]
+  }
+  ```

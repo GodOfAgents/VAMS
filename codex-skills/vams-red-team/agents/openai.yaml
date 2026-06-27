@@ -1,0 +1,4 @@
+interface:
+  display_name: "VAMS Red Team"
+  short_description: "Adversarial VAMS threat review"
+  default_prompt: "Use $vams-red-team to adversarially review this VAMS design or diff."

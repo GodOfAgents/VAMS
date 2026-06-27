@@ -27,11 +27,11 @@
 
   [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
   [![Status](https://img.shields.io/badge/Status-Pre--Testnet%20Candidate-orange.svg)](./REPO_STATUS_REPORT.md)
-  [![Architecture](https://img.shields.io/badge/Architecture-v0.7.0-blue.svg)](./docs/team/ARCHITECTURE_v0-7-0.md)
+  [![Architecture](https://img.shields.io/badge/Architecture-v0.8.0-blue.svg)](./docs/team/ARCHITECTURE_v0-8-0.md)
   [![Release](https://img.shields.io/badge/Release-v1.3.0--oms-purple.svg)](./docs/CHANGELOG.md)
   [![Build](https://img.shields.io/badge/Tests-1,083%20Passing-brightgreen.svg)](./audit.md#10-test-coverage--verification)
 
-  **[Documentation](./REPO_STATUS_REPORT.md)** • **[Architecture](./docs/team/ARCHITECTURE_v0-7-0.md)** • **[Developer Guide](./docs/DEVELOPER_GUIDE.md)** • **[Whitepaper](./docs/team/WHITEPAPER.md)** • **[Academic Audit](./audit.md)**
+  **[Documentation](./REPO_STATUS_REPORT.md)** • **[Architecture](./docs/team/ARCHITECTURE_v0-8-0.md)** • **[Developer Guide](./docs/DEVELOPER_GUIDE.md)** • **[Whitepaper](./docs/team/WHITEPAPER.md)** • **[Academic Audit](./audit.md)**
 
 </div>
 
@@ -80,7 +80,7 @@ Building autonomous agent workflows today requires juggling fragmented compute l
 
 ## ✨ The VAMS Solution
 
-### 🏗️ The 5 Core Pillars
+### 🏗️ The 6 Core Pillars
 
 #### 1️⃣ Unified DePIN Compute Sourcing
 Provides a single, secure API for compute (io.net, Akash, Phala) and storage (Iagon, Celestia), abstracting multi-wallet complexity from agent creators. Grounded in [ServiceBlockRegistry.sol](file:///c:/Users/aseem/Desktop/VAMS-main/VAMS-main/contracts/src/registry/ServiceBlockRegistry.sol) and `neuron/services/`.
@@ -105,6 +105,9 @@ Agents can "roam" to external EVM and non-EVM chains (Solana, Base, Ethereum) to
 
 #### 5️⃣ Consolidated Trust Decagon
 VAMS aggregates trust and reputation proofs across 10 security standards (TEE remote attestations, staked watchtower telemetry, and behavioral analysis) to issue a consolidated **Trust Score** for compute nodes. Grounded in [VAMSTrustAggregator.sol](file:///c:/Users/aseem/Desktop/VAMS-main/VAMS-main/contracts/src/trust/VAMSTrustAggregator.sol).
+
+#### 6️⃣ CHC Cognitive Profiling & 6-Axis Composer Scoring
+VAMS incorporates the **Cattell-Horn-Carroll (CHC) Cognitive scoring framework** to measure and rank DePIN compute node capabilities across 10 distinct cognitive dimensions (such as Working Memory, Fluid Reasoning, and Memory Storage), preventing agent amnesia and providing verifiable resource matching. Grounded in [scorer.py](file:///c:/Users/aseem/Desktop/VAMS-main/VAMS-main/neuron/composer/scorer.py) and [ARCHITECTURE_v0-8-0.md](./docs/team/ARCHITECTURE_v0-8-0.md).
 
 ---
 

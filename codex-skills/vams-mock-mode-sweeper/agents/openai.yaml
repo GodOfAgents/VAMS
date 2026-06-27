@@ -1,0 +1,4 @@
+interface:
+  display_name: "VAMS Mock Mode Sweeper"
+  short_description: "Find mock-mode production blockers"
+  default_prompt: "Use $vams-mock-mode-sweeper to find mock-mode blockers before staging."

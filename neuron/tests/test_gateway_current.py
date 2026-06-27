@@ -1,66 +1,96 @@
 import sys
 import os
 import time
+import json
 import unittest
 from fastapi.testclient import TestClient
+from ecdsa import SigningKey, SECP256k1
 
-# Ensure sys.path resolves 'gateway' as 'neuron/gateway' when run inside 'neuron/' or 'neuron/tests/'
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# Ensure root directory is in sys.path
+root_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, root_dir)
 
-from gateway.server import app, AGENTS
-from gateway.rate_limiter import RateLimiter
+# Clear any already loaded 'gateway' modules from sys.modules to prevent cross-contamination
+for mod in list(sys.modules.keys()):
+    if mod.startswith("gateway"):
+        del sys.modules[mod]
+
+os.environ["GATEWAY_ADMIN_PASSWORD"] = "SecureTestPassword123!"
+
+from gateway.server import app, nodes
+from neuron.gateway.rate_limiter import RateLimiter
 
 class TestGatewayCurrent(unittest.TestCase):
     
     def setUp(self):
         self.client = TestClient(app)
-        # Clear in-memory node registry
-        AGENTS.clear()
+        nodes.clear()
         
-    def test_register_agent(self):
-        """Test agent registration adds the node to in-memory AGENTS state."""
+    def test_heartbeat_new_agent(self):
+        """Test sending heartbeat with valid signature registers a new agent."""
+        sk = SigningKey.generate(curve=SECP256k1)
+        vk = sk.verifying_key
+        public_key_hex = vk.to_string().hex()
+        
         node_id = "0x" + "01" * 32
         payload = {
             "node_id": node_id,
-            "public_key": "0xPub123",
-            "stake_amount": 1000.0,
-            "capabilities": {"compute": "gpu"},
-            "version": "1.0.0"
+            "block_height": 100,
+            "public_key": public_key_hex,
+            "region": "us-east-1",
+            "cost_per_hour": 0.15,
+            "credit_score": 750,
+            "passports": "ERC-8004 Phala TEE"
         }
-        response = self.client.post("/agents/register", json=payload)
-        self.assertEqual(response.status_code, 200)
-        self.assertTrue(response.json()["success"])
-        self.assertIn(node_id, AGENTS)
-        self.assertEqual(AGENTS[node_id]["stake"], 1000.0)
-
-    def test_heartbeat_unknown_agent(self):
-        """Test heartbeat from unregistered agent returns success=False."""
-        unknown_id = "0x" + "ff" * 32
-        payload = {
-            "payload": f"{time.time()}|active|{unknown_id}",
-            "signature": "0xSig"
-        }
-        response = self.client.post("/heartbeat", json=payload)
-        self.assertEqual(response.status_code, 200)
-        self.assertFalse(response.json()["success"])
-
-    def test_heartbeat_success(self):
-        """Test heartbeat from registered agent returns success=True."""
-        node_id = "0x" + "02" * 32
-        # 1. Register
-        self.client.post("/agents/register", json={
-            "node_id": node_id, "public_key": "0xPub", "stake_amount": 500
-        })
+        payload_str = json.dumps(payload)
         
-        # 2. Heartbeat
-        payload = {
-            "payload": f"{time.time()}|active|{node_id}",
-            "signature": "0xSig"
+        signature = sk.sign(payload_str.encode()).hex()
+        
+        headers = {
+            "X-VAMS-DID": "did:key:" + public_key_hex,
+            "X-VAMS-Signature": signature,
+            "X-VAMS-Timestamp": str(int(time.time()))
         }
-        response = self.client.post("/heartbeat", json=payload)
+        
+        hb_data = {
+            "payload": payload_str,
+            "signature": signature
+        }
+        
+        response = self.client.post("/heartbeat", json=hb_data, headers=headers)
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(response.json()["success"])
-        self.assertEqual(AGENTS[node_id]["status"], "active")
+        self.assertEqual(response.json()["status"], "ok")
+        
+        self.assertIn(node_id, nodes)
+        self.assertEqual(nodes[node_id].last_block, 100)
+        self.assertEqual(nodes[node_id].public_key, public_key_hex)
+
+    def test_heartbeat_invalid_signature(self):
+        """Test sending heartbeat with invalid signature returns 403."""
+        sk = SigningKey.generate(curve=SECP256k1)
+        vk = sk.verifying_key
+        public_key_hex = vk.to_string().hex()
+        
+        node_id = "0x" + "02" * 32
+        payload = {
+            "node_id": node_id,
+            "block_height": 100,
+            "public_key": public_key_hex
+        }
+        payload_str = json.dumps(payload)
+        
+        # Invalid signature (wrong key)
+        other_sk = SigningKey.generate(curve=SECP256k1)
+        signature = other_sk.sign(payload_str.encode()).hex()
+        
+        hb_data = {
+            "payload": payload_str,
+            "signature": signature
+        }
+        
+        response = self.client.post("/heartbeat", json=hb_data)
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.json()["detail"], "Invalid heartbeat signature")
 
     def test_rate_limiter(self):
         """Test the gateway RateLimiter utility class limits requests properly."""

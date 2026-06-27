@@ -5,6 +5,33 @@ All notable changes to the VAMS project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Security
+- **`neuron/runtime_safety.py`**: Added centralized live-environment safety gates for `VAMS_ENV=staging`, `VAMS_ENV=testnet`, and `VAMS_ENV=production`.
+- **`gateway/server.py`**: Gateway DA audit initialization now rejects mock audit mode in live environments before any mock DA receipt can be emitted.
+- **`gateway/server.py`**: Live environments now require `GATEWAY_ADMIN_DID`, reject Basic Auth on protected control-plane routes, enforce single-use DID signatures within the 5-minute timestamp window, and bind direct Uvicorn startup to `127.0.0.1`.
+- **`gateway/server.py`**: Live `/heartbeat` telemetry now requires proxy-verified mTLS client certificate headers and an allowlisted certificate fingerprint via `GATEWAY_HEARTBEAT_CERT_FINGERPRINTS`.
+- **`neuron/sdk/oms_identity.py`**, **`neuron/sdk/trails_client.py`**, **`neuron/payments/coinme_client.py`**, **`neuron/sdk/avail_substrate.py`**, **`neuron/sdk/eigenda_kzg.py`**, **`neuron/sdk/iagon_storage.py`**, **`neuron/sdk/phala_tee.py`**, and **`neuron/bridge_executor.py`**: Added fail-closed live-mode checks that reject mock clients, demo credentials, mock bridge verification, and mock TEE execution in staging/testnet/production.
+- **`neuron/da/adapters/avail_adapter.py`** and **`neuron/da/adapters/eigenda_adapter.py`**: Explicitly block structured stub adapters from instantiating in live environments.
+
+### Testing
+- **`neuron/tests/test_runtime_safety.py`**: Added regression tests for local mock allowance and live-environment rejection across OMS, Trails, Coinme, DA adapters, DA audit logging, and bridge mock paths.
+- **`neuron/tests/test_gateway_auth_hardening.py`**: Added regression tests for DID signature replay rejection, live-mode Basic Auth rejection, live-mode loopback binding, and live heartbeat client certificate enforcement.
+
+## [0.8.0] - 2026-06-23
+
+### Added — Phase 7: CHC Cognitive Scoring & 6-Axis Composer Scoring
+- **`neuron/composer/models.py`**: Added `cognitive_requirements` (`Dict[str, float]`) to `InstanceBlueprint` for defining agent capability targets.
+- **`neuron/composer/scorer.py`**: Implemented the 6-axis composition ranking engine with the **Cattell-Horn-Carroll (CHC) cognitive shortfall scoring formula**:
+  $$S_{\text{cog}} = 1.0 - \frac{1}{|D_{\text{req}}|} \sum_{d \in D_{\text{req}}} \max\left(0, \text{Req}_d - \text{Profile}_d\right)$$
+- **`neuron/composer/scorer.py`**: Implemented dynamic weights scaling that adjusts weights proportionally (dedicating 10% to skills and 10% to cognitive requirements when present) while maintaining the 1.0 sum constraint, preserving backward compatibility.
+- **`gateway/server.py`**: Extended `NodeInfo` dataclass and heartbeat registration payloads to accept node cognitive profiles, TEE passports, credit scores, registered skills, hourly cost, and regions.
+- **`frontend-vite/src/App.jsx`**: Built a new split-screen dashboard layout with an interactive SVG-based Radar Chart visualizing the 10 CHC domains (Decagon Graph) in light/dark modes.
+
+### Testing
+- Fully verified via 28 unit tests in `test_chc_scoring.py` and `test_composer_scorer.py` verifying dynamic scaling, shortfall math, edge cases, and 100% test success rate.
+
 ## [1.3.0-oms] - 2026-05-06
 
 ### Added — Phase 1: Two-Layer Identity Model

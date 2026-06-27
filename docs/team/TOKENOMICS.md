@@ -214,6 +214,14 @@ To ensure robust security and incentivize long-term participation, validating an
 To prevent flash-collusion attacks and ensure network stability during market volatility, all staked $VAMS (both validator bonds and delegated stakes) are subject to a **14-day unbonding period**. 
 - During economic circuit breaker events (e.g., severe price drops >90%), the unbonding period can be dynamically extended by the protocol up to 30 days.
 
+### 8.3 Cognitive Benchmark Premium & Composition Yields
+
+DePIN compute nodes do not receive flat yields. To incentivize the deployment of high-specification hardware that prevents the "agent amnesia" bottleneck, VAMS ties operator composition yields and market pricing power directly to their verified **Cattell-Horn-Carroll (CHC) cognitive benchmarks**:
+
+1. **Composition Premium Multiplier**: Nodes that report high cognitive profile scores (particularly in Memory Storage `MS`, Fluid Reasoning `R`, and Working Memory `WM`, typically supported by secure TEEs with large memory capacities) receive a yield multiplier of up to **\(1.5\text{x}\)** on their base staking emissions.
+2. **Pricing Command**: When matching blueprints via the 6-axis scoring engine, nodes satisfying high cognitive thresholds command a pricing premium in the marketplace. High-performance enclaves can claim higher hourly fees (\(cost\_per\_hour\) in $VAMS) since the shortfall scoring algorithm prioritizes nodes that fully satisfy the blueprint's requirements without penalty.
+3. **Attestation Auditing**: These cognitive capabilities are verified by Sentinel nodes during periodic challenge cycles, and any discrepancies or failure to meet the reported CHC metrics results in immediate down-grading of the node's profile, dilution of its yield multiplier, and potential slashing of its staked collateral.
+
 ---
 
 ## Appendix A: Token Unlock Schedule (v2.1 — Restructured)

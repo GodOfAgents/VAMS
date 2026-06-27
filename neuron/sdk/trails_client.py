@@ -21,6 +21,8 @@ class TrailsStatus:
 import os
 import requests
 
+from neuron.runtime_safety import require_live_secret, require_not_live_mock
+
 class TrailsClient:
     """OMS Trails API Client wrapper."""
     
@@ -32,6 +34,8 @@ class TrailsClient:
             
         self.api_url = api_url or os.getenv("TRAILS_API_URL", "https://api.trails.polygon.technology/v1")
         self.api_key = api_key or os.getenv("TRAILS_API_KEY", "demo-key")
+        require_not_live_mock("TrailsClient", self.mock_mode)
+        require_live_secret("TrailsClient", self.api_key, insecure_values={"demo-key"})
         logger.info(f"Initialized TrailsClient (mock_mode={self.mock_mode}, url={self.api_url})")
 
     def submit_intent(self, source: str, dest: str, payload: bytes, value: int = 0) -> TrailsReceipt:
@@ -89,4 +93,3 @@ class TrailsClient:
         except Exception as e:
             logger.error(f"Error fetching Trails status: {e}")
             raise
-

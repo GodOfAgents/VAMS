@@ -4,6 +4,8 @@ import os
 import requests
 from typing import Dict, Any, Optional
 
+from neuron.runtime_safety import require_live_secret, require_not_live_mock
+
 logger = logging.getLogger("VAMS-Coinme")
 
 class CoinmeClient:
@@ -21,6 +23,9 @@ class CoinmeClient:
             self.mock_mode = mock_mode
         else:
             self.mock_mode = os.getenv("COINME_MOCK_MODE", "true").lower() == "true" or self.api_key == "demo-key"
+
+        require_not_live_mock("CoinmeClient", self.mock_mode)
+        require_live_secret("CoinmeClient", self.api_key, insecure_values={"demo-key"})
             
         logger.info(f"Initialized CoinmeClient (mock_mode={self.mock_mode}, url={self.base_url})")
 
@@ -124,4 +129,3 @@ class CoinmeClient:
             return True
         except json.JSONDecodeError:
             return False
-

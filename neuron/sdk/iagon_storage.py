@@ -7,6 +7,8 @@ from typing import Optional, Dict, Any, Tuple
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from cryptography.exceptions import InvalidTag
 
+from neuron.runtime_safety import require_not_live_mock
+
 class IagonStorageError(Exception):
     pass
 
@@ -29,6 +31,7 @@ class IagonStorageSDK:
         self.api_key = api_key or os.getenv("IAGON_API_KEY", "")
         self.timeout = timeout
         self.mock_mode = os.getenv("IAGON_MOCK_MODE", "true").lower() == "true"
+        require_not_live_mock("IagonStorageSDK", self.mock_mode)
         
         # Identity-derived symmetric encryption key (AES-256)
         # In a real node, this is derived from the ECDSA private key using HKDF

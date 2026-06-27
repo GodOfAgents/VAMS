@@ -48,15 +48,17 @@ class ScorerWeights:
     latency: float = 0.20
     regional: float = 0.15
     skill_alignment: float = 0.0  # AUTOSKILL Phase 3b: Cosine similarity to requested skill vector
+    cognitive_alignment: float = 0.0  # CHC Phase 7: Shortfall cognitive alignment
 
     def validate(self) -> None:
-        total = self.price + self.sla + self.latency + self.regional + self.skill_alignment
+        total = self.price + self.sla + self.latency + self.regional + self.skill_alignment + self.cognitive_alignment
         if abs(total - 1.0) > 0.001:
             raise ValueError(
                 f"Scorer weights must sum to 1.0, got {total:.3f}. "
                 f"Adjust weights: price={self.price}, sla={self.sla}, "
                 f"latency={self.latency}, regional={self.regional}, "
-                f"skill_alignment={self.skill_alignment}"
+                f"skill_alignment={self.skill_alignment}, "
+                f"cognitive_alignment={self.cognitive_alignment}"
             )
 
 
@@ -83,6 +85,7 @@ class RawNodeData:
     latency_ms: float = 0.0        # From latency_probe
     last_benchmark_at: float = 0.0  # Unix timestamp
     skill_profile: Optional[List[float]] = None  # AUTOSKILL Phase 3b: extracted skill vector
+    cognitive_profile: Dict[str, float] = field(default_factory=dict)  # CHC Phase 7: cognitive capabilities profile
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -146,6 +149,27 @@ class CandidateScorer:
             )
             return []
 
+        # Determine actual weights to use for this blueprint (dynamic normalization)
+        weights = self.weights
+        has_skills = bool(blueprint.skill_vector)
+        has_cog = bool(blueprint.cognitive_requirements)
+
+        if (has_skills and weights.skill_alignment == 0.0) or (has_cog and weights.cognitive_alignment == 0.0):
+            skill_w = 0.10 if has_skills else 0.0
+            cog_w = 0.10 if has_cog else 0.0
+            remaining = 1.0 - (skill_w + cog_w)
+            non_align_sum = weights.price + weights.sla + weights.latency + weights.regional
+            if non_align_sum > 0:
+                scale = remaining / non_align_sum
+                weights = ScorerWeights(
+                    price=weights.price * scale,
+                    sla=weights.sla * scale,
+                    latency=weights.latency * scale,
+                    regional=weights.regional * scale,
+                    skill_alignment=skill_w,
+                    cognitive_alignment=cog_w
+                )
+
         # Step 2: Compute dimension ranges for normalization
         price_range = self._compute_range([n.reservation_price for n in eligible])
         sla_range = self._compute_range([n.benchmark_score_bps for n in eligible])
@@ -174,12 +198,25 @@ class CandidateScorer:
                         # Normalize cosine similarity from [-1, 1] to [0, 1]
                         skill_score = (cos_sim + 1.0) / 2.0
 
+            # CHC Phase 7: Compute cognitive alignment score using shortfall formula
+            cognitive_score = 1.0
+            if blueprint.cognitive_requirements:
+                if node.cognitive_profile:
+                    diffs = []
+                    for k, req_val in blueprint.cognitive_requirements.items():
+                        prof_val = node.cognitive_profile.get(k, 0.0)
+                        diffs.append(max(0.0, req_val - prof_val))
+                    cognitive_score = max(0.0, 1.0 - (sum(diffs) / len(blueprint.cognitive_requirements)))
+                else:
+                    cognitive_score = 0.0
+
             total = (
-                self.weights.price * price_score
-                + self.weights.sla * sla_score
-                + self.weights.latency * latency_score
-                + self.weights.regional * regional_score
-                + self.weights.skill_alignment * skill_score
+                weights.price * price_score
+                + weights.sla * sla_score
+                + weights.latency * latency_score
+                + weights.regional * regional_score
+                + weights.skill_alignment * skill_score
+                + weights.cognitive_alignment * cognitive_score
             )
 
             scored.append(ScoredCandidate(
@@ -195,6 +232,7 @@ class CandidateScorer:
                 latency_score=latency_score,
                 regional_score=regional_score,
                 skill_alignment_score=skill_score,
+                cognitive_alignment_score=cognitive_score,
                 total_score=total,
                 benchmark_score_bps=node.benchmark_score_bps,
                 latency_ms=node.latency_ms,
