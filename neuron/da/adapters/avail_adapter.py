@@ -16,6 +16,7 @@ from typing import Optional
 
 from neuron.da.adapters.base import DAAdapter
 from neuron.da.models import DAProtocol, DAReceipt
+from neuron.runtime_safety import require_not_live_mock
 
 logger = logging.getLogger("VAMS-DA-Avail")
 
@@ -33,6 +34,7 @@ class AvailDAAdapter(DAAdapter):
     name = "Avail (KZG Backup)"
 
     def __init__(self, rpc_url: str = "https://avail-turing.api.onfinality.io/public", mock_mode: bool = True):
+        require_not_live_mock("AvailDAAdapter", True)
         super().__init__(rpc_url, namespace=b"vams-perf-v1", mock_mode=True)  # Always mock for now
         self._mock_height = 200
 

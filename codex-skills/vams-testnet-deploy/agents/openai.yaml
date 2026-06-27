@@ -1,0 +1,4 @@
+interface:
+  display_name: "VAMS Testnet Deploy"
+  short_description: "Plan and verify testnet deploys"
+  default_prompt: "Use $vams-testnet-deploy to prepare this VAMS deployment for testnet."

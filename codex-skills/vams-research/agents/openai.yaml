@@ -1,0 +1,4 @@
+interface:
+  display_name: "VAMS Research"
+  short_description: "Map research into VAMS code"
+  default_prompt: "Use $vams-research to map this paper or idea into VAMS implementation reality."

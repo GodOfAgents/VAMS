@@ -16,6 +16,7 @@ from typing import Optional
 
 from neuron.da.adapters.base import DAAdapter
 from neuron.da.models import DAProtocol, DAReceipt
+from neuron.runtime_safety import require_not_live_mock
 
 logger = logging.getLogger("VAMS-DA-EigenDA")
 
@@ -32,6 +33,7 @@ class EigenDAAdapter(DAAdapter):
     name = "EigenDA (High-Security)"
 
     def __init__(self, rpc_url: str = "https://holesky.drpc.org", mock_mode: bool = True):
+        require_not_live_mock("EigenDAAdapter", True)
         super().__init__(rpc_url, namespace=b"vams-perf-v1", mock_mode=True)  # Always mock for now
         self._mock_height = 100
 

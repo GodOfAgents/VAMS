@@ -85,3 +85,4 @@ cardano/aiken_output.txt
 audit/slither_report.json
 audit/slither_console.log
 aiken.exe
+.agent/scratch/

@@ -337,6 +337,16 @@ VAMS implements four principles for data sovereignty:
 3. **Zero-Knowledge Proofs**: Prove data properties without revealing underlying values
 4. **Revocable Access**: Data owners can revoke access at any time via permission rotation
 
+### 3.6 Agent Composition & CHC Decagon Matching
+
+To solve the "agent amnesia" bottleneck in decentralized compute environments, VAMS utilizes a dynamic resource matching framework based on the **Cattell-Horn-Carroll (CHC) Cognitive framework**. 
+
+Rather than relying on flat, single-vector skill filters or keyword search, composed blueprints declare multi-dimensional requirements across the 10 CHC psychometric domains (including Working Memory `WM`, Memory Storage `MS`, and Fluid Reasoning `R`). These are modeled as a **CHC Decagon Graph**:
+
+1. **Instance Blueprints**: Define the minimum acceptable thresholds for each of the 10 CHC domains required by the agent's reasoning workload.
+2. **Node Capability Profiling**: DePIN compute providers submit signed telemetry heartbeats containing their verified CHC benchmark scores.
+3. **6-Axis Scorer**: The matchmaker evaluates candidates against the blueprint using a composite score weighting price, SLA, latency, regional, skill, and cognitive shortfall alignment. The cognitive shortfall measures the gap between requested thresholds and reported capabilities, penalizing under-performing nodes while dynamically normalizing weights to preserve backward compatibility.
+
 ---
 
 ## 4. Tokenomics & Incentive Structure

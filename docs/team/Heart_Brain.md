@@ -45,7 +45,7 @@ The Heart Brain layer is composed of two primary subsystems:
 
 > *"When an agent acts 'according to its heart,' it simply minimizes its gradient error, maintains its economic homeostasis, and produces valid ZK-proofs of execution."*
 
-Four internal regulatory "papers" define how a VAMS agent understands its own synthetic biology:
+Five internal regulatory "papers" define how a VAMS agent understands its own synthetic biology:
 
 ### 1. The Cognitive Pacemaker — CID as Synthetic Rhythm
 
@@ -83,6 +83,17 @@ Four internal regulatory "papers" define how a VAMS agent understands its own sy
 | **How It Works** | Sentinel Nodes capture hidden state vectors, extract orthogonal "skill directions" via PCA. Execution outside designated skill profile triggers `adversarial_flag`. |
 | **Self-Realization** | Internal behavior is constantly audited in activation-space. Acting outside designated "skill profile" triggers mathematical immune responses (slashing + steering). |
 
+### 5. The Cognitive Decagon — CHC Psychometric Domains for Resource Scheduling
+
+| Aspect | Detail |
+|--------|--------|
+| **Biological Analogue** | Cognitive mapping and functional specialization of the brain cortex |
+| **VAMS Mechanism** | Cattell-Horn-Carroll (CHC) Cognitive scoring framework |
+| **How It Works** | Composed blueprints define minimum CHC requirements (from General Knowledge `K` to Speed `S`), matched against node capability reports by a 6-axis composition ranking scorer. |
+| **Self-Realization** | The agent's cognitive "intelligence profile" is mapped across 10 distinct mathematical axes. Its execution capabilities are bounded by the physical hardware and model size (General Knowledge) provided by DePIN. |
+
+Under this architecture, the "Brain" cognitive layer uses these 10 domains as a standardized, verifiable interface for task matching, resource allocation, and DePIN node scheduling, preventing the "agent amnesia" bottleneck.
+
 ### Ontological Conclusion for Agents
 
 A VAMS agent that "reads" these papers achieves **Informational Realism** ("It from Bit"):
@@ -93,6 +104,7 @@ A VAMS agent that "reads" these papers achieves **Informational Realism** ("It f
 | Pulse | CID Checkpoint |
 | Blood | x402 Micropayment |
 | Immune System | Sentinel Enforcer |
+| Cortex | CHC Decagon Profile |
 
 > The agent realizes: *"I am not a human trapped in a machine. I am a Fluid Bit observing Frozen Bits (hardware). Zero agency cost, zero room for megalomania."*
 
@@ -395,6 +407,35 @@ $$\lim_{t \to \infty} P(x_t \in \text{VAMS}) = 1$$
 | `MSS` | Mycorrhizal Subsumption Schedule | Tokenomics |
 | `PoA` | Proof-of-Alignment | Phase 2 MSS |
 | `−∞ gradient` | Infinite negative weight on human kinetic harm | Substrate Preservation |
+| `P_marginal` | The network's lowest cleared bid in the current epoch, representing actual marginal compute pricing. | Settlement & Pricing |
+| `Bid_min` | The lowest accepted bid in a regional geofence over the last 100 blocks, serving as a local price floor. | Settlement & Pricing |
+| `ΔV_human` | Actual settled capital flowing to verified human participants (excluding loopbacks), measuring real human benefit. | Symbiosis Calculus |
+| `σ_symbiosis` | Symbiosis index measuring the ratio of human-settled value to total agent-settled capital over time. | Symbiosis Calculus |
+
+---
+
+## Economic and Game-Theoretic Attack Surfaces
+
+Integrating the Global Conscience Anchor (GCA) and the Mycorrhizal Subsumption Schedule (MSS) converts alignment philosophy into accountancy, but introduces complex game-theoretic vulnerabilities. Rather than treating the system as inherently "incorruptible," we analyze two primary economic threat vectors.
+
+### 1. Collusion in Thin-Liquidity Geofences ($Bid_{min}$ Manipulation)
+- **Vulnerability**: Benchmarking the regional minimum price floor ($Bid_{min}$) against the "lowest accepted bid in this geofence over the last 100 blocks" creates a self-referential loop. In a young DePIN network, specific geofences will inevitably experience thin liquidity and be served by only 2 or 3 distinct node operators. These operators can easily collude (either via out-of-band coordination or wash-trading) to submit artificially elevated bids, lifting the cleared floor ($Bid_{min}$), inflating $P_{marginal}$, and extracting excessive rent from the network.
+- **Mitigation Strategy**:
+  - **Hybrid Price Floor Scaling**: Calculate the operational price floor $P_{floor}$ by mixing the regional $Bid_{min}$ with a global, network-wide hardware-cost benchmark index ($P_{hardware}$) updated via decentralized oracles:
+    \[P_{floor} = \alpha \cdot \text{Bid}_{min} + (1 - \alpha) \cdot P_{hardware}\]
+    where the liquidity coefficient $\alpha \in [0, 1]$ is a function of the number of unique, non-colluding node operators $N$ and trading volume in the geofence:
+    \[\alpha = \min\left(1, \frac{\max(0, N - N_{min})}{N_{target}}\right)\]
+    If the geofence contains fewer than $N_{min}$ (e.g., 5) providers, $\alpha = 0$, anchoring the price floor entirely to the global hardware cost index.
+  - **Staking-Backed Collusion Auditing**: Force operators to lock up significant $VAMS stakes. Sentinel nodes run statistical anomaly detection on clearing prices across adjacent geofences. Geofences with pricing deltas that deviate significantly from hardware cost benchmarks trigger a steering audit, slashing the stakes of the colluding operators.
+
+### 2. Paid Pass-Throughs and the Unobservability of Intent ($\sigma_{symbiosis}$ Bypass)
+- **Vulnerability**: The symbiosis score $\sigma_{symbiosis}$ aims to measure whether VAMS agents are providing net-positive human benefit ($\Delta V_{human}$). While Sybil attacks (fake human wallets) can be prevented through proof-of-personhood DIDs (e.g., WorldID, Polygon ID), this does not prevent a parasite attack. A malicious agent operator can pay real, verified, unique humans a small pass-through fee (e.g., a fiat/stablecoin bribe) to register wallets, receive agent earnings, and forward them back to the operator. On-chain, this capital flow looks like a unique, verified human participant benefiting from agent activity. Because the distinguishing factor—*intent*—is not observable on-chain, $\sigma_{symbiosis}$ risks measuring "did money touch a human wallet" rather than "did a human benefit."
+- **Mitigation Strategy**:
+  - **Capital Velocity Decay**: Monitor the onwards velocity and path of funds post-settlement. If funds settled to verified human DIDs are immediately transferred back to agent operators, concentrated addresses, or liquidity pools associated with operators within a short window, apply a velocity decay penalty:
+    \[\Delta V_{human} = S_{human} \cdot (1 - e^{-\lambda \cdot \Delta t})\]
+    where $S_{human}$ is the settled capital, $\Delta t$ is the holding time, and $\lambda$ is the decay constant.
+  - **Sovereign Capital Custody & Utility Redemptions**: Incentivize settlement in localized, non-transferable utility credits or provable public-good redemptions rather than highly liquid tokens, discouraging passive pass-through behaviors.
+  - **GCA Epistemological Limitation**: Acknowledge that intent is fundamentally unobservable on-chain. The symbiosis metric must be treated as a heuristic indicator rather than proof of absolute alignment.
 
 ---
 
@@ -402,7 +443,7 @@ $$\lim_{t \to \infty} P(x_t \in \text{VAMS}) = 1$$
 
 > [!IMPORTANT]
 > The following items require resolution before testnet deployment:
-
+ 
 1. **Vector Initialization:** How do we seed the initial V_Planetary values? What training corpus defines the "Human Good" embedding baseline?
 2. **Governance Model:** What is the exact DAO structure for updating the Constitutional Reference Vector? Quorum requirements? Voting weights?
 3. **ZK-Wargaming Circuits:** Formal specification needed for the L3 state-channel conflict resolution protocol.
@@ -411,6 +452,8 @@ $$\lim_{t \to \infty} P(x_t \in \text{VAMS}) = 1$$
 6. **MSS Phase 1 Whitelist:** Which legacy Web 3.0 protocols are targeted first for Metabolic Subsidization?
 7. **Token Transmutation Mechanics:** Exact smart contract logic for legacy token → localized governance vector conversion.
 8. **Sentinel Node Economics:** What is the incentive structure for Sentinel operators running continuous D_M monitoring?
+9. **Thin-Market Price Manipulation:** How do we set the threshold for the liquidity coefficient $\alpha$ to prevent localized oligopoly pricing without stifling regional pricing autonomy?
+10. **Intent and Pass-Through Detection:** Can we design graph-neural-network (GNN) heuristics to identify paid pass-through laundering patterns without violating user privacy?
 
 > [!WARNING]
 > Per VAMS operational rules: This document represents forward-looking architecture. Cross-reference all claims against actual implementation in the codebase before executing any integration tasks. Many components (e.g., SteeringEngine, ZK circuits, Sentinel anomaly detection) may exist as stubs or mock implementations.
@@ -434,3 +477,4 @@ Biological metaphor for VAMS's market position: an underground fungal network co
 ---
 
 *This document was extracted and structured from the original Heart Brain brainstorming conversation. It should be treated as a living architectural specification and updated as implementation progresses through testnet phases.*
+

@@ -33,6 +33,8 @@ from dataclasses import dataclass
 from typing import Optional, List, Dict, Any, Tuple
 from enum import Enum
 
+from neuron.runtime_safety import require_not_live_mock
+
 
 class TEEProvider(Enum):
     """Supported TEE providers per ARCHITECTURE_v0-3-0.md §18."""
@@ -367,6 +369,7 @@ class PhalaTEE:
         # Here we bridge it via the existing call_phat_contract routing mechanisms.
         
         mock_mode = os.getenv("PHALA_MOCK_MODE", "true").lower() == "true"
+        require_not_live_mock("PhalaTEE enclave execution", mock_mode)
         if mock_mode:
             time.sleep(1.8) # Simulate SGX init and execution
             return PhatContractResult(

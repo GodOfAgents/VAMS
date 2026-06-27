@@ -25,6 +25,7 @@ from neuron.da.adapters.celestia_adapter import CelestiaDAAdapter
 from neuron.da.adapters.near_adapter import NearDAAdapter
 from neuron.da.adapters.eigenda_adapter import EigenDAAdapter
 from neuron.da.adapters.avail_adapter import AvailDAAdapter
+from neuron.runtime_safety import require_not_live_mock
 
 logger = logging.getLogger("VAMS-PerformanceAuditLog")
 
@@ -47,6 +48,7 @@ class PerformanceAuditLog:
     """
 
     def __init__(self, mock_mode: bool = False, config: Optional[Dict] = None):
+        require_not_live_mock("PerformanceAuditLog", mock_mode)
         self.mock_mode = mock_mode
         self._config = config or {}
 

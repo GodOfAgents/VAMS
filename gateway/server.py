@@ -19,6 +19,7 @@ import os
 import secrets
 import asyncio
 import threading
+import hashlib
 from datetime import datetime
 from typing import Dict, List, Optional
 from dataclasses import dataclass, field, asdict
@@ -39,11 +40,28 @@ except ImportError:
     sys.exit(1)
 
 
+from neuron.runtime_safety import current_environment, is_live_environment
+
+
 # --- CONFIGURATION ---
 VERSION = "v0.2.0-alpha"
 NODE_TIMEOUT = 120  # Seconds before node is considered offline
 MAX_NODES = 5000
 CLEANUP_INTERVAL = 3600 # 1 hour
+AUTH_REPLAY_WINDOW_SECONDS = 300
+LIVE_BIND_HOST = "127.0.0.1"
+LOCAL_BIND_HOST = "0.0.0.0"
+CLIENT_CERT_VERIFIED_HEADERS = (
+    "X-VAMS-Client-Cert-Verified",
+    "X-Forwarded-Tls-Client-Cert-Verified",
+    "X-SSL-Client-Verify",
+)
+CLIENT_CERT_FINGERPRINT_HEADERS = (
+    "X-VAMS-Client-Cert-Fingerprint",
+    "X-Forwarded-Tls-Client-Cert-Fingerprint",
+    "X-SSL-Client-Fingerprint",
+)
+CLIENT_CERT_VERIFIED_VALUES = {"1", "true", "success", "verified"}
 
 
 # --- DATA MODELS ---
@@ -61,7 +79,15 @@ class NodeInfo:
     last_seen: float = 0
     heartbeat_count: int = 0
     first_seen: float = field(default_factory=time.time)
-    
+
+    # CHC Phase 7: Add agent profile & cognitive properties
+    region: str = "us-east-1"
+    cost_per_hour: float = 0.15
+    credit_score: int = 750
+    passports: str = "ERC-8004 Phala TEE"
+    skills: List[str] = field(default_factory=list)
+    cognitive_profile: Dict[str, float] = field(default_factory=dict)
+
     @property
     def is_online(self) -> bool:
         return (time.time() - self.last_seen) < NODE_TIMEOUT
@@ -95,6 +121,14 @@ async def lifespan(app: FastAPI):
         raise RuntimeError("CRITICAL: GATEWAY_ADMIN_PASSWORD is not set in the environment.")
     if admin_password == "vams2026":
         raise RuntimeError("CRITICAL: GATEWAY_ADMIN_PASSWORD is set to the default insecure value 'vams2026'. Please change it.")
+    if is_live_environment() and not os.getenv("GATEWAY_ADMIN_DID"):
+        raise RuntimeError(
+            f"CRITICAL: GATEWAY_ADMIN_DID is required when VAMS_ENV={current_environment()}."
+        )
+    if is_live_environment() and not os.getenv("GATEWAY_HEARTBEAT_CERT_FINGERPRINTS"):
+        raise RuntimeError(
+            f"CRITICAL: GATEWAY_HEARTBEAT_CERT_FINGERPRINTS is required when VAMS_ENV={current_environment()}."
+        )
         
     asyncio.create_task(cleanup_offline_nodes())
     yield
@@ -196,6 +230,7 @@ app.add_middleware(
 
 # In-memory node registry
 nodes: Dict[str, NodeInfo] = {}
+used_did_signatures: Dict[str, float] = {}
 
 # --- RESOURCE COMPOSER (Phase 3) ---
 try:
@@ -232,7 +267,9 @@ except ImportError:
 try:
     from neuron.da.performance_audit import PerformanceAuditLog
     from neuron.da.models import DAProtocol
+    from neuron.runtime_safety import require_not_live_mock
     mock_mode_flag = os.getenv("VAMS_MOCK_MODE", "true").lower() == "true"
+    require_not_live_mock("Gateway DA audit log", mock_mode_flag)
     da_audit_log = PerformanceAuditLog(mock_mode=mock_mode_flag)
     DA_AUDIT_AVAILABLE = True
 except ImportError:
@@ -245,30 +282,47 @@ security = HTTPBasic(auto_error=False)
 def verify_did_signature(did: str, signature_hex: str, timestamp_str: str, method: str, path: str) -> bool:
     try:
         ts = float(timestamp_str)
-        if abs(time.time() - ts) > 300:  # 5 minutes window
+        now = time.time()
+        if abs(now - ts) > AUTH_REPLAY_WINDOW_SECONDS:
             return False
-            
+
+        # Store only a digest of the credential tuple; raw signatures remain out of memory logs/state.
+        replay_key = hashlib.sha256(
+            f"{did}:{signature_hex}:{timestamp_str}:{method}:{path}".encode("utf-8")
+        ).hexdigest()
+        expired_keys = [
+            key for key, seen_at in used_did_signatures.items()
+            if now - seen_at > AUTH_REPLAY_WINDOW_SECONDS
+        ]
+        for key in expired_keys:
+            del used_did_signatures[key]
+        if replay_key in used_did_signatures:
+            return False
+
         pubkey_hex = did
         if did.startswith("did:key:"):
             pubkey_hex = did[len("did:key:"):]
-            
+
         authorized_did = os.getenv("GATEWAY_ADMIN_DID")
         if not authorized_did:
             return False
-            
+
         auth_pubkey = authorized_did[len("did:key:"):] if authorized_did.startswith("did:key:") else authorized_did
         if pubkey_hex.lower() != auth_pubkey.lower():
             return False
-            
+
         message = f"VAMS_ADMIN_AUTH:{method}:{path}:{timestamp_str}"
         vk = VerifyingKey.from_string(
             bytes.fromhex(pubkey_hex),
             curve=SECP256k1
         )
-        return vk.verify(
+        verified = vk.verify(
             bytes.fromhex(signature_hex),
             message.encode()
         )
+        if verified:
+            used_did_signatures[replay_key] = now
+        return verified
     except Exception:
         return False
 
@@ -279,7 +333,7 @@ def get_current_username(request: Request, credentials: Optional[HTTPBasicCreden
     did = request.headers.get("X-VAMS-DID")
     signature = request.headers.get("X-VAMS-Signature")
     timestamp = request.headers.get("X-VAMS-Timestamp")
-    
+
     if did and signature and timestamp:
         if verify_did_signature(did, signature, timestamp, request.method, request.url.path):
             return did
@@ -288,7 +342,13 @@ def get_current_username(request: Request, credentials: Optional[HTTPBasicCreden
             detail="Invalid DID signature or timestamp expired",
             headers={"WWW-Authenticate": "Basic"},
         )
-        
+
+    if is_live_environment():
+        raise HTTPException(
+            status_code=HTTP_401_UNAUTHORIZED,
+            detail="DID authentication is required for live gateway control-plane routes.",
+        )
+
     # Fallback to Basic Auth
     if credentials:
         admin_user = os.getenv("GATEWAY_ADMIN_USER", "admin")
@@ -308,6 +368,55 @@ def get_current_username(request: Request, credentials: Optional[HTTPBasicCreden
         detail="Not authenticated. Provide DID headers or Basic Auth.",
         headers={"WWW-Authenticate": "Basic"},
     )
+
+
+def _normalize_cert_fingerprint(value: str) -> str:
+    return value.replace(":", "").replace(" ", "").strip().lower()
+
+
+def _configured_heartbeat_fingerprints() -> set[str]:
+    raw = os.getenv("GATEWAY_HEARTBEAT_CERT_FINGERPRINTS", "")
+    return {
+        _normalize_cert_fingerprint(item)
+        for item in raw.split(",")
+        if item.strip()
+    }
+
+
+def verify_heartbeat_client_certificate(request: Request) -> Optional[str]:
+    """Require proxy-verified mTLS client identity for live heartbeat telemetry."""
+    if not is_live_environment():
+        return None
+
+    verified = any(
+        request.headers.get(header, "").strip().lower() in CLIENT_CERT_VERIFIED_VALUES
+        for header in CLIENT_CERT_VERIFIED_HEADERS
+    )
+    if not verified:
+        raise HTTPException(
+            status_code=401,
+            detail="mTLS client certificate verification is required for live heartbeats.",
+        )
+
+    fingerprint = ""
+    for header in CLIENT_CERT_FINGERPRINT_HEADERS:
+        value = request.headers.get(header)
+        if value:
+            fingerprint = _normalize_cert_fingerprint(value)
+            break
+    if not fingerprint:
+        raise HTTPException(
+            status_code=401,
+            detail="mTLS client certificate fingerprint is required for live heartbeats.",
+        )
+
+    allowed = _configured_heartbeat_fingerprints()
+    if fingerprint not in allowed:
+        raise HTTPException(
+            status_code=403,
+            detail="mTLS client certificate fingerprint is not authorized.",
+        )
+    return fingerprint
 
 
 async def cleanup_offline_nodes():
@@ -463,11 +572,13 @@ async def dashboard(username: str = Depends(get_current_username)):
 
 
 @app.post("/heartbeat")
-async def receive_heartbeat(request: HeartbeatRequest):
+async def receive_heartbeat(heartbeat: HeartbeatRequest, http_request: Request):
     """Receive a signed heartbeat from a neuron."""
     try:
+        verify_heartbeat_client_certificate(http_request)
+
         # Parse the payload
-        payload = json.loads(request.payload)
+        payload = json.loads(heartbeat.payload)
         node_id = payload.get("node_id", "unknown")
         block_height = payload.get("block_height", 0)
         
@@ -490,8 +601,8 @@ async def receive_heartbeat(request: HeartbeatRequest):
                     curve=SECP256k1
                 )
                 vk.verify(
-                    bytes.fromhex(request.signature),
-                    request.payload.encode()
+                    bytes.fromhex(heartbeat.signature),
+                    heartbeat.payload.encode()
                 )
         except BadSignatureError:
             raise HTTPException(status_code=403, detail="Invalid heartbeat signature")
@@ -506,13 +617,46 @@ async def receive_heartbeat(request: HeartbeatRequest):
                     del nodes[oldest.node_id]
                 else:
                     raise HTTPException(status_code=429, detail="Max capacity reached")
-            nodes[node_id] = NodeInfo(node_id=node_id)
+
+            # CHC Phase 7: Extract fields from payload or use defaults
+            region = payload.get("region", "us-east-1")
+            cost_per_hour = payload.get("cost_per_hour", 0.15)
+            credit_score = payload.get("credit_score", 750)
+            passports = payload.get("passports", "ERC-8004 Phala TEE")
+            skills = payload.get("skills", ["token-swap", "arbitrage-analysis"])
+            cognitive_profile = payload.get("cognitive_profile", {
+                "K": 0.85, "RW": 0.90, "M": 0.95, "R": 0.80, "WM": 0.75, "MS": 0.85, "MR": 0.90, "V": 0.40, "A": 0.30, "S": 0.95
+            })
+
+            nodes[node_id] = NodeInfo(
+                node_id=node_id,
+                region=region,
+                cost_per_hour=cost_per_hour,
+                credit_score=credit_score,
+                passports=passports,
+                skills=skills,
+                cognitive_profile=cognitive_profile
+            )
         
         node = nodes[node_id]
         node.last_block = block_height
         node.last_seen = time.time()
         node.heartbeat_count += 1
         node.network = "mocha-4"  # From Celestia
+
+        # Update fields if in payload
+        if "region" in payload:
+            node.region = payload["region"]
+        if "cost_per_hour" in payload:
+            node.cost_per_hour = payload["cost_per_hour"]
+        if "credit_score" in payload:
+            node.credit_score = payload["credit_score"]
+        if "passports" in payload:
+            node.passports = payload["passports"]
+        if "skills" in payload:
+            node.skills = payload["skills"]
+        if "cognitive_profile" in payload:
+            node.cognitive_profile = payload["cognitive_profile"]
         
         # Store public key on first heartbeat
         if not node.public_key and "public_key" in payload:
@@ -798,14 +942,16 @@ async def da_anchors(
 
 def main():
     """Run the gateway server."""
+    bind_host = LIVE_BIND_HOST if is_live_environment() else LOCAL_BIND_HOST
     print()
     print("⚡ VAMS Gateway Server")
     print(f"   Version: {VERSION}")
     print(f"   Dashboard: http://localhost:8000")
     print(f"   API Docs: http://localhost:8000/docs")
+    print(f"   Bind Host: {bind_host}")
     print()
-    
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+
+    uvicorn.run(app, host=bind_host, port=8000)
 
 
 if __name__ == "__main__":

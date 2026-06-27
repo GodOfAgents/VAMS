@@ -1,0 +1,4 @@
+interface:
+  display_name: "VAMS Invariant Auditor"
+  short_description: "Audit VAMS invariants and risk"
+  default_prompt: "Use $vams-invariant-auditor to audit this VAMS change for invariant risk."

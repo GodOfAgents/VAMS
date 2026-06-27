@@ -1,0 +1,4 @@
+interface:
+  display_name: "VAMS Six Hats"
+  short_description: "Structured six-hats VAMS review"
+  default_prompt: "Use $vams-six-hats to run a six-hats review of this VAMS decision."

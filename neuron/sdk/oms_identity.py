@@ -10,6 +10,8 @@ from typing import Dict, Optional
 
 import logging
 
+from neuron.runtime_safety import require_live_secret, require_not_live_mock
+
 logger = logging.getLogger("VAMS-OMS-Identity")
 
 class OMSIdentityVerifier:
@@ -25,6 +27,9 @@ class OMSIdentityVerifier:
             self.mock_mode = mock_mode
         else:
             self.mock_mode = os.getenv("OMS_MOCK_MODE", "true").lower() == "true"
+
+        require_not_live_mock("OMSIdentityVerifier", self.mock_mode)
+        require_live_secret("OMSIdentityVerifier", self.api_key, insecure_values={"demo-key"})
             
         logger.info(f"Initialized OMSIdentityVerifier (mock_mode={self.mock_mode}, url={self.api_url})")
 
@@ -58,4 +63,3 @@ class OMSIdentityVerifier:
         except Exception as e:
             logger.error(f"Unexpected error in OMS Identity verification: {e}")
             return False
-

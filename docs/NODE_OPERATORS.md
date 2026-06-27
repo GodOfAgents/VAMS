@@ -605,6 +605,51 @@ print('API URL:', v.api_url)
 print('Real key set:', v.api_key != 'demo-key')
 ```
 
+## 11. Cognitive Benchmark Reporting (v0.8.0)
+
+With the integration of the **Cattell-Horn-Carroll (CHC) Cognitive framework**, node operators must report their verified cognitive capabilities alongside basic resource metadata. The VAMS Neuron client automatically loads this configuration from a local `config.json` file in the neuron configuration directory.
+
+### Configuration Schema (`config.json`)
+
+Configure your node attributes, TEE passports, skills, and CHC cognitive scores (ranging from `0.0` to `1.0` reflecting verified benchmark performance):
+
+```json
+{
+  "node_id": "node_01",
+  "public_key": "0xabc...",
+  "network": "Amoy",
+  "region": "us-east-1",
+  "cost_per_hour": 0.15,
+  "credit_score": 750,
+  "passports": "ERC-8004 Phala TEE",
+  "skills": ["llm-inference", "vector-db-ops"],
+  "cognitive_profile": {
+    "K": 0.85,
+    "RW": 0.90,
+    "M": 0.75,
+    "R": 0.80,
+    "WM": 0.85,
+    "MS": 0.95,
+    "MR": 0.90,
+    "V": 0.50,
+    "A": 0.30,
+    "S": 0.70
+  }
+}
+```
+
+### Heartbeat & Telemetry Publishing
+
+The Neuron client reads these values and appends them to the heartbeat telemetry payload. This payload is signed using the operator's private key and transmitted to the VAMS Gateway every `HEARTBEAT_INTERVAL` seconds (default: 30s):
+
+```bash
+# Start the telemetry publishing loop
+python -m neuron.services.telemetry_publisher --config config.json
+```
+
+The gateway receives the heartbeat, verifies the signature, and updates the active node registry. Operators can check their status on the Vite split-screen dashboard, where their node's CHC profile is visualized as a 10-axis radar chart. If a node fails to report a heartbeat within 120 seconds, it is marked offline and removed from the active routing pool.
+
+
 ### Troubleshooting (OMS)
 
 | Symptom | Likely Cause | Fix |
