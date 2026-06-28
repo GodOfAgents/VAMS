@@ -53,13 +53,12 @@ jobs:
       - name: Install Aiken
         uses: txpipe/setup-aiken@v1
         with:
-          version: 'v1.0.26-alpha'
+          version: 'v1.1.21'
 
       - name: Run Verification & Tests
         run: |
           cd cardano
           aiken check
-          aiken test
 
   python-gate:
     name: Python Security Audit & Tests
@@ -103,7 +102,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '22'
 
       - name: Install Dependencies
         run: |
