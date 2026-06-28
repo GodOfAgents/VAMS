@@ -99,14 +99,16 @@ class NeuronStorage:
         """Mark heartbeats as synced to gateway."""
         if not heartbeat_ids:
             return
+        heartbeat_ids = [int(heartbeat_id) for heartbeat_id in heartbeat_ids]
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
             placeholders = ','.join('?' * len(heartbeat_ids))
-            cursor.execute(f'''
-                UPDATE heartbeats 
-                SET synced = 1, synced_at = ?
-                WHERE id IN ({placeholders})
-            ''', [time.time()] + heartbeat_ids)
+            query = (  # nosec B608
+                "UPDATE heartbeats "
+                "SET synced = 1, synced_at = ? "
+                f"WHERE id IN ({placeholders})"
+            )
+            cursor.execute(query, [time.time()] + heartbeat_ids)
             conn.commit()
     
     def record_metric(self, name: str, value: float):

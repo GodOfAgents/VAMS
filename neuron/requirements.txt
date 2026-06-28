@@ -8,6 +8,8 @@ web3>=6.0.0           # Ethereum interaction (Polygon CDK, x402)
 python-dotenv>=1.0.0
 cryptography>=41.0.0  # Cryptographic primitives
 eth-abi>=4.0.0        # Ethereum ABI encoding/decoding
+numpy>=1.26.0         # Intelligence layer vector math and anomaly detection
+scikit-learn>=1.4.0   # Incremental PCA for SkillDiscovery profiles
 
 # Layer 3: DBOS Durable Workflow Engine (real SDK — replaces custom SQLite engine)
 dbos>=0.29.0           # Durable execution, crash recovery, exactly-once steps

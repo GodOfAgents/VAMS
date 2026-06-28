@@ -7,7 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- **`REPO_STATUS_REPORT.md`**: Rewrote the repository status report for the July 2026 public testnet launch window with commit-history chronology, current component maturity, verified blockers, and gated roadmap language.
+- **`.github/workflows/security-gates.yml`**: Aligned CI with the current frontend and Cardano toolchains by moving frontend verification to Node.js 22, pinning Aiken to `v1.1.21`, and using `aiken check` as the Aiken verification command.
+- **`neuron/requirements.txt`**: Declared `numpy` and `scikit-learn` for the intelligence-layer modules and tests that already import vector math and Incremental PCA dependencies.
+
 ### Security
+- **`gateway/server.py`** and **`neuron/gateway/server.py`**: Tightened default local/direct server binds from `0.0.0.0` to `127.0.0.1` to satisfy the security gate and keep direct startup loopback-first.
+- **`neuron/intelligence/skill_discovery.py`**: Added a narrow Bandit suppression for trusted local `SkillDiscovery` model artifact loading.
+- **`neuron/storage/local.py`**: Normalized heartbeat IDs to integers before constructing SQLite placeholders and added a narrow Bandit suppression for the parameterized dynamic `IN` clause.
 - **`neuron/runtime_safety.py`**: Added centralized live-environment safety gates for `VAMS_ENV=staging`, `VAMS_ENV=testnet`, and `VAMS_ENV=production`.
 - **`gateway/server.py`**: Gateway DA audit initialization now rejects mock audit mode in live environments before any mock DA receipt can be emitted.
 - **`gateway/server.py`**: Live environments now require `GATEWAY_ADMIN_DID`, reject Basic Auth on protected control-plane routes, enforce single-use DID signatures within the 5-minute timestamp window, and bind direct Uvicorn startup to `127.0.0.1`.
@@ -16,6 +24,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`neuron/da/adapters/avail_adapter.py`** and **`neuron/da/adapters/eigenda_adapter.py`**: Explicitly block structured stub adapters from instantiating in live environments.
 
 ### Testing
+- **Security/build gates**: Verified `bandit -r neuron gateway -ll -ii` passed with no issues, `npm ci` reported 0 vulnerabilities, `npm audit --audit-level=high` reported 0 vulnerabilities, `npm run build` passed, `forge test -vvv` passed with 627 tests, and `git diff --check` passed for the updated files.
+- **Python full-suite status**: Full `pytest -v --tb=short` remains pending locally because Windows package installation for `scikit-learn`/`pip-audit` hung before the rerun could complete; CI should rerun after dependency declaration.
 - **`neuron/tests/test_runtime_safety.py`**: Added regression tests for local mock allowance and live-environment rejection across OMS, Trails, Coinme, DA adapters, DA audit logging, and bridge mock paths.
 - **`neuron/tests/test_gateway_auth_hardening.py`**: Added regression tests for DID signature replay rejection, live-mode Basic Auth rejection, live-mode loopback binding, and live heartbeat client certificate enforcement.
 

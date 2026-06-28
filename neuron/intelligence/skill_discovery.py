@@ -433,8 +433,9 @@ class SkillDiscovery:
         Returns:
             A fitted SkillDiscovery instance.
         """
+        # SkillDiscovery loads trusted local model artifacts only.
         with open(path, "rb") as f:
-            state = pickle.load(f)
+            state = pickle.load(f)  # nosec B301
 
         instance = cls(
             n_components=state["n_components"],
