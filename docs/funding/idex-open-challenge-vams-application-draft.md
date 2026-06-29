@@ -1,10 +1,10 @@
 # iDEX Open Challenge Application Draft - VAMS
 
-**Applicant / Project:** VAMS - Verifiable and Agentic Modular Stack  
-**Challenge:** iDEX Open Challenge 2026  
-**Draft date:** 2026-06-28  
-**Submission deadline noted on iDEX portal:** 30 June 2026, 11:59 PM  
-**Grant ceiling noted on iDEX portal:** Up to Rs. 1.5 crore  
+**Applicant / Project:** VAMS - Verifiable and Agentic Modular Stack
+**Challenge:** iDEX Open Challenge 2026
+**Draft date:** 2026-06-28
+**Submission deadline noted on iDEX portal:** 30 June 2026, 11:59 PM
+**Grant ceiling noted on iDEX portal:** Up to Rs. 1.5 crore
 **Status:** Portal-ready technical draft with legal/entity placeholders still to be completed.
 
 > This document is a prepared application draft for entering into the iDEX portal. It is not a claim of final eligibility, grant approval, security certification, or deployed defence production readiness.
@@ -97,25 +97,25 @@ VAMS Defence is a secure infrastructure layer that enables defence users to depl
 
 The proposed prototype will provide:
 
-1. **Agent Identity And Scoped Authority**  
+1. **Agent Identity And Scoped Authority**
    Every agent, node, and operator-facing workflow receives a verifiable identity. Actions are authorized through scoped permissions, expiring session keys, and policy gates.
 
-2. **Durable Agent Execution**  
+2. **Durable Agent Execution**
    Agent workflows checkpoint state into a transactional backend so that interrupted tasks can resume from the last verified step rather than restarting or silently failing.
 
-3. **Trust-Scored Compute Routing**  
+3. **Trust-Scored Compute Routing**
    Compute nodes are scored using capability, reliability, attestation, geography, and policy-fit signals. Defence workflows can route tasks only to nodes that meet required trust thresholds.
 
-4. **Policy-Based Multi-Path Routing**  
+4. **Policy-Based Multi-Path Routing**
    Workflows can be routed based on privacy, latency, cost, formal verification need, and compliance posture. For defence deployment, the routing can be run in a permissioned, sovereign, tokenless mode.
 
-5. **Tamper-Evident Audit Trail**  
+5. **Tamper-Evident Audit Trail**
    Every important step - instruction, authorization, node selection, execution result, checkpoint, recovery, and operator approval - is logged as signed evidence for later review.
 
-6. **Secure Gateway For Integration**  
+6. **Secure Gateway For Integration**
    A hardened gateway exposes controlled APIs for heartbeats, node registration, task execution, status reporting, and telemetry under DID-based and certificate-backed access controls.
 
-7. **Human-Supervised Mission Support**  
+7. **Human-Supervised Mission Support**
    VAMS Defence keeps humans in the loop for sensitive operational decisions. The prototype is designed for mission support and decision-assistance, not autonomous weapon release.
 
 ---
