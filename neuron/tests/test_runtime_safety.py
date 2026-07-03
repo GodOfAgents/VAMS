@@ -44,6 +44,24 @@ def test_live_environment_rejects_default_oms_secret(monkeypatch):
         OMSIdentityVerifier()
 
 
+def test_local_non_mock_clients_require_explicit_api_keys(monkeypatch):
+    monkeypatch.delenv("VAMS_ENV", raising=False)
+    monkeypatch.delenv("OMS_API_KEY", raising=False)
+    monkeypatch.delenv("TRAILS_API_KEY", raising=False)
+    monkeypatch.delenv("COINME_API_KEY", raising=False)
+
+    from neuron.sdk.oms_identity import OMSIdentityVerifier
+    from neuron.sdk.trails_client import TrailsClient
+    from neuron.payments.coinme_client import CoinmeClient
+
+    with pytest.raises(LiveModeSafetyError, match="OMS_API_KEY"):
+        OMSIdentityVerifier(mock_mode=False)
+    with pytest.raises(LiveModeSafetyError, match="TRAILS_API_KEY"):
+        TrailsClient(mock_mode=False)
+    with pytest.raises(LiveModeSafetyError, match="COINME_API_KEY"):
+        CoinmeClient(mock_mode=False)
+
+
 def test_live_environment_rejects_da_stub_adapters(monkeypatch):
     monkeypatch.setenv("VAMS_ENV", "testnet")
 

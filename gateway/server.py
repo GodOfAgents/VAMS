@@ -62,6 +62,12 @@ CLIENT_CERT_FINGERPRINT_HEADERS = (
     "X-SSL-Client-Fingerprint",
 )
 CLIENT_CERT_VERIFIED_VALUES = {"1", "true", "success", "verified"}
+DEFAULT_LOCAL_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "http://localhost:5173",
+    "http://127.0.0.1:3000",
+    "http://127.0.0.1:5173",
+]
 
 
 # --- DATA MODELS ---
@@ -189,16 +195,29 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         return await call_next(request)
 
 # Configure CORS
-allowed_origins_str = os.getenv("GATEWAY_ALLOWED_ORIGINS", "")
-if allowed_origins_str:
-    allowed_origins = [origin.strip() for origin in allowed_origins_str.split(",") if origin.strip()]
-else:
-    allowed_origins = [
-        "http://localhost:3000",
-        "http://localhost:5173",
-        "http://127.0.0.1:3000",
-        "http://127.0.0.1:5173"
-    ]
+def resolve_allowed_origins(raw_origins: Optional[str] = None) -> List[str]:
+    allowed_origins_str = (
+        os.getenv("GATEWAY_ALLOWED_ORIGINS", "")
+        if raw_origins is None
+        else raw_origins
+    )
+    if allowed_origins_str:
+        allowed_origins = [
+            origin.strip()
+            for origin in allowed_origins_str.split(",")
+            if origin.strip()
+        ]
+    else:
+        allowed_origins = list(DEFAULT_LOCAL_ALLOWED_ORIGINS)
+
+    if is_live_environment() and any("*" in origin for origin in allowed_origins):
+        raise RuntimeError(
+            f"Wildcard CORS origins are not allowed when VAMS_ENV={current_environment()}."
+        )
+    return allowed_origins
+
+
+allowed_origins = resolve_allowed_origins()
 
 app.add_middleware(
     CORSMiddleware,

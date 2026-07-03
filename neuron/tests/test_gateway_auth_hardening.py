@@ -87,6 +87,13 @@ def test_live_gateway_startup_requires_heartbeat_cert_allowlist(monkeypatch):
             pass
 
 
+def test_live_gateway_rejects_wildcard_cors(monkeypatch):
+    monkeypatch.setenv("VAMS_ENV", "testnet")
+
+    with pytest.raises(RuntimeError, match="Wildcard CORS origins"):
+        server.resolve_allowed_origins("*")
+
+
 def test_live_gateway_main_binds_loopback(monkeypatch):
     monkeypatch.setenv("VAMS_ENV", "testnet")
 

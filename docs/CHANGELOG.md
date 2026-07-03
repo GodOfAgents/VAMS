@@ -8,12 +8,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Changed
-- **`.github/workflows/security-gates.yml`**: Added native docs-only change detection and a lightweight `Docs Verification` job so funding and team documentation PRs can verify Markdown hygiene without running full Solidity, Aiken, Python, frontend, and SBOM gates.
+- **`.github/workflows/security-gates.yml`**: Restricted the lightweight `Docs Verification` path to `docs/team/**/*.md` only; funding/proposal material no longer qualifies for docs-only bypass.
+- **`contracts/CONTRACTS.md`**: Replaced stale deployed/ready language with a pre-testnet deployment evidence register for Polygon Amoy and Cardano Pre-Prod, including pending fields for addresses, tx hashes, verification status, Safe/multisig ownership, and timelocks.
+- **`docs/GATEWAY_HARDENING_BLUEPRINTS.md`** and **`gateway/Caddyfile.testnet.example`**: Added the loopback-Uvicorn-behind-Caddy deployment profile and proxy-set mTLS certificate headers expected by the gateway.
 - **`REPO_STATUS_REPORT.md`**: Rewrote the repository status report for the July 2026 public testnet launch window with commit-history chronology, current component maturity, verified blockers, and gated roadmap language.
 - **`.github/workflows/security-gates.yml`**: Aligned CI with the current frontend and Cardano toolchains by moving frontend verification to Node.js 22, pinning Aiken to `v1.1.21`, and using `aiken check` as the Aiken verification command.
 - **`neuron/requirements.txt`**: Declared `numpy` and `scikit-learn` for the intelligence-layer modules and tests that already import vector math and Incremental PCA dependencies.
 
 ### Security
+- **`.github/workflows/security-gates.yml`** and **`scripts/security/`**: Added Slither, Semgrep, TruffleHog, default credential, public-content policy, mock-mode promotion, and Caddy config gates.
+- **`gateway/server.py`**: Live environments now reject wildcard CORS origins.
+- **`neuron/sdk/oms_identity.py`**, **`neuron/sdk/trails_client.py`**, and **`neuron/payments/coinme_client.py`**: Removed placeholder API-key fallbacks and fail closed outside mock mode when explicit live credentials are missing.
+- **`neuron/services/registry_client.py`**: Service Blocks now expose fail-closed memory policy metadata to prevent unreviewed persistent prompt-memory mutation in live paths.
+- **`neuron/sentinel/sentinel_node.py`**: Added telemetry-only `continualLearningGain` reporting without slashing, reward, routing, or regional-bonus impact.
 - **`gateway/server.py`** and **`neuron/gateway/server.py`**: Tightened default local/direct server binds from `0.0.0.0` to `127.0.0.1` to satisfy the security gate and keep direct startup loopback-first.
 - **`neuron/intelligence/skill_discovery.py`**: Added a narrow Bandit suppression for trusted local `SkillDiscovery` model artifact loading.
 - **`neuron/storage/local.py`**: Normalized heartbeat IDs to integers before constructing SQLite placeholders and added a narrow Bandit suppression for the parameterized dynamic `IN` clause.
@@ -25,7 +32,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`neuron/da/adapters/avail_adapter.py`** and **`neuron/da/adapters/eigenda_adapter.py`**: Explicitly block structured stub adapters from instantiating in live environments.
 
 ### Testing
-- **Docs-only PR gate**: Planned verification with `git diff --check` over `docs/funding` and `docs/team` changes; full gates remain active for pushes to `main` and PRs with code/config changes.
+- **Security scripts**: Verified `default_credential_scan.py`, `public_content_policy_scan.py`, and `mock_mode_promotion_scan.py` passed locally.
+- **Targeted hardening tests**: `pytest -q neuron/tests/test_runtime_safety.py neuron/tests/test_gateway_auth_hardening.py neuron/tests/test_service_blocks.py neuron/tests/test_sentinel.py` produced 52 passed and 1 existing environment failure because local temp dependencies did not include `torch`; the new Sentinel continual-learning telemetry test passed directly.
+- **Syntax/hygiene**: Verified touched Python files with `py_compile`; `git diff --check` passed.
+- **Docs-only PR gate**: Planned verification with `git diff --check` over `docs/team` changes only; full gates remain active for pushes to `main` and PRs with code/config/funding changes.
 - **Security/build gates**: Verified `bandit -r neuron gateway -ll -ii` passed with no issues, `npm ci` reported 0 vulnerabilities, `npm audit --audit-level=high` reported 0 vulnerabilities, `npm run build` passed, `forge test -vvv` passed with 627 tests, and `git diff --check` passed for the updated files.
 - **Python full-suite status**: Full `pytest -v --tb=short` remains pending locally because Windows package installation for `scikit-learn`/`pip-audit` hung before the rerun could complete; CI should rerun after dependency declaration.
 - **`neuron/tests/test_runtime_safety.py`**: Added regression tests for local mock allowance and live-environment rejection across OMS, Trails, Coinme, DA adapters, DA audit logging, and bridge mock paths.

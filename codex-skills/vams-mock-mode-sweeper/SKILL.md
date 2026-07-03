@@ -12,7 +12,7 @@ Use this skill to separate legitimate local simulation from unsafe live-path moc
 1. Search for mock and stub indicators:
    - `mock_mode`, `mock=True`, `MOCK_MODE`, `_MOCK_MODE`
    - `NotImplementedError`
-   - `Stub`, `[STUB]`, `demo-key`
+   - `Stub`, `[STUB]`, placeholder API keys
    - environment defaults such as `"true"` for live clients
 2. Read each hit in context. Do not classify from grep output alone.
 3. Categorize each path:

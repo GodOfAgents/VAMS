@@ -4,7 +4,11 @@ import os
 import requests
 from typing import Dict, Any, Optional
 
-from neuron.runtime_safety import require_live_secret, require_not_live_mock
+from neuron.runtime_safety import (
+    LiveModeSafetyError,
+    require_live_secret,
+    require_not_live_mock,
+)
 
 logger = logging.getLogger("VAMS-Coinme")
 
@@ -15,17 +19,19 @@ class CoinmeClient:
     """
     
     def __init__(self, api_key: Optional[str] = None, base_url: str = None, mock_mode: Optional[bool] = None):
-        self.api_key = api_key or os.getenv("COINME_API_KEY", "demo-key")
+        self.api_key = api_key or os.getenv("COINME_API_KEY", "")
         self.base_url = base_url or os.getenv("COINME_API_URL", "https://api.coinme.com/v1")
         
         # Determine mock mode
         if mock_mode is not None:
             self.mock_mode = mock_mode
         else:
-            self.mock_mode = os.getenv("COINME_MOCK_MODE", "true").lower() == "true" or self.api_key == "demo-key"
+            self.mock_mode = os.getenv("COINME_MOCK_MODE", "true").lower() == "true"
 
         require_not_live_mock("CoinmeClient", self.mock_mode)
-        require_live_secret("CoinmeClient", self.api_key, insecure_values={"demo-key"})
+        require_live_secret("CoinmeClient", self.api_key)
+        if not self.mock_mode and not self.api_key:
+            raise LiveModeSafetyError("CoinmeClient requires COINME_API_KEY outside mock mode")
             
         logger.info(f"Initialized CoinmeClient (mock_mode={self.mock_mode}, url={self.base_url})")
 
