@@ -65,6 +65,37 @@ class VAMSSentinelNode:
             "memory": MemoryBenchmark()
         }
 
+    @staticmethod
+    def _build_continual_learning_gain(kpis: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        """
+        Build telemetry-only stateful-vs-stateless gain evidence.
+
+        Gain must remain observational until calibrated benchmarks and reward
+        policy thresholds exist.
+        """
+        if not isinstance(kpis, dict):
+            return None
+
+        if "stateful_reward" not in kpis or "stateless_reward" not in kpis:
+            return None
+
+        try:
+            stateful_reward = float(kpis["stateful_reward"])
+            stateless_reward = float(kpis["stateless_reward"])
+        except (TypeError, ValueError):
+            return None
+
+        gain = stateful_reward - stateless_reward
+        return {
+            "statefulReward": stateful_reward,
+            "statelessReward": stateless_reward,
+            "gain": round(gain, 6),
+            "status": "telemetry_only",
+            "operationalFailureCandidate": gain < 0.0,
+            "rewardImpact": "none",
+            "regionalBonusImpact": "none",
+        }
+
     async def execute_challenge(self, node_id: bytes, endpoint: str, challenge_type: str, hw_class: bytes) -> Dict[str, Any]:
         logger.info(f"Sentinel [{self.operator_address[:8]}] dispatching '{challenge_type}' to Node {node_id.hex()[:8]}")
         
@@ -87,6 +118,10 @@ class VAMSSentinelNode:
             "timestamp": int(time.time()),
             "duration": time.time() - start_time
         }
+
+        gain_telemetry = self._build_continual_learning_gain(result.kpis)
+        if gain_telemetry is not None:
+            report["continualLearningGain"] = gain_telemetry
         
         return report
 

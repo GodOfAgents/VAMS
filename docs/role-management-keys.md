@@ -83,8 +83,8 @@ Two environment variables are introduced in v0.6.0 for the OMS Compliance and RP
 
 > [!CAUTION]
 > Never commit `OMS_API_KEY` or `OMS_IDENTITY_API` to version control. Load exclusively from
-> environment variables or a secrets manager. The `oms_identity.py` module falls back to
-> `"demo-key"` if `OMS_API_KEY` is unset — this is **not** safe for production use.
+> environment variables or a secrets manager. `oms_identity.py` fails closed outside
+> mock mode when `OMS_API_KEY` is unset.
 
 ---
 

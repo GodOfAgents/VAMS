@@ -602,7 +602,7 @@ Quick check after rotation:
 from neuron.sdk.oms_identity import OMSIdentityVerifier
 v = OMSIdentityVerifier()
 print('API URL:', v.api_url)
-print('Real key set:', v.api_key != 'demo-key')
+print('Real key set:', bool(v.api_key))
 ```
 
 ## 11. Cognitive Benchmark Reporting (v0.8.0)
@@ -655,7 +655,7 @@ The gateway receives the heartbeat, verifies the signature, and updates the acti
 | Symptom | Likely Cause | Fix |
 |---|---|---|
 | P3 route returning `403` | `is_verified()` returning `False` | Check `OMS_API_KEY`; verify address at polygon.technology/oms |
-| `demo-key` in logs | `OMS_API_KEY` not set | Set env var; verifier is in stub mode |
+| Placeholder API key in logs | `OMS_API_KEY` not set | Set env var; verifier is in mock mode |
 | `stale=True` for Polygon chain | OMS RPC unreachable | Check `OMS_POLYGON_RPC_PRIMARY`; oracle auto-falls-back to cache |
 | Session key rejected | Expired (>24 h) or over value cap | Restart Neuron — auto-provisions new session key |
 | `setAuthorizedWallet` tx fails | Caller is not agent owner | Use root EOA private key, not session key |

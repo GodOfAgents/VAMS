@@ -14,6 +14,7 @@ from __future__ import annotations
 import hashlib
 import logging
 from dataclasses import dataclass, field
+from enum import Enum
 from typing import Any, Dict, List, Optional
 
 from neuron.composer.models import (
@@ -55,6 +56,15 @@ class ServiceBlockInfo:
 
     # Off-chain blueprint spec (resolved from deployment_cid)
     blueprint: Optional[InstanceBlueprint] = None
+
+
+class ServiceBlockMemoryPolicy(str, Enum):
+    """Off-chain memory policy used to prevent unreviewed prompt-memory loops."""
+
+    STATELESS = "STATELESS"
+    SESSION_ICL = "SESSION_ICL"
+    EXTERNAL_READONLY = "EXTERNAL_READONLY"
+    PERSISTENT_MUTATING_REQUIRES_REVIEW = "PERSISTENT_MUTATING_REQUIRES_REVIEW"
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -169,6 +179,21 @@ _SERVICE_BLOCK_BLUEPRINTS: Dict[str, InstanceBlueprint] = {
 }
 
 
+_SERVICE_BLOCK_MEMORY_POLICIES: Dict[str, ServiceBlockMemoryPolicy] = {
+    "llama_inference": ServiceBlockMemoryPolicy.STATELESS,
+    "vector_db": ServiceBlockMemoryPolicy.EXTERNAL_READONLY,
+    "tee_wrapper": ServiceBlockMemoryPolicy.STATELESS,
+    "celestia_audit": ServiceBlockMemoryPolicy.STATELESS,
+    "x402_payments": ServiceBlockMemoryPolicy.STATELESS,
+    "mev_protection": ServiceBlockMemoryPolicy.STATELESS,
+    "high_speed_compute": ServiceBlockMemoryPolicy.STATELESS,
+    "multi_chain_bridge": ServiceBlockMemoryPolicy.STATELESS,
+    "storage_cluster_block": ServiceBlockMemoryPolicy.EXTERNAL_READONLY,
+    "cpu_compute_block": ServiceBlockMemoryPolicy.STATELESS,
+    "ServiceBlock_OMS_v1": ServiceBlockMemoryPolicy.STATELESS,
+}
+
+
 # ═══════════════════════════════════════════════════════════════
 # Service Block Client
 # ═══════════════════════════════════════════════════════════════
@@ -205,6 +230,7 @@ class ServiceBlockClient:
         """List available service blocks."""
         result = []
         for name, bp in _SERVICE_BLOCK_BLUEPRINTS.items():
+            memory_policy = self.get_memory_policy(name)
             block_info = {
                 "name": name,
                 "category": self._infer_category(name),
@@ -214,6 +240,11 @@ class ServiceBlockClient:
                 "storage_gb": bp.storage.capacity_gb,
                 "max_cost_per_hour": bp.max_cost_per_hour,
                 "tee_required": bp.tee.tee_type != TEEType.NONE,
+                "memory_policy": memory_policy.value,
+                "memory_policy_requires_review": (
+                    memory_policy
+                    == ServiceBlockMemoryPolicy.PERSISTENT_MUTATING_REQUIRES_REVIEW
+                ),
             }
 
             if category and block_info["category"] != category:
@@ -227,11 +258,34 @@ class ServiceBlockClient:
         bp = _SERVICE_BLOCK_BLUEPRINTS.get(block_name)
         if not bp:
             return None
+        memory_policy = self.get_memory_policy(block_name)
         return {
             "name": block_name,
             "category": self._infer_category(block_name),
+            "memory_policy": memory_policy.value,
+            "memory_policy_requires_review": (
+                memory_policy
+                == ServiceBlockMemoryPolicy.PERSISTENT_MUTATING_REQUIRES_REVIEW
+            ),
             "blueprint": bp.to_dict(),
         }
+
+    def get_memory_policy(self, block_name: str) -> ServiceBlockMemoryPolicy:
+        """
+        Return the memory policy for a registered service block.
+
+        Missing or unknown policies fail closed so a live Service Block cannot
+        silently become a persistent prompt-memory mutation surface.
+        """
+        if block_name not in _SERVICE_BLOCK_BLUEPRINTS:
+            raise KeyError(f"Unknown service block '{block_name}'")
+
+        if block_name not in _SERVICE_BLOCK_MEMORY_POLICIES:
+            raise KeyError(f"Missing memory policy for service block '{block_name}'")
+
+        return self._validate_memory_policy(
+            _SERVICE_BLOCK_MEMORY_POLICIES[block_name]
+        )
 
     # ──────────────────────────────────────────────────
     # Resolution API
@@ -281,6 +335,21 @@ class ServiceBlockClient:
     # ──────────────────────────────────────────────────
     # Helpers
     # ──────────────────────────────────────────────────
+
+    @staticmethod
+    def _validate_memory_policy(policy: Any) -> ServiceBlockMemoryPolicy:
+        """Validate a memory policy and reject unknown values."""
+        if isinstance(policy, ServiceBlockMemoryPolicy):
+            return policy
+
+        try:
+            return ServiceBlockMemoryPolicy(policy)
+        except ValueError as exc:
+            allowed = [p.value for p in ServiceBlockMemoryPolicy]
+            raise ValueError(
+                f"Unknown service block memory policy '{policy}'. "
+                f"Allowed policies: {allowed}"
+            ) from exc
 
     @staticmethod
     def _infer_category(name: str) -> str:

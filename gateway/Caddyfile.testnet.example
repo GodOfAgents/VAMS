@@ -1,0 +1,31 @@
+# VAMS public testnet gateway proxy example.
+#
+# Run Uvicorn on 127.0.0.1:8000 and expose HTTPS through Caddy.
+# Replace the domain and CA path with the live testnet values before deployment.
+
+{$VAMS_GATEWAY_DOMAIN:gateway.vams.network} {
+    encode zstd gzip
+
+    tls {
+        client_auth {
+            mode require_and_verify
+            trusted_ca_cert_file {$VAMS_ROOT_CA_CERT:/etc/caddy/certs/vams-root-ca.crt}
+        }
+    }
+
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "DENY"
+        Referrer-Policy "no-referrer"
+    }
+
+    reverse_proxy 127.0.0.1:8000 {
+        header_up Host {host}
+        header_up X-Real-IP {remote_host}
+        header_up X-Forwarded-For {remote_host}
+        header_up X-Forwarded-Proto {scheme}
+        header_up X-VAMS-Client-Cert-Verified "success"
+        header_up X-VAMS-Client-Cert-Fingerprint "{http.request.tls.client.fingerprint}"
+    }
+}

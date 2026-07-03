@@ -38,6 +38,7 @@ Current blockers before public testnet:
 - Avail and EigenDA remain structured stubs and must stay blocked from live environments.
 - Deployment artifacts are incomplete: chain IDs, addresses, transaction hashes, verification status, multisig owners, and timelock ownership.
 - Live DA, identity, Trails, TEE, and gateway configuration need testnet evidence.
+- Continual-learning safety needs Service Block memory-policy review, deterministic S-MMU context reset controls, and telemetry-only Sentinel gain baselines before stateful-learning signals can affect rewards or routing.
 - Frontend production hardening remains pending: wallet workflows, CSP/security headers, and API boundary review.
 
 ---
@@ -116,6 +117,9 @@ Latest local evidence:
 | Frontend build | `npm run build` | Passed with Vite 7.3.6. |
 | Report/diff hygiene | `git diff --check -- ...` | Passed. |
 | Gateway/runtime focused tests | `pytest -q neuron/tests/test_gateway_auth_hardening.py neuron/tests/test_gateway_root.py neuron/tests/test_runtime_safety.py` | Previously recorded targeted evidence: 20 passed. |
+| Phase 6 security scripts | `default_credential_scan.py`, `public_content_policy_scan.py`, `mock_mode_promotion_scan.py` | Passed locally on 2026-07-02. |
+| Python syntax check | `py_compile` on touched gateway, runtime, client, Sentinel, Service Block, sandbox, and security-script files | Passed locally on 2026-07-02. |
+| Targeted hardening tests | `pytest -q neuron/tests/test_runtime_safety.py neuron/tests/test_gateway_auth_hardening.py neuron/tests/test_service_blocks.py neuron/tests/test_sentinel.py` | 52 passed; 1 existing environment failure in `test_gpu_challenge_no_cuda` because local temp dependencies did not include `torch`. New Sentinel continual-learning telemetry test passed directly. |
 
 Verification still pending or blocked locally:
 
@@ -124,11 +128,12 @@ Verification still pending or blocked locally:
 | Full Python suite | Pending. Local run initially failed because `sklearn`, `web3`, `eth_account`, and `sqlalchemy` were unavailable. `numpy` and `scikit-learn` are now declared in `neuron/requirements.txt`, but local Windows `pip install` hung before a full rerun could complete. |
 | `pip-audit` | Pending locally because the local `pip-audit` install path hung before completion. CI installs it directly and should rerun this gate. |
 | Aiken | Pending in CI. Local bundled Aiken `v1.1.21` failed to resolve unpinned stdlib without network. The workflow has been aligned to `aiken check`, which is the test-running command for this toolchain. |
-| Slither | Not yet represented in the current workflow. |
-| Semgrep | Not yet represented in the current workflow. |
-| Trufflehog | Not yet represented in the current workflow. |
-| Default credential scan | Not yet represented in the current workflow. |
-| Mock-mode promotion scan | Not yet represented in the current workflow. |
+| Slither | Represented in the workflow; pending CI execution. |
+| Semgrep | Represented in the workflow; pending CI execution. |
+| TruffleHog | Represented in the workflow; pending CI execution. |
+| Default credential scan | Represented in the workflow and passed locally; pending CI execution. |
+| Mock-mode promotion scan | Represented in the workflow and passed locally; pending CI execution. |
+| Public-content policy scan | Represented in the workflow and passed locally; pending CI execution. |
 
 Required full gate set before public testnet:
 
@@ -166,6 +171,7 @@ Public Testnet is targeted for a July 2026 launch window. This is a gated rollou
 Public testnet should not open until all of the following are true:
 
 - No live mock-mode paths for DA, identity, Trails, TEE, bridge, or escrow-state clients.
+- Live Service Blocks declare a memory policy and do not perform unreviewed autonomous text-memory rewriting.
 - Gateway DID auth, mTLS/proxy certificate telemetry gate, Caddy/TLS deployment, loopback live bind, and production CORS review are complete.
 - CI security gates include Forge, Aiken, pytest, Bandit, pip-audit, npm audit, frontend build, Gitleaks, SBOM, Cosign, Slither, Semgrep, Trufflehog, default credential scan, and mock-mode promotion scan.
 - Forge, Aiken, Python, and frontend verification commands pass on the current commit.
@@ -189,7 +195,7 @@ Public testnet should not open until all of the following are true:
 
 | Period | Roadmap |
 | --- | --- |
-| August 2026 | Incentivized testnet missions, live monitoring dashboards, node operator onboarding, DA adapter hardening, and expanded testnet telemetry. |
+| August 2026 | Incentivized testnet missions, live monitoring dashboards, node operator onboarding, DA adapter hardening, expanded testnet telemetry, and calibrated stateful-vs-stateless gain monitoring. |
 | September 2026 | External audit readiness, broader DePIN/provider integrations, frontend wallet workflows, and integration burn-in across Polygon Amoy and Cardano Pre-Prod. |
 | Q4 2026 | Guarded mainnet preparation only if public testnet, external audit, multisig/timelock ownership, live integration evidence, and monitoring gates pass. |
 
@@ -206,6 +212,7 @@ Mainnet remains conditional. No mainnet date should be promised until public tes
 5. Produce deploy rehearsal artifacts for Polygon Amoy and Cardano Pre-Prod.
 6. Document Safe/timelock ownership and update `contracts/CONTRACTS.md`.
 7. Reality-sync API, operator, and deployment docs against the hardened gateway and mock-mode policy.
+8. Implement continual-learning safety checks for Service Blocks, S-MMU/HIPIF/EvoMem context boundaries, and telemetry-only Sentinel gain reporting.
 
 ---
 

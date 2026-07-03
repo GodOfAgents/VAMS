@@ -97,3 +97,35 @@ class TestSentinelNode:
         node = VAMSSentinelNode()
         res = await node.audit_node(b"1234"*8, "http://test", "latency", b"NETWORK_10G")
         assert res is True
+
+    async def test_continual_learning_negative_gain_is_telemetry_only(self):
+        from sentinel.challenges.base_challenge import ChallengeResult
+
+        class MockGainChallenge:
+            async def run(self, endpoint):
+                return ChallengeResult(
+                    success=True,
+                    score=9500,
+                    kpis={
+                        "stateful_reward": 1.0,
+                        "stateless_reward": 2.5,
+                    },
+                    passed=True,
+                )
+
+        node = VAMSSentinelNode()
+        node.challenges["latency"] = MockGainChallenge()
+
+        report = await node.execute_challenge(
+            b"1234" * 8,
+            "http://test",
+            "latency",
+            b"NETWORK_10G",
+        )
+
+        gain = report["continualLearningGain"]
+        assert gain["gain"] == -1.5
+        assert gain["status"] == "telemetry_only"
+        assert gain["operationalFailureCandidate"] is True
+        assert gain["rewardImpact"] == "none"
+        assert gain["regionalBonusImpact"] == "none"

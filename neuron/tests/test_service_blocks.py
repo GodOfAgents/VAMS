@@ -11,7 +11,12 @@ import pytest
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
 
-from neuron.services.registry_client import ServiceBlockClient, _SERVICE_BLOCK_BLUEPRINTS
+from neuron.services.registry_client import (
+    ServiceBlockClient,
+    ServiceBlockMemoryPolicy,
+    _SERVICE_BLOCK_BLUEPRINTS,
+    _SERVICE_BLOCK_MEMORY_POLICIES,
+)
 from neuron.services.macro_blocks import (
     MACRO_BLOCKS,
     get_macro,
@@ -44,6 +49,8 @@ class TestServiceBlockClient:
         assert block is not None
         assert block["name"] == "llama_inference"
         assert block["category"] == "AI"
+        assert block["memory_policy"] == ServiceBlockMemoryPolicy.STATELESS.value
+        assert block["memory_policy_requires_review"] is False
         assert "blueprint" in block
 
     def test_get_unknown_block(self):
@@ -61,6 +68,43 @@ class TestServiceBlockClient:
         client = ServiceBlockClient()
         with pytest.raises(KeyError, match="Unknown service block"):
             client.resolve_blueprint("nonexistent")
+
+    def test_all_blocks_expose_memory_policy(self):
+        client = ServiceBlockClient()
+        blocks = client.list_blocks()
+        valid_policies = {p.value for p in ServiceBlockMemoryPolicy}
+
+        assert set(_SERVICE_BLOCK_MEMORY_POLICIES) == set(_SERVICE_BLOCK_BLUEPRINTS)
+        for block in blocks:
+            assert block["memory_policy"] in valid_policies
+            assert "memory_policy_requires_review" in block
+
+    def test_external_readonly_blocks_are_explicit(self):
+        client = ServiceBlockClient()
+
+        vector_block = client.get_block("vector_db")
+        storage_block = client.get_block("storage_cluster_block")
+
+        assert vector_block["memory_policy"] == ServiceBlockMemoryPolicy.EXTERNAL_READONLY.value
+        assert storage_block["memory_policy"] == ServiceBlockMemoryPolicy.EXTERNAL_READONLY.value
+
+    def test_unknown_memory_policy_fails_closed(self, monkeypatch):
+        client = ServiceBlockClient()
+        monkeypatch.setitem(
+            _SERVICE_BLOCK_MEMORY_POLICIES,
+            "llama_inference",
+            "UNREVIEWED_PROMPT_MEMORY",
+        )
+
+        with pytest.raises(ValueError, match="Unknown service block memory policy"):
+            client.get_block("llama_inference")
+
+    def test_missing_memory_policy_fails_closed(self, monkeypatch):
+        client = ServiceBlockClient()
+        monkeypatch.delitem(_SERVICE_BLOCK_MEMORY_POLICIES, "llama_inference")
+
+        with pytest.raises(KeyError, match="Missing memory policy"):
+            client.get_block("llama_inference")
 
 
 # ═══════════════════════════════════════════════════════════════
