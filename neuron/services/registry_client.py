@@ -12,6 +12,7 @@ Architecture Reference:
 from __future__ import annotations
 
 import hashlib
+import json
 import logging
 from dataclasses import dataclass, field
 from enum import Enum
@@ -65,6 +66,75 @@ class ServiceBlockMemoryPolicy(str, Enum):
     SESSION_ICL = "SESSION_ICL"
     EXTERNAL_READONLY = "EXTERNAL_READONLY"
     PERSISTENT_MUTATING_REQUIRES_REVIEW = "PERSISTENT_MUTATING_REQUIRES_REVIEW"
+
+
+class ServiceBlockPermission(str, Enum):
+    """SkillOps permission scopes mirrored by the Solidity bitmap."""
+
+    EXTERNAL_READ = "EXTERNAL_READ"
+    SESSION_WRITE = "SESSION_WRITE"
+    PERSISTENT_MUTATION = "PERSISTENT_MUTATION"
+    WALLET_ACCESS = "WALLET_ACCESS"
+    NETWORK_EGRESS = "NETWORK_EGRESS"
+    TEE_REQUIRED = "TEE_REQUIRED"
+
+
+_PERMISSION_BITS: Dict[ServiceBlockPermission, int] = {
+    ServiceBlockPermission.EXTERNAL_READ: 1 << 0,
+    ServiceBlockPermission.SESSION_WRITE: 1 << 1,
+    ServiceBlockPermission.PERSISTENT_MUTATION: 1 << 2,
+    ServiceBlockPermission.WALLET_ACCESS: 1 << 3,
+    ServiceBlockPermission.NETWORK_EGRESS: 1 << 4,
+    ServiceBlockPermission.TEE_REQUIRED: 1 << 5,
+}
+
+
+@dataclass(frozen=True)
+class ServiceBlockManifest:
+    """Deterministic off-chain SkillOps manifest metadata."""
+
+    block_name: str
+    permission_scopes: List[str]
+    manifest_version: int = 1
+    capability_root: Optional[str] = None
+    manifest_hash: Optional[str] = None
+
+    def permissions_bitmap(self) -> int:
+        bitmap = 0
+        for scope in self.permission_scopes:
+            permission = ServiceBlockClient._validate_permission_scope(scope)
+            bitmap |= _PERMISSION_BITS[permission]
+        return bitmap
+
+    def computed_capability_root(self) -> str:
+        if self.capability_root:
+            return self.capability_root
+        return "0x" + hashlib.sha256(
+            f"{self.block_name}:capabilities".encode("utf-8")
+        ).hexdigest()
+
+    def computed_manifest_hash(self) -> str:
+        if self.manifest_hash:
+            return self.manifest_hash
+        payload = {
+            "block_name": self.block_name,
+            "capability_root": self.computed_capability_root(),
+            "manifest_version": self.manifest_version,
+            "permission_scopes": list(self.permission_scopes),
+            "permissions_bitmap": self.permissions_bitmap(),
+        }
+        encoded = json.dumps(payload, sort_keys=True, separators=(",", ":"))
+        return "0x" + hashlib.sha256(encoded.encode("utf-8")).hexdigest()
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "block_name": self.block_name,
+            "manifest_hash": self.computed_manifest_hash(),
+            "capability_root": self.computed_capability_root(),
+            "manifest_version": self.manifest_version,
+            "permission_scopes": list(self.permission_scopes),
+            "permissions_bitmap": self.permissions_bitmap(),
+        }
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -194,6 +264,21 @@ _SERVICE_BLOCK_MEMORY_POLICIES: Dict[str, ServiceBlockMemoryPolicy] = {
 }
 
 
+_SERVICE_BLOCK_PERMISSION_SCOPES: Dict[str, List[str]] = {
+    "llama_inference": ["EXTERNAL_READ", "NETWORK_EGRESS"],
+    "vector_db": ["EXTERNAL_READ"],
+    "tee_wrapper": ["EXTERNAL_READ", "TEE_REQUIRED"],
+    "celestia_audit": ["EXTERNAL_READ", "NETWORK_EGRESS"],
+    "x402_payments": ["EXTERNAL_READ", "WALLET_ACCESS", "NETWORK_EGRESS"],
+    "mev_protection": ["EXTERNAL_READ", "NETWORK_EGRESS"],
+    "high_speed_compute": ["EXTERNAL_READ", "NETWORK_EGRESS"],
+    "multi_chain_bridge": ["EXTERNAL_READ", "WALLET_ACCESS", "NETWORK_EGRESS"],
+    "storage_cluster_block": ["EXTERNAL_READ"],
+    "cpu_compute_block": ["EXTERNAL_READ", "NETWORK_EGRESS"],
+    "ServiceBlock_OMS_v1": ["EXTERNAL_READ", "NETWORK_EGRESS"],
+}
+
+
 # ═══════════════════════════════════════════════════════════════
 # Service Block Client
 # ═══════════════════════════════════════════════════════════════
@@ -231,6 +316,7 @@ class ServiceBlockClient:
         result = []
         for name, bp in _SERVICE_BLOCK_BLUEPRINTS.items():
             memory_policy = self.get_memory_policy(name)
+            manifest = self.get_skillops_manifest(name)
             block_info = {
                 "name": name,
                 "category": self._infer_category(name),
@@ -245,6 +331,7 @@ class ServiceBlockClient:
                     memory_policy
                     == ServiceBlockMemoryPolicy.PERSISTENT_MUTATING_REQUIRES_REVIEW
                 ),
+                "skillops_manifest": manifest.to_dict(),
             }
 
             if category and block_info["category"] != category:
@@ -259,6 +346,7 @@ class ServiceBlockClient:
         if not bp:
             return None
         memory_policy = self.get_memory_policy(block_name)
+        manifest = self.get_skillops_manifest(block_name)
         return {
             "name": block_name,
             "category": self._infer_category(block_name),
@@ -267,6 +355,7 @@ class ServiceBlockClient:
                 memory_policy
                 == ServiceBlockMemoryPolicy.PERSISTENT_MUTATING_REQUIRES_REVIEW
             ),
+            "skillops_manifest": manifest.to_dict(),
             "blueprint": bp.to_dict(),
         }
 
@@ -286,6 +375,53 @@ class ServiceBlockClient:
         return self._validate_memory_policy(
             _SERVICE_BLOCK_MEMORY_POLICIES[block_name]
         )
+
+    def get_skillops_manifest(self, block_name: str) -> ServiceBlockManifest:
+        """
+        Return validated SkillOps manifest metadata for a registered block.
+
+        Missing or unknown permission scopes fail closed so off-chain registry
+        mirrors do not silently grant undeclared capabilities.
+        """
+        if block_name not in _SERVICE_BLOCK_BLUEPRINTS:
+            raise KeyError(f"Unknown service block '{block_name}'")
+
+        if block_name not in _SERVICE_BLOCK_PERMISSION_SCOPES:
+            raise KeyError(f"Missing SkillOps manifest for service block '{block_name}'")
+
+        manifest = ServiceBlockManifest(
+            block_name=block_name,
+            permission_scopes=list(_SERVICE_BLOCK_PERMISSION_SCOPES[block_name]),
+        )
+        return self.validate_skillops_manifest(manifest)
+
+    def validate_skillops_manifest(
+        self,
+        manifest: ServiceBlockManifest,
+    ) -> ServiceBlockManifest:
+        """Validate SkillOps permission scopes and memory-policy coupling."""
+        if manifest.manifest_version <= 0:
+            raise ValueError("SkillOps manifest version must be positive")
+        if not manifest.permission_scopes:
+            raise ValueError("SkillOps manifest must declare at least one permission")
+
+        permissions = {
+            self._validate_permission_scope(scope)
+            for scope in manifest.permission_scopes
+        }
+        memory_policy = self.get_memory_policy(manifest.block_name)
+        if (
+            ServiceBlockPermission.PERSISTENT_MUTATION in permissions
+            and memory_policy
+            != ServiceBlockMemoryPolicy.PERSISTENT_MUTATING_REQUIRES_REVIEW
+        ):
+            raise ValueError(
+                "Persistent mutation permission requires review-gated memory policy"
+            )
+
+        manifest.permissions_bitmap()
+        manifest.computed_manifest_hash()
+        return manifest
 
     # ──────────────────────────────────────────────────
     # Resolution API
@@ -349,6 +485,21 @@ class ServiceBlockClient:
             raise ValueError(
                 f"Unknown service block memory policy '{policy}'. "
                 f"Allowed policies: {allowed}"
+            ) from exc
+
+    @staticmethod
+    def _validate_permission_scope(scope: Any) -> ServiceBlockPermission:
+        """Validate a SkillOps permission scope and reject unknown values."""
+        if isinstance(scope, ServiceBlockPermission):
+            return scope
+
+        try:
+            return ServiceBlockPermission(scope)
+        except ValueError as exc:
+            allowed = [p.value for p in ServiceBlockPermission]
+            raise ValueError(
+                f"Unknown service block permission scope '{scope}'. "
+                f"Allowed scopes: {allowed}"
             ) from exc
 
     @staticmethod

@@ -129,3 +129,48 @@ class TestSentinelNode:
         assert gain["operationalFailureCandidate"] is True
         assert gain["rewardImpact"] == "none"
         assert gain["regionalBonusImpact"] == "none"
+
+    async def test_world_state_fidelity_is_telemetry_only(self):
+        from sentinel.challenges.base_challenge import ChallengeResult
+
+        class MockWorldStateChallenge:
+            async def run(self, endpoint):
+                return ChallengeResult(
+                    success=True,
+                    score=9900,
+                    kpis={
+                        "world_state_trace": [
+                            {
+                                "step": 1,
+                                "agent_state": {"escrow": "locked"},
+                                "verified_external_state": {"escrow": "locked"},
+                                "action_valid": True,
+                            },
+                            {
+                                "step": 2,
+                                "agent_state": {"escrow": "locked"},
+                                "verified_external_state": {"escrow": "claimed"},
+                                "action_valid": True,
+                            },
+                        ]
+                    },
+                    passed=True,
+                )
+
+        node = VAMSSentinelNode()
+        node.challenges["latency"] = MockWorldStateChallenge()
+
+        report = await node.execute_challenge(
+            b"1234" * 8,
+            "http://test",
+            "latency",
+            b"NETWORK_10G",
+        )
+
+        fidelity = report["worldStateFidelity"]
+        assert report["passed"] is True
+        assert fidelity["state_fidelity_score"] == 0.5
+        assert fidelity["first_state_divergence_step"] == 2
+        assert fidelity["status"] == "telemetry_only"
+        assert fidelity["rewardImpact"] == "none"
+        assert fidelity["regionalBonusImpact"] == "none"

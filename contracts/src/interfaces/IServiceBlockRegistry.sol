@@ -32,6 +32,34 @@ interface IServiceBlockRegistry {
         bool isActive;                  // Currently available
         uint256 registeredAt;
         uint256 totalProvisions;        // Usage counter
+        bytes32 manifestHash;           // Hash of signed SkillOps manifest
+        bytes32 capabilityRoot;         // Merkle root of declared capabilities
+        uint256 permissionsBitmap;      // Declared capability permissions
+        address manifestSigner;         // Signer that authorized the manifest
+        uint256 manifestVersion;        // Monotonic manifest schema/version
+        bool isQuarantined;             // Blocked from provisioning
+        bytes32 quarantineReasonHash;   // Hash of quarantine evidence/reason
+    }
+
+    /// @notice SkillOps manifest metadata signed by the builder.
+    struct ServiceBlockManifest {
+        bytes32 manifestHash;
+        bytes32 capabilityRoot;
+        uint256 permissionsBitmap;
+        address manifestSigner;
+        uint256 manifestVersion;
+    }
+
+    /// @notice Registration payload for a Service Block listing.
+    struct ServiceBlockRegistration {
+        string name;
+        string category;
+        string description;
+        bytes32 resourceRequirementsHash;
+        string deploymentCID;
+        uint256 revenueShareBps;
+        uint256 minTrustTier;
+        ServiceBlockManifest manifest;
     }
 
     // ═══════════════════ Events ═══════════════════
@@ -47,6 +75,8 @@ interface IServiceBlockRegistry {
     event ServiceBlockVerified(bytes32 indexed blockId, address verifiedBy);
     event ServiceBlockDeactivated(bytes32 indexed blockId);
     event ServiceBlockActivated(bytes32 indexed blockId);
+    event ServiceBlockQuarantined(bytes32 indexed blockId, bytes32 reasonHash, address indexed quarantinedBy);
+    event ServiceBlockQuarantineCleared(bytes32 indexed blockId, address indexed clearedBy);
 
     event ServiceBlockProvisioned(
         bytes32 indexed blockId,
@@ -58,13 +88,8 @@ interface IServiceBlockRegistry {
 
     /// @notice Register a new service block (requires stake)
     function registerServiceBlock(
-        string calldata name,
-        string calldata category,
-        string calldata description,
-        bytes32 resourceRequirementsHash,
-        string calldata deploymentCID,
-        uint256 revenueShareBps,
-        uint256 minTrustTier
+        ServiceBlockRegistration calldata registration,
+        bytes calldata manifestSignature
     ) external returns (bytes32 blockId);
 
     /// @notice Verify a service block (admin/DAO)
@@ -72,6 +97,12 @@ interface IServiceBlockRegistry {
 
     /// @notice Deactivate a service block
     function deactivateServiceBlock(bytes32 blockId) external;
+
+    /// @notice Quarantine a service block after SkillOps/security evidence
+    function quarantineServiceBlock(bytes32 blockId, bytes32 reasonHash) external;
+
+    /// @notice Clear a service block quarantine
+    function clearServiceBlockQuarantine(bytes32 blockId) external;
 
     /// @notice Record a provision event (called by Composer)
     function recordProvision(bytes32 blockId, address agent) external;

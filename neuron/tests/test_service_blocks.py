@@ -13,9 +13,12 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
 
 from neuron.services.registry_client import (
     ServiceBlockClient,
+    ServiceBlockManifest,
     ServiceBlockMemoryPolicy,
+    ServiceBlockPermission,
     _SERVICE_BLOCK_BLUEPRINTS,
     _SERVICE_BLOCK_MEMORY_POLICIES,
+    _SERVICE_BLOCK_PERMISSION_SCOPES,
 )
 from neuron.services.macro_blocks import (
     MACRO_BLOCKS,
@@ -105,6 +108,48 @@ class TestServiceBlockClient:
 
         with pytest.raises(KeyError, match="Missing memory policy"):
             client.get_block("llama_inference")
+
+    def test_all_blocks_expose_skillops_manifest(self):
+        client = ServiceBlockClient()
+        blocks = client.list_blocks()
+
+        assert set(_SERVICE_BLOCK_PERMISSION_SCOPES) == set(_SERVICE_BLOCK_BLUEPRINTS)
+        for block in blocks:
+            manifest = block["skillops_manifest"]
+            assert manifest["manifest_hash"].startswith("0x")
+            assert manifest["capability_root"].startswith("0x")
+            assert manifest["manifest_version"] == 1
+            assert manifest["permissions_bitmap"] > 0
+
+    def test_unknown_permission_scope_fails_closed(self):
+        client = ServiceBlockClient()
+        manifest = ServiceBlockManifest(
+            block_name="llama_inference",
+            permission_scopes=["EXTERNAL_READ", "ROOT_WALLET"],
+        )
+
+        with pytest.raises(ValueError, match="Unknown service block permission scope"):
+            client.validate_skillops_manifest(manifest)
+
+    def test_missing_skillops_manifest_fails_closed(self, monkeypatch):
+        client = ServiceBlockClient()
+        monkeypatch.delitem(_SERVICE_BLOCK_PERMISSION_SCOPES, "llama_inference")
+
+        with pytest.raises(KeyError, match="Missing SkillOps manifest"):
+            client.get_block("llama_inference")
+
+    def test_persistent_mutation_requires_review_policy(self):
+        client = ServiceBlockClient()
+        manifest = ServiceBlockManifest(
+            block_name="llama_inference",
+            permission_scopes=[
+                ServiceBlockPermission.EXTERNAL_READ.value,
+                ServiceBlockPermission.PERSISTENT_MUTATION.value,
+            ],
+        )
+
+        with pytest.raises(ValueError, match="Persistent mutation permission"):
+            client.validate_skillops_manifest(manifest)
 
 
 # ═══════════════════════════════════════════════════════════════

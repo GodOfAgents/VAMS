@@ -59,6 +59,7 @@ class AuditReport:
     timestamp: int
     duration: float
     da_target: DAProtocol = DAProtocol.CELESTIA
+    telemetry: Dict[str, Any] = field(default_factory=dict)
 
     def serialize(self) -> bytes:
         """Deterministic JSON serialization for hashing."""
@@ -69,6 +70,7 @@ class AuditReport:
             "metricsScore": self.metrics_score,
             "passed": self.passed,
             "kpis": self.kpis,
+            "telemetry": self.telemetry,
             "timestamp": self.timestamp,
             "duration": round(self.duration, 6),
         }
@@ -91,4 +93,14 @@ class AuditReport:
             timestamp=report["timestamp"],
             duration=report.get("duration", 0.0),
             da_target=da_target,
+            telemetry={
+                key: report[key]
+                for key in (
+                    "worldStateFidelity",
+                    "continualLearningGain",
+                    "activation_anomaly_score",
+                    "adversarial_flag",
+                )
+                if key in report
+            },
         )
