@@ -70,13 +70,23 @@ You must stake $VAMS to register a block to prevent spam.
 ```solidity
 // In your Hardhat/Foundry console
 ServiceBlockRegistry.registerServiceBlock(
-    "DeepSeek R1 + TDX Wrapper",
-    "ai-inference",
-    "High security inference block",
-    resourceHash,
-    "ipfs://...",
-    500, // 5% Revenue Share on all usage!
-    3    // Minimum Trust Tier required
+    IServiceBlockRegistry.ServiceBlockRegistration({
+        name: "DeepSeek R1 + TDX Wrapper",
+        category: "ai-inference",
+        description: "High security inference block",
+        resourceRequirementsHash: resourceHash,
+        deploymentCID: "celestia://vams-ns/blob123",
+        revenueShareBps: 500, // 5% Revenue Share on all usage!
+        minTrustTier: 3,      // Minimum Trust Tier required
+        manifest: IServiceBlockRegistry.ServiceBlockManifest({
+            manifestHash: manifestHash,
+            capabilityRoot: capabilityRoot,
+            permissionsBitmap: permissionsBitmap,
+            manifestSigner: builder,
+            manifestVersion: 1
+        })
+    }),
+    manifestSignature
 );
 ```
 

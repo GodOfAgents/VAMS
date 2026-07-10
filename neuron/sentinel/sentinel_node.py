@@ -27,6 +27,7 @@ from .challenges.cpu_benchmark import CPUBenchmark
 from .challenges.storage_iops import StorageBenchmark
 from .challenges.latency_probe import LatencyBenchmark
 from .challenges.memory_bandwidth import MemoryBenchmark
+from .world_state_fidelity import WorldStateFidelitySentinel
 
 logger = logging.getLogger(__name__)
 
@@ -42,7 +43,7 @@ CHALLENGE_DA_MAP: Dict[str, DAProtocol] = {
 
 class VAMSSentinelNode:
     def __init__(self, private_key: str = None, registry_addr: str = None, rpc_url: str = None, mock_mode: bool = True,
-                 anomaly_detector=None):
+                 anomaly_detector=None, world_state_fidelity_sentinel=None):
         self.registry = HardwareRegistryClient(registry_addr, rpc_url, private_key)
         self.da = PerformanceAuditLog(mock_mode=mock_mode)
         self.private_key = private_key
@@ -53,6 +54,9 @@ class VAMSSentinelNode:
         # When provided, audit reports are enriched with activation_anomaly_score
         # and adversarial_flag based on PCA-projected Mahalanobis distance.
         self.anomaly_detector = anomaly_detector
+        self.world_state_fidelity_sentinel = (
+            world_state_fidelity_sentinel or WorldStateFidelitySentinel()
+        )
 
         # AUTOSKILL Phase 5: Per-node skill gap tracking for informed challenge selection
         self._node_skill_gaps: Dict[str, Dict[str, float]] = {}
@@ -122,6 +126,11 @@ class VAMSSentinelNode:
         gain_telemetry = self._build_continual_learning_gain(result.kpis)
         if gain_telemetry is not None:
             report["continualLearningGain"] = gain_telemetry
+
+        world_state_trace = result.kpis.get("world_state_trace")
+        if world_state_trace is not None:
+            fidelity = self.world_state_fidelity_sentinel.evaluate_trace(world_state_trace)
+            report["worldStateFidelity"] = fidelity.to_dict()
         
         return report
 

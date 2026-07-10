@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **`neuron/sentinel/world_state_fidelity.py`** and **`neuron/sentinel/sentinel_node.py`**: Added telemetry-only world-state fidelity reporting for long-horizon agent audits, including state hashes, divergence step, invalid-action step, staleness, and false-progress scoring.
+- **`contracts/src/registry/ServiceBlockRegistry.sol`** and **`contracts/src/interfaces/IServiceBlockRegistry.sol`**: Added EIP-712 SkillOps manifest metadata, permission bitmaps, verifier quarantine controls, and provisioning rejection for quarantined Service Blocks.
+- **`neuron/tests/test_world_state_fidelity.py`** and **`neuron/tests/test_world_state_phase_boundary.py`**: Added deterministic world-state fidelity and phase-boundary regression coverage.
+
 ### Changed
 - **`.github/workflows/security-gates.yml`**: Restricted the lightweight `Docs Verification` path to `docs/team/**/*.md` only; funding/proposal material no longer qualifies for docs-only bypass.
 - **`contracts/CONTRACTS.md`**: Replaced stale deployed/ready language with a pre-testnet deployment evidence register for Polygon Amoy and Cardano Pre-Prod, including pending fields for addresses, tx hashes, verification status, Safe/multisig ownership, and timelocks.
@@ -14,6 +19,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`REPO_STATUS_REPORT.md`**: Rewrote the repository status report for the July 2026 public testnet launch window with commit-history chronology, current component maturity, verified blockers, and gated roadmap language.
 - **`.github/workflows/security-gates.yml`**: Aligned CI with the current frontend and Cardano toolchains by moving frontend verification to Node.js 22, pinning Aiken to `v1.1.21`, and using `aiken check` as the Aiken verification command.
 - **`neuron/requirements.txt`**: Declared `numpy` and `scikit-learn` for the intelligence-layer modules and tests that already import vector math and Incremental PCA dependencies.
+- **`neuron/da/models.py`**: Included Sentinel telemetry extras in deterministic DA audit report serialization so fidelity and SkillOps-related telemetry can be committed in report hashes.
+- **`neuron/services/registry_client.py`**: Extended Service Block metadata with deterministic SkillOps manifests and fail-closed permission-scope validation.
 
 ### Security
 - **`.github/workflows/security-gates.yml`** and **`scripts/security/`**: Added Slither, Semgrep, TruffleHog, default credential, public-content policy, mock-mode promotion, and Caddy config gates.
@@ -30,9 +37,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`gateway/server.py`**: Live `/heartbeat` telemetry now requires proxy-verified mTLS client certificate headers and an allowlisted certificate fingerprint via `GATEWAY_HEARTBEAT_CERT_FINGERPRINTS`.
 - **`neuron/sdk/oms_identity.py`**, **`neuron/sdk/trails_client.py`**, **`neuron/payments/coinme_client.py`**, **`neuron/sdk/avail_substrate.py`**, **`neuron/sdk/eigenda_kzg.py`**, **`neuron/sdk/iagon_storage.py`**, **`neuron/sdk/phala_tee.py`**, and **`neuron/bridge_executor.py`**: Added fail-closed live-mode checks that reject mock clients, demo credentials, mock bridge verification, and mock TEE execution in staging/testnet/production.
 - **`neuron/da/adapters/avail_adapter.py`** and **`neuron/da/adapters/eigenda_adapter.py`**: Explicitly block structured stub adapters from instantiating in live environments.
+- **`contracts/src/registry/ServiceBlockRegistry.sol`**: Service Block provisioning now fails closed when verifier-governed quarantine is active.
 
 ### Testing
 - **Security scripts**: Verified `default_credential_scan.py`, `public_content_policy_scan.py`, and `mock_mode_promotion_scan.py` passed locally.
+- **World-state and SkillOps targeted tests**: Verified `pytest -q neuron/tests/test_service_blocks.py neuron/tests/test_world_state_fidelity.py neuron/tests/test_world_state_phase_boundary.py` passed with 31 tests.
+- **Sentinel targeted dependency status**: `neuron/tests/test_sentinel.py::TestSentinelNode::test_world_state_fidelity_is_telemetry_only` remains blocked locally because the temp Python dependency path does not include `web3`.
+- **ServiceBlockRegistry Solidity status**: Targeted Foundry runs for `ServiceBlockRegistryTest` remain blocked locally by Windows `Access is denied` before Solidity diagnostics are emitted, even with per-command submodule `safe.directory` overrides and alternate Foundry output/cache paths.
 - **Targeted hardening tests**: `pytest -q neuron/tests/test_runtime_safety.py neuron/tests/test_gateway_auth_hardening.py neuron/tests/test_service_blocks.py neuron/tests/test_sentinel.py` produced 52 passed and 1 existing environment failure because local temp dependencies did not include `torch`; the new Sentinel continual-learning telemetry test passed directly.
 - **Syntax/hygiene**: Verified touched Python files with `py_compile`; `git diff --check` passed.
 - **Docs-only PR gate**: Planned verification with `git diff --check` over `docs/team` changes only; full gates remain active for pushes to `main` and PRs with code/config/funding changes.

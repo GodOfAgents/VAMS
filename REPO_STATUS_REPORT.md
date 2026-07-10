@@ -120,6 +120,7 @@ Latest local evidence:
 | Phase 6 security scripts | `default_credential_scan.py`, `public_content_policy_scan.py`, `mock_mode_promotion_scan.py` | Passed locally on 2026-07-02. |
 | Python syntax check | `py_compile` on touched gateway, runtime, client, Sentinel, Service Block, sandbox, and security-script files | Passed locally on 2026-07-02. |
 | Targeted hardening tests | `pytest -q neuron/tests/test_runtime_safety.py neuron/tests/test_gateway_auth_hardening.py neuron/tests/test_service_blocks.py neuron/tests/test_sentinel.py` | 52 passed; 1 existing environment failure in `test_gpu_challenge_no_cuda` because local temp dependencies did not include `torch`. New Sentinel continual-learning telemetry test passed directly. |
+| R10 world-state and SkillOps hardening | `WorldStateFidelitySentinel`, Service Block EIP-712 manifests, and verifier quarantine | Implemented as a pre-testnet hardening addition; full local verification must be rerun before claiming updated readiness. |
 
 Verification still pending or blocked locally:
 
