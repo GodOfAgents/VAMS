@@ -76,21 +76,29 @@ contract ServiceBlockRegistryTest is Test {
 
         vm.startPrank(builder1);
         vams.approve(address(registry), STAKE);
-        vm.expectRevert("Block already registered");
-        bytes32 specHash = keccak256("spec");
+        bytes32 specHash = keccak256(abi.encodePacked("spec_", "test_block"));
         IServiceBlockRegistry.ServiceBlockManifest memory manifest = _manifest(builder1);
+        bytes memory signature = _signManifest(
+            builder1Pk,
+            builder1,
+            "test_block",
+            "celestia://vams-ns/blob123",
+            specHash,
+            manifest
+        );
+        vm.expectRevert("Block already registered");
         registry.registerServiceBlock(
             _registration(
                 "test_block",
                 "TEST",
                 "desc",
                 specHash,
-                "celestia://ns/blob123",
+                "celestia://vams-ns/blob123",
                 1500,
                 0,
                 manifest
             ),
-            _signManifest(builder1Pk, builder1, "test_block", "celestia://ns/blob123", specHash, manifest)
+            signature
         );
         vm.stopPrank();
     }
@@ -100,6 +108,7 @@ contract ServiceBlockRegistryTest is Test {
         vams.approve(address(registry), STAKE);
         bytes32 specHash = keccak256("spec");
         IServiceBlockRegistry.ServiceBlockManifest memory manifest = _manifest(builder1);
+        bytes memory signature = _signManifest(builder1Pk, builder1, "greedy_block", "celestia://ns/blob123", specHash, manifest);
         vm.expectRevert("Revenue share too high");
         registry.registerServiceBlock(
             _registration(
@@ -112,7 +121,7 @@ contract ServiceBlockRegistryTest is Test {
                 0,
                 manifest
             ),
-            _signManifest(builder1Pk, builder1, "greedy_block", "celestia://ns/blob123", specHash, manifest)
+            signature
         );
         vm.stopPrank();
     }
@@ -132,6 +141,7 @@ contract ServiceBlockRegistryTest is Test {
 
         bytes32 specHash = keccak256("spec");
         IServiceBlockRegistry.ServiceBlockManifest memory manifest = _manifest(builder1);
+        bytes memory signature = _signManifest(builder2Pk, builder1, "bad_sig_block", "celestia://ns/blob123", specHash, manifest);
 
         vm.expectRevert("Invalid manifest signature");
         registry.registerServiceBlock(
@@ -145,21 +155,23 @@ contract ServiceBlockRegistryTest is Test {
                 0,
                 manifest
             ),
-            _signManifest(builder2Pk, builder1, "bad_sig_block", "celestia://ns/blob123", specHash, manifest)
+            signature
         );
         vm.stopPrank();
     }
 
     function test_register_revert_wrongRegistryReplay() public {
         ServiceBlockRegistry registry2 = new ServiceBlockRegistry(admin, address(vams));
-        vm.prank(admin);
+        vm.startPrank(admin);
         registry2.grantRole(registry2.COMPOSER_ROLE(), composerBot);
+        vm.stopPrank();
 
         vm.startPrank(builder1);
         vams.approve(address(registry2), STAKE);
 
         bytes32 specHash = keccak256("spec");
         IServiceBlockRegistry.ServiceBlockManifest memory manifest = _manifest(builder1);
+        bytes memory signature = _signManifest(builder1Pk, builder1, "replay_block", "celestia://ns/blob123", specHash, manifest);
 
         vm.expectRevert("Invalid manifest signature");
         registry2.registerServiceBlock(
@@ -173,7 +185,7 @@ contract ServiceBlockRegistryTest is Test {
                 0,
                 manifest
             ),
-            _signManifest(builder1Pk, builder1, "replay_block", "celestia://ns/blob123", specHash, manifest)
+            signature
         );
         vm.stopPrank();
     }
@@ -185,6 +197,7 @@ contract ServiceBlockRegistryTest is Test {
         bytes32 specHash = keccak256("spec");
         IServiceBlockRegistry.ServiceBlockManifest memory manifest = _manifest(builder1);
         manifest.permissionsBitmap = 1 << 99;
+        bytes memory signature = _signManifest(builder1Pk, builder1, "bad_permission_block", "celestia://ns/blob123", specHash, manifest);
 
         vm.expectRevert("Unknown permission");
         registry.registerServiceBlock(
@@ -198,7 +211,7 @@ contract ServiceBlockRegistryTest is Test {
                 0,
                 manifest
             ),
-            _signManifest(builder1Pk, builder1, "bad_permission_block", "celestia://ns/blob123", specHash, manifest)
+            signature
         );
         vm.stopPrank();
     }

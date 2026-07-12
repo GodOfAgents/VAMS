@@ -4,7 +4,7 @@ pragma solidity ^0.8.20;
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 /**
  * @title GovernorExecutor
@@ -25,7 +25,7 @@ contract GovernorExecutor is
     Initializable,
     AccessControlUpgradeable,
     PausableUpgradeable,
-    ReentrancyGuardUpgradeable 
+    ReentrancyGuard
 {
     // ============ Constants ============
 
@@ -35,8 +35,8 @@ contract GovernorExecutor is
     /// @notice Role for emergency operations
     bytes32 public constant SENTINEL_ROLE = keccak256("SENTINEL_ROLE");
 
-    /// @notice Minimum timelock delay (24 hours)
-    uint256 public constant MIN_DELAY = 24 hours;
+    /// @notice Minimum timelock delay (48 hours)
+    uint256 public constant MIN_DELAY = 48 hours;
 
     /// @notice Maximum timelock delay (7 days)
     uint256 public constant MAX_DELAY = 7 days;
@@ -135,7 +135,6 @@ contract GovernorExecutor is
     ) external initializer {
         __AccessControl_init();
         __Pausable_init();
-        __ReentrancyGuard_init();
 
         if (_delay < MIN_DELAY || _delay > MAX_DELAY) revert InvalidDelay(_delay);
 

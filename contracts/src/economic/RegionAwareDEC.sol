@@ -43,8 +43,8 @@ contract RegionAwareDEC is IRegionAwareDEC, AccessControl {
     /// @notice Default per-region cap: 30%
     uint256 public constant DEFAULT_REGION_CAP_BPS = 3_000;
 
-    /// @notice Maximum per-region cap: 100% (effectively no cap)
-    uint256 public constant MAX_REGION_CAP_BPS = 10_000;
+    /// @notice Absolute per-region ceiling: 30% (INV-1)
+    uint256 public constant MAX_REGION_CAP_BPS = 3_000;
 
     /// @notice Minimum per-region cap: 5%
     uint256 public constant MIN_REGION_CAP_BPS = 500;
@@ -55,7 +55,7 @@ contract RegionAwareDEC is IRegionAwareDEC, AccessControl {
     IRegionalIncentives public regionalIncentives;
 
     /// @notice VAMS token for emission distribution
-    IERC20 public vamsToken;
+    IERC20 public immutable vamsToken;
 
     /// @notice Address of the RewardDistributor that receives emissions
     address public rewardDistributor;

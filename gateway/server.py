@@ -125,7 +125,8 @@ async def lifespan(app: FastAPI):
     admin_password = os.getenv("GATEWAY_ADMIN_PASSWORD")
     if not admin_password:
         raise RuntimeError("CRITICAL: GATEWAY_ADMIN_PASSWORD is not set in the environment.")
-    if admin_password == "vams2026":
+    # Reject the removed legacy password rather than treating it as a credential.
+    if admin_password == "vams2026":  # nosec B105
         raise RuntimeError("CRITICAL: GATEWAY_ADMIN_PASSWORD is set to the default insecure value 'vams2026'. Please change it.")
     if is_live_environment() and not os.getenv("GATEWAY_ADMIN_DID"):
         raise RuntimeError(
@@ -194,6 +195,70 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
 
         return await call_next(request)
 
+
+class RequestSizeLimitMiddleware:
+    def __init__(self, app, max_bytes: int = 1_048_576):
+        self.app = app
+        self.max_bytes = max_bytes
+
+    async def __call__(self, scope, receive, send):
+        if scope["type"] != "http":
+            await self.app(scope, receive, send)
+            return
+
+        content_lengths = [
+            value
+            for key, value in scope.get("headers", [])
+            if key.lower() == b"content-length"
+        ]
+        if len(content_lengths) > 1:
+            await self._reject(scope, receive, send, 400, "Multiple Content-Length headers.")
+            return
+        if content_lengths:
+            try:
+                content_length = int(content_lengths[0].decode("ascii"))
+                if content_length < 0:
+                    raise ValueError
+            except (UnicodeDecodeError, ValueError):
+                await self._reject(scope, receive, send, 400, "Invalid Content-Length header.")
+                return
+            if content_length > self.max_bytes:
+                await self._reject(scope, receive, send, 413, "Request body exceeds the gateway limit.")
+                return
+
+        buffered_messages = []
+        received_bytes = 0
+        while True:
+            message = await receive()
+            buffered_messages.append(message)
+            if message["type"] == "http.disconnect":
+                break
+            if message["type"] != "http.request":
+                continue
+            received_bytes += len(message.get("body", b""))
+            if received_bytes > self.max_bytes:
+                await self._reject(scope, receive, send, 413, "Request body exceeds the gateway limit.")
+                return
+            if not message.get("more_body", False):
+                break
+
+        message_index = 0
+
+        async def replay_receive():
+            nonlocal message_index
+            if message_index < len(buffered_messages):
+                message = buffered_messages[message_index]
+                message_index += 1
+                return message
+            return {"type": "http.request", "body": b"", "more_body": False}
+
+        await self.app(scope, replay_receive, send)
+
+    @staticmethod
+    async def _reject(scope, receive, send, status_code: int, detail: str):
+        response = JSONResponse(status_code=status_code, content={"detail": detail})
+        await response(scope, receive, send)
+
 # Configure CORS
 def resolve_allowed_origins(raw_origins: Optional[str] = None) -> List[str]:
     allowed_origins_str = (
@@ -201,6 +266,10 @@ def resolve_allowed_origins(raw_origins: Optional[str] = None) -> List[str]:
         if raw_origins is None
         else raw_origins
     )
+    if is_live_environment() and not allowed_origins_str:
+        raise RuntimeError(
+            f"GATEWAY_ALLOWED_ORIGINS is required when VAMS_ENV={current_environment()}."
+        )
     if allowed_origins_str:
         allowed_origins = [
             origin.strip()
@@ -223,8 +292,14 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=allowed_origins,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "DELETE", "OPTIONS"],
+    allow_headers=[
+        "Authorization",
+        "Content-Type",
+        "X-VAMS-DID",
+        "X-VAMS-Signature",
+        "X-VAMS-Timestamp",
+    ],
 )
 
 # Configure Rate Limiting
@@ -246,6 +321,7 @@ app.add_middleware(
     limit=limit_val,
     window_sec=window_val
 )
+app.add_middleware(RequestSizeLimitMiddleware, max_bytes=1_048_576)
 
 # In-memory node registry
 nodes: Dict[str, NodeInfo] = {}

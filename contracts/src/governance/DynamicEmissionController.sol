@@ -49,7 +49,7 @@ contract DynamicEmissionController is AccessControl, IDynamicEmissionController 
     
     // DAO Multisig configuration for recovery
     address[] public daoSigners;
-    uint256 public daoQuorumThreshold;
+    uint256 public immutable daoQuorumThreshold;
     mapping(address => bool) public isDaoSigner;
     
     uint256 public currentEpoch;

@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vams.network/schemas/audit/privacy-review.schema.json",
+  "title": "VAMS Testnet Privacy Review",
+  "type": "object",
+  "required": ["schema_version", "commit_sha", "reviewer", "reviewed_at", "data_inventory_approved", "retention_policy_approved", "redaction_tests_passed", "public_content_reviewed", "publisher_inventory_complete", "blocking_findings_open"],
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "commit_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "reviewer": {"type": "string", "minLength": 1},
+    "reviewed_at": {"type": "string", "format": "date-time"},
+    "data_inventory_approved": {"const": true},
+    "retention_policy_approved": {"const": true},
+    "redaction_tests_passed": {"const": true},
+    "public_content_reviewed": {"const": true},
+    "publisher_inventory_complete": {"const": true},
+    "blocking_findings_open": {"const": 0}
+  },
+  "additionalProperties": false
+}

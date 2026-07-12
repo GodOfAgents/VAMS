@@ -17,6 +17,11 @@ import "../src/slashing/VAMSSlasher.sol";
 import "../src/sentinel/VAMSSentinel.sol";
 
 contract DeployV2 is Script {
+    /// @dev Legacy integration script. It intentionally fails closed unless a
+    ///      maintainer explicitly acknowledges that it is not the approved
+    ///      public-testnet deployment ceremony.
+    string internal constant LEGACY_DEPLOY_ACK = "VAMS_ALLOW_UNSAFE_LEGACY_DEPLOYMENT";
+
     // State variables to avoid stack-too-deep
     VAMSTimelockController public timelock;
     VAMSToken public token;
@@ -31,6 +36,12 @@ contract DeployV2 is Script {
     VAMSRouter public router;
 
     function run() external {
+        bool legacyDeployAcknowledged = vm.envOr(LEGACY_DEPLOY_ACK, false);
+        require(
+            legacyDeployAcknowledged,
+            "DeployV2 blocked: use audited Safe/timelock testnet ceremony"
+        );
+
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
         address deployer = vm.addr(deployerPrivateKey);
 
@@ -40,11 +51,11 @@ contract DeployV2 is Script {
         // 1. Governance Infrastructure (Timelock needs to be deployed early for Treasury)
         // =========================================================================
         
-        // Timelock Controller (Min delay 1 day)
+        // Timelock Controller (hard minimum 48 hours)
         address[] memory proposers = new address[](0);
         address[] memory executors = new address[](0);
         timelock = new VAMSTimelockController(
-            1 days,
+            2 days,
             proposers,
             executors,
             deployer // Admin (will renounce later if fully decentralized, keeping for now)

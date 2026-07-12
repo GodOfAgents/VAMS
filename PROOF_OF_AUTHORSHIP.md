@@ -1,5 +1,8 @@
 # VAMS Proof of Authorship
 
+**Lifecycle:** Historical integrity record
+**Last verified:** 2026-07-12
+
 > **Cryptographic Proof of Original Authorship for VAMS Protocol Documentation**
 
 This document serves as a centralized manifest of SHA-256 cryptographic fingerprints for all core VAMS intellectual property assets. These fingerprints establish verifiable proof of content existence and authorship at specific timestamps.
@@ -21,8 +24,8 @@ This document serves as a centralized manifest of SHA-256 cryptographic fingerpr
 
 | Document | Version | SHA-256 Fingerprint | Timestamp (ISO 8601) |
 |----------|---------|---------------------|----------------------|
-| [WHITEPAPER.md](./WHITEPAPER.md) | 1.0.0 | `2B1BDDD1418EDE2413F505C3D515A3C1DFDD193941BA37D093611E06872B689C` | 2026-01-13T00:30:13+05:30 |
-| [ARCHITECTURE_v0-3-0.md](./ARCHITECTURE_v0-3-0.md) | 0.3.0 | `1FC554F7082EE8ADDDC3EF7250BCDA0CB004A04810BF73524ADCD62564F24A88` | 2026-01-13T00:30:13+05:30 |
+| [WHITEPAPER.md](./docs/team/WHITEPAPER.md) | 1.0.0 | `2B1BDDD1418EDE2413F505C3D515A3C1DFDD193941BA37D093611E06872B689C` | 2026-01-13T00:30:13+05:30 |
+| [ARCHITECTURE_v0-3-0.md](./docs/team/ARCHITECTURE_v0-3-0.md) | 0.3.0 | `1FC554F7082EE8ADDDC3EF7250BCDA0CB004A04810BF73524ADCD62564F24A88` | 2026-01-13T00:30:13+05:30 |
 
 ---
 

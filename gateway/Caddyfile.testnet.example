@@ -6,6 +6,10 @@
 {$VAMS_GATEWAY_DOMAIN:gateway.vams.network} {
     encode zstd gzip
 
+    request_body {
+        max_size 1MB
+    }
+
     tls {
         client_auth {
             mode require_and_verify
@@ -18,6 +22,8 @@
         X-Content-Type-Options "nosniff"
         X-Frame-Options "DENY"
         Referrer-Policy "no-referrer"
+        Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=()"
+        Content-Security-Policy "default-src 'none'; style-src 'unsafe-inline'; img-src data:; frame-ancestors 'none'; base-uri 'none'"
     }
 
     reverse_proxy 127.0.0.1:8000 {

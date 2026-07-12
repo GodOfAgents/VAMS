@@ -1,0 +1,20 @@
+{
+  "schema_version": "1.1.0",
+  "current_architecture_version": "0.8.0",
+  "last_verified": "2026-07-12",
+  "versions": [
+    {"version": "0.3.0", "document": "docs/team/ARCHITECTURE_v0-3-0.md", "lifecycle": "historical", "maturity": "design baseline"},
+    {"version": "0.4.0", "document": "docs/team/ARCHITECTURE_v0-4-0.md", "lifecycle": "historical", "maturity": "implemented source; deployment pending"},
+    {"version": "0.5.0", "document": "docs/team/ARCHITECTURE_v0-5-0.md", "lifecycle": "historical", "maturity": "implemented source; live verification pending"},
+    {"version": "0.6.0", "document": "docs/team/ARCHITECTURE_v0-6-0.md", "lifecycle": "historical", "maturity": "OMS baseline; mock-default integrations"},
+    {"version": "0.7.0", "document": "docs/team/ARCHITECTURE_v0-7-0.md", "lifecycle": "historical", "maturity": "implemented source; testnet restrictions"},
+    {"version": "0.8.0", "document": "docs/team/ARCHITECTURE_v0-8-0.md", "lifecycle": "current", "maturity": "hardened pre-testnet candidate"}
+  ],
+  "current_components": [
+    "neuron/composer/scorer.py",
+    "neuron/sdk/semantic_mmu.py",
+    "neuron/intelligence/world_model.py",
+    "gateway/server.py",
+    "frontend-vite/src/App.jsx"
+  ]
+}

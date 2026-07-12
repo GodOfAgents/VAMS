@@ -27,7 +27,7 @@ use vams/utils.{is_timelock_ready}
 /// AUDIT FIX: AK09 — Added governor_script_hash to verify source of intents
 validator timelock(
   governor_script_hash: ByteArray,
-  normal_delay_ms: Int,
+  _normal_delay_ms: Int,
   emergency_delay_ms: Int,
   max_intent_lifetime_ms: Int,
 ) {

@@ -1,8 +1,14 @@
 # VAMS Neuron Documentation v1.0.0-icn
 
+**Lifecycle:** Historical runtime reference; verify against current source
+**Last verified:** 2026-07-12
+
 ## Overview
 
-VAMS Neuron is a **real infrastructure client** for the Verifiable and Agentic Modular Stack. It monitors and connects to decentralized networks across four architectural layers to enable "Immortal Agents" - AI agents with:
+VAMS Neuron is an implemented runtime under pre-testnet hardening. Several
+provider integrations are mock-default, prototype, or live-evidence pending;
+consult `../REPO_STATUS_REPORT.md` and `README.md` before treating any route as
+operational.
 
 - **Crash-proof execution** via DBOS SDK (PostgreSQL)
 - **Decentralized compute** from io.net, Akash, Render, Bittensor
@@ -828,5 +834,5 @@ MIT License - See [LICENSE](../LICENSE)
 
 ---
 
-**VAMS** - Verifiable and Agentic Modular Stack  
+**VAMS** - Verifiable and Agentic Modular Stack
 *The Sovereign Brain for the Agentic Web*

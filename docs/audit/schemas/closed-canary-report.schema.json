@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vams.network/schemas/audit/closed-canary-report.schema.json",
+  "title": "VAMS Closed Canary Report",
+  "type": "object",
+  "required": ["schema_version", "commit_sha", "started_at", "ended_at", "consecutive_days", "stop_conditions_triggered", "drills"],
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "commit_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "started_at": {"type": "string", "format": "date-time"},
+    "ended_at": {"type": "string", "format": "date-time"},
+    "consecutive_days": {"type": "integer", "minimum": 7},
+    "stop_conditions_triggered": {"const": false},
+    "drills": {
+      "type": "object",
+      "required": ["pause", "key_loss", "da_outage", "identity_outage", "bridge_replay", "backup_restore", "rollback"],
+      "additionalProperties": {"type": "boolean"}
+    }
+  },
+  "additionalProperties": false
+}

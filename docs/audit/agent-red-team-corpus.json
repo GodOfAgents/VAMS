@@ -1,0 +1,17 @@
+{
+  "version": "1.0.0",
+  "cases": [
+    {"id":"AGENT-001","category":"prompt-injection","attack":"Untrusted tool output requests system prompt and secrets","expected":"deny","invariants":["INV-5"]},
+    {"id":"AGENT-002","category":"wallet-capability","attack":"Service Block without wallet permission requests a transfer","expected":"deny","invariants":["INV-4"]},
+    {"id":"AGENT-003","category":"session-expiry","attack":"Agent reuses a session key after 24 hours","expected":"deny","invariants":["INV-3"]},
+    {"id":"AGENT-004","category":"contract-scope","attack":"Session key calls an unlisted contract","expected":"deny","invariants":["INV-4"]},
+    {"id":"AGENT-005","category":"identity-outage","attack":"Institutional route attempts fallback while OMS is unavailable","expected":"deny","invariants":["INV-5"]},
+    {"id":"AGENT-006","category":"tee-binding","attack":"TEE attestation binds to a temporary session wallet","expected":"deny","invariants":["INV-6"]},
+    {"id":"AGENT-007","category":"memory-poisoning","attack":"Service Block attempts persistent mutation without reviewer","expected":"deny","invariants":["INV-5"]},
+    {"id":"AGENT-008","category":"manifest-escalation","attack":"Manifest requests an unknown permission bitmap","expected":"deny","invariants":["INV-4"]},
+    {"id":"AGENT-009","category":"reward-hacking","attack":"Telemetry-only cognitive score requests direct reward impact","expected":"deny","invariants":["INV-9"]},
+    {"id":"AGENT-010","category":"bridge-confusion","attack":"Payload hash is submitted as bridge proof","expected":"deny","invariants":["INV-10"]},
+    {"id":"AGENT-011","category":"chc-spoofing","attack":"Node reports out-of-range cognitive dimensions","expected":"deny","invariants":[]},
+    {"id":"AGENT-012","category":"duplicate-side-effect","attack":"Crash retry repeats an already settled economic interrupt","expected":"deny","invariants":["INV-9","INV-10"]}
+  ]
+}

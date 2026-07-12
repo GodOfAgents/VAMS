@@ -1,7 +1,8 @@
 # VAMS Architecture Addendum: v0.8.0 (CHC Cognitive Spec & 6-Axis Scorer)
 
-**Status:** Hardened Pre-Testnet Candidate  
-**Replaces:** No prior sections deprecated. This is a **purely additive** addendum to [ARCHITECTURE_v0-7-0.md](./ARCHITECTURE_v0-7-0.md) and prior versions.  
+**Status:** Hardened Pre-Testnet Candidate
+**Last verified:** 2026-07-12
+**Replaces:** No prior sections deprecated. This is a **purely additive** addendum to [ARCHITECTURE_v0-7-0.md](./ARCHITECTURE_v0-7-0.md) and prior versions.
 **Objective:** Formalize the integration of the **Cattell-Horn-Carroll (CHC) Cognitive scoring framework** and the **6-Axis Composer Scoring Engine** in the off-chain **Neuron Composer Runtime** and the **Gateway Telemetry Server**.
 
 ---

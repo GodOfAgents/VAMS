@@ -1,12 +1,19 @@
 # VAMS Neuron Workflow Engine (DBOS)
 
-The VAMS Neuron implements durable, crash-proof execution using the [DBOS Python SDK](https://dbos.dev/).
+**Lifecycle:** DBOS-backed demonstration workflow
+**Last verified:** 2026-07-12
+
+The VAMS Neuron includes a DBOS-backed durable workflow demonstration using the
+[DBOS Python SDK](https://dbos.dev/). Its checked-in steps return simulated DA,
+inference, action, and reporting values; it is not a live settlement workflow.
 
 ## Overview
 
 In decentralized AI networks, node crashes, RPC timeouts, and transient failures are common. Traditional Python execution loses state in memory when a crash occurs. VAMS solves this by storing execution state in PostgreSQL using DBOS.
 
-- **Exactly-once execution:** Steps never run twice, even if the node restarts.
+- **Recorded step replay:** DBOS can replay completed workflow steps according
+  to its persistence model; external side effects still require idempotency
+  keys and integration-specific evidence.
 - **Crash recovery:** If the process dies mid-workflow, it resumes exactly where it left off.
 - **Idempotency:** Workflows are assigned unique IDs, preventing duplicate runs.
 
@@ -52,10 +59,10 @@ All durable functions in VAMS are decorated with `@DBOS.step()`.
 
 | Step Function | Purpose | Upgrading from Mock to Real |
 |---------------|---------|-----------------------------|
-| `step_gather_data` | Collects necessary input context for the task. | Replace `asyncio.sleep()` with real DA/Oracle queries. |
-| `step_run_inference` | Prompts the AI model (or compute provider). | Integrate with IO.net or Bittensor SDKs. |
-| `step_execute_action` | Dispatches transactions or API calls. | Use `mev_protection.py` to route signed txs. |
-| `step_report_result` | Saves the final outcome or anchors it to L1. | Use `anchoring.py` to commit state to Polygon/Celestia. |
+| `step_gather_data` | Demonstrates input collection. | Replace the mock return with reviewed DA/oracle queries. |
+| `step_run_inference` | Demonstrates inference orchestration. | Integrate a reviewed provider client. |
+| `step_execute_action` | Demonstrates an action boundary. | Add idempotency and real signed transaction handling. |
+| `step_report_result` | Demonstrates result reporting. | Add a reviewed gateway or anchoring integration. |
 
 ## Running & Monitoring
 

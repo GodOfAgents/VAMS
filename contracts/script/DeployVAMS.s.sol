@@ -11,7 +11,13 @@ import "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.so
 import "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
 
 contract DeployVAMS is Script {
+    string internal constant LEGACY_DEPLOY_ACK = "VAMS_ALLOW_UNSAFE_LEGACY_DEPLOYMENT";
+
     function run() external {
+        require(
+            vm.envOr(LEGACY_DEPLOY_ACK, false),
+            "DeployVAMS blocked: use DeployTestnet Safe/timelock ceremony"
+        );
         // Use PRIVATE_KEY passed via command line --private-key if env var fails
         // Or handle the hex string properly
         
@@ -35,7 +41,7 @@ contract DeployVAMS is Script {
         executors[0] = address(0); // Anyone can execute
         
         VAMSTimelockController timelock = new VAMSTimelockController(
-            86400, // 24h delay
+            2 days,
             proposers,
             executors,
             deployer

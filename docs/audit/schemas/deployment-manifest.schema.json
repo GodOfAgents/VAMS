@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vams.network/schemas/audit/deployment-manifest.schema.json",
+  "title": "VAMS Testnet Deployment Manifest",
+  "type": "object",
+  "required": ["commit_sha", "network", "deployment_status", "chain_identifier", "deployer", "authorities", "timelock_seconds", "deployer_privileges_removed", "mock_routes_disabled", "artifacts", "role_transfers", "rollback_plan"],
+  "properties": {
+    "commit_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "network": {"enum": ["polygon-amoy", "cardano-preprod"]},
+    "deployment_status": {"enum": ["rehearsed", "deployed"]},
+    "chain_identifier": {"type": "string", "minLength": 1},
+    "deployer": {"type": "string", "minLength": 1},
+    "authorities": {
+      "type": "object",
+      "required": ["governance", "treasury", "emergency"],
+      "properties": {
+        "governance": {"$ref": "#/$defs/fiveOwnerAuthority"},
+        "treasury": {"$ref": "#/$defs/fiveOwnerAuthority"},
+        "emergency": {"$ref": "#/$defs/emergencyAuthority"}
+      },
+      "additionalProperties": false
+    },
+    "timelock_seconds": {"type": "integer", "minimum": 172800},
+    "deployer_privileges_removed": {"const": true},
+    "mock_routes_disabled": {"const": true},
+    "artifacts": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["name", "source", "artifact_sha256", "verification"],
+        "properties": {
+          "name": {"type": "string", "minLength": 1},
+          "source": {"type": "string", "minLength": 1},
+          "artifact_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+          "verification": {"enum": ["simulation-passed", "explorer-verified", "script-hash-verified"]},
+          "address": {"type": "string"},
+          "transaction_hash": {"type": "string"}
+        },
+        "additionalProperties": false
+      }
+    },
+    "role_transfers": {"type": "array", "minItems": 1, "items": {"type": "object"}},
+    "rollback_plan": {"type": "string", "minLength": 1}
+  },
+  "$defs": {
+    "fiveOwnerAuthority": {
+      "type": "object",
+      "required": ["address", "owners", "threshold", "recovery_policy"],
+      "properties": {
+        "address": {"type": "string", "minLength": 1},
+        "owners": {"type": "array", "minItems": 5, "maxItems": 5, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+        "threshold": {"const": 3},
+        "recovery_policy": {"type": "string", "minLength": 1}
+      },
+      "additionalProperties": false
+    },
+    "emergencyAuthority": {
+      "type": "object",
+      "required": ["address", "owners", "threshold", "scope", "recovery_policy"],
+      "properties": {
+        "address": {"type": "string", "minLength": 1},
+        "owners": {"type": "array", "minItems": 3, "maxItems": 3, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+        "threshold": {"const": 2},
+        "scope": {"const": "pause-only"},
+        "recovery_policy": {"type": "string", "minLength": 1}
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

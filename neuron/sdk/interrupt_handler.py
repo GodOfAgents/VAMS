@@ -22,6 +22,12 @@ from dataclasses import dataclass, field
 from typing import Optional, Dict, Any, Callable, List
 from enum import Enum
 
+from neuron.runtime_safety import (
+    LiveModeSafetyError,
+    is_live_environment,
+    require_not_live_mock,
+)
+
 logger = logging.getLogger("vams.interrupt_handler")
 
 
@@ -135,6 +141,13 @@ class InterruptVectorTable:
         max_retries: int = 2,
         x402_handler: Optional[Any] = None
     ):
+        require_not_live_mock("InterruptVectorTable", mock_mode)
+        if is_live_environment() and not mock_mode:
+            raise LiveModeSafetyError(
+                "InterruptVectorTable live execution is disabled until every "
+                "economic interrupt has an audited real handler"
+            )
+
         self.agent_id = agent_id
         self.mock_mode = mock_mode
         self.timeout_ms = timeout_ms

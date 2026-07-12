@@ -1,5 +1,8 @@
 # VAMS Smart Contracts
 
+**Lifecycle:** Implemented source; Polygon Amoy deployment pending
+**Last verified:** 2026-07-12
+
 This workspace contains all Solidity smart contracts for the Verifiable and Agentic Modular Stack (VAMS). It is built using the Foundry framework.
 
 ## Architecture
@@ -9,18 +12,18 @@ graph TD
     %% Core Architecture Diagram
     AGT[VAMSAgentRegistry] --> TRUST[VAMSTrustAggregator]
     AGT --> COMP[ResourceComposer / ServiceBlocks]
-    
+
     TRUST --> PL1[TEEProofPlugin]
     TRUST --> PL2[HardwareVerifiedPlugin]
     TRUST --> PL3[ZKMLProofPlugin]
-    
+
     SENT[Sentinel Network] --> SLA[SLAEnforcer]
     SLA --> PL2
     SLA --> HW[VAMSHardwareRegistry]
-    
+
     COMP --> ECON[RegionalIncentives / RegionAwareDEC]
     COMP --> SETTLE[ComposedSettlement]
-    
+
     SETTLE --> REW[RewardDistributor]
 ```
 
@@ -30,7 +33,7 @@ The `src/` directory is organized modularly inside the VAMS logic layers:
 
 - `da/` — Satellite DA auditing registries (Phase 0)
 - `economic/` — Bonding, hardware commitments, composed settlements, regional DEC (Phase 2 & 4)
-- `governance/` — Protocol timelock and multisig 
+- `governance/` — Protocol timelock and multisig
 - `infrastructure/` — Hardware registry, Service Block registry (Phase 2 & 3)
 - `interfaces/` — Shared external and internal interfaces
 - `oracle/` — Price oracles and chain metric feeds
@@ -63,7 +66,7 @@ forge doc --check
 
 ## Interface Index
 
-Below are some of the most critical interfaces. 
+Below are some of the most critical interfaces.
 
 | Interface | Description | Location |
 |-----------|-------------|----------|

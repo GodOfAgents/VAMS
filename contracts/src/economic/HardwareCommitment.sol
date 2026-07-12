@@ -4,7 +4,7 @@ pragma solidity ^0.8.20;
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 import "../interfaces/IHardwareCommitment.sol";
 import "./IProviderBondRegistry.sol";
@@ -19,7 +19,7 @@ contract HardwareCommitment is
     Initializable, 
     AccessControlUpgradeable,
     PausableUpgradeable,
-    ReentrancyGuardUpgradeable,
+    ReentrancyGuard,
     IHardwareCommitment 
 {
     bytes32 public constant SLA_ENFORCER_ROLE = keccak256("SLA_ENFORCER_ROLE");
@@ -55,7 +55,6 @@ contract HardwareCommitment is
         
         __AccessControl_init();
         __Pausable_init();
-        __ReentrancyGuard_init();
 
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
         _grantRole(ADMIN_ROLE, admin);
@@ -92,9 +91,6 @@ contract HardwareCommitment is
 
         uint256 _requiredCollateral = calculateDiscountedCollateral(baseCollateral, durationSeconds);
 
-        // Lock collateral in the ProviderBondRegistry
-        bondRegistry.lockHardwareCollateral(msg.sender, _requiredCollateral);
-
         commitmentId = keccak256(abi.encodePacked(msg.sender, block.timestamp, nodeIds[0]));
 
         HardwareCommitment storage c = _commitments[commitmentId];
@@ -111,6 +107,9 @@ contract HardwareCommitment is
         }
 
         _providerCommitments[msg.sender].push(commitmentId);
+
+        // Interact only after the commitment is fully visible to callbacks.
+        bondRegistry.lockHardwareCollateral(msg.sender, _requiredCollateral);
 
         emit CommitmentCreated(commitmentId, msg.sender, durationSeconds, c.collateral);
         return commitmentId;

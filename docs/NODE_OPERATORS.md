@@ -2,6 +2,8 @@
 
 **Audience:** Suppliers — GPU / bare-metal node operators
 **Version:** v1.3.0-oms
+**Lifecycle:** Local and pre-testnet guide
+**Last verified:** 2026-07-12
 **Prerequisites:** Familiarity with the [Developer Guide](./DEVELOPER_GUIDE.md) and
 [Architecture v0.6.0](./team/ARCHITECTURE_v0-6-0.md)
 
@@ -71,7 +73,7 @@ node = VAMSSentinelNode(
     private_key="0xYOUR_OPERATOR_PRIVATE_KEY",
     registry_addr="0xYOUR_REGISTRY_ADDRESS",
     rpc_url="http://localhost:8545",
-    mock_mode=True,  # Set to False to interact with live contracts
+    mock_mode=True,  # Local development only; testnet rejects mock execution.
 )
 
 asyncio.run(node.run_scheduler(interval_seconds=300))

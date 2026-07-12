@@ -6,7 +6,7 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 import {ITwoPhaseCommitManager} from "./ITwoPhaseCommitManager.sol";
 import {IX402EscrowManager} from "./IX402EscrowManager.sol";
@@ -32,7 +32,7 @@ contract TwoPhaseCommitManager is
     Initializable,
     AccessControlUpgradeable,
     PausableUpgradeable,
-    ReentrancyGuardUpgradeable,
+    ReentrancyGuard,
     ITwoPhaseCommitManager 
 {
     using SafeERC20 for IERC20;
@@ -91,7 +91,6 @@ contract TwoPhaseCommitManager is
         
         __AccessControl_init();
         __Pausable_init();
-        __ReentrancyGuard_init();
         
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
         _grantRole(ADMIN_ROLE, admin);

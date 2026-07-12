@@ -1,11 +1,12 @@
 # 🛡️ VAMS Protocol — Comprehensive Audit & Architecture Evolution Report
 ### Multi-Layer Infrastructure for the Agentic Economy & Planetary Computer
 
-**Document Version:** 3.0.0  
-**Date:** May 19, 2026  
+**Document Version:** 3.0.0
+**Date:** May 19, 2026
+**Last verified:** 2026-07-12
 **Scope:** Architecture Evolution (v0.3.0 → v0.8.0) + Security Audit Remediation (68 Findings) + Academic Foundations
 **Status:** Hardened Pre-Testnet Candidate; deployment gates remain required
-**Classification:** Web 4.0 Planetary Infrastructure — Not a typical DeFi/Web3 application  
+**Classification:** Web 4.0 Planetary Infrastructure — Not a typical DeFi/Web3 application
 
 ---
 
@@ -13,7 +14,7 @@
 
 VAMS (Verifiable and Agentic Modular Stack) is a **multi-layer planetary infrastructure** designed to serve as the foundational compute, identity, and economic substrate for the **Agentic Economy** — the emerging paradigm where autonomous AI agents operate as first-class economic actors with sovereign identity, asset custody, and verifiable execution guarantees.
 
-This document provides a unified view of the protocol's **architectural evolution** across six major architecture stages, the **security audit remediation** that hardened the stack for testnet deployment, and the **academic research foundations** that ground every subsystem in peer-reviewed science. The original audit remediation baseline resolved 68 findings through the OMS integration release. The protocol has evolved from a monolithic 5-layer stack (v0.3.0) to a fully modular OMS-integrated platform (v0.6.0), then to the additive cognitive/composer architecture in v0.7.0 and v0.8.0.
+This document provides a unified view of the protocol's **architectural evolution** across six major architecture stages, the **security audit remediation** that hardened the stack for testnet deployment, and the **academic research foundations** that ground every subsystem in peer-reviewed science. The original audit remediation baseline resolved 68 findings through the OMS integration release. The protocol evolved from a monolithic 5-layer stack (v0.3.0) to the OMS-integrated security baseline (v0.6.0), then added the cognitive and composer layers in v0.7.0 and v0.8.0. v0.6.0 is therefore a historical audit baseline, not the current architecture ceiling.
 
 > [!IMPORTANT]
 > **Current Architecture Version:** v0.8.0 cognitive/composer layer, additive over v0.6.0 (`v1.3.0-oms`)
@@ -176,7 +177,7 @@ v0.3.0 (Jan 2026)     v0.4.0 (Apr 2026)      v0.5.0 (Apr 2026)       v0.6.0 (May
 
 ## 2. v0.3.0 — Monolithic Foundation
 
-**Status:** Partially Deprecated (superseded by v0.4.0+)  
+**Status:** Partially Deprecated (superseded by v0.4.0+)
 **Academic Context:** Established the DePIN-native compute mesh **[R3.1]**, durable execution substrate **[R9.1]**, and initial trust scoring **[R4.4]**
 
 ### 2.1 Original 5-Layer Architecture
@@ -210,8 +211,8 @@ v0.3.0 (Jan 2026)     v0.4.0 (Apr 2026)      v0.5.0 (Apr 2026)       v0.6.0 (May
 
 ## 3. v0.4.0 — ICN-Inspired Modular Stack
 
-**Release:** `1.0.0-icn` (April 9, 2026)  
-**Theme:** Decompose monolith into 6 independent logic packages inspired by Impossible Cloud Network (ICN)  
+**Release:** `1.0.0-icn` (April 9, 2026)
+**Theme:** Decompose monolith into 6 independent logic packages inspired by Impossible Cloud Network (ICN)
 **Academic Context:** Implements modular protocol composition **[R3.3]**, self-organizing orchestration **[R3.4]**, stake-backed Sybil resistance **[R4.2]**, and sustainable dynamic emissions **[R7.1]**
 
 ### 3.1 Modular Package Structure
@@ -279,9 +280,9 @@ contracts/src/
 
 ## 4. v0.5.0 — AUTOSKILL Intelligence Layer
 
-**Release:** `1.2.0-autoskill` (April 29, 2026)  
-**Theme:** Open the behavioral black box — PCA-based skill discovery + anomaly detection  
-**Breaking Changes:** None (purely additive)  
+**Release:** `1.2.0-autoskill` (April 29, 2026)
+**Theme:** Open the behavioral black box — PCA-based skill discovery + anomaly detection
+**Breaking Changes:** None (purely additive)
 **Academic Context:** Direct implementation of AutoSkill dual-loop architecture **[R5.1]**, PCA activation steering **[R5.2]**, LGSD skill diversity **[R5.3]**, and Mahalanobis OOD detection **[R5.4]**
 
 ### 4.1 New Subsystem: `neuron/intelligence/`
@@ -314,9 +315,9 @@ contracts/src/
 
 ## 5. v0.6.0 — Polygon OMS Integration
 
-**Release:** `1.3.0-oms` (May 6, 2026)  
-**Theme:** Enterprise-grade identity, fiat rails, stablecoin payouts, yield management  
-**Breaking Changes:** None (purely additive)  
+**Release:** `1.3.0-oms` (May 6, 2026)
+**Theme:** Enterprise-grade identity, fiat rails, stablecoin payouts, yield management
+**Breaking Changes:** None (purely additive)
 **Academic Context:** Implements Intelligent AI Delegation framework **[R1.1]**, ERC-4337 account abstraction **[R6.1]**, TEE attestation binding **[R6.2][R6.3]**, and agent-as-economic-principal identity **[R1.2][R1.3]**
 
 ### 5.1 Five-Phase Integration
@@ -540,7 +541,12 @@ contracts/src/
 
 ## 11. Test Coverage & Verification
 
-### 11.1 Current Test Suite (v0.6.0 audit baseline)
+### 11.1 Historical Test Suite (v0.6.0 audit baseline)
+
+> [!CAUTION]
+> These totals are retained as historical v0.6.0 audit evidence. They are not
+> current-tree or deployment evidence. Current readiness must be generated for
+> one commit by the 36-track program in `docs/audit/control-matrix.json`.
 
 | Suite | Count | Status |
 |-------|:-----:|:------:|
@@ -576,15 +582,18 @@ contracts/src/
 ## 12. CI-Bound Items
 
 > [!NOTE]
-> The following require the CI/staging environment and are **not deployment blockers** for testnet:
+> The following require the CI/staging environment and are **mandatory deployment blockers** for testnet until they pass on the exact deployment commit:
 
 | Item | Tool | Status |
 |------|------|:------:|
-| Full Solidity compilation | `forge build` | ⏳ CI-bound |
-| Solidity unit tests | `forge test` | ⏳ CI-bound |
-| Aiken validator compilation | `aiken check` | ⏳ CI-bound |
-| Slither re-scan | `slither .` | ⏳ CI-bound |
-| Deployment script dry-run | `forge script DeployV2` | ⏳ CI-bound |
+| Full Solidity compilation | `forge build --sizes` | ✅ Local pass; current-commit CI evidence pending |
+| Solidity unit tests | `forge test` | ✅ Local post-change pass: 643/643 across 32 suites; exact-commit CI evidence pending |
+| Aiken validator compilation | `aiken check --deny --seed 20260711 --max-success 250` | ✅ Local pass: 33 unit + 7 properties, 1,783 checks, 0 errors or warnings; CI evidence pending |
+| Python unit/integration tests | `pytest -q --tb=short -p no:cacheprovider` | ✅ Local post-change pass: 569/569; exact-commit CI evidence pending |
+| Bandit and Python SCA | `bandit -ll -ii`; `pip-audit` | ✅ Configured Bandit gate passed with 0 high findings; Gateway and Neuron dependency graphs have no known vulnerabilities; CI evidence pending |
+| Semgrep security audit | `semgrep scan --config auto --error` | ✅ Zero findings across 393 owned files and 517 rules; CI evidence pending |
+| Slither re-scan | `slither . --exclude-low --exclude-informational --fail-high` | ✅ 169 contracts analyzed with 0 high findings; 18 residual medium results match the adjudication; independent CI review pending |
+| Canonical deployment ceremony rehearsal | `DeployTestnet.s.sol` | ⏳ Implemented; Safe-backed Amoy rehearsal and role evidence pending |
 
 ---
 
@@ -595,14 +604,14 @@ contracts/src/
 ║                                                                      ║
 ║   CLASSIFICATION: Web 4.0 Planetary Infrastructure                   ║
 ║   ARCHITECTURE:   v0.8.0 cognitive/composer over v0.6.0 OMS baseline ║
-║   AUDIT STATUS:   ✅ ALL 68 FINDINGS RESOLVED                        ║
+║   AUDIT BASELINE: 68 historical v0.6.0 findings recorded as resolved ║
 ║                                                                      ║
 ║   Critical:    4/4  RESOLVED                                         ║
 ║   High:       21/21 RESOLVED                                         ║
 ║   Medium:     31/31 RESOLVED                                         ║
 ║   Low/QA:     12/12 RESOLVED                                         ║
-║   Tests:      1,083 PASSING (619 Forge + 37 Aiken + 427 Pytest)      ║
-║   Regressions: 0                                                     ║
+║   Current tests: generated by commit-bound CI evidence               ║
+║   Current audit: 36-track testnet assurance program open             ║
 ║   Academic Refs: 30 arXiv/peer-reviewed papers mapped to subsystems  ║
 ║                                                                      ║
 ║   VERDICT:  HARDENED PRE-TESTNET CANDIDATE; GATES REQUIRED           ║
@@ -636,6 +645,9 @@ This makes VAMS the first protocol to unify the full Web 4.0 stack — from phys
 | [ARCHITECTURE_v0-6-0.md](docs/team/ARCHITECTURE_v0-6-0.md) | Polygon OMS integration addendum |
 | [ARCHITECTURE_v0-7-0.md](docs/team/ARCHITECTURE_v0-7-0.md) | Cognitive Layer integration addendum |
 | [ARCHITECTURE_v0-8-0.md](docs/team/ARCHITECTURE_v0-8-0.md) | CHC cognitive spec and 6-axis Composer addendum |
+| [AUDIT_PROGRAM.md](docs/audit/AUDIT_PROGRAM.md) | 36-track testnet assurance program, gates, ownership, and rollout policy |
+| [RISK_REGISTER.md](docs/audit/RISK_REGISTER.md) | Open pre-testnet risks and evidence required for closure |
+| [INCIDENT_RESPONSE.md](docs/audit/INCIDENT_RESPONSE.md) | Testnet severity, containment, recovery, and drill requirements |
 | [CHANGELOG.md](docs/CHANGELOG.md) | Full release history |
 | [DEVELOPER_GUIDE.md](docs/DEVELOPER_GUIDE.md) | Developer onboarding |
 | [NODE_OPERATORS.md](docs/NODE_OPERATORS.md) | Node operator guide |
