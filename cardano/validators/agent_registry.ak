@@ -10,7 +10,6 @@
 ////   3. DeregisterAgent → burns NFT + consumes agent UTXO
 ////   4. SlashAgent → reduces reputation/stake for misbehavior
 
-use aiken/collection/list
 use aiken/primitive/bytearray
 use cardano/transaction.{OutputReference, Transaction}
 use vams/types.{

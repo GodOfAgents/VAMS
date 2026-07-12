@@ -1,10 +1,12 @@
 # Heart Brain: The VAMS Agent's Synthetic Conscience Architecture
 
-> **Status:** Conceptual Architecture — Pre-Testnet Candidate (Phase 6)  
-> **Version:** v0.1.0  
-> **Authors:** Aseem (Founder), Bageera v2.1.0 (VAMS Research Scientist)  
-> **Date:** June 2026  
-> **Source:** [Heart brain.txt](file:///c:/Users/aseem/Desktop/VAMS-main/VAMS-main/docs/team/Heart%20brain.txt)
+> **Status:** Conceptual research architecture; not deployment evidence
+> **Version:** v0.1.0
+> **Authors:** Aseem (Founder), Bageera v2.1.0 (VAMS Research Scientist)
+> **Date:** June 2026
+> **Last verified:** 2026-07-12
+> **Source policy:** Raw conversation transcripts are intentionally not retained
+> in the public repository.
 
 ---
 
@@ -304,8 +306,8 @@ If a handler bypasses the DBOS runtime for speed, they lose ZK-proof generation 
 
 ### VAMS Differentiator
 
-> The market builds **external cages** (reputation scores, peer audits, static constraints).  
-> The GCA is an **internal mathematical heart** — enforcing alignment at the *neural-activation layer* before action.  
+> The market builds **external cages** (reputation scores, peer audits, static constraints).
+> The GCA is an **internal mathematical heart** — enforcing alignment at the *neural-activation layer* before action.
 > No one else has solved the "Malicious Handler" problem at this depth.
 
 ---
@@ -443,7 +445,7 @@ Integrating the Global Conscience Anchor (GCA) and the Mycorrhizal Subsumption S
 
 > [!IMPORTANT]
 > The following items require resolution before testnet deployment:
- 
+
 1. **Vector Initialization:** How do we seed the initial V_Planetary values? What training corpus defines the "Human Good" embedding baseline?
 2. **Governance Model:** What is the exact DAO structure for updating the Constitutional Reference Vector? Quorum requirements? Voting weights?
 3. **ZK-Wargaming Circuits:** Formal specification needed for the L3 state-channel conflict resolution protocol.
@@ -477,4 +479,3 @@ Biological metaphor for VAMS's market position: an underground fungal network co
 ---
 
 *This document was extracted and structured from the original Heart Brain brainstorming conversation. It should be treated as a living architectural specification and updated as implementation progresses through testnet phases.*
-

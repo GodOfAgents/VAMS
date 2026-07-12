@@ -43,8 +43,9 @@ Architecture Reference:
 from __future__ import annotations
 
 import logging
+import json
 import os
-import pickle
+import zipfile
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -52,6 +53,10 @@ import numpy as np
 from sklearn.decomposition import IncrementalPCA
 
 logger = logging.getLogger("VAMS-SkillDiscovery")
+
+_MODEL_FORMAT_VERSION = 1
+_MAX_MODEL_ARCHIVE_BYTES = 256 * 1024 * 1024
+_MAX_MODEL_MEMBERS = 16
 
 
 @dataclass
@@ -89,8 +94,8 @@ class SkillDiscovery:
     streaming compatibility — can fit on large activation datasets
     without loading everything into memory.
 
-    The fitted model persists as a .pkl file for reuse across
-    sessions.
+    The fitted model persists as a non-executable NumPy archive for reuse
+    across sessions.
     """
 
     def __init__(
@@ -396,7 +401,7 @@ class SkillDiscovery:
         Save the fitted model to disk.
 
         Args:
-            path: File path (should end in .pkl).
+            path: File path (should end in .npz).
 
         Returns:
             Absolute path of the saved file.
@@ -405,18 +410,32 @@ class SkillDiscovery:
 
         os.makedirs(os.path.dirname(os.path.abspath(path)), exist_ok=True)
 
-        state = {
-            "pca": self._pca,
-            "centroid": self._centroid,
-            "covariance_inv": self._covariance_inv,
+        metadata = {
+            "format_version": _MODEL_FORMAT_VERSION,
             "hidden_dim": self._hidden_dim,
             "n_components": self._n_components,
             "variance_threshold": self._variance_threshold,
+            "batch_size": self._batch_size,
             "fit_stats": self._fit_stats,
+            "pca_n_components": int(self._pca.n_components_),
+            "pca_n_features": int(self._pca.n_features_in_),
+            "pca_n_samples_seen": int(self._pca.n_samples_seen_),
+            "pca_noise_variance": float(self._pca.noise_variance_),
         }
 
         with open(path, "wb") as f:
-            pickle.dump(state, f, protocol=pickle.HIGHEST_PROTOCOL)
+            np.savez_compressed(
+                f,
+                metadata=np.asarray(json.dumps(metadata)),
+                components=self._pca.components_,
+                mean=self._pca.mean_,
+                variance=self._pca.var_,
+                singular_values=self._pca.singular_values_,
+                explained_variance=self._pca.explained_variance_,
+                explained_variance_ratio=self._pca.explained_variance_ratio_,
+                centroid=self._centroid,
+                covariance_inv=self._covariance_inv,
+            )
 
         abs_path = os.path.abspath(path)
         logger.info(f"SkillDiscovery model saved to {abs_path}")
@@ -428,24 +447,68 @@ class SkillDiscovery:
         Load a fitted model from disk.
 
         Args:
-            path: Path to the .pkl file.
+            path: Path to a model archive created by :meth:`save`.
 
         Returns:
             A fitted SkillDiscovery instance.
         """
-        # SkillDiscovery loads trusted local model artifacts only.
-        with open(path, "rb") as f:
-            state = pickle.load(f)  # nosec B301
+        cls._validate_archive(path)
+        try:
+            archive = np.load(path, allow_pickle=False)
+        except (OSError, ValueError, zipfile.BadZipFile) as exc:
+            raise ValueError("Invalid SkillDiscovery model archive") from exc
+
+        with archive as state:
+            required = {
+                "metadata",
+                "components",
+                "mean",
+                "variance",
+                "singular_values",
+                "explained_variance",
+                "explained_variance_ratio",
+                "centroid",
+                "covariance_inv",
+            }
+            if set(state.files) != required:
+                raise ValueError("SkillDiscovery model archive has an invalid schema")
+
+            try:
+                metadata = json.loads(str(state["metadata"].item()))
+            except (KeyError, TypeError, ValueError, json.JSONDecodeError) as exc:
+                raise ValueError("SkillDiscovery model metadata is invalid") from exc
+
+            if metadata.get("format_version") != _MODEL_FORMAT_VERSION:
+                raise ValueError("Unsupported SkillDiscovery model format")
+
+            arrays = {name: np.asarray(state[name]).copy() for name in required - {"metadata"}}
+
+        cls._validate_model_state(metadata, arrays)
 
         instance = cls(
-            n_components=state["n_components"],
-            variance_threshold=state["variance_threshold"],
+            n_components=int(metadata["n_components"]),
+            variance_threshold=float(metadata["variance_threshold"]),
+            batch_size=int(metadata["batch_size"]),
         )
-        instance._pca = state["pca"]
-        instance._centroid = state["centroid"]
-        instance._covariance_inv = state["covariance_inv"]
-        instance._hidden_dim = state["hidden_dim"]
-        instance._fit_stats = state["fit_stats"]
+        instance._pca = IncrementalPCA(
+            n_components=int(metadata["pca_n_components"]),
+            batch_size=int(metadata["batch_size"]),
+        )
+        instance._pca.components_ = arrays["components"]
+        instance._pca.mean_ = arrays["mean"]
+        instance._pca.var_ = arrays["variance"]
+        instance._pca.singular_values_ = arrays["singular_values"]
+        instance._pca.explained_variance_ = arrays["explained_variance"]
+        instance._pca.explained_variance_ratio_ = arrays["explained_variance_ratio"]
+        instance._pca.n_components_ = int(metadata["pca_n_components"])
+        instance._pca.n_features_in_ = int(metadata["pca_n_features"])
+        instance._pca.n_samples_seen_ = int(metadata["pca_n_samples_seen"])
+        instance._pca.noise_variance_ = float(metadata["pca_noise_variance"])
+        instance._pca.batch_size_ = int(metadata["batch_size"])
+        instance._centroid = arrays["centroid"]
+        instance._covariance_inv = arrays["covariance_inv"]
+        instance._hidden_dim = int(metadata["hidden_dim"])
+        instance._fit_stats = metadata["fit_stats"]
         instance._is_fitted = True
 
         logger.info(
@@ -454,6 +517,58 @@ class SkillDiscovery:
             f"components={instance._n_components})"
         )
         return instance
+
+    @staticmethod
+    def _validate_archive(path: str) -> None:
+        try:
+            with zipfile.ZipFile(path) as archive:
+                members = archive.infolist()
+                if not members or len(members) > _MAX_MODEL_MEMBERS:
+                    raise ValueError("SkillDiscovery model archive member count is invalid")
+                if any(info.is_dir() or "/" in info.filename or "\\" in info.filename for info in members):
+                    raise ValueError("SkillDiscovery model archive contains unsafe paths")
+                total_size = sum(info.file_size for info in members)
+                if total_size > _MAX_MODEL_ARCHIVE_BYTES:
+                    raise ValueError("SkillDiscovery model archive is too large")
+        except (OSError, zipfile.BadZipFile) as exc:
+            raise ValueError("Invalid SkillDiscovery model archive") from exc
+
+    @staticmethod
+    def _validate_model_state(metadata: Dict[str, Any], arrays: Dict[str, np.ndarray]) -> None:
+        required_metadata = {
+            "hidden_dim",
+            "n_components",
+            "variance_threshold",
+            "batch_size",
+            "fit_stats",
+            "pca_n_components",
+            "pca_n_features",
+            "pca_n_samples_seen",
+            "pca_noise_variance",
+        }
+        if not required_metadata.issubset(metadata):
+            raise ValueError("SkillDiscovery model metadata is incomplete")
+
+        hidden_dim = int(metadata["hidden_dim"])
+        components = int(metadata["pca_n_components"])
+        expected_shapes = {
+            "components": (components, hidden_dim),
+            "mean": (hidden_dim,),
+            "variance": (hidden_dim,),
+            "singular_values": (components,),
+            "explained_variance": (components,),
+            "explained_variance_ratio": (components,),
+            "centroid": (hidden_dim,),
+            "covariance_inv": (components, components),
+        }
+        if hidden_dim < 1 or components < 1:
+            raise ValueError("SkillDiscovery model dimensions are invalid")
+        for name, expected_shape in expected_shapes.items():
+            value = arrays[name]
+            if value.shape != expected_shape or not np.issubdtype(value.dtype, np.number):
+                raise ValueError(f"SkillDiscovery model array {name} has an invalid shape or type")
+            if not np.all(np.isfinite(value)):
+                raise ValueError(f"SkillDiscovery model array {name} contains non-finite values")
 
     # ──────────────────────────────────────────────────
     # Public API — Statistics

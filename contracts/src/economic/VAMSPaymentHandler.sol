@@ -7,7 +7,7 @@ import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import "./IVAMSPaymentHandler.sol";
 
@@ -24,7 +24,7 @@ import "./IVAMSPaymentHandler.sol";
 contract VAMSPaymentHandler is 
     Initializable, 
     AccessControlUpgradeable,
-    ReentrancyGuardUpgradeable,
+    ReentrancyGuard,
     PausableUpgradeable,
     IVAMSPaymentHandler 
 {
@@ -87,7 +87,6 @@ contract VAMSPaymentHandler is
         }
         
         __AccessControl_init();
-        __ReentrancyGuard_init();
         __Pausable_init();
         
         _grantRole(DEFAULT_ADMIN_ROLE, _admin);

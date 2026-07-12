@@ -309,8 +309,12 @@ contract RegionAwareDECTest is Test {
         dec.setRegionCap(100);
 
         // Too high
-        vm.expectRevert(abi.encodeWithSelector(IRegionAwareDEC.InvalidRegionCap.selector, 15_000));
-        dec.setRegionCap(15_000);
+        vm.expectRevert(abi.encodeWithSelector(IRegionAwareDEC.InvalidRegionCap.selector, 3_001));
+        dec.setRegionCap(3_001);
+
+        // INV-1 boundary remains configurable at exactly 30%.
+        dec.setRegionCap(3_000);
+        assertEq(dec.regionCapBps(), 3_000);
 
         vm.stopPrank();
     }

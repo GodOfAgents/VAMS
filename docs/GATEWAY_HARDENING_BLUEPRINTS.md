@@ -1,5 +1,8 @@
 # VAMS Gateway Hardening Blueprints (TLS & mTLS)
 
+**Lifecycle:** Testnet deployment template; runtime evidence pending
+**Last verified:** 2026-07-12
+
 This guide provides configuration blueprints for securing the VAMS Gateway Server transport layer using **Caddy** (as an HTTPS reverse proxy) and **mutual TLS (mTLS)** for client authentication.
 
 ---

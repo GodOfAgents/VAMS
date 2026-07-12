@@ -1,0 +1,33 @@
+{
+  "profile_version": "1.0.0",
+  "asset_policy": "faucet-only",
+  "staking_rewards_enabled": false,
+  "real_fiat_enabled": false,
+  "real_yield_capital_enabled": false,
+  "exposure_limits": {
+    "single_operation_insurance_reserve_bps": 100,
+    "daily_aggregate_insurance_reserve_bps": 1000
+  },
+  "concentration_stop_conditions": {
+    "linked_operator_share_bps": 2000,
+    "top_four_provider_share_bps": 5000,
+    "hhi": 0.25,
+    "regional_reward_share_bps": 3000
+  },
+  "thin_liquidity": {
+    "minimum_independent_providers": 5,
+    "require_hardware_cost_weighted_floor_below_minimum": true
+  },
+  "governance": {
+    "safe_threshold": 3,
+    "safe_owners": 5,
+    "timelock_seconds": 172800,
+    "emergency_threshold": 2,
+    "emergency_owners": 3,
+    "emergency_scope": "pause-only"
+  },
+  "soak_periods": {
+    "closed_canary_days": 7,
+    "public_testnet_days": 14
+  }
+}

@@ -4,7 +4,7 @@ pragma solidity ^0.8.20;
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "./IVAMSFeeCollector.sol";
@@ -29,7 +29,7 @@ contract VAMSFeeCollector is
     Initializable,
     AccessControlUpgradeable,
     PausableUpgradeable,
-    ReentrancyGuardUpgradeable,
+    ReentrancyGuard,
     IVAMSFeeCollector 
 {
     using SafeERC20 for IERC20;
@@ -111,7 +111,6 @@ contract VAMSFeeCollector is
 
         __AccessControl_init();
         __Pausable_init();
-        __ReentrancyGuard_init();
 
         _grantRole(DEFAULT_ADMIN_ROLE, _admin);
         _grantRole(FEE_COLLECTOR_ROLE, _admin);
@@ -459,7 +458,8 @@ contract VAMSFeeCollector is
      * @return total Total accumulated fees
      */
     function getTotalAccumulatedFees() external view returns (uint256 total) {
-        for (uint256 i = 0; i < supportedTokenList.length; i++) {
+        uint256 tokenCount = supportedTokenList.length;
+        for (uint256 i = 0; i < tokenCount; i++) {
             total += tokenFees[supportedTokenList[i]];
         }
     }

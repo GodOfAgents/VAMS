@@ -25,7 +25,8 @@
 
 **Version:** 0.3.0   
 **Date:** January 2026  
-**Status:** Mainnet Specification (Partially Deprecated)
+**Status:** Historical design baseline; partially superseded and not deployment evidence
+**Last verified:** 2026-07-12
 
 > [!WARNING]
 > **Architecture Superseded**
@@ -1072,7 +1073,7 @@ contract DynamicTAOGovernor {
 ## Dynamic Emission Controller (DEC) RL Model Validation Report
 
 ### Model Version: v1.2.0
-### Validation Date: 2026-XX-XX
+### Validation Date: Historical template; no completed validation recorded
 ### Validator: [Third-party auditor name]
 
 #### 1. Backtesting Results

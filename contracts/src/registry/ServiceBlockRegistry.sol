@@ -5,6 +5,7 @@ import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import {EIP712} from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
+import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import {IServiceBlockRegistry} from "../interfaces/IServiceBlockRegistry.sol";
 
 /**
@@ -20,7 +21,7 @@ import {IServiceBlockRegistry} from "../interfaces/IServiceBlockRegistry.sol";
  *
  *      Architecture Reference: Phase 3 (Intelligence Layer), Sprint 8
  */
-contract ServiceBlockRegistry is IServiceBlockRegistry, AccessControl, EIP712 {
+contract ServiceBlockRegistry is IServiceBlockRegistry, AccessControl, EIP712, ReentrancyGuard {
     // ═══════════════════ Constants ═══════════════════
 
     bytes32 public constant VERIFIER_ROLE = keccak256("VERIFIER_ROLE");
@@ -88,7 +89,7 @@ contract ServiceBlockRegistry is IServiceBlockRegistry, AccessControl, EIP712 {
     function registerServiceBlock(
         ServiceBlockRegistration calldata registration,
         bytes calldata manifestSignature
-    ) external returns (bytes32 blockId) {
+    ) external nonReentrant returns (bytes32 blockId) {
         require(bytes(registration.name).length > 0, "Name required");
         require(bytes(registration.category).length > 0, "Category required");
         require(registration.revenueShareBps <= MAX_REVENUE_SHARE_BPS, "Revenue share too high");
@@ -105,12 +106,6 @@ contract ServiceBlockRegistry is IServiceBlockRegistry, AccessControl, EIP712 {
         // Generate deterministic block ID
         blockId = keccak256(abi.encodePacked(registration.name, msg.sender));
         require(!_blockExists[blockId], "Block already registered");
-
-        // Transfer stake from builder
-        require(
-            vamsToken.transferFrom(msg.sender, address(this), MINIMUM_STAKE),
-            "Stake transfer failed"
-        );
 
         // Register block
         _blocks[blockId] = ServiceBlock({
@@ -139,6 +134,11 @@ contract ServiceBlockRegistry is IServiceBlockRegistry, AccessControl, EIP712 {
 
         _blockIds.push(blockId);
         _blockExists[blockId] = true;
+
+        require(
+            vamsToken.transferFrom(msg.sender, address(this), MINIMUM_STAKE),
+            "Stake transfer failed"
+        );
 
         emit ServiceBlockRegistered(
             blockId,

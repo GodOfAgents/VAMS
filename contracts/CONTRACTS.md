@@ -1,6 +1,7 @@
 # VAMS Public Testnet Deployment Evidence Register
 
-**Status Date:** 2026-07-01
+**Status Date:** 2026-07-12
+**Last verified:** 2026-07-12
 **Stage:** Pre-testnet deployment evidence template
 **Scope:** Polygon Amoy contracts and Cardano Pre-Prod validators
 
@@ -77,6 +78,23 @@ or completed public testnet launch.
 
 ## Required Pre-Testnet Evidence
 
+`contracts/script/DeployV2.s.sol` is a legacy integration script and is not an
+approved public-testnet ceremony. It defaults to a blocked execution path
+because it still contains deployer-controlled placeholder allocations and an
+incomplete multisig handoff. Do not set its legacy acknowledgement
+flag for a public deployment.
+
+The approved Polygon Amoy source ceremony is
+`contracts/script/DeployTestnet.s.sol`. It requires deployed governance and
+treasury Safes with at least 3-of-5 thresholds plus a distinct 2-of-3 emergency
+council, locks execution to chain ID `80002`, enforces a 48-hour timelock,
+assigns the entire fixed supply to the treasury Safe, keeps staking rewards at
+zero without granting the staking contract minter authority, and fails if the
+deployer retains token or timelock roles. Reward activation is outside the
+first public-testnet profile and requires a separately audited solvency design
+plus a 48-hour governance action. Source validation does not replace the
+on-chain evidence required below.
+
 Before public testnet onboarding, attach or link the following evidence:
 
 1. `forge build --sizes` and `forge test -vvv` output for the exact deploy commit.
@@ -87,6 +105,8 @@ Before public testnet onboarding, attach or link the following evidence:
 6. Safe owner list, threshold, and recovery policy.
 7. Gateway live configuration evidence: Caddy config, loopback bind, DID admin, and mTLS fingerprint allowlist.
 8. Mock-mode promotion scan output proving live DA, identity, TEE, bridge, Trails, Coinme, and gateway audit paths fail closed.
+9. `DeployTestnet.s.sol` simulation and broadcast JSON reviewed against the deployment manifest.
+10. Safe `getOwners()` and `getThreshold()` evidence for governance, treasury, and emergency councils.
 
 ---
 

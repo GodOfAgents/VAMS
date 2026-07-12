@@ -20,6 +20,8 @@ REQUIRED_GUARDS = {
     "neuron/sdk/eigenda_kzg.py": ('require_not_live_mock("EigenDASDK"',),
     "neuron/sdk/iagon_storage.py": ('require_not_live_mock("IagonStorageSDK"',),
     "neuron/sdk/phala_tee.py": ('require_not_live_mock("PhalaTEE enclave execution"',),
+    "neuron/sdk/interrupt_handler.py": ('require_not_live_mock("InterruptVectorTable"',),
+    "neuron/storage/arweave.py": ('require_not_live_mock("ArweaveStorage upload"',),
     "neuron/bridge_executor.py": (
         'require_not_live_mock("BridgeExecutor"',
         'require_not_live_mock("MultiISMVerifier"',

@@ -155,6 +155,10 @@ contract StakingGovernanceIntegration is BaseTest {
         
         uint256 pending = staking.pendingRewards(user1);
         uint256 stakeBefore = staking.getStakeInfo(user1).amount;
+
+        // Fixed supply permits reward reminting only after an equivalent burn.
+        vm.prank(treasury);
+        vamsToken.burn(pending);
         
         // Compound rewards
         vm.prank(user1);
@@ -163,6 +167,7 @@ contract StakingGovernanceIntegration is BaseTest {
         uint256 stakeAfter = staking.getStakeInfo(user1).amount;
         assertTrue(stakeAfter > stakeBefore, "Stake should increase after compound");
         assertEq(stakeAfter - stakeBefore, pending, "Increase should equal pending rewards");
+        assertEq(vamsToken.totalSupply(), vamsToken.MAX_SUPPLY());
     }
     
     function test_AutoCompound_Setting() public {

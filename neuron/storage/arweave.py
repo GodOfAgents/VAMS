@@ -4,6 +4,8 @@ import json
 import logging
 from typing import Optional, Dict, Any
 
+from neuron.runtime_safety import require_not_live_mock
+
 logger = logging.getLogger("VAMSArweave")
 
 class ArweaveStorage:
@@ -17,12 +19,11 @@ class ArweaveStorage:
     
     def __init__(self, key: Optional[str] = None):
         self.key = key or os.getenv("VAMS_IRYS_KEY")
-        self.mock_mode = not bool(self.key)
-        
-        if self.mock_mode:
-            logger.info("Arweave/Irys key not found. Running in MOCK mode for storage.")
-        else:
-            logger.info("Arweave/Irys key found. Real storage enabled.")
+        self.mock_mode = True
+        require_not_live_mock("ArweaveStorage upload", self.mock_mode)
+        logger.info(
+            "Arweave/Irys upload is unavailable; local execution remains mock-only."
+        )
 
     def store_memory(self, agent_id: str, data: Dict[str, Any], tags: Optional[Dict[str, str]] = None) -> str:
         """
@@ -37,11 +38,7 @@ class ArweaveStorage:
             logger.info(f"[MOCK] Stored memory to Arweave: {mock_tx}")
             return mock_tx
             
-        # TODO: Implement real Irys upload with signing
-        # requires signing library (ecdsa/etc) matching the key type (Arweave JWK or Eth PK)
-        # For now, we fall back to mock even if key is present until signing logic is added
-        logger.warning("Real upload not yet implemented in Python client. Returning mock TX.")
-        return "mock_tx_" + agent_id[:8]
+        raise RuntimeError("Arweave/Irys live upload is not implemented")
 
     def retrieve_memory(self, tx_id: str) -> Optional[Dict[str, Any]]:
         """

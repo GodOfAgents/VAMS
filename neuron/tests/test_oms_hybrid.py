@@ -66,7 +66,7 @@ class TestOMSSigner(unittest.TestCase):
         mock_is_verified.side_effect = mock_verify
         
         # Instantiate verifier and compliant signer
-        verifier = OMSIdentityVerifier(mock_mode=False)
+        verifier = OMSIdentityVerifier(mock_mode=False, api_key="unit-test-key")
         compliant_signer = OMSSigner(inner_signer=base_signer, identity_verifier=verifier)
         
         # Check factory wrapping

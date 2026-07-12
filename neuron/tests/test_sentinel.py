@@ -3,7 +3,11 @@ Tests for the VAMS Sentinel monitoring network.
 """
 import pytest
 import asyncio
+import os
+import sys
 from unittest.mock import patch, MagicMock
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from sentinel.challenges.cpu_benchmark import CPUBenchmark
 from sentinel.challenges.gpu_benchmark import GPUBenchmark
@@ -36,11 +40,12 @@ class TestSentinelChallenges:
         assert "Multiprocessing crashed" in result.error
 
     # ═══════════════════ GPU Benchmark Tests ═══════════════════
-    @patch("torch.cuda.is_available")
-    async def test_gpu_challenge_no_cuda(self, mock_cuda):
-        mock_cuda.return_value = False
-        challenge = GPUBenchmark()
-        result = await challenge.run("mock")
+    async def test_gpu_challenge_no_cuda(self):
+        fake_torch = MagicMock()
+        fake_torch.cuda.is_available.return_value = False
+        with patch.dict("sys.modules", {"torch": fake_torch}):
+            challenge = GPUBenchmark()
+            result = await challenge.run("mock")
         assert result.success is False
         assert result.score == 0.0
         assert "CUDA not available" in result.error
@@ -83,6 +88,28 @@ class TestSentinelPublisher:
 
 @pytest.mark.asyncio
 class TestSentinelNode:
+
+    async def test_weighted_challenge_selection_uses_system_random(self):
+        node = VAMSSentinelNode(anomaly_detector=MagicMock())
+        node_id_hex = "01" * 32
+        node._node_skill_gaps[node_id_hex] = {"gpu": 0.8}
+        node._secure_random = MagicMock()
+        node._secure_random.choices.return_value = ["gpu"]
+
+        with patch.object(node, "_compute_challenge_weights", return_value=[0.8, 0.2]):
+            selected = node._select_challenge_type(["gpu", "cpu"], node_id_hex)
+
+        assert selected == "gpu"
+        node._secure_random.choices.assert_called_once_with(
+            ["gpu", "cpu"], weights=[0.8, 0.2], k=1
+        )
+
+    async def test_scheduler_delay_never_becomes_negative(self):
+        node = VAMSSentinelNode()
+        node._secure_random = MagicMock()
+        node._secure_random.uniform.return_value = -10.0
+
+        assert node._scheduler_delay(5) == 0.0
     
     @patch("sentinel.da_publisher.DAPublisher.publish_report")
     @patch("sentinel.challenges.latency_probe.LatencyBenchmark.run")

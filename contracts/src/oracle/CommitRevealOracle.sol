@@ -12,7 +12,8 @@ import "./OracleRegistry.sol";
 contract CommitRevealOracle is AccessControl {
     bytes32 public constant ORACLE_ROLE = keccak256("ORACLE_ROLE");
 
-    IOracleRegistry public registry;
+    IOracleRegistry public immutable registry;
+    bytes32 public immutable staleFallbackValue;
     IOracleRegistry.Category public category;
 
     struct Request {
@@ -56,18 +57,26 @@ contract CommitRevealOracle is AccessControl {
     error DidNotCommit();
     error AlreadyRevealed();
     error HashMismatch();
+    error RequestNotStale();
 
     event RequestCreated(uint256 indexed requestId, uint256 expectedResolvesAt);
     event Committed(uint256 indexed requestId, address indexed oracle);
     event Revealed(uint256 indexed requestId, address indexed oracle, bytes32 value);
     event RequestResolved(uint256 indexed requestId, bytes32 finalValue);
+    event StaleRequestResolved(uint256 indexed requestId, bytes32 fallbackValue);
 
-    constructor(address _admin, address _registry, IOracleRegistry.Category _category) {
+    constructor(
+        address _admin,
+        address _registry,
+        IOracleRegistry.Category _category,
+        bytes32 _staleFallbackValue
+    ) {
         if (_admin == address(0) || _registry == address(0)) revert ZeroAddress();
         _grantRole(DEFAULT_ADMIN_ROLE, _admin);
 
         registry = IOracleRegistry(_registry);
         category = _category;
+        staleFallbackValue = _staleFallbackValue;
     }
 
     /**
@@ -173,5 +182,22 @@ contract CommitRevealOracle is AccessControl {
     function getResult(uint256 requestId) external view returns (bool resolved, bytes32 value) {
         Request storage req = requests[requestId];
         return (req.resolved, req.finalValue);
+    }
+
+    /**
+     * @notice Resolve an expired request to the configured fail-closed fallback.
+     * @dev Permissionless because blockchains cannot execute deadline transitions
+     *      automatically. The fixed fallback prevents caller-selected stale values.
+     */
+    function resolveStaleRequest(uint256 requestId) external {
+        Request storage req = requests[requestId];
+        if (req.id == 0) revert RequestDoesNotExist();
+        if (req.resolved) revert RequestAlreadyResolved();
+        if (block.timestamp <= req.expectedResolvesAt) revert RequestNotStale();
+
+        req.resolved = true;
+        req.finalValue = staleFallbackValue;
+        emit StaleRequestResolved(requestId, staleFallbackValue);
+        emit RequestResolved(requestId, staleFallbackValue);
     }
 }

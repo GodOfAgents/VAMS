@@ -1,5 +1,8 @@
 # VAMS Cardano — Brain Layer
 
+**Lifecycle:** Implemented source; Cardano Pre-Prod deployment pending
+**Last verified:** 2026-07-12
+
 > **"The Brain"** — Governance sovereignty, insurance custody, and agent identity on Cardano.
 
 ## Architecture
@@ -16,6 +19,7 @@ cardano/
 │   ├── timelock.ak         # Intent emission → Polygon
 │   ├── insurance_fund.ak   # Capital custody + claims
 │   └── agent_registry.ak  # Agent DID + NFT identity
+│   └── agent_nft.ak       # One-shot agent NFT minting policy
 └── plutus.json             # Generated blueprint (after build)
 ```
 

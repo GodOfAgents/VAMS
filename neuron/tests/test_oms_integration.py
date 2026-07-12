@@ -53,7 +53,7 @@ class TestOMSIdentityVerifier(unittest.TestCase):
         mock_response.json.return_value = {"is_verified": False}
         mock_get.return_value = mock_response
 
-        verifier = OMSIdentityVerifier(mock_mode=False)
+        verifier = OMSIdentityVerifier(mock_mode=False, api_key="test-key")
         self.assertFalse(verifier.is_verified("0x112233"))
 
     @patch("requests.get")
@@ -63,7 +63,7 @@ class TestOMSIdentityVerifier(unittest.TestCase):
         mock_response.status_code = 500
         mock_get.return_value = mock_response
 
-        verifier = OMSIdentityVerifier(mock_mode=False)
+        verifier = OMSIdentityVerifier(mock_mode=False, api_key="test-key")
         self.assertFalse(verifier.is_verified("0x112233"))
 
         # Check fail closed on connection exception
@@ -112,7 +112,11 @@ class TestCoinmeClient(unittest.TestCase):
         mock_response.json.return_value = {"rate": 12.5}
         mock_get.return_value = mock_response
 
-        client = CoinmeClient(mock_mode=False, base_url="https://api.coinme.test")
+        client = CoinmeClient(
+            mock_mode=False,
+            base_url="https://api.coinme.test",
+            api_key="test-key",
+        )
         rate = client.get_conversion_rate("USD", "VAMS")
         self.assertEqual(rate, 12.5)
 
@@ -123,7 +127,11 @@ class TestCoinmeClient(unittest.TestCase):
         mock_response.json.return_value = {"status": "pending_manual_review"}
         mock_get.return_value = mock_response
 
-        client = CoinmeClient(mock_mode=False, base_url="https://api.coinme.test")
+        client = CoinmeClient(
+            mock_mode=False,
+            base_url="https://api.coinme.test",
+            api_key="test-key",
+        )
         kyc = client.get_kyc_status("user_456")
         self.assertEqual(kyc["status"], "pending_manual_review")
 
@@ -174,7 +182,11 @@ class TestTrailsClient(unittest.TestCase):
         }
         mock_get.return_value = mock_response
 
-        client = TrailsClient(mock_mode=False, api_url="https://api.trails.test")
+        client = TrailsClient(
+            mock_mode=False,
+            api_url="https://api.trails.test",
+            api_key="test-key",
+        )
         status = client.get_status("int_999")
         self.assertEqual(status.status, "completed")
         self.assertEqual(status.tx_hash, "0x123abc456def")

@@ -64,8 +64,23 @@ venv/
 .env
 *.db
 
-# Frontend (excluded per user request)
-frontend-vite/
+# Frontend is maintained as an embedded repository. Vendor the minimum source
+# inputs required for the parent repository's reproducible CI build.
+frontend-vite/*
+!frontend-vite/.gitignore
+!frontend-vite/index.html
+!frontend-vite/package.json
+!frontend-vite/package-lock.json
+!frontend-vite/postcss.config.js
+!frontend-vite/tailwind.config.js
+!frontend-vite/vite.config.js
+!frontend-vite/src/
+frontend-vite/src/*
+!frontend-vite/src/App.css
+!frontend-vite/src/App.jsx
+!frontend-vite/src/config.js
+!frontend-vite/src/index.css
+!frontend-vite/src/main.jsx
 
 # Local State
 .data/

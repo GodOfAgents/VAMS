@@ -11,6 +11,8 @@ class TrustTier(IntEnum):
     PLATINUM = 4
 
 class SessionKeyManager:
+    MAX_VALIDITY_HOURS = 24
+
     def __init__(self, manager: 'SequenceWalletManager'):
         self.manager = manager
         self.active_sessions: Dict[str, Dict[str, Any]] = {}
@@ -19,6 +21,29 @@ class SessionKeyManager:
         """
         Creates a scoped session key.
         """
+        if (
+            isinstance(validity_hours, bool)
+            or not isinstance(validity_hours, int)
+            or validity_hours < 1
+            or validity_hours > self.MAX_VALIDITY_HOURS
+        ):
+            raise ValueError("session key validity must be between 1 and 24 hours")
+        if not allowed_contracts or any(
+            not isinstance(address, str) or not address.strip()
+            for address in allowed_contracts
+        ):
+            raise ValueError("session keys require a non-empty contract allowlist")
+        normalized_contracts = list(
+            dict.fromkeys(address.strip().lower() for address in allowed_contracts)
+        )
+        configured_contracts = self.manager.core_contracts
+        if not configured_contracts:
+            raise ValueError("VAMS core contract whitelist is not configured")
+        unapproved = set(normalized_contracts) - configured_contracts
+        if unapproved:
+            raise PermissionError(
+                "session key requested contracts outside the VAMS core whitelist"
+            )
         max_value_map = {
             TrustTier.BRONZE: 100,
             TrustTier.SILVER: 1000,
@@ -34,7 +59,7 @@ class SessionKeyManager:
             "private_key": private_key,
             "session_key_address": account.address,
             "max_value_per_tx": max_value_map.get(trust_tier, 0),
-            "allowed_contracts": allowed_contracts,
+            "allowed_contracts": normalized_contracts,
             "expires_at": (datetime.now(timezone.utc) + timedelta(hours=validity_hours)).timestamp()
         }
         
@@ -53,7 +78,7 @@ class SessionKeyManager:
         if value > session["max_value_per_tx"]:
             return False
             
-        if session["allowed_contracts"] and contract_address not in session["allowed_contracts"]:
+        if contract_address.strip().lower() not in session["allowed_contracts"]:
             return False
             
         return True
@@ -62,6 +87,14 @@ class SequenceWalletManager:
     def __init__(self, config: Optional[Dict] = None, mock_mode: bool = False):
         self.config = config or {}
         self.mock_mode = mock_mode
+        configured_contracts = self.config.get("core_contracts", [])
+        if not isinstance(configured_contracts, list):
+            raise ValueError("core_contracts must be a list")
+        self.core_contracts = {
+            address.strip().lower()
+            for address in configured_contracts
+            if isinstance(address, str) and address.strip()
+        }
         self.session_manager = SessionKeyManager(self)
         self.wallets: Dict[str, str] = {}
         

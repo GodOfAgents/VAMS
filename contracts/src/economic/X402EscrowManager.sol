@@ -6,7 +6,7 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 import {IX402EscrowManager} from "./IX402EscrowManager.sol";
 import {IX402NonceRegistry} from "./IX402NonceRegistry.sol";
@@ -33,7 +33,7 @@ contract X402EscrowManager is
     Initializable,
     AccessControlUpgradeable,
     PausableUpgradeable,
-    ReentrancyGuardUpgradeable,
+    ReentrancyGuard,
     IX402EscrowManager 
 {
     using SafeERC20 for IERC20;
@@ -150,7 +150,6 @@ contract X402EscrowManager is
         
         __AccessControl_init();
         __Pausable_init();
-        __ReentrancyGuard_init();
         
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
         _grantRole(ADMIN_ROLE, admin);
@@ -397,7 +396,7 @@ contract X402EscrowManager is
             revert InvalidServiceProof();
         }
         
-        // Compute receipt hash and consume nonce
+        // Compute receipt hash
         bytes32 receiptHash = keccak256(abi.encodePacked(
             escrow.agent,
             escrow.nonce,
@@ -405,13 +404,6 @@ contract X402EscrowManager is
             escrow.provider,
             block.timestamp
         ));
-        
-        nonceRegistry.consumeNonce(
-            escrow.agent,
-            escrow.nonce,
-            receiptHash,
-            escrowId
-        );
         
         // Calculate fee
         uint256 fee = (escrow.amount * SETTLEMENT_FEE_BPS) / BPS_DENOMINATOR;
@@ -423,9 +415,6 @@ contract X402EscrowManager is
         totalEscrowed -= escrow.amount;
         totalFeesCollected += fee;
         
-        // Complete request in bond registry
-        bondRegistry.completeRequest(escrow.provider, escrowId);
-        
         // AUDIT FIX H02: Hold funds locally during the dispute window.
         // Funds are NOT transferred immediately — provider must call
         // withdrawClaimed() after the 72-hour dispute window closes.
@@ -435,6 +424,15 @@ contract X402EscrowManager is
             claimTimestamp: block.timestamp,
             withdrawn: false
         });
+
+        nonceRegistry.consumeNonce(
+            escrow.agent,
+            escrow.nonce,
+            receiptHash,
+            escrowId
+        );
+
+        bondRegistry.completeRequest(escrow.provider, escrowId);
         
         emit EscrowClaimed(escrowId, escrow.provider, providerPayout, serviceProof.proofType);
     }

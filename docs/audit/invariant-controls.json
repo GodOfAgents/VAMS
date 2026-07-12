@@ -1,0 +1,66 @@
+{
+  "schema_version": "1.0.0",
+  "architecture_version": "0.8.0",
+  "controls": [
+    {
+      "id": "INV-1",
+      "statement": "Regional emissions cannot exceed 30 percent.",
+      "enforcement": [{"path": "contracts/src/economic/RegionAwareDEC.sol", "must_contain": ["MAX_REGION_CAP_BPS = 3_000", "capBps > MAX_REGION_CAP_BPS"]}],
+      "tests": [{"path": "contracts/test/economic/RegionAwareDEC.t.sol", "must_contain": ["test_setRegionCap_reverts_invalidCap", "3_001"]}]
+    },
+    {
+      "id": "INV-2",
+      "statement": "Insurance yield deployment cannot exceed 30 percent.",
+      "enforcement": [{"path": "contracts/src/economic/VAMSInsuranceFund.sol", "must_contain": ["currentFundBalance * 3000", "totalDeployedBalance + amount > maxDeployable"]}],
+      "tests": [{"path": "contracts/test/economic/VAMSInsuranceFund_Yield.t.sol", "must_contain": ["test_deployToYield_RevertsIfExceedsMax"]}]
+    },
+    {
+      "id": "INV-3",
+      "statement": "Session keys expire within 24 hours.",
+      "enforcement": [{"path": "neuron/sdk/sequence_wallet.py", "must_contain": ["MAX_VALIDITY_HOURS = 24", "validity_hours > self.MAX_VALIDITY_HOURS"]}],
+      "tests": [{"path": "neuron/tests/test_sequence_wallet.py", "must_contain": ["test_session_key_rejects_more_than_24_hours"]}]
+    },
+    {
+      "id": "INV-4",
+      "statement": "Session keys target only explicitly configured VAMS core contracts.",
+      "enforcement": [{"path": "neuron/sdk/sequence_wallet.py", "must_contain": ["session keys require a non-empty contract allowlist", "set(normalized_contracts) - configured_contracts"]}],
+      "tests": [{"path": "neuron/tests/test_sequence_wallet.py", "must_contain": ["test_session_key_rejects_empty_or_non_core_allowlist"]}]
+    },
+    {
+      "id": "INV-5",
+      "statement": "Institutional compliance routing fails closed on OMS identity failure.",
+      "enforcement": [{"path": "neuron/clr_router.py", "must_contain": ["Institutional compliance routing requires an OMS verified identity"]}],
+      "tests": [{"path": "neuron/tests/test_oms_integration.py", "must_contain": ["test_live_mode_fail_closed_on_error"]}]
+    },
+    {
+      "id": "INV-6",
+      "statement": "TEE attestations bind to an explicit root EOA and never fall back to a session identity.",
+      "enforcement": [{"path": "neuron/trust_plugins/tee_plugin.py", "must_contain": ["TEE attestations require a non-zero 20-byte root EOA", "root EOA must not be supplied as a session key"]}],
+      "tests": [{"path": "neuron/tests/test_trust_plugins.py", "must_contain": ["test_requires_explicit_root_eoa", "test_rejects_session_key_as_root_identity"]}]
+    },
+    {
+      "id": "INV-7",
+      "statement": "Expired oracle requests resolve only to a fixed fail-closed fallback.",
+      "enforcement": [{"path": "contracts/src/oracle/CommitRevealOracle.sol", "must_contain": ["staleFallbackValue", "resolveStaleRequest", "RequestNotStale"]}],
+      "tests": [{"path": "contracts/test/oracle/CommitRevealOracle.t.sol", "must_contain": ["test_staleRequestResolvesToFixedFallback", "test_staleFallbackCannotBeReplayed"]}]
+    },
+    {
+      "id": "INV-8",
+      "statement": "VAMS supply cannot exceed 1 billion tokens.",
+      "enforcement": [{"path": "contracts/src/token/VAMSToken.sol", "must_contain": ["MAX_SUPPLY = INITIAL_SUPPLY", "totalSupply() + amount > MAX_SUPPLY"]}],
+      "tests": [{"path": "contracts/test/token/VAMSToken.t.sol", "must_contain": ["test_Mint_RevertsAboveFixedSupplyCap"]}]
+    },
+    {
+      "id": "INV-9",
+      "statement": "Testnet cannot accrue unbacked staking rewards.",
+      "enforcement": [{"path": "contracts/script/DeployTestnet.s.sol", "must_contain": ["token.hasRole(token.MINTER_ROLE(), address(staking))", "staking.rewardPerSecond() == 0"]}, {"path": "docs/audit/testnet-profile.json", "must_contain": ["\"staking_rewards_enabled\": false"]}],
+      "tests": [{"path": "scripts/audit/test_deployment_readiness.py", "must_contain": ["test_scanner_covers_reward_and_minter_disablement"]}]
+    },
+    {
+      "id": "INV-10",
+      "statement": "Bridge proofs and payload hashes remain separate with strict nonce replay protection.",
+      "enforcement": [{"path": "neuron/bridge_executor.py", "must_contain": ["verify_bridge_proof", "expected_payload_hash"]}, {"path": "cardano/validators/insurance_fund.ak", "must_contain": ["bridge_proof, payload_hash", "verify_bridge_proof(bridge_proof, payload_hash)"]}],
+      "tests": [{"path": "neuron/tests/test_clr_v3.py", "must_contain": ["test_icb_nonce_replay"]}, {"path": "cardano/lib/vams/icb.ak", "must_contain": ["prop_nonce_replay_always_rejected"]}]
+    }
+  ]
+}

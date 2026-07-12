@@ -9,11 +9,12 @@ from neuron.trust_plugins.output_hash_plugin import OutputHashProofPlugin
 
 SERVICE_HASH = b"\x11" * 32
 DELIVERY_HASH = b"\x22" * 32
+ROOT_EOA = b"\x33" * 20
 
 class TestTEEPlugin:
     def test_generate_and_verify(self):
         plugin = TEEProofPlugin()
-        result = plugin.generate_proof(SERVICE_HASH, DELIVERY_HASH)
+        result = plugin.generate_proof(SERVICE_HASH, DELIVERY_HASH, root_address=ROOT_EOA)
         assert result.valid
         assert plugin.verify_proof(SERVICE_HASH, DELIVERY_HASH, result.proof_data)
 
@@ -23,11 +24,26 @@ class TestTEEPlugin:
 
     def test_abi_round_trip(self):
         plugin = TEEProofPlugin()
-        result = plugin.generate_proof(SERVICE_HASH, DELIVERY_HASH)
+        result = plugin.generate_proof(SERVICE_HASH, DELIVERY_HASH, root_address=ROOT_EOA)
         decoded = decode(['bytes', 'bytes32', 'bytes32', 'address'], result.proof_data)
         assert len(decoded) == 4
         assert isinstance(decoded[0], bytes)
         assert isinstance(decoded[1], bytes)
+
+    def test_requires_explicit_root_eoa(self):
+        plugin = TEEProofPlugin()
+        with pytest.raises(ValueError, match="root EOA"):
+            plugin.generate_proof(SERVICE_HASH, DELIVERY_HASH)
+
+    def test_rejects_session_key_as_root_identity(self):
+        plugin = TEEProofPlugin()
+        with pytest.raises(ValueError, match="session key"):
+            plugin.generate_proof(
+                SERVICE_HASH,
+                DELIVERY_HASH,
+                root_address=ROOT_EOA,
+                session_key_address=ROOT_EOA,
+            )
 
 class TestZKMLPlugin:
     def test_generate_and_verify(self):

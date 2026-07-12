@@ -70,7 +70,7 @@ contract RewardDistributor is
     event ConversionRouted(address indexed provider, uint256 amount);
 
     /// @notice VAMS token
-    IERC20 public vamsToken;
+    IERC20 public immutable vamsToken;
 
     /// @notice Regional incentives for multiplier lookups
     IRegionalIncentives public regionalIncentives;

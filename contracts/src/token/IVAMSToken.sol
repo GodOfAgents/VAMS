@@ -45,6 +45,9 @@ interface IVAMSToken {
     /// @notice Thrown when annual mint cap would be exceeded
     error AnnualMintCapExceeded(uint256 attempted, uint256 cap);
 
+    /// @notice Thrown when minting would exceed the fixed 1 billion supply cap
+    error MaxSupplyExceeded(uint256 attempted, uint256 cap);
+
     // ============ View Functions ============
 
     /// @notice Check if anti-whale protection is enabled

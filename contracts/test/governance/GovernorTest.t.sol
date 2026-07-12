@@ -24,7 +24,7 @@ contract GovernorTest is Test {
         // 2. Deploy Timelock
         address[] memory proposers = new address[](0);
         address[] memory executors = new address[](0);
-        timelock = new VAMSTimelockController(1 days, proposers, executors, deployer);
+        timelock = new VAMSTimelockController(2 days, proposers, executors, deployer);
 
         // 3. Deploy Governor
         governor = new VAMSGovernor(IVotes(address(token)), timelock);

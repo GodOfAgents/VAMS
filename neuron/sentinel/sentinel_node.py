@@ -12,7 +12,6 @@ Phase 0 Migration:
 import time
 import asyncio
 import secrets
-import random
 import logging
 import os
 from typing import Dict, Any, List, Optional
@@ -60,6 +59,7 @@ class VAMSSentinelNode:
 
         # AUTOSKILL Phase 5: Per-node skill gap tracking for informed challenge selection
         self._node_skill_gaps: Dict[str, Dict[str, float]] = {}
+        self._secure_random = secrets.SystemRandom()
 
         self.challenges = {
             "gpu": GPUBenchmark(),
@@ -68,6 +68,15 @@ class VAMSSentinelNode:
             "latency": LatencyBenchmark(),
             "memory": MemoryBenchmark()
         }
+
+    def _select_challenge_type(self, challenge_types: List[str], node_id_hex: str) -> str:
+        if self.anomaly_detector and self._node_skill_gaps.get(node_id_hex):
+            weights = self._compute_challenge_weights(node_id_hex)
+            return self._secure_random.choices(challenge_types, weights=weights, k=1)[0]
+        return self._secure_random.choice(challenge_types)
+
+    def _scheduler_delay(self, interval_seconds: int) -> float:
+        return max(0.0, interval_seconds + self._secure_random.uniform(-10.0, 10.0))
 
     @staticmethod
     def _build_continual_learning_gain(kpis: Dict[str, Any]) -> Optional[Dict[str, Any]]:
@@ -250,13 +259,10 @@ class VAMSSentinelNode:
                 # areas where the target node shows historical weakness.
                 node_id_hex = node_id.hex()
                 if self.anomaly_detector and self._node_skill_gaps.get(node_id_hex):
-                    weights = self._compute_challenge_weights(node_id_hex)
-                    challenge_type = random.choices(challenge_types, weights=weights, k=1)[0]
+                    challenge_type = self._select_challenge_type(challenge_types, node_id_hex)
                     logger.debug(f"AUTOSKILL: Informed challenge selection for {node_id_hex[:8]}: {challenge_type}")
                 else:
-                    # AUDIT FIX OFC03: Use secrets.choice for cryptographic randomness
-                    # to prevent validators from predicting upcoming challenges
-                    challenge_type = secrets.choice(challenge_types)
+                    challenge_type = self._select_challenge_type(challenge_types, node_id_hex)
                 
                 # 3. Audit
                 asyncio.create_task(self.audit_node(node_id, endpoint, challenge_type, hw_class))
@@ -265,4 +271,4 @@ class VAMSSentinelNode:
                 logger.error(f"Scheduler error: {e}")
                 
             # Random jitter to prevent timing attacks
-            await asyncio.sleep(interval_seconds + random.uniform(-10.0, 10.0))
+            await asyncio.sleep(self._scheduler_delay(interval_seconds))
