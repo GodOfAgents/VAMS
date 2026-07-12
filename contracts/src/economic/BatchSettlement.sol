@@ -9,7 +9,7 @@ import "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 import {IBatchSettlement} from "./IBatchSettlement.sol";
 import {IX402NonceRegistry} from "./IX402NonceRegistry.sol";
@@ -34,7 +34,7 @@ contract BatchSettlement is
     Initializable,
     AccessControlUpgradeable,
     PausableUpgradeable,
-    ReentrancyGuardUpgradeable,
+    ReentrancyGuard,
     IBatchSettlement 
 {
     using SafeERC20 for IERC20;
@@ -131,7 +131,6 @@ contract BatchSettlement is
         
         __AccessControl_init();
         __Pausable_init();
-        __ReentrancyGuard_init();
         
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
         _grantRole(ADMIN_ROLE, admin);
@@ -447,20 +446,11 @@ contract BatchSettlement is
             revert InvalidMerkleProof();
         }
         
-        // Consume nonce
-        bytes32 receiptHash = keccak256(abi.encodePacked(paymentHash, block.timestamp));
-        nonceRegistry.consumeNonce(
-            payment.agent,
-            payment.nonce,
-            receiptHash,
-            bytes32(batchId)
-        );
-        
         // Calculate fee
         uint256 fee = (payment.amount * SETTLEMENT_FEE_BPS) / BPS_DENOMINATOR;
         uint256 payout = payment.amount - fee;
-        
-        // Record claim
+
+        bytes32 receiptHash = keccak256(abi.encodePacked(paymentHash, block.timestamp));
         _claims[paymentHash] = PaymentClaim({
             batchId: batchId,
             paymentHash: paymentHash,
@@ -470,6 +460,13 @@ contract BatchSettlement is
         
         totalSettled += payment.amount;
         totalFees += fee;
+
+        nonceRegistry.consumeNonce(
+            payment.agent,
+            payment.nonce,
+            receiptHash,
+            bytes32(batchId)
+        );
         
         // Transfer fee
         if (fee > 0 && treasury != address(0)) {

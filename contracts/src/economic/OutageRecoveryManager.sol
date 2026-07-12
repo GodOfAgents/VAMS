@@ -3,7 +3,7 @@ pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "./IOutageRecoveryManager.sol";
@@ -29,7 +29,7 @@ import "./IOutageRecoveryManager.sol";
 contract OutageRecoveryManager is 
     Initializable,
     AccessControlUpgradeable,
-    ReentrancyGuardUpgradeable,
+    ReentrancyGuard,
     IOutageRecoveryManager 
 {
     using SafeERC20 for IERC20;
@@ -111,7 +111,6 @@ contract OutageRecoveryManager is
         require(_guardians.length >= 3, "Need at least 3 guardians");
 
         __AccessControl_init();
-        __ReentrancyGuard_init();
 
         _grantRole(DEFAULT_ADMIN_ROLE, _admin);
         _grantRole(OPERATOR_ROLE, _admin);

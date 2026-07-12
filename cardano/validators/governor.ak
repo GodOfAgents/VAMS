@@ -36,9 +36,9 @@ validator governor(
   vams_policy_id: PolicyId,
   vams_asset_name: ByteArray,
   timelock_script_hash: ByteArray,
-  min_proposal_stake: Int,
-  min_voting_period_ms: Int,
-  default_quorum: Int,
+  _min_proposal_stake: Int,
+  _min_voting_period_ms: Int,
+  _default_quorum: Int,
 ) {
   spend(
     datum_opt: Option<ProposalDatum>,

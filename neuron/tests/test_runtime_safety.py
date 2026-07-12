@@ -44,6 +44,24 @@ def test_live_environment_rejects_default_oms_secret(monkeypatch):
         OMSIdentityVerifier()
 
 
+def test_local_non_mock_clients_require_explicit_api_keys(monkeypatch):
+    monkeypatch.delenv("VAMS_ENV", raising=False)
+    monkeypatch.delenv("OMS_API_KEY", raising=False)
+    monkeypatch.delenv("TRAILS_API_KEY", raising=False)
+    monkeypatch.delenv("COINME_API_KEY", raising=False)
+
+    from neuron.sdk.oms_identity import OMSIdentityVerifier
+    from neuron.sdk.trails_client import TrailsClient
+    from neuron.payments.coinme_client import CoinmeClient
+
+    with pytest.raises(LiveModeSafetyError, match="OMS_API_KEY"):
+        OMSIdentityVerifier(mock_mode=False)
+    with pytest.raises(LiveModeSafetyError, match="TRAILS_API_KEY"):
+        TrailsClient(mock_mode=False)
+    with pytest.raises(LiveModeSafetyError, match="COINME_API_KEY"):
+        CoinmeClient(mock_mode=False)
+
+
 def test_live_environment_rejects_da_stub_adapters(monkeypatch):
     monkeypatch.setenv("VAMS_ENV", "testnet")
 
@@ -56,13 +74,26 @@ def test_live_environment_rejects_da_stub_adapters(monkeypatch):
         AvailDAAdapter()
 
 
-def test_live_environment_rejects_audit_log_with_stub_routes(monkeypatch):
+def test_live_environment_excludes_audit_log_stub_routes(monkeypatch):
+    monkeypatch.setenv("VAMS_ENV", "testnet")
+
+    from neuron.da.models import DAProtocol
+    from neuron.da.performance_audit import PerformanceAuditLog
+
+    audit_log = PerformanceAuditLog(mock_mode=False)
+    assert set(audit_log.adapters) == {DAProtocol.CELESTIA, DAProtocol.NEAR_DA}
+
+
+def test_live_environment_rejects_enabling_da_stub_routes(monkeypatch):
     monkeypatch.setenv("VAMS_ENV", "testnet")
 
     from neuron.da.performance_audit import PerformanceAuditLog
 
     with pytest.raises(LiveModeSafetyError):
-        PerformanceAuditLog(mock_mode=False)
+        PerformanceAuditLog(
+            mock_mode=False,
+            config={"enabled_protocols": ["celestia", "eigenda"]},
+        )
 
 
 def test_live_environment_rejects_bridge_mock(monkeypatch):
@@ -74,3 +105,23 @@ def test_live_environment_rejects_bridge_mock(monkeypatch):
         MultiISMVerifier(mock_mode=True)
     with pytest.raises(LiveModeSafetyError):
         BridgeExecutor(mock_mode=True)
+
+
+def test_live_environment_rejects_incomplete_interrupt_routes(monkeypatch):
+    monkeypatch.setenv("VAMS_ENV", "testnet")
+
+    from neuron.sdk.interrupt_handler import InterruptVectorTable
+
+    with pytest.raises(LiveModeSafetyError):
+        InterruptVectorTable(mock_mode=True)
+    with pytest.raises(LiveModeSafetyError, match="audited real handler"):
+        InterruptVectorTable(mock_mode=False)
+
+
+def test_live_environment_rejects_arweave_mock_upload(monkeypatch):
+    monkeypatch.setenv("VAMS_ENV", "testnet")
+
+    from neuron.storage.arweave import ArweaveStorage
+
+    with pytest.raises(LiveModeSafetyError):
+        ArweaveStorage()

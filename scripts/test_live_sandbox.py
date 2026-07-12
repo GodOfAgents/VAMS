@@ -79,15 +79,31 @@ def main():
     print("VAMS Live Sandbox Reachability Verification")
     print("===========================================")
     
-    # Instantiate clients with mock_mode=False to bypass simulation layer
-    # We use empty/demo keys to trigger authorization checks on remote server.
+    # Instantiate clients with mock_mode=False to bypass simulation layer.
+    # Live checks require explicit API keys from the operator environment.
     identity_url = os.getenv("OMS_IDENTITY_API", "https://api.oms.polygon.technology/identity")
     coinme_url = os.getenv("COINME_API_URL", "https://api.coinme.com/v1")
     trails_url = os.getenv("TRAILS_API_URL", "https://api.trails.polygon.technology/v1")
+    oms_api_key = os.getenv("OMS_API_KEY")
+    coinme_api_key = os.getenv("COINME_API_KEY")
+    trails_api_key = os.getenv("TRAILS_API_KEY")
 
-    identity_verifier = OMSIdentityVerifier(mock_mode=False, api_url=identity_url, api_key="demo-key")
-    coinme_client = CoinmeClient(mock_mode=False, base_url=coinme_url, api_key="demo-key")
-    trails_client = TrailsClient(mock_mode=False, api_url=trails_url, api_key="demo-key")
+    missing = [
+        name
+        for name, value in (
+            ("OMS_API_KEY", oms_api_key),
+            ("COINME_API_KEY", coinme_api_key),
+            ("TRAILS_API_KEY", trails_api_key),
+        )
+        if not value
+    ]
+    if missing:
+        print(f"[-] Missing required live API keys: {', '.join(missing)}")
+        return
+
+    identity_verifier = OMSIdentityVerifier(mock_mode=False, api_url=identity_url, api_key=oms_api_key)
+    coinme_client = CoinmeClient(mock_mode=False, base_url=coinme_url, api_key=coinme_api_key)
+    trails_client = TrailsClient(mock_mode=False, api_url=trails_url, api_key=trails_api_key)
     
     results = {}
     
@@ -96,7 +112,7 @@ def main():
     # Note: OMS Identity Verifier catches RequestException internally and fails closed (returns False).
     # To capture HTTP code, we will make a direct requests check or inspect verifier logs.
     def test_identity():
-        headers = {"Authorization": "Bearer demo-key"}
+        headers = {"Authorization": f"Bearer {oms_api_key}"}
         resp = requests.get(f"{identity_url}/v1/verification/0x0000000000000000000000000000000000000000", headers=headers, timeout=5)
         resp.raise_for_status()
         

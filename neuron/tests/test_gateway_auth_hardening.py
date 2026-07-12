@@ -87,6 +87,66 @@ def test_live_gateway_startup_requires_heartbeat_cert_allowlist(monkeypatch):
             pass
 
 
+def test_live_gateway_rejects_wildcard_cors(monkeypatch):
+    monkeypatch.setenv("VAMS_ENV", "testnet")
+
+    with pytest.raises(RuntimeError, match="Wildcard CORS origins"):
+        server.resolve_allowed_origins("*")
+
+
+def test_live_gateway_requires_explicit_cors_origins(monkeypatch):
+    monkeypatch.setenv("VAMS_ENV", "testnet")
+    monkeypatch.delenv("GATEWAY_ALLOWED_ORIGINS", raising=False)
+
+    with pytest.raises(RuntimeError, match="GATEWAY_ALLOWED_ORIGINS is required"):
+        server.resolve_allowed_origins()
+
+
+def test_gateway_rejects_oversized_request_before_parsing():
+    client = TestClient(server.app)
+    response = client.post(
+        "/heartbeat",
+        content=b"x",
+        headers={"Content-Length": str(1_048_577)},
+    )
+
+    assert response.status_code == 413
+
+
+@pytest.mark.asyncio
+async def test_gateway_rejects_chunked_oversized_request_without_length():
+    downstream_called = False
+
+    async def downstream(scope, receive, send):
+        nonlocal downstream_called
+        downstream_called = True
+
+    middleware = server.RequestSizeLimitMiddleware(downstream, max_bytes=4)
+    messages = iter(
+        [
+            {"type": "http.request", "body": b"123", "more_body": True},
+            {"type": "http.request", "body": b"45", "more_body": False},
+        ]
+    )
+    sent = []
+
+    async def receive():
+        return next(messages)
+
+    async def send(message):
+        sent.append(message)
+
+    await middleware(
+        {"type": "http", "method": "POST", "path": "/heartbeat", "headers": []},
+        receive,
+        send,
+    )
+
+    assert downstream_called is False
+    assert sent[0]["type"] == "http.response.start"
+    assert sent[0]["status"] == 413
+
+
 def test_live_gateway_main_binds_loopback(monkeypatch):
     monkeypatch.setenv("VAMS_ENV", "testnet")
 

@@ -1,11 +1,12 @@
 # 🛡️ VAMS Protocol — Comprehensive Audit & Architecture Evolution Report
 ### Multi-Layer Infrastructure for the Agentic Economy & Planetary Computer
 
-**Document Version:** 3.0.0  
-**Date:** May 19, 2026  
-**Scope:** Architecture Evolution (v0.3.0 → v0.6.0) + Security Audit Remediation (68 Findings) + Academic Foundations  
-**Status:** ✅ Testnet Deployment Cleared  
-**Classification:** Web 4.0 Planetary Infrastructure — Not a typical DeFi/Web3 application  
+**Document Version:** 3.0.0
+**Date:** May 19, 2026
+**Last verified:** 2026-07-12
+**Scope:** Architecture Evolution (v0.3.0 → v0.8.0) + Security Audit Remediation (68 Findings) + Academic Foundations
+**Status:** Hardened Pre-Testnet Candidate; deployment gates remain required
+**Classification:** Web 4.0 Planetary Infrastructure — Not a typical DeFi/Web3 application
 
 ---
 
@@ -13,11 +14,11 @@
 
 VAMS (Verifiable and Agentic Modular Stack) is a **multi-layer planetary infrastructure** designed to serve as the foundational compute, identity, and economic substrate for the **Agentic Economy** — the emerging paradigm where autonomous AI agents operate as first-class economic actors with sovereign identity, asset custody, and verifiable execution guarantees.
 
-This document provides a unified view of the protocol's **architectural evolution** across four major releases, the **security audit remediation** that hardened the stack for testnet deployment, and the **academic research foundations** that ground every subsystem in peer-reviewed science. All 68 security findings have been verified as resolved. The protocol has evolved from a monolithic 5-layer stack (v0.3.0) to a fully modular, OMS-integrated enterprise platform (v0.6.0).
+This document provides a unified view of the protocol's **architectural evolution** across six major architecture stages, the **security audit remediation** that hardened the stack for testnet deployment, and the **academic research foundations** that ground every subsystem in peer-reviewed science. The original audit remediation baseline resolved 68 findings through the OMS integration release. The protocol evolved from a monolithic 5-layer stack (v0.3.0) to the OMS-integrated security baseline (v0.6.0), then added the cognitive and composer layers in v0.7.0 and v0.8.0. v0.6.0 is therefore a historical audit baseline, not the current architecture ceiling.
 
 > [!IMPORTANT]
-> **Current Architecture Version:** v0.6.0 (v1.3.0-oms release)  
-> **Audit Verdict:** ✅ GO FOR TESTNET — 68/68 findings resolved, 1,083 tests passing (619 Forge + 37 Aiken + 427 Pytest)
+> **Current Architecture Version:** v0.8.0 cognitive/composer layer, additive over v0.6.0 (`v1.3.0-oms`)
+> **Audit Verdict:** Hardened pre-testnet candidate. The v0.6.0 audit baseline resolved 68/68 findings; current v0.8.0 readiness still requires the Phase 6 verification gates documented in `REPO_STATUS_REPORT.md`.
 
 ---
 
@@ -38,7 +39,7 @@ This positions VAMS at the convergence of five research frontiers:
 | Decentralized AI Infrastructure | Multi-DA Router, ServiceBlockRegistry | ZKML surveys (CCS 2024), DAS research |
 | Verifiable Computation | CommitRevealOracle, TEE binding | Commit-Reveal² (arXiv:2504.03936) |
 | Autonomous Trust & Reputation | VAMSTrustAggregator, SLAEnforcer | AgentReputation, AetherWeave, MeritRank |
-| Lifelong Agent Learning | AUTOSKILL Intelligence Layer | AutoSkill (arXiv, March 2026), PCA steering vectors |
+| Lifelong Agent Learning & State Fidelity | AUTOSKILL Intelligence Layer, Sentinel Fidelity Telemetry | AutoSkill (arXiv, March 2026), World-Model Collapse (arXiv:2606.31399), Agentic Skills |
 
 ---
 
@@ -91,6 +92,14 @@ The following arXiv papers and peer-reviewed publications provide the theoretica
 | **[R5.3]** | Language Guided Skill Discovery (LGSD) — Autonomous task decomposition (ICLR, 2024) | Validates VAMS's approach to maximizing semantic diversity in discovered skill directions |
 | **[R5.4]** | Mahalanobis distance for OOD detection in neural networks (arXiv, 2024) | Theoretical basis for `ActivationAnomalyDetector` (3.0σ threshold for adversarial detection) |
 
+### R10. World-State Fidelity & SkillOps Hardening
+
+| Ref | Paper | Relevance to VAMS |
+|-----|-------|-------------------|
+| **[R10.1]** | World-Model Collapse as a Phase Transition (arXiv:2606.31399, 2026) | Basis for `WorldStateFidelitySentinel`: external-state hash comparison, first divergence step, invalid-action step, staleness, and false-progress telemetry before rewards or slashing use. |
+| **[R10.2]** | SoK: Agentic Skills — Beyond Tool Use in LLM Agents (arXiv:2602.20867, 2026) | Basis for Service Block SkillOps governance: signed manifests, declared permissions, verifier quarantine, and fail-closed provisioning controls. |
+| **[R10.3]** | MUSE-Autoskill: Self-Evolving Agents via Skill Creation, Memory, Management, and Evaluation (arXiv:2605.27366, 2026) | Basis for treating skills/service blocks as versioned, testable assets with runtime feedback and quarantine rather than unbounded self-mutation. |
+
 ### R6. Account Abstraction, TEE & Confidential Computing
 
 | Ref | Paper | Relevance to VAMS |
@@ -132,26 +141,27 @@ The following arXiv papers and peer-reviewed publications provide the theoretica
 3. [v0.4.0 — ICN-Inspired Modular Stack](#3-v040--icn-inspired-modular-stack)
 4. [v0.5.0 — AUTOSKILL Intelligence Layer](#4-v050--autoskill-intelligence-layer)
 5. [v0.6.0 — Polygon OMS Integration](#5-v060--polygon-oms-integration)
-6. [Security Audit — Findings & Remediation](#6-security-audit--findings--remediation)
-7. [Current Security Posture](#7-current-security-posture)
-8. [Smart Contract Architecture (Current)](#8-smart-contract-architecture-current)
-9. [Economic Security Model](#9-economic-security-model)
-10. [Test Coverage & Verification](#10-test-coverage--verification)
-11. [CI-Bound Items](#11-ci-bound-items)
+6. [v0.7.0/v0.8.0 — Cognitive & Composer Addenda](#6-v070v080--cognitive--composer-addenda)
+7. [Security Audit — Findings & Remediation](#7-security-audit--findings--remediation)
+8. [Current Security Posture](#8-current-security-posture)
+9. [Smart Contract Architecture (Current)](#9-smart-contract-architecture-current)
+10. [Economic Security Model](#10-economic-security-model)
+11. [Test Coverage & Verification](#11-test-coverage--verification)
+12. [CI-Bound Items](#12-ci-bound-items)
 
 ---
 
 ## 1. Architecture Evolution Timeline
 
 ```
-v0.3.0 (Jan 2026)     v0.4.0 (Apr 2026)      v0.5.0 (Apr 2026)       v0.6.0 (May 2026)
+v0.3.0 (Jan 2026)     v0.4.0 (Apr 2026)      v0.5.0 (Apr 2026)       v0.6.0 (May 2026)       v0.7.0/v0.8.0 (Jun 2026)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 │ Monolithic Stack    │ ICN Modular Split     │ Intelligence Layer     │ OMS Integration
 │ 5-Layer Design      │ 6 Logic Packages      │ AUTOSKILL PCA Engine   │ Identity + Fiat
 │ Static Emissions    │ Regional DEC          │ Anomaly Detection      │ Session Keys
 │ Single Escrow       │ ComposedSettlement    │ Skill-Aligned Scoring  │ Stablecoin Payouts
 │ Raw EOA Signing     │ Sentinel Enforcer     │ Inference Steering     │ Trails Transport
-│                     │ Service Block Registry│                        │ Insurance Yield
+│                     │ Service Block Registry│                        │ Insurance Yield       │ S-MMU + CHC Scoring
 ```
 
 | Version | Release Tag | Key Theme | Test Count | Breaking Changes |
@@ -160,12 +170,14 @@ v0.3.0 (Jan 2026)     v0.4.0 (Apr 2026)      v0.5.0 (Apr 2026)       v0.6.0 (May
 | v0.4.0 | `1.0.0-icn` | Modular Decoupling | — | Yes (5 subsystems replaced) |
 | v0.5.0 | `1.2.0-autoskill` | Intelligence Layer | 373 | No (purely additive) |
 | v0.6.0 | `1.3.0-oms` | OMS Enterprise Integration | 1,083 | No (purely additive) |
+| v0.7.0 | — | Cognitive Layer Integration | See changelog | No (purely additive) |
+| v0.8.0 | — | CHC Cognitive Spec & 6-Axis Scorer | 28 targeted composer tests documented | No (purely additive) |
 
 ---
 
 ## 2. v0.3.0 — Monolithic Foundation
 
-**Status:** Partially Deprecated (superseded by v0.4.0+)  
+**Status:** Partially Deprecated (superseded by v0.4.0+)
 **Academic Context:** Established the DePIN-native compute mesh **[R3.1]**, durable execution substrate **[R9.1]**, and initial trust scoring **[R4.4]**
 
 ### 2.1 Original 5-Layer Architecture
@@ -199,8 +211,8 @@ v0.3.0 (Jan 2026)     v0.4.0 (Apr 2026)      v0.5.0 (Apr 2026)       v0.6.0 (May
 
 ## 3. v0.4.0 — ICN-Inspired Modular Stack
 
-**Release:** `1.0.0-icn` (April 9, 2026)  
-**Theme:** Decompose monolith into 6 independent logic packages inspired by Impossible Cloud Network (ICN)  
+**Release:** `1.0.0-icn` (April 9, 2026)
+**Theme:** Decompose monolith into 6 independent logic packages inspired by Impossible Cloud Network (ICN)
 **Academic Context:** Implements modular protocol composition **[R3.3]**, self-organizing orchestration **[R3.4]**, stake-backed Sybil resistance **[R4.2]**, and sustainable dynamic emissions **[R7.1]**
 
 ### 3.1 Modular Package Structure
@@ -237,6 +249,8 @@ neuron/
 - Permissionless "app store" for compute deployment patterns
 - Builders stake $VAMS to list configurations
 - Revenue share on blueprint usage
+- EIP-712 SkillOps manifests bind declared capabilities, permission bitmaps, deployment CID, resource hash, and builder signer before listing
+- Verifier quarantine blocks provisioning without touching reward/slashing logic until evidence is reviewed
 
 #### Security Council Timelocks
 - `RegionCapBps` adjustments: 48-hour timelock
@@ -266,9 +280,9 @@ contracts/src/
 
 ## 4. v0.5.0 — AUTOSKILL Intelligence Layer
 
-**Release:** `1.2.0-autoskill` (April 29, 2026)  
-**Theme:** Open the behavioral black box — PCA-based skill discovery + anomaly detection  
-**Breaking Changes:** None (purely additive)  
+**Release:** `1.2.0-autoskill` (April 29, 2026)
+**Theme:** Open the behavioral black box — PCA-based skill discovery + anomaly detection
+**Breaking Changes:** None (purely additive)
 **Academic Context:** Direct implementation of AutoSkill dual-loop architecture **[R5.1]**, PCA activation steering **[R5.2]**, LGSD skill diversity **[R5.3]**, and Mahalanobis OOD detection **[R5.4]**
 
 ### 4.1 New Subsystem: `neuron/intelligence/`
@@ -301,9 +315,9 @@ contracts/src/
 
 ## 5. v0.6.0 — Polygon OMS Integration
 
-**Release:** `1.3.0-oms` (May 6, 2026)  
-**Theme:** Enterprise-grade identity, fiat rails, stablecoin payouts, yield management  
-**Breaking Changes:** None (purely additive)  
+**Release:** `1.3.0-oms` (May 6, 2026)
+**Theme:** Enterprise-grade identity, fiat rails, stablecoin payouts, yield management
+**Breaking Changes:** None (purely additive)
 **Academic Context:** Implements Intelligent AI Delegation framework **[R1.1]**, ERC-4337 account abstraction **[R6.1]**, TEE attestation binding **[R6.2][R6.3]**, and agent-as-economic-principal identity **[R1.2][R1.3]**
 
 ### 5.1 Five-Phase Integration
@@ -352,9 +366,26 @@ CLRouter.route_v3(request, agent_id)
 
 ---
 
-## 6. Security Audit — Findings & Remediation
+## 6. v0.7.0/v0.8.0 — Cognitive & Composer Addenda
 
-### 6.1 Audit Overview
+**Status:** Additive pre-testnet architecture layer
+**Primary References:** `docs/team/ARCHITECTURE_v0-7-0.md`, `docs/team/ARCHITECTURE_v0-8-0.md`, `docs/CHANGELOG.md`
+
+The discrepancy existed because this audit report was originally written as the v0.6.0 OMS integration roll-up, while later architecture work was recorded in additive team addenda and the changelog instead of being promoted into the audit report metadata. The current architecture ceiling is v0.8.0, but v0.6.0 remains the base audited OMS release that the newer cognitive/composer layers build on.
+
+| Version | Additive Capability | Current Implementation Surface |
+|---------|---------------------|--------------------------------|
+| v0.7.0 | S-MMU memory hierarchy, SIRA retrieval, HORMA layout, HIPIF folding, EvoMem patches, ProPlay planning | Neuron cognitive-layer documentation and off-chain runtime design |
+| v0.8.0 | CHC Decagon profiles, 6-axis Composer scoring, dynamic weight normalization, enriched node telemetry, radar dashboard | `neuron/composer`, `gateway/server.py`, `frontend-vite/src/App.jsx`, `docs/team/ARCHITECTURE_v0-8-0.md` |
+| R10 addendum | World-state fidelity telemetry and SkillOps manifest hardening | `neuron/sentinel/world_state_fidelity.py`, `contracts/src/registry/ServiceBlockRegistry.sol`, `neuron/services/registry_client.py` |
+
+The v0.8.0 layer does not supersede OMS identity, session-key, or payment boundaries. It extends the off-chain cognition and matchmaking model while preserving the v0.6.0 security invariants and Phase 6 deployment gates.
+
+---
+
+## 7. Security Audit — Findings & Remediation
+
+### 7.1 Audit Overview
 
 | Parameter | Value |
 |-----------|-------|
@@ -366,7 +397,7 @@ CLRouter.route_v3(request, agent_id)
 | **Low/QA** | 12 |
 | **All Resolved** | ✅ 68/68 |
 
-### 6.2 Critical Findings (4/4 Resolved ✅)
+### 7.2 Critical Findings (4/4 Resolved ✅)
 
 | ID | Finding | Fix | Evidence |
 |----|---------|-----|----------|
@@ -375,7 +406,7 @@ CLRouter.route_v3(request, agent_id)
 | **AK01** | Governor accepted arbitrary vote weight | `get_voter_balance()` sums UTXO inputs | `governor.ak:74` |
 | **AK02** | Insurance fund `bridge_proof == payload_hash` tautological | Separate `bridge_proof` + `payload_hash` fields | `insurance_fund.ak:48` |
 
-### 6.3 High Findings (21/21 Resolved ✅)
+### 7.3 High Findings (21/21 Resolved ✅)
 
 | ID | Finding | Fix | Status |
 |----|---------|-----|:------:|
@@ -401,7 +432,7 @@ CLRouter.route_v3(request, agent_id)
 | AK05 | Agent registry accepted any slasher | `authorized_slashers` list check | ✅ |
 | AK06 | Insurance fund duplicate approval | Sorted unique deduplication | ✅ |
 
-### 6.4 Medium Findings (31/31 Resolved ✅)
+### 7.4 Medium Findings (31/31 Resolved ✅)
 
 | Category | Count | IDs | Summary |
 |----------|:-----:|-----|---------|
@@ -412,7 +443,7 @@ CLRouter.route_v3(request, agent_id)
 | Off-Chain Python | 5 | OFC04–OFC08 | Config injection, timeouts, error propagation |
 | Integration | 3 | INTG05–INTG10 | Cross-contract wiring, deployment ordering |
 
-### 6.5 Low/QA Findings (12/12 Resolved ✅)
+### 7.5 Low/QA Findings (12/12 Resolved ✅)
 
 | Category | IDs | Status |
 |----------|-----|:------:|
@@ -421,7 +452,7 @@ CLRouter.route_v3(request, agent_id)
 | Off-Chain QA | OFC09, OFC10, OFC11 | ✅ |
 | Integration QA | INTG-QA items | ✅ |
 
-### 6.6 Audit Fix Markers
+### 7.6 Audit Fix Markers
 
 | Layer | `AUDIT FIX` Comments | Files |
 |-------|:--------------------:|:-----:|
@@ -432,22 +463,22 @@ CLRouter.route_v3(request, agent_id)
 
 ---
 
-## 7. Current Security Posture
+## 8. Current Security Posture
 
-### 7.1 Cross-Version Security Hardening
+### 8.1 Cross-Version Security Hardening
 
-| Security Domain | v0.3.0 | v0.4.0 | v0.5.0 | v0.6.0 |
-|-----------------|--------|--------|--------|--------|
-| Signing | Raw EOA | Raw EOA | Raw EOA | `SignerInterface` + ERC-4337 session keys |
-| Bridge Security | Multi-ISM | Multi-ISM + Sentinel | Multi-ISM + Sentinel | + Trails (AggLayer) + transport fallback |
-| Identity | ERC-8004 only | Trust Score tiers | + Anomaly detection | + OMS Identity (fail-closed) |
-| Economic Safety | Static inflation | Regional DEC + caps | Unchanged | + Insurance yield cap (30% on-chain) |
-| Agent Verification | Basic proof check | SLA Enforcer loop | + Activation-space anomaly | + P3 institutional gate |
-| TEE Binding | Single attestation | Multi-TEE | Unchanged | Root EOA invariant (never session wallet) |
-| PRNG Security | `random.choice` | `random.choice` | `secrets.choice` | `secrets.choice` |
-| Upgradeability | No guards | Timelocks | Unchanged | Unchanged + `_disableInitializers()` |
+| Security Domain | v0.3.0 | v0.4.0 | v0.5.0 | v0.6.0 | v0.7.0/v0.8.0 |
+|-----------------|--------|--------|--------|--------|---------------|
+| Signing | Raw EOA | Raw EOA | Raw EOA | `SignerInterface` + ERC-4337 session keys | SkillOps manifest signatures |
+| Bridge Security | Multi-ISM | Multi-ISM + Sentinel | Multi-ISM + Sentinel | + Trails (AggLayer) + transport fallback | S-MMU/ProPlay planning telemetry |
+| Identity | ERC-8004 only | Trust Score tiers | + Anomaly detection | + OMS Identity (fail-closed) | CHC capability declarations |
+| Economic Safety | Static inflation | Regional DEC + caps | Unchanged | + Insurance yield cap (30% on-chain) | Telemetry-only cognitive/world-state signals |
+| Agent Verification | Basic proof check | SLA Enforcer loop | + Activation-space anomaly | + P3 institutional gate | World-state fidelity reporting |
+| TEE Binding | Single attestation | Multi-TEE | Unchanged | Root EOA invariant (never session wallet) | TEE-required permission scope |
+| PRNG Security | `random.choice` | `random.choice` | `secrets.choice` | `secrets.choice` | Unchanged |
+| Upgradeability | No guards | Timelocks | Unchanged | Unchanged + `_disableInitializers()` | Quarantine before provisioning |
 
-### 7.2 Key Security Invariants (Enforced)
+### 8.2 Key Security Invariants (Enforced)
 
 1. **Fail-Closed Identity:** `OMSIdentityVerifier.is_verified()` returns `False` on any error
 2. **TEE Root Binding:** Attestations always bind to root EOA, never session keys
@@ -459,7 +490,7 @@ CLRouter.route_v3(request, agent_id)
 
 ---
 
-## 8. Smart Contract Architecture (Current)
+## 9. Smart Contract Architecture (Current)
 
 ```
 contracts/src/
@@ -484,9 +515,9 @@ contracts/src/
 
 ---
 
-## 9. Economic Security Model
+## 10. Economic Security Model
 
-### 9.1 Six Yield Avenues (v0.6.0)
+### 10.1 Six Yield Avenues (v0.6.0 base, preserved through v0.8.0)
 
 | Avenue | Participant | Key Contracts |
 |--------|-------------|---------------|
@@ -497,7 +528,7 @@ contracts/src/
 | Insurance Underwriting | Risk underwriters | `VAMSInsuranceFund` (30% yield cap) |
 | AUTOSKILL Data Curation | Domain experts | `SteeringEngine`, skill schema registry |
 
-### 9.2 Token Economics
+### 10.2 Token Economics
 
 | Parameter | Value |
 |-----------|-------|
@@ -508,9 +539,14 @@ contracts/src/
 
 ---
 
-## 10. Test Coverage & Verification
+## 11. Test Coverage & Verification
 
-### 10.1 Current Test Suite (v0.6.0)
+### 11.1 Historical Test Suite (v0.6.0 audit baseline)
+
+> [!CAUTION]
+> These totals are retained as historical v0.6.0 audit evidence. They are not
+> current-tree or deployment evidence. Current readiness must be generated for
+> one commit by the 36-track program in `docs/audit/control-matrix.json`.
 
 | Suite | Count | Status |
 |-------|:-----:|:------:|
@@ -519,7 +555,7 @@ contracts/src/
 | Pytest (Python) | 427 | ✅ Passing |
 | **Total** | **1,083** | **✅ Zero Regressions** |
 
-### 10.2 Test Evolution
+### 11.2 Test Evolution
 
 | Version | Tests | Regressions |
 |---------|:-----:|:-----------:|
@@ -527,8 +563,9 @@ contracts/src/
 | v0.5.0 (`1.2.0-autoskill`) | 373 | 0 |
 | Post-Audit (`1.1.0-audit-remediated`) | 265 (Python) | 0 |
 | v0.6.0 (`1.3.0-oms`) | 1,083 | 0 |
+| v0.8.0 cognitive/composer addendum | 28 targeted composer tests documented | 0 documented in addendum |
 
-### 10.3 Key Test Files (v0.6.0)
+### 11.3 Key Test Files (v0.6.0 baseline + v0.8.0 addenda)
 
 - `test_fiat_yield.py` — Coinme, UniversalTopup, YieldManager
 - `test_sequence_wallet.py` — Session keys, tier scopes, expiry
@@ -537,21 +574,26 @@ contracts/src/
 - `test_steering_prototype.py` — AUTOSKILL Phase 4 validation
 - `test_composed_settlement.py` — Multi-provider escrow flows
 - `test_performance_audit.py` — Sentinel DA anchoring
+- `test_chc_scoring.py` / `test_composer_scorer.py` — CHC cognitive scoring and dynamic 6-axis weight normalization
+- `test_world_state_fidelity.py` / `test_world_state_phase_boundary.py` — R10 world-state fidelity telemetry and phase-boundary regression coverage
 
 ---
 
-## 11. CI-Bound Items
+## 12. CI-Bound Items
 
 > [!NOTE]
-> The following require the CI/staging environment and are **not deployment blockers** for testnet:
+> The following require the CI/staging environment and are **mandatory deployment blockers** for testnet until they pass on the exact deployment commit:
 
 | Item | Tool | Status |
 |------|------|:------:|
-| Full Solidity compilation | `forge build` | ⏳ CI-bound |
-| Solidity unit tests | `forge test` | ⏳ CI-bound |
-| Aiken validator compilation | `aiken check` | ⏳ CI-bound |
-| Slither re-scan | `slither .` | ⏳ CI-bound |
-| Deployment script dry-run | `forge script DeployV2` | ⏳ CI-bound |
+| Full Solidity compilation | `forge build --sizes` | ✅ Local pass; current-commit CI evidence pending |
+| Solidity unit tests | `forge test` | ✅ Local post-change pass: 643/643 across 32 suites; exact-commit CI evidence pending |
+| Aiken validator compilation | `aiken check --deny --seed 20260711 --max-success 250` | ✅ Local pass: 33 unit + 7 properties, 1,783 checks, 0 errors or warnings; CI evidence pending |
+| Python unit/integration tests | `pytest -q --tb=short -p no:cacheprovider` | ✅ Local post-change pass: 569/569; exact-commit CI evidence pending |
+| Bandit and Python SCA | `bandit -ll -ii`; `pip-audit` | ✅ Configured Bandit gate passed with 0 high findings; Gateway and Neuron dependency graphs have no known vulnerabilities; CI evidence pending |
+| Semgrep security audit | `semgrep scan --config auto --error` | ✅ Zero findings across 393 owned files and 517 rules; CI evidence pending |
+| Slither re-scan | `slither . --exclude-low --exclude-informational --fail-high` | ✅ 169 contracts analyzed with 0 high findings; 18 residual medium results match the adjudication; independent CI review pending |
+| Canonical deployment ceremony rehearsal | `DeployTestnet.s.sol` | ⏳ Implemented; Safe-backed Amoy rehearsal and role evidence pending |
 
 ---
 
@@ -561,18 +603,18 @@ contracts/src/
 ╔══════════════════════════════════════════════════════════════════════╗
 ║                                                                      ║
 ║   CLASSIFICATION: Web 4.0 Planetary Infrastructure                   ║
-║   ARCHITECTURE:   v0.6.0 (v1.3.0-oms)                               ║
-║   AUDIT STATUS:   ✅ ALL 68 FINDINGS RESOLVED                        ║
+║   ARCHITECTURE:   v0.8.0 cognitive/composer over v0.6.0 OMS baseline ║
+║   AUDIT BASELINE: 68 historical v0.6.0 findings recorded as resolved ║
 ║                                                                      ║
 ║   Critical:    4/4  RESOLVED                                         ║
 ║   High:       21/21 RESOLVED                                         ║
 ║   Medium:     31/31 RESOLVED                                         ║
 ║   Low/QA:     12/12 RESOLVED                                         ║
-║   Tests:      1,083 PASSING (619 Forge + 37 Aiken + 427 Pytest)      ║
-║   Regressions: 0                                                     ║
+║   Current tests: generated by commit-bound CI evidence               ║
+║   Current audit: 36-track testnet assurance program open             ║
 ║   Academic Refs: 30 arXiv/peer-reviewed papers mapped to subsystems  ║
 ║                                                                      ║
-║   VERDICT:  ✅ GO FOR TESTNET DEPLOYMENT                              ║
+║   VERDICT:  HARDENED PRE-TESTNET CANDIDATE; GATES REQUIRED           ║
 ║                                                                      ║
 ╚══════════════════════════════════════════════════════════════════════╝
 ```
@@ -601,6 +643,11 @@ This makes VAMS the first protocol to unify the full Web 4.0 stack — from phys
 | [ARCHITECTURE_v0-4-0.md](docs/team/ARCHITECTURE_v0-4-0.md) | ICN-inspired modular stack addendum |
 | [ARCHITECTURE_v0-5-0.md](docs/team/ARCHITECTURE_v0-5-0.md) | AUTOSKILL Intelligence Layer addendum |
 | [ARCHITECTURE_v0-6-0.md](docs/team/ARCHITECTURE_v0-6-0.md) | Polygon OMS integration addendum |
+| [ARCHITECTURE_v0-7-0.md](docs/team/ARCHITECTURE_v0-7-0.md) | Cognitive Layer integration addendum |
+| [ARCHITECTURE_v0-8-0.md](docs/team/ARCHITECTURE_v0-8-0.md) | CHC cognitive spec and 6-axis Composer addendum |
+| [AUDIT_PROGRAM.md](docs/audit/AUDIT_PROGRAM.md) | 36-track testnet assurance program, gates, ownership, and rollout policy |
+| [RISK_REGISTER.md](docs/audit/RISK_REGISTER.md) | Open pre-testnet risks and evidence required for closure |
+| [INCIDENT_RESPONSE.md](docs/audit/INCIDENT_RESPONSE.md) | Testnet severity, containment, recovery, and drill requirements |
 | [CHANGELOG.md](docs/CHANGELOG.md) | Full release history |
 | [DEVELOPER_GUIDE.md](docs/DEVELOPER_GUIDE.md) | Developer onboarding |
 | [NODE_OPERATORS.md](docs/NODE_OPERATORS.md) | Node operator guide |

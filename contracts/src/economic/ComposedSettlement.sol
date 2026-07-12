@@ -56,7 +56,7 @@ contract ComposedSettlement is
     // ═══════════════════ Storage ═══════════════════
 
     /// @notice VAMS token
-    IERC20 public vamsToken;
+    IERC20 public immutable vamsToken;
 
     /// @notice Provider bond registry for validation
     IProviderBondRegistry public bondRegistry;
@@ -144,8 +144,8 @@ contract ComposedSettlement is
         // Validate all providers are bonded
         for (uint256 i = 0; i < providers.length; i++) {
             require(providers[i] != address(0), "Zero provider address");
-            (bool canAccept,) = bondRegistry.canAcceptRequest(providers[i], amounts[i]);
-            require(canAccept, "Provider not bondable");
+            (bool canAccept, string memory reason) = bondRegistry.canAcceptRequest(providers[i], amounts[i]);
+            require(canAccept, reason);
         }
 
         // Generate allocation ID

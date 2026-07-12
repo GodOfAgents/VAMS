@@ -11,11 +11,12 @@ Proof Types:
 """
 
 import hashlib
+import hmac
 import time
 import json
 from enum import Enum
 from dataclasses import dataclass, field
-from typing import Optional, Dict, Any, Union
+from typing import Optional, Dict, Any, Callable
 
 class ProofType(Enum):
     HASH_PREIMAGE = "hash_preimage"
@@ -69,12 +70,18 @@ class HashPreimageProof(ServiceDeliveryProof):
         if not self.preimage:
             return False
             
-        algo, target_hash = expected_commitment.split(":")
-        if algo != "sha256":
+        try:
+            algo, target_hash = expected_commitment.split(":", 1)
+        except (AttributeError, ValueError):
             return False
-            
+        normalized_target = target_hash.removeprefix("0x").lower()
+        if algo != "sha256" or len(normalized_target) != 64:
+            return False
+        if any(char not in "0123456789abcdef" for char in normalized_target):
+            return False
+
         hashed = hashlib.sha256(self.preimage.encode()).hexdigest()
-        return f"0x{hashed}" == target_hash or hashed == target_hash.replace("0x", "")
+        return hmac.compare_digest(hashed, normalized_target)
 
 @dataclass
 class TEEAttestationProof(ServiceDeliveryProof):
@@ -85,6 +92,7 @@ class TEEAttestationProof(ServiceDeliveryProof):
     quote: str = ""           # Base64 encoded quote
     signature: str = ""       # Enclave signature
     measurement: str = ""     # MRENCLAVE / PCR0
+    verifier: Optional[Callable[[str, str, str, str], bool]] = None
     
     def __post_init__(self):
         if self.proof_type != ProofType.TEE_ATTESTATION:
@@ -104,10 +112,19 @@ class TEEAttestationProof(ServiceDeliveryProof):
         Verify TEE quote against expected measurement (PCR0/MRENCLAVE).
         Commitment format: "sgx:mrenclave" or "nitro:pcr0"
         """
-        # In a real implementation, this would verify the Intel/AWS signature chain.
-        # For simulation/soft-verification:
-        platform, expected_measurement = expected_commitment.split(":")
-        return self.measurement.lower() == expected_measurement.lower()
+        if self.verifier is None:
+            return False
+        try:
+            return bool(
+                self.verifier(
+                    self.quote,
+                    self.signature,
+                    self.measurement,
+                    expected_commitment,
+                )
+            )
+        except Exception:
+            return False
 
 @dataclass
 class ZKMLProof(ServiceDeliveryProof):
@@ -117,6 +134,7 @@ class ZKMLProof(ServiceDeliveryProof):
     """
     snark_proof: str = ""     # Serialized proof (e.g. Groth16)
     public_inputs: str = ""   # Model hash, input hash, output hash
+    verifier: Optional[Callable[[str, str, str], bool]] = None
     
     def __post_init__(self):
         if self.proof_type != ProofType.ZK_SNARK:
@@ -135,16 +153,26 @@ class ZKMLProof(ServiceDeliveryProof):
         Verify ZK proof. 
         Commitment format: "zk:verifier_address" or "zk:model_hash"
         """
-        # Real verification requires running a verifier (e.g. snarkjs or py-binding)
-        # For now, we assume if proof exists it's valid (stub)
-        return len(self.snark_proof) > 0
+        if self.verifier is None:
+            return False
+        try:
+            return bool(
+                self.verifier(
+                    self.snark_proof,
+                    self.public_inputs,
+                    expected_commitment,
+                )
+            )
+        except Exception:
+            return False
 
 def create_proof(
     proof_type: str, 
     service_id: str, 
     consumer: str, 
     provider: str, 
-    payload: Dict[str, Any]
+    payload: Dict[str, Any],
+    verifier: Optional[Callable[..., bool]] = None,
 ) -> ServiceDeliveryProof:
     """Factory function to create appropriate proof object."""
     
@@ -166,7 +194,8 @@ def create_proof(
             provider=provider,
             quote=payload.get("quote", ""),
             signature=payload.get("signature", ""),
-            measurement=payload.get("measurement", "")
+            measurement=payload.get("measurement", ""),
+            verifier=verifier,
         )
     elif ptype == ProofType.ZK_SNARK:
         return ZKMLProof(
@@ -175,7 +204,8 @@ def create_proof(
             consumer=consumer,
             provider=provider,
             snark_proof=payload.get("proof", ""),
-            public_inputs=payload.get("inputs", "")
+            public_inputs=payload.get("inputs", ""),
+            verifier=verifier,
         )
     else:
         raise ValueError(f"Unknown proof type: {proof_type}")

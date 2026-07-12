@@ -49,6 +49,9 @@ contract VAMSToken is
     /// @notice Initial supply: 1 billion tokens with 18 decimals
     uint256 public constant INITIAL_SUPPLY = 1_000_000_000 * 1e18;
 
+    /// @notice Absolute supply ceiling; burned supply may be reminted within this cap
+    uint256 public constant MAX_SUPPLY = INITIAL_SUPPLY;
+
     /// @notice Six months in seconds (anti-whale duration)
     uint256 public constant SIX_MONTHS = 180 days;
 
@@ -147,6 +150,9 @@ contract VAMSToken is
     function mint(address to, uint256 amount) external override onlyRole(MINTER_ROLE) {
         if (to == address(0)) revert ZeroAddress();
         if (amount == 0) revert ZeroAmount();
+        if (totalSupply() + amount > MAX_SUPPLY) {
+            revert MaxSupplyExceeded(totalSupply() + amount, MAX_SUPPLY);
+        }
         
         // Rotate year if needed — advance by SECONDS_PER_YEAR, not block.timestamp
         // to prevent gap-gaming (skipping years compresses the cap window)

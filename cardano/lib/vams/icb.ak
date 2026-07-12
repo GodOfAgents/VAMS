@@ -4,6 +4,7 @@
 //// Polygon (Hands) and Cardano (Brain) via the ICB relay.
 
 use aiken/primitive/bytearray
+use aiken/fuzz
 
 // ═══════════════════ Bridge Verification ═══════════════════
 
@@ -105,4 +106,15 @@ test is_valid_nonce_replay() {
 
 test is_valid_nonce_reorder() {
   is_valid_nonce(3, 4) == False
+}
+
+test prop_nonce_replay_always_rejected(nonce via fuzz.int()) {
+  !is_valid_nonce(nonce, nonce)
+}
+
+test prop_nonce_strictly_increases(
+  (last_nonce, raw_delta) via fuzz.both(fuzz.int(), fuzz.int_at_least(1)),
+) {
+  let delta = raw_delta % 1_000_000 + 1
+  is_valid_nonce(last_nonce + delta, last_nonce)
 }

@@ -3,7 +3,7 @@ pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -30,7 +30,7 @@ contract VAMSValidatorManager is
     Initializable,
     AccessControlUpgradeable,
     PausableUpgradeable,
-    ReentrancyGuardUpgradeable,
+    ReentrancyGuard,
     UUPSUpgradeable,
     IVAMSValidatorManager 
 {
@@ -137,7 +137,6 @@ contract VAMSValidatorManager is
         
         __AccessControl_init();
         __Pausable_init();
-        __ReentrancyGuard_init();
         
         // AC02: Set DEFAULT_ADMIN_ROLE as the admin for all operational roles
         _setRoleAdmin(UPGRADER_ROLE, DEFAULT_ADMIN_ROLE);
@@ -391,9 +390,10 @@ contract VAMSValidatorManager is
         if (targetCapacity == 0) return 0;
         
         uint256 utilizationBps = (activeManagedL1s * BPS_DENOMINATOR) / targetCapacity;
+        uint256 thresholdCount = _demandThresholds.length;
         
         // Walk through thresholds to find applicable modifier
-        for (uint256 i = 0; i < _demandThresholds.length; i++) {
+        for (uint256 i = 0; i < thresholdCount; i++) {
             if (utilizationBps < _demandThresholds[i]) {
                 return _demandModifiers[i];
             }

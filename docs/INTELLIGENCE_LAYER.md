@@ -1,9 +1,12 @@
 # VAMS Intelligence Layer
 
-**Module:** `neuron/intelligence/`  
-**Version:** 0.1.0  
-**Status:** Stable (v1.3.0-oms)  
-**Paper Reference:** [AUTOSKILL: Characterizing Model-Native Skills](./papers/Characterizing%20Model-Native%20Skills.pdf)
+**Lifecycle:** Implemented research layer; live economic use pending
+**Last verified:** 2026-07-12
+**Module:** `neuron/intelligence/`
+**Version:** 0.1.0
+**Status:** Stable (v1.3.0-oms)
+**Paper reference:** AUTOSKILL, "Characterizing Model-Native Skills." The
+repository retains citations and implementation notes rather than a copied paper.
 
 ---
 
@@ -348,25 +351,25 @@ existing integrations that don't set `skill_vector` are completely unaffected.
 
 ## FAQ
 
-**Q: Does the Intelligence Layer require PyTorch?**  
+**Q: Does the Intelligence Layer require PyTorch?**
 A: No. The `ActivationCache` is framework-agnostic — it accepts raw numpy arrays. Node clients
 are responsible for extracting activations from whatever inference framework they use (PyTorch,
 vLLM, etc.) before passing them to the cache.
 
-**Q: How many samples are needed to fit a reliable PCA model?**  
+**Q: How many samples are needed to fit a reliable PCA model?**
 A: The AUTOSKILL paper demonstrates that 1,000 pilot fine-tuning samples are sufficient to
 identify stable principal components. For VAMS, we recommend collecting activations from
 at least 500 diverse audit challenge responses before fitting.
 
-**Q: What happens if I call `steer()` with an `alpha` above `max_alpha`?**  
+**Q: What happens if I call `steer()` with an `alpha` above `max_alpha`?**
 A: The engine automatically clamps the value to `max_alpha` and logs a warning. The steered
 activation is returned using the clamped value — no exception is raised.
 
-**Q: Can the AnomalyDetector be used without first calling `fit_baseline()`?**  
+**Q: Can the AnomalyDetector be used without first calling `fit_baseline()`?**
 A: If the `SkillDiscovery` model was fitted with data (which pre-computes a centroid and
 covariance), the detector will auto-initialize from those values. Otherwise, calling any
 scoring method before `fit_baseline()` raises a `RuntimeError`.
 
-**Q: Where does the "skill_vector" in a blueprint come from?**  
+**Q: Where does the "skill_vector" in a blueprint come from?**
 A: It is the PCA-projected skill profile of a reference node or task type. You can derive it
 by running `skill_discovery.compute_skill_profile(reference_activations).coordinates`.

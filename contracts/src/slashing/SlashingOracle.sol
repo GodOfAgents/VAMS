@@ -4,7 +4,7 @@ pragma solidity ^0.8.20;
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "./ISlashingOracle.sol";
 import "./VAMSSlasher.sol";
 import "../staking/IVAMSStaking.sol";
@@ -29,7 +29,7 @@ contract SlashingOracle is
     Initializable,
     AccessControlUpgradeable,
     PausableUpgradeable,
-    ReentrancyGuardUpgradeable,
+    ReentrancyGuard,
     ISlashingOracle 
 {
     // ============ Constants ============
@@ -105,7 +105,6 @@ contract SlashingOracle is
 
         __AccessControl_init();
         __Pausable_init();
-        __ReentrancyGuard_init();
 
         _grantRole(DEFAULT_ADMIN_ROLE, _admin);
         _grantRole(PROPOSER_ROLE, _admin);

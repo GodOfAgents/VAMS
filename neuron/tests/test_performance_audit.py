@@ -14,7 +14,7 @@ from unittest.mock import AsyncMock, patch, MagicMock
 import sys, os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
 
-from neuron.da.models import DAProtocol, DAReceipt, AuditReport
+from neuron.da.models import DAProtocol, DAReceipt, AuditReport, sanitize_public_kpis
 from neuron.da.performance_audit import PerformanceAuditLog, CHALLENGE_DA_ROUTING
 
 
@@ -88,6 +88,64 @@ class TestAuditReportSerialization:
         r2 = AuditReport.from_sentinel_report(latency_report)
         assert r1.compute_hash() != r2.compute_hash()
 
+    def test_sensitive_and_structured_kpis_are_not_archived(self, sample_report):
+        sample_report["kpis"].update(
+            {
+                "world_state_trace": [
+                    {
+                        "agent_state": {"balance": 100},
+                        "verified_external_state": {"balance": 80},
+                    }
+                ],
+                "system_prompt": "private agent instructions",
+                "api_token": "secret-token",
+                "nested_payload": {"email": "operator@example.com"},
+            }
+        )
+
+        report = AuditReport.from_sentinel_report(sample_report)
+        serialized = json.loads(report.serialize())
+
+        assert serialized["kpis"] == {"flops": 120.5, "memory_bw": 3200}
+        assert "private agent instructions" not in report.serialize().decode("utf-8")
+        assert "operator@example.com" not in report.serialize().decode("utf-8")
+
+    def test_public_kpis_are_bounded_scalars(self):
+        sanitized = sanitize_public_kpis(
+            {
+                "device": "NVIDIA H100",
+                "score": 99.5,
+                "passed": True,
+                "not_finite": float("inf"),
+                "oversized_number": 10**30,
+                "too_long": "x" * 129,
+                "items": [1, 2, 3],
+            }
+        )
+
+        assert sanitized == {
+            "passed": True,
+            "score": 99.5,
+        }
+
+    def test_telemetry_is_schema_allowlisted(self, sample_report):
+        sample_report["worldStateFidelity"] = {
+            "agent_state_hash": "a" * 64,
+            "verified_external_state_hash": "b" * 64,
+            "state_fidelity_score": 0.75,
+            "status": "telemetry_only",
+            "system_prompt": "do not publish this",
+            "raw_trace": [{"email": "operator@example.com"}],
+        }
+
+        serialized = AuditReport.from_sentinel_report(sample_report).serialize().decode("utf-8")
+        telemetry = json.loads(serialized)["telemetry"]["worldStateFidelity"]
+
+        assert telemetry["state_fidelity_score"] == 0.75
+        assert telemetry["agent_state_hash"] == "a" * 64
+        assert "do not publish this" not in serialized
+        assert "operator@example.com" not in serialized
+
 
 # --- Multi-DA Routing Tests ---
 
@@ -112,6 +170,33 @@ class TestMultiDARouting:
         result = await audit_log.publish_sentinel_report(sample_report, da_target=DAProtocol.NEAR_DA)
         assert result["success"] is True
         assert result["protocol"] == "near"
+
+    @pytest.mark.asyncio
+    async def test_disabled_explicit_target_fails_closed(self, sample_report):
+        audit_log = PerformanceAuditLog(
+            mock_mode=True,
+            config={"enabled_protocols": ["celestia", "near"]},
+        )
+
+        result = await audit_log.publish_sentinel_report(
+            sample_report,
+            da_target=DAProtocol.EIGEN_DA,
+        )
+
+        assert result["success"] is False
+        assert result["protocol"] == "eigenda"
+        assert "not enabled" in result["error"]
+
+    @pytest.mark.asyncio
+    async def test_unknown_explicit_target_fails_closed(self, sample_report):
+        result = await PerformanceAuditLog(mock_mode=True).publish_sentinel_report(
+            sample_report,
+            da_target="untrusted-da",
+        )
+
+        assert result["success"] is False
+        assert result["protocol"] == "untrusted-da"
+        assert "Unknown DA protocol" in result["error"]
 
     @pytest.mark.asyncio
     async def test_unknown_challenge_defaults_to_celestia(self, audit_log):

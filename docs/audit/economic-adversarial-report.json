@@ -1,0 +1,37 @@
+{
+  "attack_classes": [
+    "linked_reward_capture",
+    "linked_capacity_capture",
+    "regional_reward_capture",
+    "thin_liquidity",
+    "wash_return"
+  ],
+  "baseline_false_positives": 0,
+  "detections": {
+    "linked_capacity_capture": 20000,
+    "linked_reward_capture": 20000,
+    "regional_reward_capture": 20000,
+    "thin_liquidity": 20000,
+    "wash_return": 20000
+  },
+  "epochs": 100000,
+  "limitations": [
+    "Synthetic campaign; live beneficial-owner attestations remain required.",
+    "Does not replace governance-capture or chain-level settlement simulation."
+  ],
+  "passed": true,
+  "profile_sha256": "6e4d6d20e60afde20e5f6967e0cd1bf2d396f048f2c0c3d13e8735224fe0af4d",
+  "schema_version": "1.0.0",
+  "seed": 20260711,
+  "stop_conditions": {
+    "hhi": 0.25,
+    "linked_operator_share_bps": 2000,
+    "regional_reward_share_bps": 3000,
+    "top_four_provider_share_bps": 5000
+  },
+  "thin_liquidity": {
+    "minimum_independent_providers": 5,
+    "require_hardware_cost_weighted_floor_below_minimum": true
+  },
+  "undetected": {}
+}

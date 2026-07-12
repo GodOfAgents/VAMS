@@ -1,7 +1,8 @@
 # VAMS Architecture Addendum: v0.7.0 (Cognitive Layer Integration)
 
-**Status:** Stable (v1.0.0-icn)  
-**Replaces:** No prior sections deprecated. This is a **purely additive** addendum to [ARCHITECTURE_v0-6-0.md](./ARCHITECTURE_v0-6-0.md) and prior versions.  
+**Status:** Historical cognitive-layer milestone; implemented source with testnet restrictions
+**Last verified:** 2026-07-12
+**Replaces:** No prior sections deprecated. This is a **purely additive** addendum to [ARCHITECTURE_v0-6-0.md](./ARCHITECTURE_v0-6-0.md) and prior versions.
 **Objective:** Formalize the integration of the off-chain VAMS Cognitive Layer (SIRA × HORMA × HIPIF × ProPlay) within the off-chain **Neuron Runtime** without touching compiled Solidity or Aiken smart contracts.
 
 ---

@@ -3,7 +3,7 @@ pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 import "../interfaces/ISLAEnforcer.sol";
@@ -15,7 +15,7 @@ import "../slashing/VAMSSlasher.sol";
  * @notice Protocol implementation for interpreting Sentinel network telemetry 
  *         and enforcing programmable SLA slashing logic.
  */
-contract SLAEnforcer is Initializable, AccessControlUpgradeable, ReentrancyGuardUpgradeable, ISLAEnforcer {
+contract SLAEnforcer is Initializable, AccessControlUpgradeable, ReentrancyGuard, ISLAEnforcer {
     using ECDSA for bytes32;
     using MessageHashUtils for bytes32;
 
@@ -61,7 +61,6 @@ contract SLAEnforcer is Initializable, AccessControlUpgradeable, ReentrancyGuard
         address _slasher
     ) public initializer {
         __AccessControl_init();
-        __ReentrancyGuard_init();
 
         _grantRole(DEFAULT_ADMIN_ROLE, _admin);
         _grantRole(ADMIN_ROLE, _admin);
@@ -106,12 +105,7 @@ contract SLAEnforcer is Initializable, AccessControlUpgradeable, ReentrancyGuard
         lastReportTimestamp[report.nodeId] = report.timestamp;
 
         // 3. Match Hardware Registry
-        IVAMSHardwareRegistry.VAMSResourceNode memory node;
-        try registry.getNode(report.nodeId) returns (IVAMSHardwareRegistry.VAMSResourceNode memory n) {
-            node = n;
-        } catch {
-            revert NodeNotRegistered();
-        }
+        IVAMSHardwareRegistry.VAMSResourceNode memory node = _getNode(report.nodeId);
 
         if (node.provider == address(0)) revert NodeNotRegistered();
 
@@ -172,7 +166,7 @@ contract SLAEnforcer is Initializable, AccessControlUpgradeable, ReentrancyGuard
      * @notice AUDIT FIX INTG04: Retry a pending slash that previously failed
      * @param index Index into the pendingSlashes array
      */
-    function retryPendingSlash(uint256 index) external onlyRole(ADMIN_ROLE) {
+    function retryPendingSlash(uint256 index) external nonReentrant onlyRole(ADMIN_ROLE) {
         require(index < pendingSlashes.length, "Invalid index");
         PendingSlash storage ps = pendingSlashes[index];
         require(!ps.retried, "Already retried");
@@ -189,5 +183,13 @@ contract SLAEnforcer is Initializable, AccessControlUpgradeable, ReentrancyGuard
     /// @notice Get count of pending slashes
     function pendingSlashCount() external view returns (uint256) {
         return pendingSlashes.length;
+    }
+
+    function _getNode(bytes32 nodeId) private view returns (IVAMSHardwareRegistry.VAMSResourceNode memory) {
+        try registry.getNode(nodeId) returns (IVAMSHardwareRegistry.VAMSResourceNode memory node) {
+            return node;
+        } catch {
+            revert NodeNotRegistered();
+        }
     }
 }

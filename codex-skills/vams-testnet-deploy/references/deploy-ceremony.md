@@ -3,7 +3,7 @@
 Required gates:
 
 - `cd contracts && forge build --sizes && forge test -vvv`
-- `cd cardano && aiken check && aiken test`
+- `cd cardano && aiken check`
 - `pytest -v --tb=short`
 - `bandit -r neuron/ gateway/ -ll -ii`
 - `pip-audit`
@@ -14,7 +14,7 @@ Block deployment if:
 
 - Any required test or scan fails.
 - Any live path uses mock DA, OMS, Trails, TEE, escrow, or bridge evidence.
-- `vams2026` appears in accepted credential paths.
+- Any retired default password appears in accepted credential paths.
 - Role owners are EOAs where multisig/timelock is required.
 - Contract addresses or deployment txs are not recorded.
 - Previous compromised/dead V1 addresses are reused.

@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vams.network/schemas/audit/finding.schema.json",
+  "title": "VAMS Audit Finding",
+  "type": "object",
+  "required": ["finding_id", "track_id", "severity", "status", "title", "economic_impact", "affected_components", "commit_sha", "owner"],
+  "properties": {
+    "finding_id": {"type": "string", "pattern": "^VAMS-[A-Z0-9-]+$"},
+    "track_id": {"type": "string", "pattern": "^T(0[1-9]|[12][0-9]|3[0-6])$"},
+    "severity": {"enum": ["Critical", "High", "Medium", "Low", "Informational"]},
+    "status": {"enum": ["open", "triaged", "remediated", "verified", "closed", "accepted_risk"]},
+    "title": {"type": "string", "minLength": 1},
+    "economic_impact": {"type": "string", "minLength": 1},
+    "affected_components": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+    "invariants": {"type": "array", "items": {"pattern": "^INV-(10|[1-9])$"}},
+    "commit_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "owner": {"type": "string", "minLength": 1},
+    "verification_evidence": {"type": "array", "items": {"type": "string"}},
+    "risk_acceptance": {
+      "type": ["object", "null"],
+      "properties": {
+        "approvers": {"type": "array", "minItems": 2, "items": {"type": "string"}},
+        "expires_at": {"type": "string", "format": "date-time"},
+        "compensating_controls": {"type": "array", "minItems": 1, "items": {"type": "string"}}
+      }
+    }
+  },
+  "additionalProperties": false
+}

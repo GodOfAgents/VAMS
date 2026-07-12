@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vams.network/schemas/audit/evidence-manifest.schema.json",
+  "title": "VAMS Audit Evidence Manifest",
+  "type": "object",
+  "required": ["schema_version", "commit_sha", "dirty", "generated_at", "environment", "control_matrix_sha256", "track_summary", "evidence_artifacts", "results"],
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "commit_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "dirty": {"type": "boolean"},
+    "generated_at": {"type": "string", "format": "date-time"},
+    "environment": {"type": "string", "minLength": 1},
+    "control_matrix_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "track_summary": {
+      "type": "object",
+      "required": ["total", "planned", "partial", "implemented", "verified", "blocked"],
+      "additionalProperties": {"type": "integer", "minimum": 0}
+    },
+    "evidence_artifacts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["path", "sha256"],
+        "properties": {
+          "path": {"type": "string", "minLength": 1},
+          "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+        },
+        "additionalProperties": false
+      }
+    },
+    "results": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "status"],
+        "properties": {
+          "name": {"type": "string"},
+          "status": {"enum": ["success", "failure", "skipped", "pending"]},
+          "command": {"type": "string"},
+          "artifact_sha256": {"type": ["string", "null"]},
+          "reviewer": {"type": ["string", "null"]}
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

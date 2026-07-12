@@ -9,12 +9,11 @@ import "@openzeppelin/contracts/governance/TimelockController.sol";
  * @notice Timelock controller for VAMS Governance
  * @dev 
  * - Enforces minimum delay for standard operations
- * - Emergency upgrades (24h) should use a SEPARATE TimelockController instance
- *   deployed with a 24h delay and restricted proposers (Guardian Committee).
+ * - Emergency response uses pause-only authority and cannot bypass this delay.
  */
 contract VAMSTimelockController is TimelockController {
-    /// @notice Minimum permissible delay constraint (e.g. 24 hours)
-    uint256 public constant ABSOLUTE_MIN_DELAY = 24 hours;
+    /// @notice Minimum permissible governance delay (48 hours)
+    uint256 public constant ABSOLUTE_MIN_DELAY = 48 hours;
     
     // ============ Errors ============
     
@@ -40,7 +39,7 @@ contract VAMSTimelockController is TimelockController {
     
     /**
      * @notice Override minimum delay updates to enforce safety floor
-     * @dev Prevents setting delay below ABSOLUTE_MIN_DELAY (24 hours)
+     * @dev Prevents setting delay below ABSOLUTE_MIN_DELAY (48 hours)
      */
     function updateDelay(uint256 newDelay) public override {
         if (newDelay < ABSOLUTE_MIN_DELAY) {

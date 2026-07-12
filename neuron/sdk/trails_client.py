@@ -21,7 +21,11 @@ class TrailsStatus:
 import os
 import requests
 
-from neuron.runtime_safety import require_live_secret, require_not_live_mock
+from neuron.runtime_safety import (
+    LiveModeSafetyError,
+    require_live_secret,
+    require_not_live_mock,
+)
 
 class TrailsClient:
     """OMS Trails API Client wrapper."""
@@ -33,9 +37,11 @@ class TrailsClient:
             self.mock_mode = os.getenv("TRAILS_MOCK_MODE", "true").lower() == "true"
             
         self.api_url = api_url or os.getenv("TRAILS_API_URL", "https://api.trails.polygon.technology/v1")
-        self.api_key = api_key or os.getenv("TRAILS_API_KEY", "demo-key")
+        self.api_key = api_key or os.getenv("TRAILS_API_KEY", "")
         require_not_live_mock("TrailsClient", self.mock_mode)
-        require_live_secret("TrailsClient", self.api_key, insecure_values={"demo-key"})
+        require_live_secret("TrailsClient", self.api_key)
+        if not self.mock_mode and not self.api_key:
+            raise LiveModeSafetyError("TrailsClient requires TRAILS_API_KEY outside mock mode")
         logger.info(f"Initialized TrailsClient (mock_mode={self.mock_mode}, url={self.api_url})")
 
     def submit_intent(self, source: str, dest: str, payload: bytes, value: int = 0) -> TrailsReceipt:

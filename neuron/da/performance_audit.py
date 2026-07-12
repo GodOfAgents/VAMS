@@ -17,6 +17,7 @@ Routing Strategy:
 import hashlib
 import json
 import logging
+import os
 from typing import Dict, Any, List, Optional
 
 from neuron.da.models import DAProtocol, DAReceipt, AuditReport
@@ -38,6 +39,18 @@ CHALLENGE_DA_ROUTING: Dict[str, DAProtocol] = {
     "memory": DAProtocol.CELESTIA,    # Memory bandwidth: public audit trail
 }
 
+LIVE_CAPABLE_PROTOCOLS = {DAProtocol.CELESTIA, DAProtocol.NEAR_DA}
+ALL_CONFIGURED_PROTOCOLS = (
+    DAProtocol.CELESTIA,
+    DAProtocol.NEAR_DA,
+    DAProtocol.EIGEN_DA,
+    DAProtocol.AVAIL,
+)
+
+
+class DAConfigurationError(RuntimeError):
+    """Raised when a requested DA route is disabled or unsupported."""
+
 
 class PerformanceAuditLog:
     """
@@ -52,30 +65,60 @@ class PerformanceAuditLog:
         self.mock_mode = mock_mode
         self._config = config or {}
 
-        # Initialize adapters from config or defaults
-        self.adapters: Dict[DAProtocol, DAAdapter] = {
-            DAProtocol.CELESTIA: CelestiaDAAdapter(
+        enabled_protocols = self._enabled_protocols()
+        self.adapters: Dict[DAProtocol, DAAdapter] = {}
+        if DAProtocol.CELESTIA in enabled_protocols:
+            self.adapters[DAProtocol.CELESTIA] = CelestiaDAAdapter(
                 rpc_url=self._config.get("celestia_rpc", "https://rpc-mocha.pops.one"),
                 mock_mode=mock_mode,
-            ),
-            DAProtocol.NEAR_DA: NearDAAdapter(
+            )
+        if DAProtocol.NEAR_DA in enabled_protocols:
+            self.adapters[DAProtocol.NEAR_DA] = NearDAAdapter(
                 rpc_url=self._config.get("near_rpc", "https://rpc.testnet.near.org"),
                 mock_mode=mock_mode,
-            ),
-            DAProtocol.EIGEN_DA: EigenDAAdapter(
+            )
+        if DAProtocol.EIGEN_DA in enabled_protocols:
+            self.adapters[DAProtocol.EIGEN_DA] = EigenDAAdapter(
                 rpc_url=self._config.get("eigenda_rpc", "https://holesky.drpc.org"),
-                mock_mode=True,  # Stub always
-            ),
-            DAProtocol.AVAIL: AvailDAAdapter(
+                mock_mode=True,
+            )
+        if DAProtocol.AVAIL in enabled_protocols:
+            self.adapters[DAProtocol.AVAIL] = AvailDAAdapter(
                 rpc_url=self._config.get("avail_rpc", "https://avail-turing.api.onfinality.io/public"),
-                mock_mode=True,  # Stub always
-            ),
-        }
+                mock_mode=True,
+            )
+
+        if DAProtocol.CELESTIA not in self.adapters:
+            raise DAConfigurationError("Celestia must remain enabled as the audit fallback")
 
         # Audit history for observability
         self.audit_history: List[Dict[str, Any]] = []
 
-    def _select_da_target(self, report: AuditReport) -> DAProtocol:
+    def _enabled_protocols(self) -> set[DAProtocol]:
+        configured = self._config.get("enabled_protocols")
+        if configured is None:
+            configured = os.getenv("VAMS_DA_ENABLED_PROTOCOLS")
+
+        if configured is None:
+            return set(ALL_CONFIGURED_PROTOCOLS if self.mock_mode else LIVE_CAPABLE_PROTOCOLS)
+        if isinstance(configured, str):
+            configured = [item.strip() for item in configured.split(",") if item.strip()]
+        if not isinstance(configured, (list, tuple, set)):
+            raise DAConfigurationError("enabled_protocols must be a list or comma-separated string")
+
+        try:
+            return {
+                item if isinstance(item, DAProtocol) else DAProtocol(str(item).strip().lower())
+                for item in configured
+            }
+        except ValueError as exc:
+            raise DAConfigurationError(f"Unknown DA protocol in enabled_protocols: {exc}") from exc
+
+    def _select_da_target(
+        self,
+        report: AuditReport,
+        explicit_target: Optional[DAProtocol | str],
+    ) -> DAProtocol:
         """
         Select the optimal DA layer for this report.
 
@@ -84,15 +127,27 @@ class PerformanceAuditLog:
         2. Challenge-type-based routing map.
         3. Default to Celestia.
         """
-        if report.da_target and report.da_target in self.adapters:
-            return report.da_target
-
-        return CHALLENGE_DA_ROUTING.get(report.challenge_type, DAProtocol.CELESTIA)
+        try:
+            target = (
+                explicit_target
+                if isinstance(explicit_target, DAProtocol)
+                else DAProtocol(str(explicit_target).strip().lower())
+                if explicit_target is not None
+                else CHALLENGE_DA_ROUTING.get(report.challenge_type, DAProtocol.CELESTIA)
+            )
+        except ValueError as exc:
+            raise DAConfigurationError(f"Unknown DA protocol: {explicit_target}") from exc
+        target = target or CHALLENGE_DA_ROUTING.get(
+            report.challenge_type, DAProtocol.CELESTIA
+        )
+        if target not in self.adapters:
+            raise DAConfigurationError(f"DA protocol {target.value} is not enabled")
+        return target
 
     async def publish_sentinel_report(
         self,
         report: Dict[str, Any],
-        da_target: Optional[DAProtocol] = None,
+        da_target: Optional[DAProtocol | str] = None,
     ) -> Dict[str, Any]:
         """
         Publish a Sentinel challenge report to the appropriate DA layer.
@@ -105,21 +160,24 @@ class PerformanceAuditLog:
             Submission result with DA receipt and Merkle proof data.
         """
         # Convert raw dict to structured AuditReport
-        target = da_target or DAProtocol.CELESTIA
-        audit_report = AuditReport.from_sentinel_report(report, da_target=target)
-
-        # Resolve final DA target
-        final_target = self._select_da_target(audit_report)
+        try:
+            provisional_report = AuditReport.from_sentinel_report(report)
+            target = self._select_da_target(provisional_report, da_target)
+            audit_report = AuditReport.from_sentinel_report(report, da_target=target)
+            final_target = self._select_da_target(audit_report, da_target)
+        except DAConfigurationError as exc:
+            logger.error(str(exc))
+            return {
+                "success": False,
+                "protocol": da_target.value if isinstance(da_target, DAProtocol) else str(da_target or "unknown"),
+                "error": str(exc),
+            }
 
         # Serialize and submit
         blob_data = audit_report.serialize()
         report_hash = audit_report.compute_hash()
 
-        adapter = self.adapters.get(final_target)
-        if not adapter:
-            logger.error(f"No adapter found for {final_target}. Falling back to Celestia.")
-            adapter = self.adapters[DAProtocol.CELESTIA]
-            final_target = DAProtocol.CELESTIA
+        adapter = self.adapters[final_target]
 
         try:
             receipt = await adapter.submit_blob(blob_data)

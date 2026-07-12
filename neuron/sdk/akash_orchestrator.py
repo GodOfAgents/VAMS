@@ -1,6 +1,7 @@
 import os
 import time
 import json
+import shutil
 import subprocess
 import tempfile
 from typing import Dict, Any, Optional
@@ -23,17 +24,34 @@ class AkashOrchestratorSDK:
         self.key_name = key_name
         self.timeout = timeout
         self.mock_mode = os.getenv("AKASH_MOCK_MODE", "true").lower() == "true"
+        self._cli_path: Optional[str] = None
         
         # We ensure the akash binary / provider-services is available unless mocked
         if not self.mock_mode:
             self._verify_cli()
 
     def _verify_cli(self):
-        """Verify the Akash CLI is installed and in PATH."""
+        """Resolve and verify the Akash CLI using an absolute executable path."""
+        configured_path = os.getenv("AKASH_CLI_PATH")
+        cli_path = configured_path or shutil.which("provider-services")
+        if not cli_path:
+            raise AkashOrchestratorError(
+                "Akash 'provider-services' CLI not found. Required for non-mock execution."
+            )
+        cli_path = os.path.abspath(cli_path)
+        if not os.path.isfile(cli_path):
+            raise AkashOrchestratorError("AKASH_CLI_PATH must reference a regular file.")
+
         try:
-            subprocess.run(["provider-services", "version"], check=True, capture_output=True)
-        except (subprocess.CalledProcessError, FileNotFoundError):
-            raise AkashOrchestratorError("Akash 'provider-services' CLI not found. Required for non-mock execution.")
+            subprocess.run(
+                [cli_path, "version"],
+                check=True,
+                capture_output=True,
+                timeout=self.timeout,
+            )
+        except (subprocess.CalledProcessError, FileNotFoundError, subprocess.TimeoutExpired) as exc:
+            raise AkashOrchestratorError("Akash 'provider-services' CLI verification failed.") from exc
+        self._cli_path = cli_path
 
     def _generate_sdl(self, docker_image: str, cpu: float, memory_mb: int, storage_mb: int) -> str:
         """
@@ -89,6 +107,8 @@ deployment:
             }
 
         sdl_content = self._generate_sdl(docker_image, cpu, memory_mb, storage_mb)
+        if not self._cli_path:
+            raise AkashOrchestratorError("Akash CLI was not verified for live execution.")
         
         # To avoid dropping secrets into open files, we use a tempfile 
         with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:
@@ -98,7 +118,7 @@ deployment:
         try:
             # 1. Create Deployment
             cmd_deploy = [
-                "provider-services", "tx", "deployment", "create", sdl_path,
+                self._cli_path, "tx", "deployment", "create", sdl_path,
                 "--from", self.key_name,
                 "--node", self.rpc_node,
                 "--chain-id", "akashnet-2",
@@ -106,7 +126,13 @@ deployment:
                 "-y", "--output", "json"
             ]
             
-            result = subprocess.run(cmd_deploy, capture_output=True, text=True, check=True)
+            result = subprocess.run(
+                cmd_deploy,
+                capture_output=True,
+                text=True,
+                check=True,
+                timeout=self.timeout,
+            )
             deploy_json = json.loads(result.stdout)
             
             # The transaction hash would normally be parsed and waited upon here
@@ -118,7 +144,7 @@ deployment:
                 "raw_log": deploy_json.get("raw_log")
             }
             
-        except subprocess.CalledProcessError as e:
+        except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as e:
             raise AkashOrchestratorError(f"Akash CLI Deployment Error: {e.stderr}")
         finally:
             if os.path.exists(sdl_path):

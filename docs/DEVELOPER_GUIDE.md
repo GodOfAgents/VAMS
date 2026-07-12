@@ -1,6 +1,15 @@
 # VAMS Developer Onboarding Guide
 
-Welcome to the Verifiable and Agentic Modular Stack (VAMS). This guide covers the **v1.3.0-oms** release, which integrates Polygon's Open Money Stack (OMS) — adding institutional identity routing, ERC-4337 session keys, Coinme fiat on-ramp, Insurance Fund yield, and stablecoin payouts — on top of the v1.2.0-autoskill Intelligence Layer.
+**Lifecycle:** Current implementation guide
+**Last verified:** 2026-07-12
+
+> This guide describes source-level capabilities. It does not authorize
+> mainnet, public-testnet, fiat, yield, or wallet-transaction use.
+
+Welcome to the Verifiable and Agentic Modular Stack (VAMS). The v1.3.0-oms
+label is a historical integration milestone; v0.8.0 is the current architecture
+version. OMS, Coinme, Trails, and related SDK paths remain mock-default or
+live-evidence-pending and must fail closed outside local development.
 
 ## What is VAMS?
 VAMS is the "Sovereign Brain" for the Agentic Web. Instead of running your AI agents on centralized AWS servers where they can be de-platformed, or on slow blockchains where they can't afford gas, VAMS provides a verifiable, fast, and multi-provider computation layer.
@@ -13,7 +22,7 @@ If you are building an AI agent (e.g., a DeFi trading bot, a research assistant)
 
 ### Step 1: Install the Neuron Package Dependencies
 ```bash
-pip install -r requirements.txt
+python -m pip install -r neuron/requirements.txt
 ```
 
 ### Step 2: Define your Intent
@@ -70,13 +79,23 @@ You must stake $VAMS to register a block to prevent spam.
 ```solidity
 // In your Hardhat/Foundry console
 ServiceBlockRegistry.registerServiceBlock(
-    "DeepSeek R1 + TDX Wrapper",
-    "ai-inference",
-    "High security inference block",
-    resourceHash,
-    "ipfs://...",
-    500, // 5% Revenue Share on all usage!
-    3    // Minimum Trust Tier required
+    IServiceBlockRegistry.ServiceBlockRegistration({
+        name: "DeepSeek R1 + TDX Wrapper",
+        category: "ai-inference",
+        description: "High security inference block",
+        resourceRequirementsHash: resourceHash,
+        deploymentCID: "celestia://vams-ns/blob123",
+        revenueShareBps: 500, // 5% Revenue Share on all usage!
+        minTrustTier: 3,      // Minimum Trust Tier required
+        manifest: IServiceBlockRegistry.ServiceBlockManifest({
+            manifestHash: manifestHash,
+            capabilityRoot: capabilityRoot,
+            permissionsBitmap: permissionsBitmap,
+            manifestSigner: builder,
+            manifestVersion: 1
+        })
+    }),
+    manifestSignature
 );
 ```
 

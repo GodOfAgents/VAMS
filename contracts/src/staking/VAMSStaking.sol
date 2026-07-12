@@ -7,6 +7,7 @@ import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Permit.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/utils/Pausable.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/utils/math/Math.sol";
 import "./IVAMSStaking.sol";
 import "../token/IVAMSToken.sol"; // Import IVAMSToken for minting
 
@@ -333,12 +334,12 @@ contract VAMSStaking is IVAMSStaking, AccessControl, Pausable, ReentrancyGuard {
         StakeInfo storage info = _stakes[msg.sender];
         StakingTier oldTier = _getTier(info.amount);
 
-        // Mint reward tokens INTO the contract so totalStaked stays backed by real tokens
-        _mintRewards_internal(address(this), amount);
-
         info.amount += amount;
         totalStaked += amount;
         info.rewardDebt = (info.amount * accRewardPerShare) / PRECISION;
+
+        // Mint after accounting effects; a failed mint reverts the full transaction.
+        _mintRewards_internal(address(this), amount);
 
         StakingTier newTier = _getTier(info.amount);
         if (newTier != oldTier) {
@@ -418,17 +419,20 @@ contract VAMSStaking is IVAMSStaking, AccessControl, Pausable, ReentrancyGuard {
         StakingTier tier = _getTier(info.amount);
         uint256 lockMult = _getLockMultiplier(info.lockPeriod);
 
-        uint256 basePower = info.amount;
+        uint256 governanceMult = BPS_DENOMINATOR;
 
         // Apply governance multiplier for Gold and Platinum
         if (tier == StakingTier.Platinum) {
-            basePower = (basePower * GOV_MULT_PLATINUM) / BPS_DENOMINATOR;
+            governanceMult = GOV_MULT_PLATINUM;
         } else if (tier == StakingTier.Gold) {
-            basePower = (basePower * GOV_MULT_GOLD) / BPS_DENOMINATOR;
+            governanceMult = GOV_MULT_GOLD;
         }
 
-        // Apply lock period multiplier
-        return (basePower * lockMult) / BPS_DENOMINATOR;
+        return Math.mulDiv(
+            info.amount,
+            governanceMult * lockMult,
+            BPS_DENOMINATOR * BPS_DENOMINATOR
+        );
     }
 
     /// @inheritdoc IVAMSStaking

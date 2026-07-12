@@ -2,6 +2,7 @@
 pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/access/AccessControl.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "./ISecurityBudgetEnforcer.sol";
 
 // Interfaces for external protocol components
@@ -33,7 +34,7 @@ interface IMetricProvider {
  * @author VAMS Protocol
  * @notice Enforces minimum economic security relative to TVL and active operations.
  */
-contract SecurityBudgetEnforcer is AccessControl, ISecurityBudgetEnforcer {
+contract SecurityBudgetEnforcer is AccessControl, ReentrancyGuard, ISecurityBudgetEnforcer {
     bytes32 public constant KEEPER_ROLE = keccak256("KEEPER_ROLE");
     bytes32 public constant EMERGENCY_ROLE = keccak256("EMERGENCY_ROLE");
 
@@ -49,9 +50,9 @@ contract SecurityBudgetEnforcer is AccessControl, ISecurityBudgetEnforcer {
 
     IPriceOracle public priceOracle;
     IMetricProvider public metricProvider;
-    ITransactionLimit public txLimiter;
-    ISettlement public settlement;
-    IValidatorRegistry public validators;
+    ITransactionLimit public immutable txLimiter;
+    ISettlement public immutable settlement;
+    IValidatorRegistry public immutable validators;
 
     SecurityLevel public currentLevel = SecurityLevel.GREEN;
     uint256 public currentSecurityBudgetUSD;
@@ -79,19 +80,20 @@ contract SecurityBudgetEnforcer is AccessControl, ISecurityBudgetEnforcer {
     /**
      * @notice Called periodically by keepers to assess protocol safety
      */
-    function updateSecurityStatus() external override onlyRole(KEEPER_ROLE) {
+    function updateSecurityStatus() external override nonReentrant onlyRole(KEEPER_ROLE) {
         ProtocolMetrics memory metrics = metricProvider.getMetrics();
         
         // AUDIT FIX ECON06: Check oracle staleness before using price data.
         // Stale prices could lead to incorrect security level assessments.
-        uint256 tokenPrice;
+        uint256 tokenPrice = 0;
         try priceOracle.getVAMSPriceWithTimestamp() returns (uint256 price, uint256 updatedAt) {
             if (block.timestamp - updatedAt > MAX_ORACLE_STALENESS) {
                 emit OraclePriceStale(updatedAt, MAX_ORACLE_STALENESS);
                 // Force CRITICAL level when price is stale — conservative default
                 if (currentLevel != SecurityLevel.CRITICAL) {
-                    _handleLevelTransition(currentLevel, SecurityLevel.CRITICAL);
+                    SecurityLevel oldLevel = currentLevel;
                     currentLevel = SecurityLevel.CRITICAL;
+                    _handleLevelTransition(oldLevel, SecurityLevel.CRITICAL);
                 }
                 return;
             }
@@ -124,8 +126,9 @@ contract SecurityBudgetEnforcer is AccessControl, ISecurityBudgetEnforcer {
 
         // 4. Trigger protective measures if condition deteriorates
         if (newLevel != currentLevel) {
-            _handleLevelTransition(currentLevel, newLevel);
+            SecurityLevel oldLevel = currentLevel;
             currentLevel = newLevel;
+            _handleLevelTransition(oldLevel, newLevel);
         }
     }
 

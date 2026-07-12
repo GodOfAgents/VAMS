@@ -18,9 +18,12 @@ import hashlib
 import json
 import logging
 import os
+import re
+import secrets
 from collections import OrderedDict
 from dataclasses import dataclass, field
-from typing import Optional, Dict, Any, List
+from pathlib import Path
+from typing import Optional, Dict, Any, List, Callable
 from enum import Enum
 
 # Try relative import or fallback to absolute path import
@@ -33,6 +36,10 @@ except ImportError:
         SiraEngine = None
 
 logger = logging.getLogger("vams.semantic_mmu")
+
+MEMORY_ROOT = Path(".data") / "memory"
+SAFE_ADDRESS_PART = re.compile(r"^[A-Za-z0-9._-]{1,96}$")
+MAX_PATCH_BYTES = 65_536
 
 
 class MemoryTier(Enum):
@@ -120,12 +127,16 @@ class SemanticMMU:
         l1_capacity: int = 128,
         l2_provider: str = "near",
         l3_provider: str = "glacier",
-        enable_access_log: bool = True
+        enable_access_log: bool = True,
+        session_id: Optional[str] = None,
+        review_authorizer: Optional[Callable[[str, str], bool]] = None,
     ):
         self.l1_capacity = l1_capacity
         self.l2_provider = l2_provider
         self.l3_provider = l3_provider
         self.enable_access_log = enable_access_log
+        self.session_id = session_id or secrets.token_hex(16)
+        self.review_authorizer = review_authorizer
         
         # L1 Cache (LRU ordered dict)
         self._l1_cache: OrderedDict[str, MemoryPage] = OrderedDict()
@@ -147,7 +158,8 @@ class SemanticMMU:
             "l3_hits": 0,
             "page_faults": 0,
             "promotions": 0,
-            "evictions": 0
+            "evictions": 0,
+            "hard_resets": 0,
         }
         
         # Load real providers if available
@@ -169,16 +181,49 @@ class SemanticMMU:
         return hashlib.sha256(
             json.dumps(content, sort_keys=True, default=str).encode()
         ).hexdigest()
+
+    @staticmethod
+    def _validate_address(address: str) -> List[str]:
+        if not isinstance(address, str) or not address or len(address) > 256:
+            raise ValueError("Memory address must be a non-empty string of at most 256 characters")
+        if "\\" in address or address.startswith("/"):
+            raise ValueError("Memory address must be a relative POSIX-style path")
+        parts = address.split("/")
+        if any(part in {"", ".", ".."} or not SAFE_ADDRESS_PART.fullmatch(part) for part in parts):
+            raise ValueError("Memory address contains an unsafe path component")
+        return parts
+
+    @classmethod
+    def _memory_path(cls, address: str) -> Path:
+        parts = cls._validate_address(address)
+        root = MEMORY_ROOT.resolve()
+        path = root.joinpath(*parts[:-1], parts[-1] + ".json").resolve()
+        if root not in path.parents:
+            raise ValueError("Memory address escapes the HORMA root")
+        return path
     
     def _log_access(self, address: str, operation: str, tier: MemoryTier):
         """Log memory access for ZK proof generation."""
+        if not self.enable_access_log:
+            return
+        self._access_log.append(
+            {
+                "address_hash": hashlib.sha256(address.encode("utf-8")).hexdigest(),
+                "operation": operation,
+                "tier": tier.value,
+                "session_id": self.session_id,
+                "timestamp": time.time(),
+            }
+        )
+        if len(self._access_log) > 10_000:
+            del self._access_log[: len(self._access_log) - 10_000]
+
     def _write_to_horma_fs(self, page: MemoryPage):
         """Write page to the HORMA hierarchical filesystem (L3 Storage)."""
-        # Formulate path under .data/memory/
-        path = os.path.join(".data", "memory", page.address + ".json")
+        path = self._memory_path(page.address)
         try:
-            os.makedirs(os.path.dirname(path), exist_ok=True)
-            with open(path, 'w') as f:
+            path.parent.mkdir(parents=True, exist_ok=True)
+            with path.open('w', encoding="utf-8") as f:
                 # Store serialized page metadata and content
                 json.dump({
                     "address": page.address,
@@ -233,11 +278,16 @@ class SemanticMMU:
         Folds raw trace steps into a compact, high-density summary block
         and stores it in the HORMA directory layout.
         """
-        if not os.path.exists(raw_trace_path):
+        self._validate_address(f"workflows/{workflow_id}/folded_summary")
+        trace_path = Path(raw_trace_path).resolve()
+        memory_root = MEMORY_ROOT.resolve()
+        if memory_root not in trace_path.parents:
+            raise ValueError("HIPIF raw traces must be contained under .data/memory")
+        if not trace_path.exists() or not trace_path.is_file():
             return "No raw trace found."
             
         try:
-            with open(raw_trace_path, 'r') as f:
+            with trace_path.open('r', encoding="utf-8") as f:
                 raw_content = f.read()
                 
             # Perform folding (mocking fast LLM translation logic using rule-based compression)
@@ -261,34 +311,62 @@ class SemanticMMU:
             self.store(address, folded_summary, tier=MemoryTier.L3_STORAGE)
             
             # Safely delete raw trace
-            os.remove(raw_trace_path)
+            trace_path.unlink()
             logger.info(f"HIPIF: Folded raw trace of {workflow_id} and deleted original.")
             return folded_summary
         except Exception as e:
             logger.error(f"Failed to run HIPIF folding: {e}")
             return f"HIPIF folding failed: {e}"
 
-    def apply_memory_patch(self, address: str, patch: Dict[str, Any]) -> bool:
+    def apply_memory_patch(
+        self,
+        address: str,
+        patch: Dict[str, Any],
+        *,
+        review_approved: bool = False,
+        reviewed_by: Optional[str] = None,
+    ) -> bool:
         """
         EvoMem Patch-Based Evolution.
         Appends a 4-tuple change patch to a jsonl file for auditability:
         {previous_state, new_state, rationale_for_change, supporting_evidence}
         """
-        # Validate 4-tuple fields
+        self._validate_address(address)
+        if (
+            not review_approved
+            or not reviewed_by
+            or not self._review_is_authorized("evomem_patch", reviewed_by)
+        ):
+            logger.warning(
+                "EvoMem: Persistent mutation requires an authorized reviewer."
+            )
+            return False
+
         required_fields = {"previous_state", "new_state", "rationale_for_change", "supporting_evidence"}
         if not all(field in patch for field in required_fields):
             logger.warning("EvoMem: Patch lacks one or more of the 4 required fields.")
             return False
             
-        patch_dir = os.path.join(".data", "memory", "patches")
-        os.makedirs(patch_dir, exist_ok=True)
+        reviewed_patch = {
+            **patch,
+            "reviewed_by": reviewed_by,
+            "reviewed_at": int(time.time()),
+            "session_id": self.session_id,
+        }
+        encoded_patch = json.dumps(reviewed_patch, sort_keys=True, default=str)
+        if len(encoded_patch.encode("utf-8")) > MAX_PATCH_BYTES:
+            logger.warning("EvoMem: Patch exceeds the 64 KiB persistence limit.")
+            return False
+
+        patch_dir = MEMORY_ROOT / "patches"
+        patch_dir.mkdir(parents=True, exist_ok=True)
         # Safe filename from address
         safe_name = address.replace("/", "_").replace("\\", "_")
-        patch_path = os.path.join(patch_dir, f"{safe_name}.jsonl")
+        patch_path = patch_dir / f"{safe_name}.jsonl"
         
         try:
-            with open(patch_path, 'a') as f:
-                f.write(json.dumps(patch) + "\n")
+            with patch_path.open('a', encoding="utf-8") as f:
+                f.write(encoded_patch + "\n")
             logger.info(f"EvoMem: Appended memory patch for {address}.")
             return True
         except Exception as e:
@@ -314,6 +392,7 @@ class SemanticMMU:
         Returns:
             MemoryPage with content hash
         """
+        self._validate_address(address)
         content_hash = self._hash_content(content)
         
         page = MemoryPage(
@@ -378,6 +457,8 @@ class SemanticMMU:
         Returns:
             MemoryPage if found, None if total cache miss
         """
+        self._validate_address(address)
+
         # Try L1 (in-process, <1ms)
         if address in self._l1_cache:
             self._l1_cache.move_to_end(address)
@@ -407,10 +488,10 @@ class SemanticMMU:
         
         # Try checking local HORMA FS if not in _l3_store dictionary
         if address not in self._l3_store:
-            path = os.path.join(".data", "memory", address + ".json")
-            if os.path.exists(path):
+            path = self._memory_path(address)
+            if path.exists():
                 try:
-                    with open(path, 'r') as f:
+                    with path.open('r', encoding="utf-8") as f:
                         data = json.load(f)
                         page = MemoryPage(
                             address=data["address"],
@@ -460,10 +541,10 @@ class SemanticMMU:
         self._l3_store.pop(address, None)
         
         # Remove from HORMA FS as well
-        path = os.path.join(".data", "memory", address + ".json")
-        if os.path.exists(path):
+        path = self._memory_path(address)
+        if path.exists():
             try:
-                os.remove(path)
+                path.unlink()
             except Exception:
                 pass
                 
@@ -513,6 +594,55 @@ class SemanticMMU:
         if page:
             return page.content
         return None
+
+    def hard_reset_session(
+        self,
+        *,
+        purge_persistent: bool = False,
+        review_approved: bool = False,
+        reviewed_by: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Clear session memory and rotate its identity without leaking content."""
+        if purge_persistent and (
+            not review_approved
+            or not reviewed_by
+            or not self._review_is_authorized("persistent_purge", reviewed_by)
+        ):
+            raise PermissionError("Persistent L3 erasure requires an authorized reviewer")
+
+        cleared = {
+            "l1_pages": len(self._l1_cache),
+            "l2_pages": len(self._l2_store),
+            "access_events": len(self._access_log),
+            "l3_pages": len(self._l3_store) if purge_persistent else 0,
+        }
+        old_session_hash = hashlib.sha256(self.session_id.encode("utf-8")).hexdigest()
+
+        self._l1_cache.clear()
+        self._l2_store.clear()
+        self._access_log.clear()
+        if purge_persistent:
+            for address in list(self._l3_store):
+                path = self._memory_path(address)
+                if path.exists():
+                    path.unlink()
+            self._l3_store.clear()
+
+        self.session_id = secrets.token_hex(16)
+        self._stats["hard_resets"] += 1
+        return {
+            **cleared,
+            "old_session_hash": old_session_hash,
+            "persistent_purged": purge_persistent,
+        }
+
+    def _review_is_authorized(self, action: str, reviewed_by: str) -> bool:
+        if self.review_authorizer is None:
+            return False
+        try:
+            return bool(self.review_authorizer(action, reviewed_by))
+        except Exception:
+            return False
 
 
     

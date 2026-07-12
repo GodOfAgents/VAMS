@@ -1,14 +1,22 @@
 name = "GodOfAgents/vams-cardano"
 version = "0.1.0"
-licence = "MIT"
+compiler = "v1.1.21"
+plutus = "v3"
 description = "VAMS Brain Layer — Cardano governance, insurance, and agent identity validators"
 
 [repository]
-platform = "github"
 user = "GodOfAgents"
 project = "VAMS"
+platform = "github"
 
 [[dependencies]]
-source = "github"
 name = "aiken-lang/stdlib"
 version = "v2"
+source = "github"
+
+[[dependencies]]
+name = "aiken-lang/fuzz"
+version = "v2"
+source = "github"
+
+[config]

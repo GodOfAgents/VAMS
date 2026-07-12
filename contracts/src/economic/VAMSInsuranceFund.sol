@@ -5,7 +5,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import "./IVAMSInsuranceFund.sol";
 import "../base/VAMSUpgradeableBase.sol";
@@ -23,7 +23,7 @@ import "../base/VAMSUpgradeableBase.sol";
 contract VAMSInsuranceFund is 
     Initializable, 
     AccessControlUpgradeable,
-    ReentrancyGuardUpgradeable,
+    ReentrancyGuard,
     PausableUpgradeable,
     IVAMSInsuranceFund 
 {
@@ -113,7 +113,6 @@ contract VAMSInsuranceFund is
         if (_admin == address(0) || _vamsToken == address(0)) revert ZeroAddress();
         
         __AccessControl_init();
-        __ReentrancyGuard_init();
         __Pausable_init();
         
         _grantRole(DEFAULT_ADMIN_ROLE, _admin);

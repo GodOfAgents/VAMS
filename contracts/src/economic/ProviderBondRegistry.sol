@@ -6,7 +6,7 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 import {IProviderBondRegistry} from "./IProviderBondRegistry.sol";
 
@@ -31,7 +31,7 @@ contract ProviderBondRegistry is
     Initializable,
     AccessControlUpgradeable,
     PausableUpgradeable,
-    ReentrancyGuardUpgradeable,
+    ReentrancyGuard,
     IProviderBondRegistry 
 {
     using SafeERC20 for IERC20;
@@ -116,7 +116,6 @@ contract ProviderBondRegistry is
         
         __AccessControl_init();
         __Pausable_init();
-        __ReentrancyGuard_init();
         
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
         _grantRole(ADMIN_ROLE, admin);

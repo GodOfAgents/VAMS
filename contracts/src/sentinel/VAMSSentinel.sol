@@ -193,17 +193,18 @@ contract VAMSSentinel is AccessControl, ReentrancyGuard, IVAMSSentinel {
             uint256 currentTVL = ITVLProvider(tvlProvider).getTotalValueLocked();
 
             if (lastKnownTVL > 0 && lastTVLBlock < block.number) {
-                uint256 drainThreshold = (lastKnownTVL * thresholds.tvlDrainBps) / 10_000;
+                uint256 previousTVL = lastKnownTVL;
+                uint256 drainThreshold = (previousTVL * thresholds.tvlDrainBps) / 10_000;
 
-                if (currentTVL + drainThreshold < lastKnownTVL) {
+                if (currentTVL + drainThreshold < previousTVL) {
                     // TVL dropped more than threshold in 1 block
+                    lastKnownTVL = currentTVL;
+                    lastTVLBlock = block.number;
                     _triggerPause(
                         AnomalyType.TVL_DRAIN,
                         9, // severity
-                        keccak256(abi.encode(lastKnownTVL, currentTVL, block.number))
+                        keccak256(abi.encode(previousTVL, currentTVL, block.number))
                     );
-                    lastKnownTVL = currentTVL;
-                    lastTVLBlock = block.number;
                     return true;
                 }
             }

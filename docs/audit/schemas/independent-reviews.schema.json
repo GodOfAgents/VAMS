@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vams.network/schemas/audit/independent-reviews.schema.json",
+  "title": "VAMS Independent Review Index",
+  "type": "object",
+  "required": ["schema_version", "commit_sha", "reviews"],
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "commit_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "reviews": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["domain", "reviewer", "organization", "approved", "blocking_findings_open", "report_sha256", "approved_at"],
+        "properties": {
+          "domain": {"enum": ["solidity-governance", "aiken-bridge", "economics-centralization", "gateway-agent-sdk", "privacy", "ai-agent-safety"]},
+          "reviewer": {"type": "string", "minLength": 1},
+          "organization": {"type": "string", "minLength": 1},
+          "approved": {"const": true},
+          "blocking_findings_open": {"const": 0},
+          "report_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+          "approved_at": {"type": "string", "format": "date-time"}
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

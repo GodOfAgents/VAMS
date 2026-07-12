@@ -1,63 +1,118 @@
-# VAMS Protocol - Deployed Contracts
+# VAMS Public Testnet Deployment Evidence Register
 
-## 🚀 V2 Release (Ready for Testnet)
+**Status Date:** 2026-07-12
+**Last verified:** 2026-07-12
+**Stage:** Pre-testnet deployment evidence template
+**Scope:** Polygon Amoy contracts and Cardano Pre-Prod validators
 
-These contracts have been updated for **VAMS v0.6.0** Tokenomics, Governance, and Open Money Stack (OMS) integrations.
-*Status: Ready for Testnet Deployment (Polygon Amoy + Cardano Pre-Prod).*
-
-### Core Infrastructure
-| Contract | Description | Tests |
-| :--- | :--- | :--- |
-| **`VAMSToken`** | ERC-20 with Votes, Permit, Burnable, and Anti-Whale extensions. | 45 |
-| **`VAMSVesting`** | Handles vesting for Community, Team, and Investors across 7 vesting types. | 3 |
-| **`VAMSStaking`** | Global staking logic with APY locks and dynamic unbonding unbonding rules. | 42 |
-
-### Governance Layer
-| Contract | Description | Tests |
-| :--- | :--- | :--- |
-| **`VAMSGovernor`** | OpenZeppelin Governor (Voting, Proposals, Quadratic logic). | 1 |
-| **`VAMSTimelockController`** | Final executor of governance proposals; holds Treasury funds. | 32 |
-| **`GovernorExecutor`** | Bridge governance — executes Cardano Brain intents on Polygon. | 31 |
-
-### Economic Layer (ICN Modular Stack + OMS Extensions)
-| Contract | Description | Tests |
-| :--- | :--- | :--- |
-| **`ComposedSettlement`** | Asynchronous escrow settlements for orchestrated multi-provider blueprints. | 14 |
-| **`RegionAwareDEC`** | Dynamic geospatial token emissions, capping regional datacenter shares at 30%. | 16 |
-| **`RegionalIncentives`** | Evaluates geospatial network utilization to distribute regional bonuses. | 17 |
-| **`RewardDistributor`** | Distributes incentives with stablecoin and hybrid opt-in split payouts. | 15 |
-| **`VAMSInsuranceFund`** | Slash protection, including yield management capabilities (YIELD_MANAGER_ROLE). | 5 |
-| **`VAMSFeeCollector`** | Collects protocol fees (capped mathematically at 5 bps) and routes to yield/burn. | 39 |
-| **`TransactionCompensation`** | Manages insurance payout payouts for failed bridges or compute dropouts. | 35 |
-| **`BatchSettlement`** | Aggregates micro-transactions with verified signatures to mitigate MEV. | 28 |
-
-### Security & Routing
-| Contract | Description | Tests |
-| :--- | :--- | :--- |
-| **`VAMSSentinel`** | Autonomous on-chain anomaly detection watchdog (L1/L2/L3 layers). | 28 |
-| **`SLAEnforcer`** | Executes oracle-mediated SLA compliance checks and slashes operators. | 8 |
-| **`SlashingParameters`** | Configurable slashing parameters per node violation type. | 31 |
-| **`VAMSRouter`** | Conditional routing coordinator executing CLR prioritizations. | 3 |
-| **`VAMSAgentRegistry`** | On-chain registry for verified agents, supporting Sequence wallet authorized keys. | 26 |
-| **`VAMSHardwareRegistry`** | Hardware registry verifying node capabilities and collateral bonds. | 22 |
-| **`VAMSTrustAggregator`** | Aggregates consensus scores for nodes from 10 distinct security inputs. | 19 |
-
-### Base Infrastructure
-| Contract | Description | Tests |
-| :--- | :--- | :--- |
-| **`VAMSUpgradeableBase`** | UUPS proxy base with storage gap safeguards. | 11 |
-| **`VAMSEmergencyPausable`** | Pauses selected targets in emergency with 48h auto-expiry. | 12 |
-| **`InsuranceFundProxy`** | Bridge-compatible proxy managing cross-chain claims. | 8 |
-
-**Total: 619 tests across 30 suites**
+This document is the source of truth for public testnet deployment artifacts.
+It does not claim mainnet deployment, production readiness, final audit status,
+or completed public testnet launch.
 
 ---
 
-## ⚠️ Archived V1 Contracts (Deprecated)
+## Recording Rules
 
-> **History:** V1 deployer was compromised (2026-02-11). The addresses below are abandoned and fully deprecated.
+- Record only verified deployment facts.
+- Leave unknown fields as `Pending`; do not use placeholder addresses.
+- Every deployed contract or validator must include network, chain identifier,
+  transaction hash, verification status, privileged role owner, Safe/multisig,
+  timelock status, and notes.
+- Privileged roles must move from deployer custody to Gnosis Safe or equivalent
+  multisig before public operator onboarding.
+- Any changed address requires a new row or a dated note preserving the old
+  evidence trail.
 
-| Contract | Address | Status |
-| :--- | :--- | :--- |
-| **$VAMS Token (V1)** | `0x62a705eD1cAbBBafFCd99e9b2497024031329fd4` | 🔴 **DEAD** |
-| **Timelock (V1)** | `0xabCC69eff15753B547E02AB56FC0aa62765fb768` | 🔴 **DEAD** |
+---
+
+## Network Baseline
+
+| Network | Chain Identifier | Purpose | Status |
+| --- | --- | --- | --- |
+| Polygon Amoy | `80002` | EVM public testnet target for Solidity contracts | Planned |
+| Cardano Pre-Prod | Network magic `1` | Validator rehearsal target for Aiken scripts | Planned |
+
+---
+
+## Polygon Amoy Contract Evidence
+
+| Contract | Proxy Address | Implementation Address | Deploy Tx | Verification | Role Owner | Safe / Multisig | Timelock | Notes |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `VAMSToken` | Pending | Pending | Pending | Pending | Pending | Pending | Pending | ERC-20 governance token; max supply invariant remains $1 \times 10^9$. |
+| `VAMSVesting` | Pending | Pending | Pending | Pending | Pending | Pending | Pending | Vesting schedules require deploy-time beneficiary review. |
+| `VAMSStaking` | Pending | Pending | Pending | Pending | Pending | Pending | Pending | Reward solvency evidence required before launch. |
+| `VAMSGovernor` | Pending | Pending | Pending | Pending | Pending | Pending | Pending | Governance wiring must point to testnet timelock. |
+| `VAMSTimelockController` | Pending | Pending | Pending | Pending | Pending | Pending | Pending | Minimum delay and proposer/executor roles must be recorded. |
+| `GovernorExecutor` | Pending | Pending | Pending | Pending | Pending | Pending | Pending | Cross-chain proof separation must be preserved. |
+| `ComposedSettlement` | Pending | Pending | Pending | Pending | Pending | Pending | Pending | Escrow role ownership and pause path required. |
+| `RegionAwareDEC` | Pending | Pending | Pending | Pending | Pending | Pending | Pending | Regional emission cap must remain <= 30%. |
+| `RegionalIncentives` | Pending | Pending | Pending | Pending | Pending | Pending | Pending | Thin-liquidity price-floor parameters required. |
+| `RewardDistributor` | Pending | Pending | Pending | Pending | Pending | Pending | Pending | Stablecoin/hybrid payout routes require live integration review. |
+| `VAMSInsuranceFund` | Pending | Pending | Pending | Pending | Pending | Pending | Pending | Yield allocation cap must remain <= 30%. |
+| `VAMSFeeCollector` | Pending | Pending | Pending | Pending | Pending | Pending | Pending | Fee cap evidence required. |
+| `TransactionCompensation` | Pending | Pending | Pending | Pending | Pending | Pending | Pending | Compensation solvency evidence required. |
+| `BatchSettlement` | Pending | Pending | Pending | Pending | Pending | Pending | Pending | Signature verification evidence required. |
+| `VAMSSentinel` | Pending | Pending | Pending | Pending | Pending | Pending | Pending | Sentinel pause/slash authority must be Safe-controlled. |
+| `SLAEnforcer` | Pending | Pending | Pending | Pending | Pending | Pending | Pending | Oracle freshness evidence required. |
+| `SlashingParameters` | Pending | Pending | Pending | Pending | Pending | Pending | Pending | Parameter changes require timelock evidence. |
+| `VAMSRouter` | Pending | Pending | Pending | Pending | Pending | Pending | Pending | CLR routing parameters require deploy-time review. |
+| `VAMSAgentRegistry` | Pending | Pending | Pending | Pending | Pending | Pending | Pending | Authorized wallet/session-key constraints required. |
+| `VAMSHardwareRegistry` | Pending | Pending | Pending | Pending | Pending | Pending | Pending | Hardware collateralization evidence required. |
+| `VAMSTrustAggregator` | Pending | Pending | Pending | Pending | Pending | Pending | Pending | Trust input weighting evidence required. |
+| `VAMSUpgradeableBase` | Pending | Pending | Pending | Pending | Pending | Pending | Pending | Upgrade authority must transfer to Safe/timelock. |
+| `VAMSEmergencyPausable` | Pending | Pending | Pending | Pending | Pending | Pending | Pending | Guardian list and auto-expiry evidence required. |
+| `InsuranceFundProxy` | Pending | Pending | Pending | Pending | Pending | Pending | Pending | Bridge-compatible insurance claims require proof review. |
+
+---
+
+## Cardano Pre-Prod Validator Evidence
+
+| Validator | Script Hash / Address | Deploy Tx | Verification | Role Owner | Safe / Multisig | Timelock | Notes |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| `governor.ak` | Pending | Pending | Pending | Pending | Pending | Pending | Must verify governance continuing-output and timelock handoff rules. |
+| `timelock.ak` | Pending | Pending | Pending | Pending | Pending | Pending | Cancel path requires at least 2 authorized DAO multisig signatures. |
+| `insurance_fund.ak` | Pending | Pending | Pending | Pending | Pending | Pending | Guardian multisig and payout cap evidence required. |
+| `agent_registry.ak` | Pending | Pending | Pending | Pending | Pending | Pending | Agent DID and CIP-68 identity evidence required. |
+
+---
+
+## Required Pre-Testnet Evidence
+
+`contracts/script/DeployV2.s.sol` is a legacy integration script and is not an
+approved public-testnet ceremony. It defaults to a blocked execution path
+because it still contains deployer-controlled placeholder allocations and an
+incomplete multisig handoff. Do not set its legacy acknowledgement
+flag for a public deployment.
+
+The approved Polygon Amoy source ceremony is
+`contracts/script/DeployTestnet.s.sol`. It requires deployed governance and
+treasury Safes with at least 3-of-5 thresholds plus a distinct 2-of-3 emergency
+council, locks execution to chain ID `80002`, enforces a 48-hour timelock,
+assigns the entire fixed supply to the treasury Safe, keeps staking rewards at
+zero without granting the staking contract minter authority, and fails if the
+deployer retains token or timelock roles. Reward activation is outside the
+first public-testnet profile and requires a separately audited solvency design
+plus a 48-hour governance action. Source validation does not replace the
+on-chain evidence required below.
+
+Before public testnet onboarding, attach or link the following evidence:
+
+1. `forge build --sizes` and `forge test -vvv` output for the exact deploy commit.
+2. Slither output for the exact deploy commit, with high findings resolved or explicitly accepted.
+3. `aiken check` output for the exact Cardano validator commit.
+4. Deployment transaction hashes and explorer verification URLs.
+5. Role transfer transactions from deployer to Safe/multisig and timelock.
+6. Safe owner list, threshold, and recovery policy.
+7. Gateway live configuration evidence: Caddy config, loopback bind, DID admin, and mTLS fingerprint allowlist.
+8. Mock-mode promotion scan output proving live DA, identity, TEE, bridge, Trails, Coinme, and gateway audit paths fail closed.
+9. `DeployTestnet.s.sol` simulation and broadcast JSON reviewed against the deployment manifest.
+10. Safe `getOwners()` and `getThreshold()` evidence for governance, treasury, and emergency councils.
+
+---
+
+## Deprecated Historical Addresses
+
+Earlier V1 addresses were documented during pre-hardening work and must not be
+used for public testnet or mainnet claims. If historical references are needed,
+keep them in archival docs with a clear `deprecated` label and never mix them
+with the active public testnet evidence table above.
