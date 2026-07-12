@@ -113,11 +113,22 @@ class TEEProofPlugin(BaseProofPlugin):
             + b"\x00" * 64  # signature placeholder
         )
 
+        root_address = kwargs.get("root_address")
+        if (
+            not isinstance(root_address, bytes)
+            or len(root_address) != 20
+            or root_address == b"\x00" * 20
+        ):
+            raise ValueError("TEE attestations require a non-zero 20-byte root EOA")
+        session_key_address = kwargs.get("session_key_address")
+        if session_key_address is not None and session_key_address == root_address:
+            raise ValueError("root EOA must not be supplied as a session key")
+
         proof_data = self._abi_encode_attestation(
             sgx_quote=sgx_quote,
             mrenclave=mrenclave,
             mrsigner=mrsigner,
-            attested_agent=kwargs.get("root_address", kwargs.get("agent_address", b"\x00" * 20)),
+            attested_agent=root_address,
         )
 
         return ProofResult(

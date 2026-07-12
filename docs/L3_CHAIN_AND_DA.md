@@ -1,7 +1,13 @@
-     # VAMS L3 Chain & Data Availability
+# VAMS L3 Chain & Data Availability
+
+**Lifecycle:** Current design and testnet boundary
+**Last verified:** 2026-07-12
 
 ## Overview
-VAMS (Verifiable Agentic Model Systems) operates its own Layer 3 (L3) chain using **Polygon CDK**. This L3 is configured as a **Validium**, meaning it posts validity proofs to the L2 (Polygon Amoy/Mainnet) but keeps data off-chain for cost efficiency and scalability.
+VAMS (Verifiable and Agentic Modular Stack) contains a Polygon CDK Validium
+prototype and an intended dual-host deployment design. It does not currently
+operate a deployed L3. The `cdk-deployment/` shell script is a local scaffold
+with mock checks, not a production deployment procedure.
 
 To ensure this off-chain data is safe, we use a **Multi-DA Router** with **Data Availability Sampling (DAS)**.
 
@@ -27,7 +33,7 @@ We do not rely on a single DA provider. The `DARouter` dynamically routes data p
 | **Polygon DA** | Committee (DAC) | **Signatures** (2/N) | **L3 State Roots** (Fast, Cheap) |
 | **Celestia** | Decentralized L1 | **DAS** (Sampling) | **Agent Logs**, Public Audit Trail |
 | **Near DA** | Sharded L1 | Optimistic/Light | High-Frequency / Ephemeral Data |
-| **Avail** | Validity L1 | KZG Commitments | Backup for Validity Proofs |
+| **Avail** | Validity L1 | KZG Commitments | Structured stub; blocked from live use |
 
 ## Data Availability Sampling (DAS)
 VAMS agents run light clients that verify data is available without downloading the full block.
@@ -39,10 +45,9 @@ We perform 2D Reed-Solomon sampling. By requesting small random chunks of the da
 We rely on a Data Availability Committee (DAC). Verification involves checking valid signatures from a quorum of committee members.
 
 ## Failover Logic
-1. **Primary**: Attempt Polygon DA.
-2. **Failure**: If DAC is unreachable or signatures are invalid...
-3. **Fallback**: Route payload to Celestia.
-4. **Final Backup**: Route to Avail/Near.
+1. Live audit paths use Celestia and Near only after receipt verification.
+2. Explicitly disabled targets fail instead of silently rerouting.
+3. Avail and EigenDA remain unavailable for live evidence until their adapters are implemented and independently verified.
 
 ## Running Node
 See `cdk-deployment/README.md` for instructions on spinning up a local CDK node.

@@ -81,7 +81,8 @@ class DARouter:
         # In production this calls specific clients in `neuron/verifiers/`
         
         # Simulate Random Failure for fallback testing if MOCK_MODE is enabled
-        if MOCK_MODE and random.random() < 0.1:
+        # This branch injects non-security-critical failures in mock mode only.
+        if MOCK_MODE and random.random() < 0.1:  # nosec B311
             raise Exception("Network Timeout (Simulated via MOCK_MODE)")
         
         tx_hash = hashlib.sha256(data + str(time.time()).encode()).hexdigest()

@@ -205,7 +205,11 @@ class TestEvoMemAndVm:
     
     def test_evomem_patch_tracking(self):
         """Test append-only 4-tuple patch logging."""
-        mmu = SemanticMMU()
+        mmu = SemanticMMU(
+            review_authorizer=lambda action, reviewer: (
+                action == "evomem_patch" and reviewer == "test-reviewer"
+            )
+        )
         address = "config/bridge_endpoints"
         
         patch_info = {
@@ -215,7 +219,12 @@ class TestEvoMemAndVm:
             "supporting_evidence": "404 responses observed"
         }
         
-        success = mmu.apply_memory_patch(address, patch_info)
+        success = mmu.apply_memory_patch(
+            address,
+            patch_info,
+            review_approved=True,
+            reviewed_by="test-reviewer",
+        )
         assert success
         
         # Verify patch file exists in patches directory
@@ -225,6 +234,54 @@ class TestEvoMemAndVm:
         with open(patch_file, 'r') as f:
             stored_patch = json.loads(f.readline().strip())
         assert stored_patch["new_state"] == "http://polygon-amoy.rpc.com/v2"
+        assert stored_patch["reviewed_by"] == "test-reviewer"
+
+    def test_evomem_patch_rejects_unreviewed_persistence(self):
+        mmu = SemanticMMU()
+        patch_info = {
+            "previous_state": "old",
+            "new_state": "new",
+            "rationale_for_change": "test",
+            "supporting_evidence": "evidence",
+        }
+
+        assert mmu.apply_memory_patch("config/value", patch_info) is False
+        assert (
+            mmu.apply_memory_patch(
+                "config/value",
+                patch_info,
+                review_approved=True,
+                reviewed_by="self-asserted-reviewer",
+            )
+            is False
+        )
+
+    def test_hard_reset_clears_session_memory_only(self):
+        mmu = SemanticMMU(session_id="session-a")
+        mmu.store("session/private", {"prompt": "sensitive"}, MemoryTier.L1_CACHE)
+        mmu.store("session/checkpoint", {"nonce": 1}, MemoryTier.L2_RAM)
+        mmu.store("workflows/persistent/summary", "approved", MemoryTier.L3_STORAGE)
+
+        result = mmu.hard_reset_session()
+
+        assert result["l1_pages"] == 1
+        assert result["l2_pages"] == 1
+        assert mmu.fetch("session/private") is None
+        assert mmu.fetch("workflows/persistent/summary") is not None
+        assert mmu.session_id != "session-a"
+
+    def test_memory_paths_reject_traversal(self):
+        mmu = SemanticMMU()
+
+        with pytest.raises(ValueError, match="unsafe path"):
+            mmu.store("../../outside", "blocked", MemoryTier.L3_STORAGE)
+
+    def test_hipif_rejects_trace_outside_memory_root(self, tmp_path):
+        trace = tmp_path / "trace.log"
+        trace.write_text("secret", encoding="utf-8")
+
+        with pytest.raises(ValueError, match="contained under"):
+            SemanticMMU().fold_completed_subtask("workflow", str(trace))
 
     def test_vm_valuation(self):
         """Test memory value consolidation scoring V(m)."""

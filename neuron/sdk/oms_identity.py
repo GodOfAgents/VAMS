@@ -10,7 +10,11 @@ from typing import Dict, Optional
 
 import logging
 
-from neuron.runtime_safety import require_live_secret, require_not_live_mock
+from neuron.runtime_safety import (
+    LiveModeSafetyError,
+    require_live_secret,
+    require_not_live_mock,
+)
 
 logger = logging.getLogger("VAMS-OMS-Identity")
 
@@ -20,7 +24,7 @@ class OMSIdentityVerifier:
     """
     def __init__(self, api_url: str = None, api_key: str = None, mock_mode: Optional[bool] = None):
         self.api_url = api_url or os.getenv("OMS_IDENTITY_API", "https://api.oms.polygon.technology/identity")
-        self.api_key = api_key or os.getenv("OMS_API_KEY", "demo-key")
+        self.api_key = api_key or os.getenv("OMS_API_KEY", "")
         
         # Determine mock mode: parameter takes precedence, then environment variable, defaulting to True
         if mock_mode is not None:
@@ -29,7 +33,9 @@ class OMSIdentityVerifier:
             self.mock_mode = os.getenv("OMS_MOCK_MODE", "true").lower() == "true"
 
         require_not_live_mock("OMSIdentityVerifier", self.mock_mode)
-        require_live_secret("OMSIdentityVerifier", self.api_key, insecure_values={"demo-key"})
+        require_live_secret("OMSIdentityVerifier", self.api_key)
+        if not self.mock_mode and not self.api_key:
+            raise LiveModeSafetyError("OMSIdentityVerifier requires OMS_API_KEY outside mock mode")
             
         logger.info(f"Initialized OMSIdentityVerifier (mock_mode={self.mock_mode}, url={self.api_url})")
 

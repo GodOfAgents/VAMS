@@ -2,6 +2,8 @@
 
 **Audience:** Suppliers — GPU / bare-metal node operators
 **Version:** v1.3.0-oms
+**Lifecycle:** Local and pre-testnet guide
+**Last verified:** 2026-07-12
 **Prerequisites:** Familiarity with the [Developer Guide](./DEVELOPER_GUIDE.md) and
 [Architecture v0.6.0](./team/ARCHITECTURE_v0-6-0.md)
 
@@ -71,7 +73,7 @@ node = VAMSSentinelNode(
     private_key="0xYOUR_OPERATOR_PRIVATE_KEY",
     registry_addr="0xYOUR_REGISTRY_ADDRESS",
     rpc_url="http://localhost:8545",
-    mock_mode=True,  # Set to False to interact with live contracts
+    mock_mode=True,  # Local development only; testnet rejects mock execution.
 )
 
 asyncio.run(node.run_scheduler(interval_seconds=300))
@@ -602,7 +604,7 @@ Quick check after rotation:
 from neuron.sdk.oms_identity import OMSIdentityVerifier
 v = OMSIdentityVerifier()
 print('API URL:', v.api_url)
-print('Real key set:', v.api_key != 'demo-key')
+print('Real key set:', bool(v.api_key))
 ```
 
 ## 11. Cognitive Benchmark Reporting (v0.8.0)
@@ -655,7 +657,7 @@ The gateway receives the heartbeat, verifies the signature, and updates the acti
 | Symptom | Likely Cause | Fix |
 |---|---|---|
 | P3 route returning `403` | `is_verified()` returning `False` | Check `OMS_API_KEY`; verify address at polygon.technology/oms |
-| `demo-key` in logs | `OMS_API_KEY` not set | Set env var; verifier is in stub mode |
+| Placeholder API key in logs | `OMS_API_KEY` not set | Set env var; verifier is in mock mode |
 | `stale=True` for Polygon chain | OMS RPC unreachable | Check `OMS_POLYGON_RPC_PRIMARY`; oracle auto-falls-back to cache |
 | Session key rejected | Expired (>24 h) or over value cap | Restart Neuron — auto-provisions new session key |
 | `setAuthorizedWallet` tx fails | Caller is not agent owner | Use root EOA private key, not session key |

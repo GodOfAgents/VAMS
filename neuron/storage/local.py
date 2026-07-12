@@ -103,7 +103,7 @@ class NeuronStorage:
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
             placeholders = ','.join('?' * len(heartbeat_ids))
-            query = (  # nosec B608
+            query = (
                 "UPDATE heartbeats "
                 "SET synced = 1, synced_at = ? "
                 f"WHERE id IN ({placeholders})"

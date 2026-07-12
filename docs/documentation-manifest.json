@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.0.0",
+  "last_verified": "2026-07-12",
+  "current_architecture_version": "0.8.0",
+  "documents": [
+    {"path":"README.md","lifecycle":"current","authority":"entrypoint"},
+    {"path":"REPO_STATUS_REPORT.md","lifecycle":"current","authority":"status"},
+    {"path":"audit.md","lifecycle":"current","authority":"audit-summary"},
+    {"path":"docs/README.md","lifecycle":"current","authority":"documentation-index"},
+    {"path":"docs/ARCHITECTURE.md","lifecycle":"current","authority":"architecture"},
+    {"path":"docs/VERSIONING.md","lifecycle":"current","authority":"versioning"},
+    {"path":"docs/API_REFERENCE.md","lifecycle":"current","authority":"gateway-api"},
+    {"path":"docs/DEVELOPER_GUIDE.md","lifecycle":"current","authority":"developer-guide"},
+    {"path":"docs/NODE_OPERATORS.md","lifecycle":"current","authority":"operator-guide"},
+    {"path":"docs/role-management-keys.md","lifecycle":"current","authority":"role-policy"},
+    {"path":"docs/L3_CHAIN_AND_DA.md","lifecycle":"current","authority":"da-boundary"},
+    {"path":"docs/GATEWAY_HARDENING_BLUEPRINTS.md","lifecycle":"current","authority":"gateway-deployment"},
+    {"path":"contracts/CONTRACTS.md","lifecycle":"current","authority":"deployment-register"},
+    {"path":"docs/team/ARCHITECTURE_v0-3-0.md","lifecycle":"historical","authority":"architecture-history"},
+    {"path":"docs/team/ARCHITECTURE_v0-4-0.md","lifecycle":"historical","authority":"architecture-history"},
+    {"path":"docs/team/ARCHITECTURE_v0-5-0.md","lifecycle":"historical","authority":"architecture-history"},
+    {"path":"docs/team/ARCHITECTURE_v0-6-0.md","lifecycle":"historical","authority":"architecture-history"},
+    {"path":"docs/team/ARCHITECTURE_v0-7-0.md","lifecycle":"historical","authority":"architecture-history"},
+    {"path":"docs/team/ARCHITECTURE_v0-8-0.md","lifecycle":"current","authority":"architecture-history"}
+  ]
+}

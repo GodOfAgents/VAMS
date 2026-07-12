@@ -1,6 +1,7 @@
 # VAMS Architecture Addendum: v0.6.0 (Polygon OMS Integration)
 
-**Status:** Stable (v1.3.0-oms)
+**Status:** Historical OMS security baseline; mock-default integrations remain live-evidence pending
+**Last verified:** 2026-07-12
 **Replaces:** No prior sections deprecated. This is a **purely additive** addendum to
 [ARCHITECTURE_v0-5-0.md](./ARCHITECTURE_v0-5-0.md) and [ARCHITECTURE_v0-4-0.md](./ARCHITECTURE_v0-4-0.md).
 **Objective:** Integrate Polygon's Open Money Stack (OMS) across 5 phases — covering identity
@@ -442,7 +443,7 @@ The x402 stack is fully integrated into `EmergencyLockdown.s.sol`:
   role granted behave identically to v0.5.0.
 - `TrailsClient` mock mode (`TrailsClient(mock=True)`) is available for all test environments.
 
-The full test suite (**1,083 tests — 619 Forge + 37 Aiken + 427 Pytest**) passes with zero regressions.
+The 1,083-test figure is historical OMS milestone evidence, not a current release claim.
 
 ---
 

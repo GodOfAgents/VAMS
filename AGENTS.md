@@ -80,6 +80,8 @@ Known current implementation constraints:
   protocol status from code, terminal output, or authoritative docs.
 - No silent mock promotion. Mock DA, identity, Trails, fiat, TEE, x402 recovery,
   or escrow-state clients must never run in staging or production.
+- No autonomous prompt-memory mutation in live Service Blocks. Persistent
+  memory must be deterministic infrastructure state, not hidden LLM self-belief.
 - No default credentials. The string `vams2026` must never be accepted as a
   live password, secret, token, or fallback.
 - No unreviewed privileged deployment. Privileged roles require Gnosis Safe or
@@ -151,6 +153,17 @@ $$V(m)=0.4 f_{util}+0.3 f_{align}+0.2 f_{size}+0.1 f_{freq}$$
 
 Only commit memory to DA when the configured threshold is met. Adjusting this
 threshold is high-risk and requires explicit design justification.
+
+Continual-learning safety:
+
+- Service Blocks must declare one memory policy: `STATELESS`, `SESSION_ICL`,
+  `EXTERNAL_READONLY`, or `PERSISTENT_MUTATING_REQUIRES_REVIEW`.
+- Unreviewed autonomous text-memory rewriting is not allowed in live paths.
+- S-MMU, HIPIF, EvoMem, SIRA, and activation-space steering remain valid, but
+  persistent state must be schema/version checked and unrelated task sequences
+  must start from a hard-reset context window.
+- Sentinel gain telemetry is observational until calibrated:
+  $$Gain = Reward_{stateful} - Reward_{stateless}$$
 
 CHC composer scoring:
 
@@ -287,6 +300,7 @@ If a tool is unavailable locally, state that clearly and do not fabricate output
   staging or production.
 - Preserve fail-closed semantics in `OMSIdentityVerifier`.
 - Preserve bridge proof separation in `bridge_executor.py`.
+- Preserve hard-reset context boundaries between unrelated task sequences.
 - Prefer Pydantic or typed dataclasses over ad hoc dictionaries for public
   request/response surfaces.
 

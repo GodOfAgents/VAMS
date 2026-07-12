@@ -6,7 +6,8 @@
 
 # VAMS Architecture Addendum: v0.4.0 (ICN-Inspired Modular Stack)
 
-**Status:** Deployed (Sprint 13-16)
+**Status:** Implemented in source; deployment evidence pending
+**Last verified:** 2026-07-12
 **Replaces:** Partial sections of `ARCHITECTURE_v0-3-0.md`. This is an addendum.
 **Objective:** Evolve the monolithic agentic framework into a fully composable, decentralized infrastructure stack inspired by the Impossible Cloud Network (ICN).
 

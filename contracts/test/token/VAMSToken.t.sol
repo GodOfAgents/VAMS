@@ -204,6 +204,20 @@ contract VAMSTokenTest is BaseTest {
         vm.expectRevert();
         vamsToken.mint(user1, 1000 ether);
     }
+
+    function test_Mint_RevertsAboveFixedSupplyCap() public {
+        uint256 attemptedSupply = vamsToken.INITIAL_SUPPLY() + 1;
+        uint256 maxSupply = vamsToken.MAX_SUPPLY();
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IVAMSToken.MaxSupplyExceeded.selector,
+                attemptedSupply,
+                maxSupply
+            )
+        );
+        vm.prank(admin);
+        vamsToken.mint(user1, 1);
+    }
     
     // ============ Burning Tests ============
     

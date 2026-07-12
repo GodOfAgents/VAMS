@@ -12,7 +12,7 @@ def test_wallet_creation():
     assert owner in manager.wallets
 
 def test_session_key_creation():
-    manager = SequenceWalletManager()
+    manager = SequenceWalletManager(config={"core_contracts": ["0xContract1", "0xContract2"]})
     session_mgr = manager.get_session_manager()
     
     allowed = ["0xContract1", "0xContract2"]
@@ -21,11 +21,11 @@ def test_session_key_creation():
     assert "private_key" in session
     assert "session_key_address" in session
     assert session["max_value_per_tx"] == 1000
-    assert session["allowed_contracts"] == allowed
+    assert session["allowed_contracts"] == [address.lower() for address in allowed]
     assert session["expires_at"] > datetime.now(timezone.utc).timestamp()
 
 def test_session_scope_verification():
-    manager = SequenceWalletManager()
+    manager = SequenceWalletManager(config={"core_contracts": ["0xContract1", "0xContract2"]})
     session_mgr = manager.get_session_manager()
     
     allowed = ["0xContract1", "0xContract2"]
@@ -42,26 +42,44 @@ def test_session_scope_verification():
     assert session_mgr.verify_session_scope(addr, "0xContract1", 60000) == False
 
 def test_session_expiry():
-    manager = SequenceWalletManager()
+    manager = SequenceWalletManager(config={"core_contracts": ["0xContract"]})
     session_mgr = manager.get_session_manager()
     
-    session = session_mgr.create_session_key(TrustTier.BRONZE, ["0xContract"], validity_hours=-1) # Already expired
-    addr = session["session_key_address"]
-    
-    assert session_mgr.verify_session_scope(addr, "0xContract", 10) == False
+    with pytest.raises(ValueError, match="between 1 and 24"):
+        session_mgr.create_session_key(
+            TrustTier.BRONZE, ["0xContract"], validity_hours=-1
+        )
 
 def test_trust_tier_mapping():
-    manager = SequenceWalletManager()
+    contracts = ["0xBronze", "0xSilver", "0xGold", "0xPlatinum"]
+    manager = SequenceWalletManager(config={"core_contracts": contracts})
     session_mgr = manager.get_session_manager()
     
-    s_bronze = session_mgr.create_session_key(TrustTier.BRONZE, [])
+    s_bronze = session_mgr.create_session_key(TrustTier.BRONZE, [contracts[0]])
     assert s_bronze["max_value_per_tx"] == 100
     
-    s_silver = session_mgr.create_session_key(TrustTier.SILVER, [])
+    s_silver = session_mgr.create_session_key(TrustTier.SILVER, [contracts[1]])
     assert s_silver["max_value_per_tx"] == 1000
     
-    s_gold = session_mgr.create_session_key(TrustTier.GOLD, [])
+    s_gold = session_mgr.create_session_key(TrustTier.GOLD, [contracts[2]])
     assert s_gold["max_value_per_tx"] == 50000
     
-    s_platinum = session_mgr.create_session_key(TrustTier.PLATINUM, [])
+    s_platinum = session_mgr.create_session_key(TrustTier.PLATINUM, [contracts[3]])
     assert s_platinum["max_value_per_tx"] == float('inf')
+
+
+def test_session_key_rejects_more_than_24_hours():
+    manager = SequenceWalletManager(config={"core_contracts": ["0xCore"]})
+    with pytest.raises(ValueError, match="between 1 and 24"):
+        manager.get_session_manager().create_session_key(
+            TrustTier.GOLD, ["0xCore"], validity_hours=25
+        )
+
+
+def test_session_key_rejects_empty_or_non_core_allowlist():
+    manager = SequenceWalletManager(config={"core_contracts": ["0xCore"]})
+    session_mgr = manager.get_session_manager()
+    with pytest.raises(ValueError, match="non-empty"):
+        session_mgr.create_session_key(TrustTier.GOLD, [])
+    with pytest.raises(PermissionError, match="outside"):
+        session_mgr.create_session_key(TrustTier.GOLD, ["0xAttacker"])

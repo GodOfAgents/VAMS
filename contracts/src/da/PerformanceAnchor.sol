@@ -3,7 +3,7 @@ pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "../interfaces/IPerformanceAnchor.sol";
 import "../interfaces/ISLAEnforcer.sol";
 
@@ -21,7 +21,7 @@ import "../interfaces/ISLAEnforcer.sol";
 contract PerformanceAnchor is
     Initializable,
     AccessControlUpgradeable,
-    ReentrancyGuardUpgradeable,
+    ReentrancyGuard,
     IPerformanceAnchor
 {
     // ============================================================
@@ -69,7 +69,6 @@ contract PerformanceAnchor is
         address _slaEnforcer
     ) public initializer {
         __AccessControl_init();
-        __ReentrancyGuard_init();
 
         require(_admin != address(0), "Admin address zero");
         require(_slaEnforcer != address(0), "SLAEnforcer address zero");

@@ -1,6 +1,9 @@
 # VAMS Security: Role & Key Management
 
-This document outlines the operational security procedures, roles, and administrative key architecture for the Verifiable and Agentic Modular Stack (VAMS). 
+**Lifecycle:** Current testnet operating policy
+**Last verified:** 2026-07-12
+
+This document outlines the operational security procedures, roles, and administrative key architecture for the Verifiable and Agentic Modular Stack (VAMS).
 
 Following the v1.0.0-icn architectural upgrade, VAMS has migrated to a robust `VAMSUpgradeableBase` architecture to strictly segment operational permissions across our modular framework. Single-key administration has been deprecated.
 
@@ -39,14 +42,14 @@ You must set up distinct keys (hardware wallets or Multi-Party Computation walle
 
 ---
 
-## 3. Governance Phases
+## 3. Testnet Governance Policy
 
-VAMS uses a 4-phase rollout plan for progressively decentralizing these keys via `VAMSUpgradeableBase`:
-
-1. **Phase 1 (Deployer EOA)**: Restricted to testnets. A single deployer holds all roles for bootstrapping.
-2. **Phase 2 (Team Multisig)**: Recommended for early mainnet. Uses `transferToMultisig()` to migrate `DEFAULT_ADMIN_ROLE` and `UPGRADER_ROLE` securely to a 3-of-5 Safe multisig.
-3. **Phase 3 (DAO Governance)**: Uses `transferToDAO()` to shift authority to an on-chain Timelock controller governed by `$VAMS` token quadratic voting. 
-4. **Phase 4 (Immutable)**: Optional final phase. Invoking `renounceUpgradeability()` permanently deletes the `UPGRADER_ROLE`, sealing the protocol logic forever.
+Public testnet does not permit a deployer-controlled bootstrapping phase. The
+deployment ceremony requires distinct 3-of-5 governance and treasury Safes, a
+separate 2-of-3 pause-only emergency council, and a minimum 48-hour timelock.
+The deployer must retain no privileged role after deployment. The exact owners,
+thresholds, role transfers, and transaction hashes remain pending until the
+rehearsal and deployment manifests are recorded in `contracts/CONTRACTS.md`.
 
 ---
 
@@ -83,8 +86,8 @@ Two environment variables are introduced in v0.6.0 for the OMS Compliance and RP
 
 > [!CAUTION]
 > Never commit `OMS_API_KEY` or `OMS_IDENTITY_API` to version control. Load exclusively from
-> environment variables or a secrets manager. The `oms_identity.py` module falls back to
-> `"demo-key"` if `OMS_API_KEY` is unset — this is **not** safe for production use.
+> environment variables or a secrets manager. `oms_identity.py` fails closed outside
+> mock mode when `OMS_API_KEY` is unset.
 
 ---
 
@@ -95,10 +98,10 @@ following expiry rules:
 
 | TrustTier | Default Validity | Maximum Validity | Can Re-issue Without Root? |
 |---|---|---|---|
-| BRONZE | 24h | 48h | Yes (up to 3 consecutive) |
-| SILVER | 24h | 72h | Yes (up to 5 consecutive) |
-| GOLD | 24h | 7 days | Yes, with governance approval |
-| PLATINUM | 24h | 30 days | Yes, with governance approval |
+| BRONZE | 24h | 24h | No |
+| SILVER | 24h | 24h | No |
+| GOLD | 24h | 24h | No |
+| PLATINUM | 24h | 24h | No |
 
 **Expiry enforcement:** Session keys are validated on-chain by the Sequence ERC-4337
 `EntryPoint`. An expired key causes the `UserOperation` to be rejected at the paymaster stage —

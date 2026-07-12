@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vams.network/schemas/audit/runtime-integration.schema.json",
+  "title": "VAMS Testnet Runtime Integration Report",
+  "type": "object",
+  "required": ["schema_version", "commit_sha", "environment", "generated_at", "gateway_checks", "da_receipts", "excluded_live_routes"],
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "commit_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "environment": {"const": "testnet"},
+    "generated_at": {"type": "string", "format": "date-time"},
+    "gateway_checks": {"type": "object", "additionalProperties": {"type": "boolean"}},
+    "da_receipts": {
+      "type": "array",
+      "minItems": 2,
+      "items": {
+        "type": "object",
+        "required": ["provider", "submission_id", "payload_sha256", "submitted_at", "retrieval_verified"],
+        "properties": {
+          "provider": {"enum": ["celestia", "near"]},
+          "submission_id": {"type": "string", "minLength": 1},
+          "payload_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+          "submitted_at": {"type": "string", "format": "date-time"},
+          "retrieval_verified": {"const": true}
+        },
+        "additionalProperties": false
+      }
+    },
+    "excluded_live_routes": {"type": "array", "uniqueItems": true, "items": {"type": "string"}}
+  },
+  "additionalProperties": false
+}

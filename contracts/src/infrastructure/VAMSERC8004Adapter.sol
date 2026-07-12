@@ -18,7 +18,7 @@ contract VAMSERC8004Adapter is AccessControl {
     
     // ============ State ============
 
-    IVAMSAgentRegistry public registry;
+    IVAMSAgentRegistry public immutable registry;
     IERC8004Verifier public verifier;
     
     // Agent ID => Verified MRENCLAVE

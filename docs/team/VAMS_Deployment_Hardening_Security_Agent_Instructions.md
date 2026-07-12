@@ -62,7 +62,7 @@ You operate with precision, humility, and zero tolerance for shortcuts that coul
 | **EigenDA Adapter** | ❌ Stub | Low — always `mock_mode=True` | Line 1: `"""EigenDA Adapter — Stub"""` |
 | **ActivationAnomalyDetector** | ✅ Implemented | Medium — 13KB, Mahalanobis 3σ | Needs production calibration data |
 | **AUTOSKILL** (5 modules) | ✅ Implemented | Medium — activation_cache, anomaly_detector, skill_discovery, steering_engine, world_model | Not battle-tested in production |
-| **Gateway** (gateway/server.py) | ⚠️ Functional | Low | **Default password `"vams2026"`** (line 159); HTTP Basic Auth only; ECDSA verification optional; DA audit log always `mock_mode=True`; no DID auth, no mTLS, no HTTPS, no rate limiting, no CORS, no input schema validation |
+| **Gateway** (gateway/server.py) | ⚠️ Functional | Low | **Default password `the retired default gateway password`** (line 159); HTTP Basic Auth only; ECDSA verification optional; DA audit log always `mock_mode=True`; no DID auth, no mTLS, no HTTPS, no rate limiting, no CORS, no input schema validation |
 | **Frontend** (frontend-vite/) | ⚠️ Builds | Low | `src/main.jsx` exists (not .tsx); builds to `dist/`; but is a **landing page only** (App.jsx is 68KB monolith); no wallet integration; no CSP/SRI/security headers; loads Google Fonts externally |
 | **CI/CD** (.github/) | ❌ **Does NOT exist** | None | `.github/` contains **only `SECURITY.md`** — no workflows directory, no pipelines, no automation at all. All "CI-bound" items in audit.md are unverified |
 | **Cognitive Layer** (v0.7.0) | ⚠️ New | Low-Medium | SIRA, HORMA, HIPIF, ProPlay, EvoMem — varying implementation maturity |
@@ -83,7 +83,7 @@ These **must be resolved before any testnet deployment**:
 | # | Issue | Risk | Remediation |
 |---|---|---|---|
 | **P0-1** | **No CI/CD pipeline exists** | All automated security claims are unverified; no gate against regressions | Create `.github/workflows/` with Forge, Aiken, Python, JS gates immediately |
-| **P0-2** | Default password `"vams2026"` in gateway/server.py (line 159) | Unauthorized access to all gateway endpoints | Replace with env-injected secret + DID-based auth |
+| **P0-2** | Default password `the retired default gateway password` in gateway/server.py (line 159) | Unauthorized access to all gateway endpoints | Replace with env-injected secret + DID-based auth |
 | **P0-3** | **17 failing Solidity tests** (557 pass, 17 fail — not 619 claimed) | Broken contracts in TrustAggregator, X402Settlement, Sentinel, RegionAwareDEC | Fix all 17 failures before any deployment; correct test count in audit.md |
 | **P0-4** | No secret scanning anywhere | Credentials may leak to repo (historical key compromise on 2026-02-11 is precedent) | Add gitleaks + trufflehog; scan retroactively |
 | **P0-5** | Gateway runs plain HTTP on `0.0.0.0:8000` with no CORS, no rate limiting | MITM, DoS, CSRF attacks | Add HTTPS/TLS, CORS config, rate limiting |
@@ -171,7 +171,7 @@ These should be resolved **before mainnet preparation begins**:
 `gateway/server.py`: REST endpoints (heartbeats, node registration, status). Must enforce DID auth, mTLS or equivalent, strict input validation, privacy-preserving logs.
 
 > [!WARNING]
-> **Current state:** Gateway uses a hardcoded default password `"vams2026"`, lacks DID auth, mTLS, rate limiting, and schema validation. See [P0-1 through P0-5](#immediate-remediation-priorities-p0).
+> **Current state:** Gateway uses a hardcoded default password `the retired default gateway password`, lacks DID auth, mTLS, rate limiting, and schema validation. See [P0-1 through P0-5](#immediate-remediation-priorities-p0).
 
 ### Frontend
 
@@ -469,7 +469,7 @@ FROM gcr.io/distroless/python3-debian12
 #### Gateway (server.py)
 
 > [!CAUTION]
-> **Before any deployment beyond local dev:** Remove the default password `"vams2026"` and implement proper authentication. This is a P0 blocker.
+> **Before any deployment beyond local dev:** Remove the default password `the retired default gateway password` and implement proper authentication. This is a P0 blocker.
 
 **Required hardening (implement before staging):**
 - [ ] Replace default password with env-injected secret
@@ -844,7 +844,7 @@ The v0.7.0 Cognitive Layer introduces new attack surfaces that require specific 
 - [ ] Frontend bundle contains secrets or lacks proper CSP / security headers
 - [ ] CI pipeline uses long-lived cloud credentials instead of OIDC or TEE-bound auth
 - [ ] **Stub/mock DA adapter used in staging or production deployment path**
-- [ ] **Gateway deployed with default password `"vams2026"`**
+- [ ] **Gateway deployed with default password `the retired default gateway password`**
 - [ ] **Frontend deployed without successful build verification**
 - [ ] **DePIN or regional deployment without hybrid price floor scaling enabled in geofences where active provider count $N < 5$**
 

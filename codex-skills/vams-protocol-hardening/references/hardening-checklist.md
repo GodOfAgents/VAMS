@@ -2,7 +2,7 @@
 
 Gateway:
 
-- Require environment-injected admin secret; reject `vams2026`.
+- Require environment-injected admin secret; reject retired default passwords.
 - Add DID signature verification for admin/state-changing routes.
 - Add mTLS or equivalent client auth for telemetry endpoints.
 - Use strict Pydantic models for request bodies.

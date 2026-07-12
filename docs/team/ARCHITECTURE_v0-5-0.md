@@ -6,7 +6,8 @@
 
 # VAMS Architecture Addendum: v0.5.0 (AUTOSKILL Intelligence Layer)
 
-**Status:** Stable (v1.2.0-autoskill)  
+**Status:** Historical AUTOSKILL milestone; implemented source with live verification pending
+**Last verified:** 2026-07-12
 **Replaces:** No prior sections deprecated. This is a **purely additive** addendum to [ARCHITECTURE_v0-4-0.md](./ARCHITECTURE_v0-4-0.md).  
 **Objective:** Integrate PCA-based model-native skill discovery, activation-space anomaly detection, and inference-time steering into the VAMS v0.4.0 modular stack.
 
@@ -254,4 +255,4 @@ with safe defaults:
 - `ScorerWeights.skill_alignment` defaults to `0.0`. Existing blueprints without `skill_vector`
   are scored identically to v0.4.0.
 
-The full test suite (373 tests) passes with zero regressions.
+The 373-test figure is historical milestone evidence, not a current release claim.

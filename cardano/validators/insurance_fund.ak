@@ -11,6 +11,7 @@
 ////   4. PayoutClaim — releases funds after approval threshold met
 
 use aiken/collection/list
+use aiken/fuzz
 use aiken/primitive/bytearray
 use cardano/assets
 use cardano/transaction.{OutputReference, Transaction}
@@ -145,4 +146,10 @@ test min_claim_is_1_ada() {
 
 test claim_window_is_7_days() {
   claim_window_ms == 7 * 24 * 60 * 60 * 1000
+}
+
+test prop_max_payout_never_exceeds_half(raw_balance via fuzz.int_at_least(0)) {
+  let balance = raw_balance % 1_000_000_000_001
+  let payout = apply_bps(balance, max_payout_bps)
+  payout >= 0 && payout <= balance / 2
 }

@@ -4,6 +4,7 @@
 //// used across all VAMS Cardano validators.
 
 use aiken/collection/list
+use aiken/fuzz
 
 // ═══════════════════ Math Helpers ═══════════════════
 
@@ -126,4 +127,37 @@ test in_range_below() {
 
 test in_range_boundary() {
   in_range(0, 0, 100) == True && in_range(100, 0, 100) == True
+}
+
+test prop_isqrt_bounds(raw_n via fuzz.int_at_least(0)) {
+  let n = raw_n % 1_000_001
+  let root = isqrt(n)
+  root * root <= n && (root + 1) * (root + 1) > n
+}
+
+test prop_apply_bps_is_bounded(
+  (raw_value, raw_bps) via fuzz.both(
+    fuzz.int_at_least(0),
+    fuzz.int_at_least(0),
+  ),
+) {
+  let value = raw_value % 1_000_000_001
+  let bps = raw_bps % 10_001
+  let result = apply_bps(value, bps)
+  result >= 0 && result <= value
+}
+
+test prop_apply_bps_monotonic_in_rate(
+  (raw_value, raw_rate) via fuzz.both(
+    fuzz.int_at_least(0),
+    fuzz.int_at_least(0),
+  ),
+) {
+  let value = raw_value % 1_000_000_001
+  let lower_rate = raw_rate % 10_000
+  apply_bps(value, lower_rate) <= apply_bps(value, lower_rate + 1)
+}
+
+test prop_in_range_matches_ordering(value via fuzz.int()) {
+  in_range(value, -1_000, 1_000) == (value >= -1_000 && value <= 1_000)
 }

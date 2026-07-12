@@ -15,7 +15,7 @@ contract StateCheckpointRegistryV2 is AccessControl {
 
     bytes32 public constant ARBITRATOR_ROLE = keccak256("ARBITRATOR_ROLE");
 
-    IERC20 public vamsToken;
+    IERC20 public immutable vamsToken;
 
     uint256 public constant CHALLENGE_PERIOD = 7 days;
     uint256 public constant REQUIRED_BOND = 50_000e18; // 50,000 VAMS required to submit or challenge

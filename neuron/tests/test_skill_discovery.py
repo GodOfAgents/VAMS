@@ -245,7 +245,7 @@ class TestSkillAlignment:
 class TestPersistence:
     def test_save_and_load(self, fitted_model, synthetic_activations):
         with tempfile.TemporaryDirectory() as tmpdir:
-            path = os.path.join(tmpdir, "skill_model.pkl")
+            path = os.path.join(tmpdir, "skill_model.npz")
             fitted_model.save(path)
             assert os.path.exists(path)
 
@@ -261,10 +261,19 @@ class TestPersistence:
                 original_result, loaded_result, atol=1e-5
             )
 
+    def test_load_rejects_executable_pickle_payload(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            path = os.path.join(tmpdir, "untrusted.pkl")
+            with open(path, "wb") as handle:
+                handle.write(b"\x80\x04cos\nsystem\nX\x02\x00\x00\x00id\x85R.")
+
+            with pytest.raises(ValueError, match="Invalid SkillDiscovery model archive"):
+                SkillDiscovery.load(path)
+
     def test_save_unfitted_raises(self):
         model = SkillDiscovery(n_components=5)
         with tempfile.TemporaryDirectory() as tmpdir:
-            path = os.path.join(tmpdir, "model.pkl")
+            path = os.path.join(tmpdir, "model.npz")
             with pytest.raises(RuntimeError, match="not been fitted"):
                 model.save(path)
 
