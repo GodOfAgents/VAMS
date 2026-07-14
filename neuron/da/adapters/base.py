@@ -10,6 +10,10 @@ from typing import Optional
 from neuron.da.models import DAProtocol, DAReceipt
 
 
+class DAAdapterError(RuntimeError):
+    """Raised when a DA adapter cannot produce verifiable live behavior."""
+
+
 class DAAdapter(ABC):
     """
     Interface every DA layer must implement for performance auditing.
@@ -20,6 +24,9 @@ class DAAdapter(ABC):
 
     protocol: DAProtocol
     name: str
+    supports_live_submission: bool = False
+    supports_exact_retrieval: bool = False
+    release_evidence_eligible: bool = False
 
     def __init__(self, rpc_url: str, namespace: bytes = b"vams-perf-v1", mock_mode: bool = False):
         self.rpc_url = rpc_url

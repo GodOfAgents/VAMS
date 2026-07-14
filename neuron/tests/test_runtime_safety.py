@@ -81,7 +81,7 @@ def test_live_environment_excludes_audit_log_stub_routes(monkeypatch):
     from neuron.da.performance_audit import PerformanceAuditLog
 
     audit_log = PerformanceAuditLog(mock_mode=False)
-    assert set(audit_log.adapters) == {DAProtocol.CELESTIA, DAProtocol.NEAR_DA}
+    assert set(audit_log.adapters) == {DAProtocol.CELESTIA}
 
 
 def test_live_environment_rejects_enabling_da_stub_routes(monkeypatch):

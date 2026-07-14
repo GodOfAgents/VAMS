@@ -4,6 +4,11 @@
   "staking_rewards_enabled": false,
   "real_fiat_enabled": false,
   "real_yield_capital_enabled": false,
+  "vdso": {
+    "mode": "off",
+    "authoritative_enabled": false,
+    "value_bearing_domains_enabled": false
+  },
   "exposure_limits": {
     "single_operation_insurance_reserve_bps": 100,
     "daily_aggregate_insurance_reserve_bps": 1000

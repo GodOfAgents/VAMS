@@ -1,0 +1,16 @@
+[package]
+name = "vir-runtime"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+
+[dependencies]
+vir-codec = { path = "../vir-codec" }
+vir-types = { path = "../vir-types" }
+
+[lints]
+workspace = true
+

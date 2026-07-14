@@ -4,7 +4,6 @@ import time
 from unittest.mock import patch
 
 import pytest
-from ecdsa import SECP256k1, SigningKey
 from fastapi.testclient import TestClient
 
 
@@ -14,17 +13,17 @@ sys.path.insert(0, root_dir)
 os.environ.setdefault("GATEWAY_ADMIN_PASSWORD", "SecureTestPassword123!")
 
 from gateway import server
+from neuron.secp256k1 import generate_private_key, public_key_bytes, sign_message
 
 
 def _signed_admin_headers(method: str, path: str):
-    signing_key = SigningKey.generate(curve=SECP256k1)
-    verifying_key = signing_key.verifying_key
-    did = "did:key:" + verifying_key.to_string().hex()
+    signing_key = generate_private_key()
+    did = "did:key:" + public_key_bytes(signing_key).hex()
     timestamp = str(time.time())
     message = f"VAMS_ADMIN_AUTH:{method}:{path}:{timestamp}"
     return {
         "X-VAMS-DID": did,
-        "X-VAMS-Signature": signing_key.sign(message.encode()).hex(),
+        "X-VAMS-Signature": sign_message(signing_key, message.encode()).hex(),
         "X-VAMS-Timestamp": timestamp,
     }, did
 

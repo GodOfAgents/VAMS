@@ -4,7 +4,6 @@ import time
 import json
 import unittest
 from fastapi.testclient import TestClient
-from ecdsa import SigningKey, SECP256k1
 
 # Ensure root directory is in sys.path
 root_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -19,6 +18,7 @@ os.environ["GATEWAY_ADMIN_PASSWORD"] = "SecureTestPassword123!"
 
 from gateway.server import app, nodes
 from neuron.gateway.rate_limiter import RateLimiter
+from neuron.secp256k1 import generate_private_key, public_key_bytes, sign_message
 
 class TestGatewayCurrent(unittest.TestCase):
     
@@ -28,9 +28,8 @@ class TestGatewayCurrent(unittest.TestCase):
         
     def test_heartbeat_new_agent(self):
         """Test sending heartbeat with valid signature registers a new agent."""
-        sk = SigningKey.generate(curve=SECP256k1)
-        vk = sk.verifying_key
-        public_key_hex = vk.to_string().hex()
+        sk = generate_private_key()
+        public_key_hex = public_key_bytes(sk).hex()
         
         node_id = "0x" + "01" * 32
         payload = {
@@ -44,7 +43,7 @@ class TestGatewayCurrent(unittest.TestCase):
         }
         payload_str = json.dumps(payload)
         
-        signature = sk.sign(payload_str.encode()).hex()
+        signature = sign_message(sk, payload_str.encode()).hex()
         
         headers = {
             "X-VAMS-DID": "did:key:" + public_key_hex,
@@ -67,9 +66,8 @@ class TestGatewayCurrent(unittest.TestCase):
 
     def test_heartbeat_invalid_signature(self):
         """Test sending heartbeat with invalid signature returns 403."""
-        sk = SigningKey.generate(curve=SECP256k1)
-        vk = sk.verifying_key
-        public_key_hex = vk.to_string().hex()
+        sk = generate_private_key()
+        public_key_hex = public_key_bytes(sk).hex()
         
         node_id = "0x" + "02" * 32
         payload = {
@@ -80,8 +78,8 @@ class TestGatewayCurrent(unittest.TestCase):
         payload_str = json.dumps(payload)
         
         # Invalid signature (wrong key)
-        other_sk = SigningKey.generate(curve=SECP256k1)
-        signature = other_sk.sign(payload_str.encode()).hex()
+        other_sk = generate_private_key()
+        signature = sign_message(other_sk, payload_str.encode()).hex()
         
         hb_data = {
             "payload": payload_str,

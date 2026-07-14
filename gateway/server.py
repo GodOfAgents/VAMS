@@ -31,11 +31,11 @@ try:
     from starlette.status import HTTP_401_UNAUTHORIZED, HTTP_500_INTERNAL_SERVER_ERROR
     from pydantic import BaseModel
     import uvicorn
-    from ecdsa import VerifyingKey, SECP256k1, BadSignatureError
+    from neuron.secp256k1 import verify_message
 except ImportError:
     print("❌ MISSING DEPENDENCIES")
     print("Please run: pip install -r requirements.txt")
-    print("Or: pip install fastapi uvicorn pydantic ecdsa")
+    print("Or: pip install fastapi uvicorn pydantic cryptography")
     import sys
     sys.exit(1)
 
@@ -147,6 +147,13 @@ app = FastAPI(
     description="Central gateway for VAMS Neuron nodes",
     lifespan=lifespan
 )
+
+# VDSO is an isolated, fail-closed shadow/canary router. Importing it may stop
+# startup when an unsafe live configuration requests canary or authoritative
+# mode; this is intentional and must not be converted into an optional mock.
+from gateway.vdso import router as vdso_router
+
+app.include_router(vdso_router)
 
 # --- MIDDLEWARES ---
 from fastapi.middleware.cors import CORSMiddleware
@@ -299,6 +306,7 @@ app.add_middleware(
         "X-VAMS-DID",
         "X-VAMS-Signature",
         "X-VAMS-Timestamp",
+        "X-VAMS-Content-SHA256",
     ],
 )
 
@@ -407,13 +415,10 @@ def verify_did_signature(did: str, signature_hex: str, timestamp_str: str, metho
             return False
 
         message = f"VAMS_ADMIN_AUTH:{method}:{path}:{timestamp_str}"
-        vk = VerifyingKey.from_string(
+        verified = verify_message(
             bytes.fromhex(pubkey_hex),
-            curve=SECP256k1
-        )
-        verified = vk.verify(
+            message.encode(),
             bytes.fromhex(signature_hex),
-            message.encode()
         )
         if verified:
             used_did_signatures[replay_key] = now
@@ -690,16 +695,13 @@ async def receive_heartbeat(heartbeat: HeartbeatRequest, http_request: Request):
                     detail="First heartbeat must include public_key in payload"
                 )
             
-            if pub_key_hex:
-                vk = VerifyingKey.from_string(
-                    bytes.fromhex(pub_key_hex),
-                    curve=SECP256k1
-                )
-                vk.verify(
-                    bytes.fromhex(heartbeat.signature),
-                    heartbeat.payload.encode()
-                )
-        except BadSignatureError:
+            if pub_key_hex and not verify_message(
+                bytes.fromhex(pub_key_hex),
+                heartbeat.payload.encode(),
+                bytes.fromhex(heartbeat.signature),
+            ):
+                raise ValueError("signature verification failed")
+        except (TypeError, ValueError):
             raise HTTPException(status_code=403, detail="Invalid heartbeat signature")
         
         # Update or create node entry

@@ -1,0 +1,132 @@
+{
+  "schema_version": "1.0.0",
+  "scope": [
+    "neuron/da",
+    "neuron/sentinel",
+    "neuron/vdso"
+  ],
+  "publishers": [
+    {
+      "id": "avail-blob-submission",
+      "path": "neuron/da/adapters/avail_adapter.py",
+      "symbol": "AvailDAAdapter.submit_blob",
+      "channel": "local-simulation",
+      "payload_policy": "local-mock-only",
+      "operational_live_capable": false,
+      "release_evidence_eligible": false,
+      "block_reason": "Structured stub; live environments reject construction and receipts are never verified.",
+      "control_refs": [
+        "neuron/da/adapters/avail_adapter.py::AvailDAAdapter.verify_blob",
+        "neuron/runtime_safety.py::require_not_live_mock"
+      ],
+      "tests": [
+        "neuron/tests/test_runtime_safety.py"
+      ]
+    },
+    {
+      "id": "celestia-blob-submission",
+      "path": "neuron/da/adapters/celestia_adapter.py",
+      "symbol": "CelestiaDAAdapter.submit_blob",
+      "channel": "public-da",
+      "payload_policy": "transport-only",
+      "operational_live_capable": true,
+      "release_evidence_eligible": false,
+      "block_reason": "Exact retrieval exists, but release evidence requires an independently operated observer.",
+      "control_refs": [
+        "neuron/da/adapters/celestia_adapter.py::CelestiaDAAdapter.verify_blob",
+        "neuron/da/models.py::AuditReport.serialize"
+      ],
+      "tests": [
+        "neuron/tests/test_da_live_boundaries.py",
+        "neuron/tests/test_performance_audit.py"
+      ]
+    },
+    {
+      "id": "eigenda-blob-submission",
+      "path": "neuron/da/adapters/eigenda_adapter.py",
+      "symbol": "EigenDAAdapter.submit_blob",
+      "channel": "local-simulation",
+      "payload_policy": "local-mock-only",
+      "operational_live_capable": false,
+      "release_evidence_eligible": false,
+      "block_reason": "Structured stub; live environments reject construction and receipts are never verified.",
+      "control_refs": [
+        "neuron/da/adapters/eigenda_adapter.py::EigenDAAdapter.verify_blob",
+        "neuron/runtime_safety.py::require_not_live_mock"
+      ],
+      "tests": [
+        "neuron/tests/test_runtime_safety.py"
+      ]
+    },
+    {
+      "id": "near-blob-submission",
+      "path": "neuron/da/adapters/near_adapter.py",
+      "symbol": "NearDAAdapter.submit_blob",
+      "channel": "local-simulation",
+      "payload_policy": "local-mock-only",
+      "operational_live_capable": false,
+      "release_evidence_eligible": false,
+      "block_reason": "Signed testnet submission and exact blob retrieval are not implemented.",
+      "control_refs": [
+        "neuron/da/adapters/near_adapter.py::NearDAAdapter.verify_blob",
+        "neuron/da/performance_audit.py::PerformanceAuditLog._enabled_protocols"
+      ],
+      "tests": [
+        "neuron/tests/test_da_live_boundaries.py"
+      ]
+    },
+    {
+      "id": "performance-audit-publisher",
+      "path": "neuron/da/performance_audit.py",
+      "symbol": "PerformanceAuditLog.publish_sentinel_report",
+      "channel": "public-da",
+      "payload_policy": "sanitized-public",
+      "operational_live_capable": true,
+      "release_evidence_eligible": false,
+      "block_reason": "Operational submission does not establish independent release evidence.",
+      "control_refs": [
+        "neuron/da/models.py::AuditReport.serialize",
+        "neuron/da/models.py::pseudonymize_public_identifier",
+        "neuron/da/models.py::sanitize_public_kpis",
+        "neuron/da/models.py::sanitize_public_telemetry"
+      ],
+      "tests": [
+        "neuron/tests/test_da_live_boundaries.py",
+        "neuron/tests/test_performance_audit.py"
+      ]
+    },
+    {
+      "id": "legacy-sentinel-da-publisher",
+      "path": "neuron/sentinel/da_publisher.py",
+      "symbol": "DAPublisher.publish_report",
+      "channel": "local-simulation",
+      "payload_policy": "local-mock-only",
+      "operational_live_capable": false,
+      "release_evidence_eligible": false,
+      "block_reason": "Legacy simulated publisher is not wired into VAMSSentinelNode live paths.",
+      "control_refs": [
+        "neuron/sentinel/sentinel_node.py::VAMSSentinelNode.__init__"
+      ],
+      "tests": [
+        "neuron/tests/test_sentinel.py"
+      ]
+    },
+    {
+      "id": "vdso-encrypted-sidecar-publisher",
+      "path": "neuron/vdso/da.py",
+      "symbol": "EncryptedSidecarPublisher.publish",
+      "channel": "encrypted-da",
+      "payload_policy": "encrypted-only",
+      "operational_live_capable": false,
+      "release_evidence_eligible": false,
+      "block_reason": "Current Celestia and Near adapters are explicitly ineligible for VDSO live evidence.",
+      "control_refs": [
+        "neuron/vdso/da.py::serialize_encrypted_sidecar",
+        "neuron/vdso/sidecar.py::EncryptedWitnessSidecar.validate_integrity"
+      ],
+      "tests": [
+        "neuron/tests/test_vdso_canary.py"
+      ]
+    }
+  ]
+}

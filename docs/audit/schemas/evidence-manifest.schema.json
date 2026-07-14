@@ -7,9 +7,9 @@
   "properties": {
     "schema_version": {"const": "1.0.0"},
     "commit_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
-    "dirty": {"type": "boolean"},
+    "dirty": {"const": false},
     "generated_at": {"type": "string", "format": "date-time"},
-    "environment": {"type": "string", "minLength": 1},
+    "environment": {"const": "github-actions"},
     "control_matrix_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
     "track_summary": {
       "type": "object",
@@ -30,15 +30,17 @@
     },
     "results": {
       "type": "array",
+      "minItems": 15,
+      "maxItems": 15,
       "items": {
         "type": "object",
-        "required": ["name", "status"],
+        "required": ["name", "status", "command", "artifact_sha256", "reviewer"],
         "properties": {
-          "name": {"type": "string"},
+          "name": {"enum": ["audit-program", "public-content", "default-credentials", "mock-mode", "gitleaks", "trufflehog", "solidity", "slither", "aiken", "vir-core", "python", "semgrep", "frontend", "gateway-config", "sbom"]},
           "status": {"enum": ["success", "failure", "skipped", "pending"]},
-          "command": {"type": "string"},
+          "command": {"type": "string", "minLength": 1},
           "artifact_sha256": {"type": ["string", "null"]},
-          "reviewer": {"type": ["string", "null"]}
+          "reviewer": {"const": "github-actions"}
         },
         "additionalProperties": false
       }

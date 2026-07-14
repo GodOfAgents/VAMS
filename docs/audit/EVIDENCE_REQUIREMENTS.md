@@ -10,6 +10,11 @@ release commit. `assurance-index.json` maps every applicable track to one or mor
 repository-relative artifacts and SHA-256 hashes. The signed aggregate manifest
 must bind those files before promotion.
 
+The complete Git history must also pass Gitleaks and TruffleHog. The blocking
+historical private-key findings recorded in `docs/audit/GITLEAKS_ADJUDICATION.md`
+require credential rotation, role-impact review, coordinated history cleanup,
+and a clean rescan; an unconditional baseline is not acceptable evidence.
+
 ## Canary Inputs
 
 | File | Required contents |
@@ -20,6 +25,22 @@ must bind those files before promotion.
 | `cardano-preprod-rehearsal.json` | Equivalent multisig/timelock parameters, validator artifacts, rollback evidence |
 | `runtime-integration.json` | External Gateway checks, real Celestia/Near submission and retrieval receipts, excluded mock/incomplete routes |
 | `privacy-review.json` | Approved inventory, retention, redaction, publisher coverage, public-content review, zero blockers |
+
+`runtime-integration.json` uses schema version `2.0.0`. Every Gateway check
+must bind a non-empty repository evidence artifact and SHA-256 digest. The file
+must contain exactly one Celestia Mocha and one Near Testnet receipt, distinct
+submitter and retrieval-observer identities, `mock_mode=false`, provider-native
+inclusion references, and retrieved payload bytes whose artifact SHA-256 equals
+the submitted payload SHA-256. Current VDSO Celestia/Near adapters, Avail,
+EigenDA, and every mock/incomplete integration remain listed in
+`excluded_live_routes`.
+
+`privacy-review.json` also uses schema version `2.0.0`. Boolean approvals alone
+are invalid: a named human reviewer and organization must bind separate data
+inventory, retention, redaction-test, public-content, and publisher-inventory
+artifacts. `docs/audit/privacy-publisher-inventory.json` is checked against
+publisher symbols discovered from the DA, Sentinel, and VDSO source trees so a
+new sink cannot bypass review by omission.
 
 ## Public Inputs
 

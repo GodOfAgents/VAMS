@@ -8,14 +8,13 @@ Reference: https://docs.celestia.org/developers/node-api
 Uses: DA_PROVIDERS["celestia"]["rpc"] from config.py
 """
 
-import hashlib
-import time
-import json
 import base64
+import binascii
+import hashlib
 import logging
 from typing import Optional
 
-from neuron.da.adapters.base import DAAdapter
+from neuron.da.adapters.base import DAAdapter, DAAdapterError
 from neuron.da.models import DAProtocol, DAReceipt
 
 logger = logging.getLogger("VAMS-DA-Celestia")
@@ -33,11 +32,16 @@ class CelestiaDAAdapter(DAAdapter):
     - POST /blob.Get      — Retrieve blobs
     - POST /header.GetByHeight — Get block header for verification
 
-    Falls back to mock mode when MOCK_MODE=true or RPC is unreachable.
+    Mock behavior is available only when ``mock_mode`` is explicitly enabled.
+    Live RPC failures never fall back to locally generated receipts.
     """
 
     protocol = DAProtocol.CELESTIA
     name = "Celestia (DAS)"
+    supports_live_submission = True
+    supports_exact_retrieval = True
+    # Release evidence additionally requires an independently operated observer.
+    release_evidence_eligible = False
 
     def __init__(self, rpc_url: str = "https://rpc-mocha.pops.one", mock_mode: bool = False):
         super().__init__(rpc_url, namespace=VAMS_PERF_NAMESPACE, mock_mode=mock_mode)
@@ -73,67 +77,72 @@ class CelestiaDAAdapter(DAAdapter):
                     headers={"Content-Type": "application/json"},
                     timeout=aiohttp.ClientTimeout(total=30),
                 ) as resp:
+                    resp.raise_for_status()
                     result = await resp.json()
 
                     if "error" in result:
-                        logger.warning(f"Celestia RPC error: {result['error']}. Falling back to mock.")
-                        return self._mock_submit(data, commitment)
+                        raise DAAdapterError(
+                            f"Celestia RPC rejected blob submission: {result['error']}"
+                        )
 
-                    height = result.get("result", self._mock_height + 1)
-                    blob_id = f"celestia:{height}:{hashlib.sha256(data).hexdigest()[:16]}"
+                    height = result.get("result")
+                    if (
+                        isinstance(height, bool)
+                        or not isinstance(height, int)
+                        or height <= 0
+                    ):
+                        raise DAAdapterError(
+                            "Celestia submission response lacks a positive integer height"
+                        )
+                    payload_hash = hashlib.sha256(data).hexdigest()
+                    blob_id = f"celestia:{height}:{payload_hash}"
 
                     logger.info(f"Blob submitted to Celestia at height {height}")
 
                     return DAReceipt(
                         protocol=DAProtocol.CELESTIA,
                         blob_id=blob_id,
-                        height=int(height) if isinstance(height, (int, float)) else self._mock_height + 1,
+                        height=height,
                         commitment=commitment,
-                        verified=True,
+                        verified=False,
                         raw_response=result,
                     )
 
-        except ImportError:
-            logger.warning("aiohttp not installed. Using mock mode.")
-            return self._mock_submit(data, commitment)
+        except ImportError as exc:
+            raise DAAdapterError(
+                "aiohttp is required for live Celestia submission"
+            ) from exc
+        except DAAdapterError:
+            raise
         except Exception as e:
-            logger.warning(f"Celestia submission failed: {e}. Falling back to mock.")
-            return self._mock_submit(data, commitment)
+            raise DAAdapterError("Celestia live submission failed") from e
 
     async def verify_blob(self, receipt: DAReceipt) -> bool:
         if self.mock_mode:
-            return True
-
-        try:
-            import aiohttp
-
-            # Celestia Node API: header.GetByHeight
-            payload = {
-                "id": 1,
-                "jsonrpc": "2.0",
-                "method": "header.GetByHeight",
-                "params": [receipt.height],
-            }
-
-            async with aiohttp.ClientSession() as session:
-                async with session.post(
-                    self.rpc_url,
-                    json=payload,
-                    headers={"Content-Type": "application/json"},
-                    timeout=aiohttp.ClientTimeout(total=10),
-                ) as resp:
-                    result = await resp.json()
-                    # If we get a valid header back, the block exists
-                    return "result" in result and result["result"] is not None
-
-        except Exception as e:
-            logger.warning(f"Celestia verification failed: {e}")
             return False
+        if receipt.protocol is not self.protocol:
+            return False
+        if not isinstance(receipt.commitment, str):
+            return False
+        try:
+            retrieved = await self.get_blob(receipt.blob_id)
+        except Exception as exc:
+            logger.warning("Celestia exact retrieval failed: %s", exc)
+            return False
+        if not isinstance(retrieved, bytes):
+            return False
+        expected = "0x" + hashlib.sha256(retrieved).hexdigest()
+        return expected == receipt.commitment.lower()
 
     async def get_blob(self, blob_id: str) -> Optional[bytes]:
         # Parse blob_id format: "celestia:{height}:{hash_prefix}"
         parts = blob_id.split(":")
         if len(parts) != 3 or parts[0] != "celestia":
+            return None
+        expected_hash = parts[2].lower()
+        if len(expected_hash) not in {16, 64} or any(
+            char not in "0123456789abcdef" for char in expected_hash
+        ):
             return None
 
         if self.mock_mode:
@@ -142,6 +151,8 @@ class CelestiaDAAdapter(DAAdapter):
         try:
             import aiohttp
             height = int(parts[1])
+            if height <= 0:
+                return None
             ns_b64 = base64.b64encode(self.namespace).decode("ascii")
 
             payload = {
@@ -158,10 +169,22 @@ class CelestiaDAAdapter(DAAdapter):
                     headers={"Content-Type": "application/json"},
                     timeout=aiohttp.ClientTimeout(total=10),
                 ) as resp:
+                    resp.raise_for_status()
                     result = await resp.json()
+                    if "error" in result:
+                        return None
                     blobs = result.get("result", [])
-                    if blobs and len(blobs) > 0:
-                        return base64.b64decode(blobs[0].get("data", ""))
+                    if not isinstance(blobs, list):
+                        return None
+                    for blob in blobs:
+                        if not isinstance(blob, dict):
+                            continue
+                        try:
+                            data = base64.b64decode(blob.get("data", ""), validate=True)
+                        except (TypeError, ValueError, binascii.Error):
+                            continue
+                        if hashlib.sha256(data).hexdigest().startswith(expected_hash):
+                            return data
                     return None
 
         except Exception as e:
@@ -171,12 +194,12 @@ class CelestiaDAAdapter(DAAdapter):
     def _mock_submit(self, data: bytes, commitment: str) -> DAReceipt:
         """Simulated submission for local development."""
         self._mock_height += 1
-        blob_id = f"celestia:{self._mock_height}:{hashlib.sha256(data).hexdigest()[:16]}"
+        blob_id = f"celestia:{self._mock_height}:{hashlib.sha256(data).hexdigest()}"
         logger.info(f"[MOCK] Celestia blob at height {self._mock_height}")
         return DAReceipt(
             protocol=DAProtocol.CELESTIA,
             blob_id=blob_id,
             height=self._mock_height,
             commitment=commitment,
-            verified=True,
+            verified=False,
         )

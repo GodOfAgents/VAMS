@@ -34,6 +34,7 @@ yarn-error.log*
 # Testing
 coverage/
 .nyc_output/
+.pytest_cache/
 
 # Blockchain
 cache/
@@ -64,6 +65,9 @@ venv/
 .env
 *.db
 
+# Rust
+target/
+
 # Frontend is maintained as an embedded repository. Vendor the minimum source
 # inputs required for the parent repository's reproducible CI build.
 frontend-vite/*
@@ -88,6 +92,9 @@ frontend-vite/src/*
 # Confidential Partnership Docs
 docs/team/Ecosystem_Grants.md
 docs/team/meeting-transcript.doc
+
+# Private Team Discussions (non-architecture)
+docs/team/VAMS-Discussions_*.txt
 
 # VAMS Local Maintainer Exclusions
 *_errors.txt

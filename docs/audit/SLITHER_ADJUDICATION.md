@@ -1,11 +1,13 @@
 # Slither Finding Adjudication
 
-**Scan date:** 2026-07-11  
-**Scope:** `contracts/src/`, excluding vendored dependencies  
-**Command:** `slither . --exclude-dependencies --filter-paths lib --exclude-low --exclude-informational --fail-high`
+**Scan date:** 2026-07-13
 
-The high-impact gate passes. The medium/high-only scan reports 18 results after
-remediation, reduced from 42. This document records why the residual results do
+**Scope:** `contracts/src/`, excluding vendored dependencies
+
+**Command:** `slither . --exclude-dependencies --exclude-informational --exclude-low --fail-high`
+
+The high-impact gate passes. The medium/high-only scan reports 19 results after
+remediation. This document records why the residual results do
 not represent unresolved exploitable paths. Any material code or trust-boundary
 change invalidates this adjudication and requires a fresh scan.
 
@@ -24,10 +26,13 @@ change invalidates this adjudication and requires a fresh scan.
 - Constructor-only state was made immutable where deployment semantics permit.
 - The SLA node lookup, provider rejection reason, and storage-array length
   findings were resolved directly.
+- `VAMSReservationManager.abortRecovery` now initializes its fail-closed verifier
+  result explicitly, and `VAMSExecutionKernel` consumes and checks the proof
+  router's success result.
 
 ## Residual Findings
 
-### Incorrect Equality: 14 Results, False Positive
+### Incorrect Equality: 15 Results, False Positive
 
 These checks intentionally require exact equality. None compares a market
 price, ratio, timestamp target, or other continuously varying value.
@@ -36,6 +41,8 @@ price, ratio, timestamp target, or other continuously varying value.
   hardware registration timestamp, checkpoint existence, fee total, stake
   total, reward amount, and releasable vesting amount.
 - Exact enum membership: pending compensation claims.
+- Exact evidence-mode identifier: VDSO adapter admission requires the canonical
+  `LIVE_EVIDENCE_MODE` constant and rejects every other self-report.
 - Exact zero guards: reward claim, compound, mint, and budget validation.
 
 Changing these checks to inequalities would weaken existence and state-machine
@@ -75,7 +82,7 @@ semantics.
 ## Gate Decision
 
 - High-impact findings: **0 unresolved**.
-- Medium scan results: **18 adjudicated**.
+- Medium scan results: **19 adjudicated**.
 - Low/informational/optimization findings remain visible in the complete report
   and are not promoted to security closure without manual review.
 - This adjudication does not replace external review, invariant fuzzing, or the

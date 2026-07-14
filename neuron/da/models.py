@@ -33,6 +33,69 @@ MAX_PUBLIC_KPI_COUNT = 64
 MAX_PUBLIC_KPI_KEY_LENGTH = 64
 MAX_PUBLIC_KPI_ABS_VALUE = 1e18
 HASH_PATTERN = re.compile(r"^[0-9a-f]{64}$")
+PUBLIC_CHALLENGE_PATTERN = re.compile(r"^[a-z][a-z0-9_]{0,63}$")
+MAX_PUBLIC_IDENTIFIER_LENGTH = 256
+MAX_PUBLIC_METRICS_SCORE = 10_000
+MAX_PUBLIC_TIMESTAMP = 2**63 - 1
+MAX_PUBLIC_DURATION_SECONDS = 86_400.0
+
+
+def pseudonymize_public_identifier(value: Any, domain: str) -> str:
+    """Return a domain-separated identifier without archiving caller input."""
+    if not isinstance(value, str) or not value.strip():
+        raise ValueError(f"{domain} identifier must be a non-empty string")
+    normalized = value.strip()
+    if len(normalized) > MAX_PUBLIC_IDENTIFIER_LENGTH:
+        raise ValueError(f"{domain} identifier exceeds the public telemetry limit")
+    return hashlib.sha256(
+        b"vams-public-audit-id-v1\x00"
+        + domain.encode("ascii")
+        + b"\x00"
+        + normalized.encode("utf-8")
+    ).hexdigest()
+
+
+def normalize_public_identifier(value: Any, domain: str) -> str:
+    """Preserve existing pseudonyms and pseudonymize every other identifier."""
+    if isinstance(value, str) and HASH_PATTERN.fullmatch(value.lower()):
+        return value.lower()
+    return pseudonymize_public_identifier(value, domain)
+
+
+def sanitize_public_challenge_type(value: Any) -> str:
+    """Accept only bounded machine-readable challenge categories."""
+    if not isinstance(value, str) or PUBLIC_CHALLENGE_PATTERN.fullmatch(value) is None:
+        raise ValueError("challengeType must be a bounded lowercase machine identifier")
+    return value
+
+
+def _bounded_public_int(value: Any, label: str, maximum: int) -> int:
+    if (
+        isinstance(value, bool)
+        or not isinstance(value, int)
+        or not 0 <= value <= maximum
+    ):
+        raise ValueError(f"{label} must be an integer between 0 and {maximum}")
+    return value
+
+
+def _bounded_public_duration(value: Any) -> float:
+    if (
+        isinstance(value, bool)
+        or not isinstance(value, (int, float))
+        or not math.isfinite(float(value))
+        or not 0.0 <= float(value) <= MAX_PUBLIC_DURATION_SECONDS
+    ):
+        raise ValueError(
+            "duration must be finite and between 0 and 86400 seconds"
+        )
+    return float(value)
+
+
+def _public_bool(value: Any, label: str) -> bool:
+    if not isinstance(value, bool):
+        raise ValueError(f"{label} must be a boolean")
+    return value
 
 
 def sanitize_public_kpis(kpis: Any) -> Dict[str, Any]:
@@ -187,15 +250,19 @@ class AuditReport:
     def serialize(self) -> bytes:
         """Deterministic JSON serialization for hashing."""
         payload = {
-            "nodeId": self.node_id,
-            "sentinelId": self.sentinel_id,
-            "challengeType": self.challenge_type,
-            "metricsScore": self.metrics_score,
-            "passed": self.passed,
+            "nodeId": normalize_public_identifier(self.node_id, "node"),
+            "sentinelId": normalize_public_identifier(self.sentinel_id, "sentinel"),
+            "challengeType": sanitize_public_challenge_type(self.challenge_type),
+            "metricsScore": _bounded_public_int(
+                self.metrics_score, "metricsScore", MAX_PUBLIC_METRICS_SCORE
+            ),
+            "passed": _public_bool(self.passed, "passed"),
             "kpis": sanitize_public_kpis(self.kpis),
             "telemetry": sanitize_public_telemetry(self.telemetry),
-            "timestamp": self.timestamp,
-            "duration": round(self.duration, 6),
+            "timestamp": _bounded_public_int(
+                self.timestamp, "timestamp", MAX_PUBLIC_TIMESTAMP
+            ),
+            "duration": round(_bounded_public_duration(self.duration), 6),
         }
         return json.dumps(payload, sort_keys=True, separators=(",", ":")).encode("utf-8")
 
@@ -207,14 +274,18 @@ class AuditReport:
     def from_sentinel_report(cls, report: Dict[str, Any], da_target: DAProtocol = DAProtocol.CELESTIA) -> "AuditReport":
         """Construct from a raw Sentinel report dict."""
         return cls(
-            node_id=report["nodeId"],
-            sentinel_id=report["sentinelId"],
-            challenge_type=report["challengeType"],
-            metrics_score=report["metricsScore"],
-            passed=report["passed"],
+            node_id=normalize_public_identifier(report["nodeId"], "node"),
+            sentinel_id=normalize_public_identifier(report["sentinelId"], "sentinel"),
+            challenge_type=sanitize_public_challenge_type(report["challengeType"]),
+            metrics_score=_bounded_public_int(
+                report["metricsScore"], "metricsScore", MAX_PUBLIC_METRICS_SCORE
+            ),
+            passed=_public_bool(report["passed"], "passed"),
             kpis=sanitize_public_kpis(report.get("kpis", {})),
-            timestamp=report["timestamp"],
-            duration=report.get("duration", 0.0),
+            timestamp=_bounded_public_int(
+                report["timestamp"], "timestamp", MAX_PUBLIC_TIMESTAMP
+            ),
+            duration=_bounded_public_duration(report.get("duration", 0.0)),
             da_target=da_target,
             telemetry=sanitize_public_telemetry(report),
         )
