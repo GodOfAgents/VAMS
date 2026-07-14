@@ -1,0 +1,412 @@
+{
+  "schema_version": "1.0.0",
+  "review_id": "VDSO-PRINCIPLES-001",
+  "status": "proposed",
+  "generated_at": "2026-07-13T00:00:00+05:30",
+  "source_provenance": {
+    "baseline_commit": "fa5165ca82e7304e87397beac35053a9699017c7",
+    "dirty": true,
+    "source_path": "docs/team/VAMS-Discussions_001.txt",
+    "source_sha256": "EEF1973EA47F5E5D58F2A8EDB45A851E0CF684C2F6FB2F7D7D27BB8643165635",
+    "source_bytes": 66551,
+    "source_lines": 1992,
+    "source_tracked": false
+  },
+  "dual_host_policy": {
+    "polygon_role": "Polygon Amoy owns EVM execution, high-frequency settlement, routing, and explicitly allowlisted VDSO canary domains.",
+    "cardano_role": "Cardano Pre-Prod owns governance, identity, insurance, and native-validator state domains.",
+    "authority_rule": "one_authoritative_writer_per_state_domain",
+    "cross_host_rule": "Cross-host proofs synchronize commitments but never create two authoritative histories for the same state domain."
+  },
+  "principle_definitions": {
+    "Sovereignty": "Protocol-owned semantics, portable state, governed migration, credible exit, and no permanent chain or vendor lock-in.",
+    "Privacy": "Data minimization, recipient-bound encryption, selective disclosure, retention controls, and measured metadata exposure.",
+    "Security": "Authorization, replay resistance, proof binding, deterministic recovery, fail-closed behavior, and explicit trust assumptions.",
+    "Modularity": "Versioned interfaces, conformance-tested replacement, capability negotiation, and no silent semantic downgrade.",
+    "Post-Quantum Readiness": "Separate authorization, execution-proof, and settlement classifications with standardized algorithms and downgrade protection.",
+    "Equality": "Published eligibility rules and deterministic selection without undocumented privileged fast lanes or guaranteed equal outcomes.",
+    "Decentralisation": "Measured governance, operator, prover, and host concentration with credible exit and migration paths.",
+    "Safety": "Bounded deterministic execution, fencing, pause and recovery controls, stale-state rejection, and invariant preservation."
+  },
+  "maturity_taxonomy": [
+    "implemented_verified",
+    "implemented_unverified",
+    "partial",
+    "mock",
+    "stub",
+    "design_only",
+    "not_found",
+    "contradicted"
+  ],
+  "verdict": {
+    "improvement_over_current_head": "conditional_yes",
+    "adoption_readiness": "no",
+    "deployment_readiness": "no",
+    "summary": "VDSO is a material design improvement if implemented, but the discussion is not a deployable specification and conflicts with the required Polygon-Cardano dual-host allocation."
+  },
+  "findings": [
+    {
+      "finding_id": "VDSO-SOV-001",
+      "principle": "Sovereignty",
+      "claim": "Protocol-owned semantics improve portability, but one universal Polygon authority would undermine the established dual-host sovereignty model.",
+      "discussion_evidence": [
+        {
+          "path": "docs/team/VAMS-Discussions_001.txt",
+          "line_start": 508,
+          "line_end": 539,
+          "observation": "The discussion proposes Polygon as the single initial canonical authority.",
+          "classification": "design_only"
+        },
+        {
+          "path": "docs/team/VAMS-Discussions_001.txt",
+          "line_start": 798,
+          "line_end": 804,
+          "observation": "The discussion states that VAMS should own state-machine semantics.",
+          "classification": "design_only"
+        }
+      ],
+      "repository_evidence": [
+        {
+          "path": "docs/ARCHITECTURE.md",
+          "line_start": 7,
+          "line_end": 17,
+          "observation": "Current architecture assigns distinct roles to Polygon Amoy and Cardano Pre-Prod.",
+          "classification": "implemented_unverified"
+        },
+        {
+          "path": "contracts/src/routing/VAMSRouter.sol",
+          "line_start": 30,
+          "line_end": 38,
+          "observation": "Current routing enumerates named chains rather than portable capabilities.",
+          "classification": "contradicted"
+        }
+      ],
+      "external_primary_sources": [],
+      "design_maturity": "design_only",
+      "current_maturity": "partial",
+      "design_verdict": "adequate",
+      "current_verdict": "weak",
+      "severity": "High",
+      "affected_invariants": ["INV-10"],
+      "adr_requirements": ["VDSO-AUTH-001", "VDSO-AUTH-002"],
+      "remediation": "Preserve the dual-host role allocation and require an atomic, governance-approved authority-epoch migration for each state domain.",
+      "verification_gate": "Demonstrate that two independent clients reproduce the migration root and that no test permits two active writers for one domain."
+    },
+    {
+      "finding_id": "VDSO-PRI-001",
+      "principle": "Privacy",
+      "claim": "Compact sidecars reduce public replication, but the proposal does not yet define enforceable encryption, disclosure, retention, or metadata guarantees.",
+      "discussion_evidence": [
+        {
+          "path": "docs/team/VAMS-Discussions_001.txt",
+          "line_start": 1126,
+          "line_end": 1176,
+          "observation": "The proposal separates compact public headers from content-addressed witness sidecars.",
+          "classification": "design_only"
+        },
+        {
+          "path": "docs/team/VAMS-Discussions_001.txt",
+          "line_start": 1781,
+          "line_end": 1818,
+          "observation": "The proposal compresses heavy identity and TEE evidence into receipts.",
+          "classification": "design_only"
+        }
+      ],
+      "repository_evidence": [
+        {
+          "path": "neuron/mev_protection.py",
+          "line_start": 145,
+          "line_end": 158,
+          "observation": "Encrypted ordering rejects production use because current encryption is a mock.",
+          "classification": "mock"
+        },
+        {
+          "path": "neuron/sdk/oms_identity.py",
+          "line_start": 29,
+          "line_end": 68,
+          "observation": "OMS defaults to mock mode and exposes a Boolean verification result.",
+          "classification": "mock"
+        },
+        {
+          "path": "neuron/trust_plugins/tee_plugin.py",
+          "line_start": 101,
+          "line_end": 158,
+          "observation": "The TEE plugin constructs a placeholder quote and verifies only its structure.",
+          "classification": "mock"
+        }
+      ],
+      "external_primary_sources": [
+        {
+          "title": "RFC 9180: Hybrid Public Key Encryption",
+          "url": "https://www.rfc-editor.org/rfc/rfc9180.html",
+          "supports": "Defines the classical HPKE suite selected for recipient-bound v1 sidecar key envelopes."
+        }
+      ],
+      "design_maturity": "partial",
+      "current_maturity": "mock",
+      "design_verdict": "weak",
+      "current_verdict": "gap",
+      "severity": "High",
+      "affected_invariants": ["INV-5", "INV-6"],
+      "adr_requirements": ["VDSO-PRIV-001", "VDSO-EVID-001"],
+      "remediation": "Specify minimized headers, authenticated sidecar encryption, selective disclosure, key-erasure records, retention, and plaintext logging prohibitions.",
+      "verification_gate": "Pass wrong-recipient, tamper, disclosure, key-rotation, metadata, and log-scrubbing tests with no plaintext sensitive data."
+    },
+    {
+      "finding_id": "VDSO-SEC-001",
+      "principle": "Security",
+      "claim": "Fencing and non-timeout recovery are sound targets, but the current verifier and unimplemented recovery path cannot secure value-bearing reservations.",
+      "discussion_evidence": [
+        {
+          "path": "docs/team/VAMS-Discussions_001.txt",
+          "line_start": 1725,
+          "line_end": 1777,
+          "observation": "The design requires destination fencing and forbids timeout-only unlock.",
+          "classification": "design_only"
+        }
+      ],
+      "repository_evidence": [
+        {
+          "path": "contracts/src/routing/RoutingProofVerifier.sol",
+          "line_start": 48,
+          "line_end": 76,
+          "observation": "The existing proof field is verified as an authorized ECDSA signature, not a ZK validity proof.",
+          "classification": "mock"
+        },
+        {
+          "path": "docs/audit/THREAT_MODEL.md",
+          "line_start": 1,
+          "line_end": 32,
+          "observation": "VAMS has a repository threat model, but it did not yet contain VDSO-specific boundaries at the baseline.",
+          "classification": "partial"
+        }
+      ],
+      "external_primary_sources": [],
+      "design_maturity": "design_only",
+      "current_maturity": "partial",
+      "design_verdict": "adequate",
+      "current_verdict": "weak",
+      "severity": "Critical",
+      "affected_invariants": ["INV-5", "INV-6", "INV-7", "INV-10"],
+      "adr_requirements": ["VDSO-RES-001", "VDSO-EVID-001"],
+      "remediation": "Implement proof-program binding, monotonically fenced destination execution, authenticated abort, replay protection, and ambiguity freeze before enabling value.",
+      "verification_gate": "Pass split-brain, delayed-finality, old-token, replay, proof-mismatch, destination-outage, and ambiguous-recovery adversarial tests."
+    },
+    {
+      "finding_id": "VDSO-MOD-001",
+      "principle": "Modularity",
+      "claim": "The proposed compiler and adapter boundaries are modular, but the prior review incorrectly treated a proposed tree and interfaces as current implementation.",
+      "discussion_evidence": [
+        {
+          "path": "docs/team/VAMS-Discussions_001.txt",
+          "line_start": 661,
+          "line_end": 700,
+          "observation": "The vams-kernel, adapter, and conformance layout is explicitly recommended rather than existing.",
+          "classification": "design_only"
+        },
+        {
+          "path": "docs/team/VAMS-Discussions_001.txt",
+          "line_start": 1233,
+          "line_end": 1253,
+          "observation": "The design distinguishes native and proof-verifying adapters and requires conformance vectors.",
+          "classification": "design_only"
+        }
+      ],
+      "repository_evidence": [
+        {
+          "path": "contracts/src/routing/VAMSRouter.sol",
+          "line_start": 266,
+          "line_end": 303,
+          "observation": "Current automatic routing is a hard-coded named-chain rule tree.",
+          "classification": "contradicted"
+        }
+      ],
+      "external_primary_sources": [],
+      "design_maturity": "design_only",
+      "current_maturity": "contradicted",
+      "design_verdict": "strong",
+      "current_verdict": "weak",
+      "severity": "High",
+      "affected_invariants": ["INV-10"],
+      "adr_requirements": ["VDSO-CANON-001", "VDSO-ADAPTER-001"],
+      "remediation": "Define versioned adapter capabilities, verifier and code hashes, conformance roots, expiry, governance activation, and downgrade rejection.",
+      "verification_gate": "Require byte-identical golden vectors across every enabled implementation and reject unknown versions or unsupported mandatory capabilities."
+    },
+    {
+      "finding_id": "VDSO-PQR-001",
+      "principle": "Post-Quantum Readiness",
+      "claim": "Versioned cryptographic operations permit migration, but current ECDSA and some compressed proof modes prevent any blanket post-quantum claim.",
+      "discussion_evidence": [
+        {
+          "path": "docs/team/VAMS-Discussions_001.txt",
+          "line_start": 1584,
+          "line_end": 1600,
+          "observation": "The proposed opcode set explicitly includes quantum-vulnerable secp256k1 verification.",
+          "classification": "design_only"
+        },
+        {
+          "path": "docs/team/VAMS-Discussions_001.txt",
+          "line_start": 1604,
+          "line_end": 1620,
+          "observation": "SP1 and RISC Zero are proposed as proving targets without a per-mode security classification.",
+          "classification": "design_only"
+        }
+      ],
+      "repository_evidence": [
+        {
+          "path": "contracts/src/routing/RoutingProofVerifier.sol",
+          "line_start": 48,
+          "line_end": 76,
+          "observation": "Current routing authorization recovers a classical ECDSA signer.",
+          "classification": "implemented_unverified"
+        }
+      ],
+      "external_primary_sources": [
+        {
+          "title": "NIST FIPS 204: Module-Lattice-Based Digital Signature Standard",
+          "url": "https://csrc.nist.gov/pubs/fips/204/final",
+          "supports": "Defines ML-DSA and the ML-DSA-65 parameter set selected for hybrid Tier 2 authorization."
+        },
+        {
+          "title": "SP1 Security Model",
+          "url": "https://docs.succinct.xyz/docs/sp1/security/security-model",
+          "supports": "Documents that some compressed SP1 proof modes add elliptic-curve assumptions."
+        },
+        {
+          "title": "RISC Zero Security Model",
+          "url": "https://dev.risczero.com/api/security-model",
+          "supports": "Distinguishes quantum-safe STARK paths from non-quantum-safe Groth16 paths."
+        }
+      ],
+      "design_maturity": "partial",
+      "current_maturity": "not_found",
+      "design_verdict": "adequate",
+      "current_verdict": "gap",
+      "severity": "High",
+      "affected_invariants": ["INV-3", "INV-4", "INV-5", "INV-6"],
+      "adr_requirements": ["VDSO-PQ-001"],
+      "remediation": "Require secp256k1 and ML-DSA-65 for Tier 2, bind the suite into the intent, and classify authorization, proof, and settlement independently.",
+      "verification_gate": "Pass NIST known-answer vectors and downgrade tests; reject classical-only Tier 2 intents and inaccurate PQ labels."
+    },
+    {
+      "finding_id": "VDSO-EQU-001",
+      "principle": "Equality",
+      "claim": "Canonical rules can improve procedural equality, but governance-gated adapters and operator overrides contradict claims of universally privilege-free routing.",
+      "discussion_evidence": [
+        {
+          "path": "docs/team/VAMS-Discussions_001.txt",
+          "line_start": 1239,
+          "line_end": 1253,
+          "observation": "Adapter enablement requires governance after conformance, so eligibility is not automatic.",
+          "classification": "design_only"
+        }
+      ],
+      "repository_evidence": [
+        {
+          "path": "contracts/src/routing/VAMSRouter.sol",
+          "line_start": 132,
+          "line_end": 173,
+          "observation": "Current routing is operator-gated and supports global and transaction-specific manual overrides.",
+          "classification": "implemented_unverified"
+        }
+      ],
+      "external_primary_sources": [],
+      "design_maturity": "design_only",
+      "current_maturity": "partial",
+      "design_verdict": "adequate",
+      "current_verdict": "weak",
+      "severity": "Medium",
+      "affected_invariants": [],
+      "adr_requirements": ["VDSO-ADAPTER-001"],
+      "remediation": "Publish adapter eligibility, deterministic tie-breaks, override and quarantine reasons, appeal paths, and governance concentration telemetry.",
+      "verification_gate": "Prove identical selection for identical capability sets and expose every governance or emergency override in signed evidence."
+    },
+    {
+      "finding_id": "VDSO-DEC-001",
+      "principle": "Decentralisation",
+      "claim": "Replaceable hosts and multiple proof backends are positive targets, but the discussion centralizes canonical state and omits operator and governance concentration controls.",
+      "discussion_evidence": [
+        {
+          "path": "docs/team/VAMS-Discussions_001.txt",
+          "line_start": 508,
+          "line_end": 539,
+          "observation": "The initial design selects one Polygon canonical state authority.",
+          "classification": "design_only"
+        },
+        {
+          "path": "docs/team/VAMS-Discussions_001.txt",
+          "line_start": 1465,
+          "line_end": 1496,
+          "observation": "The proposal separates canonical VIR-Core from SP1 and RISC Zero backends.",
+          "classification": "design_only"
+        }
+      ],
+      "repository_evidence": [
+        {
+          "path": "docs/ARCHITECTURE.md",
+          "line_start": 7,
+          "line_end": 17,
+          "observation": "The current intended architecture assigns distinct economic and security roles to both hosts.",
+          "classification": "implemented_unverified"
+        }
+      ],
+      "external_primary_sources": [],
+      "design_maturity": "partial",
+      "current_maturity": "partial",
+      "design_verdict": "adequate",
+      "current_verdict": "weak",
+      "severity": "High",
+      "affected_invariants": ["INV-10"],
+      "adr_requirements": ["VDSO-AUTH-001", "VDSO-AUTH-002", "VDSO-ROLL-001"],
+      "remediation": "Keep one writer per domain while requiring independent backends, measured operator and governance concentration, and rehearsed host migration.",
+      "verification_gate": "Complete dual-host migration and recovery rehearsals without conflicting roots and publish prover, operator, and governance concentration evidence."
+    },
+    {
+      "finding_id": "VDSO-SAF-001",
+      "principle": "Safety",
+      "claim": "Fail-closed transitions and fenced recovery improve the design, but VDSO-specific pause, invariant, and rollback integration remains unimplemented.",
+      "discussion_evidence": [
+        {
+          "path": "docs/team/VAMS-Discussions_001.txt",
+          "line_start": 851,
+          "line_end": 888,
+          "observation": "The discussion corrects absolute MEV immunity to fail-closed state-bound execution integrity.",
+          "classification": "design_only"
+        },
+        {
+          "path": "docs/team/VAMS-Discussions_001.txt",
+          "line_start": 1725,
+          "line_end": 1777,
+          "observation": "The design requires fencing, non-execution evidence, and capability denial when recovery cannot be enforced.",
+          "classification": "design_only"
+        }
+      ],
+      "repository_evidence": [
+        {
+          "path": "contracts/src/base/VAMSEmergencyPausable.sol",
+          "line_start": 9,
+          "line_end": 79,
+          "observation": "A reusable emergency pause control exists outside the proposed VDSO stack.",
+          "classification": "implemented_unverified"
+        },
+        {
+          "path": "docs/audit/THREAT_MODEL.md",
+          "line_start": 15,
+          "line_end": 32,
+          "observation": "Existing deployment stop conditions and residual risks do not by themselves specify VDSO recovery.",
+          "classification": "partial"
+        }
+      ],
+      "external_primary_sources": [],
+      "design_maturity": "design_only",
+      "current_maturity": "partial",
+      "design_verdict": "adequate",
+      "current_verdict": "weak",
+      "severity": "Critical",
+      "affected_invariants": ["INV-1", "INV-2", "INV-3", "INV-4", "INV-5", "INV-6", "INV-7", "INV-8", "INV-9", "INV-10"],
+      "adr_requirements": ["VDSO-RES-001", "VDSO-ROLL-001"],
+      "remediation": "Integrate pause, commit, recovery, rollback, and every invariant without permitting automatic unlock or an authority fallback that creates two writers.",
+      "verification_gate": "Pass exact-commit invariant, crash-retry, DA-outage, stale-evidence, proof-disagreement, split-brain, and rollback tests before promotion."
+    }
+  ]
+}

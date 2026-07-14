@@ -2,11 +2,11 @@
 # Install with: pip install -r requirements.txt
 
 requests>=2.31.0      # HTTP client for Celestia/Arweave RPC
-ecdsa>=0.18.0         # ECDSA cryptography (Secp256k1)
 colorama>=0.4.6       # Terminal colors (cross-platform)
 web3>=6.0.0           # Ethereum interaction (Polygon CDK, x402)
 python-dotenv>=1.0.0
-cryptography>=41.0.0  # Cryptographic primitives
+cryptography>=41.0.0  # Secp256k1 plus sidecar cryptographic primitives
+PyNaCl>=1.5.0         # XChaCha20-Poly1305 sidecar encryption (no plaintext fallback)
 eth-abi>=4.0.0        # Ethereum ABI encoding/decoding
 numpy>=1.26.0         # Intelligence layer vector math and anomaly detection
 scikit-learn>=1.4.0   # Incremental PCA for SkillDiscovery profiles

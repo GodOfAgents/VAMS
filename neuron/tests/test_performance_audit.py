@@ -14,7 +14,13 @@ from unittest.mock import AsyncMock, patch, MagicMock
 import sys, os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
 
-from neuron.da.models import DAProtocol, DAReceipt, AuditReport, sanitize_public_kpis
+from neuron.da.models import (
+    DAProtocol,
+    DAReceipt,
+    AuditReport,
+    pseudonymize_public_identifier,
+    sanitize_public_kpis,
+)
 from neuron.da.performance_audit import PerformanceAuditLog, CHALLENGE_DA_ROUTING
 
 
@@ -146,6 +152,38 @@ class TestAuditReportSerialization:
         assert "do not publish this" not in serialized
         assert "operator@example.com" not in serialized
 
+    def test_public_identifiers_are_domain_separated_pseudonyms(self, sample_report):
+        sample_report["nodeId"] = "operator@example.com"
+        sample_report["sentinelId"] = "operator@example.com"
+
+        serialized = json.loads(AuditReport.from_sentinel_report(sample_report).serialize())
+
+        assert "operator@example.com" not in json.dumps(serialized)
+        assert serialized["nodeId"] == pseudonymize_public_identifier(
+            "operator@example.com", "node"
+        )
+        assert serialized["sentinelId"] == pseudonymize_public_identifier(
+            "operator@example.com", "sentinel"
+        )
+        assert serialized["nodeId"] != serialized["sentinelId"]
+
+    @pytest.mark.parametrize(
+        "field,value",
+        [
+            ("nodeId", ""),
+            ("sentinelId", "x" * 257),
+            ("challengeType", "GPU benchmark for operator@example.com"),
+            ("metricsScore", "operator@example.com"),
+            ("passed", 1),
+            ("timestamp", "operator@example.com"),
+            ("duration", 86_401),
+        ],
+    )
+    def test_invalid_public_identity_fields_fail_closed(self, sample_report, field, value):
+        sample_report[field] = value
+        with pytest.raises(ValueError):
+            AuditReport.from_sentinel_report(sample_report)
+
 
 # --- Multi-DA Routing Tests ---
 
@@ -230,6 +268,9 @@ class TestResultStructure:
         assert "daCommitment" in result
         assert "reportHash" in result
         assert "verified" in result
+        assert result["verified"] is False
+        assert result["mock_mode"] is True
+        assert result["release_evidence_eligible"] is False
 
     @pytest.mark.asyncio
     async def test_report_hash_matches_serialized(self, audit_log, sample_report):
@@ -249,7 +290,9 @@ class TestObservability:
         await audit_log.publish_sentinel_report(sample_report)
         history = audit_log.get_audit_history()
         assert len(history) == 1
-        assert history[0]["node_id"] == "abcdef1234567890"
+        assert history[0]["node_id"] == pseudonymize_public_identifier(
+            "abcdef1234567890", "node"
+        )
 
     @pytest.mark.asyncio
     async def test_audit_history_limit(self, audit_log, sample_report):

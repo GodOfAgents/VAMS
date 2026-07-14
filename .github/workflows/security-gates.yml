@@ -34,16 +34,20 @@ jobs:
       - name: Classify PR Changes
         id: filter
         shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
           set -euo pipefail
 
-          if [[ "${{ github.event_name }}" != "pull_request" ]]; then
+          if [[ "$EVENT_NAME" != "pull_request" ]]; then
             echo "docs_only=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
-          base="${{ github.event.pull_request.base.sha }}"
-          head="${{ github.event.pull_request.head.sha }}"
+          base="$BASE_SHA"
+          head="$HEAD_SHA"
           mapfile -t changed_files < <(git diff --name-only "$base" "$head")
 
           if [[ "${#changed_files[@]}" -eq 0 ]]; then
@@ -92,6 +96,11 @@ jobs:
           python scripts/docs/validate_docs.py
           python -m unittest scripts/docs/test_validate_docs.py
 
+      - name: Validate VDSO Review Evidence
+        run: |
+          python scripts/docs/validate_vdso_evidence.py
+          python -m unittest discover -s scripts/docs/tests -p "test_validate_vdso_evidence.py"
+
       - name: Validate Workflow Supply Chain
         run: |
           python scripts/audit/validate_workflow_security.py
@@ -130,11 +139,14 @@ jobs:
 
       - name: Verify Team Docs Diff
         shell: bash
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
           set -euo pipefail
 
-          base="${{ github.event.pull_request.base.sha }}"
-          head="${{ github.event.pull_request.head.sha }}"
+          base="$BASE_SHA"
+          head="$HEAD_SHA"
           mapfile -t changed_files < <(git diff --name-only "$base" "$head")
 
           for file in "${changed_files[@]}"; do
@@ -206,6 +218,7 @@ jobs:
         uses: gitleaks/gitleaks-action@dcedce43c6f43de0b836d1fe38946645c9c638dc # v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_VERSION: 8.30.1
 
   trufflehog-scanning:
     name: Secret Scanning (TruffleHog)
@@ -221,6 +234,7 @@ jobs:
         uses: trufflesecurity/trufflehog@8feb77b20aeb64366d106b08f2941287755c173b
         with:
           path: ./
+          version: 3.95.9
           extra_args: --only-verified --fail
 
   solidity-gate:
@@ -285,6 +299,31 @@ jobs:
         run: |
           cd cardano
           aiken check --deny --seed 20260711 --max-success 250
+
+  vir-core-gate:
+    name: VIR Core Determinism & Conformance
+    runs-on: ubuntu-latest
+    needs: changes
+    if: github.event_name != 'pull_request' || needs.changes.outputs.docs_only != 'true'
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Install Pinned Rust Toolchain
+        shell: bash
+        run: |
+          set -euo pipefail
+          rustup toolchain install 1.92.0 --profile minimal --component rustfmt,clippy
+
+      - name: Verify VIR Core
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd vams-vm
+          cargo +1.92.0 fmt --all -- --check
+          cargo +1.92.0 check --workspace --all-targets --locked
+          cargo +1.92.0 clippy --workspace --all-targets --locked -- -D warnings
+          cargo +1.92.0 test --workspace --all-targets --locked
 
   python-gate:
     name: Python Security Audit & Tests
@@ -405,7 +444,7 @@ jobs:
   sbom-generation:
     name: SBOM Generation & Signing
     runs-on: ubuntu-latest
-    needs: [changes, solidity-gate, slither-gate, aiken-gate, python-gate, semgrep-gate, frontend-gate, gateway-config-gate]
+    needs: [changes, solidity-gate, slither-gate, aiken-gate, vir-core-gate, python-gate, semgrep-gate, frontend-gate, gateway-config-gate]
     if: github.event_name != 'pull_request' || needs.changes.outputs.docs_only != 'true'
     permissions:
       contents: read
@@ -465,6 +504,7 @@ jobs:
       - solidity-gate
       - slither-gate
       - aiken-gate
+      - vir-core-gate
       - python-gate
       - semgrep-gate
       - frontend-gate
@@ -482,6 +522,7 @@ jobs:
       SOLIDITY: ${{ needs.solidity-gate.result }}
       SLITHER: ${{ needs.slither-gate.result }}
       AIKEN: ${{ needs.aiken-gate.result }}
+      VIR_CORE: ${{ needs.vir-core-gate.result }}
       PYTHON: ${{ needs.python-gate.result }}
       SEMGREP: ${{ needs.semgrep-gate.result }}
       FRONTEND: ${{ needs.frontend-gate.result }}
@@ -514,7 +555,7 @@ jobs:
             fi
           else
             full_required=(
-              SOLIDITY SLITHER AIKEN PYTHON SEMGREP FRONTEND
+              SOLIDITY SLITHER AIKEN VIR_CORE PYTHON SEMGREP FRONTEND
               GATEWAY_CONFIG SBOM
             )
             for name in "${full_required[@]}"; do
@@ -538,6 +579,7 @@ jobs:
             --result solidity="$SOLIDITY" \
             --result slither="$SLITHER" \
             --result aiken="$AIKEN" \
+            --result vir-core="$VIR_CORE" \
             --result python="$PYTHON" \
             --result semgrep="$SEMGREP" \
             --result frontend="$FRONTEND" \

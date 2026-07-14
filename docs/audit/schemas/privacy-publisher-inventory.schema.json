@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vams.network/schemas/audit/privacy-publisher-inventory.schema.json",
+  "title": "VAMS External Publisher Inventory",
+  "type": "object",
+  "required": ["schema_version", "scope", "publishers"],
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "scope": {
+      "const": ["neuron/da", "neuron/sentinel", "neuron/vdso"]
+    },
+    "publishers": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "path", "symbol", "channel", "payload_policy", "operational_live_capable", "release_evidence_eligible", "block_reason", "control_refs", "tests"],
+        "properties": {
+          "id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$"},
+          "path": {"type": "string", "pattern": "^neuron/[A-Za-z0-9_./-]+\\.py$"},
+          "symbol": {"type": "string", "minLength": 1},
+          "channel": {"enum": ["public-da", "encrypted-da", "local-simulation"]},
+          "payload_policy": {"enum": ["sanitized-public", "encrypted-only", "transport-only", "local-mock-only"]},
+          "operational_live_capable": {"type": "boolean"},
+          "release_evidence_eligible": {"type": "boolean"},
+          "block_reason": {"type": ["string", "null"]},
+          "control_refs": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+          "tests": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}}
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

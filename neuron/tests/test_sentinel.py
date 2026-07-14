@@ -5,7 +5,7 @@ import pytest
 import asyncio
 import os
 import sys
-from unittest.mock import patch, MagicMock
+from unittest.mock import AsyncMock, patch, MagicMock
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -67,12 +67,33 @@ class TestSentinelChallenges:
         assert "bandwidth_gbps" in result.kpis
         
     # ═══════════════════ Latency Probe Tests ═══════════════════
-    async def test_latency_probe_success(self):
+    @patch(
+        "sentinel.challenges.latency_probe.time.perf_counter",
+        side_effect=[
+            0.000,
+            0.002,
+            0.010,
+            0.012,
+            0.020,
+            0.022,
+            0.030,
+            0.032,
+            0.040,
+            0.042,
+        ],
+    )
+    @patch(
+        "sentinel.challenges.latency_probe.asyncio.sleep",
+        new_callable=AsyncMock,
+    )
+    async def test_latency_probe_success(self, mock_sleep, _mock_clock):
         challenge = LatencyBenchmark()
         result = await challenge.run("mock")
         assert result.success is True
-        assert result.score > 0
-        assert "avg_rtt_ms" in result.kpis
+        assert result.score == 10_000
+        assert result.kpis["avg_rtt_ms"] == pytest.approx(2.0)
+        assert result.kpis["jitter_ms"] == pytest.approx(0.0)
+        assert mock_sleep.await_count == 5
 
 @pytest.mark.asyncio
 class TestSentinelPublisher:

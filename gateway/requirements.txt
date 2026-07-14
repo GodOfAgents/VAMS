@@ -4,4 +4,4 @@
 fastapi>=0.109.0      # Web framework
 uvicorn>=0.27.0       # ASGI server
 pydantic>=2.5.0       # Data validation
-ecdsa>=0.18.0         # Signature verification (optional)
+cryptography>=41.0.0  # Constant-time secp256k1 primitives for DID/VDSO auth

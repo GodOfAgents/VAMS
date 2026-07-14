@@ -8,6 +8,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Deployment identity evidence**: Added `contracts/script/utils/AuthorityIdentityValidator.sol`
+  and network-specific deployment-manifest validation. Polygon evidence binds
+  each Safe proxy and singleton runtime code hash, exact owners/thresholds,
+  timelock bytecode and roles, transfers, and deployer-role removal. Cardano
+  evidence binds multisig credentials, validator CBOR/script hashes, governor
+  and timelock scripts, and control handoffs without applying EVM Safe fields.
+- **Runtime/privacy evidence inventory**: Added an AST-derived publisher
+  inventory and artifact-bound v2 runtime/privacy schemas so new DA, Sentinel,
+  or VDSO publication sinks cannot bypass review by omission.
+- **VDSO evidence hardening**: Added `docs/adr/ADR-VDSO-001.md`, corrected
+  review artifacts under `docs/team/vdso/`, and a provenance-bound evidence
+  manifest/schema. The ADR is `Proposed` and authorizes only side-by-side
+  canary implementation work; it is not deployment or testnet-readiness
+  evidence.
+- **`vams-vm/`**: Added the Rust 1.92 VIR-Core v1 reference foundation with
+  restricted positional CBOR, raw domain-prefixed Keccak identifiers, explicit
+  Polygon/Cardano authority epochs, bounded checked-integer execution, semantic
+  receipts, shared golden vectors, and fail-closed SP1/RISC Zero placeholders.
+- **`contracts/src/vdso/`**: Added side-by-side object, reservation, adapter,
+  program, proof, capability-routing, and execution-kernel modules. The canary
+  binds host and authority epoch, uses compare-and-swap object versions and
+  fencing tokens, separates semantic transitions from settlement, and keeps
+  ambiguous recovery locked unless execution or non-execution is verified.
+- **`neuron/vdso/` and `gateway/vdso.py`**: Added exact VIR intent encoding,
+  height-aware expiry, body-bound secp256k1 requests, nonce/replay policy,
+  deterministic capability routing, encrypted witness-sidecar handling,
+  a ciphertext-only DA publication boundary, and shadow/canary workflow
+  orchestration. Current Celestia/Near adapters are ineligible for VDSO live
+  evidence; authoritative mode and unconfigured live cryptography fail closed.
+- **`cardano/lib/vams/vdso.ak`**: Added the Cardano read/conformance boundary,
+  shared intent vector, Polygon/Cardano wire mapping, and executable bridge
+  proof/payload separation checks. Value-bearing `CONSUME` and `RESERVE` remain
+  disabled for the initial Cardano canary.
+- **`contracts/script/DeployVDSOCanary.s.sol`**: Added a Polygon Amoy-locked,
+  empty-state deployment rehearsal that validates distinct Safe/timelock roles,
+  performs role handoff, activates no adapter/verifier/program/domain, and
+  leaves recovery abort disabled until a real non-execution verifier exists.
 - **Documentation reality sync**: Added a canonical documentation index,
   current v0.8.0 architecture reference, versioning policy, machine-readable
   documentation manifest, and CI-checkable documentation validator.
@@ -28,6 +65,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Cardano property tests**: Added seven seeded Aiken properties covering integer-square-root bounds, basis-point safety and monotonicity, inclusive ranges, strict bridge nonce ordering/replay rejection, and insurance payout caps.
 
 ### Changed
+- **Gateway and Neuron secp256k1**: Replaced the unpatched `python-ecdsa`
+  dependency with `cryptography` ECDSA/SHA-256 primitives using the existing
+  64-byte public-key and signature encodings, low-S normalization, and
+  fail-closed rejection of malformed or high-S signatures.
+- **Neuron Gateway transport**: Live Gateway clients now require HTTPS;
+  plaintext is allowed only for loopback development. The direct HTTP heartbeat
+  fallback was removed, and credential-bearing or ambiguous Gateway URLs are
+  rejected.
+- **Live DA boundary**: Celestia submission failures no longer fall back to mock
+  receipts and exact retrieval is mandatory. Near non-mock submission is
+  disabled until signed submission and retrieval exist. Mock, Avail, EigenDA,
+  and release-ineligible VDSO receipts never report verified evidence.
+- **VDSO Python execution boundary**: Capability requirements are now derived
+  only from signed VIR intent fields. Canary orchestration must select eligible
+  adapters before external work, rejects Cardano `CONSUME`/`RESERVE`, requires
+  Tier 2 hybrid authorization for every non-`READ` access and every nonzero
+  settlement-cost budget, and joins every nonzero signed `sidecar_root` to the
+  exact uploaded encrypted sidecar content hash.
+- **VDSO settlement metadata**: Aligned Python with VIR-Core's eight-field
+  settlement encoding and added mandatory, distinct `bridge_proof_hash` and
+  `payload_hash` semantics for INV-10.
+- **VDSO Solidity admission and topology**: Restricted program activation to
+  VIR-Core v1 and the three exact checked-in policy commitments, made the
+  Polygon kernel reject all Cardano-authoritative state writes, and required
+  an executable governance/open-executor timelock before role handoff. Proof
+  configurations that require agreement now reject identical primary and
+  secondary verifier addresses.
+- **`docs/ARCHITECTURE.md`, `REPO_STATUS_REPORT.md`, and audit documents**:
+  Added the proposed VDSO canary boundary while preserving the Polygon–Cardano
+  dual-host allocation. Each state domain has one authoritative writer; a
+  Cardano read-first integration phase does not demote its governance, identity,
+  insurance, or native-validator authority.
 - **Repository documentation**: Replaced stale deployment, API, test-count,
   local-path, and mock-integration claims with source-backed pre-testnet
   boundaries; historical version documents now carry lifecycle and verification
@@ -42,6 +111,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`README.md`**: Replaced the stale fixed test-count badge with the 36-track audit-program status and linked the executable testnet assurance program.
 - **`audit.md`** and **`REPO_STATUS_REPORT.md`**: Reclassified v0.6.0 test totals as historical evidence, made current CI verification deployment-blocking, and aligned Phase 6 priorities with the 36-track program.
 - **`.github/workflows/security-gates.yml`**: Restricted the lightweight `Docs Verification` path to `docs/team/**/*.md` only; funding/proposal material no longer qualifies for docs-only bypass.
+- **`.github/workflows/security-gates.yml`**: Added VDSO evidence tests and a
+  pinned Rust 1.92 VIR-Core format/check/clippy/test job to the aggregate
+  security-evidence and SBOM dependency graph.
 - **`contracts/CONTRACTS.md`**: Replaced stale deployed/ready language with a pre-testnet deployment evidence register for Polygon Amoy and Cardano Pre-Prod, including pending fields for addresses, tx hashes, verification status, Safe/multisig ownership, and timelocks.
 - **`docs/GATEWAY_HARDENING_BLUEPRINTS.md`** and **`gateway/Caddyfile.testnet.example`**: Added the loopback-Uvicorn-behind-Caddy deployment profile and proxy-set mTLS certificate headers expected by the gateway.
 - **`REPO_STATUS_REPORT.md`**: Rewrote the repository status report for the July 2026 public testnet launch window with commit-history chronology, current component maturity, verified blockers, and gated roadmap language.
@@ -53,6 +125,45 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`neuron/services/registry_client.py`**: Extended Service Block metadata with deterministic SkillOps manifests and fail-closed permission-scope validation.
 
 ### Security
+- **Historical secret gate**: A fully redacted Gitleaks v8.30.1 scan of all 82
+  reachable commits found 1,734 matches, including three historical PEM
+  private-key findings. `docs/audit/GITLEAKS_ADJUDICATION.md` blocks release
+  pending rotation, role-impact review, coordinated history cleanup, and clean
+  Gitleaks/TruffleHog rescans; no blanket baseline was added.
+- **Secret-scanner reproducibility**: Pinned the workflow runtime versions to
+  Gitleaks 8.30.1 and TruffleHog 3.95.9 instead of inheriting mutable scanner
+  defaults from otherwise commit-pinned actions.
+- **Safe/timelock identity**: `DeployTestnet.s.sol` and
+  `DeployVDSOCanary.s.sol` now reject interface-shaped impostors by checking
+  proxy runtime code, singleton identity/runtime code, exact owner counts and
+  thresholds, and the compiled VAMS timelock runtime before rehearsal or role
+  handoff.
+- **VDSO scanner remediation**: Explicitly initialized recovery-verifier state
+  and require the execution kernel to consume a successful proof-router result.
+  Slither's configured fail-high gate reports zero high findings; all 19
+  residual medium results are documented in `docs/audit/SLITHER_ADJUDICATION.md`.
+- **VDSO DA evidence gate**: Current `NearDAAdapter` and
+  `CelestiaDAAdapter` implementations are explicitly blocked from encrypted
+  VDSO sidecar publication. A replacement route must inject receipt-verifier
+  and blob-retriever observers that are not bound to the submitting adapter and
+  establish exact retrieval-bound evidence; adapter self-verification,
+  `mock_mode`, and a receipt's `verified` flag are not accepted as proof. The
+  runtime blocks directly or partially bound methods; independent operational
+  and deployment provenance remains a canary-admission review requirement.
+- **VDSO implementation-identity gate**: The empty deployment activates no
+  adapter or verifier. Upgradeable proxy implementations remain ineligible
+  because an address codehash does not pin the proxy implementation; live
+  activation requires an independently reviewed immutable direct deployment.
+  Safe/timelock interface responses are source-level rehearsal checks only;
+  deployment still requires known implementation bytecode and instance/role
+  evidence.
+- **VDSO canary controls**: Implemented host/epoch binding, non-timeout
+  reservation recovery, destination fencing, proof/payload separation,
+  classical XChaCha20-Poly1305 sidecar encryption, hybrid-suite binding for
+  every Tier 2 or nonzero-settlement-cost authorization, separate
+  authorization/proof/settlement labels, and fail-closed rejection of mock
+  evidence. Reviewed HPKE, ML-DSA, and proof
+  backends remain unconfigured; the code blocks rather than substitutes mocks.
 - **`neuron/sdk/interrupt_handler.py`**, **`neuron/storage/arweave.py`**, and **`neuron/payments/delivery_proof.py`**: Excluded incomplete live economic routes and changed TEE/ZK delivery proofs from soft acceptance to verifier-required failure.
 - **`contracts/script/DeployVAMS.s.sol`**: Blocked the second legacy broad deployment path by default.
 - **`neuron/da/models.py`**: Added bounded scalar KPI sanitization before public DA serialization, rejecting raw world-state traces, prompts, credentials, nested payloads, non-finite numbers, and oversized values while retaining benchmark evidence.
@@ -66,6 +177,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`neuron/trust_plugins/tee_plugin.py`**: Removed agent/session fallback identity and require an explicit non-zero root EOA for TEE proof encoding, preserving INV-6.
 - **`CommitRevealOracle.sol`**: Added permissionless post-deadline resolution to an immutable fallback value with replay protection, preserving INV-7 without caller-selected stale values.
 - **`.github/workflows/security-gates.yml`**: Removed direct workflow-input interpolation from the readiness shell step, defaulted non-dispatch runs to the canary stage through a quoted environment variable, and excluded generated Foundry/Vite caches from owned-source Semgrep analysis.
+- **`.github/workflows/security-gates.yml`**: Routed event names and pull-request base/head SHAs through step environment variables before shell use, eliminating the remaining direct GitHub-context interpolation from change-classification scripts.
 - **`neuron/sdk/oms_identity.py`**, **`neuron/sdk/trails_client.py`**, and **`neuron/payments/coinme_client.py`**: Removed placeholder API-key fallbacks and fail closed outside mock mode when explicit live credentials are missing.
 - **`neuron/services/registry_client.py`**: Service Blocks now expose fail-closed memory policy metadata to prevent unreviewed persistent prompt-memory mutation in live paths.
 - **`neuron/sentinel/sentinel_node.py`**: Added telemetry-only `continualLearningGain` reporting without slashing, reward, routing, or regional-bonus impact.
@@ -77,6 +189,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`neuron/sdk/akash_orchestrator.py`**: Resolves and verifies the Akash CLI as an absolute regular-file path before live subprocess execution and applies execution timeouts.
 - **`gateway/server.py`** and **`neuron/gateway/server.py`**: Tightened default local/direct server binds from `0.0.0.0` to `127.0.0.1` to satisfy the security gate and keep direct startup loopback-first.
 - **`neuron/storage/local.py`**: Normalized heartbeat IDs to integers before constructing the parameterized SQLite `IN` clause.
+- **`neuron/sentinel/challenges/latency_probe.py`**: Switched simulated RTT measurement to the monotonic performance clock; the success-path regression now injects a deterministic clock and async sleep so concurrent analyzer load cannot create a false zero-score failure.
 - **`neuron/runtime_safety.py`**: Added centralized live-environment safety gates for `VAMS_ENV=staging`, `VAMS_ENV=testnet`, and `VAMS_ENV=production`.
 - **`gateway/server.py`**: Gateway DA audit initialization now rejects mock audit mode in live environments before any mock DA receipt can be emitted.
 - **`gateway/server.py`**: Live environments now require `GATEWAY_ADMIN_DID`, reject Basic Auth on protected control-plane routes, enforce single-use DID signatures within the 5-minute timestamp window, and bind direct Uvicorn startup to `127.0.0.1`.
@@ -86,22 +199,51 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`contracts/src/registry/ServiceBlockRegistry.sol`**: Service Block provisioning now fails closed when verifier-governed quarantine is active.
 
 ### Testing
-- **Solidity aggregate**: The post-change `forge test` run passed 643/643 tests across 32 suites. Exact-commit CI evidence remains pending.
+- **VDSO focused verification**: Python passed 65/65 VDSO boundary tests and
+  Aiken passed all 10 VDSO conformance definitions. Changed VDSO/deployment
+  Solidity paths pass scoped formatting; repository-wide formatting retains
+  unrelated legacy drift.
+- **Solidity verification status**: Final-tree `forge build --sizes` passed and
+  `forge test -vvv` passed 693/693 tests across 40 suites. The
+  `VAMSExecutionKernel` runtime is 10,467 bytes with 14,109 bytes of EIP-170
+  margin. Exact-commit CI evidence remains required.
 - **Audit controls**: Fifteen readiness tests, two deployment-source tests, two traceability tests, one workflow-supply-chain test, eight economic-concentration tests, and two adversarial-campaign tests passed; the 12-class agent corpus and first-party security scans also passed.
 - **Economic adversarial campaign**: The seed `20260711` campaign passed 100,000 epochs with 20,000 detections per attack class, zero misses, and zero baseline false positives; synthetic evidence does not replace live beneficial-owner attestations.
 - **Invariant regressions**: Focused runs passed 16 regional-emission tests, 3 stale-oracle tests, and 52 session-key/TEE/SDK tests.
-- **Cardano verification**: `aiken check --deny --seed 20260711 --max-success 250` passed 33 unit tests and 7 properties over 1,750 generated cases, totaling 1,783 checks with zero errors or warnings. Transaction-level validator state-machine properties remain required.
+- **Cardano verification**: `aiken check --deny --seed 20260713 --max-success
+  250` passed 43 unit tests and 7 properties over 1,750 generated cases; all
+  50 test definitions passed. Transaction-level validator state-machine
+  properties remain required.
 - **Frontend verification status**: `node --check` passed for the Vite/config modules, `npm audit --audit-level=high` found zero vulnerabilities, and the Vite 7.3.6 production build passed with 1,712 modules transformed.
 - **`neuron/tests/test_performance_audit.py`**: Added regression coverage proving sensitive and structured KPI data cannot survive DA report serialization.
 - **Security scripts**: Verified `default_credential_scan.py`, `public_content_policy_scan.py`, and `mock_mode_promotion_scan.py` passed locally.
 - **World-state and SkillOps targeted tests**: Verified `pytest -q neuron/tests/test_service_blocks.py neuron/tests/test_world_state_fidelity.py neuron/tests/test_world_state_phase_boundary.py` passed with 31 tests.
-- **Python aggregate**: The post-change isolated suite passed 569/569 with one third-party `websockets.legacy` deprecation warning. Exact-commit CI evidence remains pending.
-- **Python security gates**: Bandit scanned 24,800 lines with 0 high findings and no reportable medium/high-confidence issue; `pip-audit` found no known vulnerabilities in either the Gateway or Neuron declared dependency graph.
-- **Cross-language analyzers**: Semgrep auto rules reported 0 findings across 393 owned files and 517 executed rules. Slither analyzed 169 contracts with 0 high findings; all 18 residual medium results match `docs/audit/SLITHER_ADJUDICATION.md`.
+- **Python aggregate**: Workspace-local componentized runs passed 684/684
+  substantive tests (236 Neuron group A, 395 Neuron group B excluding the
+  isolated latency case, 52 scripts, and the hardened latency regression).
+  Monolithic sandbox runs were blocked by temporary-directory ACL errors, not
+  test assertions; exact-commit CI execution remains required.
+- **Python security gates**: Bandit reports no qualifying medium/high-confidence
+  issue. Both Gateway and Neuron requirement sets pass `pip-audit` with no known
+  vulnerabilities after removal of `python-ecdsa`.
+- **VIR-Core verification**: Rust 1.92 Linux execution passed all 34/34 tests;
+  format, workspace/all-target check, and Clippy with `-D warnings` also pass.
+- **Cross-language analyzers**: Slither 0.11.5 passes the fail-high gate with 19
+  adjudicated medium findings. Semgrep 1.169.0 reports zero findings across 444
+  tracked files/520 rules and 61 explicit untracked VDSO files/314 rules. All
+  17 timed-out rule/file pairs were separately source-reviewed with no confirmed
+  vulnerability and are retained in `docs/audit/SEMGREP_ADJUDICATION.md`;
+  exact-commit CI rerun and external acceptance remain required.
 - **World ID regressions**: Added five Foundry tests covering zero-verifier rejection, verifier-bound acceptance, malformed input, wrong action scope, and verifier-revert failure.
 - **Syntax/hygiene**: Verified touched Python files with `py_compile`; `git diff --check` passed.
 - **Docs-only PR gate**: Planned verification with `git diff --check` over `docs/team` changes only; full gates remain active for pushes to `main` and PRs with code/config/funding changes.
-- **Security/build gates**: Current first-party credential, mock-mode, and public-content scans passed; npm audit/build, Forge build/tests, Aiken unit tests, full pytest, Bandit, pip-audit, Semgrep blocking severity, Slither high impact, and `git diff --check` passed. TruffleHog, Gitleaks, signed SBOM, and aggregate CI evidence remain pending.
+- **Security/build gates**: Current first-party default-credential, mock-mode,
+  and public-content scans, Aiken checks, full pytest, Bandit, evidence/schema,
+  documentation, audit-program, invariant-traceability, workflow-pinning,
+  deployment-source, and agent-red-team gates passed. Pip-audit, final Foundry,
+  Linux Rust, Slither, and broad Semgrep scans now pass their configured local
+  thresholds. Historical Gitleaks, TruffleHog, signed SBOM, exact-commit CI,
+  and aggregate Cosign evidence remain blocking.
 - **`neuron/tests/test_runtime_safety.py`**: Added regression tests for local mock allowance and live-environment rejection across OMS, Trails, Coinme, DA adapters, DA audit logging, and bridge mock paths.
 - **`neuron/tests/test_gateway_auth_hardening.py`**: Added regression tests for DID signature replay rejection, live-mode Basic Auth rejection, live-mode loopback binding, and live heartbeat client certificate enforcement.
 
@@ -116,6 +258,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`frontend-vite/src/App.jsx`**: Built a new split-screen dashboard layout with an interactive SVG-based Radar Chart visualizing the 10 CHC domains (Decagon Graph) in light/dark modes.
 
 ### Testing
+- **`scripts/docs/validate_vdso_evidence.py`**: Added fail-closed validation for
+  discussion hash/size/line provenance, exact eight-principle coverage,
+  repository line citations, controlled maturity labels, dual-host authority,
+  proposed readiness status, ADR requirements, and INV-1 through INV-10
+  traceability, with stdlib regression tests.
 - Fully verified via 28 unit tests in `test_chc_scoring.py` and `test_composer_scorer.py` verifying dynamic scaling, shortfall math, edge cases, and 100% test success rate.
 
 ## [1.3.0-oms] - 2026-05-06

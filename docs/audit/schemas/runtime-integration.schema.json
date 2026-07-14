@@ -2,31 +2,78 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://vams.network/schemas/audit/runtime-integration.schema.json",
   "title": "VAMS Testnet Runtime Integration Report",
+  "$defs": {
+    "artifact": {
+      "type": "object",
+      "required": ["path", "sha256"],
+      "properties": {
+        "path": {"type": "string", "pattern": "^docs/audit/evidence/[A-Za-z0-9._/-]+$"},
+        "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+      },
+      "additionalProperties": false
+    },
+    "gateway_check": {
+      "type": "object",
+      "required": ["passed", "artifact"],
+      "properties": {
+        "passed": {"const": true},
+        "artifact": {"$ref": "#/$defs/artifact"}
+      },
+      "additionalProperties": false
+    }
+  },
   "type": "object",
   "required": ["schema_version", "commit_sha", "environment", "generated_at", "gateway_checks", "da_receipts", "excluded_live_routes"],
   "properties": {
-    "schema_version": {"const": "1.0.0"},
+    "schema_version": {"const": "2.0.0"},
     "commit_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
     "environment": {"const": "testnet"},
     "generated_at": {"type": "string", "format": "date-time"},
-    "gateway_checks": {"type": "object", "additionalProperties": {"type": "boolean"}},
+    "gateway_checks": {
+      "type": "object",
+      "required": ["tls", "mtls", "did_auth", "replay_rejection", "cors", "rate_limits", "request_limits", "loopback_bind", "dast", "load_test"],
+      "properties": {
+        "tls": {"$ref": "#/$defs/gateway_check"},
+        "mtls": {"$ref": "#/$defs/gateway_check"},
+        "did_auth": {"$ref": "#/$defs/gateway_check"},
+        "replay_rejection": {"$ref": "#/$defs/gateway_check"},
+        "cors": {"$ref": "#/$defs/gateway_check"},
+        "rate_limits": {"$ref": "#/$defs/gateway_check"},
+        "request_limits": {"$ref": "#/$defs/gateway_check"},
+        "loopback_bind": {"$ref": "#/$defs/gateway_check"},
+        "dast": {"$ref": "#/$defs/gateway_check"},
+        "load_test": {"$ref": "#/$defs/gateway_check"}
+      },
+      "additionalProperties": false
+    },
     "da_receipts": {
       "type": "array",
       "minItems": 2,
+      "maxItems": 2,
       "items": {
         "type": "object",
-        "required": ["provider", "submission_id", "payload_sha256", "submitted_at", "retrieval_verified"],
+        "required": ["provider", "network", "submission_id", "inclusion_reference", "commitment", "payload_sha256", "retrieved_payload_sha256", "submitted_at", "retrieved_at", "retrieval_verified", "mock_mode", "submitter_identity", "retrieval_observer_identity", "submission_artifact", "retrieval_artifact"],
         "properties": {
           "provider": {"enum": ["celestia", "near"]},
-          "submission_id": {"type": "string", "minLength": 1},
+          "network": {"enum": ["celestia-mocha", "near-testnet"]},
+          "submission_id": {"type": "string", "minLength": 1, "maxLength": 256},
+          "inclusion_reference": {"type": "string", "minLength": 1, "maxLength": 256},
+          "commitment": {"type": "string", "pattern": "^0x[0-9a-f]{64}$"},
           "payload_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+          "retrieved_payload_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
           "submitted_at": {"type": "string", "format": "date-time"},
-          "retrieval_verified": {"const": true}
+          "retrieved_at": {"type": "string", "format": "date-time"},
+          "retrieval_verified": {"const": true},
+          "mock_mode": {"const": false},
+          "submitter_identity": {"type": "string", "minLength": 1, "maxLength": 256},
+          "retrieval_observer_identity": {"type": "string", "minLength": 1, "maxLength": 256},
+          "submission_artifact": {"$ref": "#/$defs/artifact"},
+          "retrieval_artifact": {"$ref": "#/$defs/artifact"}
         },
         "additionalProperties": false
       }
     },
-    "excluded_live_routes": {"type": "array", "uniqueItems": true, "items": {"type": "string"}}
+    "excluded_live_routes": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}}
   },
   "additionalProperties": false
 }
