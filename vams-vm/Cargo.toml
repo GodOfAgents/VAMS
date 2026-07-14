@@ -1,0 +1,25 @@
+[workspace]
+resolver = "3"
+members = [
+    "crates/vir-types",
+    "crates/vir-codec",
+    "crates/vir-runtime",
+    "crates/vir-conformance",
+    "crates/prover-sp1",
+    "crates/prover-risc0",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.92"
+license = "MIT"
+authors = ["VAMS Contributors"]
+repository = "https://github.com/GodOfAgents/VAMS"
+
+[workspace.lints.rust]
+unsafe_code = "forbid"
+
+[workspace.lints.clippy]
+all = "deny"
+
