@@ -1,0 +1,108 @@
+name: VAMS Operational Evidence Intake
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_stage:
+        description: Operational evidence stage to validate
+        required: true
+        default: canary
+        type: choice
+        options:
+          - canary
+          - public
+      target_sha:
+        description: Frozen full 40-character commit SHA
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  validate-operational-evidence:
+    name: Validate Post-Freeze Operational Evidence
+    runs-on: [self-hosted, linux, x64, vams-testnet-evidence]
+    environment: testnet-operational-evidence
+    timeout-minutes: 30
+    steps:
+      - name: Checkout Frozen Target
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          ref: ${{ inputs.target_sha }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Bind Run To Frozen Commit
+        shell: bash
+        env:
+          TARGET_SHA: ${{ inputs.target_sha }}
+        run: |
+          set -euo pipefail
+          [[ "$TARGET_SHA" =~ ^[0-9a-f]{40}$ ]]
+          [[ "$GITHUB_RUN_ATTEMPT" == "1" ]]
+          [[ "$(git rev-parse HEAD)" == "$TARGET_SHA" ]]
+          test -z "$(git status --porcelain --untracked-files=no)"
+
+      - name: Import Read-Only Evidence Snapshot
+        shell: bash
+        env:
+          TARGET_SHA: ${{ inputs.target_sha }}
+          RELEASE_STAGE: ${{ inputs.release_stage }}
+        run: |
+          set -euo pipefail
+          source_dir="/var/lib/vams/operational-evidence/$TARGET_SHA/$RELEASE_STAGE"
+          test -d "$source_dir/docs/audit/evidence"
+          if find "$source_dir" -type l -print -quit | grep -q .; then
+            echo "Operational evidence source must not contain symlinks" >&2
+            exit 1
+          fi
+          mkdir operational-evidence
+          cp -a "$source_dir/." operational-evidence/
+          test -n "$(find operational-evidence -type f -print -quit)"
+          if grep -RIlE 'BEGIN ([A-Z0-9 ]+ )?PRIVATE KEY|(^|[^a-z])mnemonic([^a-z]|$)|seed phrase' operational-evidence; then
+            echo "Operational bundle contains prohibited secret material" >&2
+            exit 1
+          fi
+          if find operational-evidence -type f \( -name 'audit-evidence.json' -o -name 'audit-evidence.sig' -o -name 'audit-evidence.pem' \) -print -quit | grep -q .; then
+            echo "Operational input must not contain an aggregate evidence manifest" >&2
+            exit 1
+          fi
+
+      - name: Validate Operational Evidence Contracts
+        shell: bash
+        env:
+          TARGET_SHA: ${{ inputs.target_sha }}
+          RELEASE_STAGE: ${{ inputs.release_stage }}
+        run: |
+          set -euo pipefail
+          python scripts/audit/audit_program.py operational \
+            --stage "$RELEASE_STAGE" \
+            --bundle-dir operational-evidence \
+            --target-sha "$TARGET_SHA"
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          binding = {
+              "schema_version": "1.0.0",
+              "target_sha": os.environ["TARGET_SHA"],
+              "release_stage": os.environ["RELEASE_STAGE"],
+              "workflow": ".github/workflows/operational-evidence.yml",
+              "run_id": int(os.environ["GITHUB_RUN_ID"]),
+              "run_attempt": int(os.environ["GITHUB_RUN_ATTEMPT"]),
+          }
+          Path("operational-evidence/operational-run-binding.json").write_text(
+              json.dumps(binding, indent=2, sort_keys=True) + "\n",
+              encoding="utf-8",
+          )
+          PY
+
+      - name: Upload Immutable Operational Evidence
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: operational-evidence-bundle
+          path: operational-evidence
+          if-no-files-found: error
+          retention-days: 365

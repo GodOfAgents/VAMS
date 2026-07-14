@@ -6,6 +6,7 @@
 use std::num::NonZeroU64;
 
 pub const SCHEMA_VERSION: u16 = 1;
+pub const SETTLEMENT_SCHEMA_VERSION: u16 = 2;
 pub const MAX_OBJECT_ACCESSES: usize = 64;
 
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -787,6 +788,8 @@ impl SemanticReceipt {
 pub struct SettlementMetadata {
     receipt_hash: Hash32,
     binding: DomainAuthorityBinding,
+    source_host: HostAuthority,
+    destination_host: HostAuthority,
     source_chain_reference: Hash32,
     source_transaction_hash: Hash32,
     settled_at_height: u64,
@@ -795,25 +798,37 @@ pub struct SettlementMetadata {
 }
 
 impl SettlementMetadata {
+    // The pre-deployment v2 settlement wire contract has nine independent,
+    // security-relevant fields. Keeping them explicit prevents a caller from
+    // silently inheriting a host or proof commitment from ambient state.
+    #[allow(clippy::too_many_arguments)]
     pub fn new(
         receipt_hash: Hash32,
         binding: DomainAuthorityBinding,
+        source_host: HostAuthority,
+        destination_host: HostAuthority,
         source_chain_reference: Hash32,
         source_transaction_hash: Hash32,
         settled_at_height: u64,
         bridge_proof_hash: Hash32,
         payload_hash: Hash32,
     ) -> Result<Self, FailureCode> {
-        let is_cross_host = !source_chain_reference.is_zero();
+        if receipt_hash.is_zero() || destination_host != binding.host_authority() {
+            return Err(FailureCode::InvalidSettlementMetadata);
+        }
+        let is_cross_host = source_host != destination_host;
         if is_cross_host {
-            if source_transaction_hash.is_zero()
+            if source_chain_reference.is_zero()
+                || source_transaction_hash.is_zero()
+                || settled_at_height == 0
                 || bridge_proof_hash.is_zero()
                 || payload_hash.is_zero()
                 || bridge_proof_hash == payload_hash
             {
                 return Err(FailureCode::InvalidSettlementMetadata);
             }
-        } else if !source_transaction_hash.is_zero()
+        } else if !source_chain_reference.is_zero()
+            || !source_transaction_hash.is_zero()
             || settled_at_height != 0
             || !bridge_proof_hash.is_zero()
             || !payload_hash.is_zero()
@@ -824,6 +839,8 @@ impl SettlementMetadata {
         Ok(Self {
             receipt_hash,
             binding,
+            source_host,
+            destination_host,
             source_chain_reference,
             source_transaction_hash,
             settled_at_height,
@@ -840,6 +857,16 @@ impl SettlementMetadata {
     #[must_use]
     pub const fn binding(&self) -> DomainAuthorityBinding {
         self.binding
+    }
+
+    #[must_use]
+    pub const fn source_host(&self) -> HostAuthority {
+        self.source_host
+    }
+
+    #[must_use]
+    pub const fn destination_host(&self) -> HostAuthority {
+        self.destination_host
     }
 
     #[must_use]
@@ -869,7 +896,7 @@ impl SettlementMetadata {
 
     #[must_use]
     pub fn is_cross_host(&self) -> bool {
-        !self.source_chain_reference.is_zero()
+        self.source_host != self.destination_host
     }
 }
 
@@ -1120,6 +1147,8 @@ mod tests {
             SettlementMetadata::new(
                 hash(1),
                 binding,
+                HostAuthority::PolygonAmoy,
+                HostAuthority::PolygonAmoy,
                 Hash32::ZERO,
                 Hash32::ZERO,
                 0,
@@ -1132,6 +1161,8 @@ mod tests {
             SettlementMetadata::new(
                 hash(1),
                 binding,
+                HostAuthority::PolygonAmoy,
+                HostAuthority::PolygonAmoy,
                 Hash32::ZERO,
                 hash(2),
                 0,
@@ -1141,12 +1172,74 @@ mod tests {
             Err(FailureCode::InvalidSettlementMetadata)
         );
         assert_eq!(
-            SettlementMetadata::new(hash(1), binding, hash(2), hash(3), 4, hash(5), hash(5),),
+            SettlementMetadata::new(
+                hash(1),
+                binding,
+                HostAuthority::CardanoPreProd,
+                HostAuthority::PolygonAmoy,
+                hash(2),
+                hash(3),
+                0,
+                hash(5),
+                hash(6),
+            ),
+            Err(FailureCode::InvalidSettlementMetadata)
+        );
+        assert_eq!(
+            SettlementMetadata::new(
+                Hash32::ZERO,
+                binding,
+                HostAuthority::PolygonAmoy,
+                HostAuthority::PolygonAmoy,
+                Hash32::ZERO,
+                Hash32::ZERO,
+                0,
+                Hash32::ZERO,
+                Hash32::ZERO,
+            ),
+            Err(FailureCode::InvalidSettlementMetadata)
+        );
+        assert_eq!(
+            SettlementMetadata::new(
+                hash(1),
+                binding,
+                HostAuthority::PolygonAmoy,
+                HostAuthority::CardanoPreProd,
+                hash(2),
+                hash(3),
+                4,
+                hash(5),
+                hash(6),
+            ),
+            Err(FailureCode::InvalidSettlementMetadata)
+        );
+        assert_eq!(
+            SettlementMetadata::new(
+                hash(1),
+                binding,
+                HostAuthority::CardanoPreProd,
+                HostAuthority::PolygonAmoy,
+                hash(2),
+                hash(3),
+                4,
+                hash(5),
+                hash(5),
+            ),
             Err(FailureCode::InvalidSettlementMetadata)
         );
         assert!(
-            SettlementMetadata::new(hash(1), binding, hash(2), hash(3), 4, hash(5), hash(6),)
-                .is_ok()
+            SettlementMetadata::new(
+                hash(1),
+                binding,
+                HostAuthority::CardanoPreProd,
+                HostAuthority::PolygonAmoy,
+                hash(2),
+                hash(3),
+                4,
+                hash(5),
+                hash(6),
+            )
+            .is_ok()
         );
     }
 }

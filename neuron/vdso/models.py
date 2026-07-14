@@ -17,6 +17,7 @@ from .keccak import domain_hash, keccak_256
 
 
 SCHEMA_VERSION = 1
+SETTLEMENT_SCHEMA_VERSION = 2
 RUNTIME_VERSION = 1
 MAX_OBJECT_ACCESSES = 64
 INTENT_DOMAIN = b"VAMS:INTENT:v1"
@@ -117,6 +118,15 @@ def _schema_version(value: int) -> int:
     _uint64("schema_version", value)
     if value != SCHEMA_VERSION:
         raise ValueError(f"schema_version must equal VIR-Core v{SCHEMA_VERSION}")
+    return value
+
+
+def _settlement_schema_version(value: int) -> int:
+    _uint64("schema_version", value)
+    if value != SETTLEMENT_SCHEMA_VERSION:
+        raise ValueError(
+            f"schema_version must equal VDSO settlement v{SETTLEMENT_SCHEMA_VERSION}"
+        )
     return value
 
 
@@ -439,6 +449,8 @@ class SettlementMetadata:
     schema_version: int
     receipt_hash: bytes
     binding: DomainAuthorityBinding
+    source_host: HostAuthority
+    destination_host: HostAuthority
     source_chain_reference: bytes
     source_transaction_hash: bytes
     settled_at_height: int
@@ -446,9 +458,13 @@ class SettlementMetadata:
     payload_hash: bytes
 
     def __post_init__(self) -> None:
-        _schema_version(self.schema_version)
+        _settlement_schema_version(self.schema_version)
         if not isinstance(self.binding, DomainAuthorityBinding):
             raise ValueError("binding must be a DomainAuthorityBinding")
+        source_host = HostAuthority(self.source_host)
+        destination_host = HostAuthority(self.destination_host)
+        if destination_host != self.binding.host_authority:
+            raise ValueError("destination_host must match the domain authority binding")
         for name in (
             "receipt_hash",
             "source_chain_reference",
@@ -459,23 +475,30 @@ class SettlementMetadata:
             _bytes32(name, getattr(self, name))
         _uint64("settled_at_height", self.settled_at_height)
         zero = b"\x00" * 32
+        if self.receipt_hash == zero:
+            raise ValueError("receipt_hash must be nonzero")
         if self.source_chain_reference != zero:
             if (
-                self.source_transaction_hash == zero
+                source_host == destination_host
+                or self.settled_at_height == 0
+                or self.source_transaction_hash == zero
                 or self.bridge_proof_hash == zero
                 or self.payload_hash == zero
                 or self.bridge_proof_hash == self.payload_hash
             ):
                 raise ValueError(
-                    "cross-host settlement requires distinct nonzero proof and payload commitments"
+                    "cross-host settlement requires distinct hosts and nonzero, distinct proof and payload commitments"
                 )
         elif (
-            self.source_transaction_hash != zero
+            source_host != destination_host
+            or self.source_transaction_hash != zero
             or self.settled_at_height != 0
             or self.bridge_proof_hash != zero
             or self.payload_hash != zero
         ):
-            raise ValueError("same-host settlement metadata must be all-zero")
+            raise ValueError(
+                "same-host settlement metadata must use equal hosts and an all-zero settlement tuple"
+            )
 
     def canonical_bytes(self) -> bytes:
         return encode_array(
@@ -483,6 +506,8 @@ class SettlementMetadata:
                 self.schema_version,
                 self.receipt_hash,
                 self.binding.canonical_value(),
+                int(self.source_host),
+                int(self.destination_host),
                 self.source_chain_reference,
                 self.source_transaction_hash,
                 self.settled_at_height,
@@ -494,8 +519,8 @@ class SettlementMetadata:
     @classmethod
     def from_canonical_bytes(cls, data: bytes) -> "SettlementMetadata":
         value = decode(data)
-        if not isinstance(value, tuple) or len(value) != 8:
-            raise ValueError("settlement metadata must be an eight-field array")
+        if not isinstance(value, tuple) or len(value) != 10:
+            raise ValueError("settlement metadata must be a ten-field array")
         binding_value = value[2]
         if not isinstance(binding_value, tuple) or len(binding_value) != 3:
             raise ValueError("settlement domainAuthorityBinding must have three fields")
@@ -509,11 +534,13 @@ class SettlementMetadata:
                 schema_version=value[0],
                 receipt_hash=value[1],
                 binding=binding,
-                source_chain_reference=value[3],
-                source_transaction_hash=value[4],
-                settled_at_height=value[5],
-                bridge_proof_hash=value[6],
-                payload_hash=value[7],
+                source_host=HostAuthority(value[3]),
+                destination_host=HostAuthority(value[4]),
+                source_chain_reference=value[5],
+                source_transaction_hash=value[6],
+                settled_at_height=value[7],
+                bridge_proof_hash=value[8],
+                payload_hash=value[9],
             )
         except (TypeError, ValueError) as exc:
             raise ValueError("invalid canonical settlement metadata") from exc

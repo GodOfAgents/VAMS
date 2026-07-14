@@ -1,22 +1,29 @@
-# Semgrep Timeout Adjudication
+# Semgrep Scan And Timeout Adjudication
 
-**Scan date:** 2026-07-13
+**Scan date:** 2026-07-14
 
 **Tool:** Semgrep 1.169.0 Community rules
 
 ## Gate Result
 
-The configured local gate passed with zero findings. The exact tracked-source
-scan evaluated 520 rules over 444 Git-tracked files and the explicit untracked
-VDSO supplement evaluated 314 rules over 61 source files. Both exited zero and
-reported approximately 99.9% parse coverage.
+The configured local gate evaluated 520 rules over 456 Git-tracked files and
+exited zero with no findings. Three rules initially timed out in
+`gateway/server.py`, `neuron/chain_oracle.py`, and
+`scripts/audit/audit_program.py`; all three files were then rescanned with 290
+rules, a 60-second per-rule timeout, and no timeout threshold. The supplemental
+scan completed with 100% parsing, zero timeouts, and zero findings.
+Every one of the 16 then-untracked branch files was also passed explicitly to
+Semgrep; that supplemental scan ran 330 rules with 100% parsing, zero timeouts,
+and zero findings.
 
-Semgrep timed out on 17 rule/file pairs. A separate direct source review found
-no matching vulnerability in any pair. This is therefore recorded as **pass
-with adjudicated timeouts**, not as a timeout-free scan. Exact-commit CI output
-and external reviewer acceptance remain required for release evidence.
+The current working-tree result is therefore a timeout-free local pass. It is
+not exact-commit release evidence until CI reruns the same sources after the
+tree is committed and binds the raw output into the signed evidence manifest.
 
-## Tracked-Source Timeout Review
+## Prior Tracked-Source Timeout Review
+
+The table below retains the previous 2026-07-13 review for audit history. The
+2026-07-14 longer-timeout rerun supersedes it for the current working tree.
 
 | File | Timed-out rule | Direct review |
 | --- | --- | --- |
@@ -33,7 +40,7 @@ and external reviewer acceptance remain required for release evidence.
 | `scripts/audit/audit_program.py` | `python.django.security.injection.command.subprocess-injection.subprocess-injection` | No Django exists. The sole Git subprocess uses an argument array, fixed working directory, implicit `shell=False`, and constant-only call sites. |
 | `scripts/audit/audit_program.py` | `python.flask.security.injection.subprocess-injection.subprocess-injection` | No Flask request input reaches the constant-only Git subprocess. |
 
-## Supplemental VDSO Timeout Review
+## Prior Supplemental VDSO Timeout Review
 
 | File | Timed-out rule | Direct review |
 | --- | --- | --- |

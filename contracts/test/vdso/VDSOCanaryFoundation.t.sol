@@ -58,8 +58,12 @@ contract MockVDSOExecutionAdapter is IVAMSExecutionAdapter {
         bytes32 expectedProof = keccak256(
             abi.encode(
                 transitionHash,
+                settlement.schemaVersion,
+                settlement.sourceHost,
+                settlement.destinationHost,
                 settlement.sourceChainId,
                 settlement.sourceTransactionHash,
+                settlement.settledAtHeight,
                 settlement.bridgeProofHash,
                 settlement.payloadHash
             )
@@ -246,6 +250,11 @@ contract VAMSReservationManagerTest is Test {
 
     function testPauseBlocksNewReservationsButAllowsCommit() public {
         uint64 token = _reserve(RESERVATION_ONE, uint64(block.timestamp + 1 days));
+        VAMSReservationManager.Reservation memory pending = manager.getReservation(RESERVATION_ONE);
+        assertEq(pending.settlement.schemaVersion, 2);
+        assertEq(uint8(pending.settlement.sourceHost), uint8(VDSOTypes.Host.NONE));
+        assertEq(uint8(pending.settlement.destinationHost), uint8(VDSOTypes.Host.NONE));
+        assertEq(pending.settlement.settledAtHeight, 0);
         vm.prank(pauser);
         manager.pause();
 
@@ -287,8 +296,12 @@ contract VAMSReservationManagerTest is Test {
 
     function _settlement() private pure returns (VDSOTypes.SettlementMetadata memory) {
         return VDSOTypes.SettlementMetadata({
-            sourceChainId: 80002,
+            schemaVersion: 2,
+            sourceHost: VDSOTypes.Host.CARDANO,
+            destinationHost: VDSOTypes.Host.POLYGON,
+            sourceChainId: 1,
             sourceTransactionHash: keccak256("source-tx"),
+            settledAtHeight: 123_456,
             bridgeProofHash: keccak256("bridge-proof"),
             payloadHash: keccak256("payload")
         });
@@ -694,6 +707,10 @@ contract VAMSExecutionKernelTest is Test {
 
         VAMSReservationManager.Reservation memory reservation = reservationManager.getReservation(RESERVATION_ID);
         assertEq(uint8(reservation.status), uint8(VDSOTypes.ReservationStatus.COMMITTED));
+        assertEq(reservation.settlement.schemaVersion, 2);
+        assertEq(uint8(reservation.settlement.sourceHost), uint8(VDSOTypes.Host.CARDANO));
+        assertEq(uint8(reservation.settlement.destinationHost), uint8(VDSOTypes.Host.POLYGON));
+        assertEq(reservation.settlement.settledAtHeight, 123_456);
         assertEq(reservation.settlement.bridgeProofHash, request.settlement.bridgeProofHash);
         assertEq(reservation.settlement.payloadHash, request.settlement.payloadHash);
 
@@ -763,7 +780,14 @@ contract VAMSExecutionKernelTest is Test {
         request.requiredHost = VDSOTypes.Host.CARDANO;
         request.accessMode = VDSOTypes.AccessMode.ACCUMULATE;
         request.settlement = VDSOTypes.SettlementMetadata({
-            sourceChainId: 0, sourceTransactionHash: bytes32(0), bridgeProofHash: bytes32(0), payloadHash: bytes32(0)
+            schemaVersion: 2,
+            sourceHost: VDSOTypes.Host.CARDANO,
+            destinationHost: VDSOTypes.Host.CARDANO,
+            sourceChainId: 0,
+            sourceTransactionHash: bytes32(0),
+            settledAtHeight: 0,
+            bridgeProofHash: bytes32(0),
+            payloadHash: bytes32(0)
         });
         request.transitionHash = kernel.computeSemanticTransitionHash(request, bytes32(0));
         bytes32[] memory candidates = new bytes32[](1);
@@ -919,7 +943,64 @@ contract VAMSExecutionKernelTest is Test {
         assertEq(reservationManager.activeReservation(OBJECT_ID), RESERVATION_ID);
     }
 
-    function testCrossHostSettlementRequiresSeparatedNonzeroCommitments() public {
+    function testSettlementRejectsLegacySchemaIndependently() public {
+        bytes32 programId = _registerProgram();
+        uint64 fencingToken = kernel.beginReservation(
+            RESERVATION_ID,
+            OBJECT_ID,
+            DOMAIN_ID,
+            INTENT_ID,
+            holder,
+            uint64(block.timestamp + 7 days),
+            VDSOTypes.Host.POLYGON,
+            1
+        );
+        VDSOTypes.TransitionRequest memory request = _request(programId, fencingToken);
+        request.settlement.schemaVersion = 1;
+
+        vm.expectRevert(VAMSExecutionKernel.InvalidCrossHostSettlement.selector);
+        kernel.executeTransition(request, _candidates(), hex"01", "", _adapterSettlementProof(request));
+    }
+
+    function testCrossHostSettlementRejectsZeroHeightIndependently() public {
+        bytes32 programId = _registerProgram();
+        uint64 fencingToken = kernel.beginReservation(
+            RESERVATION_ID,
+            OBJECT_ID,
+            DOMAIN_ID,
+            INTENT_ID,
+            holder,
+            uint64(block.timestamp + 7 days),
+            VDSOTypes.Host.POLYGON,
+            1
+        );
+        VDSOTypes.TransitionRequest memory request = _request(programId, fencingToken);
+        request.settlement.settledAtHeight = 0;
+
+        vm.expectRevert(VAMSExecutionKernel.InvalidCrossHostSettlement.selector);
+        kernel.executeTransition(request, _candidates(), hex"01", "", _adapterSettlementProof(request));
+    }
+
+    function testCrossHostSettlementRejectsProofPayloadAliasIndependently() public {
+        bytes32 programId = _registerProgram();
+        uint64 fencingToken = kernel.beginReservation(
+            RESERVATION_ID,
+            OBJECT_ID,
+            DOMAIN_ID,
+            INTENT_ID,
+            holder,
+            uint64(block.timestamp + 7 days),
+            VDSOTypes.Host.POLYGON,
+            1
+        );
+        VDSOTypes.TransitionRequest memory request = _request(programId, fencingToken);
+        request.settlement.bridgeProofHash = request.settlement.payloadHash;
+
+        vm.expectRevert(VAMSExecutionKernel.InvalidCrossHostSettlement.selector);
+        kernel.executeTransition(request, _candidates(), hex"01", "", _adapterSettlementProof(request));
+    }
+
+    function testSettlementRejectsMalformedHostAndCommitmentTuples() public {
         bytes32 programId = _registerProgram();
         uint64 fencingToken = kernel.beginReservation(
             RESERVATION_ID,
@@ -933,10 +1014,6 @@ contract VAMSExecutionKernelTest is Test {
         );
         VDSOTypes.TransitionRequest memory request = _request(programId, fencingToken);
 
-        request.settlement.bridgeProofHash = request.settlement.payloadHash;
-        vm.expectRevert(VAMSExecutionKernel.InvalidCrossHostSettlement.selector);
-        kernel.executeTransition(request, _candidates(), hex"01", "", _adapterSettlementProof(request));
-
         request.settlement.bridgeProofHash = bytes32(0);
         vm.expectRevert(VAMSExecutionKernel.InvalidCrossHostSettlement.selector);
         kernel.executeTransition(request, _candidates(), hex"01", "", _adapterSettlementProof(request));
@@ -946,7 +1023,37 @@ contract VAMSExecutionKernelTest is Test {
         vm.expectRevert(VAMSExecutionKernel.InvalidCrossHostSettlement.selector);
         kernel.executeTransition(request, _candidates(), hex"01", "", _adapterSettlementProof(request));
 
+        request = _request(programId, fencingToken);
         request.settlement.sourceChainId = 0;
+        vm.expectRevert(VAMSExecutionKernel.InvalidCrossHostSettlement.selector);
+        kernel.executeTransition(request, _candidates(), hex"01", "", _adapterSettlementProof(request));
+
+        request = _request(programId, fencingToken);
+        request.settlement.payloadHash = bytes32(0);
+        vm.expectRevert(VAMSExecutionKernel.InvalidCrossHostSettlement.selector);
+        kernel.executeTransition(request, _candidates(), hex"01", "", _adapterSettlementProof(request));
+
+        request = _request(programId, fencingToken);
+        request.settlement.sourceHost = VDSOTypes.Host.POLYGON;
+        vm.expectRevert(VAMSExecutionKernel.InvalidCrossHostSettlement.selector);
+        kernel.executeTransition(request, _candidates(), hex"01", "", _adapterSettlementProof(request));
+
+        request = _request(programId, fencingToken);
+        request.settlement.sourceHost = VDSOTypes.Host.POLYGON;
+        request.settlement.destinationHost = VDSOTypes.Host.CARDANO;
+        vm.expectRevert(VAMSExecutionKernel.InvalidCrossHostSettlement.selector);
+        kernel.executeTransition(request, _candidates(), hex"01", "", _adapterSettlementProof(request));
+
+        request = _request(programId, fencingToken);
+        request.settlement.sourceHost = VDSOTypes.Host.NONE;
+        vm.expectRevert(VAMSExecutionKernel.InvalidCrossHostSettlement.selector);
+        kernel.executeTransition(request, _candidates(), hex"01", "", _adapterSettlementProof(request));
+
+        request = _request(programId, fencingToken);
+        request.settlement.sourceHost = VDSOTypes.Host.POLYGON;
+        request.settlement.destinationHost = VDSOTypes.Host.POLYGON;
+        request.settlement.sourceChainId = 0;
+        request.settlement.settledAtHeight = 0;
         request.settlement.payloadHash = bytes32(0);
         request.settlement.bridgeProofHash = bytes32(0);
         request.settlement.sourceTransactionHash = keccak256("malformed-local-tx");
@@ -1064,8 +1171,12 @@ contract VAMSExecutionKernelTest is Test {
                 requiredHost: VDSOTypes.Host.POLYGON,
                 accessMode: VDSOTypes.AccessMode.RESERVE,
                 settlement: VDSOTypes.SettlementMetadata({
-                    sourceChainId: 80002,
+                    schemaVersion: 2,
+                    sourceHost: VDSOTypes.Host.CARDANO,
+                    destinationHost: VDSOTypes.Host.POLYGON,
+                    sourceChainId: 1,
                     sourceTransactionHash: keccak256("source-tx"),
+                    settledAtHeight: 123_456,
                     bridgeProofHash: keccak256("bridge-proof"),
                     payloadHash: keccak256("payload")
                 })
@@ -1079,8 +1190,12 @@ contract VAMSExecutionKernelTest is Test {
             keccak256(
                 abi.encode(
                     request.transitionHash,
+                    request.settlement.schemaVersion,
+                    request.settlement.sourceHost,
+                    request.settlement.destinationHost,
                     request.settlement.sourceChainId,
                     request.settlement.sourceTransactionHash,
+                    request.settlement.settledAtHeight,
                     request.settlement.bridgeProofHash,
                     request.settlement.payloadHash
                 )

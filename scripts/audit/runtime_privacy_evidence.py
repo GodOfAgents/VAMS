@@ -202,7 +202,12 @@ def _artifact_file(
     return resolved
 
 
-def validate_runtime_report(path: Path, commit_sha: str, root: Path = ROOT) -> list[str]:
+def validate_runtime_report(
+    path: Path,
+    commit_sha: str,
+    root: Path = ROOT,
+    artifact_root: Path | None = None,
+) -> list[str]:
     """Validate artifact-bound testnet Gateway and live-DA evidence."""
 
     if not path.is_file():
@@ -229,6 +234,7 @@ def validate_runtime_report(path: Path, commit_sha: str, root: Path = ROOT) -> l
         errors.append("runtime integration report environment must be testnet")
     generated_at = _parse_utc(report.get("generated_at"), "generated_at", errors)
 
+    evidence_root = artifact_root or root
     gateway = report.get("gateway_checks")
     if _strict_keys(gateway, REQUIRED_GATEWAY_CHECKS, "gateway_checks", errors):
         for name in sorted(REQUIRED_GATEWAY_CHECKS):
@@ -240,7 +246,7 @@ def validate_runtime_report(path: Path, commit_sha: str, root: Path = ROOT) -> l
                 errors.append(f"{label} did not pass")
             _artifact_file(
                 check.get("artifact"),
-                root=root,
+                root=evidence_root,
                 allowed_root="docs/audit/evidence",
                 label=f"{label}.artifact",
                 errors=errors,
@@ -325,7 +331,7 @@ def validate_runtime_report(path: Path, commit_sha: str, root: Path = ROOT) -> l
                 da_artifact_paths.add(artifact_path)
             _artifact_file(
                 reference,
-                root=root,
+                root=evidence_root,
                 allowed_root="docs/audit/evidence",
                 label=f"{label}.{kind}_artifact",
                 errors=errors,
@@ -546,7 +552,12 @@ def validate_publisher_inventory(path: Path = PUBLISHER_INVENTORY_PATH, root: Pa
     return errors
 
 
-def validate_privacy_review(path: Path, commit_sha: str, root: Path = ROOT) -> list[str]:
+def validate_privacy_review(
+    path: Path,
+    commit_sha: str,
+    root: Path = ROOT,
+    artifact_root: Path | None = None,
+) -> list[str]:
     """Validate a human approval bound to concrete privacy artifacts."""
 
     if not path.is_file():
@@ -600,6 +611,7 @@ def validate_privacy_review(path: Path, commit_sha: str, root: Path = ROOT) -> l
     ):
         errors.append("privacy review has open blocking findings")
 
+    evidence_root = artifact_root or root
     artifacts = review.get("evidence_artifacts")
     seen_paths: set[str] = set()
     if _strict_keys(artifacts, PRIVACY_ARTIFACTS, "privacy evidence_artifacts", errors):
@@ -625,7 +637,7 @@ def validate_privacy_review(path: Path, commit_sha: str, root: Path = ROOT) -> l
             else:
                 _artifact_file(
                     reference,
-                    root=root,
+                    root=evidence_root,
                     allowed_root="docs/audit/evidence",
                     label=f"privacy evidence_artifacts.{name}",
                     errors=errors,

@@ -31,7 +31,13 @@ interface IVDSOAccessLike {
 
     function hasRole(bytes32 role, address account) external view returns (bool);
 
+    function paused() external view returns (bool);
+
+    function pause() external;
+
     function grantRole(bytes32 role, address account) external;
+
+    function revokeRole(bytes32 role, address account) external;
 
     function renounceRole(bytes32 role, address account) external;
 }
@@ -52,12 +58,12 @@ contract DeployVDSOCanary is Script, AuthorityIdentityValidator {
     }
 
     error InvalidChain(uint256 actual, uint256 expected);
-    error InvalidAuthority(address candidate);
     error InvalidTimelock(address candidate, uint256 delay);
     error TimelockGovernanceMissing(address timelock, address governanceSafe);
     error TimelockExecutorMissing(address timelock, address governanceSafe);
     error SharedAuthority(address first, address second);
     error RoleInvariantFailed(address target, bytes32 role, address account, bool expected);
+    error PauseInvariantFailed(address target, bool expected);
     error WiringInvariantFailed(address target, address expected);
     error CanaryNotEmpty(address target);
 
@@ -125,14 +131,14 @@ contract DeployVDSOCanary is Script, AuthorityIdentityValidator {
             address(capabilityRouter)
         );
 
-        // Only the kernel is paused in the canary. Pausing a dependency would
-        // strand an already-reserved transition and violate recovery liveness.
-        objectStore.revokeRole(objectStore.PAUSER_ROLE(), authorities.pauseCouncil);
-        reservationManager.revokeRole(reservationManager.PAUSER_ROLE(), authorities.pauseCouncil);
-        adapterRegistry.revokeRole(adapterRegistry.PAUSER_ROLE(), authorities.pauseCouncil);
-        programRegistry.revokeRole(programRegistry.PAUSER_ROLE(), authorities.pauseCouncil);
-        proofRouter.revokeRole(proofRouter.PAUSER_ROLE(), authorities.pauseCouncil);
-        capabilityRouter.revokeRole(capabilityRouter.PAUSER_ROLE(), authorities.pauseCouncil);
+        // Every module starts fail-closed. The deployer receives pause
+        // authority only long enough to perform this setup step; the role is
+        // then removed, leaving the distinct 2-of-3 council as the sole
+        // configured emergency-stop authority on all seven modules.
+        address[7] memory modules = _modules();
+        for (uint256 i = 0; i < modules.length; ++i) {
+            _pauseAndRemoveDeployer(modules[i], deploymentActor);
+        }
 
         objectStore.grantRole(objectStore.KERNEL_ROLE(), address(kernel));
         reservationManager.grantRole(reservationManager.KERNEL_ROLE(), address(kernel));
@@ -165,11 +171,30 @@ contract DeployVDSOCanary is Script, AuthorityIdentityValidator {
         IVDSOAccessLike(target).renounceRole(adminRole, deploymentActor);
     }
 
+    function _pauseAndRemoveDeployer(address target, address deploymentActor) private {
+        bytes32 pauserRole = IVDSOAccessLike(target).PAUSER_ROLE();
+        IVDSOAccessLike(target).grantRole(pauserRole, deploymentActor);
+        IVDSOAccessLike(target).pause();
+        IVDSOAccessLike(target).revokeRole(pauserRole, deploymentActor);
+    }
+
+    function _modules() private view returns (address[7] memory modules) {
+        modules = [
+            address(objectStore),
+            address(reservationManager),
+            address(adapterRegistry),
+            address(programRegistry),
+            address(proofRouter),
+            address(capabilityRouter),
+            address(kernel)
+        ];
+    }
+
     function _validateAuthorities(Authorities memory authorities, SafeIdentity memory safeIdentity) private view {
         _requireSafe(authorities.governanceSafe, 5, 3, safeIdentity);
         _requireSafe(authorities.pauseCouncil, 3, 2, safeIdentity);
-        _requireContract(authorities.guardian);
-        _requireContract(authorities.recoveryAuthority);
+        _requireSafe(authorities.guardian, 3, 2, safeIdentity);
+        _requireSafe(authorities.recoveryAuthority, 3, 2, safeIdentity);
         _requireTimelock(authorities.timelock, authorities.governanceSafe);
 
         address[5] memory allAuthorities = [
@@ -186,10 +211,6 @@ contract DeployVDSOCanary is Script, AuthorityIdentityValidator {
                 }
             }
         }
-    }
-
-    function _requireContract(address candidate) private view {
-        if (candidate == address(0) || candidate.code.length == 0) revert InvalidAuthority(candidate);
     }
 
     function _requireTimelock(address candidate, address governanceSafe) private view {
@@ -236,24 +257,12 @@ contract DeployVDSOCanary is Script, AuthorityIdentityValidator {
         SafeIdentity memory safeIdentity
     ) private view {
         _validateAuthorities(authorities, safeIdentity);
-        address[7] memory modules = [
-            address(objectStore),
-            address(reservationManager),
-            address(adapterRegistry),
-            address(programRegistry),
-            address(proofRouter),
-            address(capabilityRouter),
-            address(kernel)
-        ];
+        address[7] memory modules = _modules();
         for (uint256 i = 0; i < modules.length; ++i) {
             _requireRole(modules[i], bytes32(0), authorities.timelock, true);
             _requireRole(modules[i], bytes32(0), deploymentActor, false);
-            _requireRole(
-                modules[i],
-                IVDSOAccessLike(modules[i]).PAUSER_ROLE(),
-                authorities.pauseCouncil,
-                modules[i] == address(kernel)
-            );
+            _requireRole(modules[i], IVDSOAccessLike(modules[i]).PAUSER_ROLE(), authorities.pauseCouncil, true);
+            _requireRole(modules[i], IVDSOAccessLike(modules[i]).PAUSER_ROLE(), deploymentActor, false);
             _requireRole(modules[i], IVDSOAccessLike(modules[i]).PAUSER_ROLE(), authorities.timelock, false);
             _requireRole(modules[i], IVDSOAccessLike(modules[i]).PAUSER_ROLE(), authorities.governanceSafe, false);
             _requireRole(modules[i], IVDSOAccessLike(modules[i]).PAUSER_ROLE(), authorities.guardian, false);
@@ -262,6 +271,7 @@ contract DeployVDSOCanary is Script, AuthorityIdentityValidator {
             _requireRole(modules[i], bytes32(0), authorities.governanceSafe, false);
             _requireRole(modules[i], bytes32(0), authorities.guardian, false);
             _requireRole(modules[i], bytes32(0), authorities.recoveryAuthority, false);
+            _requirePaused(modules[i], true);
         }
 
         _requireRole(address(objectStore), objectStore.KERNEL_ROLE(), address(kernel), true);
@@ -335,19 +345,65 @@ contract DeployVDSOCanary is Script, AuthorityIdentityValidator {
                 || address(kernel.capabilityRouter()) != address(capabilityRouter)
         ) revert WiringInvariantFailed(address(kernel), address(0));
 
-        VAMSObjectStore.DomainAuthority memory authority = objectStore.getDomainAuthority(keccak256("REHEARSAL"));
-        VAMSAdapterRegistry.AdapterConfig memory adapter = adapterRegistry.getAdapter(keccak256("REHEARSAL"));
-        VAMSProgramRegistry.ProgramConfig memory program = programRegistry.getProgram(keccak256("REHEARSAL"));
-        VAMSProofRouter.VerifierSet memory verifier = proofRouter.getVerifier(keccak256("REHEARSAL"));
+        _requireEmptyAndInactive();
+    }
+
+    function _requireEmptyAndInactive() private view {
+        bytes32 sentinel = keccak256("VDSO_CANARY_EMPTY_SENTINEL");
+
+        VAMSObjectStore.DomainAuthority memory authority = objectStore.getDomainAuthority(sentinel);
+        VAMSObjectStore.ObjectHeader memory objectHeader = objectStore.getObject(sentinel);
         if (
-            authority.enabled || authority.epoch != 0 || adapter.status != VDSOTypes.AdapterStatus.NONE
-                || program.active || verifier.active
-        ) revert CanaryNotEmpty(address(kernel));
+            authority.host != VDSOTypes.Host.NONE || authority.writer != address(0) || authority.epoch != 0
+                || authority.enabled || objectHeader.domainId != bytes32(0) || objectHeader.stateRoot != bytes32(0)
+                || objectHeader.evidenceRoot != bytes32(0) || objectHeader.version != 0 || objectHeader.updatedAt != 0
+        ) revert CanaryNotEmpty(address(objectStore));
+
+        VAMSReservationManager.Reservation memory reservation = reservationManager.getReservation(sentinel);
+        if (
+            reservation.objectId != bytes32(0) || reservation.holder != address(0)
+                || reservation.status != VDSOTypes.ReservationStatus.NONE
+                || reservationManager.activeReservation(sentinel) != bytes32(0)
+                || reservationManager.lastFencingToken(sentinel) != 0 || reservationManager.reservationIdUsed(sentinel)
+                || address(reservationManager.recoveryVerifier()) != address(0)
+        ) revert CanaryNotEmpty(address(reservationManager));
+
+        VAMSAdapterRegistry.AdapterConfig memory adapter = adapterRegistry.getAdapter(sentinel);
+        if (
+            adapter.adapter != address(0) || adapter.status != VDSOTypes.AdapterStatus.NONE || adapter.version != 0
+                || adapter.capabilityMask != 0
+        ) revert CanaryNotEmpty(address(adapterRegistry));
+
+        VAMSProgramRegistry.ProgramConfig memory program = programRegistry.getProgram(sentinel);
+        if (program.active || program.bytecodeHash != bytes32(0) || program.verifierId != bytes32(0)) {
+            revert CanaryNotEmpty(address(programRegistry));
+        }
+
+        VAMSProofRouter.VerifierSet memory verifier = proofRouter.getVerifier(sentinel);
+        if (
+            verifier.active || verifier.primary != address(0) || verifier.secondary != address(0)
+                || proofRouter.receiptUsed(sentinel)
+        ) revert CanaryNotEmpty(address(proofRouter));
+
+        // The capability router has no mutable activation registry of its own;
+        // its only route source is the empty adapter registry checked above.
+        if (address(capabilityRouter.adapterRegistry()) != address(adapterRegistry)) {
+            revert CanaryNotEmpty(address(capabilityRouter));
+        }
+
+        if (kernel.executionUsed(sentinel) || kernel.executionAdapter(sentinel) != bytes32(0)) {
+            revert CanaryNotEmpty(address(kernel));
+        }
     }
 
     function _requireRole(address target, bytes32 role, address account, bool expected) private view {
         bool actual = IVDSOAccessLike(target).hasRole(role, account);
         if (actual != expected) revert RoleInvariantFailed(target, role, account, expected);
+    }
+
+    function _requirePaused(address target, bool expected) private view {
+        bool actual = IVDSOAccessLike(target).paused();
+        if (actual != expected) revert PauseInvariantFailed(target, expected);
     }
 
     function _requireAmoy() private view {

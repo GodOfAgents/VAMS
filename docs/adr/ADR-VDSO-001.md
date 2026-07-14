@@ -172,6 +172,14 @@ Semantic transition commitments remain structurally separate from bridge proof,
 payload hash, chain transaction data, and settlement metadata, preserving
 INV-10.
 
+The pre-deployment settlement envelope is versioned independently as
+`vdso-settlement-v2`. It binds explicit `sourceHost` and `destinationHost`
+fields; `destinationHost` must match the domain authority binding. Cross-host
+settlement requires unequal non-null hosts, a nonzero source-chain reference,
+source transaction, finalized height, bridge-proof hash, and payload hash, with
+`bridgeProofHash != payloadHash`. Same-host metadata requires equal hosts and an
+all-zero settlement tuple. Version 1 settlement envelopes fail closed.
+
 ### VDSO-ROLL-001: Parallel canary and promotion
 
 Rollout order is `off -> shadow -> canary -> authoritative`, independently per

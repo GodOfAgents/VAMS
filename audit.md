@@ -587,12 +587,12 @@ contracts/src/
 | Item | Tool | Status |
 |------|------|:------:|
 | Full Solidity compilation | `forge build --sizes` | ✅ Local pass; current-commit CI evidence pending |
-| Solidity unit tests | `forge test` | ✅ Local post-change pass: 643/643 across 32 suites; exact-commit CI evidence pending |
-| Aiken validator compilation | `aiken check --deny --seed 20260711 --max-success 250` | ✅ Local pass: 33 unit + 7 properties, 1,783 checks, 0 errors or warnings; CI evidence pending |
-| Python unit/integration tests | `pytest -q --tb=short -p no:cacheprovider` | ✅ Local post-change pass: 569/569; exact-commit CI evidence pending |
+| Solidity unit tests | `forge test` | ✅ Local working-tree pass: 709/709 across 40 suites; exact-commit CI evidence pending |
+| Aiken validator compilation | `aiken check --deny --seed 20260713 --max-success 250` | ✅ Local working-tree pass: 47 unit + 7 properties; all 54 definitions pass and each property completed 250 successful cases; CI evidence pending |
+| Python unit/integration tests | `pytest -q -p no:cacheprovider --ignore=neuron/tests/test_vdso_postgres_integration.py` plus the opt-in PostgreSQL test | ✅ Local working-tree aggregate and disposable PostgreSQL integration pass; exact counts are recorded in `REPO_STATUS_REPORT.md`; exact-commit CI evidence pending |
 | Bandit and Python SCA | `bandit -ll -ii`; `pip-audit` | ✅ Configured Bandit gate passed with 0 high findings; Gateway and Neuron dependency graphs have no known vulnerabilities; CI evidence pending |
-| Semgrep security audit | `semgrep scan --config auto --error` | ✅ Zero findings across 393 owned files and 517 rules; CI evidence pending |
-| Slither re-scan | `slither . --exclude-low --exclude-informational --fail-high` | ✅ 169 contracts analyzed with 0 high findings; 18 residual medium results match the adjudication; independent CI review pending |
+| Semgrep security audit | `semgrep scan --config auto --error` plus longer-timeout rescan of initial timeout paths | ✅ Zero findings across 456 tracked files and 520 rules; the three initial timeout paths completed separately with zero findings; CI evidence pending |
+| Slither re-scan | `slither . --exclude-dependencies --exclude-low --exclude-informational --fail-high` | ✅ 181 contracts analyzed with 0 high findings; 19 residual results match the adjudication; independent CI review pending |
 | Canonical deployment ceremony rehearsal | `DeployTestnet.s.sol` | ⏳ Implemented; Safe-backed Amoy rehearsal and role evidence pending |
 
 ---

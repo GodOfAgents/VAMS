@@ -17,13 +17,15 @@ for mod in list(sys.modules.keys()):
         del sys.modules[mod]
 
 os.environ["GATEWAY_ADMIN_PASSWORD"] = "SecureTestPassword123!"
+os.environ["VAMS_ENV"] = "local"
+os.environ["VDSO_MODE"] = "off"
 
-from gateway.server import app
+from gateway.server import create_public_app
 
 class TestGatewayRoot(unittest.TestCase):
     
     def setUp(self):
-        self.client = TestClient(app)
+        self.client = TestClient(create_public_app())
 
     @patch("gateway.server.composer")
     def test_compose_endpoint_premium(self, mock_composer):

@@ -1,9 +1,10 @@
 # VAMS Public Testnet Deployment Evidence Register
 
-**Status Date:** 2026-07-12
-**Last verified:** 2026-07-12
+**Status Date:** 2026-07-14
+**Last verified:** 2026-07-14
 **Stage:** Pre-testnet deployment evidence template
-**Scope:** Polygon Amoy contracts and Cardano Pre-Prod validators
+**Scope:** Polygon Amoy contracts, an empty paused VDSO suite, and Cardano
+Pre-Prod validators
 
 This document is the source of truth for public testnet deployment artifacts.
 It does not claim mainnet deployment, production readiness, final audit status,
@@ -65,6 +66,33 @@ or completed public testnet launch.
 
 ---
 
+## Polygon Amoy VDSO Canary Evidence
+
+The VDSO suite is deployment-eligible only as an empty, non-authoritative,
+non-value-bearing canary with public `VDSO_MODE=off`. No public Gateway VDSO
+route may be mounted. All seven EVM modules must be paused at deployment, with
+`PAUSER_ROLE` held only by the distinct 2-of-3 emergency Safe and no deployer
+privilege remaining. Guardian/quarantine and recovery authority must use two
+additional, mutually distinct 2-of-3 Safe proxies; no privileged authority may
+be an EOA. Each authority Safe must have nonce zero and no enabled module,
+transaction guard, module guard, or fallback handler at the deployment
+snapshot. This current-state check is not proof that no hash was preapproved:
+the ceremony must also pin an audited Safe release and provide complete setup
+and `ApproveHash` event history. Every field remains `Pending` until a chain-ID
+`80002` rehearsal or deployment produces exact-commit evidence.
+
+| Module | Address | Deploy Tx | Runtime Code Hash | Explorer Verification | Authority | Empty / Inactive Evidence | Notes |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| `VAMSObjectStore` | Pending | Pending | Pending | Pending | Pending | Pending | No state domain or writer may be active. |
+| `VAMSReservationManager` | Pending | Pending | Pending | Pending | Pending | Pending | No reservation or recovery verifier may be active. |
+| `VAMSAdapterRegistry` | Pending | Pending | Pending | Pending | Pending | Pending | Registry must be empty; Avail, EigenDA, and current Celestia/Near VDSO routes remain excluded. |
+| `VAMSProgramRegistry` | Pending | Pending | Pending | Pending | Pending | Pending | Registry must contain no active program. |
+| `VAMSProofRouter` | Pending | Pending | Pending | Pending | Pending | Pending | No proof or recovery verifier may be configured. |
+| `VAMSCapabilityRouter` | Pending | Pending | Pending | Pending | Pending | Pending | No execution capability may be activated. |
+| `VAMSExecutionKernel` | Pending | Pending | Pending | Pending | Pending | Pending | No execution route may be active. |
+
+---
+
 ## Cardano Pre-Prod Validator Evidence
 
 | Validator | Script Hash / Address | Deploy Tx | Verification | Role Owner | Safe / Multisig | Timelock | Notes |
@@ -73,6 +101,10 @@ or completed public testnet launch.
 | `timelock.ak` | Pending | Pending | Pending | Pending | Pending | Pending | Cancel path requires at least 2 authorized DAO multisig signatures. |
 | `insurance_fund.ak` | Pending | Pending | Pending | Pending | Pending | Pending | Guardian multisig and payout cap evidence required. |
 | `agent_registry.ak` | Pending | Pending | Pending | Pending | Pending | Pending | Agent DID and CIP-68 identity evidence required. |
+
+`cardano/lib/vams/vdso.ak` is conformance-only library evidence. It is not a
+validator entrypoint and must never be entered in this register as a deployed
+Cardano VDSO validator.
 
 ---
 
@@ -106,7 +138,15 @@ Before public testnet onboarding, attach or link the following evidence:
 7. Gateway live configuration evidence: Caddy config, loopback bind, DID admin, and mTLS fingerprint allowlist.
 8. Mock-mode promotion scan output proving live DA, identity, TEE, bridge, Trails, Coinme, and gateway audit paths fail closed.
 9. `DeployTestnet.s.sol` simulation and broadcast JSON reviewed against the deployment manifest.
-10. Safe `getOwners()` and `getThreshold()` evidence for governance, treasury, and emergency councils.
+10. Safe release/runtime allowlist, `getOwners()`, `getThreshold()`, zero nonce,
+    extension-free storage, setup transaction, and complete `ApproveHash`
+    history evidence for every authority Safe.
+11. VDSO runtime code hashes plus empty registry/domain/program/verifier counts,
+    `paused() == true`, pause-authority transfer, and zero deployer privileges
+    for all seven modules.
+12. A public profile proving `VDSO_MODE=off`; private shadow evidence is kept in
+    a separately signed `vdso-shadow-report.json` and cannot authorize public or
+    value-bearing VDSO operation.
 
 ---
 

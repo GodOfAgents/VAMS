@@ -11,9 +11,16 @@ root_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__fil
 sys.path.insert(0, root_dir)
 
 os.environ.setdefault("GATEWAY_ADMIN_PASSWORD", "SecureTestPassword123!")
+os.environ.setdefault("GATEWAY_ALLOWED_ORIGINS", "https://gateway.vams.test")
+os.environ["VAMS_ENV"] = "local"
+os.environ["VDSO_MODE"] = "off"
 
 from gateway import server
 from neuron.secp256k1 import generate_private_key, public_key_bytes, sign_message
+
+
+def _public_app():
+    return server.create_public_app()
 
 
 def _signed_admin_headers(method: str, path: str):
@@ -29,7 +36,7 @@ def _signed_admin_headers(method: str, path: str):
 
 
 def test_did_signature_is_single_use(monkeypatch):
-    monkeypatch.delenv("VAMS_ENV", raising=False)
+    monkeypatch.setenv("VAMS_ENV", "local")
     server.used_did_signatures.clear()
     headers, did = _signed_admin_headers("POST", "/compose")
     monkeypatch.setenv("GATEWAY_ADMIN_DID", did)
@@ -54,7 +61,7 @@ def test_live_gateway_rejects_basic_auth(monkeypatch):
     monkeypatch.setenv("VAMS_ENV", "testnet")
     monkeypatch.setenv("GATEWAY_ADMIN_DID", "did:key:" + "00" * 64)
     monkeypatch.setenv("GATEWAY_HEARTBEAT_CERT_FINGERPRINTS", "aa")
-    client = TestClient(server.app)
+    client = TestClient(_public_app())
 
     response = client.post(
         "/compose",
@@ -72,7 +79,7 @@ def test_live_gateway_startup_requires_admin_did(monkeypatch):
     monkeypatch.setenv("GATEWAY_HEARTBEAT_CERT_FINGERPRINTS", "aa")
 
     with pytest.raises(RuntimeError, match="GATEWAY_ADMIN_DID is required"):
-        with TestClient(server.app):
+        with TestClient(_public_app()):
             pass
 
 
@@ -82,7 +89,7 @@ def test_live_gateway_startup_requires_heartbeat_cert_allowlist(monkeypatch):
     monkeypatch.delenv("GATEWAY_HEARTBEAT_CERT_FINGERPRINTS", raising=False)
 
     with pytest.raises(RuntimeError, match="GATEWAY_HEARTBEAT_CERT_FINGERPRINTS is required"):
-        with TestClient(server.app):
+        with TestClient(_public_app()):
             pass
 
 
@@ -102,7 +109,7 @@ def test_live_gateway_requires_explicit_cors_origins(monkeypatch):
 
 
 def test_gateway_rejects_oversized_request_before_parsing():
-    client = TestClient(server.app)
+    client = TestClient(_public_app())
     response = client.post(
         "/heartbeat",
         content=b"x",
@@ -148,6 +155,8 @@ async def test_gateway_rejects_chunked_oversized_request_without_length():
 
 def test_live_gateway_main_binds_loopback(monkeypatch):
     monkeypatch.setenv("VAMS_ENV", "testnet")
+    monkeypatch.setenv("VDSO_MODE", "off")
+    monkeypatch.setenv("GATEWAY_ALLOWED_ORIGINS", "https://gateway.vams.test")
 
     with patch("gateway.server.uvicorn.run") as run:
         server.main()
@@ -155,11 +164,40 @@ def test_live_gateway_main_binds_loopback(monkeypatch):
     assert run.call_args.kwargs["host"] == "127.0.0.1"
 
 
+def test_gateway_factory_rejects_missing_environment(monkeypatch):
+    monkeypatch.delenv("VAMS_ENV", raising=False)
+    monkeypatch.setenv("VDSO_MODE", "off")
+    with pytest.raises(server.RuntimeConfigurationError, match="VAMS_ENV is required"):
+        server.create_public_app()
+
+
+def test_gateway_module_import_does_not_construct_application(monkeypatch):
+    monkeypatch.delenv("VAMS_ENV", raising=False)
+    monkeypatch.delenv("VDSO_MODE", raising=False)
+    assert not hasattr(server, "app")
+    with pytest.raises(server.RuntimeConfigurationError, match="VDSO_MODE is required"):
+        server.create_public_app()
+
+
+def test_gateway_factory_rejects_unknown_environment(monkeypatch):
+    monkeypatch.setenv("VAMS_ENV", "dev")
+    monkeypatch.setenv("VDSO_MODE", "off")
+    with pytest.raises(server.RuntimeConfigurationError, match="VAMS_ENV must be one of"):
+        server.create_public_app()
+
+
+def test_gateway_factory_rejects_missing_vdso_mode(monkeypatch):
+    monkeypatch.setenv("VAMS_ENV", "local")
+    monkeypatch.delenv("VDSO_MODE", raising=False)
+    with pytest.raises(server.RuntimeConfigurationError, match="VDSO_MODE is required"):
+        server.create_public_app()
+
+
 def test_live_heartbeat_requires_verified_client_cert(monkeypatch):
     monkeypatch.setenv("VAMS_ENV", "testnet")
     monkeypatch.setenv("GATEWAY_ADMIN_DID", "did:key:" + "00" * 64)
     monkeypatch.setenv("GATEWAY_HEARTBEAT_CERT_FINGERPRINTS", "aa")
-    client = TestClient(server.app)
+    client = TestClient(_public_app())
 
     response = client.post("/heartbeat", json={"payload": "{}", "signature": "00"})
 

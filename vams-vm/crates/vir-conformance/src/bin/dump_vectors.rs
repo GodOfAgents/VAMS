@@ -28,6 +28,7 @@ fn main() {
     println!("  \"execution_tier\": 2,");
     println!("  \"max_execution_units\": 100,");
     println!("  \"max_settlement_cost\": 5000,");
+    println!("  \"settlement_schema\": \"vdso-settlement-v2\",");
     println!(
         "  \"settlement_cbor_field_order\": [{}],",
         SETTLEMENT_CBOR_FIELD_ORDER

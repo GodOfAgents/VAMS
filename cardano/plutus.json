@@ -104,19 +104,19 @@
           }
         },
         {
-          "title": "min_proposal_stake",
+          "title": "_min_proposal_stake",
           "schema": {
             "$ref": "#/definitions/Int"
           }
         },
         {
-          "title": "min_voting_period_ms",
+          "title": "_min_voting_period_ms",
           "schema": {
             "$ref": "#/definitions/Int"
           }
         },
         {
-          "title": "default_quorum",
+          "title": "_default_quorum",
           "schema": {
             "$ref": "#/definitions/Int"
           }
@@ -150,19 +150,19 @@
           }
         },
         {
-          "title": "min_proposal_stake",
+          "title": "_min_proposal_stake",
           "schema": {
             "$ref": "#/definitions/Int"
           }
         },
         {
-          "title": "min_voting_period_ms",
+          "title": "_min_voting_period_ms",
           "schema": {
             "$ref": "#/definitions/Int"
           }
         },
         {
-          "title": "default_quorum",
+          "title": "_default_quorum",
           "schema": {
             "$ref": "#/definitions/Int"
           }
@@ -218,7 +218,7 @@
           }
         },
         {
-          "title": "normal_delay_ms",
+          "title": "_normal_delay_ms",
           "schema": {
             "$ref": "#/definitions/Int"
           }
@@ -252,7 +252,7 @@
           }
         },
         {
-          "title": "normal_delay_ms",
+          "title": "_normal_delay_ms",
           "schema": {
             "$ref": "#/definitions/Int"
           }

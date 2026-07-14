@@ -10,8 +10,8 @@ use std::num::NonZeroU64;
 use vir_types::{
     AccessMode, DomainAuthorityBinding, ExecutionPolicy, ExecutionTier, FailureCode, Hash32,
     HostAuthority, IntentCommitments, MAX_OBJECT_ACCESSES, ObjectAccess, ReceiptCommitments,
-    SCHEMA_VERSION, SemanticReceipt, SettlementMetadata, SignatureSuite, StateObjectHeader,
-    TransitionOutcome, UnsignedIntent,
+    SCHEMA_VERSION, SETTLEMENT_SCHEMA_VERSION, SemanticReceipt, SettlementMetadata, SignatureSuite,
+    StateObjectHeader, TransitionOutcome, UnsignedIntent,
 };
 
 const DOMAIN_INTENT: &[u8] = b"VAMS:INTENT:v1";
@@ -244,6 +244,13 @@ fn decode_binding(decoder: &mut Decoder<'_>) -> Result<DomainAuthorityBinding, D
     ))
 }
 
+fn decode_host_authority(decoder: &mut Decoder<'_>) -> Result<HostAuthority, DecodeError> {
+    let raw_host = decoder.uint()?;
+    let host = u8::try_from(raw_host)
+        .map_err(|_| decoder.semantic_error(FailureCode::UnsupportedHostAuthority))?;
+    HostAuthority::try_from(host).map_err(|code| decoder.semantic_error(code))
+}
+
 fn encode_hash(encoder: &mut Encoder, hash: Hash32) {
     encoder.bytes(hash.as_bytes());
 }
@@ -269,6 +276,14 @@ fn require_array(decoder: &mut Decoder<'_>, expected: usize) -> Result<(), Decod
 fn require_schema(decoder: &mut Decoder<'_>) -> Result<(), DecodeError> {
     let schema = decoder.uint()?;
     if schema != u64::from(SCHEMA_VERSION) {
+        return Err(decoder.semantic_error(FailureCode::UnsupportedVersion));
+    }
+    Ok(())
+}
+
+fn require_settlement_schema(decoder: &mut Decoder<'_>) -> Result<(), DecodeError> {
+    let schema = decoder.uint()?;
+    if schema != u64::from(SETTLEMENT_SCHEMA_VERSION) {
         return Err(decoder.semantic_error(FailureCode::UnsupportedVersion));
     }
     Ok(())
@@ -509,10 +524,12 @@ pub fn decode_semantic_receipt(bytes: &[u8]) -> Result<SemanticReceipt, DecodeEr
 #[must_use]
 pub fn encode_settlement_metadata(metadata: &SettlementMetadata) -> Vec<u8> {
     let mut encoder = Encoder::default();
-    encoder.array(8);
-    encoder.uint(u64::from(SCHEMA_VERSION));
+    encoder.array(10);
+    encoder.uint(u64::from(SETTLEMENT_SCHEMA_VERSION));
     encode_hash(&mut encoder, metadata.receipt_hash());
     encode_binding(&mut encoder, metadata.binding());
+    encoder.uint(u64::from(metadata.source_host().as_u8()));
+    encoder.uint(u64::from(metadata.destination_host().as_u8()));
     encode_hash(&mut encoder, metadata.source_chain_reference());
     encode_hash(&mut encoder, metadata.source_transaction_hash());
     encoder.uint(metadata.settled_at_height());
@@ -523,10 +540,12 @@ pub fn encode_settlement_metadata(metadata: &SettlementMetadata) -> Vec<u8> {
 
 pub fn decode_settlement_metadata(bytes: &[u8]) -> Result<SettlementMetadata, DecodeError> {
     let mut decoder = Decoder::new(bytes);
-    require_array(&mut decoder, 8)?;
-    require_schema(&mut decoder)?;
+    require_array(&mut decoder, 10)?;
+    require_settlement_schema(&mut decoder)?;
     let receipt_hash = decode_hash(&mut decoder)?;
     let binding = decode_binding(&mut decoder)?;
+    let source_host = decode_host_authority(&mut decoder)?;
+    let destination_host = decode_host_authority(&mut decoder)?;
     let source_chain_reference = decode_hash(&mut decoder)?;
     let source_transaction_hash = decode_hash(&mut decoder)?;
     let settled_at_height = decoder.uint()?;
@@ -536,6 +555,8 @@ pub fn decode_settlement_metadata(bytes: &[u8]) -> Result<SettlementMetadata, De
     SettlementMetadata::new(
         receipt_hash,
         binding,
+        source_host,
+        destination_host,
         source_chain_reference,
         source_transaction_hash,
         settled_at_height,
@@ -855,6 +876,8 @@ mod tests {
         let local = match SettlementMetadata::new(
             hash(1),
             binding,
+            HostAuthority::PolygonAmoy,
+            HostAuthority::PolygonAmoy,
             Hash32::ZERO,
             Hash32::ZERO,
             0,
@@ -866,10 +889,18 @@ mod tests {
         };
         let local_cbor = encode_settlement_metadata(&local);
         assert_eq!(decode_settlement_metadata(&local_cbor), Ok(local));
+        let mut legacy_cbor = local_cbor;
+        legacy_cbor[1] = 1;
+        assert!(matches!(
+            decode_settlement_metadata(&legacy_cbor),
+            Err(value) if value.code() == FailureCode::UnsupportedVersion
+        ));
 
         let cross_host = match SettlementMetadata::new(
             hash(1),
             binding,
+            HostAuthority::CardanoPreProd,
+            HostAuthority::PolygonAmoy,
             hash(2),
             hash(3),
             4,

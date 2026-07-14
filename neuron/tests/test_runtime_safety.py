@@ -1,10 +1,46 @@
 import pytest
 
-from neuron.runtime_safety import LiveModeSafetyError, is_live_environment
+from neuron.runtime_safety import (
+    LiveModeSafetyError,
+    RuntimeConfigurationError,
+    current_environment,
+    current_network,
+    is_live_environment,
+)
+
+
+def test_environment_selector_rejects_unknown_or_blank_values(monkeypatch):
+    for value in ("prod", "polygon-amoy", "", "unknown"):
+        monkeypatch.setenv("VAMS_ENV", value)
+        with pytest.raises(RuntimeConfigurationError, match="VAMS_ENV must be one of"):
+            current_environment()
+
+
+def test_environment_selector_rejects_missing_value(monkeypatch):
+    monkeypatch.delenv("VAMS_ENV", raising=False)
+    with pytest.raises(RuntimeConfigurationError, match="VAMS_ENV is required"):
+        current_environment()
+
+
+def test_network_selector_is_separate_and_fail_closed(monkeypatch):
+    monkeypatch.setenv("VAMS_ENV", "testnet")
+    monkeypatch.delenv("VAMS_NETWORK", raising=False)
+    assert current_network() is None
+    with pytest.raises(RuntimeConfigurationError, match="VAMS_NETWORK is required"):
+        current_network(required=True)
+
+    for value in ("polygon-amoy", "cardano-preprod"):
+        monkeypatch.setenv("VAMS_NETWORK", value)
+        assert current_network(required=True) == value
+
+    for value in ("testnet", "cardano-pre-prod", "", "mainnet"):
+        monkeypatch.setenv("VAMS_NETWORK", value)
+        with pytest.raises(RuntimeConfigurationError, match="VAMS_NETWORK must be one of"):
+            current_network()
 
 
 def test_local_environment_allows_explicit_mock(monkeypatch):
-    monkeypatch.delenv("VAMS_ENV", raising=False)
+    monkeypatch.setenv("VAMS_ENV", "local")
     monkeypatch.setenv("OMS_MOCK_MODE", "true")
 
     from neuron.sdk.oms_identity import OMSIdentityVerifier
@@ -45,7 +81,7 @@ def test_live_environment_rejects_default_oms_secret(monkeypatch):
 
 
 def test_local_non_mock_clients_require_explicit_api_keys(monkeypatch):
-    monkeypatch.delenv("VAMS_ENV", raising=False)
+    monkeypatch.setenv("VAMS_ENV", "local")
     monkeypatch.delenv("OMS_API_KEY", raising=False)
     monkeypatch.delenv("TRAILS_API_KEY", raising=False)
     monkeypatch.delenv("COINME_API_KEY", raising=False)

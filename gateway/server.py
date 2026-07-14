@@ -20,12 +20,13 @@ import secrets
 import asyncio
 import threading
 import hashlib
+from contextlib import asynccontextmanager, suppress
 from datetime import datetime
-from typing import Dict, List, Optional
+from typing import Callable, Dict, List, Optional
 from dataclasses import dataclass, field, asdict
 
 try:
-    from fastapi import FastAPI, HTTPException, Depends
+    from fastapi import APIRouter, FastAPI, HTTPException, Depends
     from fastapi.responses import HTMLResponse
     from fastapi.security import HTTPBasic, HTTPBasicCredentials
     from starlette.status import HTTP_401_UNAUTHORIZED, HTTP_500_INTERNAL_SERVER_ERROR
@@ -40,7 +41,12 @@ except ImportError:
     sys.exit(1)
 
 
-from neuron.runtime_safety import current_environment, is_live_environment
+from neuron.runtime_safety import (
+    RuntimeConfigurationError,
+    current_environment,
+    current_network,
+    is_live_environment,
+)
 
 
 # --- CONFIGURATION ---
@@ -117,43 +123,7 @@ class NodeInfo:
         }
 
 
-from contextlib import asynccontextmanager
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    # Startup tasks
-    admin_password = os.getenv("GATEWAY_ADMIN_PASSWORD")
-    if not admin_password:
-        raise RuntimeError("CRITICAL: GATEWAY_ADMIN_PASSWORD is not set in the environment.")
-    # Reject the removed legacy password rather than treating it as a credential.
-    if admin_password == "vams2026":  # nosec B105
-        raise RuntimeError("CRITICAL: GATEWAY_ADMIN_PASSWORD is set to the default insecure value 'vams2026'. Please change it.")
-    if is_live_environment() and not os.getenv("GATEWAY_ADMIN_DID"):
-        raise RuntimeError(
-            f"CRITICAL: GATEWAY_ADMIN_DID is required when VAMS_ENV={current_environment()}."
-        )
-    if is_live_environment() and not os.getenv("GATEWAY_HEARTBEAT_CERT_FINGERPRINTS"):
-        raise RuntimeError(
-            f"CRITICAL: GATEWAY_HEARTBEAT_CERT_FINGERPRINTS is required when VAMS_ENV={current_environment()}."
-        )
-        
-    asyncio.create_task(cleanup_offline_nodes())
-    yield
-
-# --- APPLICATION ---
-app = FastAPI(
-    title="VAMS Gateway",
-    version=VERSION,
-    description="Central gateway for VAMS Neuron nodes",
-    lifespan=lifespan
-)
-
-# VDSO is an isolated, fail-closed shadow/canary router. Importing it may stop
-# startup when an unsafe live configuration requests canary or authoritative
-# mode; this is intentional and must not be converted into an optional mock.
-from gateway.vdso import router as vdso_router
-
-app.include_router(vdso_router)
+core_router = APIRouter()
 
 # --- MIDDLEWARES ---
 from fastapi.middleware.cors import CORSMiddleware
@@ -293,43 +263,19 @@ def resolve_allowed_origins(raw_origins: Optional[str] = None) -> List[str]:
     return allowed_origins
 
 
-allowed_origins = resolve_allowed_origins()
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=allowed_origins,
-    allow_credentials=True,
-    allow_methods=["GET", "POST", "DELETE", "OPTIONS"],
-    allow_headers=[
-        "Authorization",
-        "Content-Type",
-        "X-VAMS-DID",
-        "X-VAMS-Signature",
-        "X-VAMS-Timestamp",
-        "X-VAMS-Content-SHA256",
-    ],
-)
-
-# Configure Rate Limiting
-rate_limit_env = os.getenv("GATEWAY_RATE_LIMIT", "100")
-try:
-    if "/" in rate_limit_env:
-        limit_str, window_str = rate_limit_env.split("/")
-        limit_val = int(limit_str)
-        window_val = int(window_str)
-    else:
-        limit_val = int(rate_limit_env)
-        window_val = 60
-except ValueError:
-    limit_val = 100
-    window_val = 60
-
-app.add_middleware(
-    RateLimitMiddleware,
-    limit=limit_val,
-    window_sec=window_val
-)
-app.add_middleware(RequestSizeLimitMiddleware, max_bytes=1_048_576)
+def resolve_rate_limit(raw_value: Optional[str] = None) -> tuple[int, int]:
+    rate_limit_value = raw_value or os.getenv("GATEWAY_RATE_LIMIT", "100")
+    try:
+        if "/" in rate_limit_value:
+            limit_str, window_str = rate_limit_value.split("/", 1)
+            limit, window = int(limit_str), int(window_str)
+        else:
+            limit, window = int(rate_limit_value), 60
+    except ValueError:
+        return 100, 60
+    if limit <= 0 or window <= 0:
+        raise RuntimeError("GATEWAY_RATE_LIMIT values must be positive integers")
+    return limit, window
 
 # In-memory node registry
 nodes: Dict[str, NodeInfo] = {}
@@ -530,7 +476,7 @@ async def cleanup_offline_nodes():
 
 # Lifespan handles startup events.
 
-@app.get("/", response_class=HTMLResponse)
+@core_router.get("/", response_class=HTMLResponse)
 async def dashboard(username: str = Depends(get_current_username)):
     """Simple HTML dashboard showing connected nodes."""
     online_nodes = [n for n in nodes.values() if n.is_online]
@@ -671,7 +617,7 @@ async def dashboard(username: str = Depends(get_current_username)):
     return HTMLResponse(content=html)
 
 
-@app.post("/heartbeat")
+@core_router.post("/heartbeat")
 async def receive_heartbeat(heartbeat: HeartbeatRequest, http_request: Request):
     """Receive a signed heartbeat from a neuron."""
     try:
@@ -775,7 +721,7 @@ async def receive_heartbeat(heartbeat: HeartbeatRequest, http_request: Request):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@app.get("/nodes")
+@core_router.get("/nodes")
 async def list_nodes():
     """List all registered nodes."""
     return {
@@ -785,7 +731,7 @@ async def list_nodes():
     }
 
 
-@app.get("/health")
+@core_router.get("/health")
 async def health_check():
     """Health check endpoint."""
     return {"status": "healthy", "version": VERSION, "composer_available": COMPOSER_AVAILABLE}
@@ -815,7 +761,7 @@ class ComposeRequest(BaseModel):
     required_service_blocks: List[str] = []
 
 
-@app.post("/compose")
+@core_router.post("/compose")
 async def compose_resources(request: ComposeRequest, username: str = Depends(get_current_username)):
     """Submit a blueprint to provision resources."""
     if not COMPOSER_AVAILABLE:
@@ -891,7 +837,7 @@ async def compose_resources(request: ComposeRequest, username: str = Depends(get
         raise HTTPException(status_code=422, detail=str(e))
 
 
-@app.delete("/compose/{instance_id}")
+@core_router.delete("/compose/{instance_id}")
 async def deprovision_resources(instance_id: str, username: str = Depends(get_current_username)):
     """Deprovision an active composed instance."""
     if not COMPOSER_AVAILABLE:
@@ -903,7 +849,7 @@ async def deprovision_resources(instance_id: str, username: str = Depends(get_cu
     return {"status": "deprovisioned", "instance_id": instance_id}
 
 
-@app.get("/compose/instances")
+@core_router.get("/compose/instances")
 async def list_composed_instances(username: str = Depends(get_current_username)):
     """List all active composed instances."""
     if not COMPOSER_AVAILABLE:
@@ -917,7 +863,7 @@ async def list_composed_instances(username: str = Depends(get_current_username))
     }
 
 
-@app.get("/compose/blueprints")
+@core_router.get("/compose/blueprints")
 async def list_available_blueprints():
     """List pre-defined blueprints (no auth required)."""
     if not COMPOSER_AVAILABLE:
@@ -926,7 +872,7 @@ async def list_available_blueprints():
     return {"blueprints": list_blueprints()}
 
 
-@app.get("/services/blocks")
+@core_router.get("/services/blocks")
 async def list_service_blocks(category: Optional[str] = None):
     """List available service blocks from the registry."""
     if not COMPOSER_AVAILABLE:
@@ -934,7 +880,7 @@ async def list_service_blocks(category: Optional[str] = None):
     return {"blocks": service_client.list_blocks(category=category)}
 
 
-@app.get("/services/macros")
+@core_router.get("/services/macros")
 async def list_macro_blocks():
     """List pre-defined macro composite blocks."""
     if not COMPOSER_AVAILABLE:
@@ -946,14 +892,14 @@ async def list_macro_blocks():
 # ECONOMICS ENDPOINTS (Phase 4)
 # ═══════════════════════════════════════════════════════════════
 
-@app.get("/economics/status")
+@core_router.get("/economics/status")
 async def get_economics_status():
     """Get the current running status of the Economics Keeper."""
     if not ECONOMICS_AVAILABLE:
         raise HTTPException(status_code=503, detail="Economics Layer not available")
     return keeper.get_status()
 
-@app.get("/economics/epochs")
+@core_router.get("/economics/epochs")
 async def list_epochs():
     """List all completed reward epochs."""
     if not ECONOMICS_AVAILABLE:
@@ -965,7 +911,7 @@ async def list_epochs():
         "epochs": summaries
     }
 
-@app.get("/economics/epochs/{epoch_id}")
+@core_router.get("/economics/epochs/{epoch_id}")
 async def get_epoch(epoch_id: int):
     """Get details for a specific reward epoch."""
     if not ECONOMICS_AVAILABLE:
@@ -977,7 +923,7 @@ async def get_epoch(epoch_id: int):
         
     return summary
 
-@app.get("/economics/estimate-apr")
+@core_router.get("/economics/estimate-apr")
 async def estimate_apr(
     region_id: str = "us-east-1",
     capacity_contribution: int = 10,
@@ -1002,7 +948,7 @@ async def estimate_apr(
 #            DA PERFORMANCE AUDIT ENDPOINTS (Phase 0)
 # ============================================================
 
-@app.get("/da/status")
+@core_router.get("/da/status")
 async def da_status():
     """Get live connectivity status for all DA layer adapters."""
     if not DA_AUDIT_AVAILABLE:
@@ -1015,7 +961,7 @@ async def da_status():
         "adapters": status,
     }
 
-@app.get("/da/anchors")
+@core_router.get("/da/anchors")
 async def da_anchors(
     protocol: Optional[str] = None,
     limit: int = 50,
@@ -1037,8 +983,244 @@ async def da_anchors(
     }
 
 
+def _application_lifespan(startup_initializers: tuple[Callable[[], None], ...]):
+    @asynccontextmanager
+    async def lifespan(_app: FastAPI):
+        current_environment()
+        current_network(required=False)
+        admin_password = os.getenv("GATEWAY_ADMIN_PASSWORD")
+        if not admin_password:
+            raise RuntimeError(
+                "CRITICAL: GATEWAY_ADMIN_PASSWORD is not set in the environment."
+            )
+        if admin_password == "vams2026":  # nosec B105
+            raise RuntimeError(
+                "CRITICAL: GATEWAY_ADMIN_PASSWORD is set to the default insecure "
+                "value 'vams2026'. Please change it."
+            )
+        if is_live_environment() and not os.getenv("GATEWAY_ADMIN_DID"):
+            raise RuntimeError(
+                "CRITICAL: GATEWAY_ADMIN_DID is required when "
+                f"VAMS_ENV={current_environment()}."
+            )
+        if is_live_environment() and not os.getenv(
+            "GATEWAY_HEARTBEAT_CERT_FINGERPRINTS"
+        ):
+            raise RuntimeError(
+                "CRITICAL: GATEWAY_HEARTBEAT_CERT_FINGERPRINTS is required when "
+                f"VAMS_ENV={current_environment()}."
+            )
+        for initialize in startup_initializers:
+            initialize()
+
+        cleanup_task = asyncio.create_task(cleanup_offline_nodes())
+        try:
+            yield
+        finally:
+            cleanup_task.cancel()
+            with suppress(asyncio.CancelledError):
+                await cleanup_task
+
+    return lifespan
+
+
+def _configured_vdso_mode() -> str:
+    raw_mode = os.getenv("VDSO_MODE")
+    if raw_mode is None:
+        raise RuntimeConfigurationError(
+            "VDSO_MODE is required and must be explicitly set to off or shadow"
+        )
+    mode = raw_mode.strip().lower()
+    allowed = {"off", "shadow", "canary", "authoritative"}
+    if mode not in allowed:
+        raise RuntimeConfigurationError(
+            "VDSO_MODE must be off, shadow, canary, or authoritative; "
+            f"received {mode!r}"
+        )
+    if mode in {"canary", "authoritative"}:
+        raise RuntimeConfigurationError(
+            f"Gateway VDSO_MODE={mode} is blocked; only private shadow routing is exposed"
+        )
+    return mode
+
+
+def _network_bound_height_provider(network: str, height_provider: Callable):
+    host_networks = {
+        "POLYGON": "polygon-amoy",
+        "CARDANO": "cardano-preprod",
+    }
+
+    def trusted_height(binding):
+        binding_network = host_networks.get(binding.host_authority.name)
+        if binding_network != network:
+            raise RuntimeError(
+                "intent authority does not match the configured VAMS_NETWORK"
+            )
+        return height_provider(binding)
+
+    return trusted_height
+
+
+def create_app(
+    *,
+    vdso_nonce_store=None,
+    vdso_replay_store=None,
+    vdso_height_provider: Optional[Callable] = None,
+    vdso_deployment_verifier: Optional[Callable] = None,
+    vdso_postgres_dsn: Optional[str] = None,
+) -> FastAPI:
+    """Compose the baseline gateway and, only when requested, private VDSO shadow."""
+
+    current_environment()
+    current_network(required=False)
+    vdso_mode = _configured_vdso_mode()
+    startup_initializers: list[Callable[[], None]] = []
+    vdso_service = None
+
+    if vdso_mode == "shadow":
+        network = current_network(required=True)
+        if vdso_height_provider is None:
+            raise RuntimeConfigurationError(
+                "private VDSO shadow requires an injected trusted height provider"
+            )
+        if vdso_deployment_verifier is None:
+            raise RuntimeConfigurationError(
+                "private VDSO shadow requires an injected on-chain deployment verifier"
+            )
+
+        if vdso_nonce_store is None or vdso_replay_store is None:
+            dsn = vdso_postgres_dsn or os.getenv("VDSO_POSTGRES_DSN")
+            if not dsn:
+                raise RuntimeConfigurationError(
+                    "VDSO_POSTGRES_DSN is required for private VDSO shadow"
+                )
+            from gateway.vdso_postgres import (
+                PostgresNonceStore,
+                PostgresReplayStore,
+                validate_live_postgres_dsn,
+            )
+
+            if is_live_environment():
+                validate_live_postgres_dsn(dsn)
+
+            vdso_nonce_store = vdso_nonce_store or PostgresNonceStore(dsn)
+            vdso_replay_store = vdso_replay_store or PostgresReplayStore(dsn)
+
+        if getattr(vdso_nonce_store, "durable", False) is not True:
+            raise RuntimeConfigurationError(
+                "private VDSO shadow requires a durable atomic nonce store"
+            )
+        if getattr(vdso_replay_store, "shared", False) is not True:
+            raise RuntimeConfigurationError(
+                "private VDSO shadow requires a shared atomic replay store"
+            )
+
+        if is_live_environment():
+            from gateway.vdso_postgres import (
+                PostgresNonceStore,
+                PostgresReplayStore,
+                validate_live_postgres_dsn,
+            )
+
+            if not isinstance(vdso_nonce_store, PostgresNonceStore) or not isinstance(
+                vdso_replay_store, PostgresReplayStore
+            ):
+                raise RuntimeConfigurationError(
+                    "live VDSO shadow requires PostgreSQL nonce and replay stores"
+                )
+            if vdso_nonce_store.dsn != vdso_replay_store.dsn:
+                raise RuntimeConfigurationError(
+                    "live VDSO shadow nonce and replay stores must share one database"
+                )
+            validate_live_postgres_dsn(vdso_nonce_store.dsn)
+
+        for store in (vdso_nonce_store, vdso_replay_store):
+            initialize = getattr(store, "initialize", None)
+            if callable(initialize):
+                startup_initializers.append(initialize)
+
+        from gateway.vdso import create_vdso_router
+        from neuron.vdso.service import VDSOCanaryService, VDSOMode
+
+        vdso_service = VDSOCanaryService(
+            mode=VDSOMode.SHADOW,
+            adapters=(),
+            height_provider=_network_bound_height_provider(
+                network, vdso_height_provider
+            ),
+            nonce_store=vdso_nonce_store,
+            deployment_verifier=vdso_deployment_verifier,
+        )
+
+    gateway_app = FastAPI(
+        title="VAMS Gateway",
+        version=VERSION,
+        description="Central gateway for VAMS Neuron nodes",
+        lifespan=_application_lifespan(tuple(startup_initializers)),
+    )
+    gateway_app.include_router(core_router)
+
+    allowed_origins = resolve_allowed_origins()
+    gateway_app.add_middleware(
+        CORSMiddleware,
+        allow_origins=allowed_origins,
+        allow_credentials=True,
+        allow_methods=["GET", "POST", "DELETE", "OPTIONS"],
+        allow_headers=[
+            "Authorization",
+            "Content-Type",
+            "X-VAMS-DID",
+            "X-VAMS-Signature",
+            "X-VAMS-Timestamp",
+            "X-VAMS-Content-SHA256",
+        ],
+    )
+    limit, window = resolve_rate_limit()
+    gateway_app.add_middleware(
+        RateLimitMiddleware,
+        limit=limit,
+        window_sec=window,
+    )
+    gateway_app.add_middleware(RequestSizeLimitMiddleware, max_bytes=1_048_576)
+
+    gateway_app.state.vdso_mode = vdso_mode
+    if vdso_service is not None:
+        gateway_app.state.vdso_service = vdso_service
+        gateway_app.state.vdso_replay_store = vdso_replay_store
+        gateway_app.include_router(create_vdso_router())
+    return gateway_app
+
+
+def create_public_app() -> FastAPI:
+    """Create the baseline public Gateway; VDSO must be explicitly off."""
+
+    if _configured_vdso_mode() != "off":
+        raise RuntimeConfigurationError(
+            "public Gateway factory requires VDSO_MODE=off"
+        )
+    return create_app()
+
+
+def create_shadow_app() -> FastAPI:
+    """Import-string factory for the real, private VDSO shadow composition."""
+
+    if _configured_vdso_mode() != "shadow":
+        raise RuntimeConfigurationError(
+            "private shadow factory requires VDSO_MODE=shadow"
+        )
+    from gateway.vdso_runtime import shadow_runtime_from_environment
+
+    height_provider, deployment_verifier = shadow_runtime_from_environment()
+    return create_app(
+        vdso_height_provider=height_provider,
+        vdso_deployment_verifier=deployment_verifier,
+    )
+
+
 def main():
     """Run the gateway server."""
+    mode = _configured_vdso_mode()
+    application = create_shadow_app() if mode == "shadow" else create_public_app()
     bind_host = LIVE_BIND_HOST if is_live_environment() else LOCAL_BIND_HOST
     print()
     print("⚡ VAMS Gateway Server")
@@ -1048,7 +1230,7 @@ def main():
     print(f"   Bind Host: {bind_host}")
     print()
 
-    uvicorn.run(app, host=bind_host, port=8000)
+    uvicorn.run(application, host=bind_host, port=8000)
 
 
 if __name__ == "__main__":

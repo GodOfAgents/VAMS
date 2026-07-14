@@ -117,8 +117,12 @@ contract VAMSReservationManager is VDSOCanaryAccess {
             transitionHash: bytes32(0),
             recoveryProofHash: bytes32(0),
             settlement: VDSOTypes.SettlementMetadata({
+                schemaVersion: VDSOTypes.SETTLEMENT_SCHEMA_VERSION,
+                sourceHost: VDSOTypes.Host.NONE,
+                destinationHost: VDSOTypes.Host.NONE,
                 sourceChainId: 0,
                 sourceTransactionHash: bytes32(0),
+                settledAtHeight: 0,
                 bridgeProofHash: bytes32(0),
                 payloadHash: bytes32(0)
             })

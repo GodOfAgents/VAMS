@@ -15,15 +15,17 @@ for mod in list(sys.modules.keys()):
         del sys.modules[mod]
 
 os.environ["GATEWAY_ADMIN_PASSWORD"] = "SecureTestPassword123!"
+os.environ["VAMS_ENV"] = "local"
+os.environ["VDSO_MODE"] = "off"
 
-from gateway.server import app, nodes
+from gateway.server import create_public_app, nodes
 from neuron.gateway.rate_limiter import RateLimiter
 from neuron.secp256k1 import generate_private_key, public_key_bytes, sign_message
 
 class TestGatewayCurrent(unittest.TestCase):
     
     def setUp(self):
-        self.client = TestClient(app)
+        self.client = TestClient(create_public_app())
         nodes.clear()
         
     def test_heartbeat_new_agent(self):

@@ -1,6 +1,6 @@
 # Slither Finding Adjudication
 
-**Scan date:** 2026-07-13
+**Scan date:** 2026-07-14
 
 **Scope:** `contracts/src/`, excluding vendored dependencies
 
@@ -83,6 +83,7 @@ semantics.
 
 - High-impact findings: **0 unresolved**.
 - Medium scan results: **19 adjudicated**.
+- Exact local scope: **181 contracts analyzed with 63 detectors**.
 - Low/informational/optimization findings remain visible in the complete report
   and are not promoted to security closure without manual review.
 - This adjudication does not replace external review, invariant fuzzing, or the

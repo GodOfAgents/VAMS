@@ -11,6 +11,18 @@ on:
         options:
           - canary
           - public
+      target_sha:
+        description: Full 40-character commit SHA to evaluate
+        required: true
+        type: string
+      stage_evidence_run_id:
+        description: Immutable prior run ID containing the complete unsigned stage-evidence bundle
+        required: true
+        type: string
+      operational_evidence_run_id:
+        description: Distinct post-freeze run ID containing immutable operational evidence
+        required: true
+        type: string
   push:
     branches: [ main ]
   pull_request:
@@ -18,6 +30,9 @@ on:
 
 permissions:
   contents: read
+
+env:
+  AUDIT_SEED: "20260713"
 
 jobs:
   changes:
@@ -69,51 +84,28 @@ jobs:
     name: Audit Program Integrity
     runs-on: ubuntu-latest
     needs: changes
+    if: github.event_name != 'workflow_dispatch'
     steps:
       - name: Checkout Code
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          fetch-depth: 0
 
-      - name: Validate Audit Program
+      - name: Execute Audit Program Gate And Capture Raw Output
+        env:
+          TARGET_SHA: ${{ github.sha }}
+          STAGE_EVIDENCE_RUN_ID: ${{ github.run_id }}
         run: |
-          python scripts/audit/audit_program.py validate
+          python scripts/audit/audit_program.py run-gate --output-dir raw-gate --name audit-program --target-sha "$TARGET_SHA" --stage-evidence-run-id "$STAGE_EVIDENCE_RUN_ID"
 
-      - name: Run Audit Program Regression Tests
-        run: |
-          python scripts/audit/test_audit_program.py
-
-      - name: Validate Deployment Ceremony Source
-        run: |
-          python scripts/audit/deployment_readiness.py
-          python scripts/audit/test_deployment_readiness.py
-
-      - name: Validate Architecture And Invariant Traceability
-        run: |
-          python scripts/audit/validate_traceability.py
-          python scripts/audit/test_traceability.py
-
-      - name: Validate Documentation Reality
-        run: |
-          python scripts/docs/validate_docs.py
-          python -m unittest scripts/docs/test_validate_docs.py
-
-      - name: Validate VDSO Review Evidence
-        run: |
-          python scripts/docs/validate_vdso_evidence.py
-          python -m unittest discover -s scripts/docs/tests -p "test_validate_vdso_evidence.py"
-
-      - name: Validate Workflow Supply Chain
-        run: |
-          python scripts/audit/validate_workflow_security.py
-          python scripts/audit/test_workflow_security.py
-
-      - name: Test Economic Concentration Controls
-        run: |
-          python scripts/audit/test_economic_concentration.py
-          python scripts/audit/test_economic_adversarial.py
-          python scripts/audit/run_economic_adversarial.py \
-            --epochs 100000 \
-            --seed 20260711 \
-            --output economic-adversarial-report.json
+      - name: Upload Audit Program Raw Gate Evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: raw-gate-audit-program
+          path: raw-gate
+          if-no-files-found: error
+          retention-days: 365
 
       - name: Upload Economic Adversarial Evidence
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
@@ -121,10 +113,6 @@ jobs:
           name: economic-adversarial-report
           path: economic-adversarial-report.json
           retention-days: 365
-
-      - name: Validate Agent Red-Team Corpus
-        run: |
-          python scripts/audit/validate_agent_red_team.py
 
   docs-gate:
     name: Docs Verification
@@ -166,82 +154,178 @@ jobs:
     name: Public Content Policy
     runs-on: ubuntu-latest
     needs: changes
+    if: github.event_name != 'workflow_dispatch'
     steps:
       - name: Checkout Code
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
           fetch-depth: 0
 
-      - name: Run Public Content Policy Scan
+      - name: Run Public Content Policy Scan And Capture Raw Output
+        env:
+          TARGET_SHA: ${{ github.sha }}
+          STAGE_EVIDENCE_RUN_ID: ${{ github.run_id }}
         run: |
-          python scripts/security/public_content_policy_scan.py
+          python scripts/audit/audit_program.py run-gate --output-dir raw-gate --name public-content --target-sha "$TARGET_SHA" --stage-evidence-run-id "$STAGE_EVIDENCE_RUN_ID"
+
+      - name: Upload Public Content Raw Gate Evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: raw-gate-public-content
+          path: raw-gate
+          if-no-files-found: error
+          retention-days: 365
 
   default-credential-scan:
     name: Default Credential Scan
     runs-on: ubuntu-latest
     needs: changes
+    if: github.event_name != 'workflow_dispatch'
     steps:
       - name: Checkout Code
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
           fetch-depth: 0
 
-      - name: Run Default Credential Scan
+      - name: Run Default Credential Scan And Capture Raw Output
+        env:
+          TARGET_SHA: ${{ github.sha }}
+          STAGE_EVIDENCE_RUN_ID: ${{ github.run_id }}
         run: |
-          python scripts/security/default_credential_scan.py
+          python scripts/audit/audit_program.py run-gate --output-dir raw-gate --name default-credentials --target-sha "$TARGET_SHA" --stage-evidence-run-id "$STAGE_EVIDENCE_RUN_ID"
+
+      - name: Upload Default Credential Raw Gate Evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: raw-gate-default-credentials
+          path: raw-gate
+          if-no-files-found: error
+          retention-days: 365
 
   mock-mode-promotion-scan:
     name: Mock-Mode Promotion Scan
     runs-on: ubuntu-latest
     needs: changes
+    if: github.event_name != 'workflow_dispatch'
     steps:
       - name: Checkout Code
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
           fetch-depth: 0
 
-      - name: Run Mock-Mode Promotion Scan
+      - name: Run Mock-Mode Promotion Scan And Capture Raw Output
+        env:
+          TARGET_SHA: ${{ github.sha }}
+          STAGE_EVIDENCE_RUN_ID: ${{ github.run_id }}
         run: |
-          python scripts/security/mock_mode_promotion_scan.py
+          python scripts/audit/audit_program.py run-gate --output-dir raw-gate --name mock-mode --target-sha "$TARGET_SHA" --stage-evidence-run-id "$STAGE_EVIDENCE_RUN_ID"
+
+      - name: Upload Mock-Mode Raw Gate Evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: raw-gate-mock-mode
+          path: raw-gate
+          if-no-files-found: error
+          retention-days: 365
 
   secret-scanning:
     name: Secret Scanning (GitLeaks)
     runs-on: ubuntu-latest
     needs: changes
+    if: github.event_name != 'workflow_dispatch'
     steps:
       - name: Checkout Code
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
           fetch-depth: 0
 
-      - name: Run GitLeaks
-        uses: gitleaks/gitleaks-action@dcedce43c6f43de0b836d1fe38946645c9c638dc # v2
+      - name: Fetch Complete Git History
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --force --prune origin '+refs/heads/*:refs/remotes/origin/*'
+          git fetch --force --tags origin
+
+      - name: Install Pinned GitLeaks
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --location --silent --show-error --output "$RUNNER_TEMP/gitleaks.tar.gz" https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/gitleaks_8.30.1_linux_x64.tar.gz
+          curl --fail --location --silent --show-error --output "$RUNNER_TEMP/gitleaks_checksums.txt" https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/gitleaks_8.30.1_checksums.txt
+          (cd "$RUNNER_TEMP" && cp gitleaks.tar.gz gitleaks_8.30.1_linux_x64.tar.gz && sha256sum --check --ignore-missing gitleaks_checksums.txt)
+          tar -xzf "$RUNNER_TEMP/gitleaks.tar.gz" -C "$RUNNER_TEMP" gitleaks
+          sudo install -m 0755 "$RUNNER_TEMP/gitleaks" /usr/local/bin/gitleaks
+
+      - name: Run Full-History GitLeaks And Capture Redacted Output
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITLEAKS_VERSION: 8.30.1
+          TARGET_SHA: ${{ github.sha }}
+          STAGE_EVIDENCE_RUN_ID: ${{ github.run_id }}
+        run: |
+          python scripts/audit/audit_program.py run-gate --output-dir raw-gate --name gitleaks --target-sha "$TARGET_SHA" --stage-evidence-run-id "$STAGE_EVIDENCE_RUN_ID"
+          test -s raw-gate/gitleaks-report.json
+
+      - name: Upload GitLeaks Raw Gate Evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: raw-gate-gitleaks
+          path: raw-gate
+          if-no-files-found: error
+          retention-days: 365
 
   trufflehog-scanning:
     name: Secret Scanning (TruffleHog)
     runs-on: ubuntu-latest
     needs: changes
+    if: github.event_name != 'workflow_dispatch'
     steps:
       - name: Checkout Code
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
           fetch-depth: 0
 
-      - name: Run TruffleHog Filesystem Scan
-        uses: trufflesecurity/trufflehog@8feb77b20aeb64366d106b08f2941287755c173b
+      - name: Fetch Complete Git History
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --force --prune origin '+refs/heads/*:refs/remotes/origin/*'
+          git fetch --force --tags origin
+
+      - name: Install Pinned TruffleHog
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --location --silent --show-error --output "$RUNNER_TEMP/trufflehog.tar.gz" https://github.com/trufflesecurity/trufflehog/releases/download/v3.95.9/trufflehog_3.95.9_linux_amd64.tar.gz
+          curl --fail --location --silent --show-error --output "$RUNNER_TEMP/trufflehog_checksums.txt" https://github.com/trufflesecurity/trufflehog/releases/download/v3.95.9/trufflehog_3.95.9_checksums.txt
+          (cd "$RUNNER_TEMP" && cp trufflehog.tar.gz trufflehog_3.95.9_linux_amd64.tar.gz && sha256sum --check --ignore-missing trufflehog_checksums.txt)
+          tar -xzf "$RUNNER_TEMP/trufflehog.tar.gz" -C "$RUNNER_TEMP" trufflehog
+          sudo install -m 0755 "$RUNNER_TEMP/trufflehog" /usr/local/bin/trufflehog
+
+      - name: Run Full-History TruffleHog And Capture Sanitized Output
+        env:
+          TARGET_SHA: ${{ github.sha }}
+          STAGE_EVIDENCE_RUN_ID: ${{ github.run_id }}
+        run: |
+          python scripts/audit/audit_program.py run-gate --output-dir raw-gate --name trufflehog --target-sha "$TARGET_SHA" --stage-evidence-run-id "$STAGE_EVIDENCE_RUN_ID"
+          test -s raw-gate/trufflehog-sanitized.json
+
+      - name: Upload TruffleHog Sanitized Raw Gate Evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          path: ./
-          version: 3.95.9
-          extra_args: --only-verified --fail
+          name: raw-gate-trufflehog
+          path: raw-gate
+          if-no-files-found: error
+          retention-days: 365
 
   solidity-gate:
     name: Solidity (Forge) Build & Test
     runs-on: ubuntu-latest
     needs: changes
-    if: github.event_name != 'pull_request' || needs.changes.outputs.docs_only != 'true'
+    if: github.event_name != 'workflow_dispatch' && (github.event_name != 'pull_request' || needs.changes.outputs.docs_only != 'true')
     steps:
       - name: Checkout Code
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
@@ -251,17 +335,27 @@ jobs:
         with:
           version: v1.7.1
 
-      - name: Compile and Test
+      - name: Compile, Test, And Capture Raw Output
+        env:
+          TARGET_SHA: ${{ github.sha }}
+          STAGE_EVIDENCE_RUN_ID: ${{ github.run_id }}
         run: |
-          cd contracts
-          forge build --sizes
-          forge test -vvv
+          python scripts/audit/audit_program.py run-gate --output-dir raw-gate --name solidity --target-sha "$TARGET_SHA" --stage-evidence-run-id "$STAGE_EVIDENCE_RUN_ID"
+
+      - name: Upload Solidity Raw Gate Evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: raw-gate-solidity
+          path: raw-gate
+          if-no-files-found: error
+          retention-days: 365
 
   slither-gate:
     name: Solidity Static Analysis (Slither)
     runs-on: ubuntu-latest
     needs: changes
-    if: github.event_name != 'pull_request' || needs.changes.outputs.docs_only != 'true'
+    if: github.event_name != 'workflow_dispatch' && (github.event_name != 'pull_request' || needs.changes.outputs.docs_only != 'true')
     steps:
       - name: Checkout Code
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
@@ -276,16 +370,27 @@ jobs:
           python -m pip install pip==26.1.2
           pip install slither-analyzer==0.11.5
 
-      - name: Run Slither
+      - name: Run Slither And Capture Raw Output
+        env:
+          TARGET_SHA: ${{ github.sha }}
+          STAGE_EVIDENCE_RUN_ID: ${{ github.run_id }}
         run: |
-          cd contracts
-          slither . --exclude-dependencies --exclude-informational --exclude-low --fail-high
+          python scripts/audit/audit_program.py run-gate --output-dir raw-gate --name slither --target-sha "$TARGET_SHA" --stage-evidence-run-id "$STAGE_EVIDENCE_RUN_ID"
+
+      - name: Upload Slither Raw Gate Evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: raw-gate-slither
+          path: raw-gate
+          if-no-files-found: error
+          retention-days: 365
 
   aiken-gate:
     name: Aiken (Cardano) Verification
     runs-on: ubuntu-latest
     needs: changes
-    if: github.event_name != 'pull_request' || needs.changes.outputs.docs_only != 'true'
+    if: github.event_name != 'workflow_dispatch' && (github.event_name != 'pull_request' || needs.changes.outputs.docs_only != 'true')
     steps:
       - name: Checkout Code
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
@@ -295,16 +400,27 @@ jobs:
         with:
           version: 'v1.1.21'
 
-      - name: Run Verification & Tests
+      - name: Run Verification, Tests, And Capture Raw Output
+        env:
+          TARGET_SHA: ${{ github.sha }}
+          STAGE_EVIDENCE_RUN_ID: ${{ github.run_id }}
         run: |
-          cd cardano
-          aiken check --deny --seed 20260711 --max-success 250
+          python scripts/audit/audit_program.py run-gate --output-dir raw-gate --name aiken --target-sha "$TARGET_SHA" --stage-evidence-run-id "$STAGE_EVIDENCE_RUN_ID"
+
+      - name: Upload Aiken Raw Gate Evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: raw-gate-aiken
+          path: raw-gate
+          if-no-files-found: error
+          retention-days: 365
 
   vir-core-gate:
     name: VIR Core Determinism & Conformance
     runs-on: ubuntu-latest
     needs: changes
-    if: github.event_name != 'pull_request' || needs.changes.outputs.docs_only != 'true'
+    if: github.event_name != 'workflow_dispatch' && (github.event_name != 'pull_request' || needs.changes.outputs.docs_only != 'true')
     steps:
       - name: Checkout Code
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
@@ -315,21 +431,41 @@ jobs:
           set -euo pipefail
           rustup toolchain install 1.92.0 --profile minimal --component rustfmt,clippy
 
-      - name: Verify VIR Core
-        shell: bash
+      - name: Verify VIR Core And Capture Raw Output
+        env:
+          TARGET_SHA: ${{ github.sha }}
+          STAGE_EVIDENCE_RUN_ID: ${{ github.run_id }}
         run: |
-          set -euo pipefail
-          cd vams-vm
-          cargo +1.92.0 fmt --all -- --check
-          cargo +1.92.0 check --workspace --all-targets --locked
-          cargo +1.92.0 clippy --workspace --all-targets --locked -- -D warnings
-          cargo +1.92.0 test --workspace --all-targets --locked
+          python scripts/audit/audit_program.py run-gate --output-dir raw-gate --name vir-core --target-sha "$TARGET_SHA" --stage-evidence-run-id "$STAGE_EVIDENCE_RUN_ID"
+
+      - name: Upload VIR Core Raw Gate Evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: raw-gate-vir-core
+          path: raw-gate
+          if-no-files-found: error
+          retention-days: 365
 
   python-gate:
     name: Python Security Audit & Tests
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16.14-bookworm@sha256:c95fd5346040eba2de3c435e14874af18f5d681fb5848d4f081dbead0878af28
+        env:
+          POSTGRES_USER: vdso_ci
+          POSTGRES_PASSWORD: vdso_ci_only
+          POSTGRES_DB: vdso_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U vdso_ci -d vdso_ci"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
     needs: changes
-    if: github.event_name != 'pull_request' || needs.changes.outputs.docs_only != 'true'
+    if: github.event_name != 'workflow_dispatch' && (github.event_name != 'pull_request' || needs.changes.outputs.docs_only != 'true')
     steps:
       - name: Checkout Code
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
@@ -348,24 +484,29 @@ jobs:
           pip install -r gateway/requirements.txt
           pip install -r neuron/requirements.txt
 
-      - name: Run Pip Audit
+      - name: Run Python Security And Postgres Integration Gates With Raw Output
+        env:
+          TARGET_SHA: ${{ github.sha }}
+          STAGE_EVIDENCE_RUN_ID: ${{ github.run_id }}
+          VDSO_TEST_POSTGRES_DSN: postgresql://vdso_ci:vdso_ci_only@127.0.0.1:5432/vdso_ci
+          VDSO_TEST_POSTGRES_ALLOW_RESET: "1"
         run: |
-          pip-audit -r gateway/requirements.txt
-          pip-audit -r neuron/requirements.txt
+          python scripts/audit/audit_program.py run-gate --output-dir raw-gate --name python --target-sha "$TARGET_SHA" --stage-evidence-run-id "$STAGE_EVIDENCE_RUN_ID"
 
-      - name: Run Bandit (Security Linter)
-        run: |
-          bandit -r neuron/ gateway/ -ll -ii
-
-      - name: Run PyTest Suite
-        run: |
-          pytest -v --tb=short
+      - name: Upload Python Raw Gate Evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: raw-gate-python
+          path: raw-gate
+          if-no-files-found: error
+          retention-days: 365
 
   semgrep-gate:
     name: Semgrep Static Analysis
     runs-on: ubuntu-latest
     needs: changes
-    if: github.event_name != 'pull_request' || needs.changes.outputs.docs_only != 'true'
+    if: github.event_name != 'workflow_dispatch' && (github.event_name != 'pull_request' || needs.changes.outputs.docs_only != 'true')
     steps:
       - name: Checkout Code
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
@@ -380,22 +521,27 @@ jobs:
           python -m pip install pip==26.1.2
           pip install semgrep==1.169.0
 
-      - name: Run Semgrep
+      - name: Run Semgrep And Capture Raw Output
+        env:
+          TARGET_SHA: ${{ github.sha }}
+          STAGE_EVIDENCE_RUN_ID: ${{ github.run_id }}
         run: |
-          semgrep scan --config auto --error \
-            --exclude contracts/lib \
-            --exclude node_modules \
-            --exclude frontend-vite/node_modules \
-            --exclude .foundry \
-            --exclude frontend-vite/.vite \
-            --exclude contracts/out \
-            --exclude .git
+          python scripts/audit/audit_program.py run-gate --output-dir raw-gate --name semgrep --target-sha "$TARGET_SHA" --stage-evidence-run-id "$STAGE_EVIDENCE_RUN_ID"
+
+      - name: Upload Semgrep Raw Gate Evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: raw-gate-semgrep
+          path: raw-gate
+          if-no-files-found: error
+          retention-days: 365
 
   frontend-gate:
     name: JS/Frontend Verification
     runs-on: ubuntu-latest
     needs: changes
-    if: github.event_name != 'pull_request' || needs.changes.outputs.docs_only != 'true'
+    if: github.event_name != 'workflow_dispatch' && (github.event_name != 'pull_request' || needs.changes.outputs.docs_only != 'true')
     steps:
       - name: Checkout Code
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
@@ -405,47 +551,52 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Install Dependencies
+      - name: Install, Audit, Build, And Capture Raw Output
+        env:
+          TARGET_SHA: ${{ github.sha }}
+          STAGE_EVIDENCE_RUN_ID: ${{ github.run_id }}
         run: |
-          cd frontend-vite
-          npm ci
+          python scripts/audit/audit_program.py run-gate --output-dir raw-gate --name frontend --target-sha "$TARGET_SHA" --stage-evidence-run-id "$STAGE_EVIDENCE_RUN_ID"
 
-      - name: Audit NPM Packages
-        run: |
-          cd frontend-vite
-          npm audit --audit-level=high
-
-      - name: Build Verification
-        run: |
-          cd frontend-vite
-          npm run build
+      - name: Upload Frontend Raw Gate Evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: raw-gate-frontend
+          path: raw-gate
+          if-no-files-found: error
+          retention-days: 365
 
   gateway-config-gate:
     name: Gateway Caddy Config Check
     runs-on: ubuntu-latest
     needs: changes
-    if: github.event_name != 'pull_request' || needs.changes.outputs.docs_only != 'true'
+    if: github.event_name != 'workflow_dispatch' && (github.event_name != 'pull_request' || needs.changes.outputs.docs_only != 'true')
     steps:
       - name: Checkout Code
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
-      - name: Adapt Caddy Config
+      - name: Validate Caddy Config And Capture Raw Output
+        env:
+          TARGET_SHA: ${{ github.sha }}
+          STAGE_EVIDENCE_RUN_ID: ${{ github.run_id }}
         run: |
-          docker run --rm \
-            -v "$PWD/gateway/Caddyfile.testnet.example:/etc/caddy/Caddyfile:ro" \
-            caddy:2 \
-            caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile
+          python scripts/audit/audit_program.py run-gate --output-dir raw-gate --name gateway-config --target-sha "$TARGET_SHA" --stage-evidence-run-id "$STAGE_EVIDENCE_RUN_ID"
 
-          docker run --rm \
-            -v "$PWD/gateway/Caddyfile.testnet.example:/etc/caddy/Caddyfile:ro" \
-            caddy:2 \
-            caddy adapt --config /etc/caddy/Caddyfile --adapter caddyfile --pretty
+      - name: Upload Gateway Config Raw Gate Evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: raw-gate-gateway-config
+          path: raw-gate
+          if-no-files-found: error
+          retention-days: 365
 
   sbom-generation:
     name: SBOM Generation & Signing
     runs-on: ubuntu-latest
     needs: [changes, solidity-gate, slither-gate, aiken-gate, vir-core-gate, python-gate, semgrep-gate, frontend-gate, gateway-config-gate]
-    if: github.event_name != 'pull_request' || needs.changes.outputs.docs_only != 'true'
+    if: github.event_name != 'workflow_dispatch' && (github.event_name != 'pull_request' || needs.changes.outputs.docs_only != 'true')
     permissions:
       contents: read
       id-token: write
@@ -453,11 +604,24 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
-      - name: Generate SBOM (Syft)
-        uses: anchore/sbom-action@e22c389904149dbc22b58101806040fa8d37a610 # v0
+      - name: Install Pinned Syft
+        uses: anchore/sbom-action/download-syft@e22c389904149dbc22b58101806040fa8d37a610 # v0
+
+      - name: Generate SBOM And Capture Raw Output
+        env:
+          TARGET_SHA: ${{ github.sha }}
+          STAGE_EVIDENCE_RUN_ID: ${{ github.run_id }}
+        run: |
+          python scripts/audit/audit_program.py run-gate --output-dir raw-gate --name sbom --target-sha "$TARGET_SHA" --stage-evidence-run-id "$STAGE_EVIDENCE_RUN_ID"
+
+      - name: Upload SBOM Raw Gate Evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          format: 'cyclonedx-json'
-          output-file: 'sbom.json'
+          name: raw-gate-sbom
+          path: raw-gate
+          if-no-files-found: error
+          retention-days: 365
 
       - name: Upload SBOM Artifact
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
@@ -490,6 +654,7 @@ jobs:
     runs-on: ubuntu-latest
     if: always()
     permissions:
+      actions: read
       contents: read
       id-token: write
     needs:
@@ -531,8 +696,11 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.target_sha || github.sha }}
 
       - name: Enforce Required Job Results
+        if: github.event_name != 'workflow_dispatch'
         shell: bash
         run: |
           set -euo pipefail
@@ -566,30 +734,141 @@ jobs:
             done
           fi
 
+      - name: Download Signed SBOM Into Stage Bundle
+        if: github.event_name != 'workflow_dispatch' && needs.sbom-generation.result == 'success'
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: signed-sbom
+          path: stage-evidence/raw/sbom
+
+      - name: Download Economic Evidence Into Stage Bundle
+        if: github.event_name != 'workflow_dispatch'
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: economic-adversarial-report
+          path: stage-evidence/raw/economic
+
+      - name: Download Per-Job Raw Gate Evidence Into Stage Bundle
+        if: github.event_name != 'workflow_dispatch'
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          pattern: raw-gate-*
+          path: stage-evidence/raw-gates
+          merge-multiple: false
+
+      - name: Build Unsigned Stage-Evidence Bundle
+        if: github.event_name != 'workflow_dispatch'
+        shell: bash
+        env:
+          TARGET_SHA: ${{ github.sha }}
+          STAGE_EVIDENCE_RUN_ID: ${{ github.run_id }}
+          STAGE_EVIDENCE_RUN_ATTEMPT: ${{ github.run_attempt }}
+        run: |
+          set -euo pipefail
+          [[ "$STAGE_EVIDENCE_RUN_ATTEMPT" == "1" ]]
+          mkdir -p stage-evidence/docs/audit/evidence
+
+          cp docs/audit/privacy-publisher-inventory.json stage-evidence/docs/audit/
+
+      - name: Upload Unsigned Stage-Evidence Bundle
+        if: github.event_name != 'workflow_dispatch'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: stage-evidence-bundle
+          path: stage-evidence
+          if-no-files-found: error
+          retention-days: 365
+
+      - name: Validate Explicit Promotion Binding
+        if: github.event_name == 'workflow_dispatch'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TARGET_SHA: ${{ inputs.target_sha }}
+          STAGE_EVIDENCE_RUN_ID: ${{ inputs.stage_evidence_run_id }}
+          OPERATIONAL_EVIDENCE_RUN_ID: ${{ inputs.operational_evidence_run_id }}
+        run: |
+          set -euo pipefail
+          [[ "$TARGET_SHA" =~ ^[0-9a-f]{40}$ ]]
+          [[ "$STAGE_EVIDENCE_RUN_ID" =~ ^[1-9][0-9]*$ ]]
+          [[ "$OPERATIONAL_EVIDENCE_RUN_ID" =~ ^[1-9][0-9]*$ ]]
+          [[ "$OPERATIONAL_EVIDENCE_RUN_ID" != "$STAGE_EVIDENCE_RUN_ID" ]]
+          [[ "$STAGE_EVIDENCE_RUN_ID" -lt "$GITHUB_RUN_ID" ]]
+          [[ "$OPERATIONAL_EVIDENCE_RUN_ID" -lt "$GITHUB_RUN_ID" ]]
+          [[ "$(git rev-parse HEAD)" == "$TARGET_SHA" ]]
+
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$STAGE_EVIDENCE_RUN_ID" > "$RUNNER_TEMP/prior-run.json"
+          [[ "$(jq -r '.status' "$RUNNER_TEMP/prior-run.json")" == "completed" ]]
+          [[ "$(jq -r '.conclusion' "$RUNNER_TEMP/prior-run.json")" == "success" ]]
+          [[ "$(jq -r '.head_sha' "$RUNNER_TEMP/prior-run.json")" == "$TARGET_SHA" ]]
+          [[ "$(jq -r '.run_attempt' "$RUNNER_TEMP/prior-run.json")" == "1" ]]
+          [[ "$(jq -r '.path' "$RUNNER_TEMP/prior-run.json")" == ".github/workflows/security-gates.yml" ]]
+
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$OPERATIONAL_EVIDENCE_RUN_ID" > "$RUNNER_TEMP/operational-run.json"
+          [[ "$(jq -r '.status' "$RUNNER_TEMP/operational-run.json")" == "completed" ]]
+          [[ "$(jq -r '.conclusion' "$RUNNER_TEMP/operational-run.json")" == "success" ]]
+          [[ "$(jq -r '.head_sha' "$RUNNER_TEMP/operational-run.json")" == "$TARGET_SHA" ]]
+          [[ "$(jq -r '.run_attempt' "$RUNNER_TEMP/operational-run.json")" == "1" ]]
+          [[ "$(jq -r '.event' "$RUNNER_TEMP/operational-run.json")" == "workflow_dispatch" ]]
+          [[ "$(jq -r '.path' "$RUNNER_TEMP/operational-run.json")" == ".github/workflows/operational-evidence.yml" ]]
+
+      - name: Download Complete Prior Stage-Evidence Bundle
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: stage-evidence-bundle
+          path: stage-evidence
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: ${{ inputs.stage_evidence_run_id }}
+
+      - name: Download Post-Freeze Operational Evidence Bundle
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: operational-evidence-bundle
+          path: operational-evidence
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: ${{ inputs.operational_evidence_run_id }}
+
+      - name: Merge Immutable Operational Evidence
+        if: github.event_name == 'workflow_dispatch'
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -d operational-evidence/docs/audit/evidence
+          if find operational-evidence -type l -print -quit | grep -q .; then
+            echo "Operational evidence must not contain symlinks" >&2
+            exit 1
+          fi
+          if find operational-evidence -type f \( -name 'audit-evidence.json' -o -name 'audit-evidence.sig' -o -name 'audit-evidence.pem' \) -print -quit | grep -q .; then
+            echo "Operational evidence must not contain aggregate self-references" >&2
+            exit 1
+          fi
+          cp -a operational-evidence/docs/audit/evidence/. stage-evidence/docs/audit/evidence/
+          cp "$RUNNER_TEMP/operational-run.json" stage-evidence/operational-evidence-run.json
+
       - name: Generate Commit-Bound Evidence Manifest
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          TARGET_SHA: ${{ inputs.target_sha }}
+          STAGE_EVIDENCE_RUN_ID: ${{ inputs.stage_evidence_run_id }}
+          OPERATIONAL_EVIDENCE_RUN_ID: ${{ inputs.operational_evidence_run_id }}
         run: |
           python scripts/audit/audit_program.py manifest \
             --output audit-evidence.json \
-            --result audit-program="$AUDIT_PROGRAM" \
-            --result public-content="$PUBLIC_CONTENT" \
-            --result default-credentials="$DEFAULT_CREDENTIALS" \
-            --result mock-mode="$MOCK_MODE" \
-            --result gitleaks="$GITLEAKS" \
-            --result trufflehog="$TRUFFLEHOG" \
-            --result solidity="$SOLIDITY" \
-            --result slither="$SLITHER" \
-            --result aiken="$AIKEN" \
-            --result vir-core="$VIR_CORE" \
-            --result python="$PYTHON" \
-            --result semgrep="$SEMGREP" \
-            --result frontend="$FRONTEND" \
-            --result gateway-config="$GATEWAY_CONFIG" \
-            --result sbom="$SBOM"
+            --bundle-dir stage-evidence \
+            --target-sha "$TARGET_SHA" \
+            --stage-evidence-run-id "$STAGE_EVIDENCE_RUN_ID" \
+            --operational-evidence-run-id "$OPERATIONAL_EVIDENCE_RUN_ID"
 
       - name: Install Cosign
+        if: github.event_name == 'workflow_dispatch'
         uses: sigstore/cosign-installer@f713795cb21599bc4e5c4b58cbad1da852d7eeb9 # v3
 
       - name: Sign Audit Evidence
+        if: github.event_name == 'workflow_dispatch'
         run: |
           cosign sign-blob --yes --oidc-provider github-actions \
             --output-signature audit-evidence.sig \
@@ -597,6 +876,7 @@ jobs:
             audit-evidence.json
 
       - name: Upload Audit Evidence
+        if: github.event_name == 'workflow_dispatch'
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: testnet-audit-evidence
@@ -604,6 +884,7 @@ jobs:
             audit-evidence.json
             audit-evidence.sig
             audit-evidence.pem
+            stage-evidence/
           retention-days: 365
 
   testnet-readiness-gate:
@@ -611,9 +892,14 @@ jobs:
     runs-on: ubuntu-latest
     needs: security-evidence-gate
     if: github.event_name == 'workflow_dispatch'
+    permissions:
+      actions: read
+      contents: read
     steps:
       - name: Checkout Code
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          ref: ${{ inputs.target_sha }}
 
       - name: Download Signed Audit Evidence
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
@@ -637,15 +923,22 @@ jobs:
         if: inputs.release_stage == 'public'
         run: |
           cosign verify-blob \
-            --certificate docs/audit/evidence/closed-canary-report.pem \
-            --signature docs/audit/evidence/closed-canary-report.sig \
+            --certificate docs/audit/evidence/stage-evidence/docs/audit/evidence/closed-canary-report.pem \
+            --signature docs/audit/evidence/stage-evidence/docs/audit/evidence/closed-canary-report.sig \
             --certificate-identity-regexp '^https://github.com/GodOfAgents/VAMS/.github/workflows/.+@refs/.+$' \
             --certificate-oidc-issuer 'https://token.actions.githubusercontent.com' \
-            docs/audit/evidence/closed-canary-report.json
+            docs/audit/evidence/stage-evidence/docs/audit/evidence/closed-canary-report.json
 
       - name: Require Stage-Specific Evidence
         env:
           RELEASE_STAGE: ${{ inputs.release_stage || 'canary' }}
+          TARGET_SHA: ${{ inputs.target_sha }}
+          STAGE_EVIDENCE_RUN_ID: ${{ inputs.stage_evidence_run_id }}
+          OPERATIONAL_EVIDENCE_RUN_ID: ${{ inputs.operational_evidence_run_id }}
         run: |
           python scripts/audit/audit_program.py readiness \
-            --stage "$RELEASE_STAGE"
+            --stage "$RELEASE_STAGE" \
+            --bundle-dir docs/audit/evidence/stage-evidence \
+            --target-sha "$TARGET_SHA" \
+            --stage-evidence-run-id "$STAGE_EVIDENCE_RUN_ID" \
+            --operational-evidence-run-id "$OPERATIONAL_EVIDENCE_RUN_ID"

@@ -3,7 +3,7 @@
   "$id": "https://vams.network/schemas/audit/closed-canary-report.schema.json",
   "title": "VAMS Closed Canary Report",
   "type": "object",
-  "required": ["schema_version", "commit_sha", "started_at", "ended_at", "consecutive_days", "stop_conditions_triggered", "drills"],
+  "required": ["schema_version", "commit_sha", "started_at", "ended_at", "consecutive_days", "stop_conditions_triggered", "daily_evidence", "drills", "metric_artifacts"],
   "properties": {
     "schema_version": {"const": "1.0.0"},
     "commit_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
@@ -11,10 +11,67 @@
     "ended_at": {"type": "string", "format": "date-time"},
     "consecutive_days": {"type": "integer", "minimum": 7},
     "stop_conditions_triggered": {"const": false},
+    "daily_evidence": {
+      "type": "array",
+      "minItems": 7,
+      "items": {"$ref": "#/$defs/dailyEvidence"}
+    },
     "drills": {
       "type": "object",
       "required": ["pause", "key_loss", "da_outage", "identity_outage", "bridge_replay", "backup_restore", "rollback"],
-      "additionalProperties": {"type": "boolean"}
+      "properties": {
+        "pause": {"$ref": "#/$defs/drillEvidence"},
+        "key_loss": {"$ref": "#/$defs/drillEvidence"},
+        "da_outage": {"$ref": "#/$defs/drillEvidence"},
+        "identity_outage": {"$ref": "#/$defs/drillEvidence"},
+        "bridge_replay": {"$ref": "#/$defs/drillEvidence"},
+        "backup_restore": {"$ref": "#/$defs/drillEvidence"},
+        "rollback": {"$ref": "#/$defs/drillEvidence"}
+      },
+      "additionalProperties": false
+    },
+    "metric_artifacts": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/metricEvidence"}
+    }
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "bundlePath": {"type": "string", "minLength": 1, "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$)).+$"},
+    "drillEvidence": {
+      "type": "object",
+      "required": ["passed", "evidence_path", "evidence_sha256"],
+      "properties": {
+        "passed": {"const": true},
+        "evidence_path": {"$ref": "#/$defs/bundlePath"},
+        "evidence_sha256": {"$ref": "#/$defs/sha256"}
+      },
+      "additionalProperties": false
+    },
+    "dailyEvidence": {
+      "type": "object",
+      "required": ["date", "started_at", "ended_at", "evidence_path", "evidence_sha256"],
+      "properties": {
+        "date": {"type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"},
+        "started_at": {"type": "string", "format": "date-time"},
+        "ended_at": {"type": "string", "format": "date-time"},
+        "evidence_path": {"$ref": "#/$defs/bundlePath"},
+        "evidence_sha256": {"$ref": "#/$defs/sha256"}
+      },
+      "additionalProperties": false
+    },
+    "metricEvidence": {
+      "type": "object",
+      "required": ["name", "value", "unit", "evidence_path", "evidence_sha256"],
+      "properties": {
+        "name": {"type": "string", "minLength": 1},
+        "value": {"type": "number"},
+        "unit": {"type": "string", "minLength": 1},
+        "evidence_path": {"$ref": "#/$defs/bundlePath"},
+        "evidence_sha256": {"$ref": "#/$defs/sha256"}
+      },
+      "additionalProperties": false
     }
   },
   "additionalProperties": false

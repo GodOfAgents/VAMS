@@ -171,6 +171,19 @@ class RuntimeEvidenceTests(unittest.TestCase):
 
             self.assertEqual(evidence.validate_runtime_report(path, COMMIT, root), [])
 
+    def test_runtime_artifacts_may_reside_in_downloaded_bundle(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir) / "source"
+            bundle = Path(temp_dir) / "bundle"
+            report = _valid_runtime(bundle)
+            path = bundle / "docs/audit/evidence/runtime-integration.json"
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(json.dumps(report), encoding="utf-8")
+
+            self.assertEqual(
+                evidence.validate_runtime_report(path, COMMIT, root, bundle), []
+            )
+
     def test_legacy_boolean_only_report_is_rejected(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
@@ -254,6 +267,27 @@ class PrivacyEvidenceTests(unittest.TestCase):
             path.write_text(json.dumps(_valid_privacy(root)), encoding="utf-8")
 
             self.assertEqual(evidence.validate_privacy_review(path, COMMIT, root), [])
+
+    def test_privacy_artifacts_may_reside_in_downloaded_bundle(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir) / "source"
+            bundle = Path(temp_dir) / "bundle"
+            review = _valid_privacy(root)
+            for name, reference in review["evidence_artifacts"].items():
+                if name == "publisher_inventory":
+                    continue
+                source = root / reference["path"]
+                destination = bundle / reference["path"]
+                destination.parent.mkdir(parents=True, exist_ok=True)
+                destination.write_bytes(source.read_bytes())
+                source.unlink()
+            path = bundle / "docs/audit/evidence/privacy-review.json"
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(json.dumps(review), encoding="utf-8")
+
+            self.assertEqual(
+                evidence.validate_privacy_review(path, COMMIT, root, bundle), []
+            )
 
     def test_generic_reviewer_and_unbound_approvals_are_rejected(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

@@ -10,9 +10,11 @@ from unittest.mock import patch
 from fastapi.testclient import TestClient
 
 os.environ.setdefault("GATEWAY_ADMIN_PASSWORD", "SecureVDSOTestPassword123!")
+os.environ["VAMS_ENV"] = "local"
+os.environ["VDSO_MODE"] = "off"
 
 from gateway import vdso as vdso_gateway
-from gateway.server import app
+from gateway.server import create_app
 from neuron.secp256k1 import (
     generate_private_key,
     public_key_bytes,
@@ -20,7 +22,7 @@ from neuron.secp256k1 import (
     sign_message,
 )
 from neuron.vdso.keccak import domain_hash
-from neuron.vdso.service import VDSOCanaryService, VDSOMode
+from neuron.vdso.service import InMemoryNonceStore
 from neuron.vdso.sidecar import RecipientEnvelope, sidecar_content_hash
 
 
@@ -34,20 +36,51 @@ class _SharedReplayStore(vdso_gateway.InMemoryReplayStore):
     shared = True
 
 
+class _DurableNonceStore(InMemoryNonceStore):
+    durable = True
+
+
 class VDSOGatewayTests(unittest.TestCase):
     def setUp(self):
-        self.environment = patch.dict(os.environ, {"VAMS_ENV": "local"}, clear=False)
+        self.environment = patch.dict(
+            os.environ,
+            {
+                "VAMS_ENV": "local",
+                "VAMS_NETWORK": "polygon-amoy",
+                "VDSO_MODE": "shadow",
+                "VDSO_OBJECT_STORE_ADDRESS": "0x" + "11" * 20,
+                "VDSO_EXECUTION_KERNEL_ADDRESS": "0x" + "22" * 20,
+                "VDSO_ADAPTER_REGISTRY_ADDRESS": "0x" + "33" * 20,
+            },
+            clear=False,
+        )
         self.environment.start()
         self.addCleanup(self.environment.stop)
-        vdso_gateway.service = VDSOCanaryService(
-            mode=VDSOMode.SHADOW,
-            height_provider=lambda _binding: 1_000,
+        self.replay_store = _SharedReplayStore()
+        self.app = create_app(
+            vdso_nonce_store=_DurableNonceStore(),
+            vdso_replay_store=self.replay_store,
+            vdso_height_provider=lambda _binding: 1_000,
+            vdso_deployment_verifier=lambda _config, _binding: True,
         )
-        vdso_gateway.replay_store = None
-        vdso_gateway._local_replay_store.clear()
-        self.client = TestClient(app)
+        self.client = TestClient(self.app)
         self.signing_key = generate_private_key()
         self.public_key = public_key_bytes(self.signing_key)
+
+    def test_public_gateway_off_mode_has_no_vdso_routes(self):
+        with patch.dict(os.environ, {"VDSO_MODE": "off"}, clear=False):
+            public_app = create_app()
+        paths = set(public_app.openapi()["paths"])
+        self.assertFalse(any(path.startswith("/v1/vdso") for path in paths))
+
+    def test_shadow_factory_fails_closed_without_postgres_dsn(self):
+        with patch.dict(os.environ, {}, clear=False):
+            os.environ.pop("VDSO_POSTGRES_DSN", None)
+            with self.assertRaisesRegex(RuntimeError, "VDSO_POSTGRES_DSN"):
+                create_app(
+                    vdso_height_provider=lambda _binding: 1_000,
+                    vdso_deployment_verifier=lambda _config, _binding: True,
+                )
 
     def _intent_body(
         self,
@@ -73,7 +106,7 @@ class VDSOGatewayTests(unittest.TestCase):
             "input_commitment": hex32(bytes.fromhex("04" * 32)),
             "expected_output_commitment": hex32(bytes.fromhex("05" * 32)),
             "evidence_root": hex32(bytes.fromhex("06" * 32)),
-            "sidecar_root": hex32(bytes.fromhex("07" * 32)),
+            "sidecar_root": hex32(bytes(32)),
             "signature_suite": (
                 "secp256k1+ml-dsa-65" if hybrid else "secp256k1"
             ),
@@ -99,11 +132,11 @@ class VDSOGatewayTests(unittest.TestCase):
     def _encoded(body):
         return json.dumps(body, separators=(",", ":")).encode()
 
-    def _headers(self, path, body_bytes, *, timestamp=None):
+    def _headers(self, path, body_bytes=b"", *, timestamp=None, method="POST"):
         timestamp_value = timestamp if timestamp is not None else str(int(time.time()))
         digest = hashlib.sha256(body_bytes).hexdigest()
         message = (
-            f"VAMS_VDSO_AUTH:POST:{path}:{timestamp_value}:{digest}"
+            f"VAMS_VDSO_AUTH:{method}:{path}:{timestamp_value}:{digest}"
         ).encode()
         signature = sign_message(self.signing_key, message).hex()
         return {
@@ -223,25 +256,14 @@ class VDSOGatewayTests(unittest.TestCase):
             )
         self.assertEqual(sum(results), 1)
 
-    def test_live_auth_fails_closed_without_shared_replay_store(self):
-        path = "/v1/vdso/intents/simulate"
-        body = self._encoded(self._simulation_body())
-        with patch.dict(os.environ, {"VAMS_ENV": "testnet"}, clear=False):
-            response = self.client.post(
-                path, content=body, headers=self._headers(path, body)
+    def test_factory_rejects_process_local_replay_store(self):
+        with self.assertRaisesRegex(RuntimeError, "shared atomic replay"):
+            create_app(
+                vdso_nonce_store=_DurableNonceStore(),
+                vdso_replay_store=vdso_gateway.InMemoryReplayStore(),
+                vdso_height_provider=lambda _binding: 1_000,
+                vdso_deployment_verifier=lambda _config, _binding: True,
             )
-        self.assertEqual(response.status_code, 503, response.text)
-        self.assertIn("shared atomic replay", response.json()["detail"])
-
-    def test_live_auth_uses_injected_shared_atomic_replay_store(self):
-        path = "/v1/vdso/intents/simulate"
-        body = self._encoded(self._simulation_body())
-        vdso_gateway.replay_store = _SharedReplayStore()
-        with patch.dict(os.environ, {"VAMS_ENV": "testnet"}, clear=False):
-            response = self.client.post(
-                path, content=body, headers=self._headers(path, body)
-            )
-        self.assertEqual(response.status_code, 200, response.text)
 
     def test_valid_until_height_uses_trusted_chain_height_not_wall_clock(self):
         path = "/v1/vdso/intents/simulate"
@@ -313,15 +335,15 @@ class VDSOGatewayTests(unittest.TestCase):
         self.assertEqual(rejected.status_code, 422, rejected.text)
         self.assertIn("max_settlement_cost", rejected.json()["detail"])
 
-    def test_tier_two_fails_closed_without_ml_dsa_verifier(self):
+    def test_tier_two_is_excluded_from_private_shadow(self):
         request_payload = self._signed_intent_payload(
             self._intent_body(tier=2, hybrid=True)
         )
         path = "/v1/vdso/intents"
         body = self._encoded(request_payload)
         response = self.client.post(path, content=body, headers=self._headers(path, body))
-        self.assertEqual(response.status_code, 403, response.text)
-        self.assertIn("ML-DSA-65 verifier is not configured", response.json()["detail"])
+        self.assertEqual(response.status_code, 422, response.text)
+        self.assertIn("rejects Tier 2", response.json()["detail"])
 
     def test_nonce_alias_is_rejected_end_to_end(self):
         path = "/v1/vdso/intents"
@@ -340,41 +362,53 @@ class VDSOGatewayTests(unittest.TestCase):
         self.assertEqual(alias.status_code, 422, alias.text)
         self.assertIn("nonce reuse", alias.json()["detail"])
 
-    def test_complete_encrypted_sidecar_is_stored_and_public_read_is_commitment_only(self):
+    def test_shadow_exposes_no_sidecar_publication_route(self):
         path = "/v1/vdso/sidecars"
         payload = self._sidecar_payload()
         body = self._encoded(payload)
         response = self.client.post(path, content=body, headers=self._headers(path, body))
-        self.assertEqual(response.status_code, 200, response.text)
-        read = self.client.get(f"{path}/{payload['content_hash']}")
-        self.assertEqual(read.status_code, 200, read.text)
-        self.assertEqual(read.json()["content_hash"], payload["content_hash"])
-        self.assertEqual(
-            set(read.json()),
-            {"content_hash", "plaintext_root", "policy_hash"},
+        self.assertIn(response.status_code, {404, 405}, response.text)
+
+    def test_vdso_reads_require_body_bound_did_authentication(self):
+        for path in (
+            "/v1/vdso/intents/" + hex32(bytes.fromhex("01" * 32)),
+            "/v1/vdso/objects/" + hex32(bytes.fromhex("02" * 32)),
+            "/v1/vdso/adapters",
+            "/v1/vdso/sidecars/" + hex32(bytes.fromhex("03" * 32)),
+        ):
+            with self.subTest(path=path):
+                response = self.client.get(path)
+                self.assertEqual(response.status_code, 401, response.text)
+
+    def test_authenticated_intent_read_returns_shadow_record(self):
+        submit_path = "/v1/vdso/intents"
+        payload = self._signed_intent_payload(self._intent_body())
+        body = self._encoded(payload)
+        submitted = self.client.post(
+            submit_path,
+            content=body,
+            headers=self._headers(submit_path, body),
         )
+        self.assertEqual(submitted.status_code, 200, submitted.text)
+        read_path = f"{submit_path}/{submitted.json()['intent_id']}"
+        read = self.client.get(
+            read_path,
+            headers=self._headers(read_path, method="GET"),
+        )
+        self.assertEqual(read.status_code, 200, read.text)
+        self.assertEqual(read.json()["status"], "shadow_accepted")
 
     def test_sidecar_schema_rejects_plaintext_and_metadata_tamper(self):
-        path = "/v1/vdso/sidecars"
         plaintext_payload = {**self._sidecar_payload(), "plaintext": "never accepted"}
-        plaintext_body = self._encoded(plaintext_payload)
-        rejected_plaintext = self.client.post(
-            path,
-            content=plaintext_body,
-            headers=self._headers(path, plaintext_body),
-        )
-        self.assertEqual(rejected_plaintext.status_code, 422)
+        with self.assertRaises(ValueError):
+            vdso_gateway.CiphertextSidecarRequest.model_validate(plaintext_payload)
 
         tampered_payload = self._sidecar_payload()
         tampered_payload["nonce_b64"] = b64encode(b"m" * 24).decode()
-        tampered_body = self._encoded(tampered_payload)
-        rejected_tamper = self.client.post(
-            path,
-            content=tampered_body,
-            headers=self._headers(path, tampered_body),
-        )
-        self.assertEqual(rejected_tamper.status_code, 422)
-        self.assertIn("content_hash", rejected_tamper.json()["detail"])
+        with self.assertRaisesRegex(ValueError, "content_hash"):
+            vdso_gateway.CiphertextSidecarRequest.model_validate(
+                tampered_payload
+            ).to_domain()
 
 
 if __name__ == "__main__":

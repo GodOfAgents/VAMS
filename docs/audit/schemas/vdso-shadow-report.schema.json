@@ -1,0 +1,176 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vams.network/schemas/audit/vdso-shadow-report.schema.json",
+  "title": "VAMS VDSO Shadow Report",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "commit_sha",
+    "seed",
+    "started_at",
+    "completed_at",
+    "consecutive_days",
+    "observed_seconds",
+    "transition_count",
+    "chunk_count",
+    "configured_max_gap_seconds",
+    "max_transition_gap_seconds",
+    "continuity_passed",
+    "restart_count",
+    "replay_verification_count",
+    "backend_eval_count",
+    "audit_chain_root_sha256",
+    "source_record_count",
+    "source_final_cursor_hash",
+    "source_chain_root_sha256",
+    "input_jsonl_path",
+    "input_jsonl_sha256",
+    "audit_jsonl_path",
+    "audit_jsonl_sha256",
+    "public_vdso_mode",
+    "worker_mode",
+    "authoritative_enabled",
+    "read_only",
+    "value_bearing_domains_enabled",
+    "divergence_count",
+    "external_write_count",
+    "plaintext_payload_count",
+    "restart_recovery_passed",
+    "replay_determinism_passed",
+    "privacy_result",
+    "stop_conditions_triggered",
+    "stop_conditions",
+    "implementation_roots",
+    "evidence_artifacts"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "commit_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "seed": {"const": 20260713},
+    "started_at": {"type": "string", "format": "date-time"},
+    "completed_at": {"type": "string", "format": "date-time"},
+    "consecutive_days": {"type": "integer", "minimum": 7},
+    "observed_seconds": {"type": "integer", "minimum": 604800},
+    "transition_count": {"type": "integer", "minimum": 100000},
+    "chunk_count": {"type": "integer", "minimum": 100},
+    "configured_max_gap_seconds": {"type": "number", "exclusiveMinimum": 0},
+    "max_transition_gap_seconds": {"type": "number", "minimum": 0},
+    "continuity_passed": {"const": true},
+    "restart_count": {"type": "integer", "minimum": 1},
+    "replay_verification_count": {"type": "integer", "minimum": 1},
+    "backend_eval_count": {"$ref": "#/$defs/backendCounts"},
+    "audit_chain_root_sha256": {"$ref": "#/$defs/sha256"},
+    "source_record_count": {"type": "integer", "minimum": 100000},
+    "source_final_cursor_hash": {"$ref": "#/$defs/nonzeroSha256"},
+    "source_chain_root_sha256": {"$ref": "#/$defs/nonzeroSha256"},
+    "input_jsonl_path": {"const": "vdso-shadow-input.jsonl"},
+    "input_jsonl_sha256": {"$ref": "#/$defs/nonzeroSha256"},
+    "audit_jsonl_path": {"const": "vdso-shadow-audit.jsonl"},
+    "audit_jsonl_sha256": {"$ref": "#/$defs/nonzeroSha256"},
+    "public_vdso_mode": {"const": "off"},
+    "worker_mode": {"const": "shadow"},
+    "authoritative_enabled": {"const": false},
+    "read_only": {"const": true},
+    "value_bearing_domains_enabled": {"const": false},
+    "divergence_count": {"const": 0},
+    "external_write_count": {"const": 0},
+    "plaintext_payload_count": {"const": 0},
+    "restart_recovery_passed": {"const": true},
+    "replay_determinism_passed": {"const": true},
+    "privacy_result": {"const": "pass"},
+    "stop_conditions_triggered": {"const": false},
+    "stop_conditions": {
+      "type": "object",
+      "required": ["transition_divergence", "external_write", "plaintext_payload", "restart_failure", "replay_mismatch", "privacy_failure", "public_mode_enabled", "authoritative_enabled", "value_bearing_enabled", "continuity_gap", "backend_unavailable", "source_chain_mismatch"],
+      "properties": {
+        "transition_divergence": {"const": false},
+        "external_write": {"const": false},
+        "plaintext_payload": {"const": false},
+        "restart_failure": {"const": false},
+        "replay_mismatch": {"const": false},
+        "privacy_failure": {"const": false},
+        "public_mode_enabled": {"const": false},
+        "authoritative_enabled": {"const": false},
+        "value_bearing_enabled": {"const": false},
+        "continuity_gap": {"const": false},
+        "backend_unavailable": {"const": false},
+        "source_chain_mismatch": {"const": false}
+      },
+      "additionalProperties": false
+    },
+    "implementation_roots": {
+      "type": "object",
+      "required": ["python", "rust", "aiken"],
+      "properties": {
+        "python": {
+          "allOf": [
+            {"$ref": "#/$defs/implementationRoot"},
+            {"properties": {"source_paths": {"prefixItems": [{"const": "neuron/vdso"}], "minItems": 1, "maxItems": 1}, "artifact_path": {"const": "vdso-shadow-python-evaluator.py"}}}
+          ]
+        },
+        "rust": {
+          "allOf": [
+            {"$ref": "#/$defs/implementationRoot"},
+            {"properties": {"source_paths": {"prefixItems": [{"const": "vams-vm/crates"}], "minItems": 1, "maxItems": 1}, "artifact_path": {"const": "vdso-shadow-rust-evaluator.bin"}}}
+          ]
+        },
+        "aiken": {
+          "allOf": [
+            {"$ref": "#/$defs/implementationRoot"},
+            {"properties": {"source_paths": {"prefixItems": [{"const": "cardano/lib/vams/vdso.ak"}], "minItems": 1, "maxItems": 1}, "artifact_path": {"const": "vdso-shadow-aiken-evaluator.cbor"}}}
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "evidence_artifacts": {
+      "type": "array",
+      "minItems": 5,
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "required": ["path", "sha256"],
+        "properties": {
+          "path": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$))(?!vdso-shadow-report\\.json$).+$"
+          },
+          "sha256": {"$ref": "#/$defs/sha256"}
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "nonzeroSha256": {"type": "string", "pattern": "^(?!0{64}$)[0-9a-f]{64}$"},
+    "backendCounts": {
+      "type": "object",
+      "required": ["python", "rust", "aiken"],
+      "properties": {
+        "python": {"type": "integer", "minimum": 100000},
+        "rust": {"type": "integer", "minimum": 100000},
+        "aiken": {"type": "integer", "minimum": 100000}
+      },
+      "additionalProperties": false
+    },
+    "safePath": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$))(?!vdso-shadow-report\\.json$).+$"
+    },
+    "implementationRoot": {
+      "type": "object",
+      "required": ["source_paths", "source_root_sha256", "artifact_path", "artifact_sha256"],
+      "properties": {
+        "source_paths": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/safePath"}},
+        "source_root_sha256": {"$ref": "#/$defs/sha256"},
+        "artifact_path": {"$ref": "#/$defs/safePath"},
+        "artifact_sha256": {"$ref": "#/$defs/sha256"}
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

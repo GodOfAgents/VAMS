@@ -29,13 +29,18 @@ Semantic receipts intentionally exclude settlement transaction hashes, block
 metadata, prover metadata, and bridge proofs. Those values use the separate
 `SettlementMetadata` type.
 
-`SettlementMetadata` uses this exact eight-element restricted-CBOR array:
+`SettlementMetadata` uses the pre-deployment `vdso-settlement-v2` wire schema,
+an exact ten-element restricted-CBOR array. VIR-Core remains v1; only the
+unlaunched settlement envelope was version-bumped to prevent v1 payloads from
+being accepted under the stronger host-binding semantics:
 
 ```text
 [
   schemaVersion,
   receiptHash,
   domainAuthorityBinding,
+  sourceHost,
+  destinationHost,
   sourceChainReference,
   sourceTransactionHash,
   settledAtHeight,
@@ -44,13 +49,15 @@ metadata, prover metadata, and bridge proofs. Those values use the separate
 ]
 ```
 
-`sourceChainReference` is the settlement discriminator. A local/same-host
-settlement requires the complete settlement-specific tuple
+`sourceHost` and `destinationHost` are explicit and `destinationHost` must equal
+the host in `domainAuthorityBinding`. A local/same-host settlement requires the
+hosts to be equal and the complete settlement-specific tuple
 `[sourceChainReference, sourceTransactionHash, settledAtHeight,
 bridgeProofHash, payloadHash]` to be zero. A cross-host settlement requires a
 nonzero source-chain reference, source transaction, bridge-proof hash, and
-payload hash. The bridge-proof and payload hashes must be distinct, preserving
-INV-10. Invalid or partially populated tuples fail with
+payload hash, a positive finalized height, and distinct source and destination
+hosts. The bridge-proof and payload hashes must be distinct, preserving INV-10.
+Invalid or partially populated tuples fail with
 `InvalidSettlementMetadata` (`44`).
 
 ## Canonical signable intent

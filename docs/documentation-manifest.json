@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "last_verified": "2026-07-12",
+  "last_verified": "2026-07-14",
   "current_architecture_version": "0.8.0",
   "documents": [
     {"path":"README.md","lifecycle":"current","authority":"entrypoint"},
@@ -15,6 +15,9 @@
     {"path":"docs/role-management-keys.md","lifecycle":"current","authority":"role-policy"},
     {"path":"docs/L3_CHAIN_AND_DA.md","lifecycle":"current","authority":"da-boundary"},
     {"path":"docs/GATEWAY_HARDENING_BLUEPRINTS.md","lifecycle":"current","authority":"gateway-deployment"},
+    {"path":"docs/runbooks/POLYGON_AMOY_REHEARSAL.md","lifecycle":"current","authority":"deployment-rehearsal"},
+    {"path":"docs/runbooks/CARDANO_PREPROD_REHEARSAL.md","lifecycle":"current","authority":"deployment-rehearsal"},
+    {"path":"docs/runbooks/VDSO_SHADOW_WORKER.md","lifecycle":"current","authority":"vdso-shadow-operations"},
     {"path":"contracts/CONTRACTS.md","lifecycle":"current","authority":"deployment-register"},
     {"path":"docs/team/ARCHITECTURE_v0-3-0.md","lifecycle":"historical","authority":"architecture-history"},
     {"path":"docs/team/ARCHITECTURE_v0-4-0.md","lifecycle":"historical","authority":"architecture-history"},

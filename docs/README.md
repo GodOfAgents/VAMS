@@ -2,7 +2,7 @@
 
 **Architecture:** v0.8.0  
 **Lifecycle:** Hardened pre-testnet candidate  
-**Last verified:** 2026-07-12
+**Last verified:** 2026-07-14
 
 VAMS documentation is organized by authority. Source code, tests, deployment
 manifests, and commit-bound evidence override narrative or historical material.
@@ -16,6 +16,11 @@ record in `contracts/CONTRACTS.md` contains verified network evidence.
 - [Versioning](VERSIONING.md): architecture, milestone, and runtime version meanings.
 - [Developer guide](DEVELOPER_GUIDE.md) and [node operator guide](NODE_OPERATORS.md).
 - [Gateway API reference](API_REFERENCE.md) and [gateway hardening guide](GATEWAY_HARDENING_BLUEPRINTS.md).
+- [Private VDSO shadow worker runbook](runbooks/VDSO_SHADOW_WORKER.md): commitment-only input,
+  three-backend conformance, durable checkpoints, and unsigned evidence export.
+- [Polygon Amoy rehearsal](runbooks/POLYGON_AMOY_REHEARSAL.md) and
+  [Cardano Pre-Prod rehearsal](runbooks/CARDANO_PREPROD_REHEARSAL.md):
+  deterministic, approval-gated deployment ceremonies.
 - [Audit program](audit/AUDIT_PROGRAM.md), [risk register](audit/RISK_REGISTER.md), and
   [evidence requirements](audit/EVIDENCE_REQUIREMENTS.md).
 

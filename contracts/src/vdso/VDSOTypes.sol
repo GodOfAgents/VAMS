@@ -5,6 +5,8 @@ pragma solidity 0.8.24;
 /// @dev These types are additive and do not replace the legacy Polygon/Cardano
 ///      dual-host routing architecture.
 library VDSOTypes {
+    uint16 internal constant SETTLEMENT_SCHEMA_VERSION = 2;
+
     enum Host {
         NONE,
         POLYGON,
@@ -36,9 +38,15 @@ library VDSOTypes {
 
     /// @dev Bridge proof and payload commitment remain structurally separate
     ///      to preserve the cross-chain proof separation invariant (INV-10).
+    ///      Host endpoints are explicit so same-host metadata cannot be
+    ///      misrepresented as a cross-host settlement.
     struct SettlementMetadata {
+        uint16 schemaVersion;
+        Host sourceHost;
+        Host destinationHost;
         uint64 sourceChainId;
         bytes32 sourceTransactionHash;
+        uint64 settledAtHeight;
         bytes32 bridgeProofHash;
         bytes32 payloadHash;
     }

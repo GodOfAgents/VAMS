@@ -2,7 +2,7 @@
 
 **Architecture version:** v0.8.0  
 **Lifecycle:** Hardened pre-testnet candidate  
-**Last verified:** 2026-07-13
+**Last verified:** 2026-07-14
 
 VAMS is a dual-host, agent-oriented protocol implementation. Polygon Amoy is
 the intended EVM testnet execution environment and Cardano Pre-Prod is the
@@ -53,9 +53,9 @@ repository now contains an additive, fail-closed canary foundation:
 | Boundary | Implemented source | Current limit |
 | --- | --- | --- |
 | VIR-Core reference | `vams-vm/` | Restricted positional CBOR, bounded integer interpreter, host/epoch binding, and Rust/Python/Aiken intent vectors exist. Settlement vectors independently bind proof and payload. SP1 and RISC Zero integrations remain disabled placeholders. |
-| Polygon contracts | `contracts/src/vdso/` | Object/version CAS, authority epochs, fencing, proof and capability routing, quarantine, VIR-v1 policy admission, Cardano-write rejection, and settlement separation exist. No adapter, verifier, program, or domain is activated by deployment rehearsal; upgradeable proxy adapters/verifiers are not eligible until implementation identity can be pinned. |
-| Neuron and Gateway | `neuron/vdso/`, `gateway/vdso.py` | Shadow/canary intent validation, exact VIR encoding, signed capability derivation, Tier-2 hybrid authorization for every nonzero settlement-cost budget, nonce/replay controls, sidecar-root binding, ciphertext-only sidecars, and fail-closed DA routing exist. Live evidence requires separately injected receipt-verifier and blob-retriever observers that are not bound to the submitting adapter; the runtime identity guard alone does not prove operational independence, so deployment provenance remains a canary-admission review requirement. Current Near/Celestia adapters remain explicitly ineligible. Live stores, audited HPKE/ML-DSA backends, and deployment verification are still required. |
-| Cardano conformance | `cardano/lib/vams/vdso.ak` | Shared intent-vector, host-wire, and proof/payload checks exist. Native Aiken conformance permits only non-economic `READ` and `ACCUMULATE`; `CONSUME` and `RESERVE` fail closed, while the Polygon kernel rejects every Cardano-authoritative write. |
+| Polygon contracts | `contracts/src/vdso/` | Object/version CAS, authority epochs, fencing, proof and capability routing, quarantine, VIR-v1 policy admission, Cardano-write rejection, and settlement separation exist. The empty deployment rehearsal pauses the kernel under the 2-of-3 council, removes deployer privilege, and activates no adapter, verifier, program, route, or domain. Upgradeable proxy adapters/verifiers are not eligible until implementation identity can be pinned. |
+| Neuron and Gateway | `neuron/vdso/`, `gateway/vdso.py`, `gateway/vdso_postgres.py` | Public composition defaults to `VDSO_MODE=off` and mounts no VDSO routes. Private shadow composition requires a strict network, injected trusted-height and on-chain-deployment verifiers, durable PostgreSQL nonce/replay stores in live environments, and DID authentication for every read. Shadow policy permits `READ` only and rejects value, Tier 2, sidecar publication, and external writes. Current Near/Celestia adapters, audited HPKE/ML-DSA backends, and authoritative execution remain ineligible or unconfigured. |
+| Cardano conformance | `cardano/lib/vams/vdso.ak` | Shared intent-vector, host-wire, settlement-v2 proof/payload checks exist. This module is a conformance library, not a validator entrypoint. Native Aiken conformance permits only non-economic `READ` and `ACCUMULATE`; `CONSUME` and `RESERVE` fail closed, while the Polygon kernel rejects every Cardano-authoritative write. |
 
 These source artifacts are implementation evidence only. They are not
 deployment, independent-audit, live-DA, privacy-assurance, or public-testnet

@@ -121,7 +121,11 @@ class VDSOCanaryService:
             )
 
         self._deployment_config: Optional[CanaryDeploymentConfig] = None
-        if self._live_environment and self.mode == VDSOMode.CANARY:
+        requires_live_dependencies = self._live_environment and self.mode in {
+            VDSOMode.SHADOW,
+            VDSOMode.CANARY,
+        }
+        if deployment_verifier is not None or requires_live_dependencies:
             required = {
                 "VDSO_OBJECT_STORE_ADDRESS": os.getenv("VDSO_OBJECT_STORE_ADDRESS", ""),
                 "VDSO_EXECUTION_KERNEL_ADDRESS": os.getenv(
@@ -136,20 +140,8 @@ class VDSOCanaryService:
             ]
             if invalid:
                 raise VDSOServiceError(
-                    "VDSO canary requires nonzero 20-byte on-chain registry addresses "
+                    "VDSO shadow/canary requires nonzero 20-byte on-chain registry addresses "
                     f"in {current_environment()}: {', '.join(invalid)}"
-                )
-            if height_provider is None:
-                raise VDSOServiceError(
-                    "live VDSO canary requires an injected trusted host-height provider"
-                )
-            if nonce_store is None or not getattr(nonce_store, "durable", False):
-                raise VDSOServiceError(
-                    "live VDSO canary requires an injected durable atomic nonce store"
-                )
-            if deployment_verifier is None:
-                raise VDSOServiceError(
-                    "live VDSO canary requires an injected deployment verifier"
                 )
             self._deployment_config = CanaryDeploymentConfig(
                 environment=current_environment(),
@@ -157,6 +149,20 @@ class VDSOCanaryService:
                 execution_kernel_address=required["VDSO_EXECUTION_KERNEL_ADDRESS"],
                 adapter_registry_address=required["VDSO_ADAPTER_REGISTRY_ADDRESS"],
             )
+
+        if requires_live_dependencies:
+            if height_provider is None:
+                raise VDSOServiceError(
+                    "live VDSO shadow/canary requires an injected trusted host-height provider"
+                )
+            if nonce_store is None or not getattr(nonce_store, "durable", False):
+                raise VDSOServiceError(
+                    "live VDSO shadow/canary requires an injected durable atomic nonce store"
+                )
+            if deployment_verifier is None:
+                raise VDSOServiceError(
+                    "live VDSO shadow/canary requires an injected deployment verifier"
+                )
 
         self._adapters: Dict[bytes, AdapterProfile] = {
             profile.adapter_id: profile for profile in adapters
@@ -191,17 +197,17 @@ class VDSOCanaryService:
             )
         return current_height
 
-    def _verify_live_deployment(self, binding: DomainAuthorityBinding) -> None:
-        if not (self._live_environment and self.mode == VDSOMode.CANARY):
+    def _verify_configured_deployment(self, binding: DomainAuthorityBinding) -> None:
+        if self._deployment_verifier is None:
             return
         if self._deployment_config is None or self._deployment_verifier is None:
-            raise VDSOServiceError("live canary deployment verification is unavailable")
+            raise VDSOServiceError("VDSO deployment verification is unavailable")
         try:
             verified = self._deployment_verifier(self._deployment_config, binding)
         except Exception as exc:
-            raise VDSOServiceError("live canary deployment verification failed") from exc
+            raise VDSOServiceError("VDSO deployment verification failed") from exc
         if verified is not True:
-            raise VDSOServiceError("live canary deployment verification rejected binding")
+            raise VDSOServiceError("VDSO deployment verification rejected binding")
 
     def simulate(
         self,
@@ -224,7 +230,7 @@ class VDSOCanaryService:
                 raise VDSOServiceError(
                     "requested current_height does not match the trusted host height"
                 )
-        self._verify_live_deployment(intent.binding)
+        self._verify_configured_deployment(intent.binding)
         if trusted_height > intent.valid_until_height:
             raise VDSOServiceError("intent is expired")
         return IntentRecord(intent=intent, status="simulated", selected_adapter_id=None)

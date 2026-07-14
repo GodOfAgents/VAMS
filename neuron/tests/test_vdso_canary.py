@@ -254,11 +254,13 @@ class KeccakAndCodecTests(unittest.TestCase):
         )
         self.assertEqual(header.canonical_bytes().hex(), vector["state_object_header_cbor"])
         settlement = SettlementMetadata(
-            schema_version=1,
+            schema_version=2,
             receipt_hash=bytes.fromhex(vector["semantic_receipt_hash"]),
             binding=DomainAuthorityBinding(
                 bytes.fromhex("30" * 32), HostAuthority.CARDANO, 4
             ),
+            source_host=HostAuthority.POLYGON,
+            destination_host=HostAuthority.CARDANO,
             source_chain_reference=bytes.fromhex("70" * 32),
             source_transaction_hash=bytes.fromhex("71" * 32),
             settled_at_height=123_456,
@@ -310,9 +312,11 @@ class KeccakAndCodecTests(unittest.TestCase):
     def test_settlement_metadata_enforces_inv_10_separation(self):
         binding = DomainAuthorityBinding(b32(3), HostAuthority.POLYGON, 1)
         local = SettlementMetadata(
-            schema_version=1,
+            schema_version=2,
             receipt_hash=b32(1),
             binding=binding,
+            source_host=HostAuthority.POLYGON,
+            destination_host=HostAuthority.POLYGON,
             source_chain_reference=b"\x00" * 32,
             source_transaction_hash=b"\x00" * 32,
             settled_at_height=0,
@@ -324,27 +328,84 @@ class KeccakAndCodecTests(unittest.TestCase):
             SettlementMetadata.from_canonical_bytes(local.canonical_bytes()),
             local,
         )
-        with self.assertRaisesRegex(ValueError, "distinct nonzero"):
+        cross_binding = DomainAuthorityBinding(b32(3), HostAuthority.CARDANO, 1)
+        with self.assertRaisesRegex(ValueError, "distinct hosts"):
             SettlementMetadata(
-                schema_version=1,
+                schema_version=2,
                 receipt_hash=b32(1),
-                binding=binding,
+                binding=cross_binding,
+                source_host=HostAuthority.CARDANO,
+                destination_host=HostAuthority.CARDANO,
                 source_chain_reference=b32(2),
                 source_transaction_hash=b32(3),
                 settled_at_height=9,
                 bridge_proof_hash=b32(4),
                 payload_hash=b32(4),
             )
+        with self.assertRaisesRegex(ValueError, "distinct proof"):
+            SettlementMetadata(
+                schema_version=2,
+                receipt_hash=b32(1),
+                binding=cross_binding,
+                source_host=HostAuthority.POLYGON,
+                destination_host=HostAuthority.CARDANO,
+                source_chain_reference=b32(2),
+                source_transaction_hash=b32(3),
+                settled_at_height=9,
+                bridge_proof_hash=b32(4),
+                payload_hash=b32(4),
+            )
+        with self.assertRaisesRegex(ValueError, "nonzero"):
+            SettlementMetadata(
+                schema_version=2,
+                receipt_hash=b32(1),
+                binding=cross_binding,
+                source_host=HostAuthority.POLYGON,
+                destination_host=HostAuthority.CARDANO,
+                source_chain_reference=b32(2),
+                source_transaction_hash=b32(3),
+                settled_at_height=0,
+                bridge_proof_hash=b32(4),
+                payload_hash=b32(5),
+            )
         with self.assertRaisesRegex(ValueError, "all-zero"):
             SettlementMetadata(
-                schema_version=1,
+                schema_version=2,
                 receipt_hash=b32(1),
                 binding=binding,
+                source_host=HostAuthority.CARDANO,
+                destination_host=HostAuthority.POLYGON,
                 source_chain_reference=b"\x00" * 32,
                 source_transaction_hash=b32(3),
                 settled_at_height=0,
                 bridge_proof_hash=b"\x00" * 32,
                 payload_hash=b"\x00" * 32,
+            )
+        with self.assertRaisesRegex(ValueError, "settlement v2"):
+            SettlementMetadata(
+                schema_version=1,
+                receipt_hash=b32(1),
+                binding=binding,
+                source_host=HostAuthority.POLYGON,
+                destination_host=HostAuthority.POLYGON,
+                source_chain_reference=b"\x00" * 32,
+                source_transaction_hash=b"\x00" * 32,
+                settled_at_height=0,
+                bridge_proof_hash=b"\x00" * 32,
+                payload_hash=b"\x00" * 32,
+            )
+        with self.assertRaisesRegex(ValueError, "domain authority"):
+            SettlementMetadata(
+                schema_version=2,
+                receipt_hash=b32(1),
+                binding=binding,
+                source_host=HostAuthority.POLYGON,
+                destination_host=HostAuthority.CARDANO,
+                source_chain_reference=b32(2),
+                source_transaction_hash=b32(3),
+                settled_at_height=9,
+                bridge_proof_hash=b32(4),
+                payload_hash=b32(5),
             )
 
 

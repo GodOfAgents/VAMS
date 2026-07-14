@@ -180,7 +180,7 @@ contract VAMSExecutionKernel is VDSOCanaryAccess, ReentrancyGuard {
         selectedAdapterId = capabilityRouter.selectAdapter(
             candidateAdapterIds, request.requiredCapabilities, request.requiredHost, request.verifierId
         );
-        _validateCrossHostSettlement(request.settlement);
+        _validateCrossHostSettlement(request.settlement, request.requiredHost);
         _verifyAdapterSettlement(selectedAdapterId, request, adapterSettlementProof);
     }
 
@@ -362,16 +362,27 @@ contract VAMSExecutionKernel is VDSOCanaryAccess, ReentrancyGuard {
         revert InvalidTransition();
     }
 
-    function _validateCrossHostSettlement(VDSOTypes.SettlementMetadata calldata settlement) private pure {
-        if (settlement.sourceChainId == 0) {
+    function _validateCrossHostSettlement(VDSOTypes.SettlementMetadata calldata settlement, VDSOTypes.Host requiredHost)
+        private
+        pure
+    {
+        if (
+            settlement.schemaVersion != VDSOTypes.SETTLEMENT_SCHEMA_VERSION
+                || settlement.sourceHost == VDSOTypes.Host.NONE || settlement.destinationHost == VDSOTypes.Host.NONE
+                || settlement.destinationHost != requiredHost
+        ) revert InvalidCrossHostSettlement();
+
+        if (settlement.sourceHost == settlement.destinationHost) {
             if (
-                settlement.sourceTransactionHash != bytes32(0) || settlement.bridgeProofHash != bytes32(0)
+                settlement.sourceChainId != 0 || settlement.sourceTransactionHash != bytes32(0)
+                    || settlement.settledAtHeight != 0 || settlement.bridgeProofHash != bytes32(0)
                     || settlement.payloadHash != bytes32(0)
             ) revert InvalidCrossHostSettlement();
             return;
         }
         if (
-            settlement.sourceTransactionHash == bytes32(0) || settlement.bridgeProofHash == bytes32(0)
+            settlement.sourceChainId == 0 || settlement.sourceTransactionHash == bytes32(0)
+                || settlement.settledAtHeight == 0 || settlement.bridgeProofHash == bytes32(0)
                 || settlement.payloadHash == bytes32(0) || settlement.bridgeProofHash == settlement.payloadHash
         ) revert InvalidCrossHostSettlement();
     }

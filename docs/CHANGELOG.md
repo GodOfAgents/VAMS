@@ -8,6 +8,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Operational evidence producer**: Added
+  `.github/workflows/operational-evidence.yml` on a dedicated protected,
+  read-only evidence runner. It binds a target SHA and release stage to a fixed
+  evidence root, rejects secrets, symlinks, and prebuilt aggregate manifests,
+  validates the raw operational bundle, and uploads an immutable 365-day
+  artifact for later promotion consumption.
+- **Deterministic deployment rehearsal tooling**: Added Polygon Amoy and Cardano
+  Pre-Prod runbooks plus `scripts/deployment/cardano_preprod_artifacts.py`. The
+  Cardano extractor emits exactly four Plutus V3 artifacts, excludes VDSO,
+  records deterministic hashes, and rejects a commit argument that does not
+  match a clean Cardano source tree at repository `HEAD`.
+- **Runnable private VDSO shadow worker**: Added
+  `neuron/vdso/shadow_worker.py`, `neuron/vdso/shadow_postgres.py`, the Rust
+  `shadow_eval` binary, and the exported Aiken `shadow_read_commitment`
+  evaluator. The worker consumes strict hash-chained commitment-only baseline
+  JSONL, executes Python/Rust/Aiken conformance on every read-only transition,
+  persists atomic PostgreSQL checkpoints and 1,000-transition audit chunks,
+  includes restart/replay regression coverage beyond `1 × 10^5` records, and emits unsigned report
+  material only after the seven-day gate. It fails closed on missing backends,
+  divergence, source gaps/reordering/duplicates, root mismatch, plaintext-like
+  fields, mutations, and continuity gaps; no completed shadow run is claimed.
+- **Private VDSO shadow composition**: Added PostgreSQL-backed atomic nonce and
+  replay stores, trusted-height and on-chain-deployment verification boundaries,
+  and application-lifespan composition for the private shadow service. Public
+  Gateway instances do not mount VDSO routes when `VDSO_MODE=off`; shadow mode
+  is read-only, non-value-bearing, and rejects sidecar publication.
+- **VDSO promotion evidence**: Added fail-closed validation for a signed,
+  versioned `vdso-shadow-report.json` and deployment evidence covering all seven
+  empty Polygon VDSO modules. Cardano `vdso.ak` is recorded only as conformance
+  evidence, never as a deployed validator.
 - **Deployment identity evidence**: Added `contracts/script/utils/AuthorityIdentityValidator.sol`
   and network-specific deployment-manifest validation. Polygon evidence binds
   each Safe proxy and singleton runtime code hash, exact owners/thresholds,
@@ -43,8 +73,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   disabled for the initial Cardano canary.
 - **`contracts/script/DeployVDSOCanary.s.sol`**: Added a Polygon Amoy-locked,
   empty-state deployment rehearsal that validates distinct Safe/timelock roles,
-  performs role handoff, activates no adapter/verifier/program/domain, and
-  leaves recovery abort disabled until a real non-execution verifier exists.
+  performs role handoff, pauses the execution kernel under the distinct 2-of-3
+  pause council, removes deployer pauser/admin/executor authority, activates no
+  adapter/verifier/program/domain, and leaves recovery abort disabled until a
+  real non-execution verifier exists.
 - **Documentation reality sync**: Added a canonical documentation index,
   current v0.8.0 architecture reference, versioning policy, machine-readable
   documentation manifest, and CI-checkable documentation validator.
@@ -83,9 +115,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Tier 2 hybrid authorization for every non-`READ` access and every nonzero
   settlement-cost budget, and joins every nonzero signed `sidecar_root` to the
   exact uploaded encrypted sidecar content hash.
-- **VDSO settlement metadata**: Aligned Python with VIR-Core's eight-field
-  settlement encoding and added mandatory, distinct `bridge_proof_hash` and
-  `payload_hash` semantics for INV-10.
+- **VDSO settlement metadata**: Version-bumped the undeployed settlement
+  semantics to `vdso-settlement-v2` in Python, Rust, Aiken, and Solidity.
+  Python, Rust, and Aiken share the ten-field CBOR
+  encoding; the Solidity ABI independently enforces the same schema-v2 host,
+  height, authority, and proof-separation semantics. Both representations bind
+  explicit source and destination hosts, require the destination to match
+  domain authority, reject equal-host cross-chain claims, and preserve
+  `bridge_proof_hash != payload_hash` for INV-10.
+- **VDSO Gateway lifecycle and authentication**: Replaced global service state
+  with application-lifespan construction, separated strict `VAMS_ENV` and
+  `VAMS_NETWORK` parsing, required shared durable stores and trusted providers
+  for private shadow startup, and extended DID authentication to intent,
+  object, adapter, and sidecar reads.
+- **Promotion evidence ordering**: Security gates now bind raw per-gate
+  artifacts and the complete stage evidence bundle before generating and
+  Cosign-signing the manifest. Manual promotion identifies both the immutable
+  target SHA and prior evidence run rather than committing evidence into a
+  self-referential release SHA.
 - **VDSO Solidity admission and topology**: Restricted program activation to
   VIR-Core v1 and the three exact checked-in policy commitments, made the
   Polygon kernel reject all Cardano-authoritative state writes, and required
@@ -119,12 +166,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`REPO_STATUS_REPORT.md`**: Rewrote the repository status report for the July 2026 public testnet launch window with commit-history chronology, current component maturity, verified blockers, and gated roadmap language.
 - **`.github/workflows/security-gates.yml`**: Aligned CI with the current frontend and Cardano toolchains by moving frontend verification to Node.js 22, pinning Aiken to `v1.1.21`, and using `aiken check` as the Aiken verification command.
 - **`.github/workflows/security-gates.yml`**: Replaced all mutable GitHub Action refs with exact commits, replaced the removed `txpipe/setup-aiken` action with the official Aiken action, and pinned Foundry and Python security-tool versions.
-- **`cardano/aiken.toml`**, **`cardano/aiken.lock`**, and **`.github/workflows/security-gates.yml`**: Pinned the official `aiken-lang/fuzz` v2 package and made the Cardano gate reproducible with seed `20260711` and 250 successful cases per property.
+- **`cardano/aiken.toml`**, **`cardano/aiken.lock`**, and **`.github/workflows/security-gates.yml`**: Pinned the official `aiken-lang/fuzz` v2 package and made the Cardano gate reproducible with seed `20260713` and 250 successful cases per property.
 - **`neuron/requirements.txt`**: Declared `numpy` and `scikit-learn` for the intelligence-layer modules and tests that already import vector math and Incremental PCA dependencies.
 - **`neuron/da/models.py`**: Included Sentinel telemetry extras in deterministic DA audit report serialization so fidelity and SkillOps-related telemetry can be committed in report hashes.
 - **`neuron/services/registry_client.py`**: Extended Service Block metadata with deterministic SkillOps manifests and fail-closed permission-scope validation.
 
 ### Security
+- **Pinned Gateway evidence runtime**: Digest-pinned Caddy 2 for configuration
+  validation and the deployment blueprint, migrated client-auth trust to the
+  current `trust_pool file` syntax, and extended the workflow validator to
+  reject mutable Caddy evidence commands.
+- **PostgreSQL checkpoint atomicity**: Extended the disposable integration gate
+  to race eight processes over the same shadow checkpoint, verify idempotent
+  serialization, restart/load continuity, replay counters, nonce/replay
+  atomicity, and more than $1 \times 10^5$ durable replay records.
+- **Closed VDSO deployment posture**: All seven Polygon VDSO modules must be
+  paused as a deployment postcondition. Empty registries, zero active
+  domains/routes/verifiers, distinct Safe-held pause/guardian/recovery roles,
+  and zero deployer privilege remain mandatory manifest evidence.
+- **Fail-closed runtime identity**: Unknown `VAMS_ENV` or `VAMS_NETWORK` values,
+  absent durable shadow stores, missing trusted heights, unverified deployments,
+  unauthenticated reads, and any shadow mutation/value/sidecar request now abort
+  instead of degrading to local behavior.
 - **Historical secret gate**: A fully redacted Gitleaks v8.30.1 scan of all 82
   reachable commits found 1,734 matches, including three historical PEM
   private-key findings. `docs/audit/GITLEAKS_ADJUDICATION.md` blocks release
@@ -136,8 +199,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Safe/timelock identity**: `DeployTestnet.s.sol` and
   `DeployVDSOCanary.s.sol` now reject interface-shaped impostors by checking
   proxy runtime code, singleton identity/runtime code, exact owner counts and
-  thresholds, and the compiled VAMS timelock runtime before rehearsal or role
-  handoff.
+  thresholds, zero transaction nonce, extension-free current state, and the
+  compiled VAMS timelock runtime before rehearsal or role handoff. This does
+  not prove absence of historical Safe hash preapprovals; the exact audited
+  Safe release plus complete setup and `ApproveHash` history remain deployment
+  evidence blockers.
 - **VDSO scanner remediation**: Explicitly initialized recovery-verifier state
   and require the execution kernel to consume a successful proof-router result.
   Slither's configured fail-high gate reports zero high findings; all 19
@@ -199,51 +265,58 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`contracts/src/registry/ServiceBlockRegistry.sol`**: Service Block provisioning now fails closed when verifier-governed quarantine is active.
 
 ### Testing
-- **VDSO focused verification**: Python passed 65/65 VDSO boundary tests and
-  Aiken passed all 10 VDSO conformance definitions. Changed VDSO/deployment
-  Solidity paths pass scoped formatting; repository-wide formatting retains
-  unrelated legacy drift.
-- **Solidity verification status**: Final-tree `forge build --sizes` passed and
-  `forge test -vvv` passed 693/693 tests across 40 suites. The
-  `VAMSExecutionKernel` runtime is 10,467 bytes with 14,109 bytes of EIP-170
-  margin. Exact-commit CI evidence remains required.
+- **Phase 6 Python and PostgreSQL verification**: On the working tree based on
+  `31929a24419a9b7b9d8954cbea2df9fe1cb77a68`, the full Python aggregate passes
+  746 tests with one intentional Rust-binary environment skip and 23 subtests. The
+  pinned disposable PostgreSQL integration separately passes multi-process
+  nonce, replay, checkpoint, restart, and six-figure persistence checks.
+- **Solidity verification boundary**: Full working-tree Foundry verification
+  passes 709/709 across 40 suites, with zero failures or skips. Build and scoped
+  formatting for every modified Solidity file pass. Exact-commit CI evidence
+  remains required.
 - **Audit controls**: Fifteen readiness tests, two deployment-source tests, two traceability tests, one workflow-supply-chain test, eight economic-concentration tests, and two adversarial-campaign tests passed; the 12-class agent corpus and first-party security scans also passed.
 - **Economic adversarial campaign**: The seed `20260711` campaign passed 100,000 epochs with 20,000 detections per attack class, zero misses, and zero baseline false positives; synthetic evidence does not replace live beneficial-owner attestations.
 - **Invariant regressions**: Focused runs passed 16 regional-emission tests, 3 stale-oracle tests, and 52 session-key/TEE/SDK tests.
 - **Cardano verification**: `aiken check --deny --seed 20260713 --max-success
-  250` passed 43 unit tests and 7 properties over 1,750 generated cases; all
-  50 test definitions passed. Transaction-level validator state-machine
-  properties remain required.
+  250` passes 47 unit tests and 7 properties; all 54 definitions pass and each
+  property completes 250 successful cases. The real exported UPLC evaluator
+  matches the Python shadow commitment.
+  `cardano/lib/vams/vdso.ak` remains conformance-only; transaction-level
+  validator state-machine properties and a deployable Cardano VDSO validator
+  remain absent.
 - **Frontend verification status**: `node --check` passed for the Vite/config modules, `npm audit --audit-level=high` found zero vulnerabilities, and the Vite 7.3.6 production build passed with 1,712 modules transformed.
 - **`neuron/tests/test_performance_audit.py`**: Added regression coverage proving sensitive and structured KPI data cannot survive DA report serialization.
 - **Security scripts**: Verified `default_credential_scan.py`, `public_content_policy_scan.py`, and `mock_mode_promotion_scan.py` passed locally.
 - **World-state and SkillOps targeted tests**: Verified `pytest -q neuron/tests/test_service_blocks.py neuron/tests/test_world_state_fidelity.py neuron/tests/test_world_state_phase_boundary.py` passed with 31 tests.
-- **Python aggregate**: Workspace-local componentized runs passed 684/684
-  substantive tests (236 Neuron group A, 395 Neuron group B excluding the
-  isolated latency case, 52 scripts, and the hardened latency regression).
-  Monolithic sandbox runs were blocked by temporary-directory ACL errors, not
-  test assertions; exact-commit CI execution remains required.
+- **Python current-tree aggregate**: Pytest passes 746 tests in the full
+  non-PostgreSQL aggregate with one Rust evaluator integration skip and 23 subtests. The real
+  PostgreSQL service test also passes separately; exact-commit CI remains
+  required.
 - **Python security gates**: Bandit reports no qualifying medium/high-confidence
   issue. Both Gateway and Neuron requirement sets pass `pip-audit` with no known
   vulnerabilities after removal of `python-ecdsa`.
-- **VIR-Core verification**: Rust 1.92 Linux execution passed all 34/34 tests;
-  format, workspace/all-target check, and Clippy with `-D warnings` also pass.
-- **Cross-language analyzers**: Slither 0.11.5 passes the fail-high gate with 19
-  adjudicated medium findings. Semgrep 1.169.0 reports zero findings across 444
-  tracked files/520 rules and 61 explicit untracked VDSO files/314 rules. All
-  17 timed-out rule/file pairs were separately source-reviewed with no confirmed
-  vulnerability and are retained in `docs/audit/SEMGREP_ADJUDICATION.md`;
-  exact-commit CI rerun and external acceptance remain required.
+- **VIR-Core verification**: Current-branch `cargo check --workspace
+  --all-targets --locked` passes. A current-branch `cargo test` result is
+  unavailable on Windows because MSVC `link.exe` is not installed. The older
+  Linux 34/34 result is baseline evidence only.
+- **Cross-language analyzers**: Slither 0.11.5 analyzes 181 contracts with 63
+  detectors, passes the fail-high gate, and retains 19 locally adjudicated
+  lower-severity results. Semgrep 1.169.0 reports zero findings across 456
+  tracked files/520 rules; the three initial timeout paths complete separately
+  under 290 rules, and all 16 then-untracked branch files complete under 330
+  rules, with zero timeouts and zero findings. Exact-commit CI rerun and external
+  acceptance remain required.
 - **World ID regressions**: Added five Foundry tests covering zero-verifier rejection, verifier-bound acceptance, malformed input, wrong action scope, and verifier-revert failure.
 - **Syntax/hygiene**: Verified touched Python files with `py_compile`; `git diff --check` passed.
 - **Docs-only PR gate**: Planned verification with `git diff --check` over `docs/team` changes only; full gates remain active for pushes to `main` and PRs with code/config/funding changes.
-- **Security/build gates**: Current first-party default-credential, mock-mode,
-  and public-content scans, Aiken checks, full pytest, Bandit, evidence/schema,
-  documentation, audit-program, invariant-traceability, workflow-pinning,
-  deployment-source, and agent-red-team gates passed. Pip-audit, final Foundry,
-  Linux Rust, Slither, and broad Semgrep scans now pass their configured local
-  thresholds. Historical Gitleaks, TruffleHog, signed SBOM, exact-commit CI,
-  and aggregate Cosign evidence remain blocking.
+- **Security/build evidence boundary**: Current focused Python, Solidity,
+  Aiken, and Rust-check results are green, but no complete current-branch
+  aggregate is claimed. Older full pytest, Foundry, Linux Rust, Bandit,
+  pip-audit, Slither, Semgrep, frontend, and first-party scanner results remain
+  baseline evidence pending exact-commit reruns. Historical Gitleaks, the three
+  PEM identity rotations and role-impact proof, history cleanup, clean
+  Gitleaks/TruffleHog rescans, signed SBOM, exact-commit CI, and aggregate
+  Cosign evidence remain blocking.
 - **`neuron/tests/test_runtime_safety.py`**: Added regression tests for local mock allowance and live-environment rejection across OMS, Trails, Coinme, DA adapters, DA audit logging, and bridge mock paths.
 - **`neuron/tests/test_gateway_auth_hardening.py`**: Added regression tests for DID signature replay rejection, live-mode Basic Auth rejection, live-mode loopback binding, and live heartbeat client certificate enforcement.
 

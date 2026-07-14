@@ -30,7 +30,7 @@ from neuron.vdso.models import (
     SignatureSuite,
     UnsignedIntent,
 )
-from neuron.vdso.service import VDSOCanaryService, VDSOServiceError
+from neuron.vdso.service import VDSOCanaryService, VDSOMode, VDSOServiceError
 from neuron.vdso.sidecar import (
     MAX_CIPHERTEXT_BYTES,
     MAX_ENCAPSULATED_KEY_BYTES,
@@ -39,9 +39,6 @@ from neuron.vdso.sidecar import (
     EncryptedWitnessSidecar,
     RecipientEnvelope,
 )
-from neuron.runtime_safety import is_live_environment
-
-
 HEX32_PATTERN = r"^0x[0-9a-fA-F]{64}$"
 HEX_PATTERN = r"^0x(?:[0-9a-fA-F]{2})+$"
 AUTH_REPLAY_WINDOW_SECONDS = 300
@@ -84,10 +81,13 @@ class InMemoryReplayStore:
         with self._lock:
             self._entries.clear()
 
-router = APIRouter(prefix="/v1/vdso", tags=["vdso-canary"])
-service = VDSOCanaryService()
-replay_store: Optional[ReplayStore] = None
-_local_replay_store = InMemoryReplayStore()
+router = APIRouter(prefix="/v1/vdso", tags=["vdso-shadow"])
+
+
+def create_vdso_router() -> APIRouter:
+    """Return the stateless VDSO router for explicit application composition."""
+
+    return router
 
 
 def _hex_bytes(value: str, *, length: Optional[int] = None) -> bytes:
@@ -317,16 +317,21 @@ class DisclosureRequest(StrictModel):
         return value
 
 
-def _active_replay_store() -> ReplayStore:
-    candidate = replay_store
-    if is_live_environment():
-        if candidate is None or getattr(candidate, "shared", False) is not True:
-            raise HTTPException(
-                status_code=503,
-                detail="live VDSO authentication requires a shared atomic replay store",
-            )
-        return candidate
-    return candidate if candidate is not None else _local_replay_store
+def _vdso_service(request: Request) -> VDSOCanaryService:
+    service = getattr(request.app.state, "vdso_service", None)
+    if not isinstance(service, VDSOCanaryService):
+        raise HTTPException(status_code=503, detail="VDSO shadow service is unavailable")
+    return service
+
+
+def _active_replay_store(request: Request) -> ReplayStore:
+    candidate = getattr(request.app.state, "vdso_replay_store", None)
+    if candidate is None or getattr(candidate, "shared", False) is not True:
+        raise HTTPException(
+            status_code=503,
+            detail="VDSO authentication requires a shared atomic replay store",
+        )
+    return candidate
 
 
 async def require_vdso_request_auth(
@@ -387,7 +392,7 @@ async def require_vdso_request_auth(
             raise ValueError("signature verification failed")
     except (TypeError, ValueError) as exc:
         raise HTTPException(status_code=401, detail="invalid VDSO DID signature") from exc
-    store = _active_replay_store()
+    store = _active_replay_store(request)
     try:
         fresh = store.check_and_record(
             replay_key,
@@ -416,7 +421,7 @@ authorization_verifier = AuthorizationVerifier(
 )
 
 
-def _intent_response(record) -> dict:
+def _intent_response(record, service: VDSOCanaryService) -> dict:
     return {
         "intent_id": "0x" + record.intent.intent_id.hex(),
         "workflow_id": "0x" + record.intent.workflow_id.hex(),
@@ -435,16 +440,33 @@ def _validate_actor_binding(intent: UnsignedIntent, did_public_key: bytes) -> No
         raise HTTPException(status_code=403, detail="DID key is not bound to intent actor_root")
 
 
+def _validate_private_shadow_policy(
+    intent: UnsignedIntent, service: VDSOCanaryService
+) -> None:
+    if service.mode != VDSOMode.SHADOW:
+        raise HTTPException(status_code=503, detail="only private VDSO shadow mode is exposed")
+    if any(access.mode != AccessMode.READ for access in intent.accesses):
+        raise HTTPException(status_code=422, detail="VDSO shadow accepts READ access only")
+    if intent.execution_tier == ExecutionTier.IMMEDIATE_DUAL_VALIDITY:
+        raise HTTPException(status_code=422, detail="VDSO shadow rejects Tier 2 authorization")
+    if intent.max_settlement_cost != 0:
+        raise HTTPException(status_code=422, detail="VDSO shadow rejects value settlement")
+    if intent.sidecar_root != b"\x00" * 32:
+        raise HTTPException(status_code=422, detail="VDSO shadow rejects sidecar publication")
+
+
 @router.post("/intents/simulate")
 async def simulate_intent(
     request: IntentSimulationRequest,
     did_public_key: bytes = Depends(require_vdso_request_auth),
+    service: VDSOCanaryService = Depends(_vdso_service),
 ):
     try:
         intent = request.intent.to_domain()
         _validate_actor_binding(intent, did_public_key)
+        _validate_private_shadow_policy(intent, service)
         return _intent_response(
-            service.simulate(intent, current_height=request.current_height)
+            service.simulate(intent, current_height=request.current_height), service
         )
     except (ValueError, VDSOServiceError) as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
@@ -454,15 +476,17 @@ async def simulate_intent(
 async def submit_intent(
     request: SignedIntentRequest,
     did_public_key: bytes = Depends(require_vdso_request_auth),
+    service: VDSOCanaryService = Depends(_vdso_service),
 ):
     try:
         intent = request.intent.to_domain()
         envelope = request.authorization.to_domain()
         _validate_actor_binding(intent, did_public_key)
+        _validate_private_shadow_policy(intent, service)
         if envelope.secp256k1_public_key != did_public_key:
             raise AuthorizationError("request DID and intent authorization key differ")
         authorization_verifier.verify(intent, envelope)
-        return _intent_response(service.submit_shadow(intent))
+        return _intent_response(service.submit_shadow(intent), service)
     except AuthorizationError as exc:
         raise HTTPException(status_code=403, detail=str(exc)) from exc
     except (ValueError, VDSOServiceError) as exc:
@@ -470,15 +494,23 @@ async def submit_intent(
 
 
 @router.get("/intents/{intent_id}")
-async def get_intent(intent_id: str):
+async def get_intent(
+    intent_id: str,
+    _did_public_key: bytes = Depends(require_vdso_request_auth),
+    service: VDSOCanaryService = Depends(_vdso_service),
+):
     try:
-        return _intent_response(service.get_intent(_hex32(intent_id)))
+        return _intent_response(service.get_intent(_hex32(intent_id)), service)
     except (KeyError, ValueError) as exc:
         raise HTTPException(status_code=404, detail="unknown intent") from exc
 
 
 @router.get("/objects/{object_id}")
-async def get_object(object_id: str):
+async def get_object(
+    object_id: str,
+    _did_public_key: bytes = Depends(require_vdso_request_auth),
+    service: VDSOCanaryService = Depends(_vdso_service),
+):
     try:
         header = service.get_object(_hex32(object_id))
     except (KeyError, ValueError) as exc:
@@ -501,7 +533,10 @@ async def get_object(object_id: str):
 
 
 @router.get("/adapters")
-async def list_adapters():
+async def list_adapters(
+    _did_public_key: bytes = Depends(require_vdso_request_auth),
+    service: VDSOCanaryService = Depends(_vdso_service),
+):
     return {
         "mode": service.mode.value,
         "adapters": [
@@ -526,21 +561,12 @@ async def list_adapters():
     }
 
 
-@router.post("/sidecars")
-async def upload_ciphertext_sidecar(
-    request: CiphertextSidecarRequest,
-    _did_public_key: bytes = Depends(require_vdso_request_auth),
-):
-    try:
-        sidecar = request.to_domain()
-        service.store_encrypted_sidecar(sidecar)
-    except (ValueError, VDSOServiceError) as exc:
-        raise HTTPException(status_code=422, detail=str(exc)) from exc
-    return {"content_hash": request.content_hash.lower(), "stored": True}
-
-
 @router.get("/sidecars/{content_hash}")
-async def get_sidecar_commitment(content_hash: str):
+async def get_sidecar_commitment(
+    content_hash: str,
+    _did_public_key: bytes = Depends(require_vdso_request_auth),
+    service: VDSOCanaryService = Depends(_vdso_service),
+):
     try:
         record = service.get_sidecar_commitment(_hex32(content_hash))
     except (KeyError, ValueError) as exc:
@@ -553,7 +579,10 @@ async def get_sidecar_commitment(content_hash: str):
 
 
 @router.post("/disclosures/verify")
-async def verify_disclosure(request: DisclosureRequest):
+async def verify_disclosure(
+    request: DisclosureRequest,
+    _did_public_key: bytes = Depends(require_vdso_request_auth),
+):
     if len(request.siblings) != len(request.path_bits):
         raise HTTPException(status_code=422, detail="siblings and path_bits lengths differ")
     node = domain_hash(

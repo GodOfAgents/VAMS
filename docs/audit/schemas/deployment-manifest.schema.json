@@ -3,9 +3,9 @@
   "$id": "https://vams.network/schemas/audit/deployment-manifest.schema.json",
   "title": "VAMS Testnet Deployment Manifest",
   "type": "object",
-  "required": ["schema_version", "commit_sha", "network", "deployment_status", "chain_identifier", "deployer", "authorities", "timelock_identity", "timelock_seconds", "deployer_privileges_removed", "deployer_privilege_checks", "mock_routes_disabled", "artifacts", "role_transfers", "rollback_plan"],
+  "required": ["schema_version", "commit_sha", "network", "deployment_status", "chain_identifier", "deployer", "authorities", "timelock_identity", "timelock_seconds", "deployer_privileges_removed", "deployer_privilege_checks", "mock_routes_disabled", "artifacts", "role_transfers", "rollback_plan", "vdso"],
   "properties": {
-    "schema_version": {"const": "1.0.0"},
+    "schema_version": {"const": "2.0.0"},
     "commit_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
     "network": {"enum": ["polygon-amoy", "cardano-preprod"]},
     "deployment_status": {"enum": ["rehearsed", "deployed"]},
@@ -22,24 +22,35 @@
       "minItems": 1,
       "items": {
         "type": "object",
-        "required": ["name", "source", "source_sha256", "artifact_sha256", "verification"],
+        "required": ["name", "source", "source_sha256", "artifact_path", "artifact_sha256", "observation_evidence_path", "observation_evidence_sha256", "verification"],
         "properties": {
           "name": {"type": "string", "minLength": 1},
           "source": {"type": "string", "minLength": 1},
           "source_sha256": {"$ref": "#/$defs/sha256"},
+          "artifact_path": {"$ref": "#/$defs/bundlePath"},
           "artifact_sha256": {"$ref": "#/$defs/sha256"},
+          "observation_evidence_path": {"$ref": "#/$defs/bundlePath"},
+          "observation_evidence_sha256": {"$ref": "#/$defs/sha256"},
           "verification": {"enum": ["simulation-passed", "explorer-verified", "script-hash-verified"]},
           "address": {"type": "string", "minLength": 1},
           "transaction_hash": {"type": "string", "minLength": 1},
           "runtime_code_hash": {"$ref": "#/$defs/evmCodeHash"},
           "script_hash": {"$ref": "#/$defs/cardanoHash"},
+          "script_cbor_path": {"$ref": "#/$defs/bundlePath"},
           "script_cbor_sha256": {"$ref": "#/$defs/sha256"}
         },
+        "allOf": [
+          {
+            "if": {"required": ["script_cbor_sha256"]},
+            "then": {"required": ["script_cbor_path"]}
+          }
+        ],
         "additionalProperties": false
       }
     },
     "role_transfers": {"type": "array", "minItems": 1},
-    "rollback_plan": {"type": "string", "minLength": 1}
+    "rollback_plan": {"type": "string", "minLength": 1},
+    "vdso": {"type": "object"}
   },
   "allOf": [
     {
@@ -49,6 +60,7 @@
           "deployer": {"$ref": "#/$defs/evmAddress"},
           "authorities": {"$ref": "#/$defs/polygonAuthorities"},
           "timelock_identity": {"$ref": "#/$defs/polygonTimelock"},
+          "vdso": {"$ref": "#/$defs/polygonVdsoState"},
           "role_transfers": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/evmRoleTransfer"}},
           "deployer_privilege_checks": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/evmPrivilegeCheck"}}
         }
@@ -61,6 +73,7 @@
           "deployer": {"$ref": "#/$defs/cardanoHash"},
           "authorities": {"$ref": "#/$defs/cardanoAuthorities"},
           "timelock_identity": {"$ref": "#/$defs/cardanoTimelock"},
+          "vdso": {"$ref": "#/$defs/cardanoVdsoState"},
           "role_transfers": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/cardanoControlTransfer"}},
           "deployer_privilege_checks": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/cardanoPrivilegeCheck"}}
         }
@@ -68,23 +81,85 @@
     }
   ],
   "$defs": {
+    "vdsoModuleName": {
+      "enum": ["VAMSObjectStore", "VAMSProgramRegistry", "VAMSAdapterRegistry", "VAMSProofRouter", "VAMSReservationManager", "VAMSExecutionKernel", "VAMSCapabilityRouter"]
+    },
+    "vdsoModuleState": {
+      "type": "object",
+      "required": ["name", "address", "empty", "paused", "active_entries", "state_evidence_path", "state_evidence_sha256"],
+      "properties": {
+        "name": {"$ref": "#/$defs/vdsoModuleName"},
+        "address": {"$ref": "#/$defs/evmAddress"},
+        "empty": {"const": true},
+        "paused": {"const": true},
+        "active_entries": {"const": 0},
+        "state_evidence_path": {"$ref": "#/$defs/bundlePath"},
+        "state_evidence_sha256": {"$ref": "#/$defs/sha256"}
+      },
+      "additionalProperties": false
+    },
+    "polygonVdsoState": {
+      "type": "object",
+      "required": ["schema_version", "mode", "authoritative_enabled", "value_bearing_domains_enabled", "kernel_paused", "recovery_verifier_configured", "execution_routes_enabled", "active_domains", "active_adapters", "active_programs", "active_verifiers", "active_routes", "modules"],
+      "properties": {
+        "schema_version": {"const": "1.0.0"},
+        "mode": {"const": "off"},
+        "authoritative_enabled": {"const": false},
+        "value_bearing_domains_enabled": {"const": false},
+        "kernel_paused": {"const": true},
+        "recovery_verifier_configured": {"const": false},
+        "execution_routes_enabled": {"const": false},
+        "active_domains": {"const": 0},
+        "active_adapters": {"const": 0},
+        "active_programs": {"const": 0},
+        "active_verifiers": {"const": 0},
+        "active_routes": {"const": 0},
+        "modules": {
+          "type": "array",
+          "minItems": 7,
+          "maxItems": 7,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/vdsoModuleState"}
+        }
+      },
+      "additionalProperties": false
+    },
+    "cardanoVdsoState": {
+      "type": "object",
+      "required": ["schema_version", "mode", "authoritative_enabled", "value_bearing_domains_enabled", "deployable", "source", "source_sha256", "conformance_evidence_path", "conformance_evidence_sha256"],
+      "properties": {
+        "schema_version": {"const": "1.0.0"},
+        "mode": {"const": "conformance-only"},
+        "authoritative_enabled": {"const": false},
+        "value_bearing_domains_enabled": {"const": false},
+        "deployable": {"const": false},
+        "source": {"const": "cardano/lib/vams/vdso.ak"},
+        "source_sha256": {"$ref": "#/$defs/sha256"},
+        "conformance_evidence_path": {"$ref": "#/$defs/bundlePath"},
+        "conformance_evidence_sha256": {"$ref": "#/$defs/sha256"}
+      },
+      "additionalProperties": false
+    },
     "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "bundlePath": {"type": "string", "minLength": 1, "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$)).+$"},
     "evmAddress": {"type": "string", "pattern": "^0x[0-9a-fA-F]{40}$"},
     "evmCodeHash": {"type": "string", "pattern": "^0x[0-9a-fA-F]{64}$"},
     "cardanoHash": {"type": "string", "pattern": "^[0-9a-f]{56}$"},
     "polygonAuthorities": {
       "type": "object",
-      "required": ["governance", "treasury", "emergency"],
+      "required": ["governance", "treasury", "emergency", "vdso_guardian", "vdso_recovery"],
       "properties": {
         "governance": {"$ref": "#/$defs/polygonFiveOwnerAuthority"},
         "treasury": {"$ref": "#/$defs/polygonFiveOwnerAuthority"},
-        "emergency": {"$ref": "#/$defs/polygonEmergencyAuthority"}
+        "emergency": {"$ref": "#/$defs/polygonEmergencyAuthority"},
+        "vdso_guardian": {"$ref": "#/$defs/polygonVdsoGuardianAuthority"},
+        "vdso_recovery": {"$ref": "#/$defs/polygonVdsoRecoveryAuthority"}
       },
       "additionalProperties": false
     },
     "polygonFiveOwnerAuthority": {
       "type": "object",
-      "required": ["authority_type", "address", "owners", "threshold", "proxy_runtime_code_hash", "singleton_address", "singleton_runtime_code_hash", "identity_check_evidence_sha256", "recovery_policy"],
+      "required": ["authority_type", "address", "owners", "threshold", "proxy_runtime_code_hash", "singleton_address", "singleton_runtime_code_hash", "identity_check_evidence_path", "identity_check_evidence_sha256", "recovery_policy"],
       "properties": {
         "authority_type": {"const": "safe"},
         "address": {"$ref": "#/$defs/evmAddress"},
@@ -93,6 +168,7 @@
         "proxy_runtime_code_hash": {"$ref": "#/$defs/evmCodeHash"},
         "singleton_address": {"$ref": "#/$defs/evmAddress"},
         "singleton_runtime_code_hash": {"$ref": "#/$defs/evmCodeHash"},
+        "identity_check_evidence_path": {"$ref": "#/$defs/bundlePath"},
         "identity_check_evidence_sha256": {"$ref": "#/$defs/sha256"},
         "recovery_policy": {"type": "string", "minLength": 1}
       },
@@ -100,7 +176,7 @@
     },
     "polygonEmergencyAuthority": {
       "type": "object",
-      "required": ["authority_type", "address", "owners", "threshold", "scope", "proxy_runtime_code_hash", "singleton_address", "singleton_runtime_code_hash", "identity_check_evidence_sha256", "recovery_policy"],
+      "required": ["authority_type", "address", "owners", "threshold", "scope", "proxy_runtime_code_hash", "singleton_address", "singleton_runtime_code_hash", "identity_check_evidence_path", "identity_check_evidence_sha256", "recovery_policy"],
       "properties": {
         "authority_type": {"const": "safe"},
         "address": {"$ref": "#/$defs/evmAddress"},
@@ -110,6 +186,43 @@
         "proxy_runtime_code_hash": {"$ref": "#/$defs/evmCodeHash"},
         "singleton_address": {"$ref": "#/$defs/evmAddress"},
         "singleton_runtime_code_hash": {"$ref": "#/$defs/evmCodeHash"},
+        "identity_check_evidence_path": {"$ref": "#/$defs/bundlePath"},
+        "identity_check_evidence_sha256": {"$ref": "#/$defs/sha256"},
+        "recovery_policy": {"type": "string", "minLength": 1}
+      },
+      "additionalProperties": false
+    },
+    "polygonVdsoGuardianAuthority": {
+      "type": "object",
+      "required": ["authority_type", "address", "owners", "threshold", "scope", "proxy_runtime_code_hash", "singleton_address", "singleton_runtime_code_hash", "identity_check_evidence_path", "identity_check_evidence_sha256", "recovery_policy"],
+      "properties": {
+        "authority_type": {"const": "safe"},
+        "address": {"$ref": "#/$defs/evmAddress"},
+        "owners": {"type": "array", "minItems": 3, "maxItems": 3, "uniqueItems": true, "items": {"$ref": "#/$defs/evmAddress"}},
+        "threshold": {"const": 2},
+        "scope": {"const": "vdso-quarantine"},
+        "proxy_runtime_code_hash": {"$ref": "#/$defs/evmCodeHash"},
+        "singleton_address": {"$ref": "#/$defs/evmAddress"},
+        "singleton_runtime_code_hash": {"$ref": "#/$defs/evmCodeHash"},
+        "identity_check_evidence_path": {"$ref": "#/$defs/bundlePath"},
+        "identity_check_evidence_sha256": {"$ref": "#/$defs/sha256"},
+        "recovery_policy": {"type": "string", "minLength": 1}
+      },
+      "additionalProperties": false
+    },
+    "polygonVdsoRecoveryAuthority": {
+      "type": "object",
+      "required": ["authority_type", "address", "owners", "threshold", "scope", "proxy_runtime_code_hash", "singleton_address", "singleton_runtime_code_hash", "identity_check_evidence_path", "identity_check_evidence_sha256", "recovery_policy"],
+      "properties": {
+        "authority_type": {"const": "safe"},
+        "address": {"$ref": "#/$defs/evmAddress"},
+        "owners": {"type": "array", "minItems": 3, "maxItems": 3, "uniqueItems": true, "items": {"$ref": "#/$defs/evmAddress"}},
+        "threshold": {"const": 2},
+        "scope": {"const": "vdso-recovery"},
+        "proxy_runtime_code_hash": {"$ref": "#/$defs/evmCodeHash"},
+        "singleton_address": {"$ref": "#/$defs/evmAddress"},
+        "singleton_runtime_code_hash": {"$ref": "#/$defs/evmCodeHash"},
+        "identity_check_evidence_path": {"$ref": "#/$defs/bundlePath"},
         "identity_check_evidence_sha256": {"$ref": "#/$defs/sha256"},
         "recovery_policy": {"type": "string", "minLength": 1}
       },
@@ -127,16 +240,18 @@
     },
     "cardanoFiveOwnerAuthority": {
       "type": "object",
-      "required": ["authority_type", "address", "owners", "threshold", "script_hash", "script_cbor_sha256", "script_source", "script_source_sha256", "identity_check_evidence_sha256", "recovery_policy"],
+      "required": ["authority_type", "address", "owners", "threshold", "script_hash", "script_cbor_path", "script_cbor_sha256", "script_source", "script_source_sha256", "identity_check_evidence_path", "identity_check_evidence_sha256", "recovery_policy"],
       "properties": {
         "authority_type": {"const": "cardano-script"},
         "address": {"type": "string", "pattern": "^addr_test1[0-9a-z]+$"},
         "owners": {"type": "array", "minItems": 5, "maxItems": 5, "uniqueItems": true, "items": {"$ref": "#/$defs/cardanoHash"}},
         "threshold": {"const": 3},
         "script_hash": {"$ref": "#/$defs/cardanoHash"},
+        "script_cbor_path": {"$ref": "#/$defs/bundlePath"},
         "script_cbor_sha256": {"$ref": "#/$defs/sha256"},
         "script_source": {"type": "string", "minLength": 1},
         "script_source_sha256": {"$ref": "#/$defs/sha256"},
+        "identity_check_evidence_path": {"$ref": "#/$defs/bundlePath"},
         "identity_check_evidence_sha256": {"$ref": "#/$defs/sha256"},
         "recovery_policy": {"type": "string", "minLength": 1}
       },
@@ -144,7 +259,7 @@
     },
     "cardanoEmergencyAuthority": {
       "type": "object",
-      "required": ["authority_type", "address", "owners", "threshold", "scope", "script_hash", "script_cbor_sha256", "script_source", "script_source_sha256", "identity_check_evidence_sha256", "recovery_policy"],
+      "required": ["authority_type", "address", "owners", "threshold", "scope", "script_hash", "script_cbor_path", "script_cbor_sha256", "script_source", "script_source_sha256", "identity_check_evidence_path", "identity_check_evidence_sha256", "recovery_policy"],
       "properties": {
         "authority_type": {"const": "cardano-script"},
         "address": {"type": "string", "pattern": "^addr_test1[0-9a-z]+$"},
@@ -152,9 +267,11 @@
         "threshold": {"const": 2},
         "scope": {"const": "pause-only"},
         "script_hash": {"$ref": "#/$defs/cardanoHash"},
+        "script_cbor_path": {"$ref": "#/$defs/bundlePath"},
         "script_cbor_sha256": {"$ref": "#/$defs/sha256"},
         "script_source": {"type": "string", "minLength": 1},
         "script_source_sha256": {"$ref": "#/$defs/sha256"},
+        "identity_check_evidence_path": {"$ref": "#/$defs/bundlePath"},
         "identity_check_evidence_sha256": {"$ref": "#/$defs/sha256"},
         "recovery_policy": {"type": "string", "minLength": 1}
       },
@@ -162,19 +279,20 @@
     },
     "timelockRole": {
       "type": "object",
-      "required": ["role", "account", "granted", "observed_at_block", "evidence_sha256"],
+      "required": ["role", "account", "granted", "observed_at_block", "evidence_path", "evidence_sha256"],
       "properties": {
         "role": {"enum": ["DEFAULT_ADMIN_ROLE", "PROPOSER_ROLE", "CANCELLER_ROLE", "EXECUTOR_ROLE"]},
         "account": {"$ref": "#/$defs/evmAddress"},
         "granted": {"type": "boolean"},
         "observed_at_block": {"type": "integer", "minimum": 0},
+        "evidence_path": {"$ref": "#/$defs/bundlePath"},
         "evidence_sha256": {"$ref": "#/$defs/sha256"}
       },
       "additionalProperties": false
     },
     "polygonTimelock": {
       "type": "object",
-      "required": ["identity_type", "address", "source", "source_sha256", "actual_runtime_code_hash", "expected_runtime_code_hash", "minimum_delay_seconds", "roles"],
+      "required": ["identity_type", "address", "source", "source_sha256", "actual_runtime_code_hash", "expected_runtime_code_hash", "minimum_delay_seconds", "identity_check_evidence_path", "identity_check_evidence_sha256", "roles"],
       "properties": {
         "identity_type": {"const": "evm-runtime"},
         "address": {"$ref": "#/$defs/evmAddress"},
@@ -183,13 +301,15 @@
         "actual_runtime_code_hash": {"$ref": "#/$defs/evmCodeHash"},
         "expected_runtime_code_hash": {"$ref": "#/$defs/evmCodeHash"},
         "minimum_delay_seconds": {"type": "integer", "minimum": 172800},
+        "identity_check_evidence_path": {"$ref": "#/$defs/bundlePath"},
+        "identity_check_evidence_sha256": {"$ref": "#/$defs/sha256"},
         "roles": {"type": "array", "minItems": 6, "maxItems": 6, "items": {"$ref": "#/$defs/timelockRole"}}
       },
       "additionalProperties": false
     },
     "cardanoTimelock": {
       "type": "object",
-      "required": ["identity_type", "script_address", "script_hash", "source", "source_sha256", "actual_script_cbor_sha256", "expected_script_cbor_sha256", "governor_script_hash", "minimum_delay_seconds", "cancel_threshold", "observed_at_slot", "control_evidence_sha256"],
+      "required": ["identity_type", "script_address", "script_hash", "source", "source_sha256", "actual_script_cbor_sha256", "expected_script_cbor_sha256", "governor_script_hash", "minimum_delay_seconds", "cancel_threshold", "observed_at_slot", "control_evidence_path", "control_evidence_sha256"],
       "properties": {
         "identity_type": {"const": "plutus-script"},
         "script_address": {"type": "string", "pattern": "^addr_test1[0-9a-z]+$"},
@@ -202,13 +322,14 @@
         "minimum_delay_seconds": {"type": "integer", "minimum": 172800},
         "cancel_threshold": {"const": 2},
         "observed_at_slot": {"type": "integer", "minimum": 0},
+        "control_evidence_path": {"$ref": "#/$defs/bundlePath"},
         "control_evidence_sha256": {"$ref": "#/$defs/sha256"}
       },
       "additionalProperties": false
     },
     "evmRoleTransfer": {
       "type": "object",
-      "required": ["target", "role", "action", "account", "verified", "observed_at_block", "evidence_sha256"],
+      "required": ["target", "role", "action", "account", "verified", "observed_at_block", "evidence_path", "evidence_sha256"],
       "properties": {
         "target": {"$ref": "#/$defs/evmAddress"},
         "role": {"type": "string", "minLength": 1},
@@ -216,6 +337,7 @@
         "account": {"$ref": "#/$defs/evmAddress"},
         "verified": {"const": true},
         "observed_at_block": {"type": "integer", "minimum": 0},
+        "evidence_path": {"$ref": "#/$defs/bundlePath"},
         "evidence_sha256": {"$ref": "#/$defs/sha256"},
         "transaction_hash": {"$ref": "#/$defs/evmCodeHash"}
       },
@@ -223,7 +345,7 @@
     },
     "cardanoControlTransfer": {
       "type": "object",
-      "required": ["control", "action", "from_credential", "to_script_hash", "verified", "observed_at_slot", "evidence_sha256"],
+      "required": ["control", "action", "from_credential", "to_script_hash", "verified", "observed_at_slot", "evidence_path", "evidence_sha256"],
       "properties": {
         "control": {"type": "string", "minLength": 1},
         "action": {"enum": ["parameterize", "handoff", "retire-deployer"]},
@@ -231,6 +353,7 @@
         "to_script_hash": {"$ref": "#/$defs/cardanoHash"},
         "verified": {"const": true},
         "observed_at_slot": {"type": "integer", "minimum": 0},
+        "evidence_path": {"$ref": "#/$defs/bundlePath"},
         "evidence_sha256": {"$ref": "#/$defs/sha256"},
         "transaction_hash": {"$ref": "#/$defs/sha256"}
       },
@@ -238,25 +361,27 @@
     },
     "evmPrivilegeCheck": {
       "type": "object",
-      "required": ["artifact", "account", "privilege", "granted", "observed_at_block", "evidence_sha256"],
+      "required": ["artifact", "account", "privilege", "granted", "observed_at_block", "evidence_path", "evidence_sha256"],
       "properties": {
         "artifact": {"type": "string", "minLength": 1},
         "account": {"$ref": "#/$defs/evmAddress"},
         "privilege": {"type": "string", "minLength": 1},
         "granted": {"const": false},
         "observed_at_block": {"type": "integer", "minimum": 0},
+        "evidence_path": {"$ref": "#/$defs/bundlePath"},
         "evidence_sha256": {"$ref": "#/$defs/sha256"}
       },
       "additionalProperties": false
     },
     "cardanoPrivilegeCheck": {
       "type": "object",
-      "required": ["artifact", "credential", "can_authorize", "observed_at_slot", "evidence_sha256"],
+      "required": ["artifact", "credential", "can_authorize", "observed_at_slot", "evidence_path", "evidence_sha256"],
       "properties": {
         "artifact": {"type": "string", "minLength": 1},
         "credential": {"$ref": "#/$defs/cardanoHash"},
         "can_authorize": {"const": false},
         "observed_at_slot": {"type": "integer", "minimum": 0},
+        "evidence_path": {"$ref": "#/$defs/bundlePath"},
         "evidence_sha256": {"$ref": "#/$defs/sha256"}
       },
       "additionalProperties": false
