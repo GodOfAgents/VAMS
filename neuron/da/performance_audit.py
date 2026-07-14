@@ -39,7 +39,10 @@ CHALLENGE_DA_ROUTING: Dict[str, DAProtocol] = {
     "memory": DAProtocol.CELESTIA,    # Memory bandwidth: public audit trail
 }
 
-LIVE_CAPABLE_PROTOCOLS = {DAProtocol.CELESTIA, DAProtocol.NEAR_DA}
+# Near remains blocked until it submits a signed transaction and supports exact
+# retrieval. Avail and EigenDA remain structured stubs. This set describes
+# operational live routing only; release evidence requires an external observer.
+LIVE_CAPABLE_PROTOCOLS = {DAProtocol.CELESTIA}
 ALL_CONFIGURED_PROTOCOLS = (
     DAProtocol.CELESTIA,
     DAProtocol.NEAR_DA,
@@ -107,12 +110,21 @@ class PerformanceAuditLog:
             raise DAConfigurationError("enabled_protocols must be a list or comma-separated string")
 
         try:
-            return {
+            enabled = {
                 item if isinstance(item, DAProtocol) else DAProtocol(str(item).strip().lower())
                 for item in configured
             }
         except ValueError as exc:
             raise DAConfigurationError(f"Unknown DA protocol in enabled_protocols: {exc}") from exc
+        unsupported_live = enabled - LIVE_CAPABLE_PROTOCOLS
+        if not self.mock_mode and unsupported_live:
+            for protocol in sorted(unsupported_live, key=lambda item: item.value):
+                require_not_live_mock(f"{protocol.value} DA adapter", True)
+            names = ", ".join(sorted(protocol.value for protocol in unsupported_live))
+            raise DAConfigurationError(
+                f"DA protocols are not live-capable and remain disabled: {names}"
+            )
+        return enabled
 
     def _select_da_target(
         self,
@@ -165,7 +177,7 @@ class PerformanceAuditLog:
             target = self._select_da_target(provisional_report, da_target)
             audit_report = AuditReport.from_sentinel_report(report, da_target=target)
             final_target = self._select_da_target(audit_report, da_target)
-        except DAConfigurationError as exc:
+        except (DAConfigurationError, KeyError, TypeError, ValueError) as exc:
             logger.error(str(exc))
             return {
                 "success": False,
@@ -181,6 +193,13 @@ class PerformanceAuditLog:
 
         try:
             receipt = await adapter.submit_blob(blob_data)
+            retrieval_verified = False
+            if not self.mock_mode:
+                retrieval_verified = await adapter.verify_blob(receipt)
+                if retrieval_verified is not True:
+                    raise DAConfigurationError(
+                        f"DA protocol {final_target.value} did not return the exact submitted blob"
+                    )
 
             result = {
                 "success": True,
@@ -191,7 +210,10 @@ class PerformanceAuditLog:
                 "reportHash": report_hash,
                 "merkleRoot": report_hash,  # Single-item tree root = report hash
                 "merkleProof": [report_hash],
-                "verified": receipt.verified,
+                "verified": retrieval_verified,
+                "mock_mode": self.mock_mode,
+                # This publisher cannot establish independent release evidence.
+                "release_evidence_eligible": False,
             }
 
             # Track for observability
@@ -247,6 +269,9 @@ class PerformanceAuditLog:
                 "rpc_url": adapter.rpc_url,
                 "mock_mode": adapter.mock_mode,
                 "healthy": is_healthy,
+                "supports_live_submission": adapter.supports_live_submission,
+                "supports_exact_retrieval": adapter.supports_exact_retrieval,
+                "release_evidence_eligible": adapter.release_evidence_eligible,
             }
         return status
 

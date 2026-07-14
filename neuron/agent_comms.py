@@ -5,7 +5,10 @@ import os
 import hashlib
 from typing import Dict, Optional, Any
 from dataclasses import dataclass, asdict
-from ecdsa import SigningKey, VerifyingKey, SECP256k1
+try:
+    from neuron.secp256k1 import PrivateKey, sign_message, verify_message
+except ModuleNotFoundError:  # Support direct execution from neuron/.
+    from secp256k1 import PrivateKey, sign_message, verify_message
 
 logger = logging.getLogger("VAMS-Comms")
 
@@ -48,7 +51,7 @@ class AgentCommunicator:
     "Trust but Verify"
     """
     
-    def __init__(self, sk: SigningKey, node_id: str):
+    def __init__(self, sk: PrivateKey, node_id: str):
         self.sk = sk
         self.node_id = node_id
         self.audit = AuditLogger()
@@ -61,7 +64,7 @@ class AgentCommunicator:
         
         # Data to sign: sender + recipient + timestamp + payload
         sign_data = f"{self.node_id}|{recipient_id}|{timestamp}|{payload_str}".encode()
-        signature = self.sk.sign(sign_data).hex()
+        signature = sign_message(self.sk, sign_data).hex()
         
         msg = SignedMessage(
             sender_id=self.node_id,
@@ -78,12 +81,14 @@ class AgentCommunicator:
     def verify_message(self, msg: SignedMessage, sender_vk_hex: str) -> bool:
         """Verify the authenticity and integrity of a message."""
         try:
-            vk = VerifyingKey.from_string(bytes.fromhex(sender_vk_hex), curve=SECP256k1)
-            
             # Reconstruct sign data
             sign_data = f"{msg.sender_id}|{msg.recipient_id}|{msg.timestamp}|{msg.payload}".encode()
-            
-            is_valid = vk.verify(bytes.fromhex(msg.signature), sign_data)
+
+            is_valid = verify_message(
+                bytes.fromhex(sender_vk_hex),
+                sign_data,
+                bytes.fromhex(msg.signature),
+            )
             
             self.audit.log_event("INCOMING", msg, verified=is_valid)
             return is_valid

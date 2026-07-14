@@ -50,12 +50,12 @@ class AvailDAAdapter(DAAdapter):
             blob_id=blob_id,
             height=self._mock_height,
             commitment=commitment,
-            verified=True,
+            verified=False,
         )
 
     async def verify_blob(self, receipt: DAReceipt) -> bool:
         logger.info(f"[STUB] Avail verification for {receipt.blob_id}")
-        return True
+        return False
 
     async def get_blob(self, blob_id: str) -> Optional[bytes]:
         logger.info(f"[STUB] Avail blob retrieval not implemented for {blob_id}")

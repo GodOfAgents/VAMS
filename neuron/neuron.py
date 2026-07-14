@@ -47,8 +47,6 @@ except ImportError:
 
 # --- DEPENDENCY CHECK ---
 try:
-    import requests
-    from ecdsa import SigningKey, VerifyingKey, SECP256k1
     from colorama import init, Fore, Style
     init(autoreset=True)
 except ImportError as e:
@@ -56,6 +54,27 @@ except ImportError as e:
     print(f"Error: {e}")
     print("\nPlease run: pip install -r requirements.txt")
     sys.exit(1)
+
+try:
+    from neuron.secp256k1 import (
+        PrivateKey,
+        PublicKey,
+        generate_private_key,
+        load_private_key_pem,
+        private_key_pem,
+        public_key_bytes,
+        sign_message,
+    )
+except ModuleNotFoundError:  # Support direct execution from neuron/.
+    from secp256k1 import (
+        PrivateKey,
+        PublicKey,
+        generate_private_key,
+        load_private_key_pem,
+        private_key_pem,
+        public_key_bytes,
+        sign_message,
+    )
 
 from config import (
     VERSION, VAMS_GATEWAY, HEARTBEAT_INTERVAL,
@@ -174,10 +193,9 @@ class VamsNeuron:
     ):
         self.mock_mode = mock_mode
         self.use_sdk = use_sdk and SDK_AVAILABLE
-        self.sk: Optional[SigningKey] = None
-        self.vk: Optional[VerifyingKey] = None
+        self.sk: Optional[PrivateKey] = None
+        self.vk: Optional[PublicKey] = None
         self.node_id: str = ""
-        self.session = requests.Session()
         self.storage = NeuronStorage()
         self.running = True
         self.gateway_available = False
@@ -352,15 +370,15 @@ class VamsNeuron:
         if os.path.exists(IDENTITY_PATH):
             try:
                 with open(IDENTITY_PATH, "rb") as f:
-                    self.sk = SigningKey.from_pem(f.read())
+                    self.sk = load_private_key_pem(f.read())
                 self.log(f"Keys loaded from {IDENTITY_PATH}", "SUCCESS")
             except Exception:
                 self._generate_new_identity()
         else:
             self._generate_new_identity()
         
-        self.vk = self.sk.verifying_key
-        self.node_id = self.vk.to_string().hex()[:16]
+        self.vk = self.sk.public_key()
+        self.node_id = public_key_bytes(self.vk).hex()[:16]
         self.storage.set_node_info("node_id", self.node_id)
         
         # 3. Print Identity Summary
@@ -370,9 +388,9 @@ class VamsNeuron:
     
     def _generate_new_identity(self):
         self.log("Generating new Secp256k1 keypair...", "CRYPTO")
-        self.sk = SigningKey.generate(curve=SECP256k1)
+        self.sk = generate_private_key()
         with open(IDENTITY_PATH, "wb") as f:
-            f.write(self.sk.to_pem())
+            f.write(private_key_pem(self.sk))
         self.log(f"New identity saved to {IDENTITY_PATH}", "SUCCESS")
     
     def sign_telemetry(self, block_height: int, provider: str) -> Tuple[str, str]:
@@ -382,7 +400,7 @@ class VamsNeuron:
             "provider": provider, "timestamp": time.time(),
             "nonce": os.urandom(8).hex()
         }, separators=(',', ':'))
-        return payload, self.sk.sign(payload.encode()).hex()
+        return payload, sign_message(self.sk, payload.encode()).hex()
     
     def send_heartbeat(self, block_info) -> bool:
         payload, signature = self.sign_telemetry(block_info.height, block_info.provider)
@@ -398,10 +416,6 @@ class VamsNeuron:
             success = False
             if hasattr(self, 'gateway') and self.gateway:
                 success = self.gateway.send_heartbeat(payload, signature)
-            else:
-                # Fallback if gateway module failed to load but imports exist (unlikely)
-                r = self.session.post(f"{VAMS_GATEWAY}/heartbeat", json={"payload": payload, "signature": signature}, timeout=5)
-                success = r.status_code == 200
             
             if success:
                 self.gateway_available = True
@@ -748,14 +762,13 @@ def main():
     if args.comms:
         from colorama import Fore, Style
         from agent_comms import AgentCommunicator
-        from ecdsa import SigningKey, SECP256k1
         from config import IDENTITY_PATH
         
         # Load Identity
         try:
             with open(IDENTITY_PATH, "rb") as f:
-                sk = SigningKey.from_pem(f.read())
-                node_id = sk.verifying_key.to_string().hex()[:16]
+                sk = load_private_key_pem(f.read())
+                node_id = public_key_bytes(sk).hex()[:16]
                 print(f"Identity loaded: {Fore.GREEN}{node_id}{Style.RESET_ALL} from {IDENTITY_PATH}")
         except FileNotFoundError:
             print(f"{Fore.RED}Identity not found. Run without args first to generate.{Style.RESET_ALL}")
@@ -771,7 +784,7 @@ def main():
             # Simulate Receive (Loopback)
             print(f"[*] Simulating network transmission...")
             from dataclasses import asdict
-            comms.receive_message(asdict(msg), sk.verifying_key.to_string().hex())
+            comms.receive_message(asdict(msg), public_key_bytes(sk).hex())
             print(f"\n{Fore.GREEN}✅ Message logged to audit.log{Style.RESET_ALL}")
         else:
             print("Listening for messages... (Mock Mode)")
@@ -815,7 +828,7 @@ def main():
             print(f"    < WWW-Authenticate: {headers['WWW-Authenticate']}")
             
             # 3. Generate Payment
-            token = client.handle_402(headers, "http://provider/api/v1/infer")
+            token = client.handle_402(headers, "https://provider.invalid/api/v1/infer")
             
             if token:
                 print(f"\n{Fore.GREEN}✅ Payment Generated{Style.RESET_ALL}")

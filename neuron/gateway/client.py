@@ -2,7 +2,10 @@ import os
 import json
 import logging
 import requests
+from urllib.parse import urlparse
 from typing import Dict, Any, Optional
+
+from neuron.runtime_safety import is_live_environment
 
 logger = logging.getLogger("VAMSGateway")
 
@@ -13,7 +16,7 @@ class GatewayClient:
     """
     
     def __init__(self, base_url: str):
-        self.base_url = base_url.rstrip('/')
+        self.base_url = self._validated_base_url(base_url)
         self.session = requests.Session()
         self.session.headers.update({
             "User-Agent": "VAMS-Neuron/1.0",
@@ -22,6 +25,26 @@ class GatewayClient:
         self.registered = False
         self.agent_id = None
         logger.info(f"Gateway Client initialized for {self.base_url}")
+
+    @staticmethod
+    def _validated_base_url(base_url: str) -> str:
+        """Require TLS for live gateways and loopback-only plaintext locally."""
+
+        candidate = base_url.strip().rstrip('/')
+        parsed = urlparse(candidate)
+        if not parsed.hostname or parsed.username or parsed.password:
+            raise ValueError("VAMS gateway URL must contain a host and no userinfo")
+        if parsed.scheme == "https":
+            return candidate
+        if (
+            parsed.scheme == "http"
+            and not is_live_environment()
+            and parsed.hostname in {"localhost", "127.0.0.1", "::1"}
+        ):
+            return candidate
+        if is_live_environment():
+            raise ValueError("live VAMS gateway URL must use HTTPS")
+        raise ValueError("plaintext VAMS gateway URL is restricted to loopback")
 
     def register_agent(self, node_id: str, public_key: str, stake_amount: float, capabilities: Dict[str, Any] = None) -> Optional[str]:
         """

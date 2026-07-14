@@ -28,9 +28,9 @@ class LatencyBenchmark(BaseChallenge):
             # Simulated ping. In prod, use `aioping` or similar.
             rtts = []
             for _ in range(5):
-                start = time.time()
+                start = time.perf_counter()
                 await asyncio.sleep(0.002) # simulate 2ms ping
-                rtts.append((time.time() - start) * 1000)
+                rtts.append((time.perf_counter() - start) * 1000)
                 
             avg_rtt = sum(rtts) / len(rtts)
             jitter = max(rtts) - min(rtts)
