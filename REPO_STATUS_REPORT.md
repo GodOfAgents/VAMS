@@ -6,7 +6,7 @@
 **Current Priority:** Phase 6: Closed Public-Testnet Baseline + Private VDSO Shadow Hardening
 **Public Testnet Target:** July 2026 launch window
 **Architecture Baseline:** v0.8.0 cognitive/composer layer + v1.3.0-oms runtime + June gateway hardening
-**Branch Baseline:** `main` at `31929a24419a9b7b9d8954cbea2df9fe1cb77a68`; current branch changes are not commit-bound release evidence
+**Branch Baseline:** implementation commit `babe45e22430b754eadbb98d2269afb3430c4ca6`, based on `main` at `31929a24419a9b7b9d8954cbea2df9fe1cb77a68`; signed aggregate release evidence is absent
 
 ---
 
@@ -34,7 +34,7 @@ The system is not mainnet-ready. It is not yet a public testnet deployment. The 
 
 Current blockers before public testnet:
 
-- Readiness is fail-closed at 3 implemented, 29 partial, 4 blocked, and 0 verified tracks. The worktree is not a release candidate until committed and rerun in CI.
+- Readiness is fail-closed at 3 implemented, 29 partial, 4 blocked, and 0 verified tracks. The implementation is committed, but it is not a release candidate until every gate reruns against the exact final HEAD in CI and the complete manifest is signed.
 - The current working tree passes the full Python aggregate, the disposable
   PostgreSQL multi-process nonce/replay/checkpoint integration, Foundry 709/709,
   Aiken 54/54, Rust format/check/deny-warnings Clippy, frontend build/audit,

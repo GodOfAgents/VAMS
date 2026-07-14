@@ -265,6 +265,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`contracts/src/registry/ServiceBlockRegistry.sol`**: Service Block provisioning now fails closed when verifier-governed quarantine is active.
 
 ### Testing
+- **Commit handoff boundary**: Implementation commit
+  `babe45e22430b754eadbb98d2269afb3430c4ca6` contains the locally verified
+  Phase 6 hardening. Local content-equivalent results are not substituted for
+  the required signed exact-final-commit CI evidence.
 - **Phase 6 Python and PostgreSQL verification**: On the working tree based on
   `31929a24419a9b7b9d8954cbea2df9fe1cb77a68`, the full Python aggregate passes
   746 tests with one intentional Rust-binary environment skip and 23 subtests. The
