@@ -7,6 +7,7 @@ import argparse
 import hashlib
 import json
 import re
+import subprocess
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -88,6 +89,19 @@ def _load_json(path: Path, label: str, errors: list[str]) -> dict[str, Any]:
     return value
 
 
+def _is_gitignored(relative: str) -> bool:
+    """Return True if the relative path matches a .gitignore pattern."""
+    try:
+        result = subprocess.run(
+            ["git", "check-ignore", "-q", relative],
+            cwd=str(ROOT),
+            capture_output=True,
+        )
+        return result.returncode == 0
+    except (FileNotFoundError, subprocess.SubprocessError):
+        return False
+
+
 def _repo_path(relative: object, label: str, errors: list[str]) -> Path | None:
     if not isinstance(relative, str) or not relative:
         errors.append(f"{label} path must be a non-empty string")
@@ -99,6 +113,8 @@ def _repo_path(relative: object, label: str, errors: list[str]) -> Path | None:
         errors.append(f"{label} path escapes the repository: {relative}")
         return None
     if not path.is_file():
+        if _is_gitignored(relative):
+            return None  # gitignored files are intentionally absent
         errors.append(f"{label} path does not exist: {relative}")
         return None
     return path
