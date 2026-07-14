@@ -34,6 +34,11 @@ class VDSOEvidenceValidatorTests(unittest.TestCase):
 
     def test_source_hash_mismatch_fails(self) -> None:
         data = copy.deepcopy(self.canonical)
+        # Point source_path to a file that exists in the repo so the
+        # hash comparison actually runs (the default may be gitignored).
+        data["source_provenance"]["source_path"] = str(
+            VALIDATOR.DEFAULT_EVIDENCE.relative_to(ROOT)
+        ).replace("\\", "/")
         data["source_provenance"]["source_sha256"] = "A" * 64
         errors = self._validate_modified(data)
         self.assertTrue(any("SHA-256 mismatch" in error for error in errors), errors)
