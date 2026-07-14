@@ -2,19 +2,19 @@ import unittest
 from unittest.mock import patch, mock_open
 import sys
 import os
-from ecdsa import SigningKey, SECP256k1
 import json
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from agent_comms import AgentCommunicator, SignedMessage
+from secp256k1 import generate_private_key, public_key_bytes
 
 class TestAgentComms(unittest.TestCase):
     
     def setUp(self):
-        self.sk = SigningKey.generate(curve=SECP256k1)
-        self.vk = self.sk.verifying_key
-        self.node_id = self.vk.to_string().hex()[:16]
+        self.sk = generate_private_key()
+        self.vk = public_key_bytes(self.sk)
+        self.node_id = self.vk.hex()[:16]
         self.comms = AgentCommunicator(self.sk, self.node_id)
         
     def test_message_signing_verification(self):
@@ -29,7 +29,7 @@ class TestAgentComms(unittest.TestCase):
         
         # 2. Verify
         # We need the VK in hex for verification
-        vk_hex = self.vk.to_string().hex()
+        vk_hex = self.vk.hex()
         is_valid = self.comms.verify_message(msg, vk_hex)
         
         self.assertTrue(is_valid)
@@ -41,7 +41,7 @@ class TestAgentComms(unittest.TestCase):
         # Tamper payload
         msg.payload = json.dumps({"data": "hacked"})
         
-        vk_hex = self.vk.to_string().hex()
+        vk_hex = self.vk.hex()
         is_valid = self.comms.verify_message(msg, vk_hex)
         
         self.assertFalse(is_valid)

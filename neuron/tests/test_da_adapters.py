@@ -55,7 +55,7 @@ class TestCelestiaAdapter:
         assert isinstance(receipt, DAReceipt)
         assert receipt.protocol == DAProtocol.CELESTIA
         assert receipt.blob_id.startswith("celestia:")
-        assert receipt.verified is True
+        assert receipt.verified is False
 
     @pytest.mark.asyncio
     async def test_submit_blob_increments_height(self, celestia_adapter, sample_data):
@@ -73,7 +73,7 @@ class TestCelestiaAdapter:
     async def test_verify_blob_mock(self, celestia_adapter, sample_data):
         receipt = await celestia_adapter.submit_blob(sample_data)
         verified = await celestia_adapter.verify_blob(receipt)
-        assert verified is True
+        assert verified is False
 
     @pytest.mark.asyncio
     async def test_get_blob_returns_none_in_mock(self, celestia_adapter, sample_data):
@@ -110,7 +110,7 @@ class TestNearDAAdapter:
     async def test_verify_blob_mock(self, near_adapter, sample_data):
         receipt = await near_adapter.submit_blob(sample_data)
         verified = await near_adapter.verify_blob(receipt)
-        assert verified is True
+        assert verified is False
 
     @pytest.mark.asyncio
     async def test_get_blob_not_implemented(self, near_adapter):
@@ -129,9 +129,9 @@ class TestEigenDAAdapter:
         assert receipt.blob_id.startswith("eigenda:")
 
     @pytest.mark.asyncio
-    async def test_verify_stub_returns_true(self, eigenda_adapter, sample_data):
+    async def test_verify_stub_never_qualifies_as_evidence(self, eigenda_adapter, sample_data):
         receipt = await eigenda_adapter.submit_blob(sample_data)
-        assert await eigenda_adapter.verify_blob(receipt) is True
+        assert await eigenda_adapter.verify_blob(receipt) is False
 
     @pytest.mark.asyncio
     async def test_get_blob_returns_none(self, eigenda_adapter):
@@ -150,9 +150,9 @@ class TestAvailAdapter:
         assert receipt.blob_id.startswith("avail:")
 
     @pytest.mark.asyncio
-    async def test_verify_stub_returns_true(self, avail_adapter, sample_data):
+    async def test_verify_stub_never_qualifies_as_evidence(self, avail_adapter, sample_data):
         receipt = await avail_adapter.submit_blob(sample_data)
-        assert await avail_adapter.verify_blob(receipt) is True
+        assert await avail_adapter.verify_blob(receipt) is False
 
 
 # --- Cross-Adapter Tests ---
@@ -171,7 +171,7 @@ class TestCrossAdapter:
             assert receipt.commitment.startswith("0x")
             assert receipt.height > 0
             assert receipt.blob_id != ""
-            assert receipt.verified is True
+            assert receipt.verified is False
 
     @pytest.mark.asyncio
     async def test_receipt_to_dict_format(self, celestia_adapter, sample_data):
