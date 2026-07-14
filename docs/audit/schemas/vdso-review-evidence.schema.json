@@ -1,0 +1,247 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vams.network/schemas/audit/vdso-review-evidence.schema.json",
+  "title": "VDSO Principles Review Evidence",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "review_id",
+    "status",
+    "generated_at",
+    "source_provenance",
+    "dual_host_policy",
+    "principle_definitions",
+    "maturity_taxonomy",
+    "verdict",
+    "findings"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "review_id": {"const": "VDSO-PRINCIPLES-001"},
+    "status": {"const": "proposed"},
+    "generated_at": {"type": "string", "format": "date-time"},
+    "source_provenance": {
+      "type": "object",
+      "required": [
+        "baseline_commit",
+        "dirty",
+        "source_path",
+        "source_sha256",
+        "source_bytes",
+        "source_lines",
+        "source_tracked"
+      ],
+      "properties": {
+        "baseline_commit": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+        "dirty": {"type": "boolean"},
+        "source_path": {"const": "docs/team/VAMS-Discussions_001.txt"},
+        "source_sha256": {"type": "string", "pattern": "^[A-F0-9]{64}$"},
+        "source_bytes": {"type": "integer", "minimum": 1},
+        "source_lines": {"type": "integer", "minimum": 1},
+        "source_tracked": {"const": false}
+      },
+      "additionalProperties": false
+    },
+    "dual_host_policy": {
+      "type": "object",
+      "required": [
+        "polygon_role",
+        "cardano_role",
+        "authority_rule",
+        "cross_host_rule"
+      ],
+      "properties": {
+        "polygon_role": {"type": "string", "minLength": 20},
+        "cardano_role": {"type": "string", "minLength": 20},
+        "authority_rule": {"const": "one_authoritative_writer_per_state_domain"},
+        "cross_host_rule": {"type": "string", "minLength": 20}
+      },
+      "additionalProperties": false
+    },
+    "principle_definitions": {
+      "type": "object",
+      "required": [
+        "Sovereignty",
+        "Privacy",
+        "Security",
+        "Modularity",
+        "Post-Quantum Readiness",
+        "Equality",
+        "Decentralisation",
+        "Safety"
+      ],
+      "properties": {
+        "Sovereignty": {"type": "string", "minLength": 20},
+        "Privacy": {"type": "string", "minLength": 20},
+        "Security": {"type": "string", "minLength": 20},
+        "Modularity": {"type": "string", "minLength": 20},
+        "Post-Quantum Readiness": {"type": "string", "minLength": 20},
+        "Equality": {"type": "string", "minLength": 20},
+        "Decentralisation": {"type": "string", "minLength": 20},
+        "Safety": {"type": "string", "minLength": 20}
+      },
+      "additionalProperties": false
+    },
+    "maturity_taxonomy": {
+      "const": [
+        "implemented_verified",
+        "implemented_unverified",
+        "partial",
+        "mock",
+        "stub",
+        "design_only",
+        "not_found",
+        "contradicted"
+      ]
+    },
+    "verdict": {
+      "type": "object",
+      "required": [
+        "improvement_over_current_head",
+        "adoption_readiness",
+        "deployment_readiness",
+        "summary"
+      ],
+      "properties": {
+        "improvement_over_current_head": {"enum": ["yes", "conditional_yes", "no"]},
+        "adoption_readiness": {"enum": ["yes", "conditional_yes", "no"]},
+        "deployment_readiness": {"enum": ["yes", "no"]},
+        "summary": {"type": "string", "minLength": 40}
+      },
+      "additionalProperties": false
+    },
+    "findings": {
+      "type": "array",
+      "minItems": 8,
+      "maxItems": 8,
+      "items": {"$ref": "#/$defs/finding"}
+    }
+  },
+  "$defs": {
+    "line_reference": {
+      "type": "object",
+      "required": ["path", "line_start", "line_end", "observation"],
+      "properties": {
+        "path": {"type": "string", "minLength": 1},
+        "line_start": {"type": "integer", "minimum": 1},
+        "line_end": {"type": "integer", "minimum": 1},
+        "observation": {"type": "string", "minLength": 10},
+        "classification": {
+          "enum": [
+            "implemented_verified",
+            "implemented_unverified",
+            "partial",
+            "mock",
+            "stub",
+            "design_only",
+            "not_found",
+            "contradicted"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "external_source": {
+      "type": "object",
+      "required": ["title", "url", "supports"],
+      "properties": {
+        "title": {"type": "string", "minLength": 3},
+        "url": {"type": "string", "pattern": "^https://"},
+        "supports": {"type": "string", "minLength": 10}
+      },
+      "additionalProperties": false
+    },
+    "finding": {
+      "type": "object",
+      "required": [
+        "finding_id",
+        "principle",
+        "claim",
+        "discussion_evidence",
+        "repository_evidence",
+        "external_primary_sources",
+        "design_maturity",
+        "current_maturity",
+        "design_verdict",
+        "current_verdict",
+        "severity",
+        "affected_invariants",
+        "adr_requirements",
+        "remediation",
+        "verification_gate"
+      ],
+      "properties": {
+        "finding_id": {"type": "string", "pattern": "^VDSO-[A-Z]{3}-[0-9]{3}$"},
+        "principle": {
+          "enum": [
+            "Sovereignty",
+            "Privacy",
+            "Security",
+            "Modularity",
+            "Post-Quantum Readiness",
+            "Equality",
+            "Decentralisation",
+            "Safety"
+          ]
+        },
+        "claim": {"type": "string", "minLength": 30},
+        "discussion_evidence": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/line_reference"}
+        },
+        "repository_evidence": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/line_reference"}
+        },
+        "external_primary_sources": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/external_source"}
+        },
+        "design_maturity": {
+          "enum": [
+            "implemented_verified",
+            "implemented_unverified",
+            "partial",
+            "mock",
+            "stub",
+            "design_only",
+            "not_found",
+            "contradicted"
+          ]
+        },
+        "current_maturity": {
+          "enum": [
+            "implemented_verified",
+            "implemented_unverified",
+            "partial",
+            "mock",
+            "stub",
+            "design_only",
+            "not_found",
+            "contradicted"
+          ]
+        },
+        "design_verdict": {"enum": ["strong", "adequate", "weak", "gap", "not_applicable"]},
+        "current_verdict": {"enum": ["strong", "adequate", "weak", "gap", "not_applicable"]},
+        "severity": {"enum": ["Critical", "High", "Medium", "Low", "Informational"]},
+        "affected_invariants": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"enum": ["INV-1", "INV-2", "INV-3", "INV-4", "INV-5", "INV-6", "INV-7", "INV-8", "INV-9", "INV-10"]}
+        },
+        "adr_requirements": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"type": "string", "pattern": "^VDSO-[A-Z]+-[0-9]{3}$"}
+        },
+        "remediation": {"type": "string", "minLength": 30},
+        "verification_gate": {"type": "string", "minLength": 30}
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

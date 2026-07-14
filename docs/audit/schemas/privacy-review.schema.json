@@ -2,19 +2,43 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://vams.network/schemas/audit/privacy-review.schema.json",
   "title": "VAMS Testnet Privacy Review",
+  "$defs": {
+    "artifact": {
+      "type": "object",
+      "required": ["path", "sha256"],
+      "properties": {
+        "path": {"type": "string", "minLength": 1},
+        "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+      },
+      "additionalProperties": false
+    }
+  },
   "type": "object",
-  "required": ["schema_version", "commit_sha", "reviewer", "reviewed_at", "data_inventory_approved", "retention_policy_approved", "redaction_tests_passed", "public_content_reviewed", "publisher_inventory_complete", "blocking_findings_open"],
+  "required": ["schema_version", "commit_sha", "reviewer", "reviewer_organization", "reviewed_at", "data_inventory_approved", "retention_policy_approved", "redaction_tests_passed", "public_content_reviewed", "publisher_inventory_complete", "blocking_findings_open", "evidence_artifacts"],
   "properties": {
-    "schema_version": {"const": "1.0.0"},
+    "schema_version": {"const": "2.0.0"},
     "commit_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
     "reviewer": {"type": "string", "minLength": 1},
+    "reviewer_organization": {"type": "string", "minLength": 1},
     "reviewed_at": {"type": "string", "format": "date-time"},
     "data_inventory_approved": {"const": true},
     "retention_policy_approved": {"const": true},
     "redaction_tests_passed": {"const": true},
     "public_content_reviewed": {"const": true},
     "publisher_inventory_complete": {"const": true},
-    "blocking_findings_open": {"const": 0}
+    "blocking_findings_open": {"const": 0},
+    "evidence_artifacts": {
+      "type": "object",
+      "required": ["data_inventory", "retention_policy", "redaction_tests", "public_content_review", "publisher_inventory"],
+      "properties": {
+        "data_inventory": {"$ref": "#/$defs/artifact"},
+        "retention_policy": {"$ref": "#/$defs/artifact"},
+        "redaction_tests": {"$ref": "#/$defs/artifact"},
+        "public_content_review": {"$ref": "#/$defs/artifact"},
+        "publisher_inventory": {"$ref": "#/$defs/artifact"}
+      },
+      "additionalProperties": false
+    }
   },
   "additionalProperties": false
 }
