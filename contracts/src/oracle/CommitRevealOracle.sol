@@ -65,12 +65,7 @@ contract CommitRevealOracle is AccessControl {
     event RequestResolved(uint256 indexed requestId, bytes32 finalValue);
     event StaleRequestResolved(uint256 indexed requestId, bytes32 fallbackValue);
 
-    constructor(
-        address _admin,
-        address _registry,
-        IOracleRegistry.Category _category,
-        bytes32 _staleFallbackValue
-    ) {
+    constructor(address _admin, address _registry, IOracleRegistry.Category _category, bytes32 _staleFallbackValue) {
         if (_admin == address(0) || _registry == address(0)) revert ZeroAddress();
         _grantRole(DEFAULT_ADMIN_ROLE, _admin);
 
@@ -102,18 +97,14 @@ contract CommitRevealOracle is AccessControl {
      */
     function commit(uint256 requestId, bytes32 commitHash) external {
         if (!registry.isAuthorizedOracle(msg.sender, category)) revert NotAuthorizedOracle();
-        
+
         Request storage req = requests[requestId];
         if (req.id == 0) revert RequestDoesNotExist();
         if (req.resolved) revert RequestAlreadyResolved();
         if (block.timestamp > req.expectedResolvesAt - REVEAL_PHASE_DURATION) revert CommitPhaseOver();
         if (commits[requestId][msg.sender].committedAt != 0) revert AlreadyCommitted();
 
-        commits[requestId][msg.sender] = Commit({
-            commitHash: commitHash,
-            committedAt: block.timestamp,
-            revealed: false
-        });
+        commits[requestId][msg.sender] = Commit({commitHash: commitHash, committedAt: block.timestamp, revealed: false});
 
         emit Committed(requestId, msg.sender);
     }

@@ -15,10 +15,10 @@ interface IRegionAwareDEC {
 
     /// @notice Per-region emission allocation for an epoch
     struct RegionEmissionAlloc {
-        bytes32 regionId;           // Region identifier
-        uint256 weightedCapacity;   // currentCapacity × multiplierBps
-        uint256 allocationBps;      // Share of epoch budget (in BPS of total)
-        uint256 emittedThisEpoch;   // Tokens emitted for this region in current epoch
+        bytes32 regionId; // Region identifier
+        uint256 weightedCapacity; // currentCapacity × multiplierBps
+        uint256 allocationBps; // Share of epoch budget (in BPS of total)
+        uint256 emittedThisEpoch; // Tokens emitted for this region in current epoch
     }
 
     /// @notice Summary of a completed epoch
@@ -33,18 +33,10 @@ interface IRegionAwareDEC {
     // ═══════════════════ Events ═══════════════════
 
     /// @notice Emitted when region allocations are recalculated
-    event RegionAllocationsUpdated(
-        uint256 indexed epochId,
-        uint256 totalWeightedCapacity,
-        uint256 regionCount
-    );
+    event RegionAllocationsUpdated(uint256 indexed epochId, uint256 totalWeightedCapacity, uint256 regionCount);
 
     /// @notice Emitted when epoch emissions are distributed
-    event EpochEmissionsDistributed(
-        uint256 indexed epochId,
-        uint256 totalEmitted,
-        address indexed rewardDistributor
-    );
+    event EpochEmissionsDistributed(uint256 indexed epochId, uint256 totalEmitted, address indexed rewardDistributor);
 
     /// @notice Emitted when the region cap is updated
     event RegionCapUpdated(uint256 oldCapBps, uint256 newCapBps);
@@ -80,10 +72,7 @@ interface IRegionAwareDEC {
 
     /// @notice Calculate per-region emission allocations based on current multipliers
     /// @return allocations Array of RegionEmissionAlloc for all active regions
-    function calculateRegionAllocations()
-        external
-        view
-        returns (RegionEmissionAlloc[] memory allocations);
+    function calculateRegionAllocations() external view returns (RegionEmissionAlloc[] memory allocations);
 
     /// @notice Distribute epoch emissions to the RewardDistributor
     /// @dev Can only be called once per epoch by KEEPER_ROLE
@@ -91,10 +80,7 @@ interface IRegionAwareDEC {
     function distributeEpochEmissions() external returns (uint256 totalEmitted);
 
     /// @notice Get the emission allocation for a specific region in the current epoch
-    function getRegionAllocation(bytes32 regionId)
-        external
-        view
-        returns (RegionEmissionAlloc memory);
+    function getRegionAllocation(bytes32 regionId) external view returns (RegionEmissionAlloc memory);
 
     /// @notice Get the total emission budget for the current epoch
     function getEpochEmissionBudget() external view returns (uint256);

@@ -13,29 +13,29 @@ interface IVAMSVesting {
     /// @notice Pre-defined vesting schedule types
     /// @notice Pre-defined vesting schedule types
     enum ScheduleType {
-        FOUNDER,        // 12mo cliff, 48mo vest, 25% cliff unlock
-        TEAM,           // 12mo cliff, 36mo vest, 33.33% cliff unlock
+        FOUNDER, // 12mo cliff, 48mo vest, 25% cliff unlock
+        TEAM, // 12mo cliff, 36mo vest, 33.33% cliff unlock
         EARLY_INVESTOR, // 6mo cliff, 18mo vest, 33.33% cliff unlock
-        REG_INVESTOR,   // 12mo cliff, 30mo vest, 40% cliff unlock
-        FOUNDATION,     // 6mo cliff, 48mo vest, 12.5% cliff unlock
-        COMMUNITY,      // 0 cliff, 60mo vest, 0% cliff unlock
-        LIQUIDITY,      // 0 cliff, 12mo vest, 0% cliff unlock
-        CUSTOM          // Custom dynamically created schedule
+        REG_INVESTOR, // 12mo cliff, 30mo vest, 40% cliff unlock
+        FOUNDATION, // 6mo cliff, 48mo vest, 12.5% cliff unlock
+        COMMUNITY, // 0 cliff, 60mo vest, 0% cliff unlock
+        LIQUIDITY, // 0 cliff, 12mo vest, 0% cliff unlock
+        CUSTOM // Custom dynamically created schedule
     }
 
     // ============ Structs ============
 
     /// @notice Vesting schedule details
     struct VestingSchedule {
-        address beneficiary;        // Recipient of vested tokens
-        uint256 totalAmount;        // Total tokens to vest
-        uint256 startTimestamp;     // Vesting start (TGE)
-        uint256 cliffDuration;      // Seconds until cliff
-        uint256 vestingDuration;    // Total seconds to full vest
-        uint16 cliffUnlockBps;      // Basis points unlocked at cliff
-        uint256 releasedAmount;     // Tokens already released
-        bool revoked;               // If schedule was revoked
-        bool revocable;             // If schedule can be revoked
+        address beneficiary; // Recipient of vested tokens
+        uint256 totalAmount; // Total tokens to vest
+        uint256 startTimestamp; // Vesting start (TGE)
+        uint256 cliffDuration; // Seconds until cliff
+        uint256 vestingDuration; // Total seconds to full vest
+        uint16 cliffUnlockBps; // Basis points unlocked at cliff
+        uint256 releasedAmount; // Tokens already released
+        bool revoked; // If schedule was revoked
+        bool revocable; // If schedule can be revoked
     }
 
     // ============ Events ============
@@ -51,18 +51,10 @@ interface IVAMSVesting {
     );
 
     /// @notice Emitted when tokens are released to beneficiary
-    event TokensReleased(
-        bytes32 indexed scheduleId,
-        address indexed beneficiary,
-        uint256 amount
-    );
+    event TokensReleased(bytes32 indexed scheduleId, address indexed beneficiary, uint256 amount);
 
     /// @notice Emitted when a vesting schedule is revoked
-    event VestingScheduleRevoked(
-        bytes32 indexed scheduleId,
-        address indexed revoker,
-        uint256 unvestedAmount
-    );
+    event VestingScheduleRevoked(bytes32 indexed scheduleId, address indexed revoker, uint256 unvestedAmount);
 
     // ============ Errors ============
 
@@ -101,12 +93,9 @@ interface IVAMSVesting {
     /// @param scheduleType Pre-defined schedule type
     /// @param revocable Whether schedule can be revoked by admin
     /// @return scheduleId Unique identifier for this schedule
-    function createVestingSchedule(
-        address beneficiary,
-        uint256 amount,
-        ScheduleType scheduleType,
-        bool revocable
-    ) external returns (bytes32 scheduleId);
+    function createVestingSchedule(address beneficiary, uint256 amount, ScheduleType scheduleType, bool revocable)
+        external
+        returns (bytes32 scheduleId);
 
     /// @notice Create custom vesting schedule
     /// @param beneficiary Address to receive vested tokens

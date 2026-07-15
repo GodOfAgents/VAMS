@@ -8,21 +8,22 @@ pragma solidity ^0.8.20;
  *         hit-and-run network registration.
  */
 interface IHardwareCommitment {
-
     struct HardwareCommitment {
-        address provider;            // Operator address
-        bytes32[] nodeIds;           // The specific nodes locked in this commitment
-        uint256 collateral;          // Total $VAMS locked (after multipliers applied)
-        uint256 commitmentStart;     // Block timestamp
-        uint256 commitmentEnd;       // Target hardware unlock time
-        uint256 minUptimeBps;        // Required uptime (e.g. 9950 = 99.5%)
-        bool isActive;               // Check if commitment hasn't been closed/slashed
-        uint256 totalSlashed;        // Record of any fines executed during term
+        address provider; // Operator address
+        bytes32[] nodeIds; // The specific nodes locked in this commitment
+        uint256 collateral; // Total $VAMS locked (after multipliers applied)
+        uint256 commitmentStart; // Block timestamp
+        uint256 commitmentEnd; // Target hardware unlock time
+        uint256 minUptimeBps; // Required uptime (e.g. 9950 = 99.5%)
+        bool isActive; // Check if commitment hasn't been closed/slashed
+        uint256 totalSlashed; // Record of any fines executed during term
     }
 
     // ============ Events ============
 
-    event CommitmentCreated(bytes32 indexed commitmentId, address indexed provider, uint256 durationSeconds, uint256 collateral);
+    event CommitmentCreated(
+        bytes32 indexed commitmentId, address indexed provider, uint256 durationSeconds, uint256 collateral
+    );
     event CommitmentExtended(bytes32 indexed commitmentId, uint256 newEndTimestamp, uint256 internalCollateralAdded);
     event CommitmentEnded(bytes32 indexed commitmentId, address indexed provider, uint256 collateralReturned);
     event CommitmentSlashed(bytes32 indexed commitmentId, uint256 slashAmount, string reason);
@@ -45,7 +46,9 @@ interface IHardwareCommitment {
      * @param minUptimeBps Expected SLA threshold (bps)
      * @return commitmentId Unique ID for this pledge
      */
-    function createCommitment(bytes32[] calldata nodeIds, uint256 durationSeconds, uint256 minUptimeBps) external returns (bytes32 commitmentId);
+    function createCommitment(bytes32[] calldata nodeIds, uint256 durationSeconds, uint256 minUptimeBps)
+        external
+        returns (bytes32 commitmentId);
 
     /**
      * @notice Extends an active commitment, applying potential new scalar multipliers
@@ -72,5 +75,4 @@ interface IHardwareCommitment {
     function getCommitment(bytes32 commitmentId) external view returns (HardwareCommitment memory);
     function getProviderCommitments(address provider) external view returns (bytes32[] memory);
     function isNodeCommitted(bytes32 nodeId) external view returns (bool, bytes32 timestamp);
-
 }

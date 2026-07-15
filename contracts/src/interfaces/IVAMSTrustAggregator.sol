@@ -10,7 +10,6 @@ import {IVAMSProofPlugin} from "./IVAMSProofPlugin.sol";
  *      Supports both the legacy "Decagon" proof types and the new extensible plugin system.
  */
 interface IVAMSTrustAggregator {
-    
     // ============================================================
     //                    LEGACY PROOF TYPES
     // ============================================================
@@ -19,20 +18,20 @@ interface IVAMSTrustAggregator {
     /// @dev Kept for backward compatibility. New proof types use the plugin system.
     enum ProofType {
         // --- A. IDENTITY ---
-        ERC8004_IDENTITY,       // 0: On-chain Registry (Base)
-        COINBASE_WALLET,        // 1: Compliance / KYC (Corporate)
-        POLYGON_ID,             // 2: ZK-VC (Private)
+        ERC8004_IDENTITY, // 0: On-chain Registry (Base)
+        COINBASE_WALLET, // 1: Compliance / KYC (Corporate)
+        POLYGON_ID, // 2: ZK-VC (Private)
 
         // --- B. VERIFICATION ---
-        PARALLEL_RESEARCH,      // 3: Proof of Research (Provenance)
-        PHALA_EXECUTION,        // 4: Proof of Execution (TEE)
-        SXT_SQL_PROOF,          // 5: Proof of SQL (Database)
-        MCP_CONNECTION,         // 6: Proof of Connection (Tooling)
+        PARALLEL_RESEARCH, // 3: Proof of Research (Provenance)
+        PHALA_EXECUTION, // 4: Proof of Execution (TEE)
+        SXT_SQL_PROOF, // 5: Proof of SQL (Database)
+        MCP_CONNECTION, // 6: Proof of Connection (Tooling)
 
         // --- C. REPUTATION ---
-        SPECTRAL_CREDIT,        // 7: On-chain Credit Score
-        AUTONOLAS_CONSENSUS,    // 8: DAO/Fleet Consensus
-        WORLD_ID_HUMAN          // 9: Proof of Personhood (Liability)
+        SPECTRAL_CREDIT, // 7: On-chain Credit Score
+        AUTONOLAS_CONSENSUS, // 8: DAO/Fleet Consensus
+        WORLD_ID_HUMAN // 9: Proof of Personhood (Liability)
     }
 
     // ============================================================
@@ -42,17 +41,17 @@ interface IVAMSTrustAggregator {
     /// @notice Trust Tiers assigned to Agents
     enum TrustTier {
         UNVERIFIED, // 0: No proofs
-        BRONZE,     // 1: Basic Identity (Sandboxed)
-        SILVER,     // 2: Verified Execution (Standard DeFi)
-        GOLD,       // 3: Full Sovereignty (High Leverage)
-        PLATINUM    // 4: Corporate/Gov Compliant (KYC + Liability)
+        BRONZE, // 1: Basic Identity (Sandboxed)
+        SILVER, // 2: Verified Execution (Standard DeFi)
+        GOLD, // 3: Full Sovereignty (High Leverage)
+        PLATINUM // 4: Corporate/Gov Compliant (KYC + Liability)
     }
 
     struct AgentProfile {
         TrustTier currentTier;
         uint256 trustScore;
         // Bitmask of verified legacy proofs (1 << ProofType)
-        uint256 verifiedProofsMask; 
+        uint256 verifiedProofsMask;
         uint256 lastVerificationTimestamp;
         // Bitmask-style tracking for plugin proofs
         uint256 pluginProofCount;
@@ -75,12 +74,7 @@ interface IVAMSTrustAggregator {
     event ProofPluginDeregistered(bytes32 indexed proofType, address indexed plugin);
 
     /// @notice Emitted when a plugin proof is verified
-    event PluginProofVerified(
-        address indexed agent, 
-        bytes32 indexed proofType, 
-        bytes32 proofHash, 
-        uint256 trustWeight
-    );
+    event PluginProofVerified(address indexed agent, bytes32 indexed proofType, bytes32 proofHash, uint256 trustWeight);
 
     // ============================================================
     //                   LEGACY FUNCTIONS

@@ -10,11 +10,11 @@ interface ISecurityBudgetEnforcer {
     // ============ Enums ============
 
     enum SecurityLevel {
-        GREEN,     // >= 150% Required
-        YELLOW,    // 100-150% Required
-        ORANGE,    // 75-100% Required
-        RED,       // < 75% Required
-        CRITICAL   // < 50% Required
+        GREEN, // >= 150% Required
+        YELLOW, // 100-150% Required
+        ORANGE, // 75-100% Required
+        RED, // < 75% Required
+        CRITICAL // < 50% Required
     }
 
     // ============ Structs ============
@@ -29,11 +29,7 @@ interface ISecurityBudgetEnforcer {
 
     // ============ Events ============
 
-    event SecurityBudgetUpdated(
-        uint256 currentSecurityUSD,
-        uint256 requiredSecurityUSD,
-        SecurityLevel level
-    );
+    event SecurityBudgetUpdated(uint256 currentSecurityUSD, uint256 requiredSecurityUSD, SecurityLevel level);
     event SecurityModeActivated(SecurityLevel level, uint256 timestamp);
     event OracleUpdated(address oldOracle, address newOracle);
     event MetricProviderUpdated(address oldProvider, address newProvider);

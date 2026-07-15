@@ -7,15 +7,14 @@ pragma solidity ^0.8.20;
  *      "The API for the Medal Board."
  */
 interface IVAMSResolver {
-    
     struct Badge {
-        string provider;      // e.g., "Phala Network"
-        string badgeName;     // e.g., "TEE Secured"
-        string badgeId;       // e.g., "SGX_V2"
-        uint256 issuedAt;     // Timestamp
-        uint256 expiresAt;    // Timestamp (0 = indefinite)
-        string metadataURI;   // IPFS URI for detailed JSON (audit reports, etc.)
-        bytes signature;      // Provider's signature (if applicable)
+        string provider; // e.g., "Phala Network"
+        string badgeName; // e.g., "TEE Secured"
+        string badgeId; // e.g., "SGX_V2"
+        uint256 issuedAt; // Timestamp
+        uint256 expiresAt; // Timestamp (0 = indefinite)
+        string metadataURI; // IPFS URI for detailed JSON (audit reports, etc.)
+        bytes signature; // Provider's signature (if applicable)
     }
 
     /**
@@ -25,10 +24,7 @@ interface IVAMSResolver {
      * @return isValid True if the agent has the valid badge.
      * @return badgeData The structured badge data.
      */
-    function verifyBadge(address agent, bytes32 badgeType) 
-        external 
-        view 
-        returns (bool isValid, Badge memory badgeData);
+    function verifyBadge(address agent, bytes32 badgeType) external view returns (bool isValid, Badge memory badgeData);
 
     /**
      * @notice Returns a dynamic score (e.g., Credit Score, Reputation).
@@ -37,8 +33,5 @@ interface IVAMSResolver {
      * @return score The numeric score (normalization handled by frontend).
      * @return lastUpdated Timestamp of the last update.
      */
-    function getScore(address agent) 
-        external 
-        view 
-        returns (uint256 score, uint256 lastUpdated);
+    function getScore(address agent) external view returns (uint256 score, uint256 lastUpdated);
 }

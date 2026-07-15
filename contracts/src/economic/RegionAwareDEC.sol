@@ -121,10 +121,7 @@ contract RegionAwareDEC is IRegionAwareDEC, AccessControl {
     // ═══════════════════ Config ═══════════════════
 
     /// @inheritdoc IRegionAwareDEC
-    function setRegionalIncentives(address _regionalIncentives)
-        external
-        onlyRole(CONFIG_ROLE)
-    {
+    function setRegionalIncentives(address _regionalIncentives) external onlyRole(CONFIG_ROLE) {
         require(_regionalIncentives != address(0), "Zero address");
         regionalIncentives = IRegionalIncentives(_regionalIncentives);
     }
@@ -135,10 +132,7 @@ contract RegionAwareDEC is IRegionAwareDEC, AccessControl {
     }
 
     /// @inheritdoc IRegionAwareDEC
-    function setRewardDistributor(address _rewardDistributor)
-        external
-        onlyRole(CONFIG_ROLE)
-    {
+    function setRewardDistributor(address _rewardDistributor) external onlyRole(CONFIG_ROLE) {
         address old = rewardDistributor;
         rewardDistributor = _rewardDistributor;
         emit RewardDistributorUpdated(old, _rewardDistributor);
@@ -177,9 +171,7 @@ contract RegionAwareDEC is IRegionAwareDEC, AccessControl {
         uint256 annualRateBps = 200; // default baseline
         if (emissionController != address(0)) {
             // DynamicEmissionController stores rate in BPS (e.g. 200 = 2%)
-            try IDynamicEmissionController(emissionController).currentEmissionRate()
-                returns (uint256 rate)
-            {
+            try IDynamicEmissionController(emissionController).currentEmissionRate() returns (uint256 rate) {
                 annualRateBps = rate;
             } catch {
                 // Fallback to baseline
@@ -195,12 +187,7 @@ contract RegionAwareDEC is IRegionAwareDEC, AccessControl {
     }
 
     /// @inheritdoc IRegionAwareDEC
-    function calculateRegionAllocations()
-        public
-        view
-        override
-        returns (RegionEmissionAlloc[] memory allocations)
-    {
+    function calculateRegionAllocations() public view override returns (RegionEmissionAlloc[] memory allocations) {
         // Enumerate all regions from RegionalIncentives
         uint256 regionCount = _getTotalRegions();
         if (regionCount == 0) {
@@ -219,16 +206,13 @@ contract RegionAwareDEC is IRegionAwareDEC, AccessControl {
                 continue;
             }
 
-            IRegionalIncentives.RegionConfig memory config =
-                regionalIncentives.getRegionConfig(regionId);
+            IRegionalIncentives.RegionConfig memory config = regionalIncentives.getRegionConfig(regionId);
             uint256 multiplier = regionalIncentives.getRewardMultiplier(regionId);
 
             // weightedCapacity = currentCapacity × multiplierBps
             // If capacity is 0 but region is active, give a minimum weight of 1
             // to ensure bootstrapping regions get a minimal allocation
-            uint256 effectiveCapacity = config.currentCapacity > 0
-                ? config.currentCapacity
-                : 1;
+            uint256 effectiveCapacity = config.currentCapacity > 0 ? config.currentCapacity : 1;
             uint256 weightedCap = effectiveCapacity * multiplier;
 
             raw[activeCount] = RegionEmissionAlloc({
@@ -288,7 +272,7 @@ contract RegionAwareDEC is IRegionAwareDEC, AccessControl {
             if (uncappedWeightedTotal > 0) {
                 uint256 distributedBps = 0;
                 uint256 lastUncappedIndex = activeCount;
-                
+
                 for (uint256 i = 0; i < activeCount; i++) {
                     if (allocations[i].allocationBps < regionCapBps) {
                         uint256 redistributedBps =
@@ -298,7 +282,7 @@ contract RegionAwareDEC is IRegionAwareDEC, AccessControl {
                         lastUncappedIndex = i;
                     }
                 }
-                
+
                 // ECON07: Distribute remaining precision remainder to the last uncapped region
                 if (lastUncappedIndex < activeCount && distributedBps < remainingBps) {
                     uint256 remainder = remainingBps - distributedBps;
@@ -313,22 +297,12 @@ contract RegionAwareDEC is IRegionAwareDEC, AccessControl {
     }
 
     /// @inheritdoc IRegionAwareDEC
-    function getRegionAllocation(bytes32 regionId)
-        external
-        view
-        override
-        returns (RegionEmissionAlloc memory)
-    {
+    function getRegionAllocation(bytes32 regionId) external view override returns (RegionEmissionAlloc memory) {
         return _currentAllocations[regionId];
     }
 
     /// @inheritdoc IRegionAwareDEC
-    function distributeEpochEmissions()
-        external
-        override
-        onlyRole(KEEPER_ROLE)
-        returns (uint256 totalEmitted)
-    {
+    function distributeEpochEmissions() external override onlyRole(KEEPER_ROLE) returns (uint256 totalEmitted) {
         // Enforce epoch boundary
         if (block.timestamp < lastEpochDistribution + epochDuration) {
             revert EpochNotElapsed(block.timestamp, lastEpochDistribution + epochDuration);
@@ -405,26 +379,20 @@ contract RegionAwareDEC is IRegionAwareDEC, AccessControl {
     function _getTotalRegions() internal view returns (uint256) {
         // RegionalIncentives exposes totalRegions()
         // We use a low-level call since the interface doesn't include it
-        (bool success, bytes memory data) = address(regionalIncentives).staticcall(
-            abi.encodeWithSignature("totalRegions()")
-        );
+        (bool success, bytes memory data) =
+            address(regionalIncentives).staticcall(abi.encodeWithSignature("totalRegions()"));
         if (!success) return 0;
         return abi.decode(data, (uint256));
     }
 
     function _getRegionIdAt(uint256 index) internal view returns (bytes32) {
-        (bool success, bytes memory data) = address(regionalIncentives).staticcall(
-            abi.encodeWithSignature("regionIdAt(uint256)", index)
-        );
+        (bool success, bytes memory data) =
+            address(regionalIncentives).staticcall(abi.encodeWithSignature("regionIdAt(uint256)", index));
         require(success, "regionIdAt failed");
         return abi.decode(data, (bytes32));
     }
 
-    function _sumWeightedCapacity(RegionEmissionAlloc[] memory allocations)
-        internal
-        pure
-        returns (uint256 total)
-    {
+    function _sumWeightedCapacity(RegionEmissionAlloc[] memory allocations) internal pure returns (uint256 total) {
         for (uint256 i = 0; i < allocations.length; i++) {
             total += allocations[i].weightedCapacity;
         }
@@ -436,9 +404,7 @@ contract RegionAwareDEC is IRegionAwareDEC, AccessControl {
     /// @return The current annual emission rate in base points
     function currentEmissionRate() external view returns (uint256) {
         if (emissionController != address(0)) {
-            try IDynamicEmissionController(emissionController).currentEmissionRate()
-                returns (uint256 rate)
-            {
+            try IDynamicEmissionController(emissionController).currentEmissionRate() returns (uint256 rate) {
                 return rate;
             } catch {}
         }

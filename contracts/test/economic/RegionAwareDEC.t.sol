@@ -79,13 +79,7 @@ contract RegionAwareDECTest is Test {
         mockDEC = new MockDEC(200); // 2% annual
 
         // Deploy RegionAwareDEC
-        dec = new RegionAwareDEC(
-            admin,
-            address(token),
-            address(ri),
-            address(mockDEC),
-            TOTAL_SUPPLY
-        );
+        dec = new RegionAwareDEC(admin, address(token), address(ri), address(mockDEC), TOTAL_SUPPLY);
 
         // Configure roles
         vm.startPrank(admin);
@@ -99,10 +93,10 @@ contract RegionAwareDECTest is Test {
         ri.setRegionConfig(AP_SOUTH, "Asia Pacific South", 150, 25_000); // 2.5x
 
         // Set capacities — US_EAST at target, EU_WEST at 75%, AF_SOUTH at 20%, AP_SOUTH at 40%
-        ri.updateCapacity(US_EAST, 500);   // 100% → multiplier = 1.0x
-        ri.updateCapacity(EU_WEST, 300);   // 75%  → multiplier = 1.5x (decay)
-        ri.updateCapacity(AF_SOUTH, 10);   // 20%  → multiplier = 3.0x (full bootstrap)
-        ri.updateCapacity(AP_SOUTH, 60);   // 40%  → multiplier = 2.5x (full bootstrap)
+        ri.updateCapacity(US_EAST, 500); // 100% → multiplier = 1.0x
+        ri.updateCapacity(EU_WEST, 300); // 75%  → multiplier = 1.5x (decay)
+        ri.updateCapacity(AF_SOUTH, 10); // 20%  → multiplier = 3.0x (full bootstrap)
+        ri.updateCapacity(AP_SOUTH, 60); // 40%  → multiplier = 2.5x (full bootstrap)
         vm.stopPrank();
 
         // Fund DEC with tokens for emission distribution
@@ -142,10 +136,7 @@ contract RegionAwareDECTest is Test {
         IRegionAwareDEC.RegionEmissionAlloc[] memory allocs = dec.calculateRegionAllocations();
 
         for (uint256 i = 0; i < allocs.length; i++) {
-            assertTrue(
-                allocs[i].allocationBps <= 2_000,
-                "No region should exceed the 20% cap"
-            );
+            assertTrue(allocs[i].allocationBps <= 2_000, "No region should exceed the 20% cap");
         }
     }
 
@@ -198,10 +189,7 @@ contract RegionAwareDECTest is Test {
         assertEq(allocs.length, 1, "Only 1 active region");
 
         // Single region gets capped at regionCapBps (default 3000 = 30%)
-        assertTrue(
-            allocs[0].allocationBps <= dec.regionCapBps(),
-            "Single region should be capped"
-        );
+        assertTrue(allocs[0].allocationBps <= dec.regionCapBps(), "Single region should be capped");
     }
 
     // ═══════════════════ Epoch Distribution Tests ═══════════════════
@@ -217,10 +205,7 @@ contract RegionAwareDECTest is Test {
         assertEq(dec.currentEpoch(), 1, "Epoch should increment");
 
         // Reward distributor should have received tokens
-        assertTrue(
-            token.balanceOf(rewardDist) > 0,
-            "RewardDistributor should receive tokens"
-        );
+        assertTrue(token.balanceOf(rewardDist) > 0, "RewardDistributor should receive tokens");
     }
 
     function test_distributeEpochEmissions_reverts_beforeEpochElapsed() public {

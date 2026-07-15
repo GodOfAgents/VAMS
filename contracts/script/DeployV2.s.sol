@@ -37,10 +37,7 @@ contract DeployV2 is Script {
 
     function run() external {
         bool legacyDeployAcknowledged = vm.envOr(LEGACY_DEPLOY_ACK, false);
-        require(
-            legacyDeployAcknowledged,
-            "DeployV2 blocked: use audited Safe/timelock testnet ceremony"
-        );
+        require(legacyDeployAcknowledged, "DeployV2 blocked: use audited Safe/timelock testnet ceremony");
 
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
         address deployer = vm.addr(deployerPrivateKey);
@@ -50,7 +47,7 @@ contract DeployV2 is Script {
         // =========================================================================
         // 1. Governance Infrastructure (Timelock needs to be deployed early for Treasury)
         // =========================================================================
-        
+
         // Timelock Controller (hard minimum 48 hours)
         address[] memory proposers = new address[](0);
         address[] memory executors = new address[](0);
@@ -83,13 +80,8 @@ contract DeployV2 is Script {
         // 25,000,000 * 1e18 / 31,536,000 seconds
         uint256 emissionsY1 = 25_000_000 * 1e18;
         uint256 ratePerSecond = emissionsY1 / 31_536_000;
-        
-        staking = new VAMSStaking(
-            address(token), 
-            address(token), 
-            ratePerSecond, 
-            deployer
-        );
+
+        staking = new VAMSStaking(address(token), address(token), ratePerSecond, deployer);
         console.log("VAMSStaking deployed to:", address(staking));
 
         // Grant Staking Contract MINTER_ROLE
@@ -109,7 +101,7 @@ contract DeployV2 is Script {
         bytes32 PROPOSER_ROLE = keccak256("PROPOSER_ROLE");
         bytes32 EXECUTOR_ROLE = keccak256("EXECUTOR_ROLE");
         bytes32 CANCELLER_ROLE = keccak256("CANCELLER_ROLE");
-        
+
         timelock.grantRole(PROPOSER_ROLE, address(governor));
         timelock.grantRole(EXECUTOR_ROLE, address(0)); // Allow anyone to execute
         timelock.grantRole(CANCELLER_ROLE, address(governor));
@@ -125,12 +117,7 @@ contract DeployV2 is Script {
 
         // VAMS Insurance Fund
         insurance = new VAMSInsuranceFund();
-        insurance.initialize(
-            deployer,
-            address(token),
-            address(staking),
-            guardians
-        );
+        insurance.initialize(deployer, address(token), address(staking), guardians);
         console.log("VAMSInsuranceFund deployed to:", address(insurance));
 
         // VAMS Slasher (Operators)
@@ -179,63 +166,33 @@ contract DeployV2 is Script {
 
         // A. Community Ecosystem (40% = 400M)
         // Beneficiary: DAO Timelock (The DAO controls the ecosystem fund)
-        vesting.createVestingSchedule(
-            address(timelock), 
-            400_000_000 * 1e18, 
-            IVAMSVesting.ScheduleType.COMMUNITY, 
-            true
-        );
+        vesting.createVestingSchedule(address(timelock), 400_000_000 * 1e18, IVAMSVesting.ScheduleType.COMMUNITY, true);
         console.log("Created Community Schedule (400M) -> Timelock");
-        
+
         // B. DAO Treasury (12% = 120M)
         // Beneficiary: DAO Timelock (The DAO controls its own treasury)
         // Using FOUNDATION type (48 months vesting)
-        vesting.createVestingSchedule(
-            address(timelock), 
-            120_000_000 * 1e18, 
-            IVAMSVesting.ScheduleType.FOUNDATION, 
-            true
-        );
+        vesting.createVestingSchedule(address(timelock), 120_000_000 * 1e18, IVAMSVesting.ScheduleType.FOUNDATION, true);
         console.log("Created DAO Treasury Schedule (120M) -> Timelock");
-        
+
         // C. Founder (12% = 120M)
         // Beneficiary: Deployer (Simulating Founder Wallet)
-        vesting.createVestingSchedule(
-            deployer, 
-            120_000_000 * 1e18, 
-            IVAMSVesting.ScheduleType.FOUNDER, 
-            true
-        );
+        vesting.createVestingSchedule(deployer, 120_000_000 * 1e18, IVAMSVesting.ScheduleType.FOUNDER, true);
         console.log("Created Founder Schedule (120M) -> Deployer");
-        
+
         // D. Team/Future Hires (13% = 130M)
         // Beneficiary: Deployer (Simulating Team Reserve Wallet)
-        vesting.createVestingSchedule(
-            deployer, 
-            130_000_000 * 1e18, 
-            IVAMSVesting.ScheduleType.TEAM, 
-            true
-        );
+        vesting.createVestingSchedule(deployer, 130_000_000 * 1e18, IVAMSVesting.ScheduleType.TEAM, true);
         console.log("Created Team Reserve Schedule (130M) -> Deployer");
-        
+
         // E. Early Investors (5% = 50M)
         // Beneficiary: Deployer (Simulating Investor Custodian)
-        vesting.createVestingSchedule(
-            deployer, 
-            50_000_000 * 1e18, 
-            IVAMSVesting.ScheduleType.EARLY_INVESTOR, 
-            true
-        );
+        vesting.createVestingSchedule(deployer, 50_000_000 * 1e18, IVAMSVesting.ScheduleType.EARLY_INVESTOR, true);
         console.log("Created Early Investor Schedule (50M) -> Deployer");
 
         // F. Regular Investors (8% = 80M)
         // Beneficiary: Deployer (Simulating Investor Custodian)
-        vesting.createVestingSchedule(
-            deployer, 
-            80_000_000 * 1e18, 
-            IVAMSVesting.ScheduleType.REG_INVESTOR, 
-            true
-        );
+        vesting.createVestingSchedule(deployer, 80_000_000 * 1e18, IVAMSVesting.ScheduleType.REG_INVESTOR, true);
         console.log("Created Regular Investor Schedule (80M) -> Deployer");
 
         console.log("Deployment V2 Complete. 1B Supply distributed.");
@@ -248,10 +205,10 @@ contract DeployV2 is Script {
         // Needed before wiring SENTINEL_ROLE grants.
         // Using deployer as DAO (testnet only) and no fallback multisig.
         VAMSSentinel sentinel = new VAMSSentinel(
-            deployer,       // admin
+            deployer, // admin
             address(token), // vamsToken for keeper bonds
-            deployer,       // dao (testnet placeholder)
-            address(0)      // no fallback multisig on testnet
+            deployer, // dao (testnet placeholder)
+            address(0) // no fallback multisig on testnet
         );
         console.log("VAMSSentinel deployed to:", address(sentinel));
 

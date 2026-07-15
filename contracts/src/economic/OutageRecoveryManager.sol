@@ -13,25 +13,20 @@ import "./IOutageRecoveryManager.sol";
  * @author VAMS Protocol
  * @notice Emergency fund release during chain outages
  * @dev Black swan disaster recovery contract
- * 
+ *
  * Flow:
  * 1. Guardian(s) declare outage → grace period starts
  * 2. After grace period → emergency mode activates
  * 3. Users can request emergency withdrawals
  * 4. System recovery proven → emergency mode deactivated
- * 
+ *
  * Safeguards:
  * - 24-hour grace period before emergency mode
  * - 7-day emergency duration limit
  * - Pro-rata withdrawal limits
  * - Guardian quorum for declarations
  */
-contract OutageRecoveryManager is 
-    Initializable,
-    AccessControlUpgradeable,
-    ReentrancyGuard,
-    IOutageRecoveryManager 
-{
+contract OutageRecoveryManager is Initializable, AccessControlUpgradeable, ReentrancyGuard, IOutageRecoveryManager {
     using SafeERC20 for IERC20;
 
     // ============ Constants ============
@@ -102,11 +97,10 @@ contract OutageRecoveryManager is
      * @param _guardians Array of guardian addresses
      * @param _supportedTokens Initial supported tokens
      */
-    function initialize(
-        address _admin,
-        address[] calldata _guardians,
-        address[] calldata _supportedTokens
-    ) external initializer {
+    function initialize(address _admin, address[] calldata _guardians, address[] calldata _supportedTokens)
+        external
+        initializer
+    {
         require(_admin != address(0), "Invalid admin");
         require(_guardians.length >= 3, "Need at least 3 guardians");
 
@@ -196,16 +190,18 @@ contract OutageRecoveryManager is
     // ============ Emergency Withdrawals ============
 
     /// @inheritdoc IOutageRecoveryManager
-    function requestEmergencyWithdraw(
-        address token,
-        uint256 amount
-    ) external override nonReentrant returns (uint256 requestId) {
+    function requestEmergencyWithdraw(address token, uint256 amount)
+        external
+        override
+        nonReentrant
+        returns (uint256 requestId)
+    {
         if (systemState != SystemState.EMERGENCY_MODE) {
             revert InvalidSystemState(systemState, SystemState.EMERGENCY_MODE);
         }
 
         OutageRecord storage outage = outages[activeOutageId];
-        
+
         // Check emergency duration not expired
         if (block.timestamp > outage.emergencyStartAt + EMERGENCY_DURATION) {
             revert EmergencyDurationExpired();
@@ -269,7 +265,9 @@ contract OutageRecoveryManager is
         WithdrawalRequest storage request = requests[requestId];
         if (request.requester == address(0)) revert RequestNotFound(requestId);
         if (request.requester != msg.sender) revert NotRequester(msg.sender, request.requester);
-        require(request.status == WithdrawalStatus.PENDING || request.status == WithdrawalStatus.APPROVED, "Cannot cancel");
+        require(
+            request.status == WithdrawalStatus.PENDING || request.status == WithdrawalStatus.APPROVED, "Cannot cancel"
+        );
 
         request.status = WithdrawalStatus.CANCELLED;
     }
@@ -341,11 +339,7 @@ contract OutageRecoveryManager is
      * @param to Recipient
      * @param amount Amount to withdraw
      */
-    function withdrawFromPool(
-        address token,
-        address to,
-        uint256 amount
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    function withdrawFromPool(address token, address to, uint256 amount) external onlyRole(DEFAULT_ADMIN_ROLE) {
         require(systemState == SystemState.NORMAL, "Not in normal state");
         IERC20(token).safeTransfer(to, amount);
     }
@@ -406,10 +400,10 @@ contract OutageRecoveryManager is
      */
     function getGracePeriodRemaining() external view returns (uint256) {
         if (systemState != SystemState.OUTAGE_DECLARED) return 0;
-        
+
         OutageRecord storage outage = outages[activeOutageId];
         uint256 gracePeriodEnd = outage.declaredAt + OUTAGE_GRACE_PERIOD;
-        
+
         if (block.timestamp >= gracePeriodEnd) return 0;
         return gracePeriodEnd - block.timestamp;
     }
@@ -420,16 +414,16 @@ contract OutageRecoveryManager is
      */
     function getEmergencyTimeRemaining() external view returns (uint256) {
         if (systemState != SystemState.EMERGENCY_MODE) return 0;
-        
+
         OutageRecord storage outage = outages[activeOutageId];
         uint256 emergencyEnd = outage.emergencyStartAt + EMERGENCY_DURATION;
-        
+
         if (block.timestamp >= emergencyEnd) return 0;
         return emergencyEnd - block.timestamp;
     }
-    
+
     // ============ Storage Gap ============
-    
+
     /// @dev Reserved storage space for future upgrades
     uint256[50] private __gap;
 }

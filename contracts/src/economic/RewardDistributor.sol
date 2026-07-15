@@ -27,12 +27,7 @@ import {IRegionalIncentives} from "./IRegionalIncentives.sol";
  *
  *      Architecture Reference: Phase 4 (Economic Layer), Sprint 11
  */
-contract RewardDistributor is
-    IRewardDistributor,
-    AccessControl,
-    ReentrancyGuard,
-    Pausable
-{
+contract RewardDistributor is IRewardDistributor, AccessControl, ReentrancyGuard, Pausable {
     using SafeERC20 for IERC20;
 
     // ═══════════════════ Constants ═══════════════════
@@ -44,10 +39,10 @@ contract RewardDistributor is
     uint256 public constant BPS_DENOMINATOR = 10_000;
 
     // Staking boost tiers (BPS addition to base reward)
-    uint256 public constant TIER_IRON_BOOST_BPS = 0;       // No boost
-    uint256 public constant TIER_BRONZE_BOOST_BPS = 200;    // +2%
-    uint256 public constant TIER_SILVER_BOOST_BPS = 500;    // +5%
-    uint256 public constant TIER_GOLD_BOOST_BPS = 1_000;    // +10%
+    uint256 public constant TIER_IRON_BOOST_BPS = 0; // No boost
+    uint256 public constant TIER_BRONZE_BOOST_BPS = 200; // +2%
+    uint256 public constant TIER_SILVER_BOOST_BPS = 500; // +5%
+    uint256 public constant TIER_GOLD_BOOST_BPS = 1_000; // +10%
     uint256 public constant TIER_DIAMOND_BOOST_BPS = 2_000; // +20%
 
     // Staking tier thresholds (in VAMS tokens)
@@ -58,7 +53,11 @@ contract RewardDistributor is
 
     // ═══════════════════ Storage ═══════════════════
 
-    enum PayoutMode { VAMS_ONLY, STABLECOIN, HYBRID }
+    enum PayoutMode {
+        VAMS_ONLY,
+        STABLECOIN,
+        HYBRID
+    }
 
     /// @notice Provider's preferred payout mode
     mapping(address => PayoutMode) public payoutPreference;
@@ -106,12 +105,7 @@ contract RewardDistributor is
     /// @param _vamsToken VAMS Token address
     /// @param _regionalIncentives Regional incentives address
     /// @param _stakingContract Staking contract address
-    constructor(
-        address admin,
-        address _vamsToken,
-        address _regionalIncentives,
-        address _stakingContract
-    ) {
+    constructor(address admin, address _vamsToken, address _regionalIncentives, address _stakingContract) {
         require(admin != address(0), "Zero admin");
         require(_vamsToken != address(0), "Zero token");
 
@@ -129,11 +123,12 @@ contract RewardDistributor is
     // ═══════════════════ Reward Accumulation ═══════════════════
 
     /// @inheritdoc IRewardDistributor
-    function accumulateReward(
-        address provider,
-        uint256 baseReward,
-        bytes32 regionId
-    ) external override onlyRole(ACCUMULATOR_ROLE) whenNotPaused {
+    function accumulateReward(address provider, uint256 baseReward, bytes32 regionId)
+        external
+        override
+        onlyRole(ACCUMULATOR_ROLE)
+        whenNotPaused
+    {
         if (provider == address(0) || baseReward == 0) revert InvalidRewardData();
 
         // 1. Base reward
@@ -178,10 +173,12 @@ contract RewardDistributor is
     }
 
     /// @inheritdoc IRewardDistributor
-    function accumulateBuilderRevenue(
-        address builder,
-        uint256 amount
-    ) external override onlyRole(ACCUMULATOR_ROLE) whenNotPaused {
+    function accumulateBuilderRevenue(address builder, uint256 amount)
+        external
+        override
+        onlyRole(ACCUMULATOR_ROLE)
+        whenNotPaused
+    {
         if (builder == address(0) || amount == 0) revert InvalidRewardData();
 
         builderRevenue[builder] += amount;
@@ -234,7 +231,7 @@ contract RewardDistributor is
         PayoutMode mode = payoutPreference[msg.sender];
         if (mode == PayoutMode.STABLECOIN && omsConversionContract != address(0)) {
             vamsToken.safeTransfer(omsConversionContract, claimable);
-            (bool success, ) = omsConversionContract.call(
+            (bool success,) = omsConversionContract.call(
                 abi.encodeWithSignature("convertAndPay(address,uint256)", msg.sender, claimable)
             );
             require(success, "OMS conversion failed");
@@ -243,9 +240,8 @@ contract RewardDistributor is
             uint256 half = claimable / 2;
             vamsToken.safeTransfer(msg.sender, claimable - half);
             vamsToken.safeTransfer(omsConversionContract, half);
-            (bool success, ) = omsConversionContract.call(
-                abi.encodeWithSignature("convertAndPay(address,uint256)", msg.sender, half)
-            );
+            (bool success,) =
+                omsConversionContract.call(abi.encodeWithSignature("convertAndPay(address,uint256)", msg.sender, half));
             require(success, "OMS conversion failed");
             emit ConversionRouted(msg.sender, half);
         } else {
@@ -259,32 +255,17 @@ contract RewardDistributor is
     // ═══════════════════ View Functions ═══════════════════
 
     /// @inheritdoc IRewardDistributor
-    function getUnclaimedRewards(address provider)
-        external
-        view
-        override
-        returns (uint256)
-    {
+    function getUnclaimedRewards(address provider) external view override returns (uint256) {
         return unclaimedRewards[provider];
     }
 
     /// @inheritdoc IRewardDistributor
-    function getRewardBreakdown(address provider)
-        external
-        view
-        override
-        returns (ProviderReward memory)
-    {
+    function getRewardBreakdown(address provider) external view override returns (ProviderReward memory) {
         return _rewardBreakdowns[provider];
     }
 
     /// @inheritdoc IRewardDistributor
-    function getEpochSummary(uint256 epochId)
-        external
-        view
-        override
-        returns (RewardEpoch memory)
-    {
+    function getEpochSummary(uint256 epochId) external view override returns (RewardEpoch memory) {
         return _epochs[epochId];
     }
 
@@ -330,19 +311,20 @@ contract RewardDistributor is
     /// @notice Emergency withdrawal of stuck tokens
     /// @param to Address to send tokens to
     /// @param amount Amount to withdraw
-    function emergencyWithdraw(address to, uint256 amount)
-        external
-        onlyRole(DEFAULT_ADMIN_ROLE)
-    {
+    function emergencyWithdraw(address to, uint256 amount) external onlyRole(DEFAULT_ADMIN_ROLE) {
         require(to != address(0), "Zero address");
         vamsToken.safeTransfer(to, amount);
     }
 
     /// @notice Pause reward accumulation and claiming
-    function pause() external onlyRole(PAUSER_ROLE) { _pause(); }
+    function pause() external onlyRole(PAUSER_ROLE) {
+        _pause();
+    }
 
     /// @notice Unpause reward accumulation and claiming
-    function unpause() external onlyRole(PAUSER_ROLE) { _unpause(); }
+    function unpause() external onlyRole(PAUSER_ROLE) {
+        _unpause();
+    }
 
     // ═══════════════════ Internal ═══════════════════
 
@@ -359,9 +341,8 @@ contract RewardDistributor is
         if (stakingContract == address(0)) return 0;
 
         // Call staking contract to get provider's staked amount
-        (bool success, bytes memory data) = stakingContract.staticcall(
-            abi.encodeWithSignature("getStakedAmount(address)", provider)
-        );
+        (bool success, bytes memory data) =
+            stakingContract.staticcall(abi.encodeWithSignature("getStakedAmount(address)", provider));
         if (!success || data.length < 32) return 0;
         return abi.decode(data, (uint256));
     }

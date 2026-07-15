@@ -11,7 +11,6 @@ import {IVAMSProofPlugin} from "../../interfaces/IVAMSProofPlugin.sol";
  *      the underlying credential data.
  */
 contract PolygonIDPlugin is IVAMSProofPlugin {
-
     /// @notice Polygon ID state contract address
     address public immutable iden3State;
 
@@ -23,11 +22,11 @@ contract PolygonIDPlugin is IVAMSProofPlugin {
 
     /// @notice Polygon ID proof structure
     struct PolygonIDProof {
-        uint256[] inputs;      // Public inputs for ZK circuit
-        uint256[2] a;          // ZK proof point A
-        uint256[2][2] b;       // ZK proof point B
-        uint256[2] c;          // ZK proof point C
-        uint256 schemaHash;    // Credential schema hash
+        uint256[] inputs; // Public inputs for ZK circuit
+        uint256[2] a; // ZK proof point A
+        uint256[2][2] b; // ZK proof point B
+        uint256[2] c; // ZK proof point C
+        uint256 schemaHash; // Credential schema hash
     }
 
     event SchemaApproved(uint256 indexed schemaHash);
@@ -48,10 +47,17 @@ contract PolygonIDPlugin is IVAMSProofPlugin {
     }
 
     function verify(
-        bytes32 /* serviceHash */,
-        bytes32 /* deliveryHash */,
+        bytes32,
+        /* serviceHash */
+        bytes32,
+        /* deliveryHash */
         bytes calldata proofData
-    ) external view override returns (bool valid) {
+    )
+        external
+        view
+        override
+        returns (bool valid)
+    {
         if (proofData.length == 0) return false;
 
         PolygonIDProof memory idProof = abi.decode(proofData, (PolygonIDProof));

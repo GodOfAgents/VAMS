@@ -12,71 +12,55 @@ interface ISlashingOracle {
 
     /// @notice Proposal status
     enum ProposalStatus {
-        PENDING,        // Submitted, awaiting voting
-        COMMIT_PHASE,   // Voters committing votes
-        REVEAL_PHASE,   // Voters revealing votes
-        APPROVED,       // Slash approved
-        REJECTED,       // Slash rejected
-        EXPIRED         // Voting window expired
+        PENDING, // Submitted, awaiting voting
+        COMMIT_PHASE, // Voters committing votes
+        REVEAL_PHASE, // Voters revealing votes
+        APPROVED, // Slash approved
+        REJECTED, // Slash rejected
+        EXPIRED // Voting window expired
     }
 
     // ============ Structs ============
 
     /// @notice Slash proposal
     struct SlashProposal {
-        address proposer;           // Who proposed the slash
-        address operator;           // Operator to be slashed
-        uint8 offenseType;          // Type of offense
-        bytes32 evidenceHash;       // Hash of evidence
-        uint256 proposedAmount;     // Proposed slash amount
-        uint256 createdAt;          // When proposal created
-        uint256 commitDeadline;     // Deadline for commits
-        uint256 revealDeadline;     // Deadline for reveals
-        uint256 forStakeWeight;     // √stake voting for
+        address proposer; // Who proposed the slash
+        address operator; // Operator to be slashed
+        uint8 offenseType; // Type of offense
+        bytes32 evidenceHash; // Hash of evidence
+        uint256 proposedAmount; // Proposed slash amount
+        uint256 createdAt; // When proposal created
+        uint256 commitDeadline; // Deadline for commits
+        uint256 revealDeadline; // Deadline for reveals
+        uint256 forStakeWeight; // √stake voting for
         uint256 againstStakeWeight; // √stake voting against
-        uint256 totalVoters;        // Number of voters
-        ProposalStatus status;      // Current status
+        uint256 totalVoters; // Number of voters
+        ProposalStatus status; // Current status
     }
 
     /// @notice Vote commitment
     struct VoteCommit {
-        bytes32 commitment;     // keccak256(vote, salt)
-        bool revealed;          // Whether revealed
-        bool vote;              // Actual vote (set on reveal)
-        uint256 stakeWeight;    // √stake weight
+        bytes32 commitment; // keccak256(vote, salt)
+        bool revealed; // Whether revealed
+        bool vote; // Actual vote (set on reveal)
+        uint256 stakeWeight; // √stake weight
     }
 
     // ============ Events ============
 
     /// @notice Emitted when slash is proposed
     event SlashProposed(
-        uint256 indexed proposalId,
-        address indexed proposer,
-        address indexed operator,
-        uint256 proposedAmount
+        uint256 indexed proposalId, address indexed proposer, address indexed operator, uint256 proposedAmount
     );
 
     /// @notice Emitted when vote is committed
-    event VoteCommitted(
-        uint256 indexed proposalId,
-        address indexed voter
-    );
+    event VoteCommitted(uint256 indexed proposalId, address indexed voter);
 
     /// @notice Emitted when vote is revealed
-    event VoteRevealed(
-        uint256 indexed proposalId,
-        address indexed voter,
-        bool vote,
-        uint256 stakeWeight
-    );
+    event VoteRevealed(uint256 indexed proposalId, address indexed voter, bool vote, uint256 stakeWeight);
 
     /// @notice Emitted when proposal is finalized
-    event ProposalFinalized(
-        uint256 indexed proposalId,
-        ProposalStatus status,
-        uint256 forStake,
-        uint256 againstStake
-    );
+    event ProposalFinalized(uint256 indexed proposalId, ProposalStatus status, uint256 forStake, uint256 againstStake);
 
     // ============ Errors ============
 
@@ -112,12 +96,9 @@ interface ISlashingOracle {
     /// @param evidenceHash Hash of evidence
     /// @param proposedAmount Proposed slash amount
     /// @return proposalId Proposal ID
-    function proposeSlash(
-        address operator,
-        uint8 offenseType,
-        bytes32 evidenceHash,
-        uint256 proposedAmount
-    ) external returns (uint256 proposalId);
+    function proposeSlash(address operator, uint8 offenseType, bytes32 evidenceHash, uint256 proposedAmount)
+        external
+        returns (uint256 proposalId);
 
     /// @notice Commit a vote
     /// @param proposalId Proposal to vote on

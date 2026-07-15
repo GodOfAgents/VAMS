@@ -8,10 +8,10 @@ pragma solidity ^0.8.20;
  */
 interface IERC8004Verifier {
     struct EnclaveReport {
-        bytes32 mrenclave;     // Measurement of the enclave code
-        bytes32 mrsigner;      // Measurement of the signer (if applicable)
-        bytes userReportData;  // Data committed by the user (e.g., public key)
-        uint64 timestamp;      // Attestation timestamp
+        bytes32 mrenclave; // Measurement of the enclave code
+        bytes32 mrsigner; // Measurement of the signer (if applicable)
+        bytes userReportData; // Data committed by the user (e.g., public key)
+        uint64 timestamp; // Attestation timestamp
     }
 
     /**
@@ -20,8 +20,5 @@ interface IERC8004Verifier {
      * @return success True if verification passed
      * @return report The decoded enclave report
      */
-    function verifyAttestation(bytes calldata proof) 
-        external 
-        view 
-        returns (bool success, EnclaveReport memory report);
+    function verifyAttestation(bytes calldata proof) external view returns (bool success, EnclaveReport memory report);
 }

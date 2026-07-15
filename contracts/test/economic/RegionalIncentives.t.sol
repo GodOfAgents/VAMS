@@ -29,7 +29,7 @@ contract RegionalIncentivesTest is Test {
         incentives.setRegionConfig(
             REGION_US_EAST,
             "US East (Virginia)",
-            500,   // target capacity
+            500, // target capacity
             10_000 // 1.0x (saturated — no boost)
         );
 
@@ -45,8 +45,8 @@ contract RegionalIncentivesTest is Test {
         incentives.setRegionConfig(
             REGION_AF_SOUTH,
             "Africa (Cape Town)",
-            50,     // low target
-            30_000  // 3.0x bootstrap
+            50, // low target
+            30_000 // 3.0x bootstrap
         );
 
         IRegionalIncentives.RegionConfig memory cfg = incentives.getRegionConfig(REGION_AF_SOUTH);
@@ -204,7 +204,7 @@ contract RegionalIncentivesTest is Test {
 
     function test_setEconomicParams() public {
         _setupRegion(REGION_US_EAST, "US East", 500, 10_000);
-        
+
         vm.prank(admin);
         incentives.setEconomicParams(REGION_US_EAST, 1500, 5); // pHardware = 1500, providerCount = 5
 
@@ -215,7 +215,7 @@ contract RegionalIncentivesTest is Test {
 
     function test_revert_setEconomicParams_unauthorized() public {
         _setupRegion(REGION_US_EAST, "US East", 500, 10_000);
-        
+
         vm.prank(stranger);
         vm.expectRevert();
         incentives.setEconomicParams(REGION_US_EAST, 1500, 5);
@@ -223,7 +223,7 @@ contract RegionalIncentivesTest is Test {
 
     function test_getPriceFloor_sufficientLiquidity() public {
         _setupRegion(REGION_US_EAST, "US East", 500, 10_000);
-        
+
         // N = 10 providers -> alpha = 1.0 (10000 BPS), P_floor should match Bid_min (2000)
         vm.prank(admin);
         incentives.setEconomicParams(REGION_US_EAST, 1500, 10);
@@ -234,7 +234,7 @@ contract RegionalIncentivesTest is Test {
 
     function test_getPriceFloor_excessLiquidity() public {
         _setupRegion(REGION_US_EAST, "US East", 500, 10_000);
-        
+
         // N = 12 providers -> alpha = 1.0 (capped), P_floor should match Bid_min (2000)
         vm.prank(admin);
         incentives.setEconomicParams(REGION_US_EAST, 1500, 12);
@@ -245,7 +245,7 @@ contract RegionalIncentivesTest is Test {
 
     function test_getPriceFloor_thinLiquidity_half() public {
         _setupRegion(REGION_US_EAST, "US East", 500, 10_000);
-        
+
         // N = 5 providers -> alpha = 0.5 (5000 BPS)
         // P_floor = 0.5 * Bid_min (2000) + 0.5 * P_hardware (1500) = 1750
         vm.prank(admin);
@@ -257,7 +257,7 @@ contract RegionalIncentivesTest is Test {
 
     function test_getPriceFloor_thinLiquidity_extreme() public {
         _setupRegion(REGION_US_EAST, "US East", 500, 10_000);
-        
+
         // N = 2 providers -> alpha = 0.2 (2000 BPS)
         // P_floor = 0.2 * Bid_min (2000) + 0.8 * P_hardware (1500) = 400 + 1200 = 1600
         vm.prank(admin);
@@ -269,7 +269,7 @@ contract RegionalIncentivesTest is Test {
 
     function test_getPriceFloor_noLiquidity() public {
         _setupRegion(REGION_US_EAST, "US East", 500, 10_000);
-        
+
         // N = 0 providers -> alpha = 0.0 (0 BPS)
         // P_floor = P_hardware (1500)
         vm.prank(admin);
@@ -288,12 +288,7 @@ contract RegionalIncentivesTest is Test {
 
     // ═══════════════════ Helpers ═══════════════════
 
-    function _setupRegion(
-        bytes32 id,
-        string memory name,
-        uint256 target,
-        uint256 multiplier
-    ) internal {
+    function _setupRegion(bytes32 id, string memory name, uint256 target, uint256 multiplier) internal {
         vm.prank(admin);
         incentives.setRegionConfig(id, name, target, multiplier);
     }

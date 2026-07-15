@@ -35,7 +35,7 @@ contract RecoveryQueue is AccessControl {
     mapping(uint256 => Action) public actions;
     // Map of priority => acton IDs for ordering logic off-chain
     // Not iterating on-chain to save gas
-    
+
     event ActionQueued(uint256 indexed id, address indexed target, Priority priority, uint256 expiresAt);
     event ActionExecuted(uint256 indexed id, address indexed executor, bool success);
     event HaltStatusChanged(bool isHalted, uint256 timestamp);
@@ -50,17 +50,16 @@ contract RecoveryQueue is AccessControl {
     /**
      * @notice Enqueue an action during an L1 halt / emergency
      */
-    function enqueueRecoveryAction(
-        address _target,
-        bytes calldata _data,
-        Priority _priority,
-        uint256 _duration
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) returns (uint256) {
+    function enqueueRecoveryAction(address _target, bytes calldata _data, Priority _priority, uint256 _duration)
+        external
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        returns (uint256)
+    {
         // usually queued by multi-sig or timelock
         uint256 id = nextActionId++;
-        
+
         uint256 expiresAt = block.timestamp + _duration;
-        
+
         actions[id] = Action({
             id: id,
             target: _target,
@@ -97,11 +96,11 @@ contract RecoveryQueue is AccessControl {
 
         a.executed = true;
 
-        (bool success, ) = a.target.call(a.data);
-        
+        (bool success,) = a.target.call(a.data);
+
         // Emitting success status - in a real fallback scenario we might allow partial failure tracking
         emit ActionExecuted(_actionId, msg.sender, success);
-        
+
         require(success, "Recovery action failed");
     }
 }

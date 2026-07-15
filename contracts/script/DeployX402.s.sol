@@ -32,42 +32,32 @@ contract DeployX402 is Script {
         // Checking constructor... it's Initializable.
         // Assuming implementation is upgradeable pattern for now, but deploying direct for simplicity if needed.
         // Let's use Transparent Proxy for Bond Registry too to be consistent.
-        
+
         ProxyAdmin proxyAdmin = new ProxyAdmin(deployer);
-        
+
         // Encode initializer for Bond Registry
-        bytes memory bondData = abi.encodeWithSelector(
-            ProviderBondRegistry.initialize.selector,
-            deployer,
-            TOKEN_ADDRESS,
-            REGISTRY_ADDRESS
-        );
-        
-        TransparentUpgradeableProxy bondProxy = new TransparentUpgradeableProxy(
-            address(bondRegistry),
-            address(proxyAdmin),
-            bondData
-        );
+        bytes memory bondData =
+            abi.encodeWithSelector(ProviderBondRegistry.initialize.selector, deployer, TOKEN_ADDRESS, REGISTRY_ADDRESS);
+
+        TransparentUpgradeableProxy bondProxy =
+            new TransparentUpgradeableProxy(address(bondRegistry), address(proxyAdmin), bondData);
         console.log("ProviderBondRegistry Proxy deployed:", address(bondProxy));
 
         // 3. Deploy X402 Escrow Manager
         X402EscrowManager escrowManager = new X402EscrowManager();
-        
+
         // Encode initializer for Escrow Manager
         bytes memory escrowData = abi.encodeWithSelector(
             X402EscrowManager.initialize.selector,
-            deployer,       // Admin
-            TOKEN_ADDRESS,  // VAMS Token
+            deployer, // Admin
+            TOKEN_ADDRESS, // VAMS Token
             address(nonceRegistry),
             address(bondProxy),
-            deployer        // Treasury (for now)
+            deployer // Treasury (for now)
         );
 
-        TransparentUpgradeableProxy escrowProxy = new TransparentUpgradeableProxy(
-            address(escrowManager),
-            address(proxyAdmin),
-            escrowData
-        );
+        TransparentUpgradeableProxy escrowProxy =
+            new TransparentUpgradeableProxy(address(escrowManager), address(proxyAdmin), escrowData);
         console.log("X402EscrowManager Proxy deployed:", address(escrowProxy));
 
         vm.stopBroadcast();

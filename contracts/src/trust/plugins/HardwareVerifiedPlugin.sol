@@ -36,7 +36,11 @@ contract HardwareVerifiedPlugin is IVAMSProofPlugin {
         bytes32, /* serviceHash */
         bytes32, /* deliveryHash */
         bytes calldata proofData
-    ) external view returns (bool) {
+    )
+        external
+        view
+        returns (bool)
+    {
         if (proofData.length == 0) return false;
 
         (bytes32 nodeId, uint256 currentScore, bytes memory sig) = abi.decode(proofData, (bytes32, uint256, bytes));
@@ -50,10 +54,9 @@ contract HardwareVerifiedPlugin is IVAMSProofPlugin {
         address signer = digest.recover(sig);
 
         // Check if the signer is a registered Sentinel in the SLAEnforcer
-        (bool success, bytes memory data) = slaEnforcer.staticcall(
-            abi.encodeWithSignature("isSentinel(address)", signer)
-        );
-        
+        (bool success, bytes memory data) =
+            slaEnforcer.staticcall(abi.encodeWithSignature("isSentinel(address)", signer));
+
         if (success && data.length > 0) {
             bool isRegistered = abi.decode(data, (bool));
             return isRegistered;

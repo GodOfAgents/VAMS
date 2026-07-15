@@ -12,12 +12,12 @@ contract DeployPhase2 is Script {
     function run() external {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
         address admin = vm.addr(deployerPrivateKey);
-        
+
         address providerBondRegistry = vm.envAddress("PROVIDER_BOND_REGISTRY");
         address vamsSlasher = vm.envAddress("VAMS_SLASHER");
-        
+
         address vamsToken = vm.envAddress("VAMS_TOKEN");
-        
+
         vm.startBroadcast(deployerPrivateKey);
 
         // 1. Deploy Hardware Registry (Phase 2, Sprint 1)

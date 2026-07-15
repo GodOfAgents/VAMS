@@ -21,7 +21,7 @@ import "./IVAMSToken.sol";
  * - AccessControl: Role-based permissions
  * - Pausable: Emergency pause capability
  * - Anti-whale: Max wallet and daily transfer limits
- *   Note: Anti-whale limits act as soft deterrents. Sybil-bypasses 
+ *   Note: Anti-whale limits act as soft deterrents. Sybil-bypasses
  *   (via multiple wallets) are documented as accepted risks for testnet.
  *
  * Token Specifications (from TOKENOMICS.md):
@@ -29,15 +29,7 @@ import "./IVAMSToken.sol";
  * - Decimals: 18
  * - Initial Circulating: 100,000,000 (10%) at TGE
  */
-contract VAMSToken is 
-    ERC20,
-    ERC20Burnable,
-    ERC20Permit,
-    ERC20Votes,
-    AccessControl,
-    Pausable,
-    IVAMSToken
-{
+contract VAMSToken is ERC20, ERC20Burnable, ERC20Permit, ERC20Votes, AccessControl, Pausable, IVAMSToken {
     // ============ Constants ============
 
     /// @notice Role required to mint new tokens (assigned to staking contract)
@@ -72,7 +64,7 @@ contract VAMSToken is
 
     // ============ Custom Errors ============
     error TokenPaused();
-    
+
     // ============ State Variables ============
 
     /// @inheritdoc IVAMSToken
@@ -112,10 +104,7 @@ contract VAMSToken is
      * @param admin Initial admin address (receives DEFAULT_ADMIN_ROLE)
      * @param treasury Address to receive initial supply
      */
-    constructor(
-        address admin,
-        address treasury
-    ) ERC20("VAMS", "VAMS") ERC20Permit("VAMS") {
+    constructor(address admin, address treasury) ERC20("VAMS", "VAMS") ERC20Permit("VAMS") {
         if (admin == address(0)) revert ZeroAddress();
         if (treasury == address(0)) revert ZeroAddress();
 
@@ -153,19 +142,19 @@ contract VAMSToken is
         if (totalSupply() + amount > MAX_SUPPLY) {
             revert MaxSupplyExceeded(totalSupply() + amount, MAX_SUPPLY);
         }
-        
+
         // Rotate year if needed — advance by SECONDS_PER_YEAR, not block.timestamp
         // to prevent gap-gaming (skipping years compresses the cap window)
         if (block.timestamp >= currentMintYearStart + SECONDS_PER_YEAR) {
             currentMintYearStart += SECONDS_PER_YEAR;
             mintedThisYear = 0;
         }
-        
+
         // Enforce annual mint cap (2.5% = 25M $VAMS/year)
         if (mintedThisYear + amount > ANNUAL_MINT_CAP) {
             revert AnnualMintCapExceeded(mintedThisYear + amount, ANNUAL_MINT_CAP);
         }
-        
+
         mintedThisYear += amount;
         _mint(to, amount);
     }
@@ -320,11 +309,7 @@ contract VAMSToken is
      * @notice Hook called before any token transfer
      * @dev Enforces pause and anti-whale restrictions
      */
-    function _update(
-        address from,
-        address to,
-        uint256 amount
-    ) internal override(ERC20, ERC20Votes) {
+    function _update(address from, address to, uint256 amount) internal override(ERC20, ERC20Votes) {
         // Check pause
         if (paused()) {
             // Allow minting even when paused (for staking rewards)
@@ -351,12 +336,7 @@ contract VAMSToken is
      * @notice Check if contract supports an interface
      * @dev Required for AccessControl
      */
-    function supportsInterface(bytes4 interfaceId) 
-        public 
-        view 
-        override(AccessControl) 
-        returns (bool) 
-    {
+    function supportsInterface(bytes4 interfaceId) public view override(AccessControl) returns (bool) {
         return super.supportsInterface(interfaceId);
     }
 }

@@ -33,9 +33,9 @@ contract GovernorTest is Test {
         bytes32 PROPOSER_ROLE = keccak256("PROPOSER_ROLE");
         bytes32 EXECUTOR_ROLE = keccak256("EXECUTOR_ROLE");
         bytes32 CANCELLER_ROLE = keccak256("CANCELLER_ROLE");
-        
+
         timelock.grantRole(PROPOSER_ROLE, address(governor));
-        timelock.grantRole(EXECUTOR_ROLE, address(0)); 
+        timelock.grantRole(EXECUTOR_ROLE, address(0));
         timelock.grantRole(CANCELLER_ROLE, address(governor));
 
         // Grant Timelock Admin Role on Token so it can execute the proposal
@@ -54,7 +54,7 @@ contract GovernorTest is Test {
         token.delegate(voter1);
         vm.prank(voter2);
         token.delegate(voter2);
-        
+
         vm.roll(block.number + 10); // Advance blocks to checkpoint votes
     }
 
@@ -93,7 +93,7 @@ contract GovernorTest is Test {
 
         // 7. Execute
         governor.execute(targets, values, calldatas, descriptionHash);
-        
+
         // Asset Minter Role granted
         assertTrue(token.hasRole(keccak256("MINTER_ROLE"), address(0x4)));
     }

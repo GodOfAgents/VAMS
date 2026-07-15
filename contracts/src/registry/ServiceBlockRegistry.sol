@@ -43,13 +43,9 @@ contract ServiceBlockRegistry is IServiceBlockRegistry, AccessControl, EIP712, R
     uint256 public constant PERMISSION_WALLET_ACCESS = 1 << 3;
     uint256 public constant PERMISSION_NETWORK_EGRESS = 1 << 4;
     uint256 public constant PERMISSION_TEE_REQUIRED = 1 << 5;
-    uint256 public constant VALID_PERMISSION_MASK =
-        PERMISSION_EXTERNAL_READ |
-        PERMISSION_SESSION_WRITE |
-        PERMISSION_PERSISTENT_MUTATION |
-        PERMISSION_WALLET_ACCESS |
-        PERMISSION_NETWORK_EGRESS |
-        PERMISSION_TEE_REQUIRED;
+    uint256 public constant VALID_PERMISSION_MASK = PERMISSION_EXTERNAL_READ | PERMISSION_SESSION_WRITE
+        | PERMISSION_PERSISTENT_MUTATION | PERMISSION_WALLET_ACCESS | PERMISSION_NETWORK_EGRESS
+        | PERMISSION_TEE_REQUIRED;
 
     bytes32 public constant SERVICE_BLOCK_MANIFEST_TYPEHASH = keccak256(
         "ServiceBlockManifest(uint256 chainId,address registry,address builder,string name,string deploymentCID,bytes32 resourceRequirementsHash,bytes32 manifestHash,bytes32 capabilityRoot,uint256 permissionsBitmap,uint256 manifestVersion)"
@@ -86,10 +82,11 @@ contract ServiceBlockRegistry is IServiceBlockRegistry, AccessControl, EIP712, R
     // ═══════════════════ Builder Functions ═══════════════════
 
     /// @inheritdoc IServiceBlockRegistry
-    function registerServiceBlock(
-        ServiceBlockRegistration calldata registration,
-        bytes calldata manifestSignature
-    ) external nonReentrant returns (bytes32 blockId) {
+    function registerServiceBlock(ServiceBlockRegistration calldata registration, bytes calldata manifestSignature)
+        external
+        nonReentrant
+        returns (bytes32 blockId)
+    {
         require(bytes(registration.name).length > 0, "Name required");
         require(bytes(registration.category).length > 0, "Category required");
         require(registration.revenueShareBps <= MAX_REVENUE_SHARE_BPS, "Revenue share too high");
@@ -135,17 +132,10 @@ contract ServiceBlockRegistry is IServiceBlockRegistry, AccessControl, EIP712, R
         _blockIds.push(blockId);
         _blockExists[blockId] = true;
 
-        require(
-            vamsToken.transferFrom(msg.sender, address(this), MINIMUM_STAKE),
-            "Stake transfer failed"
-        );
+        require(vamsToken.transferFrom(msg.sender, address(this), MINIMUM_STAKE), "Stake transfer failed");
 
         emit ServiceBlockRegistered(
-            blockId,
-            msg.sender,
-            registration.name,
-            registration.category,
-            registration.revenueShareBps
+            blockId, msg.sender, registration.name, registration.category, registration.revenueShareBps
         );
         return blockId;
     }
@@ -167,10 +157,7 @@ contract ServiceBlockRegistry is IServiceBlockRegistry, AccessControl, EIP712, R
     function deactivateServiceBlock(bytes32 blockId) external {
         require(_blockExists[blockId], "Block not found");
         ServiceBlock storage blk = _blocks[blockId];
-        require(
-            blk.builder == msg.sender || hasRole(VERIFIER_ROLE, msg.sender),
-            "Not authorized"
-        );
+        require(blk.builder == msg.sender || hasRole(VERIFIER_ROLE, msg.sender), "Not authorized");
         require(blk.isActive, "Already inactive");
 
         blk.isActive = false;
@@ -179,10 +166,7 @@ contract ServiceBlockRegistry is IServiceBlockRegistry, AccessControl, EIP712, R
     }
 
     /// @inheritdoc IServiceBlockRegistry
-    function quarantineServiceBlock(bytes32 blockId, bytes32 reasonHash)
-        external
-        onlyRole(VERIFIER_ROLE)
-    {
+    function quarantineServiceBlock(bytes32 blockId, bytes32 reasonHash) external onlyRole(VERIFIER_ROLE) {
         require(_blockExists[blockId], "Block not found");
         require(reasonHash != bytes32(0), "Reason required");
         ServiceBlock storage blk = _blocks[blockId];
@@ -194,10 +178,7 @@ contract ServiceBlockRegistry is IServiceBlockRegistry, AccessControl, EIP712, R
     }
 
     /// @inheritdoc IServiceBlockRegistry
-    function clearServiceBlockQuarantine(bytes32 blockId)
-        external
-        onlyRole(VERIFIER_ROLE)
-    {
+    function clearServiceBlockQuarantine(bytes32 blockId) external onlyRole(VERIFIER_ROLE) {
         require(_blockExists[blockId], "Block not found");
         ServiceBlock storage blk = _blocks[blockId];
         require(blk.isQuarantined, "Not quarantined");
@@ -214,10 +195,7 @@ contract ServiceBlockRegistry is IServiceBlockRegistry, AccessControl, EIP712, R
         ServiceBlock storage blk = _blocks[blockId];
         require(blk.builder == msg.sender, "Not the builder");
         require(!blk.isActive, "Must deactivate first");
-        require(
-            block.timestamp >= _deactivatedAt[blockId] + STAKE_LOCK_PERIOD,
-            "Stake still locked"
-        );
+        require(block.timestamp >= _deactivatedAt[blockId] + STAKE_LOCK_PERIOD, "Stake still locked");
         require(blk.stakedAmount > 0, "Already withdrawn");
 
         uint256 amount = blk.stakedAmount;
@@ -228,10 +206,7 @@ contract ServiceBlockRegistry is IServiceBlockRegistry, AccessControl, EIP712, R
     // ═══════════════════ Composer Integration ═══════════════════
 
     /// @inheritdoc IServiceBlockRegistry
-    function recordProvision(bytes32 blockId, address agent)
-        external
-        onlyRole(COMPOSER_ROLE)
-    {
+    function recordProvision(bytes32 blockId, address agent) external onlyRole(COMPOSER_ROLE) {
         require(_blockExists[blockId], "Block not found");
         require(_blocks[blockId].isActive, "Block not active");
         require(!_blocks[blockId].isQuarantined, "Block quarantined");
@@ -243,17 +218,13 @@ contract ServiceBlockRegistry is IServiceBlockRegistry, AccessControl, EIP712, R
     // ═══════════════════ View Functions ═══════════════════
 
     /// @inheritdoc IServiceBlockRegistry
-    function getServiceBlock(bytes32 blockId)
-        external view returns (ServiceBlock memory)
-    {
+    function getServiceBlock(bytes32 blockId) external view returns (ServiceBlock memory) {
         require(_blockExists[blockId], "Block not found");
         return _blocks[blockId];
     }
 
     /// @inheritdoc IServiceBlockRegistry
-    function calculateBuilderRevenue(bytes32 blockId, uint256 usageFees)
-        external view returns (uint256 builderShare)
-    {
+    function calculateBuilderRevenue(bytes32 blockId, uint256 usageFees) external view returns (uint256 builderShare) {
         require(_blockExists[blockId], "Block not found");
         return (usageFees * _blocks[blockId].revenueShareBps) / 10_000;
     }
@@ -284,13 +255,7 @@ contract ServiceBlockRegistry is IServiceBlockRegistry, AccessControl, EIP712, R
         bytes32 resourceRequirementsHash,
         ServiceBlockManifest calldata manifest
     ) external view returns (bytes32) {
-        return _hashServiceBlockManifest(
-            builder,
-            name,
-            deploymentCID,
-            resourceRequirementsHash,
-            manifest
-        );
+        return _hashServiceBlockManifest(builder, name, deploymentCID, resourceRequirementsHash, manifest);
     }
 
     function _verifyManifest(
@@ -306,18 +271,9 @@ contract ServiceBlockRegistry is IServiceBlockRegistry, AccessControl, EIP712, R
         require(manifest.manifestSigner == builder, "Manifest signer mismatch");
         require(manifest.manifestVersion > 0, "Manifest version required");
         require(manifest.permissionsBitmap != 0, "Permissions required");
-        require(
-            manifest.permissionsBitmap & ~VALID_PERMISSION_MASK == 0,
-            "Unknown permission"
-        );
+        require(manifest.permissionsBitmap & ~VALID_PERMISSION_MASK == 0, "Unknown permission");
 
-        bytes32 digest = _hashServiceBlockManifest(
-            builder,
-            name,
-            deploymentCID,
-            resourceRequirementsHash,
-            manifest
-        );
+        bytes32 digest = _hashServiceBlockManifest(builder, name, deploymentCID, resourceRequirementsHash, manifest);
         require(ECDSA.recover(digest, manifestSignature) == builder, "Invalid manifest signature");
     }
 

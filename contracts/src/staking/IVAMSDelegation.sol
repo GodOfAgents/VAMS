@@ -6,7 +6,7 @@ pragma solidity ^0.8.20;
  * @author VAMS Protocol
  * @notice Interface for Delegated Proof of Stake (DPoS) agent delegation.
  *
- * Allows $VAMS holders to delegate their staking weight to agents 
+ * Allows $VAMS holders to delegate their staking weight to agents
  * (validators, keepers, compute providers) without transferring tokens.
  *
  * Phase 1: Stub interface for future implementation.
@@ -17,7 +17,7 @@ interface IVAMSDelegation {
 
     /// @notice Delegation record
     struct Delegation {
-        /// @notice Delegator address  
+        /// @notice Delegator address
         address delegator;
         /// @notice Agent (delegatee) address
         address agent;
@@ -38,12 +38,7 @@ interface IVAMSDelegation {
     event Undelegated(address indexed delegator, address indexed agent, uint256 amount);
 
     /// @notice Emitted when a user re-delegates to a new agent
-    event Redelegated(
-        address indexed delegator, 
-        address indexed fromAgent, 
-        address indexed toAgent, 
-        uint256 amount
-    );
+    event Redelegated(address indexed delegator, address indexed fromAgent, address indexed toAgent, uint256 amount);
 
     /// @notice Emitted when delegation rewards are claimed
     event DelegationRewardsClaimed(address indexed delegator, uint256 amount);
@@ -96,10 +91,7 @@ interface IVAMSDelegation {
      * @param agent Agent address
      * @return delegation Delegation record
      */
-    function getDelegation(
-        address delegator, 
-        address agent
-    ) external view returns (Delegation memory delegation);
+    function getDelegation(address delegator, address agent) external view returns (Delegation memory delegation);
 
     /**
      * @notice Get total delegated to an agent

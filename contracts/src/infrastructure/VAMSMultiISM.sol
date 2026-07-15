@@ -85,14 +85,9 @@ contract VAMSMultiISM is AccessControl, IInterchainSecurityModule {
      * @param _metadata Aggregated or unified metadata payload
      * @param _message Hyperlane formatted message
      */
-    function verify(
-        bytes calldata _metadata,
-        bytes calldata _message
-    ) external override returns (bool) {
+    function verify(bytes calldata _metadata, bytes calldata _message) external override returns (bool) {
         require(
-            address(phalaISM) != address(0) &&
-            address(oracleISM) != address(0) &&
-            address(multisigISM) != address(0),
+            address(phalaISM) != address(0) && address(oracleISM) != address(0) && address(multisigISM) != address(0),
             "ISMs not fully configured"
         );
 
@@ -101,17 +96,17 @@ contract VAMSMultiISM is AccessControl, IInterchainSecurityModule {
         // Try Phala ISM
         try phalaISM.verify(_metadata, _message) returns (bool success) {
             if (success) validations++;
-        } catch { } // Ignore reverts, continue to next
+        } catch {} // Ignore reverts, continue to next
 
         // Try Oracle ISM
         try oracleISM.verify(_metadata, _message) returns (bool success) {
             if (success) validations++;
-        } catch { }
+        } catch {}
 
         // Try Multisig ISM
         try multisigISM.verify(_metadata, _message) returns (bool success) {
             if (success) validations++;
-        } catch { }
+        } catch {}
 
         return validations >= THRESHOLD;
     }

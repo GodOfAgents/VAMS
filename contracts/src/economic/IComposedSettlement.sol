@@ -27,26 +27,26 @@ interface IComposedSettlement {
 
     /// @notice A single provider's allocation within a composed request
     struct ProviderAlloc {
-        address provider;        // Provider address
-        uint256 amount;          // Payment amount for this provider
-        bool claimed;            // Whether this provider has claimed
-        uint256 claimedAt;       // Timestamp of claim (0 if unclaimed)
+        address provider; // Provider address
+        uint256 amount; // Payment amount for this provider
+        bool claimed; // Whether this provider has claimed
+        uint256 claimedAt; // Timestamp of claim (0 if unclaimed)
     }
 
     /// @notice A composed allocation spanning multiple providers
     struct ComposedAllocation {
-        bytes32 allocationId;    // Unique identifier
-        address agent;           // Requesting agent
-        uint256 totalAmount;     // Total escrowed amount
-        uint256 providerCount;   // Number of providers in the allocation
-        uint256 claimedCount;    // Providers that have successfully claimed
-        bytes32 blueprintHash;   // Hash of the blueprint that was composed
-        bytes32 serviceBlockId;  // Associated service block (0 if raw blueprint)
-        uint256 createdAt;       // Lock timestamp
-        uint256 expiresAt;       // Expiry timestamp
+        bytes32 allocationId; // Unique identifier
+        address agent; // Requesting agent
+        uint256 totalAmount; // Total escrowed amount
+        uint256 providerCount; // Number of providers in the allocation
+        uint256 claimedCount; // Providers that have successfully claimed
+        bytes32 blueprintHash; // Hash of the blueprint that was composed
+        bytes32 serviceBlockId; // Associated service block (0 if raw blueprint)
+        uint256 createdAt; // Lock timestamp
+        uint256 expiresAt; // Expiry timestamp
         AllocationStatus status; // Current status
         uint256 builderRevShareBps; // Builder revenue share in basis points
-        address builderAddress;  // Builder who receives revenue share
+        address builderAddress; // Builder who receives revenue share
     }
 
     // ═══════════════════ Events ═══════════════════
@@ -60,23 +60,12 @@ interface IComposedSettlement {
     );
 
     event ProviderShareClaimed(
-        bytes32 indexed allocationId,
-        address indexed provider,
-        uint256 payout,
-        uint256 fee,
-        uint256 builderShare
+        bytes32 indexed allocationId, address indexed provider, uint256 payout, uint256 fee, uint256 builderShare
     );
 
-    event ComposedEscrowRefunded(
-        bytes32 indexed allocationId,
-        address indexed agent,
-        uint256 refundedAmount
-    );
+    event ComposedEscrowRefunded(bytes32 indexed allocationId, address indexed agent, uint256 refundedAmount);
 
-    event ComposedEscrowDisputed(
-        bytes32 indexed allocationId,
-        address indexed disputer
-    );
+    event ComposedEscrowDisputed(bytes32 indexed allocationId, address indexed disputer);
 
     // ═══════════════════ Errors ═══════════════════
 
@@ -114,26 +103,17 @@ interface IComposedSettlement {
     /// @notice Provider claims their share of a composed allocation
     /// @param allocationId The allocation to claim from
     /// @param providerIndex Index of the provider in the allocation
-    function claimProviderShare(
-        bytes32 allocationId,
-        uint256 providerIndex
-    ) external;
+    function claimProviderShare(bytes32 allocationId, uint256 providerIndex) external;
 
     /// @notice Refund expired and unclaimed portions to the agent
     /// @param allocationId The expired allocation
     function refundExpiredComposed(bytes32 allocationId) external;
 
     /// @notice Get a composed allocation's details
-    function getComposedAllocation(bytes32 allocationId)
-        external
-        view
-        returns (ComposedAllocation memory);
+    function getComposedAllocation(bytes32 allocationId) external view returns (ComposedAllocation memory);
 
     /// @notice Get a specific provider's allocation
-    function getProviderAlloc(bytes32 allocationId, uint256 providerIndex)
-        external
-        view
-        returns (ProviderAlloc memory);
+    function getProviderAlloc(bytes32 allocationId, uint256 providerIndex) external view returns (ProviderAlloc memory);
 
     /// @notice Check if all providers in an allocation have claimed
     function isFullyClaimed(bytes32 allocationId) external view returns (bool);

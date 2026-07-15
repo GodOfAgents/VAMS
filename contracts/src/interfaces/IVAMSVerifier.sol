@@ -7,20 +7,19 @@ pragma solidity ^0.8.20;
  *      "Your Medals determine your Access."
  */
 interface IVAMSVerifier {
-
     enum RiskState {
-        VERIFIED,   // 🟢 Full Access
-        ROAMING,    // 🟡 Suspended (Away)
-        UNTRUSTED,  // 🔴 Restricted (Bad Log / Gap)
-        PROBATION   // 🟠 Limited (Rebuilding Trust)
+        VERIFIED, // 🟢 Full Access
+        ROAMING, // 🟡 Suspended (Away)
+        UNTRUSTED, // 🔴 Restricted (Bad Log / Gap)
+        PROBATION // 🟠 Limited (Rebuilding Trust)
     }
 
     struct RoamingLog {
         uint256 timestampOut;
         uint256 timestampIn;
-        uint256 chainId;        // Where did they go?
-        bytes32 activityHash;   // Hash of the off-chain log
-        bytes signature;        // TEE/Bridge Signature
+        uint256 chainId; // Where did they go?
+        bytes32 activityHash; // Hash of the off-chain log
+        bytes signature; // TEE/Bridge Signature
     }
 
     // =============================================================
@@ -47,10 +46,7 @@ interface IVAMSVerifier {
      * @param signature Cryptographic proof (TEE/Bridge) of the log.
      * @return newState The calculated RiskState based on the proof.
      */
-    function submitReEntryLog(
-        bytes calldata activities, 
-        bytes calldata signature
-    ) external returns (RiskState newState);
+    function submitReEntryLog(bytes calldata activities, bytes calldata signature) external returns (RiskState newState);
 
     /**
      * @notice Checks if an agent has the required "Medal" for a specific action.

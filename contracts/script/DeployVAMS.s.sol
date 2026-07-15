@@ -14,17 +14,14 @@ contract DeployVAMS is Script {
     string internal constant LEGACY_DEPLOY_ACK = "VAMS_ALLOW_UNSAFE_LEGACY_DEPLOYMENT";
 
     function run() external {
-        require(
-            vm.envOr(LEGACY_DEPLOY_ACK, false),
-            "DeployVAMS blocked: use DeployTestnet Safe/timelock ceremony"
-        );
+        require(vm.envOr(LEGACY_DEPLOY_ACK, false), "DeployVAMS blocked: use DeployTestnet Safe/timelock ceremony");
         // Use PRIVATE_KEY passed via command line --private-key if env var fails
         // Or handle the hex string properly
-        
+
         // Setup Deployer
         // Note: When using --private-key flag in forge script, msg.sender is automatically set.
         // vm.startBroadcast() without arguments uses that key.
-        
+
         vm.startBroadcast();
 
         address deployer = msg.sender;
@@ -39,48 +36,37 @@ contract DeployVAMS is Script {
         proposers[0] = deployer;
         address[] memory executors = new address[](1);
         executors[0] = address(0); // Anyone can execute
-        
-        VAMSTimelockController timelock = new VAMSTimelockController(
-            2 days,
-            proposers,
-            executors,
-            deployer
-        );
+
+        VAMSTimelockController timelock = new VAMSTimelockController(2 days, proposers, executors, deployer);
         console.log("VAMSTimelock deployed to:", address(timelock));
 
         // 3. Deploy Staking
         VAMSStaking staking = new VAMSStaking(
             address(token),
             address(token), // Using VAMS as reward token
-            1e18,           // Initial reward rate
+            1e18, // Initial reward rate
             address(timelock)
         );
         console.log("VAMSStaking deployed to:", address(staking));
 
         // 4. Deploy Vesting
-        VAMSVesting vesting = new VAMSVesting(
-            address(token),
-            address(timelock)
-        );
+        VAMSVesting vesting = new VAMSVesting(address(token), address(timelock));
         console.log("VAMSVesting deployed to:", address(vesting));
 
         // 5. Deploy Registry (Upgradeable)
         VAMSAgentRegistry implementation = new VAMSAgentRegistry();
-        
+
         ProxyAdmin proxyAdmin = new ProxyAdmin(deployer);
 
         bytes memory data = abi.encodeWithSelector(
             VAMSAgentRegistry.initialize.selector,
-            deployer,       // Admin
+            deployer, // Admin
             address(token), // VAMS Token
-            address(0)      // Slasher (set later)
+            address(0) // Slasher (set later)
         );
 
-        TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(
-            address(implementation),
-            address(proxyAdmin),
-            data
-        );
+        TransparentUpgradeableProxy proxy =
+            new TransparentUpgradeableProxy(address(implementation), address(proxyAdmin), data);
         console.log("VAMSAgentRegistry Proxy deployed to:", address(proxy));
 
         vm.stopBroadcast();

@@ -67,15 +67,15 @@ contract VAMSStaking is IVAMSStaking, AccessControl, Pausable, ReentrancyGuard {
 
     // ============ Base APYs (in basis points) ============
 
-    uint256 public constant APY_SILVER = 800;     // 8%
-    uint256 public constant APY_GOLD = 1000;      // 10%
-    uint256 public constant APY_PLATINUM = 1200;  // 12%
+    uint256 public constant APY_SILVER = 800; // 8%
+    uint256 public constant APY_GOLD = 1000; // 10%
+    uint256 public constant APY_PLATINUM = 1200; // 12%
 
     // ============ Lock Multipliers (in basis points, 10000 = 1x) ============
 
-    uint256 public constant LOCK_MULT_7_DAYS = 10_000;   // 1.0x
-    uint256 public constant LOCK_MULT_30_DAYS = 11_000;  // 1.1x
-    uint256 public constant LOCK_MULT_90_DAYS = 12_500;  // 1.25x
+    uint256 public constant LOCK_MULT_7_DAYS = 10_000; // 1.0x
+    uint256 public constant LOCK_MULT_30_DAYS = 11_000; // 1.1x
+    uint256 public constant LOCK_MULT_90_DAYS = 12_500; // 1.25x
     uint256 public constant LOCK_MULT_180_DAYS = 15_000; // 1.5x
 
     // ============ Lock Durations ============
@@ -87,7 +87,7 @@ contract VAMSStaking is IVAMSStaking, AccessControl, Pausable, ReentrancyGuard {
 
     // ============ Governance Multipliers ============
 
-    uint256 public constant GOV_MULT_GOLD = 15_000;     // 1.5x for Gold
+    uint256 public constant GOV_MULT_GOLD = 15_000; // 1.5x for Gold
     uint256 public constant GOV_MULT_PLATINUM = 20_000; // 2.0x for Platinum
 
     // ============ Custom Errors ============
@@ -146,12 +146,7 @@ contract VAMSStaking is IVAMSStaking, AccessControl, Pausable, ReentrancyGuard {
      * @param _rewardPerSecond Initial emission rate
      * @param admin Admin address
      */
-    constructor(
-        address _stakingToken,
-        address _rewardToken,
-        uint256 _rewardPerSecond,
-        address admin
-    ) {
+    constructor(address _stakingToken, address _rewardToken, uint256 _rewardPerSecond, address admin) {
         if (_stakingToken == address(0)) revert ZeroAddress();
         if (_rewardToken == address(0)) revert ZeroAddress();
         if (admin == address(0)) revert ZeroAddress();
@@ -176,23 +171,13 @@ contract VAMSStaking is IVAMSStaking, AccessControl, Pausable, ReentrancyGuard {
     }
 
     /// @inheritdoc IVAMSStaking
-    function stakeWithPermit(
-        uint256 amount,
-        LockPeriod lockPeriod,
-        uint256 deadline,
-        uint8 v,
-        bytes32 r,
-        bytes32 s
-    ) external override nonReentrant whenNotPaused {
-        IERC20Permit(address(stakingToken)).permit(
-            msg.sender,
-            address(this),
-            amount,
-            deadline,
-            v,
-            r,
-            s
-        );
+    function stakeWithPermit(uint256 amount, LockPeriod lockPeriod, uint256 deadline, uint8 v, bytes32 r, bytes32 s)
+        external
+        override
+        nonReentrant
+        whenNotPaused
+    {
+        IERC20Permit(address(stakingToken)).permit(msg.sender, address(this), amount, deadline, v, r, s);
         _stake(msg.sender, amount, lockPeriod);
     }
 
@@ -200,7 +185,7 @@ contract VAMSStaking is IVAMSStaking, AccessControl, Pausable, ReentrancyGuard {
     function addStake(uint256 amount) external override nonReentrant whenNotPaused {
         StakeInfo storage info = _stakes[msg.sender];
         if (info.amount == 0) revert NoStake();
-        
+
         _updatePool();
         _harvestRewards(msg.sender);
 
@@ -245,8 +230,7 @@ contract VAMSStaking is IVAMSStaking, AccessControl, Pausable, ReentrancyGuard {
         // Create unbonding request (dynamic period based on crisis mode)
         uint256 unbondingPeriod = crisisMode ? UNBONDING_PERIOD_CRISIS : UNBONDING_PERIOD_NORMAL;
         _unbonding[msg.sender] = UnbondingRequest({
-            amount: _unbonding[msg.sender].amount + amount,
-            unbondingEnd: block.timestamp + unbondingPeriod
+            amount: _unbonding[msg.sender].amount + amount, unbondingEnd: block.timestamp + unbondingPeriod
         });
 
         StakingTier newTier = _getTier(info.amount);
@@ -293,7 +277,7 @@ contract VAMSStaking is IVAMSStaking, AccessControl, Pausable, ReentrancyGuard {
         if (unbondingAmount > 0) {
             // totalUnbonding tracking (if the contract tracks it separately, deduct)
         }
-        
+
         // Clear state (forfeit rewards)
         delete _stakes[msg.sender];
         delete _unbonding[msg.sender];
@@ -311,7 +295,7 @@ contract VAMSStaking is IVAMSStaking, AccessControl, Pausable, ReentrancyGuard {
         amount = _previewHarvest(msg.sender);
 
         if (amount == 0) revert NothingToClaim();
-        
+
         _validateBudget(amount);
         amount = _harvestRewards(msg.sender);
 
@@ -327,7 +311,7 @@ contract VAMSStaking is IVAMSStaking, AccessControl, Pausable, ReentrancyGuard {
         amount = _previewHarvest(msg.sender);
 
         if (amount == 0) revert NothingToClaim();
-        
+
         _validateBudget(amount);
         amount = _harvestRewards(msg.sender);
 
@@ -385,12 +369,12 @@ contract VAMSStaking is IVAMSStaking, AccessControl, Pausable, ReentrancyGuard {
         }
 
         uint256 pending = (info.amount * _accRewardPerShare) / PRECISION - info.rewardDebt;
-        
+
         // Apply tier and lock multipliers
         StakingTier tier = _getTier(info.amount);
         uint256 apyBps = _getBaseAPY(tier);
         uint256 lockMult = _getLockMultiplier(info.lockPeriod);
-        
+
         // Adjust pending by effective multiplier (simplified)
         pending = (pending * apyBps * lockMult) / (APY_SILVER * BPS_DENOMINATOR);
 
@@ -428,11 +412,7 @@ contract VAMSStaking is IVAMSStaking, AccessControl, Pausable, ReentrancyGuard {
             governanceMult = GOV_MULT_GOLD;
         }
 
-        return Math.mulDiv(
-            info.amount,
-            governanceMult * lockMult,
-            BPS_DENOMINATOR * BPS_DENOMINATOR
-        );
+        return Math.mulDiv(info.amount, governanceMult * lockMult, BPS_DENOMINATOR * BPS_DENOMINATOR);
     }
 
     /// @inheritdoc IVAMSStaking
@@ -491,7 +471,7 @@ contract VAMSStaking is IVAMSStaking, AccessControl, Pausable, ReentrancyGuard {
         if (amount == 0) revert ZeroAmount();
 
         StakeInfo storage info = _stakes[user];
-        
+
         // Check minimum stake for new stakers
         if (info.amount == 0 && amount < MIN_STAKE) {
             revert BelowMinimumStake(amount, MIN_STAKE);
@@ -499,8 +479,6 @@ contract VAMSStaking is IVAMSStaking, AccessControl, Pausable, ReentrancyGuard {
 
         _updatePool();
 
-
-        
         // Harvest existing rewards if any
         if (info.amount > 0) {
             _harvestRewards(user);
@@ -551,12 +529,12 @@ contract VAMSStaking is IVAMSStaking, AccessControl, Pausable, ReentrancyGuard {
         if (info.amount == 0) return 0;
 
         uint256 pending = (info.amount * accRewardPerShare) / PRECISION - info.rewardDebt;
-        
+
         // Apply tier and lock multipliers
         StakingTier tier = _getTier(info.amount);
         uint256 apyBps = _getBaseAPY(tier);
         uint256 lockMult = _getLockMultiplier(info.lockPeriod);
-        
+
         pending = (pending * apyBps * lockMult) / (APY_SILVER * BPS_DENOMINATOR);
 
         harvested = info.pendingRewards + pending;
@@ -572,12 +550,12 @@ contract VAMSStaking is IVAMSStaking, AccessControl, Pausable, ReentrancyGuard {
         if (info.amount == 0) return info.pendingRewards;
 
         uint256 pending = (info.amount * accRewardPerShare) / PRECISION - info.rewardDebt;
-        
+
         // Apply tier and lock multipliers
         StakingTier tier = _getTier(info.amount);
         uint256 apyBps = _getBaseAPY(tier);
         uint256 lockMult = _getLockMultiplier(info.lockPeriod);
-        
+
         pending = (pending * apyBps * lockMult) / (APY_SILVER * BPS_DENOMINATOR);
 
         return info.pendingRewards + pending;
@@ -588,7 +566,7 @@ contract VAMSStaking is IVAMSStaking, AccessControl, Pausable, ReentrancyGuard {
      */
     function _validateBudget(uint256 amount) internal view {
         if (amount == 0) return;
-        
+
         uint256 currentMintYearStart_ = currentMintYearStart;
         uint256 annualMintedTokens_ = annualMintedTokens;
 
@@ -597,7 +575,9 @@ contract VAMSStaking is IVAMSStaking, AccessControl, Pausable, ReentrancyGuard {
         }
 
         if (annualMintedTokens_ + amount > annualEmissionBudget) {
-            revert IVAMSStaking.EmissionBudgetExceeded(amount, annualEmissionBudget >= annualMintedTokens_ ? annualEmissionBudget - annualMintedTokens_ : 0);
+            revert IVAMSStaking.EmissionBudgetExceeded(
+                amount, annualEmissionBudget >= annualMintedTokens_ ? annualEmissionBudget - annualMintedTokens_ : 0
+            );
         }
     }
 
@@ -606,7 +586,7 @@ contract VAMSStaking is IVAMSStaking, AccessControl, Pausable, ReentrancyGuard {
      */
     function _mintRewards_internal(address to, uint256 amount) internal {
         if (amount == 0) return;
-        
+
         // Year rotation
         if (block.timestamp >= currentMintYearStart + SECONDS_PER_YEAR) {
             currentMintYearStart += SECONDS_PER_YEAR;
@@ -614,7 +594,9 @@ contract VAMSStaking is IVAMSStaking, AccessControl, Pausable, ReentrancyGuard {
         }
 
         if (annualMintedTokens + amount > annualEmissionBudget) {
-            revert IVAMSStaking.EmissionBudgetExceeded(amount, annualEmissionBudget >= annualMintedTokens ? annualEmissionBudget - annualMintedTokens : 0);
+            revert IVAMSStaking.EmissionBudgetExceeded(
+                amount, annualEmissionBudget >= annualMintedTokens ? annualEmissionBudget - annualMintedTokens : 0
+            );
         }
 
         annualMintedTokens += amount;

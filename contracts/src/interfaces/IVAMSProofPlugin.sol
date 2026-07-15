@@ -12,7 +12,6 @@ pragma solidity ^0.8.20;
  *      All functions are `view` to enforce this constraint.
  */
 interface IVAMSProofPlugin {
-
     /// @notice Returns the unique type identifier for this proof plugin.
     /// @dev Should return keccak256(abi.encodePacked("PROOF_TYPE_NAME")).
     ///      Example: keccak256("PHALA_EXECUTION") for TEE attestation proofs.
@@ -29,11 +28,10 @@ interface IVAMSProofPlugin {
     /// @param deliveryHash Hash of the service response/output
     /// @param proofData Plugin-specific proof bytes (ABI-encoded)
     /// @return valid Whether the proof is valid
-    function verify(
-        bytes32 serviceHash,
-        bytes32 deliveryHash,
-        bytes calldata proofData
-    ) external view returns (bool valid);
+    function verify(bytes32 serviceHash, bytes32 deliveryHash, bytes calldata proofData)
+        external
+        view
+        returns (bool valid);
 
     /// @notice Returns the trust weight of this proof type in basis points (0–10000).
     /// @dev Used by VAMSTrustAggregator to compute weighted composite trust scores.

@@ -14,14 +14,13 @@ import {PolygonIDPlugin} from "../src/trust/plugins/PolygonIDPlugin.sol";
 /**
  * @title DeployPlugins
  * @notice Deployment script for VAMS proof plugins and registration with the aggregator.
- * @dev Usage: 
+ * @dev Usage:
  *      forge script script/DeployPlugins.s.sol:DeployPlugins \
  *          --rpc-url $RPC_URL \
  *          --broadcast \
  *          --verify
  */
 contract DeployPlugins is Script {
-
     /// @notice Address of the deployed VAMSTrustAggregator proxy
     /// @dev Set this to the actual deployed proxy address before running
     address constant AGGREGATOR_PROXY = address(0); // TODO: Set before deployment
@@ -45,7 +44,7 @@ contract DeployPlugins is Script {
         vm.startBroadcast(deployerPrivateKey);
 
         // --- 1. Deploy Plugins ---
-        
+
         console.log("\n=== Deploying Proof Plugins ===\n");
 
         TEEProofPlugin teePlugin = new TEEProofPlugin(deployer);

@@ -21,12 +21,7 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
  * The accumulated funds are bridged weekly to the Cardano VAMSInsuranceFund
  * (Plutus V3) which custodies the capital and allows DAO-voted claims.
  */
-contract InsuranceFundProxy is 
-    Initializable,
-    AccessControlUpgradeable,
-    PausableUpgradeable,
-    ReentrancyGuard
-{
+contract InsuranceFundProxy is Initializable, AccessControlUpgradeable, PausableUpgradeable, ReentrancyGuard {
     using SafeERC20 for IERC20;
 
     // ============ Constants ============
@@ -96,12 +91,10 @@ contract InsuranceFundProxy is
      * @param _bridgeEndpoint ICB bridge endpoint
      * @param _minBatchSize Minimum batch size to bridge
      */
-    function initialize(
-        address _admin,
-        address _vamsToken,
-        address _bridgeEndpoint,
-        uint256 _minBatchSize
-    ) external initializer {
+    function initialize(address _admin, address _vamsToken, address _bridgeEndpoint, uint256 _minBatchSize)
+        external
+        initializer
+    {
         if (_admin == address(0) || _vamsToken == address(0)) revert ZeroAddress();
 
         __AccessControl_init();

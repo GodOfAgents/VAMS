@@ -11,7 +11,6 @@ import {IVAMSProofPlugin} from "../../interfaces/IVAMSProofPlugin.sol";
  *      This plugin replaces the legacy PHALA_EXECUTION proof type.
  */
 contract TEEProofPlugin is IVAMSProofPlugin {
-
     /// @notice Allowed enclave measurement hashes (mrenclave)
     mapping(bytes32 => bool) public allowedEnclaves;
 
@@ -20,10 +19,10 @@ contract TEEProofPlugin is IVAMSProofPlugin {
 
     /// @notice TEE attestation proof structure (decoded from proofData)
     struct TEEAttestation {
-        bytes sgxQuote;         // Raw SGX quote bytes
-        bytes32 mrenclave;      // Enclave measurement hash
-        bytes32 mrsigner;       // Signer measurement hash
-        address attestedAgent;  // Agent address embedded in quote
+        bytes sgxQuote; // Raw SGX quote bytes
+        bytes32 mrenclave; // Enclave measurement hash
+        bytes32 mrsigner; // Signer measurement hash
+        address attestedAgent; // Agent address embedded in quote
     }
 
     event EnclaveAllowed(bytes32 indexed mrenclave);
@@ -46,20 +45,17 @@ contract TEEProofPlugin is IVAMSProofPlugin {
         return keccak256(abi.encodePacked("PHALA_EXECUTION"));
     }
 
-    function verify(
-        bytes32 serviceHash,
-        bytes32 deliveryHash,
-        bytes calldata proofData
-    ) external view override returns (bool valid) {
+    function verify(bytes32 serviceHash, bytes32 deliveryHash, bytes calldata proofData)
+        external
+        view
+        override
+        returns (bool valid)
+    {
         if (proofData.length == 0) return false;
 
         // Decode the TEE attestation elements individually
-        (
-            bytes memory sgxQuote,
-            bytes32 mrenclave,
-            bytes32 mrsigner,
-            address attestedAgent
-        ) = abi.decode(proofData, (bytes, bytes32, bytes32, address));
+        (bytes memory sgxQuote, bytes32 mrenclave, bytes32 mrsigner, address attestedAgent) =
+            abi.decode(proofData, (bytes, bytes32, bytes32, address));
 
         // 1. Verify sgxQuote is non-empty
         if (sgxQuote.length == 0) return false;
@@ -72,7 +68,7 @@ contract TEEProofPlugin is IVAMSProofPlugin {
         //    For now: verify the quote contains the expected binding
         bytes32 expectedBinding = keccak256(abi.encodePacked(serviceHash, deliveryHash));
         bytes32 quoteBinding = keccak256(sgxQuote);
-        
+
         // Commitment: the quote must have been generated FOR this specific service/delivery pair.
         // Full Automata DCAP verification extracts report_data from the raw quote.
         // For Phase 1: use a deterministic hash commitment.

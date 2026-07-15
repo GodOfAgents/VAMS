@@ -16,7 +16,6 @@ interface IAccessControlPausable {
 }
 
 contract EmergencyLockdown is Script {
-
     // ============ Deployed Contract Addresses (Polygon Amoy) ============
 
     address VAMS_TOKEN;
@@ -30,21 +29,21 @@ contract EmergencyLockdown is Script {
 
     // ============ Role Hashes ============
 
-    bytes32 constant DEFAULT_ADMIN_ROLE     = 0x00;
-    bytes32 constant MINTER_ROLE            = keccak256("MINTER_ROLE");
-    bytes32 constant PAUSER_ROLE            = keccak256("PAUSER_ROLE");
+    bytes32 constant DEFAULT_ADMIN_ROLE = 0x00;
+    bytes32 constant MINTER_ROLE = keccak256("MINTER_ROLE");
+    bytes32 constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
     // bytes32 constant EMISSION_ADMIN_ROLE    = keccak256("EMISSION_ADMIN_ROLE");
     // bytes32 constant VESTING_ADMIN_ROLE_ACTUAL = keccak256("VESTING_ADMIN_ROLE");
-    bytes32 constant GUARDIAN_ROLE          = keccak256("GUARDIAN_ROLE");
-    bytes32 constant ADMIN_ROLE             = keccak256("ADMIN_ROLE");
+    bytes32 constant GUARDIAN_ROLE = keccak256("GUARDIAN_ROLE");
+    bytes32 constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
     // bytes32 constant SETTLER_ROLE           = keccak256("SETTLER_ROLE");
-    bytes32 constant ESCROW_ROLE            = keccak256("ESCROW_ROLE");
-    bytes32 constant SLASHER_ROLE           = keccak256("SLASHER_ROLE");
+    bytes32 constant ESCROW_ROLE = keccak256("ESCROW_ROLE");
+    bytes32 constant SLASHER_ROLE = keccak256("SLASHER_ROLE");
 
     // Timelock-specific roles
-    bytes32 constant PROPOSER_ROLE          = keccak256("PROPOSER_ROLE");
-    bytes32 constant EXECUTOR_ROLE          = keccak256("EXECUTOR_ROLE");
-    bytes32 constant CANCELLER_ROLE         = keccak256("CANCELLER_ROLE");
+    bytes32 constant PROPOSER_ROLE = keccak256("PROPOSER_ROLE");
+    bytes32 constant EXECUTOR_ROLE = keccak256("EXECUTOR_ROLE");
+    bytes32 constant CANCELLER_ROLE = keccak256("CANCELLER_ROLE");
 
     function run() external {
         VAMS_TOKEN = vm.envAddress("VAMS_TOKEN");
@@ -52,7 +51,7 @@ contract EmergencyLockdown is Script {
         AGENT_REGISTRY = vm.envAddress("AGENT_REGISTRY");
         X402_ESCROW = vm.envAddress("X402_ESCROW");
         PROVIDER_BOND = vm.envAddress("PROVIDER_BOND");
-        
+
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
 
         vm.startBroadcast();

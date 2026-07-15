@@ -19,93 +19,93 @@ import {IX402NonceRegistry} from "./IX402NonceRegistry.sol";
  * @author VAMS Protocol
  * @notice Gas-efficient batch settlement using Merkle proofs
  * @dev Implements batch settlement per ARCHITECTURE_v0-3-0.md §20.2.4
- * 
+ *
  * Gas Optimization:
  * - Single Merkle root submission vs N individual txs
  * - ~90% gas savings for batches of 100+ payments
  * - Lazy claiming: providers claim when convenient
- * 
+ *
  * Security:
  * - 24-hour dispute window before finalization
  * - Fraud proofs can cancel entire batch
  * - Individual payment disputes supported
  */
-contract BatchSettlement is 
+contract BatchSettlement is
     Initializable,
     AccessControlUpgradeable,
     PausableUpgradeable,
     ReentrancyGuard,
-    IBatchSettlement 
+    IBatchSettlement
 {
     using SafeERC20 for IERC20;
     using ECDSA for bytes32;
     using MessageHashUtils for bytes32;
-    
+
     // ============ Constants ============
-    
+
     /// @notice Dispute window: 24 hours
     uint256 public constant DISPUTE_WINDOW = 24 hours;
-    
+
     /// @notice Minimum provider signatures required
     uint256 public constant MIN_SIGNATURES = 1;
-    
+
     /// @notice Settlement fee: 0.05% (5 basis points)
     uint256 public constant SETTLEMENT_FEE_BPS = 5;
-    
+
     /// @notice Basis points denominator
     uint256 private constant BPS_DENOMINATOR = 10000;
-    
+
     /// @notice Role for gateway submission
     bytes32 public constant GATEWAY_ROLE = keccak256("GATEWAY_ROLE");
-    
+
     /// @notice Role for dispute resolution
     bytes32 public constant RESOLVER_ROLE = keccak256("RESOLVER_ROLE");
-    
+
     /// @notice Role for administration
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
-    
+
     // ============ Storage ============
-    
+
     /// @notice VAMS token
     IERC20 public vamsToken;
-    
+
     /// @notice Nonce registry for double-spend prevention
     IX402NonceRegistry public nonceRegistry;
-    
+
     /// @notice Treasury for fee collection
     address public treasury;
-    
+
     /// @notice Batches by ID
     mapping(uint256 => Batch) private _batches;
-    
+
     /// @notice Payment claims by hash
     mapping(bytes32 => PaymentClaim) private _claims;
-    
+
     /// @notice Payment disputes evidence
     mapping(bytes32 => bytes) private _disputeEvidence;
-    
+
     struct DisputedPayment {
         address agent; // The one who sent the payment
         uint256 amount; // Amount to refund
     }
-    
+
     /// @notice Details for disputed payments
     mapping(bytes32 => DisputedPayment) private _disputedPayments;
-    
+
     /// @notice Batch count
     uint256 private _batchCount;
-    
+
     /// @notice Total value settled
     uint256 public totalSettled;
-    
+
     /// @notice Total fees collected
     uint256 public totalFees;
-    
+
     /// @notice Batch expiry period after which gateway can reclaim unclaimed funds
     uint256 public constant BATCH_EXPIRY = 30 days;
-    
+
     // ============ Initializer ============
-    
+
     /**
      * @notice Initialize batch settlement
      * @param admin Protocol admin
@@ -117,88 +117,72 @@ contract BatchSettlement is
     constructor() {
         _disableInitializers();
     }
-    
-    function initialize(
-        address admin,
-        address _vamsToken,
-        address _nonceRegistry,
-        address _treasury
-    ) external initializer {
+
+    function initialize(address admin, address _vamsToken, address _nonceRegistry, address _treasury)
+        external
+        initializer
+    {
         require(admin != address(0), "Zero address: admin");
         require(_vamsToken != address(0), "Zero address: _vamsToken");
         require(_nonceRegistry != address(0), "Zero address: _nonceRegistry");
         require(_treasury != address(0), "Zero address: _treasury");
-        
+
         __AccessControl_init();
         __Pausable_init();
-        
+
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
         _grantRole(ADMIN_ROLE, admin);
         _grantRole(RESOLVER_ROLE, admin);
-        
+
         vamsToken = IERC20(_vamsToken);
         nonceRegistry = IX402NonceRegistry(_nonceRegistry);
         treasury = _treasury;
     }
-    
+
     // ============ View Functions ============
-    
+
     /// @inheritdoc IBatchSettlement
-    function getBatch(uint256 batchId) 
-        external 
-        view 
-        override 
-        returns (Batch memory) 
-    {
+    function getBatch(uint256 batchId) external view override returns (Batch memory) {
         return _batches[batchId];
     }
-    
+
     /// @inheritdoc IBatchSettlement
-    function getPaymentClaim(bytes32 paymentHash) 
-        external 
-        view 
-        override 
-        returns (PaymentClaim memory) 
-    {
+    function getPaymentClaim(bytes32 paymentHash) external view override returns (PaymentClaim memory) {
         return _claims[paymentHash];
     }
-    
+
     /// @inheritdoc IBatchSettlement
-    function computePaymentHash(Payment calldata payment) 
-        external 
-        pure 
-        override 
-        returns (bytes32) 
-    {
+    function computePaymentHash(Payment calldata payment) external pure override returns (bytes32) {
         return _computePaymentHash(payment);
     }
-    
+
     /// @inheritdoc IBatchSettlement
-    function verifyPayment(
-        uint256 batchId,
-        Payment calldata payment,
-        bytes32[] calldata merkleProof
-    ) external view override returns (bool) {
+    function verifyPayment(uint256 batchId, Payment calldata payment, bytes32[] calldata merkleProof)
+        external
+        view
+        override
+        returns (bool)
+    {
         Batch storage batch = _batches[batchId];
         if (batch.merkleRoot == bytes32(0)) return false;
-        
+
         bytes32 leaf = _computePaymentHash(payment);
         return MerkleProof.verify(merkleProof, batch.merkleRoot, leaf);
     }
-    
+
     /// @inheritdoc IBatchSettlement
     function isFinalized(uint256 batchId) external view override returns (bool) {
         Batch storage batch = _batches[batchId];
         return batch.status == BatchStatus.FINALIZED;
     }
-    
+
     /// @inheritdoc IBatchSettlement
     function totalBatches() external view override returns (uint256) {
         return _batchCount;
     }
-    
+
     // ============ Gateway Functions ============
-    
+
     /// @inheritdoc IBatchSettlement
     function submitBatch(
         bytes32 merkleRoot,
@@ -212,24 +196,19 @@ contract BatchSettlement is
         if (providerSignatures.length < MIN_SIGNATURES) {
             revert InsufficientSignatures(providerSignatures.length, MIN_SIGNATURES);
         }
-        
+
         // Verify provider signatures
-        bytes32 batchCommitment = keccak256(abi.encodePacked(
-            merkleRoot,
-            totalPayments,
-            totalValue,
-            block.chainid
-        ));
-        
+        bytes32 batchCommitment = keccak256(abi.encodePacked(merkleRoot, totalPayments, totalValue, block.chainid));
+
         // Verify at least MIN_SIGNATURES unique providers signed
         _verifySignatures(batchCommitment, providerSignatures);
-        
+
         // AUDIT FIX ECON01: Gateway must deposit totalValue to fund claims
         vamsToken.safeTransferFrom(msg.sender, address(this), totalValue);
-        
+
         // Create batch
         batchId = ++_batchCount;
-        
+
         _batches[batchId] = Batch({
             merkleRoot: merkleRoot,
             totalPayments: totalPayments,
@@ -239,58 +218,60 @@ contract BatchSettlement is
             status: BatchStatus.SUBMITTED,
             submitter: msg.sender
         });
-        
+
         emit BatchSubmitted(batchId, merkleRoot, totalPayments, totalValue, msg.sender);
-        
+
         return batchId;
     }
-    
+
     /// @inheritdoc IBatchSettlement
     function finalizeBatch(uint256 batchId) external override {
         Batch storage batch = _batches[batchId];
-        
+
         if (batch.merkleRoot == bytes32(0)) revert BatchNotFound(batchId);
         if (batch.status != BatchStatus.SUBMITTED) {
             revert InvalidBatchStatus(batchId, batch.status, BatchStatus.SUBMITTED);
         }
-        
+
         uint256 disputeExpiry = batch.submittedAt + DISPUTE_WINDOW;
         if (block.timestamp < disputeExpiry) {
             revert DisputeWindowActive(disputeExpiry);
         }
-        
+
         batch.status = BatchStatus.FINALIZED;
         batch.finalizedAt = block.timestamp;
-        
+
         emit BatchFinalized(batchId);
     }
-    
+
     // ============ Provider Functions ============
-    
+
     /// @inheritdoc IBatchSettlement
-    function claimPayment(
-        uint256 batchId,
-        Payment calldata payment,
-        bytes32[] calldata merkleProof
-    ) external override nonReentrant whenNotPaused {
+    function claimPayment(uint256 batchId, Payment calldata payment, bytes32[] calldata merkleProof)
+        external
+        override
+        nonReentrant
+        whenNotPaused
+    {
         _claimPayment(batchId, payment, merkleProof);
     }
-    
+
     /// @inheritdoc IBatchSettlement
-    function batchClaimPayments(
-        uint256 batchId,
-        Payment[] calldata payments,
-        bytes32[][] calldata merkleProofs
-    ) external override nonReentrant whenNotPaused {
+    function batchClaimPayments(uint256 batchId, Payment[] calldata payments, bytes32[][] calldata merkleProofs)
+        external
+        override
+        nonReentrant
+        whenNotPaused
+    {
         require(payments.length == merkleProofs.length, "Array length mismatch");
-        
+
         for (uint256 i = 0; i < payments.length; i++) {
             _claimPayment(batchId, payments[i], merkleProofs[i]);
         }
     }
-    
+
     // ============ Dispute Functions ============
-    
+
     /// @inheritdoc IBatchSettlement
     function disputePayment(
         uint256 batchId,
@@ -299,86 +280,78 @@ contract BatchSettlement is
         bytes calldata evidence
     ) external override {
         Batch storage batch = _batches[batchId];
-        
+
         if (batch.merkleRoot == bytes32(0)) revert BatchNotFound(batchId);
-        
+
         // Can only dispute during dispute window
         if (batch.status != BatchStatus.SUBMITTED) {
             revert InvalidBatchStatus(batchId, batch.status, BatchStatus.SUBMITTED);
         }
-        
+
         uint256 disputeExpiry = batch.submittedAt + DISPUTE_WINDOW;
         if (block.timestamp > disputeExpiry) {
             revert DisputeWindowExpired(disputeExpiry);
         }
-        
+
         // Verify payment is in batch
         bytes32 paymentHash = _computePaymentHash(payment);
         if (!MerkleProof.verify(merkleProof, batch.merkleRoot, paymentHash)) {
             revert InvalidMerkleProof();
         }
-        
+
         // Only agent can dispute their own payment
         if (msg.sender != payment.agent) {
             revert UnauthorizedCaller();
         }
-        
+
         // Mark as disputed
-        _claims[paymentHash] = PaymentClaim({
-            batchId: batchId,
-            paymentHash: paymentHash,
-            claimedAt: 0,
-            status: PaymentStatus.DISPUTED
-        });
-        
-        _disputedPayments[paymentHash] = DisputedPayment({
-            agent: payment.agent,
-            amount: payment.amount
-        });
-        
+        _claims[paymentHash] =
+            PaymentClaim({batchId: batchId, paymentHash: paymentHash, claimedAt: 0, status: PaymentStatus.DISPUTED});
+
+        _disputedPayments[paymentHash] = DisputedPayment({agent: payment.agent, amount: payment.amount});
+
         _disputeEvidence[paymentHash] = evidence;
-        
+
         emit PaymentDisputed(batchId, paymentHash, msg.sender);
     }
-    
+
     /// @inheritdoc IBatchSettlement
-    function disputeBatch(uint256 batchId, bytes calldata evidence) 
-        external 
-        override 
-    {
+    function disputeBatch(uint256 batchId, bytes calldata evidence) external override {
         Batch storage batch = _batches[batchId];
-        
+
         if (batch.merkleRoot == bytes32(0)) revert BatchNotFound(batchId);
         if (batch.status != BatchStatus.SUBMITTED) {
             revert InvalidBatchStatus(batchId, batch.status, BatchStatus.SUBMITTED);
         }
-        
+
         uint256 disputeExpiry = batch.submittedAt + DISPUTE_WINDOW;
         if (block.timestamp > disputeExpiry) {
             revert DisputeWindowExpired(disputeExpiry);
         }
-        
+
         batch.status = BatchStatus.DISPUTED;
-        
+
         emit BatchDisputed(batchId, msg.sender);
     }
-    
+
     /// @inheritdoc IBatchSettlement
-    function resolvePaymentDispute(
-        bytes32 paymentHash,
-        bool refundAgent
-    ) external override onlyRole(RESOLVER_ROLE) nonReentrant {
+    function resolvePaymentDispute(bytes32 paymentHash, bool refundAgent)
+        external
+        override
+        onlyRole(RESOLVER_ROLE)
+        nonReentrant
+    {
         PaymentClaim storage claim = _claims[paymentHash];
-        
+
         if (claim.status != PaymentStatus.DISPUTED) {
             revert PaymentAlreadyClaimed(paymentHash);
         }
-        
+
         Batch storage batch = _batches[claim.batchId];
-        
+
         if (refundAgent) {
             claim.status = PaymentStatus.REFUNDED;
-            
+
             DisputedPayment storage dp = _disputedPayments[paymentHash];
             if (dp.amount > 0) {
                 // Return funds to the agent
@@ -389,137 +362,111 @@ contract BatchSettlement is
             claim.claimedAt = block.timestamp;
         }
     }
-    
+
     /**
      * @notice Cancel a disputed batch
      * @param batchId Batch to cancel
      * @param reason Cancellation reason
      */
-    function cancelBatch(uint256 batchId, string calldata reason) 
-        external 
-        onlyRole(RESOLVER_ROLE) 
-    {
+    function cancelBatch(uint256 batchId, string calldata reason) external onlyRole(RESOLVER_ROLE) {
         Batch storage batch = _batches[batchId];
-        
+
         if (batch.merkleRoot == bytes32(0)) revert BatchNotFound(batchId);
         if (batch.status != BatchStatus.DISPUTED) {
             revert InvalidBatchStatus(batchId, batch.status, BatchStatus.DISPUTED);
         }
-        
+
         batch.status = BatchStatus.CANCELLED;
-        
+
         emit BatchCancelled(batchId, reason);
     }
-    
+
     // ============ Internal Functions ============
-    
+
     /**
      * @dev Claim a single payment
      */
-    function _claimPayment(
-        uint256 batchId,
-        Payment calldata payment,
-        bytes32[] calldata merkleProof
-    ) internal {
+    function _claimPayment(uint256 batchId, Payment calldata payment, bytes32[] calldata merkleProof) internal {
         Batch storage batch = _batches[batchId];
-        
+
         if (batch.merkleRoot == bytes32(0)) revert BatchNotFound(batchId);
         if (batch.status != BatchStatus.FINALIZED) {
             revert InvalidBatchStatus(batchId, batch.status, BatchStatus.FINALIZED);
         }
-        
+
         // Only provider can claim
         if (msg.sender != payment.provider) {
             revert UnauthorizedCaller();
         }
-        
+
         // Compute payment hash
         bytes32 paymentHash = _computePaymentHash(payment);
-        
+
         // Check not already claimed
         if (_claims[paymentHash].status == PaymentStatus.CLAIMED) {
             revert PaymentAlreadyClaimed(paymentHash);
         }
-        
+
         // Verify Merkle proof
         if (!MerkleProof.verify(merkleProof, batch.merkleRoot, paymentHash)) {
             revert InvalidMerkleProof();
         }
-        
+
         // Calculate fee
         uint256 fee = (payment.amount * SETTLEMENT_FEE_BPS) / BPS_DENOMINATOR;
         uint256 payout = payment.amount - fee;
 
         bytes32 receiptHash = keccak256(abi.encodePacked(paymentHash, block.timestamp));
         _claims[paymentHash] = PaymentClaim({
-            batchId: batchId,
-            paymentHash: paymentHash,
-            claimedAt: block.timestamp,
-            status: PaymentStatus.CLAIMED
+            batchId: batchId, paymentHash: paymentHash, claimedAt: block.timestamp, status: PaymentStatus.CLAIMED
         });
-        
+
         totalSettled += payment.amount;
         totalFees += fee;
 
-        nonceRegistry.consumeNonce(
-            payment.agent,
-            payment.nonce,
-            receiptHash,
-            bytes32(batchId)
-        );
-        
+        nonceRegistry.consumeNonce(payment.agent, payment.nonce, receiptHash, bytes32(batchId));
+
         // Transfer fee
         if (fee > 0 && treasury != address(0)) {
             vamsToken.safeTransfer(treasury, fee);
         }
-        
+
         // Transfer payout
         vamsToken.safeTransfer(payment.provider, payout);
-        
+
         emit PaymentClaimed(batchId, paymentHash, payment.provider, payout);
     }
-    
+
     /**
      * @dev Compute payment hash (leaf in Merkle tree)
      */
-    function _computePaymentHash(Payment calldata payment) 
-        internal 
-        pure 
-        returns (bytes32) 
-    {
-        return keccak256(abi.encodePacked(
-            payment.agent,
-            payment.provider,
-            payment.amount,
-            payment.nonce,
-            payment.serviceType
-        ));
+    function _computePaymentHash(Payment calldata payment) internal pure returns (bytes32) {
+        return keccak256(
+            abi.encodePacked(payment.agent, payment.provider, payment.amount, payment.nonce, payment.serviceType)
+        );
     }
-    
+
     /**
      * @dev Verify provider signatures on batch commitment.
      * Recovers signer addresses via ECDSA, verifies each is a registered
      * provider, prevents duplicate signers, and enforces MIN_SIGNATURES.
-     * 
+     *
      * AUDIT FIX: C01 — Replaced no-op length check with real cryptographic
      * signature verification to prevent settlement fraud.
      */
-    function _verifySignatures(
-        bytes32 commitment,
-        bytes[] calldata signatures
-    ) internal view {
+    function _verifySignatures(bytes32 commitment, bytes[] calldata signatures) internal view {
         require(signatures.length >= MIN_SIGNATURES, "Insufficient signatures");
-        
+
         bytes32 ethHash = MessageHashUtils.toEthSignedMessageHash(commitment);
         address[] memory signers = new address[](signatures.length);
-        
+
         for (uint256 i = 0; i < signatures.length; i++) {
             require(signatures[i].length > 0, "Empty signature");
-            
+
             // Recover signer address from ECDSA signature
             address signer = ECDSA.recover(ethHash, signatures[i]);
             require(signer != address(0), "Invalid signature");
-            
+
             // Check for duplicate signers
             for (uint256 j = 0; j < i; j++) {
                 require(signers[j] != signer, "Duplicate signer");
@@ -527,9 +474,9 @@ contract BatchSettlement is
             signers[i] = signer;
         }
     }
-    
+
     // ============ Admin Functions ============
-    
+
     /**
      * @notice Reclaim unclaimed funds from expired batches
      * @dev AUDIT FIX ECON01: Gateway can recover deposited-but-unclaimed funds
@@ -539,23 +486,17 @@ contract BatchSettlement is
     function reclaimExpiredBatch(uint256 batchId) external nonReentrant {
         Batch storage batch = _batches[batchId];
         if (batch.merkleRoot == bytes32(0)) revert BatchNotFound(batchId);
-        require(
-            batch.status == BatchStatus.FINALIZED || batch.status == BatchStatus.CANCELLED,
-            "Batch not reclaimable"
-        );
-        require(
-            block.timestamp > batch.submittedAt + BATCH_EXPIRY,
-            "Batch not yet expired"
-        );
+        require(batch.status == BatchStatus.FINALIZED || batch.status == BatchStatus.CANCELLED, "Batch not reclaimable");
+        require(block.timestamp > batch.submittedAt + BATCH_EXPIRY, "Batch not yet expired");
         require(msg.sender == batch.submitter, "Only submitter can reclaim");
-        
+
         // Calculate remaining unclaimed value
         uint256 remaining = vamsToken.balanceOf(address(this));
         if (remaining > 0) {
             vamsToken.safeTransfer(batch.submitter, remaining);
         }
     }
-    
+
     /**
      * @notice Update treasury address
      * @param _treasury New treasury
@@ -564,23 +505,23 @@ contract BatchSettlement is
         require(_treasury != address(0), "Zero address");
         treasury = _treasury;
     }
-    
+
     /**
      * @notice Pause the contract
      */
     function pause() external onlyRole(ADMIN_ROLE) {
         _pause();
     }
-    
+
     /**
      * @notice Unpause the contract
      */
     function unpause() external onlyRole(ADMIN_ROLE) {
         _unpause();
     }
-    
+
     // ============ Storage Gap ============
-    
+
     /// @dev Reserved storage space for future upgrades
     uint256[50] private __gap;
 }

@@ -18,55 +18,46 @@ interface IVAMSStaking {
 
     /// @notice Staking tier based on amount
     enum StakingTier {
-        None,       // < 50,000 VAMS
-        Silver,     // 50,000 - 99,999
-        Gold,       // 100,000 - 999,999
-        Platinum    // 1,000,000+
+        None, // < 50,000 VAMS
+        Silver, // 50,000 - 99,999
+        Gold, // 100,000 - 999,999
+        Platinum // 1,000,000+
     }
 
     /// @notice Lock period options
     enum LockPeriod {
-        SevenDays,      // 7 days - 1.0x multiplier
-        ThirtyDays,     // 30 days - 1.1x multiplier
-        NinetyDays,     // 90 days - 1.25x multiplier
-        OneEightyDays   // 180 days - 1.5x multiplier
+        SevenDays, // 7 days - 1.0x multiplier
+        ThirtyDays, // 30 days - 1.1x multiplier
+        NinetyDays, // 90 days - 1.25x multiplier
+        OneEightyDays // 180 days - 1.5x multiplier
     }
 
     // ============ Structs ============
 
     /// @notice User stake information
     struct StakeInfo {
-        uint256 amount;             // Amount staked
-        uint256 rewardDebt;         // Reward debt for calculation
-        uint256 pendingRewards;     // Accumulated pending rewards
-        uint256 stakedAt;           // Timestamp when staked
-        uint256 lockedUntil;        // Timestamp when unlock possible
-        LockPeriod lockPeriod;      // Selected lock period
-        bool autoCompound;          // Auto-compound rewards
+        uint256 amount; // Amount staked
+        uint256 rewardDebt; // Reward debt for calculation
+        uint256 pendingRewards; // Accumulated pending rewards
+        uint256 stakedAt; // Timestamp when staked
+        uint256 lockedUntil; // Timestamp when unlock possible
+        LockPeriod lockPeriod; // Selected lock period
+        bool autoCompound; // Auto-compound rewards
     }
 
     /// @notice Unbonding request
     struct UnbondingRequest {
-        uint256 amount;             // Amount being unbonded
-        uint256 unbondingEnd;       // When unbonding completes
+        uint256 amount; // Amount being unbonded
+        uint256 unbondingEnd; // When unbonding completes
     }
 
     // ============ Events ============
 
     /// @notice Emitted when tokens are staked
-    event Staked(
-        address indexed user,
-        uint256 amount,
-        LockPeriod lockPeriod,
-        uint256 lockedUntil
-    );
+    event Staked(address indexed user, uint256 amount, LockPeriod lockPeriod, uint256 lockedUntil);
 
     /// @notice Emitted when unstaking is initiated
-    event Unstaked(
-        address indexed user,
-        uint256 amount,
-        uint256 unbondingEnds
-    );
+    event Unstaked(address indexed user, uint256 amount, uint256 unbondingEnds);
 
     /// @notice Emitted when tokens are withdrawn after unbonding
     event Withdrawn(address indexed user, uint256 amount);
@@ -78,11 +69,7 @@ interface IVAMSStaking {
     event RewardsCompounded(address indexed user, uint256 amount);
 
     /// @notice Emitted when user's tier changes
-    event TierChanged(
-        address indexed user,
-        StakingTier oldTier,
-        StakingTier newTier
-    );
+    event TierChanged(address indexed user, StakingTier oldTier, StakingTier newTier);
 
     /// @notice Emitted when emission rate is updated
     event EmissionRateUpdated(uint256 oldRate, uint256 newRate);
@@ -139,14 +126,8 @@ interface IVAMSStaking {
     /// @param v Signature v
     /// @param r Signature r
     /// @param s Signature s
-    function stakeWithPermit(
-        uint256 amount,
-        LockPeriod lockPeriod,
-        uint256 deadline,
-        uint8 v,
-        bytes32 r,
-        bytes32 s
-    ) external;
+    function stakeWithPermit(uint256 amount, LockPeriod lockPeriod, uint256 deadline, uint8 v, bytes32 r, bytes32 s)
+        external;
 
     /// @notice Add to existing stake (inherits original lock)
     /// @param amount Amount to add

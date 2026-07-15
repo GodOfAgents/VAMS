@@ -149,17 +149,13 @@ contract VAMSSentinelTest is BaseTest {
         uint256 lowBond = 5_000e18; // Below MIN_KEEPER_BOND
         _fundAndApprove(newKeeper, address(sentinel), lowBond);
 
-        vm.expectRevert(abi.encodeWithSelector(
-            IVAMSSentinel.InsufficientKeeperBond.selector, lowBond, KEEPER_BOND
-        ));
+        vm.expectRevert(abi.encodeWithSelector(IVAMSSentinel.InsufficientKeeperBond.selector, lowBond, KEEPER_BOND));
         vm.prank(newKeeper);
         sentinel.registerKeeper(lowBond);
     }
 
     function test_RegisterKeeper_RevertAlreadyRegistered() public {
-        vm.expectRevert(abi.encodeWithSelector(
-            IVAMSSentinel.KeeperAlreadyRegistered.selector, keeper1
-        ));
+        vm.expectRevert(abi.encodeWithSelector(IVAMSSentinel.KeeperAlreadyRegistered.selector, keeper1));
         vm.prank(keeper1);
         sentinel.registerKeeper(KEEPER_BOND);
     }
@@ -371,9 +367,7 @@ contract VAMSSentinelTest is BaseTest {
     function test_SlashKeeper_RevertNotRegistered() public {
         _triggerL2Pause();
 
-        vm.expectRevert(abi.encodeWithSelector(
-            IVAMSSentinel.KeeperNotRegistered.selector, user1
-        ));
+        vm.expectRevert(abi.encodeWithSelector(IVAMSSentinel.KeeperNotRegistered.selector, user1));
         vm.prank(dao);
         sentinel.slashKeeper(user1, "not a keeper");
     }

@@ -11,9 +11,9 @@ import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol"
  */
 abstract contract VAMSTimelockedAdmin is AccessControlUpgradeable {
     uint256 public constant ADMIN_DELAY = 24 hours;
-    
+
     mapping(bytes32 => uint256) public pendingChanges;
-    
+
     event ChangeProposed(bytes32 indexed changeId, uint256 executionTime);
     event ChangeExecuted(bytes32 indexed changeId);
     event ChangeCancelled(bytes32 indexed changeId);
@@ -39,7 +39,7 @@ abstract contract VAMSTimelockedAdmin is AccessControlUpgradeable {
         uint256 executionTime = pendingChanges[changeId];
         if (executionTime == 0) revert ChangeNotProposed(changeId);
         if (block.timestamp < executionTime) revert TimelockNotExpired(executionTime);
-        
+
         pendingChanges[changeId] = 0; // reset
         emit ChangeExecuted(changeId);
     }

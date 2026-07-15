@@ -14,23 +14,23 @@ import "../staking/IVAMSStaking.sol";
  * @author VAMS Protocol
  * @notice √stake-weighted oracle voting for contested slashing decisions
  * @dev Implements commit-reveal scheme to prevent front-running
- * 
+ *
  * Flow:
  * 1. Proposer submits slash proposal with evidence
  * 2. Commit phase: Stakers commit vote hashes
  * 3. Reveal phase: Stakers reveal actual votes
  * 4. Finalization: √stake-weighted tally determines outcome
  * 5. Execution: Approved slashes are executed via VAMSSlasher
- * 
+ *
  * √stake weighting ensures larger stakers have more influence
  * but prevents plutocracy (10x stake = ~3.2x voting power)
  */
-contract SlashingOracle is 
+contract SlashingOracle is
     Initializable,
     AccessControlUpgradeable,
     PausableUpgradeable,
     ReentrancyGuard,
-    ISlashingOracle 
+    ISlashingOracle
 {
     // ============ Constants ============
 
@@ -94,11 +94,7 @@ contract SlashingOracle is
      * @param _slasher VAMSSlasher contract
      * @param _staking VAMSStaking contract
      */
-    function initialize(
-        address _admin,
-        address _slasher,
-        address _staking
-    ) external initializer {
+    function initialize(address _admin, address _slasher, address _staking) external initializer {
         require(_admin != address(0), "Invalid admin");
         require(_slasher != address(0), "Invalid slasher");
         require(_staking != address(0), "Invalid staking");
@@ -117,12 +113,13 @@ contract SlashingOracle is
     // ============ Proposal Management ============
 
     /// @inheritdoc ISlashingOracle
-    function proposeSlash(
-        address operator,
-        uint8 offenseType,
-        bytes32 evidenceHash,
-        uint256 proposedAmount
-    ) external override whenNotPaused onlyRole(PROPOSER_ROLE) returns (uint256 proposalId) {
+    function proposeSlash(address operator, uint8 offenseType, bytes32 evidenceHash, uint256 proposedAmount)
+        external
+        override
+        whenNotPaused
+        onlyRole(PROPOSER_ROLE)
+        returns (uint256 proposalId)
+    {
         require(operator != address(0), "Invalid operator");
         require(evidenceHash != bytes32(0), "Invalid evidence");
         require(proposedAmount > 0, "Invalid amount");
@@ -161,13 +158,10 @@ contract SlashingOracle is
     }
 
     /// @inheritdoc ISlashingOracle
-    function commitVote(
-        uint256 proposalId, 
-        bytes32 commitment
-    ) external override whenNotPaused {
+    function commitVote(uint256 proposalId, bytes32 commitment) external override whenNotPaused {
         SlashProposal storage proposal = proposals[proposalId];
         if (proposal.proposer == address(0)) revert ProposalNotFound(proposalId);
-        
+
         if (block.timestamp > proposal.commitDeadline) {
             revert NotInCommitPhase(proposalId);
         }
@@ -191,22 +185,14 @@ contract SlashingOracle is
         // Calculate √stake weight
         uint256 stakeWeight = _sqrt(voterStake);
 
-        voteCommits[proposalId][msg.sender] = VoteCommit({
-            commitment: commitment,
-            revealed: false,
-            vote: false,
-            stakeWeight: stakeWeight
-        });
+        voteCommits[proposalId][msg.sender] =
+            VoteCommit({commitment: commitment, revealed: false, vote: false, stakeWeight: stakeWeight});
 
         emit VoteCommitted(proposalId, msg.sender);
     }
 
     /// @inheritdoc ISlashingOracle
-    function revealVote(
-        uint256 proposalId, 
-        bool vote, 
-        bytes32 salt
-    ) external override whenNotPaused {
+    function revealVote(uint256 proposalId, bool vote, bytes32 salt) external override whenNotPaused {
         SlashProposal storage proposal = proposals[proposalId];
         if (proposal.proposer == address(0)) revert ProposalNotFound(proposalId);
 
@@ -259,8 +245,7 @@ contract SlashingOracle is
         // Must be after reveal deadline
         require(block.timestamp > proposal.revealDeadline, "Reveal phase not ended");
         require(
-            proposal.status == ProposalStatus.COMMIT_PHASE || 
-            proposal.status == ProposalStatus.REVEAL_PHASE,
+            proposal.status == ProposalStatus.COMMIT_PHASE || proposal.status == ProposalStatus.REVEAL_PHASE,
             "Already finalized"
         );
 
@@ -273,7 +258,7 @@ contract SlashingOracle is
         } else {
             // Check if approved (60% threshold)
             uint256 approvalBps = (proposal.forStakeWeight * 10_000) / totalParticipation;
-            
+
             if (approvalBps >= APPROVAL_THRESHOLD_BPS) {
                 proposal.status = ProposalStatus.APPROVED;
             } else {
@@ -281,21 +266,14 @@ contract SlashingOracle is
             }
         }
 
-        emit ProposalFinalized(
-            proposalId, 
-            proposal.status, 
-            proposal.forStakeWeight, 
-            proposal.againstStakeWeight
-        );
+        emit ProposalFinalized(proposalId, proposal.status, proposal.forStakeWeight, proposal.againstStakeWeight);
     }
 
     /// @inheritdoc ISlashingOracle
-    function executeSlash(
-        uint256 proposalId
-    ) external override nonReentrant onlyRole(EXECUTOR_ROLE) {
+    function executeSlash(uint256 proposalId) external override nonReentrant onlyRole(EXECUTOR_ROLE) {
         SlashProposal storage proposal = proposals[proposalId];
         if (proposal.proposer == address(0)) revert ProposalNotFound(proposalId);
-        
+
         if (proposal.status != ProposalStatus.APPROVED) {
             revert ProposalNotFinalized(proposalId);
         }
@@ -308,7 +286,7 @@ contract SlashingOracle is
         // The slasher contract handles the actual slashing logic
         // This would require VAMSSlasher to have a function that accepts oracle-approved slashes
         // For now, emit event - integration would require VAMSSlasher modification
-        
+
         // Note: In production, add: slasher.executeOracleSlash(proposal.operator, proposal.proposedAmount);
     }
 
@@ -339,17 +317,16 @@ contract SlashingOracle is
     /// @inheritdoc ISlashingOracle
     function getCurrentPhase(uint256 proposalId) external view override returns (ProposalStatus) {
         SlashProposal storage proposal = proposals[proposalId];
-        
+
         if (proposal.proposer == address(0)) {
             return ProposalStatus.PENDING;
         }
-        
+
         // If already finalized, return that status
-        if (proposal.status != ProposalStatus.COMMIT_PHASE && 
-            proposal.status != ProposalStatus.REVEAL_PHASE) {
+        if (proposal.status != ProposalStatus.COMMIT_PHASE && proposal.status != ProposalStatus.REVEAL_PHASE) {
             return proposal.status;
         }
-        
+
         // Determine current phase based on time
         if (block.timestamp <= proposal.commitDeadline) {
             return ProposalStatus.COMMIT_PHASE;
@@ -366,10 +343,7 @@ contract SlashingOracle is
      * @param voter Voter address
      * @return commit Vote commitment details
      */
-    function getVoteCommit(
-        uint256 proposalId, 
-        address voter
-    ) external view returns (VoteCommit memory) {
+    function getVoteCommit(uint256 proposalId, address voter) external view returns (VoteCommit memory) {
         return voteCommits[proposalId][voter];
     }
 
@@ -416,18 +390,18 @@ contract SlashingOracle is
      */
     function _sqrt(uint256 x) internal pure returns (uint256 y) {
         if (x == 0) return 0;
-        
+
         uint256 z = (x + 1) / 2;
         y = x;
-        
+
         while (z < y) {
             y = z;
             z = (x / z + z) / 2;
         }
     }
-    
+
     // ============ Storage Gap ============
-    
+
     /// @dev Reserved storage space for future upgrades
     uint256[50] private __gap;
 }

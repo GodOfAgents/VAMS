@@ -13,7 +13,7 @@ import "./Constants.sol";
 abstract contract BaseTest is Test {
     // ============ Common Contracts ============
     MockVAMSToken public token;
-    
+
     // ============ Common Addresses ============
     address public admin;
     address public treasury;
@@ -28,9 +28,9 @@ abstract contract BaseTest is Test {
     address public guardian2;
     address public guardian3;
     address public slasher;
-    
+
     // ============ Setup ============
-    
+
     function setUp() public virtual {
         // Create labeled addresses
         admin = makeAddr("admin");
@@ -46,12 +46,12 @@ abstract contract BaseTest is Test {
         guardian2 = makeAddr("guardian2");
         guardian3 = makeAddr("guardian3");
         slasher = makeAddr("slasher");
-        
+
         // Deploy mock token
         vm.prank(admin);
         token = new MockVAMSToken();
         vm.label(address(token), "VAMSToken");
-        
+
         // Fund common test accounts
         _fundAccount(user1, TestConstants.INITIAL_BALANCE);
         _fundAccount(user2, TestConstants.INITIAL_BALANCE);
@@ -60,9 +60,9 @@ abstract contract BaseTest is Test {
         _fundAccount(agent1, TestConstants.INITIAL_BALANCE);
         _fundAccount(agent2, TestConstants.INITIAL_BALANCE);
     }
-    
+
     // ============ Token Helpers ============
-    
+
     /**
      * @notice Fund an account with tokens
      * @param account Account to fund
@@ -73,7 +73,7 @@ abstract contract BaseTest is Test {
         // forge-lint: disable-next-line(erc20-unchecked-transfer)
         token.transfer(account, amount);
     }
-    
+
     /**
      * @notice Mint tokens to an account
      * @param account Account to mint to
@@ -82,7 +82,7 @@ abstract contract BaseTest is Test {
     function _mintTo(address account, uint256 amount) internal {
         token.mint(account, amount);
     }
-    
+
     /**
      * @notice Approve tokens for spending
      * @param owner Token owner
@@ -93,7 +93,7 @@ abstract contract BaseTest is Test {
         vm.prank(owner);
         token.approve(spender, amount);
     }
-    
+
     /**
      * @notice Fund and approve in one call
      * @param account Account to setup
@@ -104,9 +104,9 @@ abstract contract BaseTest is Test {
         _mintTo(account, amount);
         _approve(account, spender, amount);
     }
-    
+
     // ============ Time Helpers ============
-    
+
     /**
      * @notice Advance block timestamp
      * @param seconds_ Seconds to advance
@@ -114,7 +114,7 @@ abstract contract BaseTest is Test {
     function _advanceTime(uint256 seconds_) internal {
         vm.warp(block.timestamp + seconds_);
     }
-    
+
     /**
      * @notice Advance to specific timestamp
      * @param timestamp Target timestamp
@@ -122,7 +122,7 @@ abstract contract BaseTest is Test {
     function _warpTo(uint256 timestamp) internal {
         vm.warp(timestamp);
     }
-    
+
     /**
      * @notice Advance blocks
      * @param blocks Number of blocks to advance
@@ -130,9 +130,9 @@ abstract contract BaseTest is Test {
     function _advanceBlocks(uint256 blocks) internal {
         vm.roll(block.number + blocks);
     }
-    
+
     // ============ Signature Helpers ============
-    
+
     /**
      * @notice Create a test private key
      * @param seed Seed for key generation
@@ -141,7 +141,7 @@ abstract contract BaseTest is Test {
     function _makePrivateKey(string memory seed) internal pure returns (uint256) {
         return uint256(keccak256(abi.encodePacked(seed)));
     }
-    
+
     /**
      * @notice Sign a message hash
      * @param privateKey Signer's private key
@@ -152,9 +152,9 @@ abstract contract BaseTest is Test {
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(privateKey, messageHash);
         return abi.encodePacked(r, s, v);
     }
-    
+
     // ============ Hash Helpers ============
-    
+
     /**
      * @notice Compute Ethereum signed message hash
      * @param messageHash Original hash
@@ -163,9 +163,9 @@ abstract contract BaseTest is Test {
     function _toEthSignedMessageHash(bytes32 messageHash) internal pure returns (bytes32) {
         return keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", messageHash));
     }
-    
+
     // ============ Array Helpers ============
-    
+
     /**
      * @notice Create single-element address array
      * @param addr Address to wrap
@@ -176,7 +176,7 @@ abstract contract BaseTest is Test {
         arr[0] = addr;
         return arr;
     }
-    
+
     /**
      * @notice Create two-element address array
      */
@@ -186,7 +186,7 @@ abstract contract BaseTest is Test {
         arr[1] = addr2;
         return arr;
     }
-    
+
     /**
      * @notice Create three-element address array
      */
@@ -197,9 +197,9 @@ abstract contract BaseTest is Test {
         arr[2] = addr3;
         return arr;
     }
-    
+
     // ============ Merkle Helpers ============
-    
+
     /**
      * @notice Compute leaf hash for Merkle tree
      * @param data Data to hash
@@ -208,7 +208,7 @@ abstract contract BaseTest is Test {
     function _computeLeaf(bytes memory data) internal pure returns (bytes32) {
         return keccak256(data);
     }
-    
+
     /**
      * @notice Compute parent hash in Merkle tree
      * @param left Left child hash
@@ -222,24 +222,20 @@ abstract contract BaseTest is Test {
             return keccak256(abi.encodePacked(right, left));
         }
     }
-    
+
     // ============ Assertion Helpers ============
-    
+
     /**
      * @notice Assert balance changed by exact amount
      * @param account Account to check
      * @param expectedChange Expected balance change (can be negative)
      * @param action Action to execute
      */
-    function _assertBalanceChange(
-        address account,
-        int256 expectedChange,
-        function() internal action
-    ) internal {
+    function _assertBalanceChange(address account, int256 expectedChange, function() internal action) internal {
         uint256 balanceBefore = token.balanceOf(account);
         action();
         uint256 balanceAfter = token.balanceOf(account);
-        
+
         if (expectedChange >= 0) {
             // forge-lint: disable-next-line(unsafe-typecast)
             assertEq(balanceAfter, balanceBefore + uint256(expectedChange), "Balance did not increase as expected");
@@ -248,9 +244,9 @@ abstract contract BaseTest is Test {
             assertEq(balanceAfter, balanceBefore - uint256(-expectedChange), "Balance did not decrease as expected");
         }
     }
-    
+
     // ============ Bound Helpers ============
-    
+
     /**
      * @notice Bound amount to valid range for token operations
      * @param amount Raw fuzz input
@@ -259,7 +255,7 @@ abstract contract BaseTest is Test {
     function _boundAmount(uint256 amount) internal pure returns (uint256) {
         return bound(amount, 1, 100_000_000 ether);
     }
-    
+
     /**
      * @notice Bound time to valid range
      * @param time Raw fuzz input
@@ -268,7 +264,7 @@ abstract contract BaseTest is Test {
     function _boundTime(uint256 time) internal pure returns (uint256) {
         return bound(time, 1, 3650 days);
     }
-    
+
     /**
      * @notice Bound basis points to valid range
      * @param bps Raw fuzz input

@@ -25,39 +25,24 @@ interface IRewardDistributor {
 
     /// @notice Reward breakdown for a single provider
     struct ProviderReward {
-        uint256 baseReward;          // Share of settled escrows
-        uint256 regionalBonus;       // Extra from region multiplier
-        uint256 stakingBoost;        // Extra from staking tier
-        uint256 builderRevenue;      // Accumulated builder share
-        uint256 totalReward;         // Sum of all components
+        uint256 baseReward; // Share of settled escrows
+        uint256 regionalBonus; // Extra from region multiplier
+        uint256 stakingBoost; // Extra from staking tier
+        uint256 builderRevenue; // Accumulated builder share
+        uint256 totalReward; // Sum of all components
     }
 
     // ═══════════════════ Events ═══════════════════
 
     event RewardsAccumulated(
-        address indexed provider,
-        uint256 baseReward,
-        uint256 regionalBonus,
-        uint256 stakingBoost,
-        uint256 totalReward
+        address indexed provider, uint256 baseReward, uint256 regionalBonus, uint256 stakingBoost, uint256 totalReward
     );
 
-    event RewardsClaimed(
-        address indexed provider,
-        uint256 amount,
-        uint256 epochsCovered
-    );
+    event RewardsClaimed(address indexed provider, uint256 amount, uint256 epochsCovered);
 
-    event EpochRewardsDistributed(
-        uint256 indexed epochId,
-        uint256 totalDistributed,
-        uint256 providerCount
-    );
+    event EpochRewardsDistributed(uint256 indexed epochId, uint256 totalDistributed, uint256 providerCount);
 
-    event BuilderRevenueAccumulated(
-        address indexed builder,
-        uint256 amount
-    );
+    event BuilderRevenueAccumulated(address indexed builder, uint256 amount);
 
     // ═══════════════════ Errors ═══════════════════
 
@@ -71,19 +56,12 @@ interface IRewardDistributor {
     /// @param provider Provider address
     /// @param baseReward Base reward from settlements
     /// @param regionId Region for multiplier lookup
-    function accumulateReward(
-        address provider,
-        uint256 baseReward,
-        bytes32 regionId
-    ) external;
+    function accumulateReward(address provider, uint256 baseReward, bytes32 regionId) external;
 
     /// @notice Accumulate builder revenue share
     /// @param builder Builder address
     /// @param amount Revenue share amount
-    function accumulateBuilderRevenue(
-        address builder,
-        uint256 amount
-    ) external;
+    function accumulateBuilderRevenue(address builder, uint256 amount) external;
 
     /// @notice Finalize an epoch's reward distribution
     /// @param epochId Epoch to finalize

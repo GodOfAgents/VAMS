@@ -55,10 +55,8 @@ contract VAMSHardwareRegistryTest is Test {
         // Deploy registry behind proxy
         vm.startPrank(owner);
         VAMSHardwareRegistry impl = new VAMSHardwareRegistry();
-        ERC1967Proxy proxy = new ERC1967Proxy(
-            address(impl),
-            abi.encodeCall(VAMSHardwareRegistry.initialize, (owner, address(vams)))
-        );
+        ERC1967Proxy proxy =
+            new ERC1967Proxy(address(impl), abi.encodeCall(VAMSHardwareRegistry.initialize, (owner, address(vams))));
         registry = VAMSHardwareRegistry(address(proxy));
 
         // Grant roles
@@ -84,8 +82,7 @@ contract VAMSHardwareRegistryTest is Test {
     }
 
     function test_PreseededClasses_GPU_H100_Info() public view {
-        IVAMSHardwareRegistry.HardwareClassInfo memory cls =
-            registry.getHardwareClass(HardwareClasses.GPU_H100);
+        IVAMSHardwareRegistry.HardwareClassInfo memory cls = registry.getHardwareClass(HardwareClasses.GPU_H100);
 
         assertEq(cls.classId, HardwareClasses.GPU_H100);
         assertEq(keccak256(bytes(cls.name)), keccak256(bytes("GPU_H100")));
@@ -96,8 +93,7 @@ contract VAMSHardwareRegistryTest is Test {
     }
 
     function test_PreseededClasses_TEE_SGX_Info() public view {
-        IVAMSHardwareRegistry.HardwareClassInfo memory cls =
-            registry.getHardwareClass(HardwareClasses.TEE_SGX);
+        IVAMSHardwareRegistry.HardwareClassInfo memory cls = registry.getHardwareClass(HardwareClasses.TEE_SGX);
 
         assertEq(cls.minCollateral, 30_000e18);
         assertEq(cls.minBenchmarkScore, 9000);
@@ -109,18 +105,11 @@ contract VAMSHardwareRegistryTest is Test {
         bytes32 newClassId = keccak256("GPU_B200");
 
         vm.prank(governance);
-        registry.registerHardwareClass(
-            newClassId,
-            "GPU_B200",
-            "GPU",
-            100_000e18,
-            8500
-        );
+        registry.registerHardwareClass(newClassId, "GPU_B200", "GPU", 100_000e18, 8500);
 
         assertEq(registry.getRegisteredClassCount(), 12);
 
-        IVAMSHardwareRegistry.HardwareClassInfo memory cls =
-            registry.getHardwareClass(newClassId);
+        IVAMSHardwareRegistry.HardwareClassInfo memory cls = registry.getHardwareClass(newClassId);
         assertEq(keccak256(bytes(cls.name)), keccak256(bytes("GPU_B200")));
         assertEq(cls.minCollateral, 100_000e18);
         assertTrue(cls.isActive);
@@ -137,10 +126,7 @@ contract VAMSHardwareRegistryTest is Test {
     function test_RegisterHardwareClass_DuplicateReverts() public {
         vm.prank(governance);
         vm.expectRevert(
-            abi.encodeWithSelector(
-                IVAMSHardwareRegistry.ClassAlreadyRegistered.selector,
-                HardwareClasses.GPU_H100
-            )
+            abi.encodeWithSelector(IVAMSHardwareRegistry.ClassAlreadyRegistered.selector, HardwareClasses.GPU_H100)
         );
         registry.registerHardwareClass(HardwareClasses.GPU_H100, "GPU_H100", "GPU", 50_000e18, 8000);
     }
@@ -152,10 +138,7 @@ contract VAMSHardwareRegistryTest is Test {
         // Try to register a node with deactivated class
         vm.prank(provider1);
         vm.expectRevert(
-            abi.encodeWithSelector(
-                IVAMSHardwareRegistry.ClassNotActive.selector,
-                HardwareClasses.STORAGE_HDD
-            )
+            abi.encodeWithSelector(IVAMSHardwareRegistry.ClassNotActive.selector, HardwareClasses.STORAGE_HDD)
         );
         registry.registerNode(HardwareClasses.STORAGE_HDD, "us-east-1", 100, 1e18, 86400);
     }
@@ -164,8 +147,7 @@ contract VAMSHardwareRegistryTest is Test {
         vm.prank(governance);
         registry.updateClassCollateral(HardwareClasses.GPU_A100, 35_000e18);
 
-        IVAMSHardwareRegistry.HardwareClassInfo memory cls =
-            registry.getHardwareClass(HardwareClasses.GPU_A100);
+        IVAMSHardwareRegistry.HardwareClassInfo memory cls = registry.getHardwareClass(HardwareClasses.GPU_A100);
         assertEq(cls.minCollateral, 35_000e18);
     }
 
@@ -176,9 +158,9 @@ contract VAMSHardwareRegistryTest is Test {
         bytes32 nodeId = registry.registerNode(
             HardwareClasses.GPU_A100,
             "us-east-1",
-            4,        // 4 GPUs
-            100e18,   // 100 VAMS/hour
-            86400     // 24h max booking
+            4, // 4 GPUs
+            100e18, // 100 VAMS/hour
+            86400 // 24h max booking
         );
 
         IVAMSHardwareRegistry.VAMSResourceNode memory node = registry.getNode(nodeId);
@@ -199,12 +181,7 @@ contract VAMSHardwareRegistryTest is Test {
         bytes32 unknownClass = keccak256("GPU_TOTALLY_FAKE");
 
         vm.prank(provider1);
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                IVAMSHardwareRegistry.ClassNotFound.selector,
-                unknownClass
-            )
-        );
+        vm.expectRevert(abi.encodeWithSelector(IVAMSHardwareRegistry.ClassNotFound.selector, unknownClass));
         registry.registerNode(unknownClass, "us-east-1", 4, 100e18, 86400);
     }
 
@@ -239,9 +216,7 @@ contract VAMSHardwareRegistryTest is Test {
 
     function test_DeregisterNode_Cooldown() public {
         vm.prank(provider1);
-        bytes32 nodeId = registry.registerNode(
-            HardwareClasses.CPU_EPYC, "us-east-1", 128, 20e18, 604800
-        );
+        bytes32 nodeId = registry.registerNode(HardwareClasses.CPU_EPYC, "us-east-1", 128, 20e18, 604800);
 
         // Request deregistration
         vm.prank(provider1);
@@ -272,9 +247,7 @@ contract VAMSHardwareRegistryTest is Test {
 
     function test_DeregisterNode_NotOwner_Reverts() public {
         vm.prank(provider1);
-        bytes32 nodeId = registry.registerNode(
-            HardwareClasses.CPU_EPYC, "us-east-1", 128, 20e18, 604800
-        );
+        bytes32 nodeId = registry.registerNode(HardwareClasses.CPU_EPYC, "us-east-1", 128, 20e18, 604800);
 
         vm.prank(provider2);
         vm.expectRevert();
@@ -285,9 +258,7 @@ contract VAMSHardwareRegistryTest is Test {
 
     function test_UpdateCapacity_OnlyProvider() public {
         vm.prank(provider1);
-        bytes32 nodeId = registry.registerNode(
-            HardwareClasses.GPU_A100, "us-east-1", 4, 100e18, 86400
-        );
+        bytes32 nodeId = registry.registerNode(HardwareClasses.GPU_A100, "us-east-1", 4, 100e18, 86400);
 
         // Owner can update
         vm.prank(provider1);
@@ -304,9 +275,7 @@ contract VAMSHardwareRegistryTest is Test {
 
     function test_UpdatePrice() public {
         vm.prank(provider1);
-        bytes32 nodeId = registry.registerNode(
-            HardwareClasses.GPU_A100, "us-east-1", 4, 100e18, 86400
-        );
+        bytes32 nodeId = registry.registerNode(HardwareClasses.GPU_A100, "us-east-1", 4, 100e18, 86400);
 
         vm.prank(provider1);
         registry.updatePrice(nodeId, 150e18);
@@ -319,9 +288,7 @@ contract VAMSHardwareRegistryTest is Test {
 
     function test_UpdateBenchmark_OnlySentinel() public {
         vm.prank(provider1);
-        bytes32 nodeId = registry.registerNode(
-            HardwareClasses.GPU_H100, "us-east-1", 8, 200e18, 172800
-        );
+        bytes32 nodeId = registry.registerNode(HardwareClasses.GPU_H100, "us-east-1", 8, 200e18, 172800);
 
         // Sentinel can update
         vm.prank(sentinel);
@@ -341,9 +308,7 @@ contract VAMSHardwareRegistryTest is Test {
 
     function test_IsNodeHealthy_NoBenchmark() public {
         vm.prank(provider1);
-        bytes32 nodeId = registry.registerNode(
-            HardwareClasses.GPU_A100, "us-east-1", 4, 100e18, 86400
-        );
+        bytes32 nodeId = registry.registerNode(HardwareClasses.GPU_A100, "us-east-1", 4, 100e18, 86400);
 
         // Not yet benchmarked -- assumed healthy
         assertTrue(registry.isNodeHealthy(nodeId));
@@ -351,9 +316,7 @@ contract VAMSHardwareRegistryTest is Test {
 
     function test_IsNodeHealthy_PassingBenchmark() public {
         vm.prank(provider1);
-        bytes32 nodeId = registry.registerNode(
-            HardwareClasses.GPU_A100, "us-east-1", 4, 100e18, 86400
-        );
+        bytes32 nodeId = registry.registerNode(HardwareClasses.GPU_A100, "us-east-1", 4, 100e18, 86400);
 
         vm.prank(sentinel);
         registry.updateBenchmark(nodeId, 8000, block.timestamp);
@@ -364,9 +327,7 @@ contract VAMSHardwareRegistryTest is Test {
 
     function test_IsNodeHealthy_FailingBenchmark() public {
         vm.prank(provider1);
-        bytes32 nodeId = registry.registerNode(
-            HardwareClasses.GPU_A100, "us-east-1", 4, 100e18, 86400
-        );
+        bytes32 nodeId = registry.registerNode(HardwareClasses.GPU_A100, "us-east-1", 4, 100e18, 86400);
 
         vm.prank(sentinel);
         registry.updateBenchmark(nodeId, 5000, block.timestamp);

@@ -32,7 +32,9 @@ contract MockToken {
         return true;
     }
 
-    function approve(address, uint256) external pure returns (bool) { return true; }
+    function approve(address, uint256) external pure returns (bool) {
+        return true;
+    }
 }
 
 contract MockBondRegistry {
@@ -70,12 +72,7 @@ contract ComposedSettlementTest is Test {
         token = new MockToken();
         bondRegistry = new MockBondRegistry();
 
-        settlement = new ComposedSettlement(
-            admin,
-            address(token),
-            address(bondRegistry),
-            treasuryAddr
-        );
+        settlement = new ComposedSettlement(admin, address(token), address(bondRegistry), treasuryAddr);
 
         vm.startPrank(admin);
         settlement.grantRole(settlement.VERIFIER_ROLE(), admin);
@@ -108,7 +105,7 @@ contract ComposedSettlementTest is Test {
             1 hours,
             keccak256("test-blueprint"),
             bytes32(0), // no service block
-            0,          // no builder share
+            0, // no builder share
             address(0)
         );
     }
@@ -162,9 +159,8 @@ contract ComposedSettlementTest is Test {
         amounts[2] = 300 ether;
 
         vm.prank(agent);
-        bytes32 allocId = settlement.createComposedEscrow(
-            providers, amounts, 2 hours, keccak256("3p"), bytes32(0), 0, address(0)
-        );
+        bytes32 allocId =
+            settlement.createComposedEscrow(providers, amounts, 2 hours, keccak256("3p"), bytes32(0), 0, address(0));
 
         IComposedSettlement.ComposedAllocation memory alloc = settlement.getComposedAllocation(allocId);
         assertEq(alloc.providerCount, 3);
@@ -260,9 +256,7 @@ contract ComposedSettlementTest is Test {
         vm.prank(admin);
         settlement.verifyProviderProof(allocId, 0);
         vm.prank(provider2); // Wrong provider for index 0
-        vm.expectRevert(
-            abi.encodeWithSelector(IComposedSettlement.ProviderMismatch.selector, provider1, provider2)
-        );
+        vm.expectRevert(abi.encodeWithSelector(IComposedSettlement.ProviderMismatch.selector, provider1, provider2));
         settlement.claimProviderShare(allocId, 0);
     }
 
@@ -275,9 +269,7 @@ contract ComposedSettlementTest is Test {
         settlement.claimProviderShare(allocId, 0);
 
         vm.prank(provider1);
-        vm.expectRevert(
-            abi.encodeWithSelector(IComposedSettlement.ProviderAlreadyClaimed.selector, allocId, 0)
-        );
+        vm.expectRevert(abi.encodeWithSelector(IComposedSettlement.ProviderAlreadyClaimed.selector, allocId, 0));
         settlement.claimProviderShare(allocId, 0);
     }
 
@@ -349,9 +341,7 @@ contract ComposedSettlementTest is Test {
         bytes32 allocId = _createAllocation2Providers();
 
         vm.prank(agent);
-        vm.expectRevert(
-            abi.encodeWithSelector(IComposedSettlement.AllocationNotExpired.selector, allocId)
-        );
+        vm.expectRevert(abi.encodeWithSelector(IComposedSettlement.AllocationNotExpired.selector, allocId));
         settlement.refundExpiredComposed(allocId);
     }
 

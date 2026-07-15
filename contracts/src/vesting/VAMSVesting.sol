@@ -57,7 +57,7 @@ contract VAMSVesting is IVAMSVesting, AccessControl, ReentrancyGuard {
     uint256 private constant VEST_LIQUIDITY = 12 * ONE_MONTH;
 
     // Cliff unlock percentages in basis points
-    uint16 private constant UNLOCK_NONE = 0;        // 0%
+    uint16 private constant UNLOCK_NONE = 0; // 0%
 
     // ============ GMV-Gated Vesting ============
 
@@ -120,12 +120,12 @@ contract VAMSVesting is IVAMSVesting, AccessControl, ReentrancyGuard {
     // ============ Schedule Creation ============
 
     /// @inheritdoc IVAMSVesting
-    function createVestingSchedule(
-        address beneficiary,
-        uint256 amount,
-        ScheduleType scheduleType,
-        bool revocable
-    ) external override onlyRole(VESTING_ADMIN_ROLE) returns (bytes32 scheduleId) {
+    function createVestingSchedule(address beneficiary, uint256 amount, ScheduleType scheduleType, bool revocable)
+        external
+        override
+        onlyRole(VESTING_ADMIN_ROLE)
+        returns (bytes32 scheduleId)
+    {
         (uint256 cliff, uint256 vest, uint16 unlock) = _getScheduleParams(scheduleType);
         return _createSchedule(beneficiary, amount, cliff, vest, unlock, revocable, scheduleType);
     }
@@ -146,11 +146,11 @@ contract VAMSVesting is IVAMSVesting, AccessControl, ReentrancyGuard {
             revert InvalidCliffDuration(cliffUnlockBps, BPS_DENOMINATOR);
         }
         return _createSchedule(
-            beneficiary, 
-            amount, 
-            cliffDuration, 
-            vestingDuration, 
-            cliffUnlockBps, 
+            beneficiary,
+            amount,
+            cliffDuration,
+            vestingDuration,
+            cliffUnlockBps,
             revocable,
             ScheduleType.CUSTOM // Custom uses CUSTOM placeholder
         );
@@ -169,15 +169,7 @@ contract VAMSVesting is IVAMSVesting, AccessControl, ReentrancyGuard {
         (uint256 cliff, uint256 vest, uint16 unlock) = _getScheduleParams(scheduleType);
 
         for (uint256 i = 0; i < beneficiaries.length; i++) {
-            scheduleIds[i] = _createSchedule(
-                beneficiaries[i],
-                amounts[i],
-                cliff,
-                vest,
-                unlock,
-                revocable,
-                scheduleType
-            );
+            scheduleIds[i] = _createSchedule(beneficiaries[i], amounts[i], cliff, vest, unlock, revocable, scheduleType);
         }
     }
 
@@ -186,7 +178,7 @@ contract VAMSVesting is IVAMSVesting, AccessControl, ReentrancyGuard {
     /// @inheritdoc IVAMSVesting
     function release(bytes32 scheduleId) external override nonReentrant returns (uint256 released) {
         VestingSchedule storage schedule = _schedules[scheduleId];
-        
+
         if (schedule.beneficiary == address(0)) revert ScheduleNotFound(scheduleId);
         if (schedule.revoked) revert AlreadyRevoked(scheduleId);
 
@@ -196,14 +188,11 @@ contract VAMSVesting is IVAMSVesting, AccessControl, ReentrancyGuard {
         // GMV gate: TEAM and FOUNDATION schedules require protocol usage
         ScheduleType sType = _scheduleTypes[scheduleId];
         if (
-            (sType == ScheduleType.TEAM || 
-             sType == ScheduleType.FOUNDATION) &&
-            gmvOracle != address(0) && gmvThreshold > 0
+            (sType == ScheduleType.TEAM || sType == ScheduleType.FOUNDATION) && gmvOracle != address(0)
+                && gmvThreshold > 0
         ) {
             // Read current GMV from oracle (expected: function currentGmv() returns (uint256))
-            (bool success, bytes memory data) = gmvOracle.staticcall(
-                abi.encodeWithSignature("currentGmv()")
-            );
+            (bool success, bytes memory data) = gmvOracle.staticcall(abi.encodeWithSignature("currentGmv()"));
             if (success && data.length >= 32) {
                 uint256 currentGmv = abi.decode(data, (uint256));
                 if (currentGmv < gmvThreshold) {
@@ -221,15 +210,15 @@ contract VAMSVesting is IVAMSVesting, AccessControl, ReentrancyGuard {
     }
 
     /// @inheritdoc IVAMSVesting
-    function batchRelease(bytes32[] calldata scheduleIds) 
-        external 
-        override 
-        nonReentrant 
-        returns (uint256 totalReleased) 
+    function batchRelease(bytes32[] calldata scheduleIds)
+        external
+        override
+        nonReentrant
+        returns (uint256 totalReleased)
     {
         for (uint256 i = 0; i < scheduleIds.length; i++) {
             VestingSchedule storage schedule = _schedules[scheduleIds[i]];
-            
+
             if (schedule.beneficiary == address(0)) continue;
             if (schedule.revoked) continue;
 
@@ -252,7 +241,7 @@ contract VAMSVesting is IVAMSVesting, AccessControl, ReentrancyGuard {
 
         for (uint256 i = 0; i < scheduleIds.length; i++) {
             VestingSchedule storage schedule = _schedules[scheduleIds[i]];
-            
+
             if (schedule.revoked) continue;
 
             uint256 released = _releasableAmount(schedule);
@@ -324,22 +313,12 @@ contract VAMSVesting is IVAMSVesting, AccessControl, ReentrancyGuard {
     // ============ View Functions ============
 
     /// @inheritdoc IVAMSVesting
-    function getSchedule(bytes32 scheduleId) 
-        external 
-        view 
-        override 
-        returns (VestingSchedule memory) 
-    {
+    function getSchedule(bytes32 scheduleId) external view override returns (VestingSchedule memory) {
         return _schedules[scheduleId];
     }
 
     /// @inheritdoc IVAMSVesting
-    function getScheduleIds(address beneficiary) 
-        external 
-        view 
-        override 
-        returns (bytes32[] memory) 
-    {
+    function getScheduleIds(address beneficiary) external view override returns (bytes32[] memory) {
         return _beneficiarySchedules[beneficiary];
     }
 
@@ -407,9 +386,7 @@ contract VAMSVesting is IVAMSVesting, AccessControl, ReentrancyGuard {
         if (amount == 0) revert ZeroAmount();
 
         // Generate unique schedule ID
-        scheduleId = keccak256(
-            abi.encodePacked(beneficiary, amount, _scheduleCount, block.timestamp)
-        );
+        scheduleId = keccak256(abi.encodePacked(beneficiary, amount, _scheduleCount, block.timestamp));
 
         // Create schedule
         _schedules[scheduleId] = VestingSchedule({
@@ -433,23 +410,16 @@ contract VAMSVesting is IVAMSVesting, AccessControl, ReentrancyGuard {
         // Transfer tokens from admin to this contract
         token.safeTransferFrom(msg.sender, address(this), amount);
 
-        emit VestingScheduleCreated(
-            scheduleId,
-            beneficiary,
-            amount,
-            scheduleType,
-            cliffDuration,
-            vestingDuration
-        );
+        emit VestingScheduleCreated(scheduleId, beneficiary, amount, scheduleType, cliffDuration, vestingDuration);
     }
 
     /**
      * @notice Get schedule parameters for a schedule type
      */
-    function _getScheduleParams(ScheduleType scheduleType) 
-        internal 
-        pure 
-        returns (uint256 cliff, uint256 vest, uint16 unlock) 
+    function _getScheduleParams(ScheduleType scheduleType)
+        internal
+        pure
+        returns (uint256 cliff, uint256 vest, uint16 unlock)
     {
         if (scheduleType == ScheduleType.FOUNDER) {
             return (CLIFF_FOUNDER, VEST_FOUNDER, UNLOCK_NONE);

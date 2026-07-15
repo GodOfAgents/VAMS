@@ -10,14 +10,13 @@ import {IVAMSProofPlugin} from "../../interfaces/IVAMSProofPlugin.sol";
  *      Lowest-weight identity proof — establishes on-chain presence.
  */
 contract ERC8004IdentityPlugin is IVAMSProofPlugin {
-
     /// @notice VAMS Agent NFT contract address
     address public immutable agentNFT;
 
     /// @notice ERC-8004 identity proof structure
     struct IdentityProof {
-        uint256 tokenId;      // VAMS Agent NFT token ID
-        address owner;        // Claimed owner
+        uint256 tokenId; // VAMS Agent NFT token ID
+        address owner; // Claimed owner
     }
 
     constructor(address _agentNFT) {
@@ -29,10 +28,17 @@ contract ERC8004IdentityPlugin is IVAMSProofPlugin {
     }
 
     function verify(
-        bytes32 /* serviceHash */,
-        bytes32 /* deliveryHash */,
+        bytes32,
+        /* serviceHash */
+        bytes32,
+        /* deliveryHash */
         bytes calldata proofData
-    ) external view override returns (bool valid) {
+    )
+        external
+        view
+        override
+        returns (bool valid)
+    {
         if (proofData.length == 0) return false;
 
         IdentityProof memory proof = abi.decode(proofData, (IdentityProof));

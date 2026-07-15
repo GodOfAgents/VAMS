@@ -14,7 +14,7 @@ import "./ITransactionCompensation.sol";
  * @author VAMS Protocol
  * @notice Handles compensation claims for failed transactions during outages
  * @dev Disaster recovery contract for black swan events
- * 
+ *
  * Key features:
  * - Guardian-controlled incident declaration
  * - Time-bounded claim window
@@ -22,12 +22,12 @@ import "./ITransactionCompensation.sol";
  * - Insurance fund integration
  * - Tiered compensation limits
  */
-contract TransactionCompensation is 
+contract TransactionCompensation is
     Initializable,
     AccessControlUpgradeable,
     PausableUpgradeable,
     ReentrancyGuard,
-    ITransactionCompensation 
+    ITransactionCompensation
 {
     using SafeERC20 for IERC20;
 
@@ -109,12 +109,10 @@ contract TransactionCompensation is
      * @param _vamsToken VAMS token address
      * @param _insuranceFund Insurance fund address
      */
-    function initialize(
-        address _admin,
-        address[] calldata _guardians,
-        address _vamsToken,
-        address _insuranceFund
-    ) external initializer {
+    function initialize(address _admin, address[] calldata _guardians, address _vamsToken, address _insuranceFund)
+        external
+        initializer
+    {
         require(_admin != address(0), "Invalid admin");
         require(_vamsToken != address(0), "Invalid token");
         require(_insuranceFund != address(0), "Invalid insurance fund");
@@ -137,10 +135,12 @@ contract TransactionCompensation is
     // ============ Incident Management ============
 
     /// @inheritdoc ITransactionCompensation
-    function declareIncident(
-        string calldata description,
-        uint256 claimWindowDays
-    ) external override onlyRole(GUARDIAN_ROLE) returns (uint256 incidentId) {
+    function declareIncident(string calldata description, uint256 claimWindowDays)
+        external
+        override
+        onlyRole(GUARDIAN_ROLE)
+        returns (uint256 incidentId)
+    {
         require(activeIncidentId == 0, "Incident already active");
         require(claimWindowDays > 0 && claimWindowDays <= 30, "Invalid claim window");
 
@@ -180,14 +180,14 @@ contract TransactionCompensation is
     // ============ Claim Management ============
 
     /// @inheritdoc ITransactionCompensation
-    function submitClaim(
-        bytes32 txHash,
-        TransactionType txType,
-        uint256 amount,
-        string calldata evidence
-    ) external override whenNotPaused returns (uint256 claimId) {
+    function submitClaim(bytes32 txHash, TransactionType txType, uint256 amount, string calldata evidence)
+        external
+        override
+        whenNotPaused
+        returns (uint256 claimId)
+    {
         if (activeIncidentId == 0) revert NoActiveIncident();
-        
+
         Incident storage incident = incidents[activeIncidentId];
         if (block.timestamp > incident.claimDeadline) revert ClaimDeadlinePassed();
         if (txToClaim[txHash] != 0) revert ClaimAlreadyExists(txHash);
@@ -238,10 +238,7 @@ contract TransactionCompensation is
     }
 
     /// @inheritdoc ITransactionCompensation
-    function rejectClaim(
-        uint256 claimId, 
-        string calldata reason
-    ) external override onlyRole(GUARDIAN_ROLE) {
+    function rejectClaim(uint256 claimId, string calldata reason) external override onlyRole(GUARDIAN_ROLE) {
         Claim storage claim = claims[claimId];
         if (claim.claimant == address(0)) revert ClaimNotFound(claimId);
         if (claim.status != ClaimStatus.PENDING) revert ClaimNotPending(claimId);
@@ -262,16 +259,12 @@ contract TransactionCompensation is
     }
 
     /// @inheritdoc ITransactionCompensation
-    function processClaim(
-        uint256 claimId
-    ) external override nonReentrant onlyRole(PROCESSOR_ROLE) {
+    function processClaim(uint256 claimId) external override nonReentrant onlyRole(PROCESSOR_ROLE) {
         _processClaim(claimId);
     }
 
     /// @inheritdoc ITransactionCompensation
-    function batchProcessClaims(
-        uint256[] calldata claimIds
-    ) external override nonReentrant onlyRole(PROCESSOR_ROLE) {
+    function batchProcessClaims(uint256[] calldata claimIds) external override nonReentrant onlyRole(PROCESSOR_ROLE) {
         for (uint256 i = 0; i < claimIds.length; i++) {
             _processClaim(claimIds[i]);
         }
@@ -328,7 +321,7 @@ contract TransactionCompensation is
     function expireClaim(uint256 claimId) external onlyRole(DEFAULT_ADMIN_ROLE) {
         Claim storage claim = claims[claimId];
         require(claim.status == ClaimStatus.PENDING, "Not pending");
-        
+
         // Only expire if incident claim window has passed
         uint256 incidentId = activeIncidentId > 0 ? activeIncidentId : incidentCounter;
         require(block.timestamp > incidents[incidentId].claimDeadline + 7 days, "Window not expired");
@@ -409,9 +402,9 @@ contract TransactionCompensation is
     function getPoolBalance() external view returns (uint256) {
         return vamsToken.balanceOf(address(this));
     }
-    
+
     // ============ Storage Gap ============
-    
+
     /// @dev Reserved storage space for future upgrades
     uint256[50] private __gap;
 }

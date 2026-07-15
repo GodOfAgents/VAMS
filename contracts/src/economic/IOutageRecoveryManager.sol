@@ -12,68 +12,57 @@ interface IOutageRecoveryManager {
 
     /// @notice System operational state
     enum SystemState {
-        NORMAL,             // Normal operation
-        OUTAGE_DECLARED,    // Outage declared, grace period active
-        EMERGENCY_MODE,     // Emergency mode activated
-        RECOVERED           // System recovered, emergency mode deactivated
+        NORMAL, // Normal operation
+        OUTAGE_DECLARED, // Outage declared, grace period active
+        EMERGENCY_MODE, // Emergency mode activated
+        RECOVERED // System recovered, emergency mode deactivated
     }
 
     /// @notice Withdrawal request status
     enum WithdrawalStatus {
-        PENDING,    // Submitted, awaiting approval
-        APPROVED,   // Approved for withdrawal
-        PROCESSED,  // Withdrawal processed
-        CANCELLED   // Request cancelled
+        PENDING, // Submitted, awaiting approval
+        APPROVED, // Approved for withdrawal
+        PROCESSED, // Withdrawal processed
+        CANCELLED // Request cancelled
     }
 
     // ============ Structs ============
 
     /// @notice Outage declaration details
     struct OutageRecord {
-        uint256 declaredAt;         // When outage was declared
-        uint256 emergencyStartAt;   // When emergency mode activated
-        uint256 recoveredAt;        // When system recovered
-        string reason;              // Outage reason
-        SystemState state;          // Current state
+        uint256 declaredAt; // When outage was declared
+        uint256 emergencyStartAt; // When emergency mode activated
+        uint256 recoveredAt; // When system recovered
+        string reason; // Outage reason
+        SystemState state; // Current state
         uint256 declaringGuardians; // Number of guardians who declared
     }
 
     /// @notice Emergency withdrawal request
     struct WithdrawalRequest {
-        address requester;          // Who requested
-        address token;              // Token to withdraw
-        uint256 amount;             // Amount requested
-        uint256 requestedAt;        // When requested
-        uint256 processedAt;        // When processed
-        WithdrawalStatus status;    // Current status
+        address requester; // Who requested
+        address token; // Token to withdraw
+        uint256 amount; // Amount requested
+        uint256 requestedAt; // When requested
+        uint256 processedAt; // When processed
+        WithdrawalStatus status; // Current status
     }
 
     // ============ Events ============
 
     /// @notice Emitted when guardian declares outage
-    event OutageDeclared(
-        uint256 indexed outageId,
-        address indexed guardian,
-        string reason
-    );
+    event OutageDeclared(uint256 indexed outageId, address indexed guardian, string reason);
 
     /// @notice Emitted when emergency mode is activated
     event EmergencyModeActivated(uint256 indexed outageId, uint256 activatedAt);
 
     /// @notice Emitted when emergency withdrawal is requested
     event EmergencyWithdrawalRequested(
-        uint256 indexed requestId,
-        address indexed requester,
-        address token,
-        uint256 amount
+        uint256 indexed requestId, address indexed requester, address token, uint256 amount
     );
 
     /// @notice Emitted when withdrawal is processed
-    event EmergencyWithdrawalProcessed(
-        uint256 indexed requestId,
-        address indexed requester,
-        uint256 amount
-    );
+    event EmergencyWithdrawalProcessed(uint256 indexed requestId, address indexed requester, uint256 amount);
 
     /// @notice Emitted when system recovery is proven
     event RecoveryProven(uint256 indexed outageId, bytes proof);
@@ -119,10 +108,7 @@ interface IOutageRecoveryManager {
     /// @param token Token to withdraw
     /// @param amount Amount to withdraw
     /// @return requestId Request ID
-    function requestEmergencyWithdraw(
-        address token,
-        uint256 amount
-    ) external returns (uint256 requestId);
+    function requestEmergencyWithdraw(address token, uint256 amount) external returns (uint256 requestId);
 
     /// @notice Process approved withdrawal
     /// @param requestId Request to process

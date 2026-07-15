@@ -16,18 +16,18 @@ interface IVAMSSentinel {
 
     /// @notice Classification of detected anomalies
     enum AnomalyType {
-        TVL_DRAIN,        // TVL drops > threshold in 1 block
-        WHALE_EXIT,       // Single withdrawal > % of pool
-        BRIDGE_FLOOD,     // Bridged amount > 3σ of daily avg
-        PRICE_CRASH,      // $VAMS price drops > threshold in window
-        KEEPER_CONSENSUS  // Staked keepers flag anomaly score > 80
+        TVL_DRAIN, // TVL drops > threshold in 1 block
+        WHALE_EXIT, // Single withdrawal > % of pool
+        BRIDGE_FLOOD, // Bridged amount > 3σ of daily avg
+        PRICE_CRASH, // $VAMS price drops > threshold in window
+        KEEPER_CONSENSUS // Staked keepers flag anomaly score > 80
     }
 
     /// @notice Protocol operational mode
     enum ProtocolMode {
-        NORMAL,       // All operations enabled
-        RESTRICTED,   // High-value operations throttled
-        PAUSED        // All operations paused
+        NORMAL, // All operations enabled
+        RESTRICTED, // High-value operations throttled
+        PAUSED // All operations paused
     }
 
     // ═══════════════════ Structs ═══════════════════
@@ -36,38 +36,33 @@ interface IVAMSSentinel {
     struct AnomalyReport {
         AnomalyType anomalyType;
         uint256 detectedAt;
-        uint8 severity;           // 1-10
+        uint8 severity; // 1-10
         bytes32 evidenceHash;
         bool pauseTriggered;
-        address reporter;         // address(0) for on-chain detection
+        address reporter; // address(0) for on-chain detection
     }
 
     /// @notice Detection thresholds (DAO-configurable)
     struct Thresholds {
-        uint16 tvlDrainBps;           // TVL drop in bps per block (default 1500 = 15%)
-        uint16 whaleExitBps;          // Single withdrawal as % of pool (default 500 = 5%)
-        uint16 bridgeFloodSigma;      // Standard deviations above daily avg (default 3)
-        uint16 priceCrashBps;         // Price drop in bps per window (default 5000 = 50%)
-        uint8  keeperConsensusMin;    // Min keepers flagging (default 3)
-        uint256 cooldownPeriod;       // Seconds between allowed pauses (default 4 hours)
+        uint16 tvlDrainBps; // TVL drop in bps per block (default 1500 = 15%)
+        uint16 whaleExitBps; // Single withdrawal as % of pool (default 500 = 5%)
+        uint16 bridgeFloodSigma; // Standard deviations above daily avg (default 3)
+        uint16 priceCrashBps; // Price drop in bps per window (default 5000 = 50%)
+        uint8 keeperConsensusMin; // Min keepers flagging (default 3)
+        uint256 cooldownPeriod; // Seconds between allowed pauses (default 4 hours)
     }
 
     /// @notice Keeper report submitted off-chain
     struct KeeperReport {
         address keeper;
-        uint8 anomalyScore;       // 0-100
+        uint8 anomalyScore; // 0-100
         bytes32 evidenceHash;
         uint256 timestamp;
     }
 
     // ═══════════════════ Events ═══════════════════
 
-    event AnomalyDetected(
-        uint256 indexed anomalyId,
-        AnomalyType anomalyType,
-        uint8 severity,
-        bytes32 evidenceHash
-    );
+    event AnomalyDetected(uint256 indexed anomalyId, AnomalyType anomalyType, uint8 severity, bytes32 evidenceHash);
     event ProtocolPaused(uint256 indexed anomalyId, ProtocolMode mode);
     event ProtocolResumed(address indexed authority, uint256 indexed anomalyId);
     event KeeperReportSubmitted(address indexed keeper, uint8 score, bytes32 evidenceHash);

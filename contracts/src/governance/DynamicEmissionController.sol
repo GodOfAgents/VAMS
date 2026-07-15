@@ -24,19 +24,19 @@ contract DynamicEmissionController is AccessControl, IDynamicEmissionController 
     uint256 public constant MAX_EMISSION_CHANGE_PER_EPOCH = 500;
     // 1000 bps = 10%
     uint256 public constant MAX_FEE_CHANGE_PER_EPOCH = 1000;
-    
+
     // ============ Absolute Emission Bounds ============
     /// @notice Minimum emission rate: 10 bps = 0.1% annual (prevents runaway deflation)
     uint256 public constant MIN_EMISSION_RATE = 10;
     /// @notice Maximum emission rate: 250 bps = 2.5% annual (prevents runaway inflation)
     uint256 public constant MAX_EMISSION_RATE = 250;
-    
+
     // ============ Baseline Parameters (Fallback) ============
     // 200 bps = 2% annual
     uint256 public constant BASELINE_EMISSION_RATE = 200;
     // 10000 bps = 1.0x (no change) multiplier
     uint256 public constant BASELINE_FEE_MULTIPLIER = 10000;
-    
+
     // ============ State ============
     uint256 public currentEmissionRate;
     uint256 public currentFeeMultiplier;
@@ -46,12 +46,12 @@ contract DynamicEmissionController is AccessControl, IDynamicEmissionController 
     address[] public modelSigners;
     uint256 public constant MODEL_SIGNER_QUORUM = 3;
     mapping(address => bool) public isModelSigner;
-    
+
     // DAO Multisig configuration for recovery
     address[] public daoSigners;
     uint256 public immutable daoQuorumThreshold;
     mapping(address => bool) public isDaoSigner;
-    
+
     uint256 public currentEpoch;
 
     /**
@@ -63,7 +63,7 @@ contract DynamicEmissionController is AccessControl, IDynamicEmissionController 
      * @param _daoQuorum Threshold of DAO signatures needed
      */
     constructor(
-        address _admin, 
+        address _admin,
         address _operator,
         address _modelSigner,
         address[] memory _daoSigners,
@@ -80,7 +80,7 @@ contract DynamicEmissionController is AccessControl, IDynamicEmissionController 
         require(_modelSigner != address(0), "Zero model signer");
         modelSigners.push(_modelSigner);
         isModelSigner[_modelSigner] = true;
-        
+
         for (uint256 i = 0; i < _daoSigners.length; i++) {
             require(_daoSigners[i] != address(0), "Zero DAO signer");
             require(!isDaoSigner[_daoSigners[i]], "Duplicate DAO signer");
@@ -88,9 +88,9 @@ contract DynamicEmissionController is AccessControl, IDynamicEmissionController 
             daoSigners.push(_daoSigners[i]);
             _grantRole(DAO_ROLE, _daoSigners[i]);
         }
-        
+
         daoQuorumThreshold = _daoQuorum;
-        
+
         // Start in baseline mode
         currentEmissionRate = BASELINE_EMISSION_RATE;
         currentFeeMultiplier = BASELINE_FEE_MULTIPLIER;
@@ -103,61 +103,61 @@ contract DynamicEmissionController is AccessControl, IDynamicEmissionController 
     /**
      * @notice Apply RL-recommended adjustment with safety checks
      */
-    function applyAdjustment(
-        uint256 _newEmissionRate,
-        uint256 _newFeeMultiplier,
-        bytes calldata _modelSignature
-    ) external override onlyRole(OPERATOR_ROLE) {
+    function applyAdjustment(uint256 _newEmissionRate, uint256 _newFeeMultiplier, bytes calldata _modelSignature)
+        external
+        override
+        onlyRole(OPERATOR_ROLE)
+    {
         require(!baselineMode, "Cannot adjust while in baseline mode");
         require(_verifyModelSignature(_newEmissionRate, _newFeeMultiplier, _modelSignature), "Invalid model signature");
-        
+
         // Enforce absolute emission bounds [0.1%, 2.5%]
         if (_newEmissionRate < MIN_EMISSION_RATE || _newEmissionRate > MAX_EMISSION_RATE) {
             _triggerRollback("Emission rate out of absolute bounds");
             return;
         }
-        
+
         uint256 emissionDelta = _absDiff(_newEmissionRate, currentEmissionRate);
         uint256 feeDelta = _absDiff(_newFeeMultiplier, currentFeeMultiplier);
-        
+
         if (emissionDelta > MAX_EMISSION_CHANGE_PER_EPOCH) {
             _triggerRollback("Emission change too large");
             return;
         }
-        
+
         if (feeDelta > MAX_FEE_CHANGE_PER_EPOCH) {
             _triggerRollback("Fee change too large");
             return;
         }
-        
+
         currentEmissionRate = _newEmissionRate;
         currentFeeMultiplier = _newFeeMultiplier;
         currentEpoch++;
-        
+
         emit AdjustmentApplied(_newEmissionRate, _newFeeMultiplier, block.timestamp);
     }
-    
+
     /**
      * @notice Revert to conservative baseline in case of bounds violations
      */
     function _triggerRollback(string memory reason) internal {
         emit RollbackTriggered(reason, currentEmissionRate, currentFeeMultiplier);
-        
+
         currentEmissionRate = BASELINE_EMISSION_RATE;
         currentFeeMultiplier = BASELINE_FEE_MULTIPLIER;
         baselineMode = true;
         currentEpoch++;
-        
+
         emit BaselineModeActivated(currentEpoch);
     }
-    
+
     /**
      * @notice DAO can restore normal RL execution after investigation
      */
     function restoreNormalMode(bytes[] calldata _daoSignatures) external override {
         require(baselineMode, "Not in baseline mode");
         require(_verifyDAOQuorum(_daoSignatures), "DAO quorum not met");
-        
+
         baselineMode = false;
         currentEpoch++;
         emit NormalModeRestored(currentEpoch);
@@ -168,21 +168,17 @@ contract DynamicEmissionController is AccessControl, IDynamicEmissionController 
     /**
      * @notice Verify signature from the ensemble RL multi-model
      */
-    function _verifyModelSignature(
-        uint256 _newEmissionRate, 
-        uint256 _newFeeMultiplier, 
-        bytes calldata _signature
-    ) internal view returns (bool) {
-        bytes32 messageHash = keccak256(abi.encodePacked(
-            currentEpoch,
-            _newEmissionRate,
-            _newFeeMultiplier,
-            address(this)
-        ));
-        
+    function _verifyModelSignature(uint256 _newEmissionRate, uint256 _newFeeMultiplier, bytes calldata _signature)
+        internal
+        view
+        returns (bool)
+    {
+        bytes32 messageHash =
+            keccak256(abi.encodePacked(currentEpoch, _newEmissionRate, _newFeeMultiplier, address(this)));
+
         bytes32 ethSignedHash = messageHash.toEthSignedMessageHash();
         address recoveredSigner = ethSignedHash.recover(_signature);
-        
+
         // Accept signature from any registered model signer
         return isModelSigner[recoveredSigner];
     }
@@ -192,29 +188,25 @@ contract DynamicEmissionController is AccessControl, IDynamicEmissionController 
      */
     function _verifyDAOQuorum(bytes[] calldata _signatures) internal view returns (bool) {
         require(_signatures.length >= daoQuorumThreshold, "Insufficient signatures provided");
-        
-        bytes32 messageHash = keccak256(abi.encodePacked(
-            "RESTORE_NORMAL_MODE",
-            currentEpoch,
-            address(this)
-        ));
-        
+
+        bytes32 messageHash = keccak256(abi.encodePacked("RESTORE_NORMAL_MODE", currentEpoch, address(this)));
+
         bytes32 ethSignedHash = messageHash.toEthSignedMessageHash();
-        
+
         uint256 validSignatures = 0;
         address lastRecovered = address(0);
-        
+
         for (uint256 i = 0; i < _signatures.length; i++) {
             address recovered = ethSignedHash.recover(_signatures[i]);
-            
+
             require(recovered > lastRecovered, "Signatures not unique or unordered");
             lastRecovered = recovered;
-            
+
             if (isDaoSigner[recovered]) {
                 validSignatures++;
             }
         }
-        
+
         return validSignatures >= daoQuorumThreshold;
     }
 

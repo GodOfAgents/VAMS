@@ -14,23 +14,23 @@ import "./IVAMSFeeCollector.sol";
  * @author VAMS Protocol
  * @notice Collects and distributes protocol fees according to tokenomics
  * @dev Supports multiple tokens and phase-based distribution:
- * 
+ *
  * Phase 1: 100% burn (deflationary launch)
  * Phase 2: 40% burn, 30% staking, 20% treasury, 10% insurance
  * Phase 3: 30% burn, 35% staking, 25% treasury, 10% insurance
- * 
+ *
  * Features:
  * - Multi-token fee collection
  * - Auto-distribution when threshold reached
  * - Phase-based distribution presets
  * - Custom distribution support
  */
-contract VAMSFeeCollector is 
+contract VAMSFeeCollector is
     Initializable,
     AccessControlUpgradeable,
     PausableUpgradeable,
     ReentrancyGuard,
-    IVAMSFeeCollector 
+    IVAMSFeeCollector
 {
     using SafeERC20 for IERC20;
 
@@ -123,12 +123,7 @@ contract VAMSFeeCollector is
 
         // Start in Phase 1: 100% burn
         currentPhase = DistributionPhase.PHASE_1;
-        distribution = Distribution({
-            burnBps: 10_000,
-            stakingBps: 0,
-            treasuryBps: 0,
-            insuranceBps: 0
-        });
+        distribution = Distribution({burnBps: 10_000, stakingBps: 0, treasuryBps: 0, insuranceBps: 0});
 
         // Support VAMS token by default
         supportedTokens[_vamsToken] = true;
@@ -148,10 +143,7 @@ contract VAMSFeeCollector is
     }
 
     /// @inheritdoc IVAMSFeeCollector
-    function collectTokenFees(
-        address token, 
-        uint256 amount
-    ) external override onlyRole(FEE_COLLECTOR_ROLE) {
+    function collectTokenFees(address token, uint256 amount) external override onlyRole(FEE_COLLECTOR_ROLE) {
         _collectTokenFees(token, amount);
     }
 
@@ -181,9 +173,13 @@ contract VAMSFeeCollector is
     }
 
     /// @inheritdoc IVAMSFeeCollector
-    function distributeTokenFees(
-        address token
-    ) external override nonReentrant whenNotPaused onlyRole(FEE_DISTRIBUTOR_ROLE) {
+    function distributeTokenFees(address token)
+        external
+        override
+        nonReentrant
+        whenNotPaused
+        onlyRole(FEE_DISTRIBUTOR_ROLE)
+    {
         _distributeTokenFees(token);
     }
 
@@ -232,78 +228,47 @@ contract VAMSFeeCollector is
     // ============ Configuration ============
 
     /// @inheritdoc IVAMSFeeCollector
-    function updateDistribution(
-        uint256 _burnBps,
-        uint256 _stakingBps,
-        uint256 _treasuryBps,
-        uint256 _insuranceBps
-    ) external override onlyRole(DEFAULT_ADMIN_ROLE) {
+    function updateDistribution(uint256 _burnBps, uint256 _stakingBps, uint256 _treasuryBps, uint256 _insuranceBps)
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+    {
         uint256 total = _burnBps + _stakingBps + _treasuryBps + _insuranceBps;
         if (total != BPS_DENOMINATOR) revert InvalidDistribution(total);
 
         distribution = Distribution({
-            burnBps: _burnBps,
-            stakingBps: _stakingBps,
-            treasuryBps: _treasuryBps,
-            insuranceBps: _insuranceBps
+            burnBps: _burnBps, stakingBps: _stakingBps, treasuryBps: _treasuryBps, insuranceBps: _insuranceBps
         });
 
         currentPhase = DistributionPhase.CUSTOM;
 
-        emit DistributionUpdated(
-            DistributionPhase.CUSTOM,
-            _burnBps,
-            _stakingBps,
-            _treasuryBps,
-            _insuranceBps
-        );
+        emit DistributionUpdated(DistributionPhase.CUSTOM, _burnBps, _stakingBps, _treasuryBps, _insuranceBps);
     }
 
     /// @inheritdoc IVAMSFeeCollector
-    function transitionToPhase(
-        DistributionPhase phase
-    ) external override onlyRole(DEFAULT_ADMIN_ROLE) {
+    function transitionToPhase(DistributionPhase phase) external override onlyRole(DEFAULT_ADMIN_ROLE) {
         currentPhase = phase;
 
         if (phase == DistributionPhase.PHASE_1) {
-            distribution = Distribution({
-                burnBps: 10_000,
-                stakingBps: 0,
-                treasuryBps: 0,
-                insuranceBps: 0
-            });
+            distribution = Distribution({burnBps: 10_000, stakingBps: 0, treasuryBps: 0, insuranceBps: 0});
         } else if (phase == DistributionPhase.PHASE_2) {
-            distribution = Distribution({
-                burnBps: 4_000,
-                stakingBps: 3_000,
-                treasuryBps: 2_000,
-                insuranceBps: 1_000
-            });
+            distribution = Distribution({burnBps: 4_000, stakingBps: 3_000, treasuryBps: 2_000, insuranceBps: 1_000});
         }
 
         emit DistributionUpdated(
-            phase,
-            distribution.burnBps,
-            distribution.stakingBps,
-            distribution.treasuryBps,
-            distribution.insuranceBps
+            phase, distribution.burnBps, distribution.stakingBps, distribution.treasuryBps, distribution.insuranceBps
         );
     }
 
     /// @inheritdoc IVAMSFeeCollector
-    function setAutoDistributeThreshold(
-        uint256 threshold
-    ) external override onlyRole(DEFAULT_ADMIN_ROLE) {
+    function setAutoDistributeThreshold(uint256 threshold) external override onlyRole(DEFAULT_ADMIN_ROLE) {
         uint256 oldThreshold = autoDistributeThreshold;
         autoDistributeThreshold = threshold;
         emit AutoDistributeThresholdUpdated(oldThreshold, threshold);
     }
 
     /// @inheritdoc IVAMSFeeCollector
-    function setTokenSupport(
-        address token, 
-        bool supported
-    ) external override onlyRole(DEFAULT_ADMIN_ROLE) {
+    function setTokenSupport(address token, bool supported) external override onlyRole(DEFAULT_ADMIN_ROLE) {
         if (token == address(0)) revert ZeroAddress();
 
         if (supported && !supportedTokens[token]) {
@@ -381,11 +346,7 @@ contract VAMSFeeCollector is
      * @param to Recipient address
      * @param amount Amount to withdraw
      */
-    function emergencyWithdraw(
-        address token,
-        address to,
-        uint256 amount
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    function emergencyWithdraw(address token, address to, uint256 amount) external onlyRole(DEFAULT_ADMIN_ROLE) {
         if (to == address(0)) revert ZeroAddress();
         // AUDIT FIX: Deduct from tokenFees accounting
         if (tokenFees[token] >= amount) {
@@ -395,7 +356,7 @@ contract VAMSFeeCollector is
         }
         IERC20(token).safeTransfer(to, amount);
     }
-    
+
     /**
      * @notice AUDIT FIX INTG03: Reconcile tokenFees with actual contract balance.
      * @dev Tokens can arrive via direct transfer (not collectFees), leaving
@@ -463,9 +424,9 @@ contract VAMSFeeCollector is
             total += tokenFees[supportedTokenList[i]];
         }
     }
-    
+
     // ============ Storage Gap ============
-    
+
     /// @dev Reserved storage space for future upgrades
     uint256[50] private __gap;
 }

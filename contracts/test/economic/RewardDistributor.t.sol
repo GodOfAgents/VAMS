@@ -11,17 +11,31 @@ import {RegionalIncentives} from "../../src/economic/RegionalIncentives.sol";
 contract MockToken {
     mapping(address => uint256) public balances;
 
-    function mint(address to, uint256 amount) external { balances[to] += amount; }
-    function balanceOf(address a) external view returns (uint256) { return balances[a]; }
+    function mint(address to, uint256 amount) external {
+        balances[to] += amount;
+    }
+
+    function balanceOf(address a) external view returns (uint256) {
+        return balances[a];
+    }
+
     function transfer(address to, uint256 am) external returns (bool) {
         require(balances[msg.sender] >= am, "Insufficient");
-        balances[msg.sender] -= am; balances[to] += am; return true;
+        balances[msg.sender] -= am;
+        balances[to] += am;
+        return true;
     }
+
     function transferFrom(address f, address t, uint256 am) external returns (bool) {
         require(balances[f] >= am, "Insufficient");
-        balances[f] -= am; balances[t] += am; return true;
+        balances[f] -= am;
+        balances[t] += am;
+        return true;
     }
-    function approve(address, uint256) external pure returns (bool) { return true; }
+
+    function approve(address, uint256) external pure returns (bool) {
+        return true;
+    }
 }
 
 contract MockStaking {
@@ -58,12 +72,7 @@ contract RewardDistributorTest is Test {
         staking = new MockStaking();
         ri = new RegionalIncentives(admin);
 
-        distributor = new RewardDistributor(
-            admin,
-            address(token),
-            address(ri),
-            address(staking)
-        );
+        distributor = new RewardDistributor(admin, address(token), address(ri), address(staking));
 
         vm.startPrank(admin);
         distributor.grantRole(distributor.KEEPER_ROLE(), keeper);
@@ -110,8 +119,7 @@ contract RewardDistributorTest is Test {
 
         // AF_SOUTH at 20% → multiplier = 3.0x → bonus = (3.0 - 1.0) × 1000 = 2000
         // SILVER boost = 50 ether
-        IRewardDistributor.ProviderReward memory breakdown =
-            distributor.getRewardBreakdown(provider1);
+        IRewardDistributor.ProviderReward memory breakdown = distributor.getRewardBreakdown(provider1);
 
         assertEq(breakdown.baseReward, 1000 ether);
         assertEq(breakdown.regionalBonus, 2000 ether);
@@ -125,8 +133,7 @@ contract RewardDistributorTest is Test {
 
         // DIAMOND → +20% = 200 ether staking boost
         // US_EAST at target → no regional bonus
-        IRewardDistributor.ProviderReward memory breakdown =
-            distributor.getRewardBreakdown(provider2);
+        IRewardDistributor.ProviderReward memory breakdown = distributor.getRewardBreakdown(provider2);
 
         assertEq(breakdown.baseReward, 1000 ether);
         assertEq(breakdown.stakingBoost, 200 ether);
@@ -139,8 +146,7 @@ contract RewardDistributorTest is Test {
         distributor.accumulateReward(provider1, 300 ether, AF_SOUTH);
         vm.stopPrank();
 
-        IRewardDistributor.ProviderReward memory breakdown =
-            distributor.getRewardBreakdown(provider1);
+        IRewardDistributor.ProviderReward memory breakdown = distributor.getRewardBreakdown(provider1);
 
         // Two base rewards summed
         assertEq(breakdown.baseReward, 800 ether);
@@ -158,8 +164,7 @@ contract RewardDistributorTest is Test {
         assertEq(distributor.getUnclaimedRewards(builder1), 500 ether);
         assertEq(distributor.builderRevenue(builder1), 500 ether);
 
-        IRewardDistributor.ProviderReward memory breakdown =
-            distributor.getRewardBreakdown(builder1);
+        IRewardDistributor.ProviderReward memory breakdown = distributor.getRewardBreakdown(builder1);
         assertEq(breakdown.builderRevenue, 500 ether);
     }
 
@@ -181,9 +186,7 @@ contract RewardDistributorTest is Test {
 
     function test_claimRewards_reverts_noRewards() public {
         vm.prank(provider1);
-        vm.expectRevert(
-            abi.encodeWithSelector(IRewardDistributor.NoRewardsToClaim.selector, provider1)
-        );
+        vm.expectRevert(abi.encodeWithSelector(IRewardDistributor.NoRewardsToClaim.selector, provider1));
         distributor.claimRewards();
     }
 
@@ -194,8 +197,7 @@ contract RewardDistributorTest is Test {
         vm.prank(provider1);
         distributor.claimRewards();
 
-        IRewardDistributor.ProviderReward memory breakdown =
-            distributor.getRewardBreakdown(provider1);
+        IRewardDistributor.ProviderReward memory breakdown = distributor.getRewardBreakdown(provider1);
         assertEq(breakdown.totalReward, 0);
     }
 
@@ -211,9 +213,7 @@ contract RewardDistributorTest is Test {
         vm.startPrank(keeper);
         distributor.finalizeEpoch(0);
 
-        vm.expectRevert(
-            abi.encodeWithSelector(IRewardDistributor.EpochAlreadyFinalized.selector, 0)
-        );
+        vm.expectRevert(abi.encodeWithSelector(IRewardDistributor.EpochAlreadyFinalized.selector, 0));
         distributor.finalizeEpoch(0);
         vm.stopPrank();
     }

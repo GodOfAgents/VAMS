@@ -22,7 +22,7 @@ contract RegisterAgent is Script {
         // We will pass the key directly as a hex string with 0x prefix or use the broadcast feature
         // Since we are running with --private-key on command line, we can just use vm.startBroadcast()
         // and it will use the deployer account automatically.
-        
+
         vm.startBroadcast(deployerPrivateKey);
 
         address deployer = msg.sender;

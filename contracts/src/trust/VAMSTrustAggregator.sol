@@ -17,10 +17,7 @@ import {IVAMSProofPlugin} from "../interfaces/IVAMSProofPlugin.sol";
  *      - Legacy state (lines 21-29 of original) is kept in the same slots.
  *      - New plugin state is appended AFTER existing storage.
  */
-contract VAMSTrustAggregator is 
-    VAMSUpgradeableBase, 
-    IVAMSTrustAggregator 
-{
+contract VAMSTrustAggregator is VAMSUpgradeableBase, IVAMSTrustAggregator {
     // ============================================================
     //              LEGACY STATE — DO NOT REORDER
     // ============================================================
@@ -75,7 +72,7 @@ contract VAMSTrustAggregator is
         legacyProofsEnabled = true;
 
         // Initialize Default Legacy Weights
-        
+
         // A. Identity (Baseline)
         proofWeights[ProofType.ERC8004_IDENTITY] = 10;
         proofWeights[ProofType.COINBASE_WALLET] = 30;
@@ -107,17 +104,17 @@ contract VAMSTrustAggregator is
         require(valid, "Invalid Proof");
 
         AgentProfile storage profile = _profiles[msg.sender];
-        
+
         uint256 proofBit = uint256(1) << uint256(proofType);
-        
+
         // Only add score if not already verified
         if ((profile.verifiedProofsMask & proofBit) == 0) {
             profile.verifiedProofsMask |= proofBit;
             profile.trustScore += proofWeights[proofType];
             profile.lastVerificationTimestamp = block.timestamp;
-            
+
             emit ProofVerified(msg.sender, proofType, keccak256(proofData));
-            
+
             _updateTier(msg.sender);
         }
     }
@@ -148,7 +145,7 @@ contract VAMSTrustAggregator is
         // Only add score if not already verified for this plugin type
         if (!_agentPluginProofs[msg.sender][pluginProofType]) {
             _agentPluginProofs[msg.sender][pluginProofType] = true;
-            
+
             // Convert basis points (0-10000) to score points (0-100)
             uint256 weight = plugin.trustWeight();
             uint256 scoreContribution = weight / 100; // 2500 bps -> 25 points
@@ -156,12 +153,7 @@ contract VAMSTrustAggregator is
             profile.pluginProofCount += 1;
             profile.lastVerificationTimestamp = block.timestamp;
 
-            emit PluginProofVerified(
-                msg.sender, 
-                pluginProofType, 
-                keccak256(proofData), 
-                weight
-            );
+            emit PluginProofVerified(msg.sender, pluginProofType, keccak256(proofData), weight);
 
             _updateTier(msg.sender);
         }
@@ -179,7 +171,7 @@ contract VAMSTrustAggregator is
     ) external view override returns (bool valid, uint256 trustWeight) {
         IVAMSProofPlugin plugin = _proofPlugins[pluginProofType];
         require(address(plugin) != address(0), "Unknown proof type");
-        
+
         valid = plugin.verify(serviceHash, deliveryHash, proofData);
         trustWeight = plugin.trustWeight();
     }
@@ -294,15 +286,19 @@ contract VAMSTrustAggregator is
      *      In Phase 2, these will migrate to individual plugins.
      */
     function _verifyLegacyProof(
-        ProofType proofType, 
-        bytes calldata proofData, 
+        ProofType proofType,
+        bytes calldata proofData,
         address /* agent */
-    ) internal view returns (bool) {
+    )
+        internal
+        view
+        returns (bool)
+    {
         if (proofData.length < 64) return false;
 
         bytes32 pTypeBytes = bytes32(uint256(proofType));
         IVAMSProofPlugin plugin = _proofPlugins[pTypeBytes];
-        
+
         if (address(plugin) == address(0)) {
             return false;
         }
@@ -311,7 +307,7 @@ contract VAMSTrustAggregator is
     }
 
     // --- Admin ---
-    
+
     function setProofWeight(ProofType proofType, uint256 weight) external onlyRole(UPGRADER_ROLE) {
         proofWeights[proofType] = weight;
     }

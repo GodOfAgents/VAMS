@@ -11,7 +11,6 @@ import {IVAMSProofPlugin} from "../../interfaces/IVAMSProofPlugin.sol";
  *      Useful as a baseline attestation for providers that don't support TEE or ZK.
  */
 contract OutputHashProofPlugin is IVAMSProofPlugin {
-
     /// @notice Registered provider addresses
     mapping(address => bool) public registeredProviders;
 
@@ -20,9 +19,9 @@ contract OutputHashProofPlugin is IVAMSProofPlugin {
 
     /// @notice Output hash proof structure
     struct OutputHashAttestation {
-        bytes32 outputHash;   // Hash of the service output
-        bytes signature;      // Provider's signature over (serviceHash, outputHash)
-        address provider;     // Claimed provider address
+        bytes32 outputHash; // Hash of the service output
+        bytes signature; // Provider's signature over (serviceHash, outputHash)
+        address provider; // Claimed provider address
     }
 
     event ProviderRegistered(address indexed provider);
@@ -45,11 +44,12 @@ contract OutputHashProofPlugin is IVAMSProofPlugin {
         return keccak256(abi.encodePacked("OUTPUT_HASH"));
     }
 
-    function verify(
-        bytes32 serviceHash,
-        bytes32 deliveryHash,
-        bytes calldata proofData
-    ) external view override returns (bool valid) {
+    function verify(bytes32 serviceHash, bytes32 deliveryHash, bytes calldata proofData)
+        external
+        view
+        override
+        returns (bool valid)
+    {
         if (proofData.length == 0) return false;
 
         OutputHashAttestation memory attestation = abi.decode(proofData, (OutputHashAttestation));
@@ -61,13 +61,8 @@ contract OutputHashProofPlugin is IVAMSProofPlugin {
         if (!registeredProviders[attestation.provider]) return false;
 
         // 3. Verify the signature
-        bytes32 messageHash = keccak256(
-            abi.encodePacked(
-                "\x19Ethereum Signed Message:\n64",
-                serviceHash,
-                attestation.outputHash
-            )
-        );
+        bytes32 messageHash =
+            keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n64", serviceHash, attestation.outputHash));
 
         address signer = _recoverSigner(messageHash, attestation.signature);
         if (signer != attestation.provider) return false;

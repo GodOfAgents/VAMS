@@ -15,12 +15,12 @@ import "../interfaces/ISLAEnforcer.sol";
  * @title HardwareCommitment
  * @notice Enforces time-locked hardware commitments.
  */
-contract HardwareCommitment is 
-    Initializable, 
+contract HardwareCommitment is
+    Initializable,
     AccessControlUpgradeable,
     PausableUpgradeable,
     ReentrancyGuard,
-    IHardwareCommitment 
+    IHardwareCommitment
 {
     bytes32 public constant SLA_ENFORCER_ROLE = keccak256("SLA_ENFORCER_ROLE");
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
@@ -34,7 +34,7 @@ contract HardwareCommitment is
     mapping(bytes32 => bytes32) private _activeNodeCommitments;
 
     uint256 public constant MIN_COMMITMENT_DURATION = 30 days;
-    
+
     // Slashing constants
     uint256 public constant EARLY_EXIT_SLASH_BPS = 2500; // 25% slash to leave early
 
@@ -46,13 +46,9 @@ contract HardwareCommitment is
         _disableInitializers();
     }
 
-    function initialize(
-        address admin,
-        address _registry,
-        address _bondRegistry
-    ) external initializer {
+    function initialize(address admin, address _registry, address _bondRegistry) external initializer {
         if (admin == address(0) || _registry == address(0) || _bondRegistry == address(0)) revert("Zero Address");
-        
+
         __AccessControl_init();
         __Pausable_init();
 
@@ -65,27 +61,28 @@ contract HardwareCommitment is
 
     // ============ Core Actions ============
 
-    function createCommitment(
-        bytes32[] calldata nodeIds, 
-        uint256 durationSeconds, 
-        uint256 minUptimeBps
-    ) external nonReentrant whenNotPaused returns (bytes32 commitmentId) {
+    function createCommitment(bytes32[] calldata nodeIds, uint256 durationSeconds, uint256 minUptimeBps)
+        external
+        nonReentrant
+        whenNotPaused
+        returns (bytes32 commitmentId)
+    {
         if (nodeIds.length == 0) revert ZeroNodeCommitment();
         if (durationSeconds < MIN_COMMITMENT_DURATION) revert("Duration too short");
 
         uint256 baseCollateral = 0;
-        
-        for (uint i = 0; i < nodeIds.length; i++) {
+
+        for (uint256 i = 0; i < nodeIds.length; i++) {
             bytes32 nid = nodeIds[i];
             IVAMSHardwareRegistry.VAMSResourceNode memory node = registry.getNode(nid);
-            
+
             if (node.provider != msg.sender) revert NodeNotOwnedByProvider(nid, msg.sender);
-            
+
             // Check if already committed
             if (_activeNodeCommitments[nid] != bytes32(0)) {
                 revert("Node already committed");
             }
-            
+
             baseCollateral += node.collateralStaked;
         }
 
@@ -102,7 +99,7 @@ contract HardwareCommitment is
         c.minUptimeBps = minUptimeBps;
         c.isActive = true;
 
-        for (uint i = 0; i < nodeIds.length; i++) {
+        for (uint256 i = 0; i < nodeIds.length; i++) {
             _activeNodeCommitments[nodeIds[i]] = commitmentId;
         }
 
@@ -136,7 +133,7 @@ contract HardwareCommitment is
 
         c.isActive = false;
 
-        for (uint i = 0; i < c.nodeIds.length; i++) {
+        for (uint256 i = 0; i < c.nodeIds.length; i++) {
             delete _activeNodeCommitments[c.nodeIds[i]];
         }
 
@@ -145,7 +142,11 @@ contract HardwareCommitment is
         emit CommitmentEnded(commitmentId, msg.sender, c.collateral);
     }
 
-    function slashCommitment(bytes32 commitmentId, uint256 penaltyBps) external onlyRole(SLA_ENFORCER_ROLE) nonReentrant {
+    function slashCommitment(bytes32 commitmentId, uint256 penaltyBps)
+        external
+        onlyRole(SLA_ENFORCER_ROLE)
+        nonReentrant
+    {
         HardwareCommitment storage c = _commitments[commitmentId];
         if (!c.isActive) revert CommitmentInactive(commitmentId);
 
@@ -153,13 +154,17 @@ contract HardwareCommitment is
         c.totalSlashed += slashAmount;
 
         // In a real execution, we trigger ProviderBondRegistry or VAMSSlasher.
-        
+
         emit CommitmentSlashed(commitmentId, slashAmount, "SLA Violation");
     }
 
     // ============ Internal Math ============
-    
-    function calculateDiscountedCollateral(uint256 baseCollateral, uint256 durationSeconds) public pure returns (uint256) {
+
+    function calculateDiscountedCollateral(uint256 baseCollateral, uint256 durationSeconds)
+        public
+        pure
+        returns (uint256)
+    {
         if (durationSeconds >= 180 days) {
             return (baseCollateral * 60) / 100; // 0.6x
         } else if (durationSeconds >= 90 days) {
@@ -178,7 +183,7 @@ contract HardwareCommitment is
     function getProviderCommitments(address provider) external view returns (bytes32[] memory) {
         return _providerCommitments[provider];
     }
-    
+
     function isNodeCommitted(bytes32 nodeId) external view returns (bool, bytes32) {
         bytes32 cid = _activeNodeCommitments[nodeId];
         if (cid == bytes32(0)) return (false, bytes32(0));

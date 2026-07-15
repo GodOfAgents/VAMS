@@ -9,19 +9,18 @@ pragma solidity ^0.8.20;
  *      after publishing them to a DA layer (Celestia, Near, EigenDA, etc.).
  */
 interface IPerformanceAnchor {
-
     // ============================================================
     //                    ENUMS & STRUCTS
     // ============================================================
 
     /// @notice Supported DA layer protocols matching the VAMS Foundation Layer.
     enum DAProtocol {
-        CELESTIA,       // DAS — Public Audit Trail
-        EIGEN_DA,       // Restaked ETH Security
-        NEAR_DA,        // High-Velocity Ephemeral
-        POLYGON_DAC,    // Primary L3 State (DAC)
-        AVAIL,          // KZG Backup
-        IAGON           // eUTXO Storage Sovereignty
+        CELESTIA, // DAS — Public Audit Trail
+        EIGEN_DA, // Restaked ETH Security
+        NEAR_DA, // High-Velocity Ephemeral
+        POLYGON_DAC, // Primary L3 State (DAC)
+        AVAIL, // KZG Backup
+        IAGON // eUTXO Storage Sovereignty
     }
 
     /// @notice On-chain record linking a DA blob to a verified performance report.
@@ -71,12 +70,7 @@ interface IPerformanceAnchor {
      * @param reportHash The SHA-256 hash of the performance report.
      * @param provider The address of the hardware provider being audited.
      */
-    function commit(
-        DAProtocol protocol,
-        bytes32 blobId,
-        bytes32 reportHash,
-        address provider
-    ) external;
+    function commit(DAProtocol protocol, bytes32 blobId, bytes32 reportHash, address provider) external;
 
     /**
      * @notice Retrieve an anchor record.
@@ -84,10 +78,7 @@ interface IPerformanceAnchor {
      * @param blobId The blob identifier.
      * @return record The full anchor record.
      */
-    function getAnchor(
-        DAProtocol protocol,
-        bytes32 blobId
-    ) external view returns (AnchorRecord memory record);
+    function getAnchor(DAProtocol protocol, bytes32 blobId) external view returns (AnchorRecord memory record);
 
     /**
      * @notice Verify that an anchor record matches the given report hash.
@@ -96,11 +87,7 @@ interface IPerformanceAnchor {
      * @param reportHash The expected report hash.
      * @return matches True if the anchor's reportHash matches.
      */
-    function verifyAnchor(
-        DAProtocol protocol,
-        bytes32 blobId,
-        bytes32 reportHash
-    ) external view returns (bool matches);
+    function verifyAnchor(DAProtocol protocol, bytes32 blobId, bytes32 reportHash) external view returns (bool matches);
 
     /**
      * @notice Get total number of anchors committed.

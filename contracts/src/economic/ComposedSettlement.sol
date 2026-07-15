@@ -24,12 +24,7 @@ import {IProviderBondRegistry} from "./IProviderBondRegistry.sol";
  *
  *      // TODO [v1.1]: Refactor to UUPS upgradeable pattern (L-02 accepted risk)
  */
-contract ComposedSettlement is
-    IComposedSettlement,
-    AccessControl,
-    ReentrancyGuard,
-    Pausable
-{
+contract ComposedSettlement is IComposedSettlement, AccessControl, ReentrancyGuard, Pausable {
     using SafeERC20 for IERC20;
 
     // ═══════════════════ Constants ═══════════════════
@@ -96,12 +91,7 @@ contract ComposedSettlement is
     /// @param _vamsToken VAMS ERC-20 token address
     /// @param _bondRegistry Provider bond registry address
     /// @param _treasury Protocol treasury address
-    constructor(
-        address admin,
-        address _vamsToken,
-        address _bondRegistry,
-        address _treasury
-    ) {
+    constructor(address admin, address _vamsToken, address _bondRegistry, address _treasury) {
         require(admin != address(0), "Zero admin");
         require(_vamsToken != address(0), "Zero token");
         require(_bondRegistry != address(0), "Zero bondRegistry");
@@ -149,12 +139,7 @@ contract ComposedSettlement is
         }
 
         // Generate allocation ID
-        allocationId = keccak256(abi.encodePacked(
-            msg.sender,
-            block.timestamp,
-            allocationCount,
-            blueprintHash
-        ));
+        allocationId = keccak256(abi.encodePacked(msg.sender, block.timestamp, allocationCount, blueprintHash));
 
         // Transfer total from agent
         vamsToken.safeTransferFrom(msg.sender, address(this), totalAmount);
@@ -179,12 +164,8 @@ contract ComposedSettlement is
 
         // Create per-provider allocations
         for (uint256 i = 0; i < providers.length; i++) {
-            _providerAllocs[allocationId][i] = ProviderAlloc({
-                provider: providers[i],
-                amount: amounts[i],
-                claimed: false,
-                claimedAt: 0
-            });
+            _providerAllocs[allocationId][i] =
+                ProviderAlloc({provider: providers[i], amount: amounts[i], claimed: false, claimedAt: 0});
         }
 
         // Track
@@ -198,10 +179,12 @@ contract ComposedSettlement is
     }
 
     /// @inheritdoc IComposedSettlement
-    function claimProviderShare(
-        bytes32 allocationId,
-        uint256 providerIndex
-    ) external override nonReentrant whenNotPaused {
+    function claimProviderShare(bytes32 allocationId, uint256 providerIndex)
+        external
+        override
+        nonReentrant
+        whenNotPaused
+    {
         ComposedAllocation storage alloc = _allocations[allocationId];
         if (alloc.agent == address(0)) revert AllocationNotFound(allocationId);
 
@@ -288,8 +271,7 @@ contract ComposedSettlement is
 
         // Must not be fully claimed or already expired-refunded
         require(
-            alloc.status == AllocationStatus.LOCKED ||
-            alloc.status == AllocationStatus.PARTIALLY_CLAIMED,
+            alloc.status == AllocationStatus.LOCKED || alloc.status == AllocationStatus.PARTIALLY_CLAIMED,
             "Cannot refund in current status"
         );
 
@@ -316,12 +298,7 @@ contract ComposedSettlement is
     // ═══════════════════ View Functions ═══════════════════
 
     /// @inheritdoc IComposedSettlement
-    function getComposedAllocation(bytes32 allocationId)
-        external
-        view
-        override
-        returns (ComposedAllocation memory)
-    {
+    function getComposedAllocation(bytes32 allocationId) external view override returns (ComposedAllocation memory) {
         return _allocations[allocationId];
     }
 

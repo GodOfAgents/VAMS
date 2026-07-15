@@ -22,7 +22,6 @@ interface IWorldIDVerifier {
  *      Integration point for the World ID Semaphore verifier.
  */
 contract WorldIDPlugin is IVAMSProofPlugin {
-
     /// @notice World ID verifier contract address
     address public immutable worldIdVerifier;
 
@@ -34,9 +33,9 @@ contract WorldIDPlugin is IVAMSProofPlugin {
 
     /// @notice World ID proof structure
     struct WorldIDProof {
-        uint256 root;           // Merkle tree root
-        uint256 nullifierHash;  // Unique nullifier (prevents double-use)
-        uint256[8] proof;       // ZK proof (Groth16)
+        uint256 root; // Merkle tree root
+        uint256 nullifierHash; // Unique nullifier (prevents double-use)
+        uint256[8] proof; // ZK proof (Groth16)
         uint256 externalNullifier; // Scoped nullifier
     }
 
@@ -49,11 +48,12 @@ contract WorldIDPlugin is IVAMSProofPlugin {
         return keccak256(abi.encodePacked("WORLD_ID_HUMAN"));
     }
 
-    function verify(
-        bytes32 serviceHash,
-        bytes32 deliveryHash,
-        bytes calldata proofData
-    ) external view override returns (bool valid) {
+    function verify(bytes32 serviceHash, bytes32 deliveryHash, bytes calldata proofData)
+        external
+        view
+        override
+        returns (bool valid)
+    {
         if (proofData.length != 11 * 32) return false;
 
         WorldIDProof memory worldProof = abi.decode(proofData, (WorldIDProof));
@@ -62,14 +62,15 @@ contract WorldIDPlugin is IVAMSProofPlugin {
         if (worldProof.externalNullifier != _hashToField(abi.encodePacked(VAMS_ACTION))) return false;
 
         uint256 signalHash = _hashToField(abi.encodePacked(serviceHash, deliveryHash));
-        try IWorldIDVerifier(worldIdVerifier).verifyProof(
-            worldProof.root,
-            WORLD_ID_GROUP,
-            signalHash,
-            worldProof.nullifierHash,
-            worldProof.externalNullifier,
-            worldProof.proof
-        ) {
+        try IWorldIDVerifier(worldIdVerifier)
+            .verifyProof(
+                worldProof.root,
+                WORLD_ID_GROUP,
+                signalHash,
+                worldProof.nullifierHash,
+                worldProof.externalNullifier,
+                worldProof.proof
+            ) {
             return true;
         } catch {
             return false;

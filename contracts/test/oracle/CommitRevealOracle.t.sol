@@ -12,12 +12,7 @@ contract CommitRevealOracleTest is Test {
 
     function setUp() public {
         registry = new OracleRegistry(address(this));
-        oracle = new CommitRevealOracle(
-            address(this),
-            address(registry),
-            IOracleRegistry.Category.PRICE,
-            FALLBACK
-        );
+        oracle = new CommitRevealOracle(address(this), address(registry), IOracleRegistry.Category.PRICE, FALLBACK);
     }
 
     function test_staleRequestResolvesToFixedFallback() public {

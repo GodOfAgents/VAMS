@@ -7,12 +7,11 @@ pragma solidity ^0.8.20;
  * @dev Verifies that routing decisions made by the CLR align with committed rules.
  */
 interface IRoutingProofVerifier {
-    
     struct RoutingProof {
-        bytes32 inputMetadataHash;    // H(valueUSD, latency, privacy, etc.)
-        bytes32 routingDecisionHash;  // H(selectedChain, selectedProvider)
-        bytes32 routingRulesRoot;     // Merkle root of active routing rules
-        bytes zkProof;                // SNARK proof (or signature in v1)
+        bytes32 inputMetadataHash; // H(valueUSD, latency, privacy, etc.)
+        bytes32 routingDecisionHash; // H(selectedChain, selectedProvider)
+        bytes32 routingRulesRoot; // Merkle root of active routing rules
+        bytes zkProof; // SNARK proof (or signature in v1)
     }
 
     event ProofVerified(bytes32 indexed txHash, bool valid);
@@ -24,10 +23,7 @@ interface IRoutingProofVerifier {
      * @param _proof The proof data.
      * @return bool True if valid, false otherwise.
      */
-    function verifyRoutingDecision(
-        bytes32 _txHash,
-        RoutingProof calldata _proof
-    ) external view returns (bool);
+    function verifyRoutingDecision(bytes32 _txHash, RoutingProof calldata _proof) external view returns (bool);
 
     /**
      * @notice Update the Merkle root of the active routing rules.

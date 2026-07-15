@@ -75,8 +75,7 @@ contract RegionalIncentives is IRegionalIncentives, AccessControl {
     ) external onlyRole(REGION_ADMIN_ROLE) {
         require(targetCapacity > 0, "Target capacity must be > 0");
         require(
-            bootstrapMultiplierBps >= BASE_MULTIPLIER_BPS &&
-            bootstrapMultiplierBps <= MAX_MULTIPLIER_BPS,
+            bootstrapMultiplierBps >= BASE_MULTIPLIER_BPS && bootstrapMultiplierBps <= MAX_MULTIPLIER_BPS,
             "Multiplier must be between 1.0x and 5.0x"
         );
 
@@ -97,27 +96,19 @@ contract RegionalIncentives is IRegionalIncentives, AccessControl {
     }
 
     /// @inheritdoc IRegionalIncentives
-    function updateCapacity(bytes32 regionId, uint256 newCapacity)
-        external
-        onlyRole(CAPACITY_UPDATER_ROLE)
-    {
+    function updateCapacity(bytes32 regionId, uint256 newCapacity) external onlyRole(CAPACITY_UPDATER_ROLE) {
         require(_regionExists[regionId], "Region not configured");
         uint256 oldCapacity = _regions[regionId].currentCapacity;
         _regions[regionId].currentCapacity = newCapacity;
 
-        emit RegionCapacityUpdated(
-            regionId,
-            oldCapacity,
-            newCapacity,
-            getRewardMultiplier(regionId)
-        );
+        emit RegionCapacityUpdated(regionId, oldCapacity, newCapacity, getRewardMultiplier(regionId));
     }
 
     /// @inheritdoc IRegionalIncentives
-    function batchUpdateCapacity(
-        bytes32[] calldata regionIds,
-        uint256[] calldata capacities
-    ) external onlyRole(CAPACITY_UPDATER_ROLE) {
+    function batchUpdateCapacity(bytes32[] calldata regionIds, uint256[] calldata capacities)
+        external
+        onlyRole(CAPACITY_UPDATER_ROLE)
+    {
         require(regionIds.length == capacities.length, "Array length mismatch");
 
         for (uint256 i = 0; i < regionIds.length; i++) {
@@ -125,31 +116,20 @@ contract RegionalIncentives is IRegionalIncentives, AccessControl {
                 uint256 oldCap = _regions[regionIds[i]].currentCapacity;
                 _regions[regionIds[i]].currentCapacity = capacities[i];
 
-                emit RegionCapacityUpdated(
-                    regionIds[i],
-                    oldCap,
-                    capacities[i],
-                    getRewardMultiplier(regionIds[i])
-                );
+                emit RegionCapacityUpdated(regionIds[i], oldCap, capacities[i], getRewardMultiplier(regionIds[i]));
             }
         }
     }
 
     /// @inheritdoc IRegionalIncentives
-    function deactivateRegion(bytes32 regionId)
-        external
-        onlyRole(REGION_ADMIN_ROLE)
-    {
+    function deactivateRegion(bytes32 regionId) external onlyRole(REGION_ADMIN_ROLE) {
         require(_regionExists[regionId], "Region not configured");
         _regions[regionId].isActive = false;
         emit RegionDeactivated(regionId);
     }
 
     /// @inheritdoc IRegionalIncentives
-    function activateRegion(bytes32 regionId)
-        external
-        onlyRole(REGION_ADMIN_ROLE)
-    {
+    function activateRegion(bytes32 regionId) external onlyRole(REGION_ADMIN_ROLE) {
         require(_regionExists[regionId], "Region not configured");
         _regions[regionId].isActive = true;
         emit RegionActivated(regionId);
@@ -158,11 +138,7 @@ contract RegionalIncentives is IRegionalIncentives, AccessControl {
     // ═══════════════════ View Functions ═══════════════════
 
     /// @inheritdoc IRegionalIncentives
-    function getRewardMultiplier(bytes32 regionId)
-        public
-        view
-        returns (uint256 multiplierBps)
-    {
+    function getRewardMultiplier(bytes32 regionId) public view returns (uint256 multiplierBps) {
         RegionConfig storage region = _regions[regionId];
 
         // Unknown or inactive region → standard rate
@@ -197,11 +173,7 @@ contract RegionalIncentives is IRegionalIncentives, AccessControl {
     }
 
     /// @inheritdoc IRegionalIncentives
-    function getRegionConfig(bytes32 regionId)
-        external
-        view
-        returns (RegionConfig memory)
-    {
+    function getRegionConfig(bytes32 regionId) external view returns (RegionConfig memory) {
         require(_regionExists[regionId], "Region not configured");
         return _regions[regionId];
     }
@@ -223,11 +195,10 @@ contract RegionalIncentives is IRegionalIncentives, AccessControl {
     }
 
     /// @notice Set hardware baseline and provider count for a region
-    function setEconomicParams(
-        bytes32 regionId,
-        uint256 pHardware,
-        uint256 providerCount
-    ) external onlyRole(REGION_ADMIN_ROLE) {
+    function setEconomicParams(bytes32 regionId, uint256 pHardware, uint256 providerCount)
+        external
+        onlyRole(REGION_ADMIN_ROLE)
+    {
         require(_regionExists[regionId], "Region not configured");
         _regionPHardware[regionId] = pHardware;
         _regionProviderCount[regionId] = providerCount;

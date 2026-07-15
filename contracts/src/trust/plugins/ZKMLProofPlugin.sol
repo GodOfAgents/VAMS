@@ -11,7 +11,6 @@ import {IVAMSProofPlugin} from "../../interfaces/IVAMSProofPlugin.sol";
  *      This plugin replaces the legacy SXT_SQL_PROOF + adds ML verification capability.
  */
 contract ZKMLProofPlugin is IVAMSProofPlugin {
-
     /// @notice External ZKML verifier contract (e.g., EZKL verifier)
     address public zkmlVerifier;
 
@@ -23,11 +22,11 @@ contract ZKMLProofPlugin is IVAMSProofPlugin {
 
     /// @notice ZKML proof structure (decoded from proofData)
     struct ZKMLProof {
-        bytes proof;           // ZK proof bytes
-        bytes32 modelHash;     // Hash of the ML model
-        bytes32 inputHash;     // Hash of the model input
-        bytes32 outputHash;    // Hash of the model output
-        bytes publicInputs;    // Public inputs for verifier circuit
+        bytes proof; // ZK proof bytes
+        bytes32 modelHash; // Hash of the ML model
+        bytes32 inputHash; // Hash of the model input
+        bytes32 outputHash; // Hash of the model output
+        bytes publicInputs; // Public inputs for verifier circuit
     }
 
     event ModelApproved(bytes32 indexed modelHash);
@@ -52,11 +51,12 @@ contract ZKMLProofPlugin is IVAMSProofPlugin {
         return keccak256(abi.encodePacked("ZKML_VERIFICATION"));
     }
 
-    function verify(
-        bytes32 serviceHash,
-        bytes32 deliveryHash,
-        bytes calldata proofData
-    ) external view override returns (bool valid) {
+    function verify(bytes32 serviceHash, bytes32 deliveryHash, bytes calldata proofData)
+        external
+        view
+        override
+        returns (bool valid)
+    {
         if (proofData.length == 0) return false;
 
         ZKMLProof memory zkProof = abi.decode(proofData, (ZKMLProof));

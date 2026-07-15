@@ -6,7 +6,10 @@ import "./interfaces/IERC8004Verifier.sol";
 
 interface IVAMSAgentRegistry {
     function updateTEEAttestation(bytes32 agentId, bytes32 attestation) external;
-    function getAgent(bytes32 agentId) external view returns (address owner, bytes32, uint256, uint8, uint256, uint256, bytes32);
+    function getAgent(bytes32 agentId)
+        external
+        view
+        returns (address owner, bytes32, uint256, uint8, uint256, uint256, bytes32);
 }
 
 /**
@@ -15,25 +18,24 @@ interface IVAMSAgentRegistry {
  * @dev Verifies TEE proofs and updates the AgentRegistry with the verified MRENCLAVE
  */
 contract VAMSERC8004Adapter is AccessControl {
-    
     // ============ State ============
 
     IVAMSAgentRegistry public immutable registry;
     IERC8004Verifier public verifier;
-    
+
     // Agent ID => Verified MRENCLAVE
     mapping(bytes32 => bytes32) public verifiedEnclaves;
-    
+
     // ============ Events ============
 
     event AgentVerified(bytes32 indexed agentId, bytes32 indexed mrenclave, uint64 timestamp);
-    
+
     // ============ Errors ============
 
     error InvalidProof();
     error NotAgentOwner();
     error RegistryNotSet();
-    
+
     // ============ Constructor ============
 
     constructor(address _registry, address _verifier) {
@@ -41,7 +43,7 @@ contract VAMSERC8004Adapter is AccessControl {
         registry = IVAMSAgentRegistry(_registry);
         verifier = IERC8004Verifier(_verifier);
     }
-    
+
     // ============ Main Functions ============
 
     /**
@@ -53,21 +55,21 @@ contract VAMSERC8004Adapter is AccessControl {
         // 1. Check ownership
         (address owner,,,,,,) = registry.getAgent(agentId);
         if (owner != msg.sender) revert NotAgentOwner();
-        
+
         // 2. Verify Proof via Automata/Phala verifier
         (bool success, IERC8004Verifier.EnclaveReport memory report) = verifier.verifyAttestation(proof);
         if (!success) revert InvalidProof();
-        
+
         // 3. Store Verification locally
         verifiedEnclaves[agentId] = report.mrenclave;
-        
+
         // 4. Update Registry (Optional: if Registry allows external updaters)
         // For now, we trust this Adapter as the source of truth for "Verified MRENCLAVE"
-        // registry.updateTEEAttestation(agentId, report.mrenclave); 
-        
+        // registry.updateTEEAttestation(agentId, report.mrenclave);
+
         emit AgentVerified(agentId, report.mrenclave, report.timestamp);
     }
-    
+
     // ============ Admin ============
 
     function setVerifier(address _verifier) external onlyRole(DEFAULT_ADMIN_ROLE) {

@@ -24,11 +24,8 @@ interface IDynamicEmissionController {
      * @param _newFeeMultiplier Recommended fee multiplier in bps
      * @param _modelSignature Centralized operator or consensus signature
      */
-    function applyAdjustment(
-        uint256 _newEmissionRate,
-        uint256 _newFeeMultiplier,
-        bytes calldata _modelSignature
-    ) external;
+    function applyAdjustment(uint256 _newEmissionRate, uint256 _newFeeMultiplier, bytes calldata _modelSignature)
+        external;
 
     /**
      * @notice Restore normal RL execution mode after a fallback

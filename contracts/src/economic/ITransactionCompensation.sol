@@ -12,88 +12,67 @@ interface ITransactionCompensation {
 
     /// @notice Status of a compensation claim
     enum ClaimStatus {
-        PENDING,    // Submitted, awaiting guardian review
-        APPROVED,   // Approved by guardian quorum
-        REJECTED,   // Rejected by guardians
-        PAID,       // Compensation paid out
-        EXPIRED     // Claim window expired
+        PENDING, // Submitted, awaiting guardian review
+        APPROVED, // Approved by guardian quorum
+        REJECTED, // Rejected by guardians
+        PAID, // Compensation paid out
+        EXPIRED // Claim window expired
     }
 
     /// @notice Type of failed transaction
     enum TransactionType {
-        SETTLEMENT,     // x402 settlement failure
-        ESCROW,         // Escrow operation failure
-        STAKE,          // Staking operation failure
-        WITHDRAWAL,     // Withdrawal failure
-        OTHER           // Other transaction type
+        SETTLEMENT, // x402 settlement failure
+        ESCROW, // Escrow operation failure
+        STAKE, // Staking operation failure
+        WITHDRAWAL, // Withdrawal failure
+        OTHER // Other transaction type
     }
 
     // ============ Structs ============
 
     /// @notice Compensation claim details
     struct Claim {
-        address claimant;           // Who submitted the claim
-        bytes32 txHash;             // Failed transaction hash
-        TransactionType txType;     // Type of failed transaction
-        uint256 amount;             // Requested compensation amount
-        uint256 submittedAt;        // When claim was submitted
-        uint256 processedAt;        // When claim was processed
-        ClaimStatus status;         // Current status
-        uint256 approvals;          // Number of guardian approvals
-        uint256 rejections;         // Number of guardian rejections
-        string evidence;            // IPFS/Arweave URI for evidence
-        string resolution;          // Resolution notes
+        address claimant; // Who submitted the claim
+        bytes32 txHash; // Failed transaction hash
+        TransactionType txType; // Type of failed transaction
+        uint256 amount; // Requested compensation amount
+        uint256 submittedAt; // When claim was submitted
+        uint256 processedAt; // When claim was processed
+        ClaimStatus status; // Current status
+        uint256 approvals; // Number of guardian approvals
+        uint256 rejections; // Number of guardian rejections
+        string evidence; // IPFS/Arweave URI for evidence
+        string resolution; // Resolution notes
     }
 
     /// @notice Incident declaration
     struct Incident {
-        uint256 declaredAt;         // When incident was declared
-        uint256 resolvedAt;         // When incident was resolved
-        uint256 claimDeadline;      // Deadline for claims
-        string description;         // Incident description
-        bool active;                // Whether incident is active
+        uint256 declaredAt; // When incident was declared
+        uint256 resolvedAt; // When incident was resolved
+        uint256 claimDeadline; // Deadline for claims
+        string description; // Incident description
+        bool active; // Whether incident is active
     }
 
     // ============ Events ============
 
     /// @notice Emitted when an incident is declared
-    event IncidentDeclared(
-        uint256 indexed incidentId,
-        string description,
-        uint256 claimDeadline
-    );
+    event IncidentDeclared(uint256 indexed incidentId, string description, uint256 claimDeadline);
 
     /// @notice Emitted when an incident is resolved
     event IncidentResolved(uint256 indexed incidentId, uint256 resolvedAt);
 
     /// @notice Emitted when a claim is submitted
-    event ClaimSubmitted(
-        uint256 indexed claimId,
-        address indexed claimant,
-        bytes32 txHash,
-        uint256 amount
-    );
+    event ClaimSubmitted(uint256 indexed claimId, address indexed claimant, bytes32 txHash, uint256 amount);
 
     /// @notice Emitted when a guardian votes on a claim
-    event ClaimVoted(
-        uint256 indexed claimId,
-        address indexed guardian,
-        bool approved
-    );
+    event ClaimVoted(uint256 indexed claimId, address indexed guardian, bool approved);
 
     /// @notice Emitted when a claim is finalized
-    event ClaimFinalized(
-        uint256 indexed claimId,
-        ClaimStatus status,
-        uint256 paidAmount
-    );
+    event ClaimFinalized(uint256 indexed claimId, ClaimStatus status, uint256 paidAmount);
 
     /// @notice Emitted when compensation is paid
-    event CompensationPaid(
-        uint256 indexed claimId,
-        address indexed recipient,
-        uint256 amount
-    );
+    event CompensationPaid(uint256 indexed claimId, address indexed recipient, uint256 amount);
 
     // ============ Errors ============
 
@@ -130,10 +109,7 @@ interface ITransactionCompensation {
     /// @param description Incident description
     /// @param claimWindowDays How many days claims can be submitted
     /// @return incidentId The incident ID
-    function declareIncident(
-        string calldata description,
-        uint256 claimWindowDays
-    ) external returns (uint256 incidentId);
+    function declareIncident(string calldata description, uint256 claimWindowDays) external returns (uint256 incidentId);
 
     /// @notice Resolve an incident
     /// @param incidentId Incident to resolve
@@ -147,12 +123,9 @@ interface ITransactionCompensation {
     /// @param amount Requested amount
     /// @param evidence Evidence URI (IPFS/Arweave)
     /// @return claimId The claim ID
-    function submitClaim(
-        bytes32 txHash,
-        TransactionType txType,
-        uint256 amount,
-        string calldata evidence
-    ) external returns (uint256 claimId);
+    function submitClaim(bytes32 txHash, TransactionType txType, uint256 amount, string calldata evidence)
+        external
+        returns (uint256 claimId);
 
     /// @notice Guardian approves a claim
     /// @param claimId Claim to approve

@@ -18,12 +18,7 @@ import "../interfaces/ISLAEnforcer.sol";
  *      - Supports all 6 DA protocols from the VAMS Foundation Layer.
  *      - Exposes verifyAnchor() for composability with SLAEnforcer and TrustAggregator.
  */
-contract PerformanceAnchor is
-    Initializable,
-    AccessControlUpgradeable,
-    ReentrancyGuard,
-    IPerformanceAnchor
-{
+contract PerformanceAnchor is Initializable, AccessControlUpgradeable, ReentrancyGuard, IPerformanceAnchor {
     // ============================================================
     //                        ROLES
     // ============================================================
@@ -60,14 +55,11 @@ contract PerformanceAnchor is
     constructor() {
         _disableInitializers();
     }
-    
+
     /// @notice Initialize the PerformanceAnchor contract.
     /// @param _admin Address with admin rights to upgrade and manage configuration.
     /// @param _slaEnforcer Address of the SLAEnforcer contract for Sentinel ACL.
-    function initialize(
-        address _admin,
-        address _slaEnforcer
-    ) public initializer {
+    function initialize(address _admin, address _slaEnforcer) public initializer {
         __AccessControl_init();
 
         require(_admin != address(0), "Admin address zero");
@@ -85,9 +77,8 @@ contract PerformanceAnchor is
 
     /// @dev Verifies msg.sender is a registered Sentinel in SLAEnforcer.
     modifier onlySentinel() {
-        (bool success, bytes memory data) = address(slaEnforcer).staticcall(
-            abi.encodeWithSignature("isSentinel(address)", msg.sender)
-        );
+        (bool success, bytes memory data) =
+            address(slaEnforcer).staticcall(abi.encodeWithSignature("isSentinel(address)", msg.sender));
         if (!success || data.length == 0) revert UnauthorizedSentinel();
         bool isRegistered = abi.decode(data, (bool));
         if (!isRegistered) revert UnauthorizedSentinel();
@@ -99,12 +90,11 @@ contract PerformanceAnchor is
     // ============================================================
 
     /// @inheritdoc IPerformanceAnchor
-    function commit(
-        DAProtocol protocol,
-        bytes32 blobId,
-        bytes32 reportHash,
-        address provider
-    ) external nonReentrant onlySentinel {
+    function commit(DAProtocol protocol, bytes32 blobId, bytes32 reportHash, address provider)
+        external
+        nonReentrant
+        onlySentinel
+    {
         // Validate inputs
         if (blobId == bytes32(0) || reportHash == bytes32(0)) revert InvalidParameters();
         if (provider == address(0)) revert InvalidParameters();
@@ -127,13 +117,7 @@ contract PerformanceAnchor is
         _protocolCounts[protocol]++;
         anchorsPerProvider[provider]++;
 
-        emit PerformanceReportAnchored(
-            protocol,
-            blobId,
-            reportHash,
-            provider,
-            msg.sender
-        );
+        emit PerformanceReportAnchored(protocol, blobId, reportHash, provider, msg.sender);
     }
 
     // ============================================================
@@ -141,19 +125,16 @@ contract PerformanceAnchor is
     // ============================================================
 
     /// @inheritdoc IPerformanceAnchor
-    function getAnchor(
-        DAProtocol protocol,
-        bytes32 blobId
-    ) external view returns (AnchorRecord memory record) {
+    function getAnchor(DAProtocol protocol, bytes32 blobId) external view returns (AnchorRecord memory record) {
         return _anchors[protocol][blobId];
     }
 
     /// @inheritdoc IPerformanceAnchor
-    function verifyAnchor(
-        DAProtocol protocol,
-        bytes32 blobId,
-        bytes32 reportHash
-    ) external view returns (bool matches) {
+    function verifyAnchor(DAProtocol protocol, bytes32 blobId, bytes32 reportHash)
+        external
+        view
+        returns (bool matches)
+    {
         AnchorRecord storage record = _anchors[protocol][blobId];
         if (record.timestamp == 0) return false;
         return record.reportHash == reportHash;

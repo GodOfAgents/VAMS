@@ -19,7 +19,6 @@ contract MockSLAEnforcerForAnchor {
 }
 
 contract PerformanceAnchorTest is Test {
-
     PerformanceAnchor public anchor;
     MockSLAEnforcerForAnchor public mockEnforcer;
 
@@ -41,8 +40,7 @@ contract PerformanceAnchorTest is Test {
         // Deploy PerformanceAnchor behind proxy (AC01: _disableInitializers)
         PerformanceAnchor impl = new PerformanceAnchor();
         ERC1967Proxy proxy = new ERC1967Proxy(
-            address(impl),
-            abi.encodeCall(PerformanceAnchor.initialize, (admin, address(mockEnforcer)))
+            address(impl), abi.encodeCall(PerformanceAnchor.initialize, (admin, address(mockEnforcer)))
         );
         anchor = PerformanceAnchor(address(proxy));
     }
@@ -53,18 +51,11 @@ contract PerformanceAnchorTest is Test {
 
     function test_commit_by_sentinel() public {
         vm.prank(sentinel);
-        anchor.commit(
-            IPerformanceAnchor.DAProtocol.CELESTIA,
-            blobId1,
-            reportHash1,
-            provider
-        );
+        anchor.commit(IPerformanceAnchor.DAProtocol.CELESTIA, blobId1, reportHash1, provider);
 
         // Verify the anchor was stored
-        IPerformanceAnchor.AnchorRecord memory record = anchor.getAnchor(
-            IPerformanceAnchor.DAProtocol.CELESTIA,
-            blobId1
-        );
+        IPerformanceAnchor.AnchorRecord memory record =
+            anchor.getAnchor(IPerformanceAnchor.DAProtocol.CELESTIA, blobId1);
 
         assertEq(record.reportHash, reportHash1);
         assertEq(record.provider, provider);
@@ -75,44 +66,26 @@ contract PerformanceAnchorTest is Test {
 
     function test_verify_anchor_matches() public {
         vm.prank(sentinel);
-        anchor.commit(
-            IPerformanceAnchor.DAProtocol.CELESTIA,
-            blobId1,
-            reportHash1,
-            provider
-        );
+        anchor.commit(IPerformanceAnchor.DAProtocol.CELESTIA, blobId1, reportHash1, provider);
 
-        bool matches = anchor.verifyAnchor(
-            IPerformanceAnchor.DAProtocol.CELESTIA,
-            blobId1,
-            reportHash1
-        );
+        bool matches = anchor.verifyAnchor(IPerformanceAnchor.DAProtocol.CELESTIA, blobId1, reportHash1);
         assertTrue(matches);
     }
 
     function test_verify_anchor_wrong_hash() public {
         vm.prank(sentinel);
-        anchor.commit(
-            IPerformanceAnchor.DAProtocol.CELESTIA,
-            blobId1,
-            reportHash1,
-            provider
-        );
+        anchor.commit(IPerformanceAnchor.DAProtocol.CELESTIA, blobId1, reportHash1, provider);
 
         bool matches = anchor.verifyAnchor(
             IPerformanceAnchor.DAProtocol.CELESTIA,
             blobId1,
-            reportHash2  // Wrong hash
+            reportHash2 // Wrong hash
         );
         assertFalse(matches);
     }
 
     function test_verify_anchor_nonexistent() public view {
-        bool matches = anchor.verifyAnchor(
-            IPerformanceAnchor.DAProtocol.CELESTIA,
-            blobId1,
-            reportHash1
-        );
+        bool matches = anchor.verifyAnchor(IPerformanceAnchor.DAProtocol.CELESTIA, blobId1, reportHash1);
         assertFalse(matches);
     }
 
@@ -120,20 +93,10 @@ contract PerformanceAnchorTest is Test {
         vm.startPrank(sentinel);
 
         // Anchor on Celestia
-        anchor.commit(
-            IPerformanceAnchor.DAProtocol.CELESTIA,
-            blobId1,
-            reportHash1,
-            provider
-        );
+        anchor.commit(IPerformanceAnchor.DAProtocol.CELESTIA, blobId1, reportHash1, provider);
 
         // Anchor on Near DA
-        anchor.commit(
-            IPerformanceAnchor.DAProtocol.NEAR_DA,
-            blobId2,
-            reportHash2,
-            provider
-        );
+        anchor.commit(IPerformanceAnchor.DAProtocol.NEAR_DA, blobId2, reportHash2, provider);
 
         vm.stopPrank();
 
@@ -150,12 +113,7 @@ contract PerformanceAnchorTest is Test {
 
     function test_statistics_tracking() public {
         vm.prank(sentinel);
-        anchor.commit(
-            IPerformanceAnchor.DAProtocol.CELESTIA,
-            blobId1,
-            reportHash1,
-            provider
-        );
+        anchor.commit(IPerformanceAnchor.DAProtocol.CELESTIA, blobId1, reportHash1, provider);
 
         assertEq(anchor.totalAnchors(), 1);
         assertEq(anchor.anchorsPerProtocol(IPerformanceAnchor.DAProtocol.CELESTIA), 1);
@@ -170,24 +128,14 @@ contract PerformanceAnchorTest is Test {
     function test_commit_unauthorized_reverts() public {
         vm.prank(stranger);
         vm.expectRevert(IPerformanceAnchor.UnauthorizedSentinel.selector);
-        anchor.commit(
-            IPerformanceAnchor.DAProtocol.CELESTIA,
-            blobId1,
-            reportHash1,
-            provider
-        );
+        anchor.commit(IPerformanceAnchor.DAProtocol.CELESTIA, blobId1, reportHash1, provider);
     }
 
     function test_commit_unregistered_sentinel_reverts() public {
         address fakeSentinel = address(99);
         vm.prank(fakeSentinel);
         vm.expectRevert(IPerformanceAnchor.UnauthorizedSentinel.selector);
-        anchor.commit(
-            IPerformanceAnchor.DAProtocol.CELESTIA,
-            blobId1,
-            reportHash1,
-            provider
-        );
+        anchor.commit(IPerformanceAnchor.DAProtocol.CELESTIA, blobId1, reportHash1, provider);
     }
 
     // ============================================================
@@ -197,19 +145,14 @@ contract PerformanceAnchorTest is Test {
     function test_duplicate_commit_reverts() public {
         vm.startPrank(sentinel);
 
-        anchor.commit(
-            IPerformanceAnchor.DAProtocol.CELESTIA,
-            blobId1,
-            reportHash1,
-            provider
-        );
+        anchor.commit(IPerformanceAnchor.DAProtocol.CELESTIA, blobId1, reportHash1, provider);
 
         // Same (protocol, blobId) should revert
         vm.expectRevert(IPerformanceAnchor.AnchorAlreadyExists.selector);
         anchor.commit(
             IPerformanceAnchor.DAProtocol.CELESTIA,
             blobId1,
-            reportHash2,  // Different hash, same key
+            reportHash2, // Different hash, same key
             provider
         );
 
@@ -219,34 +162,19 @@ contract PerformanceAnchorTest is Test {
     function test_commit_zero_blobId_reverts() public {
         vm.prank(sentinel);
         vm.expectRevert(IPerformanceAnchor.InvalidParameters.selector);
-        anchor.commit(
-            IPerformanceAnchor.DAProtocol.CELESTIA,
-            bytes32(0),
-            reportHash1,
-            provider
-        );
+        anchor.commit(IPerformanceAnchor.DAProtocol.CELESTIA, bytes32(0), reportHash1, provider);
     }
 
     function test_commit_zero_reportHash_reverts() public {
         vm.prank(sentinel);
         vm.expectRevert(IPerformanceAnchor.InvalidParameters.selector);
-        anchor.commit(
-            IPerformanceAnchor.DAProtocol.CELESTIA,
-            blobId1,
-            bytes32(0),
-            provider
-        );
+        anchor.commit(IPerformanceAnchor.DAProtocol.CELESTIA, blobId1, bytes32(0), provider);
     }
 
     function test_commit_zero_provider_reverts() public {
         vm.prank(sentinel);
         vm.expectRevert(IPerformanceAnchor.InvalidParameters.selector);
-        anchor.commit(
-            IPerformanceAnchor.DAProtocol.CELESTIA,
-            blobId1,
-            reportHash1,
-            address(0)
-        );
+        anchor.commit(IPerformanceAnchor.DAProtocol.CELESTIA, blobId1, reportHash1, address(0));
     }
 
     // ============================================================
@@ -275,19 +203,10 @@ contract PerformanceAnchorTest is Test {
     function test_emit_PerformanceReportAnchored() public {
         vm.expectEmit(true, true, true, true);
         emit IPerformanceAnchor.PerformanceReportAnchored(
-            IPerformanceAnchor.DAProtocol.CELESTIA,
-            blobId1,
-            reportHash1,
-            provider,
-            sentinel
+            IPerformanceAnchor.DAProtocol.CELESTIA, blobId1, reportHash1, provider, sentinel
         );
 
         vm.prank(sentinel);
-        anchor.commit(
-            IPerformanceAnchor.DAProtocol.CELESTIA,
-            blobId1,
-            reportHash1,
-            provider
-        );
+        anchor.commit(IPerformanceAnchor.DAProtocol.CELESTIA, blobId1, reportHash1, provider);
     }
 }

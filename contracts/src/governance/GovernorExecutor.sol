@@ -9,7 +9,7 @@ import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 /**
  * @title GovernorExecutor
  * @author VAMS Protocol
- * @notice Receives governance intents from Cardano (Brain) via ICB relay and 
+ * @notice Receives governance intents from Cardano (Brain) via ICB relay and
  *         executes them on Polygon (Hands).
  *
  * Flow:
@@ -21,12 +21,7 @@ import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
  *   - Replay protection via nonce tracking
  *   - DAO_ROLE restricted to ICB relay address
  */
-contract GovernorExecutor is 
-    Initializable,
-    AccessControlUpgradeable,
-    PausableUpgradeable,
-    ReentrancyGuard
-{
+contract GovernorExecutor is Initializable, AccessControlUpgradeable, PausableUpgradeable, ReentrancyGuard {
     // ============ Constants ============
 
     /// @notice Role for the ICB relay to submit intents
@@ -88,18 +83,9 @@ contract GovernorExecutor is
 
     // ============ Events ============
 
-    event IntentQueued(
-        bytes32 indexed intentId,
-        address indexed target,
-        bytes32 cardanoTxHash,
-        uint256 executeAfter
-    );
+    event IntentQueued(bytes32 indexed intentId, address indexed target, bytes32 cardanoTxHash, uint256 executeAfter);
 
-    event IntentExecuted(
-        bytes32 indexed intentId,
-        address indexed target,
-        bool success
-    );
+    event IntentExecuted(bytes32 indexed intentId, address indexed target, bool success);
 
     event IntentCancelled(bytes32 indexed intentId);
 
@@ -128,11 +114,7 @@ contract GovernorExecutor is
      * @param _relay ICB relay address
      * @param _delay Initial timelock delay
      */
-    function initialize(
-        address _admin,
-        address _relay, 
-        uint256 _delay
-    ) external initializer {
+    function initialize(address _admin, address _relay, uint256 _delay) external initializer {
         __AccessControl_init();
         __Pausable_init();
 
@@ -169,9 +151,7 @@ contract GovernorExecutor is
 
         uint256 nonce = currentNonce++;
 
-        intentId = keccak256(abi.encodePacked(
-            target, data, value, cardanoTxHash, nonce
-        ));
+        intentId = keccak256(abi.encodePacked(target, data, value, cardanoTxHash, nonce));
 
         if (intents[intentId].status != IntentStatus.NONE) {
             revert IntentAlreadyExists(intentId);
@@ -190,12 +170,7 @@ contract GovernorExecutor is
 
         executedCardanoTxs[cardanoTxHash] = true;
 
-        emit IntentQueued(
-            intentId, 
-            target, 
-            cardanoTxHash, 
-            block.timestamp + timelockDelay
-        );
+        emit IntentQueued(intentId, target, cardanoTxHash, block.timestamp + timelockDelay);
     }
 
     /**

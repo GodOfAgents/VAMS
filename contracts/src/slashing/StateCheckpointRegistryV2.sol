@@ -35,7 +35,9 @@ contract StateCheckpointRegistryV2 is AccessControl {
     event CheckpointSubmitted(bytes32 indexed stateRoot, address indexed operator, uint256 timestamp);
     event CheckpointChallenged(bytes32 indexed stateRoot, address indexed challenger, uint256 timestamp);
     event CheckpointFinalized(bytes32 indexed stateRoot, uint256 timestamp);
-    event DisputeResolved(bytes32 indexed stateRoot, address indexed winner, address indexed loser, uint256 slashedAmount);
+    event DisputeResolved(
+        bytes32 indexed stateRoot, address indexed winner, address indexed loser, uint256 slashedAmount
+    );
 
     constructor(address _admin, address _vamsToken) {
         require(_admin != address(0) && _vamsToken != address(0), "Zero address");

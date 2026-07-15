@@ -11,46 +11,34 @@ interface IVAMSFeeCollector {
 
     /// @notice Distribution phases per tokenomics
     enum DistributionPhase {
-        PHASE_1,  // 100% burn
-        PHASE_2,  // 40% burn, 30% staking, 20% treasury, 10% insurance
-        CUSTOM    // Custom allocation
+        PHASE_1, // 100% burn
+        PHASE_2, // 40% burn, 30% staking, 20% treasury, 10% insurance
+        CUSTOM // Custom allocation
     }
 
     // ============ Structs ============
 
     /// @notice Fee distribution allocation
     struct Distribution {
-        uint256 burnBps;      // Buyback and burn %
-        uint256 stakingBps;   // Staking rewards %
-        uint256 treasuryBps;  // Treasury %
+        uint256 burnBps; // Buyback and burn %
+        uint256 stakingBps; // Staking rewards %
+        uint256 treasuryBps; // Treasury %
         uint256 insuranceBps; // Insurance fund %
     }
 
     // ============ Events ============
 
     /// @notice Emitted when fees are collected
-    event FeesCollected(
-        address indexed from,
-        address indexed token,
-        uint256 amount
-    );
+    event FeesCollected(address indexed from, address indexed token, uint256 amount);
 
     /// @notice Emitted when fees are distributed
     event FeesDistributed(
-        address indexed token,
-        uint256 burned,
-        uint256 toStaking,
-        uint256 toTreasury,
-        uint256 toInsurance
+        address indexed token, uint256 burned, uint256 toStaking, uint256 toTreasury, uint256 toInsurance
     );
 
     /// @notice Emitted when distribution is updated
     event DistributionUpdated(
-        DistributionPhase phase,
-        uint256 burnBps,
-        uint256 stakingBps,
-        uint256 treasuryBps,
-        uint256 insuranceBps
+        DistributionPhase phase, uint256 burnBps, uint256 stakingBps, uint256 treasuryBps, uint256 insuranceBps
     );
 
     /// @notice Emitted when auto-distribute threshold is updated
@@ -106,12 +94,8 @@ interface IVAMSFeeCollector {
     /// @param _stakingBps Staking percentage in basis points
     /// @param _treasuryBps Treasury percentage in basis points
     /// @param _insuranceBps Insurance percentage in basis points
-    function updateDistribution(
-        uint256 _burnBps,
-        uint256 _stakingBps,
-        uint256 _treasuryBps,
-        uint256 _insuranceBps
-    ) external;
+    function updateDistribution(uint256 _burnBps, uint256 _stakingBps, uint256 _treasuryBps, uint256 _insuranceBps)
+        external;
 
     /// @notice Transition to predefined phase
     /// @param phase Target phase

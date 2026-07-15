@@ -99,17 +99,17 @@ contract VAMSHardwareRegistry is
         vamsToken = IERC20(_vamsToken);
 
         // Pre-seed the 11 initial hardware classes
-        _seedClass(HardwareClasses.GPU_H100,     "GPU_H100",     "GPU",     50_000e18, 8000);
-        _seedClass(HardwareClasses.GPU_A100,     "GPU_A100",     "GPU",     25_000e18, 7500);
-        _seedClass(HardwareClasses.GPU_L40S,     "GPU_L40S",     "GPU",     20_000e18, 7000);
-        _seedClass(HardwareClasses.GPU_RTX_4090, "GPU_RTX_4090", "GPU",     10_000e18, 6000);
-        _seedClass(HardwareClasses.CPU_EPYC,     "CPU_EPYC",     "CPU",     10_000e18, 7000);
-        _seedClass(HardwareClasses.CPU_XEON,     "CPU_XEON",     "CPU",     10_000e18, 7000);
+        _seedClass(HardwareClasses.GPU_H100, "GPU_H100", "GPU", 50_000e18, 8000);
+        _seedClass(HardwareClasses.GPU_A100, "GPU_A100", "GPU", 25_000e18, 7500);
+        _seedClass(HardwareClasses.GPU_L40S, "GPU_L40S", "GPU", 20_000e18, 7000);
+        _seedClass(HardwareClasses.GPU_RTX_4090, "GPU_RTX_4090", "GPU", 10_000e18, 6000);
+        _seedClass(HardwareClasses.CPU_EPYC, "CPU_EPYC", "CPU", 10_000e18, 7000);
+        _seedClass(HardwareClasses.CPU_XEON, "CPU_XEON", "CPU", 10_000e18, 7000);
         _seedClass(HardwareClasses.STORAGE_NVME, "STORAGE_NVME", "STORAGE", 15_000e18, 8000);
-        _seedClass(HardwareClasses.STORAGE_HDD,  "STORAGE_HDD",  "STORAGE",  5_000e18, 5000);
-        _seedClass(HardwareClasses.NETWORK_10G,  "NETWORK_10G",  "NETWORK",  8_000e18, 7500);
-        _seedClass(HardwareClasses.TEE_SGX,      "TEE_SGX",      "TEE",     30_000e18, 9000);
-        _seedClass(HardwareClasses.TEE_NITRO,    "TEE_NITRO",    "TEE",     30_000e18, 9000);
+        _seedClass(HardwareClasses.STORAGE_HDD, "STORAGE_HDD", "STORAGE", 5_000e18, 5000);
+        _seedClass(HardwareClasses.NETWORK_10G, "NETWORK_10G", "NETWORK", 8_000e18, 7500);
+        _seedClass(HardwareClasses.TEE_SGX, "TEE_SGX", "TEE", 30_000e18, 9000);
+        _seedClass(HardwareClasses.TEE_NITRO, "TEE_NITRO", "TEE", 30_000e18, 9000);
     }
 
     // ═══════════════════ Hardware Class Management ═══════════════════
@@ -150,10 +150,11 @@ contract VAMSHardwareRegistry is
     }
 
     /// @inheritdoc IVAMSHardwareRegistry
-    function updateClassCollateral(
-        bytes32 classId,
-        uint256 newMinCollateral
-    ) external override onlyRole(GOVERNANCE_ROLE) {
+    function updateClassCollateral(bytes32 classId, uint256 newMinCollateral)
+        external
+        override
+        onlyRole(GOVERNANCE_ROLE)
+    {
         HardwareClassInfo storage cls = _classes[classId];
         if (cls.classId == bytes32(0)) revert ClassNotFound(classId);
         if (newMinCollateral == 0) revert ZeroValue();
@@ -300,11 +301,11 @@ contract VAMSHardwareRegistry is
     }
 
     /// @inheritdoc IVAMSHardwareRegistry
-    function updateBenchmark(
-        bytes32 nodeId,
-        uint256 score,
-        uint256 timestamp
-    ) external override onlyRole(SENTINEL_ROLE) {
+    function updateBenchmark(bytes32 nodeId, uint256 score, uint256 timestamp)
+        external
+        override
+        onlyRole(SENTINEL_ROLE)
+    {
         VAMSResourceNode storage node = _nodes[nodeId];
         if (node.registeredAt == 0) revert NodeNotFound(nodeId);
 

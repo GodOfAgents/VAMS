@@ -15,28 +15,22 @@ interface IRegionalIncentives {
 
     /// @notice Configuration for a geographic region
     struct RegionConfig {
-        bytes32 regionId;           // keccak256("us-east-1")
-        string displayName;         // "US East (Virginia)"
-        uint256 targetCapacity;     // Target capacity units
+        bytes32 regionId; // keccak256("us-east-1")
+        string displayName; // "US East (Virginia)"
+        uint256 targetCapacity; // Target capacity units
         uint256 bootstrapMultiplierBps; // Max reward multiplier (10000 = 1.0x, 30000 = 3.0x)
-        uint256 currentCapacity;    // Live capacity from HardwareRegistry
+        uint256 currentCapacity; // Live capacity from HardwareRegistry
         bool isActive;
     }
 
     // ═══════════════════ Events ═══════════════════
 
     event RegionConfigured(
-        bytes32 indexed regionId,
-        string displayName,
-        uint256 targetCapacity,
-        uint256 bootstrapMultiplierBps
+        bytes32 indexed regionId, string displayName, uint256 targetCapacity, uint256 bootstrapMultiplierBps
     );
 
     event RegionCapacityUpdated(
-        bytes32 indexed regionId,
-        uint256 oldCapacity,
-        uint256 newCapacity,
-        uint256 currentMultiplierBps
+        bytes32 indexed regionId, uint256 oldCapacity, uint256 newCapacity, uint256 currentMultiplierBps
     );
 
     event RegionDeactivated(bytes32 indexed regionId);
@@ -56,10 +50,7 @@ interface IRegionalIncentives {
     function updateCapacity(bytes32 regionId, uint256 newCapacity) external;
 
     /// @notice Batch update capacities for multiple regions
-    function batchUpdateCapacity(
-        bytes32[] calldata regionIds,
-        uint256[] calldata capacities
-    ) external;
+    function batchUpdateCapacity(bytes32[] calldata regionIds, uint256[] calldata capacities) external;
 
     /// @notice Deactivate a region (multiplier returns 1.0x)
     function deactivateRegion(bytes32 regionId) external;

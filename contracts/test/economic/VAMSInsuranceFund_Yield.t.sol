@@ -41,19 +41,19 @@ contract VAMSInsuranceFund_YieldTest is Test {
         VAMSInsuranceFund fundImpl = new VAMSInsuranceFund();
         address[] memory guardians = new address[](1);
         guardians[0] = guardian;
-        
+
         ERC1967Proxy proxy = new ERC1967Proxy(
             address(fundImpl),
             abi.encodeCall(VAMSInsuranceFund.initialize, (admin, address(vamsToken), address(staking), guardians))
         );
         fund = VAMSInsuranceFund(address(proxy));
-        
+
         fund.grantRole(YIELD_MANAGER_ROLE, yieldManager);
         fund.grantRole(SLASHER_ROLE, slasher);
-        
+
         // Fund the slasher so it can deposit
         vamsToken.transfer(slasher, 100_000 ether);
-        
+
         vm.stopPrank();
 
         // Deposit initial funds to Insurance Fund

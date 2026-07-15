@@ -12,13 +12,26 @@ import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.s
 
 contract MockLegacyPlugin is IVAMSProofPlugin {
     bytes32 private _type;
-    constructor(bytes32 t) { _type = t; }
-    function proofType() external view override returns (bytes32) { return _type; }
+
+    constructor(bytes32 t) {
+        _type = t;
+    }
+
+    function proofType() external view override returns (bytes32) {
+        return _type;
+    }
+
     function verify(bytes32, bytes32, bytes calldata proofData) external pure override returns (bool) {
         return proofData.length >= 64;
     }
-    function trustWeight() external pure override returns (uint256) { return 1000; }
-    function name() external pure override returns (string memory) { return "Mock Legacy"; }
+
+    function trustWeight() external pure override returns (uint256) {
+        return 1000;
+    }
+
+    function name() external pure override returns (string memory) {
+        return "Mock Legacy";
+    }
 }
 
 contract VAMSTrustAggregatorTest is Test {
@@ -26,7 +39,7 @@ contract VAMSTrustAggregatorTest is Test {
     TEEProofPlugin public teePlugin;
     OutputHashProofPlugin public outputHashPlugin;
     ERC8004IdentityPlugin public identityPlugin;
-    
+
     address public owner;
     address public agent;
     address public nonOwner;
@@ -38,9 +51,7 @@ contract VAMSTrustAggregatorTest is Test {
 
         // Deploy aggregator via UUPS proxy
         VAMSTrustAggregator impl = new VAMSTrustAggregator();
-        bytes memory initData = abi.encodeWithSelector(
-            VAMSTrustAggregator.initialize.selector
-        );
+        bytes memory initData = abi.encodeWithSelector(VAMSTrustAggregator.initialize.selector);
         ERC1967Proxy proxy = new ERC1967Proxy(address(impl), initData);
         aggregator = VAMSTrustAggregator(address(proxy));
 
@@ -49,11 +60,21 @@ contract VAMSTrustAggregatorTest is Test {
         outputHashPlugin = new OutputHashProofPlugin(owner);
         identityPlugin = new ERC8004IdentityPlugin(address(0x789));
 
-        aggregator.registerProofPlugin(new MockLegacyPlugin(bytes32(uint256(IVAMSTrustAggregator.ProofType.ERC8004_IDENTITY))));
-        aggregator.registerProofPlugin(new MockLegacyPlugin(bytes32(uint256(IVAMSTrustAggregator.ProofType.POLYGON_ID))));
-        aggregator.registerProofPlugin(new MockLegacyPlugin(bytes32(uint256(IVAMSTrustAggregator.ProofType.COINBASE_WALLET))));
-        aggregator.registerProofPlugin(new MockLegacyPlugin(bytes32(uint256(IVAMSTrustAggregator.ProofType.PARALLEL_RESEARCH))));
-        aggregator.registerProofPlugin(new MockLegacyPlugin(bytes32(uint256(IVAMSTrustAggregator.ProofType.PHALA_EXECUTION))));
+        aggregator.registerProofPlugin(
+            new MockLegacyPlugin(bytes32(uint256(IVAMSTrustAggregator.ProofType.ERC8004_IDENTITY)))
+        );
+        aggregator.registerProofPlugin(
+            new MockLegacyPlugin(bytes32(uint256(IVAMSTrustAggregator.ProofType.POLYGON_ID)))
+        );
+        aggregator.registerProofPlugin(
+            new MockLegacyPlugin(bytes32(uint256(IVAMSTrustAggregator.ProofType.COINBASE_WALLET)))
+        );
+        aggregator.registerProofPlugin(
+            new MockLegacyPlugin(bytes32(uint256(IVAMSTrustAggregator.ProofType.PARALLEL_RESEARCH)))
+        );
+        aggregator.registerProofPlugin(
+            new MockLegacyPlugin(bytes32(uint256(IVAMSTrustAggregator.ProofType.PHALA_EXECUTION)))
+        );
     }
 
     // ============================================================
@@ -62,14 +83,14 @@ contract VAMSTrustAggregatorTest is Test {
 
     function test_InitialState() public view {
         IVAMSTrustAggregator.TrustTier tier = aggregator.getAgentTier(agent);
-        assertEq(uint(tier), uint(IVAMSTrustAggregator.TrustTier.UNVERIFIED));
+        assertEq(uint256(tier), uint256(IVAMSTrustAggregator.TrustTier.UNVERIFIED));
     }
 
     function test_SubmitIdentityProof_UpdatesTier() public {
         vm.startPrank(agent);
         aggregator.submitProof(IVAMSTrustAggregator.ProofType.ERC8004_IDENTITY, new bytes(64));
         IVAMSTrustAggregator.TrustTier tier = aggregator.getAgentTier(agent);
-        assertEq(uint(tier), uint(IVAMSTrustAggregator.TrustTier.BRONZE));
+        assertEq(uint256(tier), uint256(IVAMSTrustAggregator.TrustTier.BRONZE));
         vm.stopPrank();
     }
 
@@ -78,17 +99,17 @@ contract VAMSTrustAggregatorTest is Test {
         aggregator.submitProof(IVAMSTrustAggregator.ProofType.ERC8004_IDENTITY, new bytes(64));
         aggregator.submitProof(IVAMSTrustAggregator.ProofType.POLYGON_ID, new bytes(64));
         IVAMSTrustAggregator.TrustTier tier = aggregator.getAgentTier(agent);
-        assertEq(uint(tier), uint(IVAMSTrustAggregator.TrustTier.SILVER));
+        assertEq(uint256(tier), uint256(IVAMSTrustAggregator.TrustTier.SILVER));
         vm.stopPrank();
     }
 
     function test_AggregateProofs_ReachesGold() public {
         vm.startPrank(agent);
-        aggregator.submitProof(IVAMSTrustAggregator.ProofType.COINBASE_WALLET, new bytes(64)); 
+        aggregator.submitProof(IVAMSTrustAggregator.ProofType.COINBASE_WALLET, new bytes(64));
         aggregator.submitProof(IVAMSTrustAggregator.ProofType.PARALLEL_RESEARCH, new bytes(64));
         aggregator.submitProof(IVAMSTrustAggregator.ProofType.PHALA_EXECUTION, new bytes(64));
         IVAMSTrustAggregator.TrustTier tier = aggregator.getAgentTier(agent);
-        assertEq(uint(tier), uint(IVAMSTrustAggregator.TrustTier.GOLD));
+        assertEq(uint256(tier), uint256(IVAMSTrustAggregator.TrustTier.GOLD));
         vm.stopPrank();
     }
 
@@ -128,7 +149,7 @@ contract VAMSTrustAggregatorTest is Test {
 
     function test_DuplicatePluginTypeReverts() public {
         aggregator.registerProofPlugin(teePlugin);
-        
+
         // Create another plugin with the same proof type
         TEEProofPlugin teePlugin2 = new TEEProofPlugin(owner);
         vm.expectRevert("Plugin type already registered");
@@ -138,9 +159,9 @@ contract VAMSTrustAggregatorTest is Test {
     function test_DeregisterPlugin() public {
         aggregator.registerProofPlugin(teePlugin);
         bytes32 pType = teePlugin.proofType();
-        
+
         aggregator.deregisterProofPlugin(pType);
-        
+
         IVAMSProofPlugin stored = aggregator.getProofPlugin(pType);
         assertEq(address(stored), address(0));
     }
@@ -166,22 +187,12 @@ contract VAMSTrustAggregatorTest is Test {
 
         // Create valid attestation proof data
         bytes memory sgxQuote = abi.encodePacked(serviceHash, deliveryHash);
-        bytes memory proofData = abi.encode(
-            sgxQuote,
-            testEnclave,
-            bytes32(0),
-            agent
-        );
+        bytes memory proofData = abi.encode(sgxQuote, testEnclave, bytes32(0), agent);
 
         // Cache proofType before prank to avoid prank being consumed by proofType() call
         bytes32 pType = teePlugin.proofType();
         vm.prank(agent);
-        aggregator.submitPluginProof(
-            pType,
-            serviceHash,
-            deliveryHash,
-            proofData
-        );
+        aggregator.submitPluginProof(pType, serviceHash, deliveryHash, proofData);
 
         // TEE weight = 2500 bps -> 25 score points
         uint256 score = aggregator.getAgentScore(agent);
@@ -196,20 +207,15 @@ contract VAMSTrustAggregatorTest is Test {
         bytes32 serviceHash = keccak256("service");
         bytes32 deliveryHash = keccak256("delivery");
 
-        bytes memory proofData = abi.encode(
-            abi.encodePacked(serviceHash, deliveryHash),
-            testEnclave,
-            bytes32(0),
-            agent
-        );
+        bytes memory proofData = abi.encode(abi.encodePacked(serviceHash, deliveryHash), testEnclave, bytes32(0), agent);
 
         vm.startPrank(agent);
         aggregator.submitPluginProof(teePlugin.proofType(), serviceHash, deliveryHash, proofData);
         uint256 score1 = aggregator.getAgentScore(agent);
-        
+
         aggregator.submitPluginProof(teePlugin.proofType(), serviceHash, deliveryHash, proofData);
         uint256 score2 = aggregator.getAgentScore(agent);
-        
+
         assertEq(score1, score2, "Score should not increase on duplicate");
         vm.stopPrank();
     }
@@ -218,12 +224,7 @@ contract VAMSTrustAggregatorTest is Test {
         bytes32 fakeType = keccak256("UNKNOWN");
         vm.prank(agent);
         vm.expectRevert("Unknown proof type");
-        aggregator.submitPluginProof(
-            fakeType,
-            bytes32(0),
-            bytes32(0),
-            new bytes(64)
-        );
+        aggregator.submitPluginProof(fakeType, bytes32(0), bytes32(0), new bytes(64));
     }
 
     function test_PluginWeightContributesToTier() public {
@@ -240,19 +241,15 @@ contract VAMSTrustAggregatorTest is Test {
         bytes32 deliveryHash = keccak256("delivery");
 
         // Submit TEE proof (25 points)
-        bytes memory teeProofData = abi.encode(
-            abi.encodePacked(serviceHash, deliveryHash),
-            testEnclave,
-            bytes32(0),
-            agent
-        );
+        bytes memory teeProofData =
+            abi.encode(abi.encodePacked(serviceHash, deliveryHash), testEnclave, bytes32(0), agent);
 
         vm.startPrank(agent);
         aggregator.submitPluginProof(teePlugin.proofType(), serviceHash, deliveryHash, teeProofData);
 
         // Agent should be Bronze (25 > 0)
-        assertEq(uint(aggregator.getAgentTier(agent)), uint(IVAMSTrustAggregator.TrustTier.BRONZE));
-        
+        assertEq(uint256(aggregator.getAgentTier(agent)), uint256(IVAMSTrustAggregator.TrustTier.BRONZE));
+
         vm.stopPrank();
     }
 
@@ -268,16 +265,10 @@ contract VAMSTrustAggregatorTest is Test {
         bytes32 serviceHash = keccak256("service");
         bytes32 deliveryHash = keccak256("delivery");
 
-        bytes memory proofData = abi.encode(
-            abi.encodePacked(serviceHash, deliveryHash),
-            testEnclave,
-            bytes32(0),
-            agent
-        );
+        bytes memory proofData = abi.encode(abi.encodePacked(serviceHash, deliveryHash), testEnclave, bytes32(0), agent);
 
-        (bool valid, uint256 weight) = aggregator.verifyServiceDelivery(
-            serviceHash, deliveryHash, teePlugin.proofType(), proofData
-        );
+        (bool valid, uint256 weight) =
+            aggregator.verifyServiceDelivery(serviceHash, deliveryHash, teePlugin.proofType(), proofData);
 
         assertTrue(valid);
         assertEq(weight, 2500);
@@ -300,23 +291,14 @@ contract VAMSTrustAggregatorTest is Test {
         assertEq(score1, 10);
 
         // Submit plugin proof (TEE = 25 points)
-        bytes memory proofData = abi.encode(
-            abi.encodePacked(keccak256("svc"), keccak256("dlv")),
-            testEnclave,
-            bytes32(0),
-            agent
-        );
-        aggregator.submitPluginProof(
-            teePlugin.proofType(),
-            keccak256("svc"),
-            keccak256("dlv"),
-            proofData
-        );
+        bytes memory proofData =
+            abi.encode(abi.encodePacked(keccak256("svc"), keccak256("dlv")), testEnclave, bytes32(0), agent);
+        aggregator.submitPluginProof(teePlugin.proofType(), keccak256("svc"), keccak256("dlv"), proofData);
         uint256 score2 = aggregator.getAgentScore(agent);
         assertEq(score2, 35); // 10 + 25
 
         // Should be Silver (35 >= 30)
-        assertEq(uint(aggregator.getAgentTier(agent)), uint(IVAMSTrustAggregator.TrustTier.SILVER));
+        assertEq(uint256(aggregator.getAgentTier(agent)), uint256(IVAMSTrustAggregator.TrustTier.SILVER));
 
         vm.stopPrank();
     }
@@ -327,13 +309,13 @@ contract VAMSTrustAggregatorTest is Test {
 
     function test_GetRegisteredPluginCount() public {
         assertEq(aggregator.getRegisteredPluginCount(), 5);
-        
+
         aggregator.registerProofPlugin(teePlugin);
         assertEq(aggregator.getRegisteredPluginCount(), 6);
-        
+
         aggregator.registerProofPlugin(outputHashPlugin);
         assertEq(aggregator.getRegisteredPluginCount(), 7);
-        
+
         aggregator.deregisterProofPlugin(teePlugin.proofType());
         assertEq(aggregator.getRegisteredPluginCount(), 6);
     }
@@ -346,7 +328,8 @@ contract VAMSTrustAggregatorTest is Test {
         bytes32 pType = teePlugin.proofType();
         assertFalse(aggregator.hasPluginProof(agent, pType));
 
-        bytes memory proofData = abi.encode(abi.encodePacked(keccak256("s"), keccak256("d")), testEnclave, bytes32(0), agent);
+        bytes memory proofData =
+            abi.encode(abi.encodePacked(keccak256("s"), keccak256("d")), testEnclave, bytes32(0), agent);
         vm.prank(agent);
         aggregator.submitPluginProof(pType, keccak256("s"), keccak256("d"), proofData);
 

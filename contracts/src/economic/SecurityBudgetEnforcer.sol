@@ -38,13 +38,13 @@ contract SecurityBudgetEnforcer is AccessControl, ReentrancyGuard, ISecurityBudg
     bytes32 public constant KEEPER_ROLE = keccak256("KEEPER_ROLE");
     bytes32 public constant EMERGENCY_ROLE = keccak256("EMERGENCY_ROLE");
 
-    uint256 public constant MIN_SECURITY_BUDGET_USD = 1_000_000e18;  // $1M floor
-    uint256 public constant TVL_SECURITY_RATIO = 10;                 // 10% of TVL
-    uint256 public constant MEV_DAYS_COVERAGE = 30;                  // 30 days of MEV
-    
+    uint256 public constant MIN_SECURITY_BUDGET_USD = 1_000_000e18; // $1M floor
+    uint256 public constant TVL_SECURITY_RATIO = 10; // 10% of TVL
+    uint256 public constant MEV_DAYS_COVERAGE = 30; // 30 days of MEV
+
     /// @notice AUDIT FIX ECON06: Maximum oracle staleness (1 hour)
     uint256 public constant MAX_ORACLE_STALENESS = 1 hours;
-    
+
     /// @notice Emitted when oracle price is stale
     event OraclePriceStale(uint256 lastUpdated, uint256 maxStaleness);
 
@@ -82,7 +82,7 @@ contract SecurityBudgetEnforcer is AccessControl, ReentrancyGuard, ISecurityBudg
      */
     function updateSecurityStatus() external override nonReentrant onlyRole(KEEPER_ROLE) {
         ProtocolMetrics memory metrics = metricProvider.getMetrics();
-        
+
         // AUDIT FIX ECON06: Check oracle staleness before using price data.
         // Stale prices could lead to incorrect security level assessments.
         uint256 tokenPrice = 0;
@@ -111,12 +111,12 @@ contract SecurityBudgetEnforcer is AccessControl, ReentrancyGuard, ISecurityBudg
         // 2. Calculate Current Security Budget (Attack Cost)
         // BFT assumption: 1/3 + 1 validators needed to corrupt
         uint256 validatorsToCorrupt = (metrics.activeValidators / 3) + 1;
-        
+
         uint256 avgStakePerValidator = 0;
         if (metrics.activeValidators > 0) {
             avgStakePerValidator = metrics.totalValidatorStake / metrics.activeValidators;
         }
-        
+
         currentSecurityBudgetUSD = (validatorsToCorrupt * avgStakePerValidator * tokenPrice) / 1e18;
 
         // 3. Determine Security Level
@@ -162,7 +162,7 @@ contract SecurityBudgetEnforcer is AccessControl, ReentrancyGuard, ISecurityBudg
                 settlement.pauseHighValueSettlements();
             }
             if (address(validators) != address(0)) {
-                validators.increaseStakeRequirement(150); 
+                validators.increaseStakeRequirement(150);
             }
         } else if (newLevel == SecurityLevel.CRITICAL) {
             // Full emergency pause
@@ -170,7 +170,7 @@ contract SecurityBudgetEnforcer is AccessControl, ReentrancyGuard, ISecurityBudg
                 settlement.pauseAllSettlements();
             }
             if (address(validators) != address(0)) {
-                validators.increaseStakeRequirement(200); 
+                validators.increaseStakeRequirement(200);
             }
         }
 

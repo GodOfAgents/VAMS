@@ -38,7 +38,13 @@ contract OracleRegistry is AccessControl, IOracleRegistry {
     mapping(Category => CategoryConfig) public categoryConfigs;
     mapping(address => mapping(Category => bool)) public authorizedOracles;
 
-    event CategoryConfigUpdated(Category indexed category, uint256 requiredStake, uint256 slashingPercentage, uint256 consensusThreshold, uint256 minParticipants);
+    event CategoryConfigUpdated(
+        Category indexed category,
+        uint256 requiredStake,
+        uint256 slashingPercentage,
+        uint256 consensusThreshold,
+        uint256 minParticipants
+    );
     event OracleAuthorizationUpdated(address indexed oracle, Category indexed category, bool isAuthorized);
 
     constructor(address _admin) {
@@ -83,7 +89,10 @@ contract OracleRegistry is AccessControl, IOracleRegistry {
         emit CategoryConfigUpdated(category, requiredStake, slashingPercentage, consensusThreshold, minParticipants);
     }
 
-    function setOracleAuthorization(address oracle, Category category, bool authorized) external onlyRole(CONFIGURER_ROLE) {
+    function setOracleAuthorization(address oracle, Category category, bool authorized)
+        external
+        onlyRole(CONFIGURER_ROLE)
+    {
         require(oracle != address(0), "Zero address");
         authorizedOracles[oracle][category] = authorized;
         emit OracleAuthorizationUpdated(oracle, category, authorized);

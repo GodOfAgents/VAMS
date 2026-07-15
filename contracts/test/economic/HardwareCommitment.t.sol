@@ -10,7 +10,7 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 contract MockVAMS is ERC20 {
     constructor() ERC20("VAMS", "VAMS") {}
-    
+
     function mint(address to, uint256 amount) external {
         _mint(to, amount);
     }
@@ -34,11 +34,10 @@ contract HardwareCommitmentTest is Test {
         // Deploy Registry via proxy
         VAMSHardwareRegistry hwImpl = new VAMSHardwareRegistry();
         ERC1967Proxy hwProxy = new ERC1967Proxy(
-            address(hwImpl),
-            abi.encodeWithSelector(VAMSHardwareRegistry.initialize.selector, admin, address(token))
+            address(hwImpl), abi.encodeWithSelector(VAMSHardwareRegistry.initialize.selector, admin, address(token))
         );
         hwRegistry = VAMSHardwareRegistry(address(hwProxy));
-        
+
         // Setup hardware class
         vm.prank(admin);
         hwRegistry.registerHardwareClass(classId, "TEST", "GPU", 5000e18, 5000);
@@ -55,7 +54,9 @@ contract HardwareCommitmentTest is Test {
         HardwareCommitment hcImpl = new HardwareCommitment();
         ERC1967Proxy hcProxy = new ERC1967Proxy(
             address(hcImpl),
-            abi.encodeWithSelector(HardwareCommitment.initialize.selector, admin, address(hwRegistry), address(bondRegistry))
+            abi.encodeWithSelector(
+                HardwareCommitment.initialize.selector, admin, address(hwRegistry), address(bondRegistry)
+            )
         );
         hwCommitment = HardwareCommitment(address(hcProxy));
 
@@ -66,10 +67,10 @@ contract HardwareCommitmentTest is Test {
 
         vm.startPrank(provider);
         token.approve(address(bondRegistry), type(uint256).max);
-        
+
         // 1. Bond 20k to Provider Bond
         bondRegistry.registerProvider(20_000e18, 1000e18);
-        
+
         // 2. Register a Node to HW Registry
         token.approve(address(hwRegistry), type(uint256).max);
         nodeId = hwRegistry.registerNode(classId, "US", 1, 1e18, 90 days);
@@ -78,13 +79,13 @@ contract HardwareCommitmentTest is Test {
 
     function test_CreateCommitment_LocksBond() public {
         vm.startPrank(provider);
-        
+
         bytes32[] memory nodes = new bytes32[](1);
         nodes[0] = nodeId;
 
         // Base collateral for this node class is 5000
         bytes32 cid = hwCommitment.createCommitment(nodes, 30 days, 9900);
-        
+
         // Verify locked in bond
         IProviderBondRegistry.ProviderBond memory bond = bondRegistry.getBond(provider);
         assertEq(bond.hardwareCollateralLocked, 5000e18); // 30 day = 1.0x
@@ -103,7 +104,7 @@ contract HardwareCommitmentTest is Test {
         nodes[0] = nodeId;
 
         bytes32 cid = hwCommitment.createCommitment(nodes, 90 days, 9900);
-        
+
         IProviderBondRegistry.ProviderBond memory bond = bondRegistry.getBond(provider);
         assertEq(bond.hardwareCollateralLocked, 4000e18); // 90 day = 0.8x of 5000
 
@@ -122,22 +123,19 @@ contract HardwareCommitmentTest is Test {
         bondRegistry.requestWithdrawal(20_000e18);
         vm.stopPrank();
     }
-    
+
     function test_EndCommitment_BeforeExpiry_Reverts() public {
         vm.startPrank(provider);
         bytes32[] memory nodes = new bytes32[](1);
         nodes[0] = nodeId;
         bytes32 cid = hwCommitment.createCommitment(nodes, 30 days, 9900);
-        
+
         // Pass 15 days
         vm.warp(block.timestamp + 15 days);
-        
+
         vm.expectRevert(
             abi.encodeWithSelector(
-                IHardwareCommitment.CommitmentNotExpired.selector, 
-                cid, 
-                block.timestamp, 
-                block.timestamp + 15 days
+                IHardwareCommitment.CommitmentNotExpired.selector, cid, block.timestamp, block.timestamp + 15 days
             )
         );
         hwCommitment.endCommitment(cid);
@@ -152,9 +150,9 @@ contract HardwareCommitmentTest is Test {
 
         // Pass 31 days
         vm.warp(block.timestamp + 31 days);
-        
+
         hwCommitment.endCommitment(cid);
-        
+
         // Verify unlocked
         IProviderBondRegistry.ProviderBond memory bond = bondRegistry.getBond(provider);
         assertEq(bond.hardwareCollateralLocked, 0);

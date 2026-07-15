@@ -69,10 +69,10 @@ contract VAMSSentinel is AccessControl, ReentrancyGuard, IVAMSSentinel {
     uint256 public constant KEEPER_SCORE_THRESHOLD = 80;
     uint256 public constant MIN_KEEPER_BOND = 100_000e18; // 100,000 $VAMS
     uint8 public constant MAX_ANOMALY_SCORE = 100;
-    
+
     // Delay before a new keeper can vote/submit reports
     uint256 public constant KEEPER_VOTING_DELAY = 100;
-    
+
     /// @notice Slash rate for false alarm (5%)
     uint16 public constant FALSE_ALARM_SLASH_BPS = 500;
 
@@ -146,12 +146,7 @@ contract VAMSSentinel is AccessControl, ReentrancyGuard, IVAMSSentinel {
      * @param _dao DAO address (Cardano GovernorExecutor)
      * @param _fallbackMultisig Dormant multi-sig (last resort)
      */
-    constructor(
-        address _admin,
-        address _vamsToken,
-        address _dao,
-        address _fallbackMultisig
-    ) {
+    constructor(address _admin, address _vamsToken, address _dao, address _fallbackMultisig) {
         if (_admin == address(0)) revert ZeroAddress();
         if (_vamsToken == address(0)) revert ZeroAddress();
         if (_dao == address(0)) revert ZeroAddress();
@@ -166,12 +161,12 @@ contract VAMSSentinel is AccessControl, ReentrancyGuard, IVAMSSentinel {
 
         // Default thresholds
         thresholds = Thresholds({
-            tvlDrainBps: 1500,          // 15% TVL drop per block
-            whaleExitBps: 500,          // 5% of pool single withdrawal
-            bridgeFloodSigma: 3,        // 3σ above daily avg
-            priceCrashBps: 5000,        // 50% drop in 1 hour
-            keeperConsensusMin: 3,      // 3+ keepers must flag
-            cooldownPeriod: 4 hours     // 4h between auto-pauses
+            tvlDrainBps: 1500, // 15% TVL drop per block
+            whaleExitBps: 500, // 5% of pool single withdrawal
+            bridgeFloodSigma: 3, // 3σ above daily avg
+            priceCrashBps: 5000, // 50% drop in 1 hour
+            keeperConsensusMin: 3, // 3+ keepers must flag
+            cooldownPeriod: 4 hours // 4h between auto-pauses
         });
 
         protocolMode = ProtocolMode.NORMAL;
@@ -221,9 +216,7 @@ contract VAMSSentinel is AccessControl, ReentrancyGuard, IVAMSSentinel {
             if (currentPrice + crashThreshold < priceAnchor) {
                 // Price crashed > threshold since last anchor
                 _triggerPause(
-                    AnomalyType.PRICE_CRASH,
-                    8,
-                    keccak256(abi.encode(priceAnchor, currentPrice, block.timestamp))
+                    AnomalyType.PRICE_CRASH, 8, keccak256(abi.encode(priceAnchor, currentPrice, block.timestamp))
                 );
                 return true;
             }
@@ -258,22 +251,16 @@ contract VAMSSentinel is AccessControl, ReentrancyGuard, IVAMSSentinel {
      * @param anomalyScore Score from 0-100 (80+ triggers consensus check)
      * @param evidenceHash IPFS/Arweave hash of detailed off-chain evidence
      */
-    function submitKeeperReport(
-        uint8 anomalyScore,
-        bytes32 evidenceHash
-    ) external nonReentrant onlyRole(KEEPER_ROLE) {
+    function submitKeeperReport(uint8 anomalyScore, bytes32 evidenceHash) external nonReentrant onlyRole(KEEPER_ROLE) {
         if (protocolMode == ProtocolMode.PAUSED) revert ProtocolAlreadyPaused();
         if (anomalyScore > MAX_ANOMALY_SCORE) revert InvalidAnomalyScore(anomalyScore);
-        
+
         // Anti-flash-loan / sybil delay
         require(block.number >= keeperRegistrationBlock[msg.sender] + KEEPER_VOTING_DELAY, "Keeper voting delay active");
 
         // Record the report
         KeeperReport memory report = KeeperReport({
-            keeper: msg.sender,
-            anomalyScore: anomalyScore,
-            evidenceHash: evidenceHash,
-            timestamp: block.timestamp
+            keeper: msg.sender, anomalyScore: anomalyScore, evidenceHash: evidenceHash, timestamp: block.timestamp
         });
 
         epochReports[block.number].push(report);
@@ -287,11 +274,7 @@ contract VAMSSentinel is AccessControl, ReentrancyGuard, IVAMSSentinel {
             // If enough keepers flagged, trigger pause
             if (epochHighScores[block.number] >= thresholds.keeperConsensusMin) {
                 if (!_isCooldownActive()) {
-                    _triggerPause(
-                        AnomalyType.KEEPER_CONSENSUS,
-                        7,
-                        evidenceHash
-                    );
+                    _triggerPause(AnomalyType.KEEPER_CONSENSUS, 7, evidenceHash);
                 }
             }
         }
@@ -380,7 +363,7 @@ contract VAMSSentinel is AccessControl, ReentrancyGuard, IVAMSSentinel {
 
         _triggerPause(
             AnomalyType.KEEPER_CONSENSUS, // closest type
-            10,                           // max severity
+            10, // max severity
             keccak256(abi.encodePacked(reason))
         );
     }
@@ -447,11 +430,7 @@ contract VAMSSentinel is AccessControl, ReentrancyGuard, IVAMSSentinel {
      * @param severity Severity 1-10
      * @param evidenceHash Hash of evidence data
      */
-    function _triggerPause(
-        AnomalyType anomalyType,
-        uint8 severity,
-        bytes32 evidenceHash
-    ) internal {
+    function _triggerPause(AnomalyType anomalyType, uint8 severity, bytes32 evidenceHash) internal {
         if (pausableTargets.length == 0) revert NoPausableTargets();
 
         // Effects
@@ -459,22 +438,23 @@ contract VAMSSentinel is AccessControl, ReentrancyGuard, IVAMSSentinel {
         lastPauseTimestamp = block.timestamp;
 
         uint256 anomalyId = anomalyHistory.length;
-        anomalyHistory.push(AnomalyReport({
-            anomalyType: anomalyType,
-            detectedAt: block.timestamp,
-            severity: severity,
-            evidenceHash: evidenceHash,
-            pauseTriggered: true,
-            reporter: msg.sender
-        }));
+        anomalyHistory.push(
+            AnomalyReport({
+                anomalyType: anomalyType,
+                detectedAt: block.timestamp,
+                severity: severity,
+                evidenceHash: evidenceHash,
+                pauseTriggered: true,
+                reporter: msg.sender
+            })
+        );
 
         // Interactions — pause all targets
         for (uint256 i = 0; i < pausableTargets.length; i++) {
             address target = pausableTargets[i];
             if (!IPausableTarget(target).paused()) {
-                IPausableTarget(target).emergencyPause(
-                    string(abi.encodePacked("SENTINEL:", _anomalyTypeToString(anomalyType)))
-                );
+                IPausableTarget(target)
+                    .emergencyPause(string(abi.encodePacked("SENTINEL:", _anomalyTypeToString(anomalyType))));
             }
         }
 

@@ -25,10 +25,10 @@ contract SetupX402Roles is Script {
         // Grant ESCROW_ROLE to EscrowManager on BondRegistry
         // ESCROW_ROLE: 0x2fdac322ee704ce09f0773f7f3f92eb98d5e7c836ee9c056cccd5f61041e5e3f
         bytes32 ESCROW_ROLE = keccak256("ESCROW_ROLE");
-        
+
         console.log("Granting ESCROW_ROLE to EscrowManager...");
         bond.grantRole(ESCROW_ROLE, ESCROW_MANAGER);
-        
+
         console.log("Roles Configured.");
 
         vm.stopBroadcast();

@@ -10,12 +10,12 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
  */
 contract MockVAMSToken is ERC20 {
     uint8 private _decimals = 18;
-    
+
     constructor() ERC20("VAMS Token", "VAMS") {
         // Mint initial supply to deployer for testing
-        _mint(msg.sender, 1_000_000_000 * 10**18);
+        _mint(msg.sender, 1_000_000_000 * 10 ** 18);
     }
-    
+
     /**
      * @notice Mint tokens to any address (for testing)
      * @param to Recipient address
@@ -24,7 +24,7 @@ contract MockVAMSToken is ERC20 {
     function mint(address to, uint256 amount) external {
         _mint(to, amount);
     }
-    
+
     /**
      * @notice Burn tokens from any address (for testing)
      * @param from Address to burn from
@@ -33,7 +33,7 @@ contract MockVAMSToken is ERC20 {
     function burn(address from, uint256 amount) external {
         _burn(from, amount);
     }
-    
+
     /**
      * @notice Set custom decimals (for edge case testing)
      * @param newDecimals New decimal value
@@ -41,7 +41,7 @@ contract MockVAMSToken is ERC20 {
     function setDecimals(uint8 newDecimals) external {
         _decimals = newDecimals;
     }
-    
+
     function decimals() public view override returns (uint8) {
         return _decimals;
     }

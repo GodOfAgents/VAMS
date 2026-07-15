@@ -2,10 +2,7 @@
 pragma solidity ^0.8.20;
 
 import {Test} from "forge-std/Test.sol";
-import {
-    IWorldIDVerifier,
-    WorldIDPlugin
-} from "../../src/trust/plugins/WorldIDPlugin.sol";
+import {IWorldIDVerifier, WorldIDPlugin} from "../../src/trust/plugins/WorldIDPlugin.sol";
 
 contract MockWorldIDVerifier is IWorldIDVerifier {
     bool public shouldRevert;
