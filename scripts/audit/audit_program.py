@@ -16,6 +16,9 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 try:
+    from scripts.audit.credential_incident_evidence import (
+        validate_credential_incident_report,
+    )
     from scripts.audit.runtime_privacy_evidence import (
         PUBLISHER_INVENTORY_PATH,
         REQUIRED_EXCLUDED_ROUTES as RUNTIME_REQUIRED_EXCLUDED_ROUTES,
@@ -25,6 +28,9 @@ try:
         validate_runtime_report,
     )
 except ModuleNotFoundError:
+    from credential_incident_evidence import (  # type: ignore[no-redef]
+        validate_credential_incident_report,
+    )
     from runtime_privacy_evidence import (  # type: ignore[no-redef]
         PUBLISHER_INVENTORY_PATH,
         REQUIRED_EXCLUDED_ROUTES as RUNTIME_REQUIRED_EXCLUDED_ROUTES,
@@ -62,7 +68,7 @@ STAGE_GATES = {
 }
 AUDIT_SEED = 20260713
 EVIDENCE_MANIFEST_SCHEMA_VERSION = "2.0.0"
-DEPLOYMENT_MANIFEST_SCHEMA_VERSION = "2.0.0"
+DEPLOYMENT_MANIFEST_SCHEMA_VERSION = "3.0.0"
 GATE_ARTIFACT_SCHEMA_VERSION = "2.0.0"
 VDSO_SHADOW_REPORT_SCHEMA_VERSION = "1.0.0"
 DEPLOYMENT_NETWORKS = {"polygon-amoy", "cardano-preprod"}
@@ -100,6 +106,7 @@ REQUIRED_EVIDENCE_RESULTS = {
             "python -m unittest discover -s scripts/docs/tests -p test_validate_vdso_evidence.py",
             "python scripts/audit/validate_workflow_security.py",
             "python scripts/audit/test_workflow_security.py",
+            "python -m unittest scripts.audit.test_credential_incident_evidence scripts.deployment.test_cardano_preprod_artifacts scripts.deployment.test_cardano_preprod_apply",
             "python scripts/audit/test_economic_concentration.py",
             "python scripts/audit/test_economic_adversarial.py",
             "python scripts/audit/run_economic_adversarial.py --epochs 100000 --seed 20260713 --output economic-adversarial-report.json",
@@ -113,7 +120,7 @@ REQUIRED_EVIDENCE_RESULTS = {
     "trufflehog": 'trufflehog git "file://$PWD" --json --fail --no-update --results=verified,unknown,unverified',
     "solidity": "cd contracts && forge build --sizes && forge test -vvv",
     "slither": "cd contracts && slither . --exclude-dependencies --exclude-informational --exclude-low --fail-high",
-    "aiken": "cd cardano && aiken check --deny --seed 20260713 --max-success 250",
+    "aiken": "cd cardano && aiken check --deny --seed 20260713 --max-success 250 && aiken build",
     "vir-core": " && ".join(
         (
             "cd vams-vm",
@@ -207,6 +214,20 @@ PUBLIC_EVM_ARTIFACTS = CANARY_EVM_ARTIFACTS | {
     "InsuranceFundProxy",
 }
 CARDANO_ARTIFACTS = {"governor.ak", "timelock.ak", "insurance_fund.ak", "agent_registry.ak"}
+CARDANO_AUXILIARY_POLICIES = {
+    "agent_nft.ak": (
+        "agent_nft.agent_nft.mint",
+        "cardano/validators/agent_nft.ak",
+    ),
+    "proposal_nft.ak": (
+        "proposal_nft.proposal_nft.mint",
+        "cardano/validators/proposal_nft.ak",
+    ),
+    "fund_nft.ak": (
+        "fund_nft.fund_nft.mint",
+        "cardano/validators/fund_nft.ak",
+    ),
+}
 DEPLOYMENT_ARTIFACT_SOURCES = {
     "VAMSToken": "contracts/src/token/VAMSToken.sol",
     "VAMSStaking": "contracts/src/staking/VAMSStaking.sol",
@@ -891,6 +912,150 @@ def _validate_deployment_artifacts(
     if len(addresses) != len(set(addresses)):
         errors.append(f"{network} deployment artifact addresses must be distinct")
     return errors, artifacts
+
+
+def _validate_cardano_auxiliary_policies(
+    manifest: dict,
+    stage: str,
+    bundle_root: Path,
+    commit_sha: str,
+) -> list[str]:
+    raw_templates = manifest.get("auxiliary_policy_templates")
+    if not isinstance(raw_templates, list):
+        return ["cardano-preprod auxiliary_policy_templates must be an array"]
+    errors: list[str] = []
+    templates: dict[str, dict] = {}
+    for item in raw_templates:
+        if not isinstance(item, dict) or not isinstance(item.get("name"), str):
+            errors.append("cardano-preprod contains a malformed auxiliary policy template")
+            continue
+        name = item["name"]
+        if name in templates:
+            errors.append(f"cardano-preprod contains duplicate auxiliary policy {name}")
+            continue
+        templates[name] = item
+    missing = set(CARDANO_AUXILIARY_POLICIES) - set(templates)
+    unexpected = set(templates) - set(CARDANO_AUXILIARY_POLICIES)
+    if missing:
+        errors.append(
+            "cardano-preprod missing auxiliary policy templates: "
+            + ", ".join(sorted(missing))
+        )
+    if unexpected:
+        errors.append(
+            "cardano-preprod contains unexpected auxiliary policy templates: "
+            + ", ".join(sorted(unexpected))
+        )
+
+    all_instance_ids: set[str] = set()
+    expected_verification = "simulation-passed" if stage == "canary" else "script-hash-verified"
+    for name, item in templates.items():
+        if name not in CARDANO_AUXILIARY_POLICIES:
+            continue
+        expected_title, expected_source = CARDANO_AUXILIARY_POLICIES[name]
+        context = f"cardano-preprod auxiliary policy {name}"
+        if item.get("title") != expected_title:
+            errors.append(f"{context} blueprint title is invalid")
+        errors.extend(
+            _validate_source_binding(
+                item.get("source"),
+                item.get("source_sha256"),
+                context,
+                expected_source=expected_source,
+            )
+        )
+        parameter_count = item.get("parameter_count")
+        if (
+            not isinstance(parameter_count, int)
+            or isinstance(parameter_count, bool)
+            or parameter_count < 1
+        ):
+            errors.append(f"{context} parameter_count must be positive")
+        if not _is_cardano_hash(item.get("template_script_hash")):
+            errors.append(f"{context} template_script_hash is invalid")
+        errors.extend(
+            _validate_bundle_evidence(
+                item.get("template_artifact_path"),
+                item.get("template_artifact_sha256"),
+                bundle_root,
+                f"{context} template artifact",
+            )
+        )
+        raw_instances = item.get("instances")
+        if not isinstance(raw_instances, list):
+            errors.append(f"{context} instances must be an array")
+            continue
+        if name == "fund_nft.ak" and len(raw_instances) != 1:
+            errors.append("cardano-preprod requires exactly one fund bootstrap policy instance")
+        for index, instance in enumerate(raw_instances):
+            instance_context = f"{context} instance[{index}]"
+            if not isinstance(instance, dict):
+                errors.append(f"{instance_context} must be an object")
+                continue
+            instance_id = instance.get("instance_id")
+            if (
+                not isinstance(instance_id, str)
+                or re.fullmatch(r"[a-z0-9](?:[a-z0-9-]{0,62}[a-z0-9])?", instance_id)
+                is None
+            ):
+                errors.append(f"{instance_context} instance_id is invalid")
+            elif instance_id in all_instance_ids:
+                errors.append("cardano-preprod auxiliary policy instance IDs must be unique")
+            else:
+                all_instance_ids.add(instance_id)
+            if instance.get("verification") != expected_verification:
+                errors.append(
+                    f"{instance_context} verification must equal {expected_verification}"
+                )
+            if not _is_cardano_hash(instance.get("script_hash")):
+                errors.append(f"{instance_context} script_hash is invalid")
+            errors.extend(
+                _validate_bundle_evidence(
+                    instance.get("script_cbor_path"),
+                    instance.get("script_cbor_sha256"),
+                    bundle_root,
+                    f"{instance_context} script CBOR",
+                )
+            )
+            errors.extend(
+                _validate_bundle_evidence(
+                    instance.get("parameter_manifest_path"),
+                    instance.get("parameter_manifest_sha256"),
+                    bundle_root,
+                    f"{instance_context} parameter manifest",
+                )
+            )
+            if stage == "public" and not _is_sha256(instance.get("transaction_hash")):
+                errors.append(f"{instance_context} public transaction_hash is invalid")
+            fields = {
+                field: instance.get(field)
+                for field in (
+                    "instance_id",
+                    "script_hash",
+                    "script_cbor_path",
+                    "script_cbor_sha256",
+                    "parameter_manifest_path",
+                    "parameter_manifest_sha256",
+                    "verification",
+                    "transaction_hash",
+                )
+                if field in instance
+            }
+            errors.extend(
+                _validate_bundle_evidence(
+                    instance.get("observation_evidence_path"),
+                    instance.get("observation_evidence_sha256"),
+                    bundle_root,
+                    f"{instance_context} observation",
+                    expected_record=_observation_record(
+                        "cardano-auxiliary-policy-instance",
+                        commit_sha,
+                        "cardano-preprod",
+                        {"name": name, "title": expected_title, **fields},
+                    ),
+                )
+            )
+    return errors
 
 
 def _validate_vdso_deployment_state(
@@ -1692,6 +1857,12 @@ def _validate_deployment_manifests(
         )
         errors.extend(artifact_errors)
         errors.extend(authority_errors)
+        if network == "cardano-preprod":
+            errors.extend(
+                _validate_cardano_auxiliary_policies(
+                    manifest, stage, evidence_root, commit_sha
+                )
+            )
         errors.extend(
             _validate_vdso_deployment_state(
                 manifest, network, artifacts, evidence_root, commit_sha
@@ -3009,6 +3180,7 @@ def validate_readiness(
     canary_certificate: Path | None = None,
     runtime_report: Path | None = None,
     privacy_review: Path | None = None,
+    credential_incident_report: Path | None = None,
     independent_reviews: Path | None = None,
     vdso_shadow_report: Path | None = None,
     bundle_dir: Path | None = None,
@@ -3096,14 +3268,24 @@ def validate_readiness(
 
     runtime_report = runtime_report or bundle_evidence_dir / "runtime-integration.json"
     privacy_review = privacy_review or bundle_evidence_dir / "privacy-review.json"
+    credential_incident_report = (
+        credential_incident_report
+        or bundle_evidence_dir / "credential-incident-report.json"
+    )
     errors.extend(_validate_runtime_report(runtime_report, commit_sha, bundle_dir))
     errors.extend(_validate_privacy_review(privacy_review, commit_sha, bundle_dir))
+    errors.extend(
+        validate_credential_incident_report(
+            credential_incident_report, commit_sha, bundle_dir
+        )
+    )
 
     supporting_artifacts = [
         assurance_index,
         *deployment_manifests,
         runtime_report,
         privacy_review,
+        credential_incident_report,
     ]
     if stage == "public":
         canary_report = canary_report or bundle_evidence_dir / "closed-canary-report.json"
@@ -3202,6 +3384,13 @@ def validate_operational_bundle(
     errors.extend(
         _validate_privacy_review(
             evidence_dir / "privacy-review.json", target_sha, bundle_dir
+        )
+    )
+    errors.extend(
+        validate_credential_incident_report(
+            evidence_dir / "credential-incident-report.json",
+            target_sha,
+            bundle_dir,
         )
     )
 
@@ -3845,6 +4034,7 @@ def main() -> int:
     readiness_parser.add_argument("--canary-certificate", type=Path)
     readiness_parser.add_argument("--runtime-report", type=Path)
     readiness_parser.add_argument("--privacy-review", type=Path)
+    readiness_parser.add_argument("--credential-incident-report", type=Path)
     readiness_parser.add_argument("--independent-reviews", type=Path)
     readiness_parser.add_argument("--vdso-shadow-report", type=Path)
     readiness_parser.add_argument("--bundle-dir", type=Path, required=True)
@@ -3887,6 +4077,7 @@ def main() -> int:
             canary_certificate=args.canary_certificate,
             runtime_report=args.runtime_report,
             privacy_review=args.privacy_review,
+            credential_incident_report=args.credential_incident_report,
             independent_reviews=args.independent_reviews,
             vdso_shadow_report=args.vdso_shadow_report,
             bundle_dir=args.bundle_dir,

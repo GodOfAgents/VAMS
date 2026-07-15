@@ -131,6 +131,7 @@ def _deployment_manifest(root: Path, network: str, commit: str) -> dict:
         )
         artifacts.append(artifact)
     by_name = {artifact["name"]: artifact for artifact in artifacts}
+    auxiliary_policy_templates: list[dict] = []
 
     if network == "polygon-amoy":
         deployer = _evm_address(1)
@@ -536,7 +537,72 @@ def _deployment_manifest(root: Path, network: str, commit: str) -> dict:
             hash_field="conformance_evidence_sha256",
         )
 
-    return {
+        for index, (name, (title, source)) in enumerate(
+            sorted(audit_program.CARDANO_AUXILIARY_POLICIES.items()), start=1
+        ):
+            safe_name = name.replace(".ak", "")
+            template_path = f"evidence/{network}/auxiliary/{safe_name}.template.json"
+            template = {
+                "name": name,
+                "title": title,
+                "source": source,
+                "source_sha256": _write_source(root, source),
+                "parameter_count": index + 1,
+                "template_script_hash": _hex(12000 + index, 56),
+                "template_artifact_path": template_path,
+                "template_artifact_sha256": _write_bytes(
+                    root,
+                    template_path,
+                    f"template:{title}".encode("utf-8"),
+                ),
+                "instances": [],
+            }
+            if name == "fund_nft.ak":
+                parameter_path = f"evidence/{network}/parameters/fund-bootstrap.json"
+                cbor_path = f"evidence/{network}/auxiliary/fund-bootstrap.plutus"
+                instance = {
+                    "name": name,
+                    "title": title,
+                    "instance_id": "fund-bootstrap",
+                    "script_hash": _hex(13000, 56),
+                    "script_cbor_path": cbor_path,
+                    "script_cbor_sha256": _write_bytes(
+                        root, cbor_path, b"applied-fund-bootstrap"
+                    ),
+                    "parameter_manifest_path": parameter_path,
+                    "parameter_manifest_sha256": _write_bytes(
+                        root, parameter_path, b"public-fund-parameters"
+                    ),
+                    "verification": "simulation-passed",
+                }
+                _attach_observation(
+                    root,
+                    instance,
+                    relative_path=f"evidence/{network}/auxiliary/fund-bootstrap-observation.json",
+                    kind="cardano-auxiliary-policy-instance",
+                    commit=commit,
+                    network=network,
+                    fields=(
+                        "name",
+                        "title",
+                        "instance_id",
+                        "script_hash",
+                        "script_cbor_path",
+                        "script_cbor_sha256",
+                        "parameter_manifest_path",
+                        "parameter_manifest_sha256",
+                        "verification",
+                        "transaction_hash",
+                    ),
+                    path_field="observation_evidence_path",
+                    hash_field="observation_evidence_sha256",
+                )
+                instance.pop("name")
+                instance.pop("title")
+                template["instances"] = [instance]
+            auxiliary_policy_templates.append(template)
+
+    manifest = {
         "schema_version": audit_program.DEPLOYMENT_MANIFEST_SCHEMA_VERSION,
         "network": network,
         "deployment_status": "rehearsed",
@@ -554,6 +620,9 @@ def _deployment_manifest(root: Path, network: str, commit: str) -> dict:
         "rollback_plan": f"rollback {network} using the signed runbook",
         "vdso": vdso,
     }
+    if network == "cardano-preprod":
+        manifest["auxiliary_policy_templates"] = auxiliary_policy_templates
+    return manifest
 
 
 def _gate_bundle(root: Path, commit: str, run_id: int = 1234) -> Path:
@@ -938,6 +1007,29 @@ class AuditProgramTests(unittest.TestCase):
             self.assertIn("required role assignments are missing", joined)
             self.assertIn("actual and expected script CBOR hashes differ", joined)
             self.assertIn("governance script_hash is invalid", joined)
+
+    def test_cardano_manifest_requires_auxiliary_templates_and_fund_bootstrap(self) -> None:
+        commit = "a" * 40
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            manifest = _deployment_manifest(root, "cardano-preprod", commit)
+            manifest["auxiliary_policy_templates"] = [
+                item
+                for item in manifest["auxiliary_policy_templates"]
+                if item["name"] != "proposal_nft.ak"
+            ]
+            fund = next(
+                item
+                for item in manifest["auxiliary_policy_templates"]
+                if item["name"] == "fund_nft.ak"
+            )
+            fund["instances"] = []
+            errors = audit_program._validate_cardano_auxiliary_policies(
+                manifest, "canary", root, commit
+            )
+        joined = "\n".join(errors)
+        self.assertIn("missing auxiliary policy templates", joined)
+        self.assertIn("exactly one fund bootstrap", joined)
 
     def test_deployment_manifests_require_fail_closed_vdso_state(self) -> None:
         commit = "a" * 40

@@ -84,8 +84,10 @@ and a clean rescan; an unconditional baseline is not acceptable evidence.
 | `cardano-preprod-rehearsal.json` | Equivalent multisig/timelock parameters, validator artifacts, rollback evidence |
 | `runtime-integration.json` | External Gateway checks, real Celestia/Near submission and retrieval receipts, excluded mock/incomplete routes |
 | `privacy-review.json` | Approved inventory, retention, redaction, publisher coverage, public-content review, zero blockers |
+| `credential-incident-report.json` | Schema v1.0.0; exactly three public fingerprints; rotation/replacement evidence; zero-balance and no-role evidence; completed all-ref cleanup; collaborator/fork/cache remediation; clean complete-history Gitleaks and TruffleHog evidence; named independent reviewer; zero blockers |
 
-The Polygon manifest uses deployment-manifest schema version `2.0.0` and must
+The Polygon and Cardano manifests use deployment-manifest schema version
+`3.0.0`. The Polygon manifest must
 contain all seven VDSO modules: `VAMSObjectStore`, `VAMSProgramRegistry`,
 `VAMSAdapterRegistry`, `VAMSProofRouter`, `VAMSReservationManager`,
 `VAMSExecutionKernel`, and `VAMSCapabilityRouter`. Each module must have a
@@ -106,6 +108,17 @@ Cardano VDSO evidence is conformance-only. The manifest must bind
 and must not list that library as a deployed validator artifact. A future
 transaction validator requires a new reviewed schema and deployment ceremony.
 
+The Cardano manifest lists exactly four persistent artifacts and a separate
+`auxiliary_policy_templates` array containing exactly `agent_nft.ak`,
+`proposal_nft.ak`, and `fund_nft.ak`. Each template binds its source,
+parameterized blueprint artifact, template hash, and parameter count. Exactly
+one applied fund bootstrap instance is mandatory. Agent/proposal instances are
+present only when a real registration/proposal transaction exists. Every
+applied instance binds the public parameter manifest, final CBOR/script hash,
+stage-appropriate verification, observation artifact, and—after broadcast—the
+real transaction hash. Unapplied template hashes never satisfy a deployed
+script-hash field.
+
 `runtime-integration.json` uses schema version `2.0.0`. Every Gateway check
 must bind a non-empty repository evidence artifact and SHA-256 digest. The file
 must contain exactly one Celestia Mocha and one Near Testnet receipt, distinct
@@ -121,6 +134,19 @@ inventory, retention, redaction-test, public-content, and publisher-inventory
 artifacts. `docs/audit/privacy-publisher-inventory.json` is checked against
 publisher symbols discovered from the DA, Sentinel, and VDSO source trees so a
 new sink cannot bypass review by omission.
+
+`credential-incident-report.json` validates against
+`credential-incident-report.schema.json` and is mandatory for both canary and
+public readiness. Every nested claim is a bundle-relative nonempty artifact
+with a recomputed SHA-256. The report contains only public fingerprints,
+accounts/node identifiers, timestamps, block-height observations, reviewer
+identity, and sanitized receipts. It must not contain PEM contents, private
+keys, seed phrases, provider tokens, credentials, or signing material. The
+validator requires exactly one Polygon Amoy and one Cardano Pre-Prod funding
+check per affected identity, all seven role-impact classes clear, completed
+all-ref rewrite/reclone/fork/cache remediation, literal complete-history scan
+coverage, and zero open blocking findings. Repository documentation or an
+adjudication baseline cannot substitute for this closure evidence.
 
 ## Public Inputs
 

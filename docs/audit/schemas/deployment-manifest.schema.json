@@ -5,7 +5,7 @@
   "type": "object",
   "required": ["schema_version", "commit_sha", "network", "deployment_status", "chain_identifier", "deployer", "authorities", "timelock_identity", "timelock_seconds", "deployer_privileges_removed", "deployer_privilege_checks", "mock_routes_disabled", "artifacts", "role_transfers", "rollback_plan", "vdso"],
   "properties": {
-    "schema_version": {"const": "2.0.0"},
+    "schema_version": {"const": "3.0.0"},
     "commit_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
     "network": {"enum": ["polygon-amoy", "cardano-preprod"]},
     "deployment_status": {"enum": ["rehearsed", "deployed"]},
@@ -48,6 +48,12 @@
         "additionalProperties": false
       }
     },
+    "auxiliary_policy_templates": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {"$ref": "#/$defs/cardanoAuxiliaryPolicyTemplate"}
+    },
     "role_transfers": {"type": "array", "minItems": 1},
     "rollback_plan": {"type": "string", "minLength": 1},
     "vdso": {"type": "object"}
@@ -69,6 +75,7 @@
     {
       "if": {"properties": {"network": {"const": "cardano-preprod"}}, "required": ["network"]},
       "then": {
+        "required": ["auxiliary_policy_templates"],
         "properties": {
           "deployer": {"$ref": "#/$defs/cardanoHash"},
           "authorities": {"$ref": "#/$defs/cardanoAuthorities"},
@@ -324,6 +331,39 @@
         "observed_at_slot": {"type": "integer", "minimum": 0},
         "control_evidence_path": {"$ref": "#/$defs/bundlePath"},
         "control_evidence_sha256": {"$ref": "#/$defs/sha256"}
+      },
+      "additionalProperties": false
+    },
+    "cardanoAuxiliaryPolicyInstance": {
+      "type": "object",
+      "required": ["instance_id", "script_hash", "script_cbor_path", "script_cbor_sha256", "parameter_manifest_path", "parameter_manifest_sha256", "verification", "observation_evidence_path", "observation_evidence_sha256"],
+      "properties": {
+        "instance_id": {"type": "string", "pattern": "^[a-z0-9](?:[a-z0-9-]{0,62}[a-z0-9])?$"},
+        "script_hash": {"$ref": "#/$defs/cardanoHash"},
+        "script_cbor_path": {"$ref": "#/$defs/bundlePath"},
+        "script_cbor_sha256": {"$ref": "#/$defs/sha256"},
+        "parameter_manifest_path": {"$ref": "#/$defs/bundlePath"},
+        "parameter_manifest_sha256": {"$ref": "#/$defs/sha256"},
+        "verification": {"enum": ["simulation-passed", "script-hash-verified"]},
+        "transaction_hash": {"$ref": "#/$defs/sha256"},
+        "observation_evidence_path": {"$ref": "#/$defs/bundlePath"},
+        "observation_evidence_sha256": {"$ref": "#/$defs/sha256"}
+      },
+      "additionalProperties": false
+    },
+    "cardanoAuxiliaryPolicyTemplate": {
+      "type": "object",
+      "required": ["name", "title", "source", "source_sha256", "parameter_count", "template_script_hash", "template_artifact_path", "template_artifact_sha256", "instances"],
+      "properties": {
+        "name": {"enum": ["agent_nft.ak", "proposal_nft.ak", "fund_nft.ak"]},
+        "title": {"enum": ["agent_nft.agent_nft.mint", "proposal_nft.proposal_nft.mint", "fund_nft.fund_nft.mint"]},
+        "source": {"enum": ["cardano/validators/agent_nft.ak", "cardano/validators/proposal_nft.ak", "cardano/validators/fund_nft.ak"]},
+        "source_sha256": {"$ref": "#/$defs/sha256"},
+        "parameter_count": {"type": "integer", "minimum": 1},
+        "template_script_hash": {"$ref": "#/$defs/cardanoHash"},
+        "template_artifact_path": {"$ref": "#/$defs/bundlePath"},
+        "template_artifact_sha256": {"$ref": "#/$defs/sha256"},
+        "instances": {"type": "array", "items": {"$ref": "#/$defs/cardanoAuxiliaryPolicyInstance"}}
       },
       "additionalProperties": false
     },

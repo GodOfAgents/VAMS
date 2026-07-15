@@ -1,178 +1,137 @@
-//// VAMS Shared Types
+//// VAMS shared Cardano types.
 ////
-//// Core data types shared across all VAMS Cardano validators.
-//// These define the eUTXO datums and redeemers for governance,
-//// timelock, insurance, and agent registry.
+//// These are pre-deployment schema-v2 datums. Every authoritative state UTxO
+//// carries an authentication asset; user-provided integer identifiers are
+//// informational and never serve as the security identity of a state object.
 
-// ═══════════════════ Governance Types ═══════════════════
+use cardano/assets.{PolicyId}
+use cardano/transaction.{OutputReference}
 
-/// Status of a governance proposal
+pub const cardano_schema_version: Int = 2
+
+// Governance -----------------------------------------------------------------
+
 pub type ProposalStatus {
-  /// Proposal created, accepting votes
   Pending
-  /// Voting period active
   Active
-  /// Passed quorum and majority threshold
-  Passed
-  /// Did not meet quorum or majority
-  Rejected
-  /// Executed on-chain after timelock
-  Executed
-  /// Cancelled by proposer before deadline
-  Cancelled
 }
 
-/// On-chain governance proposal datum
-/// Each proposal lives in its own UTXO
 pub type ProposalDatum {
-  /// Unique proposal identifier
+  schema_version: Int,
+  /// Informational identifier. The proposal NFT and UTxO reference are canonical.
   id: Int,
-  /// Proposer's verification key hash
+  proposal_policy_id: PolicyId,
+  proposal_asset_name: ByteArray,
   proposer: ByteArray,
-  /// IPFS hash of the full proposal text
   description_hash: ByteArray,
-  /// Hash of the executable action payload
+  /// Blake2b-256 hash of the exact inline datum emitted by the timelock.
   action_hash: ByteArray,
-  /// Quadratic-weighted votes in favor
+  /// Cardano-local target script hash. Cross-chain execution is disabled.
+  target_script_hash: ByteArray,
+  created_at: Int,
   for_votes: Int,
-  /// Quadratic-weighted votes against
   against_votes: Int,
-  /// Minimum total participation required
   quorum: Int,
-  /// Voting deadline (POSIX milliseconds)
   deadline: Int,
-  /// Current proposal status
   status: ProposalStatus,
-  /// List of voters (verification key hashes) who already voted
   voters: List<ByteArray>,
 }
 
-/// Redeemer actions for the Governor validator
 pub type GovernorRedeemer {
-  /// Create a new proposal
-  CreateProposal {
-    description_hash: ByteArray,
-    action_hash: ByteArray,
-    quorum: Int,
-    deadline: Int,
-  }
-  /// Cast a vote on a proposal
   Vote { support: Bool, weight: Int }
-  /// Execute a passed proposal (after timelock)
   Execute
-  /// Cancel a proposal (proposer only, before deadline)
   Cancel
 }
 
-// ═══════════════════ Timelock Types ═══════════════════
+// Timelock -------------------------------------------------------------------
 
-/// Governance intent queued for cross-chain execution
 pub type IntentDatum {
-  /// Monotonically increasing nonce for replay protection
-  nonce: Int,
-  /// Target chain identifier (e.g., "polygon")
-  target_chain: ByteArray,
-  /// Hash of the action to execute on target chain
+  schema_version: Int,
+  proposal_policy_id: PolicyId,
+  proposal_asset_name: ByteArray,
+  source_proposal: OutputReference,
   action_hash: ByteArray,
-  /// Earliest execution time (POSIX milliseconds)
+  target_script_hash: ByteArray,
   execute_after: Int,
-  /// Reference to the governance proposal that spawned this
-  proposal_id: Int,
-  /// Whether this intent has been consumed
-  consumed: Bool,
+  expires_at: Int,
+  refund_key_hash: ByteArray,
 }
 
-/// Redeemer actions for the Timelock validator
 pub type TimelockRedeemer {
-  /// Queue a new intent from a passed governance proposal
-  QueueIntent { proposal_id: Int, delay_ms: Int }
-  /// Release the intent for ICB relay (after delay)
-  ExecuteIntent { mithril_proof: ByteArray }
-  /// Cancel a queued intent (DAO vote required)
+  /// Execute an exact Cardano-local output after the delay.
+  ExecuteLocal
+  /// Reserved wire branch. It always fails closed until a real verifier exists.
+  ExecuteBridge { bridge_proof: ByteArray, payload_hash: ByteArray }
   CancelIntent
 }
 
-// ═══════════════════ Insurance Fund Types ═══════════════════
+// Insurance ------------------------------------------------------------------
 
-/// Insurance fund state datum
 pub type FundDatum {
-  /// Current ADA balance in the fund (lovelace)
+  schema_version: Int,
+  fund_policy_id: PolicyId,
+  fund_asset_name: ByteArray,
   total_balance: Int,
-  /// Number of pending claims
-  pending_claims: Int,
-  /// Last bridge deposit epoch
-  last_bridge_epoch: Int,
-  /// Maximum payout as basis points of fund (5000 = 50%)
+  next_claim_id: Int,
+  /// Commitments authenticate claim UTxOs created by a canonical fund transition.
+  pending_claim_commitments: List<ByteArray>,
   max_payout_bps: Int,
-  /// Required approval threshold for claims
   approval_threshold: Int,
-  /// Guardian verification key hashes
   guardians: List<ByteArray>,
 }
 
-/// Insurance claim datum
 pub type ClaimDatum {
-  /// Unique claim identifier
+  schema_version: Int,
+  fund_policy_id: PolicyId,
+  fund_asset_name: ByteArray,
   id: Int,
-  /// Claimant's verification key hash
   claimant: ByteArray,
-  /// Requested amount in lovelace
   amount: Int,
-  /// IPFS hash of evidence/proof
   evidence_hash: ByteArray,
-  /// Number of guardian approvals received
-  approvals: Int,
-  /// Guardian keys that have approved
+  submitted_at: Int,
+  expires_at: Int,
+  commitment: ByteArray,
   approvers: List<ByteArray>,
-  /// Whether claim has been paid out
-  paid: Bool,
 }
 
-/// Redeemer actions for the InsuranceFund validator
+pub type InsuranceDatum {
+  FundState(FundDatum)
+  ClaimState(ClaimDatum)
+}
+
 pub type InsuranceFundRedeemer {
-  /// Deposit from bridge (ICB relay proof required)
-  /// AUDIT FIX: AK02 — Added payload_hash field to separate proof from expected hash
-  Deposit { amount: Int, bridge_proof: ByteArray, payload_hash: ByteArray }
-  /// Submit a new claim
+  DepositLocal { amount: Int }
+  /// Reserved wire branch. It always fails closed until a real verifier exists.
+  DepositBridge {
+    amount: Int,
+    bridge_proof: ByteArray,
+    payload_hash: ByteArray,
+  }
   SubmitClaim { amount: Int, evidence_hash: ByteArray }
-  /// Guardian approves a claim
   ApproveClaim { claim_id: Int }
-  /// Payout an approved claim
   PayoutClaim { claim_id: Int }
 }
 
-// ═══════════════════ Agent Registry Types ═══════════════════
+// Agent registry -------------------------------------------------------------
 
-/// On-chain agent record datum (one UTXO per agent)
 pub type AgentDatum {
-  /// Decentralized Identifier (DID)
+  schema_version: Int,
+  identity_policy_id: PolicyId,
+  identity_asset_name: ByteArray,
   did: ByteArray,
-  /// Owner's verification key hash
   owner: ByteArray,
-  /// Reputation score (0-10000 basis points)
   reputation_score: Int,
-  /// Registration timestamp (POSIX ms)
   registered_at: Int,
-  /// IPFS hash of agent metadata (capabilities, endpoints, etc.)
   metadata_hash: ByteArray,
-  /// Whether the agent is currently active
   is_active: Bool,
-  /// Staked amount (in lovelace equivalent)
   staked_amount: Int,
-  /// AUDIT FIX: AK05 — List of authorized slasher verification key hashes.
-  /// Only these keys may sign SlashAgent transactions. An empty list means
-  /// slashing is disabled for this agent record (safe default).
+  /// Empty in the initial Pre-Prod profile: slashing is disabled.
   authorized_slashers: List<ByteArray>,
 }
 
-/// Redeemer actions for the AgentRegistry validator
 pub type RegistryRedeemer {
-  /// Register a new agent (mints identity NFT)
-  RegisterAgent { did: ByteArray, metadata_hash: ByteArray }
-  /// Update agent's metadata
   UpdateAgent { new_metadata_hash: ByteArray }
-  /// Deregister an agent (burns identity NFT)
   DeregisterAgent
-  /// Slash agent for misbehavior (reduces reputation + stake)
+  /// Reserved wire branch. It always fails closed in the initial profile.
   SlashAgent { evidence_hash: ByteArray, slash_amount: Int }
 }

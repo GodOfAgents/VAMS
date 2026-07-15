@@ -1,44 +1,33 @@
-//// VAMS Governor Validator
+//// VAMS Cardano-local governance state machine.
 ////
-//// On-chain governance with quadratic voting for the VAMS protocol.
-//// Each proposal is a separate UTXO with a ProposalDatum.
-////
-//// Flow:
-////   1. CreateProposal → mints a new proposal UTXO
-////   2. Vote → spends + recreates proposal UTXO with updated tallies
-////   3. Execute → consumes passed proposal, creates timelock intent
-////   4. Cancel → proposer burns proposal before deadline
-////
-//// AUDIT FIXES APPLIED:
-////   AK01 — Vote weight now verified against on-chain VAMS token balance
-////   AK03 — has_valid_continuing_output now inspects tx.outputs
+//// Proposal creation is authenticated by proposal_nft.mint. Voting preserves
+//// the exact state value and proposal NFT. Execution transfers both into one
+//// exact timelock intent. Cross-chain actions are intentionally unavailable.
 
 use aiken/collection/list
 use aiken/interval.{Finite}
+use aiken/primitive/bytearray
 use cardano/address.{Address, Script, VerificationKey}
-use cardano/assets.{PolicyId}
-use cardano/transaction.{InlineDatum, Output, OutputReference, Transaction}
-use vams/types.{
-  Active, Cancel, Execute, GovernorRedeemer, Pending, ProposalDatum, Vote,
+use cardano/assets.{PolicyId, Value, add, lovelace_of, quantity_of}
+use cardano/transaction.{
+  InlineDatum, Input, NoDatum, Output, OutputReference, Transaction,
 }
-use vams/utils.{has_deadline_passed, is_signed_by, isqrt}
+use vams/types.{
+  Active, Cancel, Execute, GovernorRedeemer, IntentDatum, Pending, ProposalDatum,
+  Vote, cardano_schema_version,
+}
+use vams/utils.{is_signed_by, isqrt}
 
-// ═══════════════════ Constants ═══════════════════
-// Constants min_proposal_stake, min_voting_period_ms, and default_quorum 
-// have been parameterized.
-
-// ═══════════════════ Validator ═══════════════════
-
-/// AUDIT FIX: AK01 — Added vams_policy_id and vams_asset_name as
-/// validator parameters so we can look up voter's on-chain VAMS balance.
-/// AK08 — Added timelock_script_hash to verify bridging execution output.
 validator governor(
   vams_policy_id: PolicyId,
   vams_asset_name: ByteArray,
   timelock_script_hash: ByteArray,
-  _min_proposal_stake: Int,
-  _min_voting_period_ms: Int,
-  _default_quorum: Int,
+  allowed_target_scripts: List<ByteArray>,
+  min_proposal_stake: Int,
+  min_voting_period_ms: Int,
+  default_quorum: Int,
+  normal_delay_ms: Int,
+  max_intent_lifetime_ms: Int,
 ) {
   spend(
     datum_opt: Option<ProposalDatum>,
@@ -46,122 +35,110 @@ validator governor(
     own_ref: OutputReference,
     tx: Transaction,
   ) {
-    // Datum must exist for spending
     expect Some(datum) = datum_opt
-
-    // Resolve our own address from the spent input
-    let own_address = resolve_own_address(tx, own_ref)
+    expect Some(own_input) =
+      list.find(tx.inputs, fn(input) { input.output_reference == own_ref })
+    expect
+      valid_proposal_state(
+        datum,
+        own_input.output,
+        allowed_target_scripts,
+        min_proposal_stake,
+        min_voting_period_ms,
+        default_quorum,
+      )
 
     when redeemer is {
-      // ── Vote on existing proposal ──
       Vote { support, weight } -> {
-        // Proposal must be Pending or Active
-        expect datum.status == Pending || datum.status == Active
-
-        // Extract current time from validity range
-        expect Finite(current_time) = tx.validity_range.lower_bound.bound_type
-
-        // Deadline must not have passed
-        expect !has_deadline_passed(datum.deadline, current_time)
-
-        // Voter must have signed the transaction
-        let voter_bytes = get_first_signatory(tx)
-        expect is_signed_by(tx.extra_signatories, voter_bytes)
-
-        // Voter must not have already voted
-        expect !list.has(datum.voters, voter_bytes)
-
-        // ── AUDIT FIX: AK01 ──
-        // Verify weight against on-chain VAMS token balance.
-        // Sum voter's VAMS tokens from all transaction inputs they own.
+        expect Finite(valid_until) = tx.validity_range.upper_bound.bound_type
+        expect valid_until <= datum.deadline
+        expect [voter, ..] = tx.extra_signatories
+        expect !list.has(datum.voters, voter)
         let voter_balance =
-          get_voter_vams_balance(
-            tx,
-            voter_bytes,
-            vams_policy_id,
-            vams_asset_name,
-          )
-
-        // Weight must equal isqrt(voter_balance) — quadratic voting
-        expect weight == isqrt(voter_balance)
-        expect weight > 0
-
-        // Verify the output recreates the proposal with updated votes
-        let expected_for =
-          if support {
-            datum.for_votes + weight
-          } else {
-            datum.for_votes
-          }
-        let expected_against =
-          if !support {
-            datum.against_votes + weight
-          } else {
-            datum.against_votes
-          }
-
-        // ── AUDIT FIX: AK03 ──
-        // Must produce a continuing output at our own address with updated datum
-        expect
-          has_valid_continuing_output(
-            tx.outputs,
-            own_address,
-            datum.id,
-            expected_for,
-            expected_against,
-            datum,
-            voter_bytes,
-          )
-
-        True
-      }
-
-      // ── Execute a passed proposal ──
-      Execute -> {
-        expect Finite(current_time) = tx.validity_range.lower_bound.bound_type
-
-        // Deadline must have passed
-        expect has_deadline_passed(datum.deadline, current_time)
-
-        // Must have met quorum
-        let total_votes = datum.for_votes + datum.against_votes
-        expect total_votes >= datum.quorum
-
-        // Must have majority
-        expect datum.for_votes > datum.against_votes
-
-        // Status must be Pending or Active (not already executed)
-        expect datum.status == Pending || datum.status == Active
-
-        // ── AUDIT FIX: AK08 ──
-        // Ensure a Timelock intent UTXO is created.
-        expect
-          list.any(
-            tx.outputs,
-            fn(out) {
-              when out.address.payment_credential is {
-                Script(hash) -> hash == timelock_script_hash
-                _ -> False
-              }
+          get_voter_vams_balance(tx, voter, vams_policy_id, vams_asset_name)
+        expect weight > 0 && weight == isqrt(voter_balance)
+        let expected =
+          ProposalDatum {
+            ..datum,
+            for_votes: if support {
+              datum.for_votes + weight
+            } else {
+              datum.for_votes
             },
-          )
-
-        True
+            against_votes: if support {
+              datum.against_votes
+            } else {
+              datum.against_votes + weight
+            },
+            status: Active,
+            voters: [voter, ..datum.voters],
+          }
+        exact_state_output(
+          tx.outputs,
+          own_input.output.address,
+          own_input.output.value,
+          expected,
+          datum.proposal_policy_id,
+          datum.proposal_asset_name,
+        )
       }
 
-      // ── Cancel a proposal (proposer only) ──
+      Execute -> {
+        expect Finite(valid_from) = tx.validity_range.lower_bound.bound_type
+        expect valid_from > datum.deadline
+        expect datum.for_votes + datum.against_votes >= datum.quorum
+        expect datum.for_votes > datum.against_votes
+        expect
+          quantity_of(
+            tx.mint,
+            datum.proposal_policy_id,
+            datum.proposal_asset_name,
+          ) == 0
+        let intent =
+          IntentDatum {
+            schema_version: cardano_schema_version,
+            proposal_policy_id: datum.proposal_policy_id,
+            proposal_asset_name: datum.proposal_asset_name,
+            source_proposal: own_ref,
+            action_hash: datum.action_hash,
+            target_script_hash: datum.target_script_hash,
+            execute_after: valid_from + normal_delay_ms,
+            expires_at: valid_from + normal_delay_ms + max_intent_lifetime_ms,
+            refund_key_hash: datum.proposer,
+          }
+        exact_timelock_output(
+          tx.outputs,
+          timelock_script_hash,
+          own_input.output.value,
+          intent,
+          datum.proposal_policy_id,
+          datum.proposal_asset_name,
+        )
+      }
+
       Cancel -> {
-        // Only the proposer can cancel
+        expect Finite(valid_until) = tx.validity_range.upper_bound.bound_type
+        expect valid_until <= datum.deadline
         expect is_signed_by(tx.extra_signatories, datum.proposer)
-
-        // Can only cancel if still Pending or Active
-        expect datum.status == Pending || datum.status == Active
-
-        True
+        expect
+          quantity_of(
+            tx.mint,
+            datum.proposal_policy_id,
+            datum.proposal_asset_name,
+          ) == -1
+        let refund =
+          add(
+            own_input.output.value,
+            datum.proposal_policy_id,
+            datum.proposal_asset_name,
+            -1,
+          )
+        exact_key_output(tx.outputs, datum.proposer, refund) && count_outputs_with_asset(
+          tx.outputs,
+          datum.proposal_policy_id,
+          datum.proposal_asset_name,
+        ) == 0
       }
-
-      // CreateProposal is handled at the minting policy level
-      _ -> False
     }
   }
 
@@ -170,77 +147,166 @@ validator governor(
   }
 }
 
-// ═══════════════════ Helper Functions ═══════════════════
-
-/// Get the first signatory from a transaction
-fn get_first_signatory(tx: Transaction) -> ByteArray {
-  expect [first, ..] = tx.extra_signatories
-  first
+fn valid_proposal_state(
+  datum: ProposalDatum,
+  output: Output,
+  allowed_target_scripts: List<ByteArray>,
+  min_proposal_stake: Int,
+  min_voting_period_ms: Int,
+  default_quorum: Int,
+) -> Bool {
+  and {
+    datum.schema_version == cardano_schema_version,
+    datum.id > 0,
+    bytearray.length(datum.proposal_asset_name) == 32,
+    quantity_of(
+      output.value,
+      datum.proposal_policy_id,
+      datum.proposal_asset_name,
+    ) == 1,
+    bytearray.length(datum.proposer) == 28,
+    bytearray.length(datum.description_hash) == 32,
+    bytearray.length(datum.action_hash) == 32,
+    bytearray.length(datum.target_script_hash) == 28,
+    !list.is_empty(allowed_target_scripts),
+    list.has(allowed_target_scripts, datum.target_script_hash),
+    datum.created_at >= 0,
+    datum.for_votes >= 0,
+    datum.against_votes >= 0,
+    datum.quorum >= default_quorum,
+    datum.deadline >= datum.created_at + min_voting_period_ms,
+    datum.status == Pending || datum.status == Active,
+    lovelace_of(output.value) >= min_proposal_stake,
+  }
 }
 
-/// Resolve our own script address from the spent input reference
-fn resolve_own_address(tx: Transaction, own_ref: OutputReference) -> Address {
-  expect Some(own_input) =
-    list.find(tx.inputs, fn(input) { input.output_reference == own_ref })
-  own_input.output.address
-}
-
-/// AUDIT FIX: AK01 — Sum the voter's VAMS token balance from tx inputs.
-/// Finds all inputs signed by the voter that contain VAMS tokens.
 fn get_voter_vams_balance(
   tx: Transaction,
-  voter_vkh: ByteArray,
+  voter: ByteArray,
   policy_id: PolicyId,
   asset_name: ByteArray,
 ) -> Int {
   list.foldl(
     tx.inputs,
     0,
-    fn(input, acc) {
-      // Check if this input is owned by the voter (payment credential matches)
-      let is_voter_input =
-        when input.output.address.payment_credential is {
-          VerificationKey(hash) -> hash == voter_vkh
-          _ -> False
-        }
-      if is_voter_input {
-        acc + assets.quantity_of(input.output.value, policy_id, asset_name)
-      } else {
-        acc
+    fn(input, total) {
+      when input.output.address.payment_credential is {
+        VerificationKey(hash) ->
+          if hash == voter {
+            total + quantity_of(input.output.value, policy_id, asset_name)
+          } else {
+            total
+          }
+        _ -> total
       }
     },
   )
 }
 
-/// AUDIT FIX: AK03 — Now actually inspects tx.outputs to verify
-/// the continuing output has the correctly updated datum.
-fn has_valid_continuing_output(
+fn exact_state_output(
   outputs: List<Output>,
-  own_address: Address,
-  proposal_id: Int,
-  expected_for: Int,
-  expected_against: Int,
-  original: ProposalDatum,
-  voter_bytes: ByteArray,
+  address: Address,
+  value: Value,
+  expected: ProposalDatum,
+  policy_id: PolicyId,
+  asset_name: ByteArray,
 ) -> Bool {
-  // Find the continuing output at our own validator address
-  when list.find(outputs, fn(output) { output.address == own_address }) is {
-    Some(output) -> {
-      // Extract and verify the inline datum
-      expect InlineDatum(raw_datum) = output.datum
-      expect updated_datum: ProposalDatum = raw_datum
-      // Verify state transition correctness
-      updated_datum.id == proposal_id && updated_datum.for_votes == expected_for && updated_datum.against_votes == expected_against && list.has(
-        updated_datum.voters,
-        voter_bytes,
-      ) && list.length(updated_datum.voters) == list.length(original.voters) + 1 && updated_datum.proposer == original.proposer && updated_datum.quorum == original.quorum && updated_datum.deadline == original.deadline && updated_datum.description_hash == original.description_hash && updated_datum.action_hash == original.action_hash
+  let matches =
+    list.filter(
+      outputs,
+      fn(output) {
+        output.address == address && output.value == value && has_proposal_datum(
+          output,
+          expected,
+        )
+      },
+    )
+  list.length(matches) == 1 && count_outputs_with_asset(
+    outputs,
+    policy_id,
+    asset_name,
+  ) == 1
+}
+
+fn exact_timelock_output(
+  outputs: List<Output>,
+  timelock_script_hash: ByteArray,
+  value: Value,
+  expected: IntentDatum,
+  policy_id: PolicyId,
+  asset_name: ByteArray,
+) -> Bool {
+  let matches =
+    list.filter(
+      outputs,
+      fn(output) {
+        when output.address.payment_credential is {
+          Script(hash) ->
+            hash == timelock_script_hash && output.value == value && has_intent_datum(
+              output,
+              expected,
+            )
+          _ -> False
+        }
+      },
+    )
+  list.length(matches) == 1 && count_outputs_with_asset(
+    outputs,
+    policy_id,
+    asset_name,
+  ) == 1
+}
+
+fn exact_key_output(
+  outputs: List<Output>,
+  key_hash: ByteArray,
+  value: Value,
+) -> Bool {
+  list.length(
+    list.filter(
+      outputs,
+      fn(output) {
+        when output.address.payment_credential is {
+          VerificationKey(hash) -> hash == key_hash && output.value == value
+          _ -> False
+        }
+      },
+    ),
+  ) == 1
+}
+
+fn has_proposal_datum(output: Output, expected: ProposalDatum) -> Bool {
+  when output.datum is {
+    InlineDatum(raw) -> {
+      expect actual: ProposalDatum = raw
+      actual == expected
     }
-    // No continuing output found — invalid
-    None -> False
+    _ -> False
   }
 }
 
-// ═══════════════════ Tests ═══════════════════
+fn has_intent_datum(output: Output, expected: IntentDatum) -> Bool {
+  when output.datum is {
+    InlineDatum(raw) -> {
+      expect actual: IntentDatum = raw
+      actual == expected
+    }
+    _ -> False
+  }
+}
+
+fn count_outputs_with_asset(
+  outputs: List<Output>,
+  policy_id: PolicyId,
+  asset_name: ByteArray,
+) -> Int {
+  list.length(
+    list.filter(
+      outputs,
+      fn(output) { quantity_of(output.value, policy_id, asset_name) == 1 },
+    ),
+  )
+}
 
 test quadratic_weight_100k() {
   isqrt(100_000) == 316
@@ -250,6 +316,330 @@ test quadratic_weight_1m() {
   isqrt(1_000_000) == 1000
 }
 
-test quadratic_weight_10k() {
-  isqrt(10_000) == 100
+const fixture_vams_policy: PolicyId =
+  #"10101010101010101010101010101010101010101010101010101010"
+
+const fixture_proposal_policy: PolicyId =
+  #"20202020202020202020202020202020202020202020202020202020"
+
+const fixture_timelock_hash: ByteArray =
+  #"30303030303030303030303030303030303030303030303030303030"
+
+const fixture_governor_hash: ByteArray =
+  #"40404040404040404040404040404040404040404040404040404040"
+
+const fixture_proposer: ByteArray =
+  #"50505050505050505050505050505050505050505050505050505050"
+
+const fixture_proposal_asset: ByteArray =
+  #"6060606060606060606060606060606060606060606060606060606060606060"
+
+const fixture_proposal_ref: OutputReference =
+  OutputReference {
+    transaction_id: #"7070707070707070707070707070707070707070707070707070707070707070",
+    output_index: 0,
+  }
+
+const fixture_proposal_address: Address =
+  Address {
+    payment_credential: Script(fixture_governor_hash),
+    stake_credential: None,
+  }
+
+const fixture_proposal_value: Value =
+  assets.from_lovelace(10_000_000)
+    |> add(fixture_proposal_policy, fixture_proposal_asset, 1)
+
+const fixture_proposal: ProposalDatum =
+  ProposalDatum {
+    schema_version: cardano_schema_version,
+    id: 1,
+    proposal_policy_id: fixture_proposal_policy,
+    proposal_asset_name: fixture_proposal_asset,
+    proposer: fixture_proposer,
+    description_hash: #"8080808080808080808080808080808080808080808080808080808080808080",
+    action_hash: #"9090909090909090909090909090909090909090909090909090909090909090",
+    target_script_hash: #"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0",
+    created_at: 0,
+    for_votes: 0,
+    against_votes: 0,
+    quorum: 1,
+    deadline: 1_000,
+    status: Pending,
+    voters: [],
+  }
+
+const fixture_proposal_input: Input =
+  Input {
+    output_reference: fixture_proposal_ref,
+    output: Output {
+      address: fixture_proposal_address,
+      value: fixture_proposal_value,
+      datum: InlineDatum(fixture_proposal),
+      reference_script: None,
+    },
+  }
+
+test cancel_burns_authentication_asset_and_refunds_exact_value() {
+  let refund =
+    Output {
+      address: Address {
+        payment_credential: VerificationKey(fixture_proposer),
+        stake_credential: None,
+      },
+      value: add(
+        fixture_proposal_value,
+        fixture_proposal_policy,
+        fixture_proposal_asset,
+        -1,
+      ),
+      datum: NoDatum,
+      reference_script: None,
+    }
+  governor.spend(
+    fixture_vams_policy,
+    "VAMS",
+    fixture_timelock_hash,
+    [fixture_proposal.target_script_hash],
+    5_000_000,
+    100,
+    1,
+    172_800_000,
+    604_800_000,
+    Some(fixture_proposal),
+    Cancel,
+    fixture_proposal_ref,
+    Transaction {
+      ..transaction.placeholder,
+      inputs: [fixture_proposal_input],
+      outputs: [refund],
+      mint: assets.from_asset(
+        fixture_proposal_policy,
+        fixture_proposal_asset,
+        -1,
+      ),
+      validity_range: interval.before(999),
+      extra_signatories: [fixture_proposer],
+    },
+  )
+}
+
+test cancel_rejects_unauthorized_signer() fail {
+  governor.spend(
+    fixture_vams_policy,
+    "VAMS",
+    fixture_timelock_hash,
+    [fixture_proposal.target_script_hash],
+    5_000_000,
+    100,
+    1,
+    172_800_000,
+    604_800_000,
+    Some(fixture_proposal),
+    Cancel,
+    fixture_proposal_ref,
+    Transaction {
+      ..transaction.placeholder,
+      inputs: [fixture_proposal_input],
+      mint: assets.from_asset(
+        fixture_proposal_policy,
+        fixture_proposal_asset,
+        -1,
+      ),
+      validity_range: interval.before(999),
+      extra_signatories: [
+        #"ffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+      ],
+    },
+  )
+}
+
+const fixture_voter: ByteArray =
+  #"b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0"
+
+fn fixture_voter_input() -> Input {
+  Input {
+    output_reference: OutputReference {
+      transaction_id: #"b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1",
+      output_index: 0,
+    },
+    output: Output {
+      address: Address {
+        payment_credential: VerificationKey(fixture_voter),
+        stake_credential: None,
+      },
+      value: assets.from_asset(fixture_vams_policy, "VAMS", 100),
+      datum: NoDatum,
+      reference_script: None,
+    },
+  }
+}
+
+test vote_recreates_one_exact_successor() {
+  let expected =
+    ProposalDatum {
+      ..fixture_proposal,
+      for_votes: 10,
+      status: Active,
+      voters: [fixture_voter],
+    }
+  let successor =
+    Output {
+      address: fixture_proposal_address,
+      value: fixture_proposal_value,
+      datum: InlineDatum(expected),
+      reference_script: None,
+    }
+  governor.spend(
+    fixture_vams_policy,
+    "VAMS",
+    fixture_timelock_hash,
+    [fixture_proposal.target_script_hash],
+    5_000_000,
+    100,
+    1,
+    172_800_000,
+    604_800_000,
+    Some(fixture_proposal),
+    Vote { support: True, weight: 10 },
+    fixture_proposal_ref,
+    Transaction {
+      ..transaction.placeholder,
+      inputs: [fixture_proposal_input, fixture_voter_input()],
+      outputs: [successor],
+      validity_range: interval.before(999),
+      extra_signatories: [fixture_voter],
+    },
+  )
+}
+
+test vote_rejects_duplicate_voter() fail {
+  let voted =
+    ProposalDatum {
+      ..fixture_proposal,
+      status: Active,
+      voters: [fixture_voter],
+    }
+  let voted_input =
+    Input {
+      ..fixture_proposal_input,
+      output: Output {
+        ..fixture_proposal_input.output,
+        datum: InlineDatum(voted),
+      },
+    }
+  governor.spend(
+    fixture_vams_policy,
+    "VAMS",
+    fixture_timelock_hash,
+    [fixture_proposal.target_script_hash],
+    5_000_000,
+    100,
+    1,
+    172_800_000,
+    604_800_000,
+    Some(voted),
+    Vote { support: True, weight: 10 },
+    fixture_proposal_ref,
+    Transaction {
+      ..transaction.placeholder,
+      inputs: [voted_input, fixture_voter_input()],
+      validity_range: interval.before(999),
+      extra_signatories: [fixture_voter],
+    },
+  )
+}
+
+test vote_rejects_value_substitution() fail {
+  let expected =
+    ProposalDatum {
+      ..fixture_proposal,
+      for_votes: 10,
+      status: Active,
+      voters: [fixture_voter],
+    }
+  let substituted =
+    Output {
+      address: fixture_proposal_address,
+      value: assets.from_lovelace(10_000_001)
+        |> add(fixture_proposal_policy, fixture_proposal_asset, 1),
+      datum: InlineDatum(expected),
+      reference_script: None,
+    }
+  governor.spend(
+    fixture_vams_policy,
+    "VAMS",
+    fixture_timelock_hash,
+    [fixture_proposal.target_script_hash],
+    5_000_000,
+    100,
+    1,
+    172_800_000,
+    604_800_000,
+    Some(fixture_proposal),
+    Vote { support: True, weight: 10 },
+    fixture_proposal_ref,
+    Transaction {
+      ..transaction.placeholder,
+      inputs: [fixture_proposal_input, fixture_voter_input()],
+      outputs: [substituted],
+      validity_range: interval.before(999),
+      extra_signatories: [fixture_voter],
+    },
+  )
+}
+
+test execute_rejects_malformed_timelock_intent() fail {
+  let approved =
+    ProposalDatum { ..fixture_proposal, for_votes: 1, status: Active }
+  let approved_input =
+    Input {
+      ..fixture_proposal_input,
+      output: Output {
+        ..fixture_proposal_input.output,
+        datum: InlineDatum(approved),
+      },
+    }
+  let malformed_intent =
+    IntentDatum {
+      schema_version: cardano_schema_version,
+      proposal_policy_id: fixture_proposal_policy,
+      proposal_asset_name: fixture_proposal_asset,
+      source_proposal: fixture_proposal_ref,
+      action_hash: #"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+      target_script_hash: fixture_proposal.target_script_hash,
+      execute_after: 1001 + 172_800_000,
+      expires_at: 1001 + 172_800_000 + 604_800_000,
+      refund_key_hash: fixture_proposer,
+    }
+  governor.spend(
+    fixture_vams_policy,
+    "VAMS",
+    fixture_timelock_hash,
+    [fixture_proposal.target_script_hash],
+    5_000_000,
+    100,
+    1,
+    172_800_000,
+    604_800_000,
+    Some(approved),
+    Execute,
+    fixture_proposal_ref,
+    Transaction {
+      ..transaction.placeholder,
+      inputs: [approved_input],
+      outputs: [
+        Output {
+          address: Address {
+            payment_credential: Script(fixture_timelock_hash),
+            stake_credential: None,
+          },
+          value: fixture_proposal_value,
+          datum: InlineDatum(malformed_intent),
+          reference_script: None,
+        },
+      ],
+      validity_range: interval.between(1001, 2000),
+    },
+  )
 }

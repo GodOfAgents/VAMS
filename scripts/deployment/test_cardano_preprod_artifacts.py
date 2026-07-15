@@ -34,6 +34,19 @@ class CardanoPreProdArtifactTests(unittest.TestCase):
         self.assertEqual(first, second)
         self.assertEqual(first_bytes, second_bytes)
         self.assertEqual(len(first["validators"]), 4)
+        self.assertEqual(first["persistent_validator_count"], 4)
+        self.assertFalse(first["artifacts_applied"])
+        self.assertTrue(all(not item["applied"] for item in first["validators"]))
+        self.assertTrue(
+            all(item["artifact_path"].endswith(".template.json") for item in first["validators"])
+        )
+        self.assertEqual(len(first["auxiliary_policy_templates"]), 3)
+        self.assertTrue(
+            all(
+                item["parameter_count"] > 0
+                for item in first["auxiliary_policy_templates"]
+            )
+        )
         self.assertEqual(first["vdso"]["deployable"], False)
         self.assertFalse(any("vdso" in item["title"] for item in first["validators"]))
 
@@ -61,6 +74,20 @@ class CardanoPreProdArtifactTests(unittest.TestCase):
             path = root / "plutus.json"
             path.write_text(json.dumps(blueprint), encoding="utf-8")
             with self.assertRaisesRegex(ValueError, "conformance-only"):
+                module.extract(path, root / "output", COMMIT)
+
+    def test_rejects_missing_auxiliary_policy_template(self) -> None:
+        blueprint = json.loads((ROOT / "cardano" / "plutus.json").read_text("utf-8"))
+        blueprint["validators"] = [
+            item
+            for item in blueprint["validators"]
+            if item["title"] != "proposal_nft.proposal_nft.mint"
+        ]
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            path = root / "plutus.json"
+            path.write_text(json.dumps(blueprint), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "missing auxiliary policy templates"):
                 module.extract(path, root / "output", COMMIT)
 
     def test_cli_binding_rejects_wrong_head_or_dirty_cardano_tree(self) -> None:

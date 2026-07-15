@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Extract the four authoritative Cardano validators deterministically."""
+"""Extract four persistent validators and bind auxiliary policy templates."""
 
 from __future__ import annotations
 
@@ -8,6 +8,7 @@ import hashlib
 import json
 import re
 import subprocess
+import tempfile
 from pathlib import Path
 from typing import Any
 
@@ -32,6 +33,11 @@ DEPLOYABLE_VALIDATORS = {
         "timelock.plutus",
         "cardano/validators/timelock.ak",
     ),
+}
+AUXILIARY_POLICY_TEMPLATES = {
+    "agent_nft.agent_nft.mint": "cardano/validators/agent_nft.ak",
+    "proposal_nft.proposal_nft.mint": "cardano/validators/proposal_nft.ak",
+    "fund_nft.fund_nft.mint": "cardano/validators/fund_nft.ak",
 }
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -71,6 +77,7 @@ def require_exact_repository_state(blueprint_path: Path, commit_sha: str) -> Non
 
 
 def extract(blueprint_path: Path, output_dir: Path, commit_sha: str) -> dict[str, Any]:
+    """Extract deterministic, explicitly non-deployable blueprint templates."""
     if COMMIT_RE.fullmatch(commit_sha) is None:
         raise ValueError("commit SHA must be 40 lowercase hexadecimal characters")
     blueprint_bytes = blueprint_path.read_bytes()
@@ -93,41 +100,92 @@ def extract(blueprint_path: Path, output_dir: Path, commit_sha: str) -> dict[str
     missing = set(DEPLOYABLE_VALIDATORS) - set(by_title)
     if missing:
         raise ValueError("missing authoritative validators: " + ", ".join(sorted(missing)))
+    missing_auxiliary = set(AUXILIARY_POLICY_TEMPLATES) - set(by_title)
+    if missing_auxiliary:
+        raise ValueError(
+            "missing auxiliary policy templates: "
+            + ", ".join(sorted(missing_auxiliary))
+        )
 
     output_dir.mkdir(parents=True, exist_ok=True)
-    records: list[dict[str, str]] = []
+    records: list[dict[str, Any]] = []
     for title, (filename, source) in DEPLOYABLE_VALIDATORS.items():
         validator = by_title[title]
         compiled_code = validator.get("compiledCode")
         script_hash = validator.get("hash")
+        parameters = validator.get("parameters", [])
         if not isinstance(compiled_code, str) or HEX_RE.fullmatch(compiled_code) is None:
             raise ValueError(f"{title} compiledCode must be nonempty lowercase hexadecimal")
         if not isinstance(script_hash, str) or HASH_RE.fullmatch(script_hash) is None:
             raise ValueError(f"{title} script hash must be 56 lowercase hexadecimal characters")
-        envelope = {
-            "cborHex": compiled_code,
-            "description": f"VAMS Cardano Pre-Prod {title}",
-            "type": "PlutusScriptV3",
+        if not isinstance(parameters, list):
+            raise ValueError(f"{title} parameters must be an array")
+        template = {
+            "compiledCode": compiled_code,
+            "deployable": False,
+            "parameters": parameters,
+            "templateHash": script_hash,
+            "title": title,
         }
-        artifact_bytes = _json_bytes(envelope)
-        artifact_path = output_dir / filename
+        artifact_bytes = _json_bytes(template)
+        artifact_path = output_dir / filename.replace(".plutus", ".template.json")
         artifact_path.write_bytes(artifact_bytes)
         records.append(
             {
-                "artifact_path": filename,
+                "applied": False,
+                "artifact_path": artifact_path.name,
                 "artifact_sha256": _sha256(artifact_bytes),
-                "compiled_code_sha256": _sha256(bytes.fromhex(compiled_code)),
-                "script_hash": script_hash,
+                "compiled_template_sha256": _sha256(bytes.fromhex(compiled_code)),
+                "parameter_count": len(parameters),
                 "source": source,
+                "template_script_hash": script_hash,
+                "title": title,
+            }
+        )
+
+    auxiliary_records: list[dict[str, Any]] = []
+    for title, source in AUXILIARY_POLICY_TEMPLATES.items():
+        validator = by_title[title]
+        compiled_code = validator.get("compiledCode")
+        script_hash = validator.get("hash")
+        parameters = validator.get("parameters")
+        if not isinstance(compiled_code, str) or HEX_RE.fullmatch(compiled_code) is None:
+            raise ValueError(f"{title} compiledCode must be nonempty lowercase hexadecimal")
+        if not isinstance(script_hash, str) or HASH_RE.fullmatch(script_hash) is None:
+            raise ValueError(f"{title} script hash must be 56 lowercase hexadecimal characters")
+        if not isinstance(parameters, list) or not parameters:
+            raise ValueError(f"{title} must remain an unapplied parameterized template")
+        template = {
+            "compiledCode": compiled_code,
+            "deployable": False,
+            "parameters": parameters,
+            "templateHash": script_hash,
+            "title": title,
+        }
+        template_bytes = _json_bytes(template)
+        template_filename = title.split(".", 1)[0].replace("_", "-") + ".template.json"
+        (output_dir / template_filename).write_bytes(template_bytes)
+        auxiliary_records.append(
+            {
+                "blueprint_entry_sha256": _sha256(_json_bytes(validator)),
+                "compiled_template_sha256": _sha256(bytes.fromhex(compiled_code)),
+                "parameter_count": len(parameters),
+                "source": source,
+                "template_artifact_path": template_filename,
+                "template_artifact_sha256": _sha256(template_bytes),
+                "template_script_hash": script_hash,
                 "title": title,
             }
         )
 
     manifest = {
+        "artifacts_applied": False,
+        "auxiliary_policy_templates": auxiliary_records,
         "blueprint_sha256": _sha256(blueprint_bytes),
         "commit_sha": commit_sha,
         "network": "cardano-preprod",
-        "schema_version": "1.0.0",
+        "persistent_validator_count": 4,
+        "schema_version": "2.1.0",
         "validators": records,
         "vdso": {
             "deployable": False,
@@ -151,8 +209,10 @@ def main() -> int:
     except (OSError, ValueError, json.JSONDecodeError, subprocess.SubprocessError) as exc:
         parser.error(str(exc))
     print(
-        "Extracted "
-        f"{len(manifest['validators'])} Cardano Pre-Prod validators to {args.output_dir}"
+        "Bound "
+        f"{len(manifest['validators'])} non-deployable persistent validator templates and "
+        f"bound {len(manifest['auxiliary_policy_templates'])} auxiliary policy "
+        f"templates in {args.output_dir}"
     )
     return 0
 

@@ -1,15 +1,17 @@
 # Gitleaks Historical Finding Adjudication
 
-**Scan date:** 2026-07-13
+**Scan date:** 2026-07-15
+
+**Closure contract added:** 2026-07-15
 
 **Tool:** Gitleaks v8.30.1
 
-**Scope:** All 82 commits reachable through `--all`; findings were fully
-redacted before classification.
+**Scope:** Complete-history `git --log-opts=--all`; findings were fully redacted
+before classification. Findings occur in 15 commits.
 
 ## Gate Result
 
-The history scan is **blocking**. It reported 1,734 matches: 1,731 generic API
+The history scan is **blocking**. It reported 1,740 matches: 1,737 generic API
 key matches and three PEM private-key matches. No baseline or allowlist has been
 added because doing so before credential invalidation and owner review would
 hide a real historical exposure.
@@ -18,9 +20,7 @@ hide a real historical exposure.
 
 | Class | Matches | Assessment |
 | --- | ---: | --- |
-| Deleted Foundry output JSON | 1,604 | Generated compiler/test output. These generic-key matches require sampled reviewer confirmation before a narrow historical allowlist is permitted. |
-| Tracked `.foundry/` test fixtures | 92 | Upstream test vectors and fixture material, not VAMS deployment credentials. Pin provenance and use path/rule-scoped exclusions only after independent review. |
-| VAMS source and deleted demo scripts | 35 | Generic-key matches across legacy deployment helpers, configuration, and deleted JavaScript demos. Treat as potentially live until the relevant providers and owners confirm revocation. |
+| Generic API-key matches | 1,737 | Concentrated in deleted Foundry output JSON, tracked upstream `.foundry/` fixtures, legacy deployment/demo helpers, and current cryptographic fixtures. Every path group still requires sampled independent review before any narrow path/rule adjudication is accepted. |
 | Deleted node identity PEM files | 3 | Confirmed private-key material committed in historical paths `node_identity.pem` and `neuron/node_identity.pem`. These identities are presumed compromised. |
 
 This classification records paths, rules, and counts only. It intentionally
@@ -40,6 +40,14 @@ does not reproduce matched values.
    path-and-rule-specific allowlist. Never allowlist the private-key findings.
 5. Rerun both the complete-history and exact-worktree Gitleaks scans, followed
    by TruffleHog. Both tools must report zero unadjudicated findings.
+
+Canary and public readiness additionally require
+`credential-incident-report.json` under the operational evidence bundle. The
+report is validated by `scripts/audit/credential_incident_evidence.py` against
+the exact target commit and requires public, content-hashed rotation, balance,
+role-impact, all-ref rewrite, collaborator/fork/cache remediation, scanner, and
+named-reviewer artifacts. This adjudication document cannot satisfy that
+contract by itself.
 
 History rewriting and credential rotation are repository-owner security
 actions. They are intentionally not performed automatically by the deployment

@@ -132,14 +132,11 @@ test in_range_boundary() {
 test prop_isqrt_bounds(raw_n via fuzz.int_at_least(0)) {
   let n = raw_n % 1_000_001
   let root = isqrt(n)
-  root * root <= n && (root + 1) * (root + 1) > n
+  root * root <= n && ( root + 1 ) * ( root + 1 ) > n
 }
 
 test prop_apply_bps_is_bounded(
-  (raw_value, raw_bps) via fuzz.both(
-    fuzz.int_at_least(0),
-    fuzz.int_at_least(0),
-  ),
+  (raw_value, raw_bps) via fuzz.both(fuzz.int_at_least(0), fuzz.int_at_least(0)),
 ) {
   let value = raw_value % 1_000_000_001
   let bps = raw_bps % 10_001
@@ -159,5 +156,5 @@ test prop_apply_bps_monotonic_in_rate(
 }
 
 test prop_in_range_matches_ordering(value via fuzz.int()) {
-  in_range(value, -1_000, 1_000) == (value >= -1_000 && value <= 1_000)
+  in_range(value, -1_000, 1_000) == ( value >= -1_000 && value <= 1_000 )
 }

@@ -59,7 +59,7 @@
     {
       "id": "INV-10",
       "statement": "Bridge proofs and payload hashes remain separate with strict nonce replay protection.",
-      "enforcement": [{"path": "neuron/bridge_executor.py", "must_contain": ["verify_bridge_proof", "expected_payload_hash"]}, {"path": "cardano/validators/insurance_fund.ak", "must_contain": ["bridge_proof, payload_hash", "verify_bridge_proof(bridge_proof, payload_hash)"]}],
+      "enforcement": [{"path": "neuron/bridge_executor.py", "must_contain": ["verify_bridge_proof", "expected_payload_hash"]}, {"path": "cardano/validators/insurance_fund.ak", "must_contain": ["DepositBridge { amount, bridge_proof, payload_hash }", "Preserve INV-10 field separation while refusing proof-shaped mocks.", ") >= 0 && False"]}],
       "tests": [{"path": "neuron/tests/test_clr_v3.py", "must_contain": ["test_icb_nonce_replay"]}, {"path": "cardano/lib/vams/icb.ak", "must_contain": ["prop_nonce_replay_always_rejected"]}]
     }
   ]

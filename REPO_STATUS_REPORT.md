@@ -1,12 +1,12 @@
 # VAMS Repository Status Report And Public Testnet Roadmap
 
-**Date:** 2026-07-14
-**Last verified:** 2026-07-14
+**Date:** 2026-07-15
+**Last verified:** 2026-07-15 (partial working-tree gates only)
 **Stage:** Hardened Pre-Testnet Candidate
 **Current Priority:** Phase 6: Closed Public-Testnet Baseline + Private VDSO Shadow Hardening
 **Public Testnet Target:** July 2026 launch window
 **Architecture Baseline:** v0.8.0 cognitive/composer layer + v1.3.0-oms runtime + June gateway hardening
-**Branch Baseline:** implementation commit `babe45e22430b754eadbb98d2269afb3430c4ca6`, based on `main` at `31929a24419a9b7b9d8954cbea2df9fe1cb77a68`; signed aggregate release evidence is absent
+**Branch Baseline:** last clean commit `9a5ef63cd76327a3c226b3249fb4138691789512`, based on `main` at `31929a24419a9b7b9d8954cbea2df9fe1cb77a68`; Cardano/evidence hardening is currently uncommitted and signed aggregate release evidence is absent
 
 ---
 
@@ -34,14 +34,14 @@ The system is not mainnet-ready. It is not yet a public testnet deployment. The 
 
 Current blockers before public testnet:
 
-- Readiness is fail-closed at 3 implemented, 29 partial, 4 blocked, and 0 verified tracks. The implementation is committed, but it is not a release candidate until every gate reruns against the exact final HEAD in CI and the complete manifest is signed.
-- The current working tree passes the full Python aggregate, the disposable
-  PostgreSQL multi-process nonce/replay/checkpoint integration, Foundry 709/709,
-  Aiken 54/54, Rust format/check/deny-warnings Clippy, frontend build/audit,
-  Bandit, pip-audit, Semgrep, Slither fail-high, and first-party gates. Rust
-  linked tests remain environment-blocked because Windows lacks MSVC
-  `link.exe`. None of these local results is signed exact-commit evidence while
-  the tree remains uncommitted.
+- Readiness is fail-closed at 3 implemented, 29 partial, 4 blocked, and 0 verified tracks. The current hardening changes are not yet committed, and no track may advance until every gate reruns against the exact final post-history-rewrite SHA in CI and the complete manifest is signed.
+- Current working-tree verification passes full Python, Foundry, Aiken,
+  Rust format/check/deny-warnings Clippy, frontend build/audit, Bandit,
+  pip-audit, Semgrep, Slither fail-high, and first-party structural gates.
+  The focused credential/deployment/audit set passes 41/41. PostgreSQL remains
+  unavailable and Rust linked tests remain environment-blocked because this
+  Windows host lacks MSVC `link.exe`. Local results are not signed
+  exact-commit evidence while the tree remains uncommitted.
 - The full Semgrep scan has zero findings; its three initial timeout paths were
   rerun with a longer per-rule budget and completed with zero findings.
   Historical
@@ -88,16 +88,16 @@ Status labels:
 
 | Component | Current Status | Reality Notes | Public Testnet Gate |
 | --- | --- | --- | --- |
-| Solidity contracts (`contracts/src/`) | Implemented, Working-Tree Verification Clean | Full Foundry passes 709/709 across 40 suites after the final Safe/VDSO changes. Modified Solidity formatting passes. | Rerun against the clean release commit in CI, then complete independent review, deployment rehearsal, role ownership review, and deployment address registry. |
-| Cardano validators (`cardano/validators/`) | Implemented, Unit and Property Suites Clean | `aiken check --deny --seed 20260713 --max-success 250` passes 47 unit tests and 7 properties; all 54 definitions pass. `cardano/lib/vams/vdso.ak` remains conformance-only and is not a deployable validator. | Expand transaction-level validator properties, retain exact-commit CI evidence, deploy only the four existing validators to Pre-Prod, and complete governance/timelock ceremony evidence. |
-| Neuron runtime (`neuron/`) | Implemented, Working-Tree Verification Clean, Live Routes Restricted | Mock clients remain available locally but are blocked from live profiles. The full Python aggregate passes with one Rust-binary environment skip, and the disposable PostgreSQL test proves multi-process nonce, replay, checkpoint, restart, and $1 \times 10^5$-scale persistence behavior. | Rerun in exact-commit CI and collect live integration evidence for every enabled route. |
+| Solidity contracts (`contracts/src/`) | Implemented, Working-Tree Verification Clean | Full Foundry passes 709/709 across 40 suites after the Safe/VDSO changes. Whole-tree `forge fmt --check` passes after deterministic formatter cleanup. | Rerun against the clean release commit in CI, then complete independent review, deployment rehearsal, role ownership review, and deployment address registry. |
+| Cardano validators (`cardano/validators/`) | Schema-v2 State Machines Implemented, Working-Tree Verification Clean | Four persistent validators preserve explicit authentication asset classes and exact datum/value transitions. Three seed/bootstrap policies are auxiliary templates. Bridge execution, cross-chain deposits, and slashing fail closed; local timelock targets are allowlisted. Seeded Aiken verification passes 71 unit tests and 6 properties (77/77), with 250 successful cases per property, and the blueprint rebuild succeeds. `cardano/lib/vams/vdso.ak` remains conformance-only. | Apply reviewed public parameters, independently verify final hashes, rerun on the exact clean post-rewrite SHA in CI, and retain signed rehearsal evidence. |
+| Neuron runtime (`neuron/`) | Implemented, Working-Tree Verification Clean, Live Routes Restricted | Mock clients remain available locally but are blocked from live profiles. The non-PostgreSQL Python aggregate passes 753 tests with one intentional Rust-binary environment skip. The real PostgreSQL atomicity/restart gate was not run on this tree because no service is available. | Run the PostgreSQL gate, rerun all Python tests in exact-commit CI, and collect live integration evidence for every enabled route. |
 | Data availability | Implemented, Live Evidence Pending | Celestia live failures no longer fall back to mock receipts and exact retrieval is required. Near non-mock submission is disabled until signed submission and retrieval exist. Mock receipts are never verified; Avail, EigenDA, and current VDSO DA paths remain release-ineligible. | Record real Celestia Mocha and Near Testnet submission, inclusion, independently observed retrieval, and payload-match artifacts before enabling either route. |
 | Gateway (`gateway/server.py`) | Implemented, Needs Live Verification | Gateway requires DID auth, replay protection, proxy-verified mTLS, explicit live CORS origins, bounded methods/headers, request limits, rate limiting, loopback binding, and Caddy TLS. Public instances do not mount VDSO routes with `VDSO_MODE=off`; private shadow startup requires PostgreSQL atomic stores, trusted heights, and deployment verification. | Certificate allowlist, live route/size/rate smoke tests, Gateway aggregate pytest evidence, external TLS scan, and multi-process shadow soak evidence. |
 | Composer and cognitive layer | Implemented | CHC 10-axis cognitive profiles and 6-axis composer scoring exist. Cognitive score: $$S_{cog}=1.0-\frac{1}{|D_{req}|}\sum_{d \in D_{req}}\max(0.0, Req_d-Profile_d)$$ | Keep scorer tests passing; verify real node telemetry maps correctly into candidate ranking. |
 | Economics and regional incentives | Implemented, Synthetic Campaign Clean | Regional/yield caps and hybrid thin-liquidity pricing exist. The seeded 100,000-epoch campaign detected all injected linked-reward, linked-capacity, regional-capture, thin-liquidity, and wash-return attacks with zero misses or baseline false positives. | Run the analyzer against live beneficial-owner attestations and add governance/settlement state-machine simulations. |
 | Frontend (`frontend-vite/`) | Read-Only Testnet Profile, Build Clean | Gateway origin is environment-bound and HTTPS-only in production. CSP removes inline scripts and external fonts. Vite production build and npm audit pass. Wallet transactions, real fiat, real yield, and staking rewards are disabled for the first testnet profile. | CI Node 22 evidence, browser CSP verification, phishing review, and accessibility review. |
 | CI/CD (`.github/workflows/security-gates.yml`) | Implemented, Needs CI Evidence | The branch restructures promotion to collect raw gate/stage artifacts before building and Cosign-signing a non-self-referential manifest bound to a target SHA and immutable evidence-run IDs. No GitHub Actions run or signed bundle is claimed. | Run on the clean target commit, verify complete non-null artifact hashes/signatures, and configure branch protection for the Security Evidence Gate. |
-| Deployment artifacts | Identity-Bound Ceremony Implemented, Runtime Evidence Pending | Polygon scripts bind each 3-of-5/3-of-5/2-of-3 Safe to proxy/singleton bytecode, require zero nonce and extension-free current state, require the exact compiled VAMS timelock runtime and at least 48 hours, disable rewards/minter authority, and remove deployer roles. Manifest validation separately binds Polygon code/roles and Cardano script/multisig evidence. | Pin an audited Safe release; supply complete setup and `ApproveHash` history evidence; supply real authorities; rehearse both hosts; verify bytecode/script hashes; and record role transfers, addresses, transactions, and rollback evidence. |
+| Deployment artifacts | Identity-Bound Ceremony and Fail-Closed Cardano Application Tooling Implemented, Runtime Evidence Pending | Polygon controls retain the Safe/timelock checks. Cardano template extraction is explicitly non-deployable; a separate tool applies reviewed CBOR parameters for four persistent validators and the canonical fund bootstrap, while optional agent/proposal policy instances require real creation transactions. It rejects unapplied values and records policy templates separately. No applied parameter manifest or real authority instance is present. | Pin an audited Safe release; supply complete setup and `ApproveHash` history; supply Cardano public parameters and seed UTxOs; rehearse both hosts; independently verify bytecode/script hashes; and record role transfers, addresses, transactions, and rollback evidence. |
 | VDSO deterministic state-object canary | Canary Foundation Implemented, Deployment Blocked | `vams-vm/`, `contracts/src/vdso/`, `neuron/vdso/`, `gateway/vdso.py`, and conformance-only `cardano/lib/vams/vdso.ak` implement a side-by-side foundation. PostgreSQL-backed atomic replay/nonce stores and a private read-only shadow composition now exist. Public VDSO remains `off`; no VDSO deployment, Cardano VDSO validator, value-bearing route, or authoritative migration is claimed. | Complete real proof/recovery verification, reviewed HPKE and ML-DSA backends, immutable adapter/verifier identity, live DA evidence, at least two independent execution backends, shadow/canary evidence, independent review, deployment rehearsal, and a governance-approved migration before promotion. |
 
 ---
@@ -128,24 +128,28 @@ June hardening materially improved INV-5, INV-6, and INV-10 by blocking live moc
 Do not preserve historical aggregate totals as current evidence unless the full
 suite has been rerun on the current tree and bound to its commit.
 
-Latest local evidence on the Phase 6 VDSO shadow hardening branch, which started
-from `main` at `31929a24419a9b7b9d8954cbea2df9fe1cb77a68`:
+Current working-tree results are explicitly marked below. They are local
+verification, not signed exact-commit evidence, because the tree is uncommitted
+and credential history remediation must precede the release SHA. The branch
+started from `main` at
+`31929a24419a9b7b9d8954cbea2df9fe1cb77a68`:
 
 | Scope | Command | Result |
 | --- | --- | --- |
-| Solidity verification | `forge build`; `forge test`; modified-file `forge fmt --check` | Passed: 709/709 tests across 40 suites, zero failures/skips; build and modified-file formatting pass. |
-| Aiken verification | `aiken check --deny --seed 20260713 --max-success 250` | Passed: 47 unit tests plus 7 properties; all 54 definitions pass, with 250 successful cases per property. The exported `shadow_read_commitment` UPLC evaluator matches Python. |
-| Python current tree | Full pytest excluding only the opt-in PostgreSQL module; separate pinned PostgreSQL integration | Full aggregate passed: 746 tests, 1 intentional Rust-binary environment skip, and 23 subtests. The separate PostgreSQL gate passed and proves eight-process nonce, replay, and checkpoint races, restart persistence, and more than $1 \times 10^5$ durable replay records. |
-| Python security lint | `bandit -r neuron gateway scripts/audit -ll -ii` | Passed across 41,096 lines: 0 high findings and no reportable medium/high-confidence issue. Raw metrics retain 1 medium low-confidence result below the configured threshold. |
+| Solidity verification | `forge build --sizes`; `forge test -vvv`; `forge fmt --check` | Current working tree passed: 709/709 tests across 40 suites, zero failures/skips; build and whole-tree formatting pass. Compiler warnings remain recorded for cleanup/review. |
+| Aiken verification | `aiken fmt --check`; `aiken check --deny --seed 20260713 --max-success 250`; `aiken build` | Current working tree passed: 71 unit tests and 6 properties, 77/77 total, with 250 successful cases per property; the parameterized `plutus.json` blueprint was regenerated. |
+| Credential/deployment/audit regressions | Focused pytest for credential incident, Cardano artifact/application tooling, audit program, and workflow security | Current working tree passed 41/41 on 2026-07-15. This focused result does not replace the full protocol gates. |
+| Python current tree | `python -m pytest -q --tb=short --ignore=neuron/tests/test_vdso_postgres_integration.py` | Passed: 753 tests, 1 intentional Rust-binary environment skip, and one upstream `websockets.legacy` deprecation warning. The separate PostgreSQL gate is environment-blocked on this host and is not claimed. |
+| Python security lint | `bandit -r neuron gateway -ll -ii -q` | Passed with no qualifying medium/high-severity, medium/high-confidence finding. |
 | Python dependency audit | `pip-audit -r gateway/requirements.txt` and `pip-audit -r neuron/requirements.txt` | Passed: no known vulnerabilities in either resolved requirement set. The unpatched `python-ecdsa` package was removed from production requirements. |
-| VIR-Core current branch | `cargo check --workspace --all-targets --locked` | Passed. A current-branch `cargo test` result is unavailable on Windows because the MSVC `link.exe` linker is not installed; the older Linux 34/34 total is baseline evidence only. |
-| Semgrep | Exact CI command, a 60-second rerun of the three initial timeout paths, and explicit coverage of every untracked branch file | Passed: zero findings across 456 tracked files/520 rules. The timeout-path scan ran 290 rules, and the 16-file untracked supplement ran 330 rules; both completed with 100% parsing, zero timeouts, and zero findings. |
+| VIR-Core current branch | `cargo fmt --all --check`; `cargo check --workspace --all-targets --locked`; `cargo clippy --workspace --all-targets --locked -- -D warnings`; `cargo test --workspace --all-targets --locked` | Format, check, and deny-warnings Clippy pass. Linked tests are unavailable because MSVC `link.exe` is not installed; run them on Linux CI or install the Visual Studio C++ workload. |
+| Semgrep | Exact workflow scan command | Passed: zero findings across 464 tracked files/520 rules, with 99.9% parsed. Exact-commit CI and independent adjudication remain required. |
 | Slither | `slither . --exclude-dependencies --exclude-low --exclude-informational --fail-high` | Passed fail-high: 181 contracts, 63 detectors, 0 high findings; 19 residual results are locally adjudicated in `docs/audit/SLITHER_ADJUDICATION.md` and still require independent acceptance. |
-| Gitleaks history | Gitleaks v8.30.1 `git --log-opts=--all` with fully redacted reporting | Failed: 1,734 matches over 82 commits, including three PEM private-key findings. Classification and mandatory closure are in `docs/audit/GITLEAKS_ADJUDICATION.md`. |
+| Gitleaks history | Gitleaks v8.30.1 `git --log-opts=--all` with fully redacted reporting | Failed: 1,740 matches (1,737 generic-key and 3 private-key findings) across 15 finding-bearing commits, including the three historical PEM files. Classification and mandatory closure are in `docs/audit/GITLEAKS_ADJUDICATION.md`. |
 | Frontend install | `npm ci` | Passed: 176 packages installed/audited, 0 vulnerabilities. |
 | Frontend audit | `npm audit --audit-level=high` | Passed: 0 vulnerabilities. |
 | Frontend build | `npm run build` | Passed with Vite 7.3.6. |
-| Report/diff hygiene | `git diff --check -- ...` | Passed. |
+| Report/diff hygiene | `git diff --check` | Pending final documentation reconciliation and commit preparation. |
 | Gateway/runtime/VDSO focused tests | Focused pytest selection covering Gateway auth/lifecycle, VDSO semantics, PostgreSQL stores, runtime safety, and the private shadow worker | Passed: 134 with one intentional skip for the real Rust binary that cannot be linked on this Windows host. The real Aiken exported UPLC integration passed. |
 | Phase 6 security scripts | `default_credential_scan.py`, `public_content_policy_scan.py`, `mock_mode_promotion_scan.py` | Passed on the current tree on 2026-07-14. |
 | Python syntax check | `compileall` on the VDSO/Gateway modules | Passed on the current tree on 2026-07-13. |
@@ -158,12 +162,12 @@ Verification still pending or blocked locally:
 
 | Scope | Status |
 | --- | --- |
-| Exact-commit aggregate rerun | Complete local Python, PostgreSQL, Foundry, Aiken, frontend, analyzer, and first-party gates pass, except Rust linked tests cannot run without MSVC `link.exe`. CI must rerun every gate against the final clean commit and sign the complete aggregate manifest. |
-| Historical secret exposure | Gitleaks reports 1,734 historical matches, including three committed PEM private keys. Rotation/revocation, funded-account and privileged-role impact proof, coordinated history cleanup, collaborator re-cloning, and clean complete-history Gitleaks/TruffleHog rescans are mandatory. |
+| Exact-commit aggregate rerun | Local Python/Foundry/Aiken/Rust-check/frontend/analyzer/security gates are green where executable, but PostgreSQL and Rust linked tests remain environment-blocked. Clean-tree post-history-rewrite CI and a signed aggregate manifest remain required. |
+| Historical secret exposure | Gitleaks reports 1,740 historical matches, including three committed PEM private keys. Rotation/revocation, funded-account and privileged-role impact proof, coordinated history cleanup, collaborator re-cloning, and clean complete-history Gitleaks/TruffleHog rescans are mandatory. |
 | Semgrep exact-commit evidence | The three initial timeout paths completed in the longer-timeout supplemental scan with zero findings. Preserve both raw runs and rerun them against the final commit in CI. |
-| Aiken transaction properties | Pure-function properties now cover quadratic bounds, basis-point safety, range semantics, nonce replay/order, and insurance payout caps. Transaction-level datum/value/state-machine properties remain required. |
+| Aiken transaction properties | Schema-v2 transaction fixtures cover exact creation/successors, duplicate identity/vote rejection, forged and replayed claim/payout rejection, malformed intents, premature execution, unauthorized cancellation, datum/value substitution, and bridge/slashing fail-closed behavior. Independent protocol review and applied-script rehearsal remain required. |
 | Slither adjudications | The 19 residual medium-scan results are documented; independent review and the complete low/informational report remain required. |
-| TruffleHog | Represented in the workflow; pending CI execution. |
+| TruffleHog | The pinned audit wrapper correctly refused to scan a dirty worktree. Run it only after the final local commit and again after the coordinated all-ref rewrite; historical PEM findings remain blocking. |
 | Default credential scan | Represented in the workflow and passed locally; pending CI execution. |
 | Mock-mode promotion scan | Represented in the workflow and passed locally; pending CI execution. |
 | Public-content policy scan | Represented in the workflow and passed locally; pending CI execution. |
@@ -242,14 +246,14 @@ Mainnet remains conditional. No mainnet date should be promised until public tes
 
 ## 9. Immediate Engineering Priorities
 
-1. Run the implemented security workflow on the current commit and retain the aggregate audit-gate evidence manifest.
-2. Rotate/revoke the three historically committed PEM identities, prove they control no funded account or privileged role, coordinate history cleanup and collaborator re-cloning, and obtain clean complete-history Gitleaks and TruffleHog rescans.
-3. Independently review the 19 residual Slither findings and the 17 Semgrep timeout adjudications against the exact release commit.
-4. Expand Aiken properties to transaction-level state machines and complete the signed SBOM and aggregate evidence in CI.
-5. Rehearse `DeployTestnet.s.sol` against deployed Safe contracts and complete Polygon Amoy evidence.
-6. Replace the current ineligible Near/Celestia VDSO adapters with retrieval-bound evidence implementations, then record real receipts and external gateway TLS/mTLS/rate-limit evidence.
-7. Run the private read-only shadow lane for at least $1 \times 10^5$ transitions over seven continuous days, with durable restart/replay, zero divergence, zero external writes, and signed privacy evidence.
-8. Complete real proof/recovery, reviewed HPKE/ML-DSA, immutable adapter identity, public-content/privacy, and independent contract/bridge/economic/Gateway/AI-agent reviews before public onboarding.
+1. Rotate/revoke the three historically committed PEM identities, prove they control no funded account or privileged role, coordinate the all-ref rewrite/reclone/fork/cache cleanup, and satisfy the new artifact-bound credential incident report with clean complete-history rescans.
+2. Resolve the pinned Aiken packages, execute the schema-v2 transaction suite with seed `20260713`, build and regenerate `cardano/plutus.json`, then add any remaining adversarial transaction regressions found by the run.
+3. Freeze the post-history-rewrite commit and run the implemented security workflow against that exact clean SHA; retain the complete signed aggregate evidence manifest.
+4. Supply reviewed public Cardano parameter CBOR, apply the four persistent validators and canonical fund bootstrap (plus only real agent/proposal creation instances), independently reproduce final hashes, and construct the unsigned Pre-Prod transaction body.
+5. Rehearse `DeployTestnet.s.sol` and the empty paused VDSO suite against real Safe/timelock instances on Polygon Amoy without broadcasting.
+6. Record real Celestia Mocha and Near Testnet inclusion/retrieval evidence plus external Gateway TLS/mTLS/rate-limit evidence; keep all VDSO sidecar publication excluded.
+7. Complete independent Solidity/governance, Aiken/bridge, economics, Gateway/SDK, privacy, and AI-agent-safety reviews bound to the exact commit.
+8. After explicit broadcast approval, run the seven-day faucet-only canary and private read-only shadow lane with at least $1 \times 10^5$ transitions, durable restart/replay, zero divergence, zero writes, and signed privacy evidence.
 
 ---
 
@@ -257,10 +261,10 @@ Mainnet remains conditional. No mainnet date should be promised until public tes
 
 | Area | Readiness |
 | --- | --- |
-| Protocol implementation | Complete local Python, PostgreSQL, Foundry, Aiken, Rust format/check/Clippy, frontend, and analyzer gates pass. Rust linked tests remain blocked by missing MSVC `link.exe`; all local results still require exact-commit CI evidence. |
+| Protocol implementation | Current working-tree Python, Foundry, Aiken, Rust format/check/Clippy, frontend, and analyzer gates pass where executable. PostgreSQL and Rust linked tests remain environment-blocked, and every gate must rerun against the exact clean post-history-rewrite SHA. |
 | Gateway security | Live clients require HTTPS, direct server bind is loopback, and DID/mTLS/replay/input gates exist; live deployment config and external route smoke tests still required. |
 | Runtime integrations | Incomplete routes now fail closed or are excluded; real enabled-route evidence remains required. |
-| Deployment evidence | Safe/timelock identity-bound ceremony and strict Polygon/Cardano manifest validators exist; addresses, transactions, ownership observations, rehearsal, and rollback evidence remain incomplete. |
+| Deployment evidence | Safe/timelock identity-bound ceremony, strict manifests, non-deployable Cardano template extraction, and fail-closed parameter application exist; real public parameters, applied hashes, addresses, transactions, ownership observations, rehearsal, and rollback evidence remain incomplete. |
 | CI/security posture | Local build/analyzer gates pass, and Semgrep's three initial timeout paths completed cleanly in the supplemental run. Historical Gitleaks is blocking; TruffleHog, signed SBOM/Cosign evidence, external review, and aggregate CI evidence remain required. |
 | VDSO posture | Public mode remains `off`. The private lane is read-only shadow only; Cardano `vdso.ak` is conformance-only. No VDSO deployment or authoritative/value-bearing activation is claimed. |
 | Public launch status | Readiness remains 0 verified, 3 implemented, 29 partial, and 4 blocked tracks. July 2026 is a gated window, not a guaranteed date. |

@@ -97,10 +97,17 @@ and `ApproveHash` event history. Every field remains `Pending` until a chain-ID
 
 | Validator | Script Hash / Address | Deploy Tx | Verification | Role Owner | Safe / Multisig | Timelock | Notes |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| `governor.ak` | Pending | Pending | Pending | Pending | Pending | Pending | Must verify governance continuing-output and timelock handoff rules. |
-| `timelock.ak` | Pending | Pending | Pending | Pending | Pending | Pending | Cancel path requires at least 2 authorized DAO multisig signatures. |
-| `insurance_fund.ak` | Pending | Pending | Pending | Pending | Pending | Pending | Guardian multisig and payout cap evidence required. |
-| `agent_registry.ak` | Pending | Pending | Pending | Pending | Pending | Pending | Agent DID and CIP-68 identity evidence required. |
+| `governor.ak` | Pending | Pending | Pending | Pending | Pending | Pending | Schema-v2 source preserves proposal authentication assets and emits one exact Cardano-local timelock intent; applied-parameter and transaction evidence pending. |
+| `timelock.ak` | Pending | Pending | Pending | Pending | Pending | Pending | Source restricts execution to configured local targets and requires emergency threshold cancellation; bridge execution is disabled. Applied evidence pending. |
+| `insurance_fund.ak` | Pending | Pending | Pending | Pending | Pending | Pending | Source binds the canonical fund asset, claim commitments, approvals, and exact payout transitions; cross-chain deposits are disabled. Applied evidence pending. |
+| `agent_registry.ak` | Pending | Pending | Pending | Pending | Pending | Pending | Source preserves the full agent authentication asset class and exact value; owner deregistration burns/refunds and slashing is disabled. Applied evidence pending. |
+
+Auxiliary creation controls are not persistent validators. Record the applied
+`agent_nft.ak`, `proposal_nft.ak`, and `fund_nft.ak` one-shot policy IDs,
+parameter manifests, seed UTxOs, and bootstrap/registration transactions in
+the Cardano deployment evidence bundle. Never count them as additional
+persistent validators. Unapplied Aiken blueprint/template hashes are not
+deployment script hashes.
 
 `cardano/lib/vams/vdso.ak` is conformance-only library evidence. It is not a
 validator entrypoint and must never be entered in this register as a deployed

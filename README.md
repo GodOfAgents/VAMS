@@ -65,7 +65,7 @@ forge build --sizes
 forge test -vvv
 
 cd ../cardano
-aiken check --deny --seed 20260711 --max-success 250
+aiken check --deny --seed 20260713 --max-success 250
 
 cd ..
 python -m pip install -r gateway/requirements.txt -r neuron/requirements.txt

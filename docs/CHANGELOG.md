@@ -8,6 +8,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Cardano schema-v2 authenticated state machines**: Reworked
+  `cardano/lib/vams/types.ak` and the four persistent validators so agent,
+  proposal, timelock, fund, and claim states carry complete authentication
+  asset classes and require exact inline-datum/value successors. Added
+  seed-bound `proposal_nft.ak` and `fund_nft.ak` auxiliary policies; agent,
+  proposal, and fund creation policies now commit to destination scripts while
+  bridge execution, cross-chain deposits, and slashing fail closed.
+- **Cardano parameter application ceremony**: Added
+  `scripts/deployment/cardano_preprod_apply.py` and
+  `cardano-preprod-parameters.schema.json`. Unapplied blueprint entries are
+  emitted only as non-deployable templates. The final tool requires ordered
+  public CBOR parameters for four persistent validators and exactly one fund
+  bootstrap policy, permits agent/proposal policy instances only for real
+  creation transactions, applies requested scripts with Aiken, rejects
+  remaining parameters, and emits separate deterministic artifacts and hashes.
+- **Credential incident closure contract**: Added
+  `scripts/audit/credential_incident_evidence.py` and
+  `credential-incident-report.schema.json`. Canary and public readiness now
+  require content-hashed public evidence for all three historical PEM
+  identities, rotation/replacement, Polygon/Cardano funding impact, seven role
+  classes, coordinated all-ref cleanup, clean complete-history scans, and a
+  named reviewer.
 - **Operational evidence producer**: Added
   `.github/workflows/operational-evidence.yml` on a dedicated protected,
   read-only evidence runner. It binds a target SHA and release stage to a fixed
@@ -97,6 +119,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Cardano property tests**: Added seven seeded Aiken properties covering integer-square-root bounds, basis-point safety and monotonicity, inclusive ranges, strict bridge nonce ordering/replay rejection, and insurance payout caps.
 
 ### Changed
+- **Aiken dependency reproducibility**: Updated `cardano/aiken.toml` and
+  `cardano/aiken.lock` from floating `v2` selectors to exact official
+  `v2.2.0` stdlib/fuzz releases. The strict seeded check and blueprint rebuild
+  pass with the resolved lockfile.
+- **Cardano deployment documentation**: Updated `cardano/README.md`,
+  `CARDANO_PREPROD_REHEARSAL.md`, `contracts/CONTRACTS.md`, and the status/risk
+  documents to distinguish templates, applied persistent validators, and
+  auxiliary one-shot policies. Cardano VDSO remains conformance-only.
+- **Deployment manifest v3**: Bumped
+  `deployment-manifest.schema.json` and readiness validation to `3.0.0` so
+  Cardano evidence must bind exactly four persistent validators, three
+  auxiliary policy templates, and the real applied fund/creation instances
+  without treating template hashes as deployed scripts.
 - **Gateway and Neuron secp256k1**: Replaced the unpatched `python-ecdsa`
   dependency with `cryptography` ECDSA/SHA-256 primitives using the existing
   64-byte public-key and signature encodings, low-S normalization, and
@@ -172,6 +207,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`neuron/services/registry_client.py`**: Extended Service Block metadata with deterministic SkillOps manifests and fail-closed permission-scope validation.
 
 ### Security
+- **Authenticated Cardano creation and execution**: Removed circular
+  script-hash/policy-ID parameter dependencies by storing complete asset
+  classes in schema-v2 datums while one-shot policies bind seed UTxOs and
+  destination scripts. Governor/timelock preserve proposal identity, timelock
+  targets are explicitly allowlisted, claims bind their canonical fund asset,
+  and mock bridge/cross-chain/slashing branches remain unconditionally false.
+- **Credential closure is a release gate**: Integrated the artifact-bound
+  historical PEM closure validator into canary/public readiness and the
+  operational evidence producer contract. A clean scanner result without
+  rotation, impact, history, collaborator/fork/cache, and reviewer proof cannot
+  clear the incident.
 - **Pinned Gateway evidence runtime**: Digest-pinned Caddy 2 for configuration
   validation and the deployment blueprint, migrated client-auth trust to the
   current `trust_pool file` syntax, and extended the workflow validator to
@@ -188,8 +234,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   absent durable shadow stores, missing trusted heights, unverified deployments,
   unauthenticated reads, and any shadow mutation/value/sidecar request now abort
   instead of degrading to local behavior.
-- **Historical secret gate**: A fully redacted Gitleaks v8.30.1 scan of all 82
-  reachable commits found 1,734 matches, including three historical PEM
+- **Historical secret gate**: A fully redacted Gitleaks v8.30.1 complete-history
+  scan found 1,740 matches across 15 finding-bearing commits, including three historical PEM
   private-key findings. `docs/audit/GITLEAKS_ADJUDICATION.md` blocks release
   pending rotation, role-impact review, coordinated history cleanup, and clean
   Gitleaks/TruffleHog rescans; no blanket baseline was added.
@@ -265,37 +311,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`contracts/src/registry/ServiceBlockRegistry.sol`**: Service Block provisioning now fails closed when verifier-governed quarantine is active.
 
 ### Testing
+- **2026-07-15 focused working-tree verification**: Passed 41/41 Python
+  regressions covering Cardano parameter application, credential incident
+  evidence, audit readiness, blueprint artifacts, and workflow supply-chain
+  controls.
 - **Commit handoff boundary**: Implementation commit
   `babe45e22430b754eadbb98d2269afb3430c4ca6` contains the locally verified
   Phase 6 hardening. Local content-equivalent results are not substituted for
   the required signed exact-final-commit CI evidence.
-- **Phase 6 Python and PostgreSQL verification**: On the working tree based on
+- **Phase 6 Python verification**: On the working tree based on
   `31929a24419a9b7b9d8954cbea2df9fe1cb77a68`, the full Python aggregate passes
-  746 tests with one intentional Rust-binary environment skip and 23 subtests. The
-  pinned disposable PostgreSQL integration separately passes multi-process
-  nonce, replay, checkpoint, restart, and six-figure persistence checks.
+  753 tests with one intentional Rust-binary environment skip. The pinned real
+  PostgreSQL integration remains required and was not run because no service is
+  available on this host.
 - **Solidity verification boundary**: Full working-tree Foundry verification
-  passes 709/709 across 40 suites, with zero failures or skips. Build and scoped
-  formatting for every modified Solidity file pass. Exact-commit CI evidence
-  remains required.
+  passes 709/709 across 40 suites, with zero failures or skips. Build and
+  whole-tree `forge fmt --check` pass after deterministic formatter cleanup.
+  Exact-commit CI evidence remains required.
 - **Audit controls**: Fifteen readiness tests, two deployment-source tests, two traceability tests, one workflow-supply-chain test, eight economic-concentration tests, and two adversarial-campaign tests passed; the 12-class agent corpus and first-party security scans also passed.
 - **Economic adversarial campaign**: The seed `20260711` campaign passed 100,000 epochs with 20,000 detections per attack class, zero misses, and zero baseline false positives; synthetic evidence does not replace live beneficial-owner attestations.
 - **Invariant regressions**: Focused runs passed 16 regional-emission tests, 3 stale-oracle tests, and 52 session-key/TEE/SDK tests.
-- **Cardano verification**: `aiken check --deny --seed 20260713 --max-success
-  250` passes 47 unit tests and 7 properties; all 54 definitions pass and each
-  property completes 250 successful cases. The real exported UPLC evaluator
-  matches the Python shadow commitment.
-  `cardano/lib/vams/vdso.ak` remains conformance-only; transaction-level
-  validator state-machine properties and a deployable Cardano VDSO validator
-  remain absent.
+- **Cardano working-tree verification**: `aiken fmt --check`,
+  `aiken check --deny --seed 20260713 --max-success 250`, and `aiken build`
+  pass. The suite contains 71 unit tests and 6 properties (77/77), with 250
+  successful cases per property. Transaction cases cover exact creation and
+  successors, duplicates, forged/replayed claims, malformed intents, premature
+  execution, unauthorized cancellation, datum/value substitution, and
+  fail-closed bridge/slashing paths. `cardano/lib/vams/vdso.ak` remains
+  conformance-only and is not a deployable validator.
 - **Frontend verification status**: `node --check` passed for the Vite/config modules, `npm audit --audit-level=high` found zero vulnerabilities, and the Vite 7.3.6 production build passed with 1,712 modules transformed.
 - **`neuron/tests/test_performance_audit.py`**: Added regression coverage proving sensitive and structured KPI data cannot survive DA report serialization.
 - **Security scripts**: Verified `default_credential_scan.py`, `public_content_policy_scan.py`, and `mock_mode_promotion_scan.py` passed locally.
 - **World-state and SkillOps targeted tests**: Verified `pytest -q neuron/tests/test_service_blocks.py neuron/tests/test_world_state_fidelity.py neuron/tests/test_world_state_phase_boundary.py` passed with 31 tests.
-- **Python current-tree aggregate**: Pytest passes 746 tests in the full
-  non-PostgreSQL aggregate with one Rust evaluator integration skip and 23 subtests. The real
-  PostgreSQL service test also passes separately; exact-commit CI remains
-  required.
+- **Python current-tree aggregate**: Pytest passes 753 tests in the full
+  non-PostgreSQL aggregate with one Rust evaluator integration skip. The real
+  PostgreSQL service test is environment-blocked locally; exact-commit CI
+  remains required.
 - **Python security gates**: Bandit reports no qualifying medium/high-confidence
   issue. Both Gateway and Neuron requirement sets pass `pip-audit` with no known
   vulnerabilities after removal of `python-ecdsa`.
@@ -305,19 +356,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Linux 34/34 result is baseline evidence only.
 - **Cross-language analyzers**: Slither 0.11.5 analyzes 181 contracts with 63
   detectors, passes the fail-high gate, and retains 19 locally adjudicated
-  lower-severity results. Semgrep 1.169.0 reports zero findings across 456
-  tracked files/520 rules; the three initial timeout paths complete separately
-  under 290 rules, and all 16 then-untracked branch files complete under 330
-  rules, with zero timeouts and zero findings. Exact-commit CI rerun and external
+  lower-severity results. Semgrep 1.169.0 reports zero findings across 464
+  tracked files/520 rules with 99.9% parsed. Exact-commit CI rerun and external
   acceptance remain required.
 - **World ID regressions**: Added five Foundry tests covering zero-verifier rejection, verifier-bound acceptance, malformed input, wrong action scope, and verifier-revert failure.
 - **Syntax/hygiene**: Verified touched Python files with `py_compile`; `git diff --check` passed.
 - **Docs-only PR gate**: Planned verification with `git diff --check` over `docs/team` changes only; full gates remain active for pushes to `main` and PRs with code/config/funding changes.
-- **Security/build evidence boundary**: Current focused Python, Solidity,
-  Aiken, and Rust-check results are green, but no complete current-branch
-  aggregate is claimed. Older full pytest, Foundry, Linux Rust, Bandit,
-  pip-audit, Slither, Semgrep, frontend, and first-party scanner results remain
-  baseline evidence pending exact-commit reruns. Historical Gitleaks, the three
+- **Security/build evidence boundary**: Current Python, Solidity, Aiken, Rust
+  format/check/Clippy, frontend, Bandit, pip-audit, Slither, Semgrep, and
+  first-party scanner results are green where executable. PostgreSQL and Rust
+  linked tests remain environment-blocked, and none of the local results is
+  signed exact-commit evidence. Historical Gitleaks, the three
   PEM identity rotations and role-impact proof, history cleanup, clean
   Gitleaks/TruffleHog rescans, signed SBOM, exact-commit CI, and aggregate
   Cosign evidence remain blocking.

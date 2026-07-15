@@ -1,77 +1,81 @@
-# VAMS Cardano — Brain Layer
+# VAMS Cardano Brain Layer
 
-**Lifecycle:** Implemented source; Cardano Pre-Prod deployment pending
-**Last verified:** 2026-07-12
+**Lifecycle:** schema-v2 source hardening in progress; Pre-Prod deployment pending
 
-> **"The Brain"** — Governance sovereignty, insurance custody, and agent identity on Cardano.
+**Last reviewed:** 2026-07-15
 
-## Architecture
+This directory contains the Cardano-local governance, insurance, and agent
+identity controls for the faucet-only Pre-Prod profile. Source code and an
+unapplied Aiken blueprint are not deployment evidence.
 
-```
-cardano/
-├── aiken.toml              # Project config
-├── lib/vams/
-│   ├── types.ak            # Shared datums & redeemers
-│   ├── utils.ak            # Math, validation, time helpers
-│   └── icb.ak              # ICB bridge verification
-├── validators/
-│   ├── governor.ak         # Quadratic voting governance
-│   ├── timelock.ak         # Intent emission → Polygon
-│   ├── insurance_fund.ak   # Capital custody + claims
-│   └── agent_registry.ak  # Agent DID + NFT identity
-│   └── agent_nft.ak       # One-shot agent NFT minting policy
-└── plutus.json             # Generated blueprint (after build)
-```
+## Deployment boundary
 
-## Prerequisites
+Exactly four persistent spending validators are in scope:
 
-- [Aiken](https://aiken-lang.org) (`aikup` → `aiken`)
-- WSL (Windows) or native Linux/macOS
+| Validator | Authenticated state transition |
+| --- | --- |
+| `agent_registry.ak` | Preserves an owner-controlled agent identity asset and exact value; deregistration burns the asset and refunds the owner. Slashing is disabled. |
+| `governor.ak` | Preserves a unique proposal asset through voting and emits one exact Cardano-local timelock intent after quorum. |
+| `insurance_fund.ak` | Preserves a canonical fund asset and coordinates committed claim states, approvals, and exact payouts. Cross-chain deposits are disabled. |
+| `timelock.ak` | Executes only configured Cardano-local target scripts after delay and before expiry. Bridge execution is disabled. |
+
+Three one-shot minting policies authenticate creation/bootstrap and are
+recorded separately from the persistent validators:
+
+- `agent_nft.ak`: seed-UTxO-bound agent identity creation;
+- `proposal_nft.ak`: seed-UTxO-bound proposal creation and terminal burn;
+- `fund_nft.ak`: one-time canonical insurance-fund bootstrap.
+
+`lib/vams/vdso.ak` remains a conformance library. It is not a validator and
+must never appear in a deployment transaction or persistent-validator list.
+
+## State model
+
+All pre-deployment datums use `cardano_schema_version = 2`. Agent, proposal,
+intent, fund, and claim states carry their full authentication asset class.
+Creation policies commit to unique seed UTxOs and destination script hashes;
+spending transitions preserve the authenticated asset class and exact inline
+datum/value successor. Initial execution is Cardano-local only. Slashing,
+cross-chain deposits, bridge execution, VDSO value operations, rewards, and
+incentives fail closed.
+
+## Build and test
+
+Use the repository-pinned Aiken compiler and dependency versions:
 
 ```bash
-# Install Aiken
-curl -sSfL https://install.aiken-lang.org | bash
-aikup
-aiken --version
-```
-
-## Build & Test
-
-```bash
-cd cardano/
-
-# Type-check and run tests
-aiken check
-
-# Compile to Plutus Core
+cd cardano
+aiken check --deny --seed 20260713 --max-success 250
 aiken build
-
-# View generated blueprint
-cat plutus.json
 ```
 
-## Validators
+`aiken build` generates `plutus.json`. The blueprint still contains
+parameterized templates; do not submit those templates. Follow
+`docs/runbooks/CARDANO_PREPROD_REHEARSAL.md` to bind public governance and seed
+parameters, apply them deterministically, independently recompute hashes, and
+stop before submission for explicit approval.
 
-| Validator | Purpose | Key Features |
-|-----------|---------|-------------|
-| `governor` | On-chain governance | Quadratic voting, quorum, double-vote prevention |
-| `timelock` | Intent relay | 48h/24h delay, Mithril proof, nonce replay protection |
-| `insurance_fund` | Capital custody | Bridge deposits, guardian multisig claims, 50% max payout |
-| `agent_registry` | Agent DID | NFT identity (CIP-68), reputation scoring, stake slashing |
+## Layout
 
-## Cross-Chain Flow
-
-```
-Cardano (Brain)          ICB Bridge            Polygon (Hands)
-─────────────────       ──────────            ─────────────────
-Governor: Propose
-  → Vote (quadratic)
-  → Pass ──────────→ Timelock: Queue
-                        → Delay 48h
-                        → Execute ──→ ICB Relay ──→ GovernorExecutor
-                                                     → Apply on Polygon
+```text
+cardano/
+|-- aiken.toml
+|-- lib/vams/
+|   |-- types.ak
+|   |-- utils.ak
+|   |-- icb.ak
+|   `-- vdso.ak              # conformance-only
+|-- validators/
+|   |-- agent_registry.ak    # persistent
+|   |-- governor.ak          # persistent
+|   |-- insurance_fund.ak    # persistent
+|   |-- timelock.ak          # persistent
+|   |-- agent_nft.ak         # auxiliary one-shot policy
+|   |-- proposal_nft.ak      # auxiliary one-shot policy
+|   `-- fund_nft.ak          # auxiliary bootstrap policy
+`-- plutus.json              # generated, parameterized blueprint
 ```
 
 ## License
 
-MIT — VAMS Protocol
+MIT - VAMS Protocol

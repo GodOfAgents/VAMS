@@ -1,121 +1,85 @@
-//// VAMS Agent Registry Validator
+//// VAMS agent registry spend validator.
 ////
-//// On-chain DID registry for AI agents on the VAMS network.
-//// Each agent is a separate UTXO with an AgentDatum.
-//// Registration mints an identity NFT (CIP-68 pattern).
-////
-//// Flow:
-////   1. RegisterAgent → mints NFT + creates agent UTXO
-////   2. UpdateAgent → spends + recreates with updated metadata
-////   3. DeregisterAgent → burns NFT + consumes agent UTXO
-////   4. SlashAgent → reduces reputation/stake for misbehavior
+//// Registration is performed by agent_nft.mint. This validator only permits
+//// exact metadata updates and owner-authorized deregistration. Slashing is
+//// deliberately disabled in the initial Cardano Pre-Prod profile.
 
+use aiken/collection/list
 use aiken/primitive/bytearray
-use cardano/transaction.{OutputReference, Transaction}
-use vams/types.{
-  AgentDatum, DeregisterAgent, RegisterAgent, RegistryRedeemer, SlashAgent,
-  UpdateAgent,
+use cardano/address.{Address, Script, VerificationKey}
+use cardano/assets.{
+  PolicyId, Value, add, from_lovelace, lovelace_of, quantity_of,
 }
-use vams/utils.{count_signatures, in_range, is_signed_by}
+use cardano/transaction.{
+  InlineDatum, Input, Output, OutputReference, Transaction,
+}
+use vams/types.{
+  AgentDatum, DeregisterAgent, RegistryRedeemer, SlashAgent, UpdateAgent,
+  cardano_schema_version,
+}
+use vams/utils.{is_signed_by}
 
-// ═══════════════════ Constants ═══════════════════
-
-/// Minimum stake to register an agent (1,000 ADA in lovelace)
 const min_agent_stake: Int = 1_000_000_000
-
-/// Maximum reputation score (10,000 = 100.00%)
-const max_reputation: Int = 10_000
-
-/// Initial reputation for new agents (5,000 = 50.00%)
-const initial_reputation: Int = 5_000
-
-/// Minimum DID length (bytes)
-const min_did_length: Int = 32
-
-/// Slash penalty for misbehavior: 10% of stake
-const slash_penalty_bps: Int = 1_000
-
-// ═══════════════════ Validator ═══════════════════
 
 validator agent_registry {
   spend(
     datum_opt: Option<AgentDatum>,
     redeemer: RegistryRedeemer,
-    _own_ref: OutputReference,
+    own_ref: OutputReference,
     tx: Transaction,
   ) {
     expect Some(datum) = datum_opt
+    expect Some(own_input) =
+      list.find(tx.inputs, fn(input) { input.output_reference == own_ref })
+    expect valid_agent_state(datum, own_input.output)
+    expect is_signed_by(tx.extra_signatories, datum.owner)
 
     when redeemer is {
-      // ── Register a new agent ──
-      RegisterAgent { did, metadata_hash } -> {
-        // Owner must sign
-        expect is_signed_by(tx.extra_signatories, datum.owner)
-
-        // DID must meet minimum length
-        expect bytearray.length(did) >= min_did_length
-
-        // Metadata hash must be provided
-        expect bytearray.length(metadata_hash) > 0
-
-        // Must deposit minimum stake
-        expect datum.staked_amount >= min_agent_stake
-
-        // Initial reputation must be set correctly
-        expect datum.reputation_score == initial_reputation
-
-        // Agent must be marked active
-        expect datum.is_active
-
-        True
-      }
-
-      // ── Update agent metadata ──
       UpdateAgent { new_metadata_hash } -> {
-        // Only the owner can update
-        expect is_signed_by(tx.extra_signatories, datum.owner)
-
-        // Agent must be active
-        expect datum.is_active
-
-        // New metadata must be provided
-        expect bytearray.length(new_metadata_hash) > 0
-
-        True
+        expect bytearray.length(new_metadata_hash) == 32
+        let expected = AgentDatum { ..datum, metadata_hash: new_metadata_hash }
+        let matches =
+          list.filter(
+            tx.outputs,
+            fn(output) {
+              output.address == own_input.output.address && output.value == own_input.output.value && has_agent_datum(
+                output,
+                expected,
+              )
+            },
+          )
+        list.length(matches) == 1 && outputs_with_identity(
+          tx.outputs,
+          datum.identity_policy_id,
+          datum.identity_asset_name,
+        ) == 1
       }
 
-      // ── Deregister an agent ──
       DeregisterAgent -> {
-        // Only the owner can deregister
-        expect is_signed_by(tx.extra_signatories, datum.owner)
-
-        // Agent must be active
-        expect datum.is_active
-
-        True
+        let asset_name = datum.identity_asset_name
+        expect quantity_of(tx.mint, datum.identity_policy_id, asset_name) == -1
+        let refund_value =
+          add(own_input.output.value, datum.identity_policy_id, asset_name, -1)
+        let refunds =
+          list.filter(
+            tx.outputs,
+            fn(output) {
+              when output.address.payment_credential is {
+                VerificationKey(hash) ->
+                  hash == datum.owner && output.value == refund_value
+                _ -> False
+              }
+            },
+          )
+        list.length(refunds) == 1 && outputs_with_identity(
+          tx.outputs,
+          datum.identity_policy_id,
+          asset_name,
+        ) == 0
       }
 
-      // ── Slash an agent for misbehavior ──
-      SlashAgent { evidence_hash, slash_amount } -> {
-        // Evidence must be provided
-        expect bytearray.length(evidence_hash) > 0
-
-        // Agent must be active
-        expect datum.is_active
-
-        // Slash amount must be positive and within bounds
-        let max_slash = datum.staked_amount * slash_penalty_bps / 10_000
-        expect slash_amount > 0 && slash_amount <= max_slash
-
-        // AUDIT FIX: AK05 — Must be signed by an authorized slasher from the
-        // datum's whitelist, not just any signer.  An empty authorized_slashers
-        // list means slashing is locked (safe default for newly registered agents).
-        let authorized_sig_count =
-          count_signatures(tx.extra_signatories, datum.authorized_slashers)
-        expect authorized_sig_count >= 1
-
-        True
-      }
+      // SlashAgent remains wire-visible but cannot authorize a transition.
+      _ -> False
     }
   }
 
@@ -124,29 +88,168 @@ validator agent_registry {
   }
 }
 
-// ═══════════════════ Tests ═══════════════════
-
-test initial_reputation_is_50_percent() {
-  initial_reputation == 5_000
+fn valid_agent_state(datum: AgentDatum, output: Output) -> Bool {
+  and {
+    datum.schema_version == cardano_schema_version,
+    bytearray.length(datum.identity_asset_name) == 32,
+    quantity_of(
+      output.value,
+      datum.identity_policy_id,
+      datum.identity_asset_name,
+    ) == 1,
+    bytearray.length(datum.did) >= 32,
+    bytearray.length(datum.owner) == 28,
+    datum.reputation_score >= 0,
+    datum.reputation_score <= 10_000,
+    bytearray.length(datum.metadata_hash) == 32,
+    datum.is_active,
+    datum.staked_amount == lovelace_of(output.value),
+    datum.staked_amount >= min_agent_stake,
+    list.is_empty(datum.authorized_slashers),
+  }
 }
 
-test max_reputation_is_100_percent() {
-  max_reputation == 10_000
+fn has_agent_datum(output: Output, expected: AgentDatum) -> Bool {
+  when output.datum is {
+    InlineDatum(raw_datum) -> {
+      expect actual: AgentDatum = raw_datum
+      actual == expected
+    }
+    _ -> False
+  }
 }
 
-test reputation_in_valid_range() {
-  in_range(initial_reputation, 0, max_reputation) == True
+fn outputs_with_identity(
+  outputs: List<Output>,
+  policy_id: PolicyId,
+  asset_name: ByteArray,
+) -> Int {
+  list.length(
+    list.filter(
+      outputs,
+      fn(output) { quantity_of(output.value, policy_id, asset_name) == 1 },
+    ),
+  )
 }
 
 test min_stake_is_1000_ada() {
   min_agent_stake == 1_000 * 1_000_000
 }
 
-test slash_penalty_is_10_percent() {
-  slash_penalty_bps == 1_000
+const fixture_policy_id: PolicyId =
+  #"11111111111111111111111111111111111111111111111111111111"
+
+const fixture_script_hash: ByteArray =
+  #"22222222222222222222222222222222222222222222222222222222"
+
+const fixture_owner: ByteArray =
+  #"33333333333333333333333333333333333333333333333333333333"
+
+const fixture_asset_name: ByteArray =
+  #"4444444444444444444444444444444444444444444444444444444444444444"
+
+const fixture_ref: OutputReference =
+  OutputReference {
+    transaction_id: #"5555555555555555555555555555555555555555555555555555555555555555",
+    output_index: 0,
+  }
+
+const fixture_address: Address =
+  Address {
+    payment_credential: Script(fixture_script_hash),
+    stake_credential: None,
+  }
+
+const fixture_value: Value =
+  from_lovelace(min_agent_stake)
+    |> add(fixture_policy_id, fixture_asset_name, 1)
+
+const fixture_datum: AgentDatum =
+  AgentDatum {
+    schema_version: cardano_schema_version,
+    identity_policy_id: fixture_policy_id,
+    identity_asset_name: fixture_asset_name,
+    did: #"6666666666666666666666666666666666666666666666666666666666666666",
+    owner: fixture_owner,
+    reputation_score: 5_000,
+    registered_at: 1,
+    metadata_hash: #"7777777777777777777777777777777777777777777777777777777777777777",
+    is_active: True,
+    staked_amount: min_agent_stake,
+    authorized_slashers: [],
+  }
+
+const fixture_input: Input =
+  Input {
+    output_reference: fixture_ref,
+    output: Output {
+      address: fixture_address,
+      value: fixture_value,
+      datum: InlineDatum(fixture_datum),
+      reference_script: None,
+    },
+  }
+
+test update_requires_exact_transaction_successor() {
+  let new_hash =
+    #"8888888888888888888888888888888888888888888888888888888888888888"
+  let updated = AgentDatum { ..fixture_datum, metadata_hash: new_hash }
+  let output =
+    Output {
+      address: fixture_address,
+      value: fixture_value,
+      datum: InlineDatum(updated),
+      reference_script: None,
+    }
+  agent_registry.spend(
+    Some(fixture_datum),
+    UpdateAgent { new_metadata_hash: new_hash },
+    fixture_ref,
+    Transaction {
+      ..transaction.placeholder,
+      inputs: [fixture_input],
+      outputs: [output],
+      extra_signatories: [fixture_owner],
+    },
+  )
 }
 
-test slash_max_calculation() {
-  let stake = 1_000_000_000
-  stake * slash_penalty_bps / 10_000 == 100_000_000
+test update_rejects_value_substitution() fail {
+  let new_hash =
+    #"8888888888888888888888888888888888888888888888888888888888888888"
+  let updated = AgentDatum { ..fixture_datum, metadata_hash: new_hash }
+  let output =
+    Output {
+      address: fixture_address,
+      value: fixture_value |> add("", "", -1),
+      datum: InlineDatum(updated),
+      reference_script: None,
+    }
+  agent_registry.spend(
+    Some(fixture_datum),
+    UpdateAgent { new_metadata_hash: new_hash },
+    fixture_ref,
+    Transaction {
+      ..transaction.placeholder,
+      inputs: [fixture_input],
+      outputs: [output],
+      extra_signatories: [fixture_owner],
+    },
+  )
+}
+
+test slashing_is_disabled_on_valid_state() fail {
+  agent_registry.spend(
+    Some(fixture_datum),
+    SlashAgent {
+      evidence_hash: #"9999999999999999999999999999999999999999999999999999999999999999",
+      slash_amount: 1,
+    },
+    fixture_ref,
+    Transaction {
+      ..transaction.placeholder,
+      inputs: [fixture_input],
+      extra_signatories: [fixture_owner],
+    },
+  )
 }
