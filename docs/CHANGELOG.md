@@ -364,6 +364,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   lower-severity results. Semgrep 1.169.0 reports zero findings across 464
   tracked files/520 rules with 99.9% parsed. Exact-commit CI rerun and external
   acceptance remain required.
+- **Offline TruffleHog boundary**: A clean-branch scan with verification
+  disabled found four unverified candidates in two test-fixture paths (two
+  Postgres and two URI detections across three commits). No raw value was
+  printed. This does not clear the historical PEM incident or replace the
+  protected sanitized verified/unknown/unverified CI gate.
 - **World ID regressions**: Added five Foundry tests covering zero-verifier rejection, verifier-bound acceptance, malformed input, wrong action scope, and verifier-revert failure.
 - **Syntax/hygiene**: Verified touched Python files with `py_compile`; `git diff --check` passed.
 - **Docs-only PR gate**: Planned verification with `git diff --check` over `docs/team` changes only; full gates remain active for pushes to `main` and PRs with code/config/funding changes.
