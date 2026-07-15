@@ -315,10 +315,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   regressions covering Cardano parameter application, credential incident
   evidence, audit readiness, blueprint artifacts, and workflow supply-chain
   controls.
-- **Commit handoff boundary**: Implementation commit
-  `babe45e22430b754eadbb98d2269afb3430c4ca6` contains the locally verified
-  Phase 6 hardening. Local content-equivalent results are not substituted for
-  the required signed exact-final-commit CI evidence.
+- **Commit handoff boundary**: Formatter commit `4d4b2e5` and implementation
+  commit `202172dbf0ed29c5ff0fdea6267dd65ef55ad68c` contain this locally
+  verified hardening. Local results are not substituted for the required
+  signed post-history-rewrite exact-commit CI evidence.
 - **Phase 6 Python verification**: On the working tree based on
   `31929a24419a9b7b9d8954cbea2df9fe1cb77a68`, the full Python aggregate passes
   753 tests with one intentional Rust-binary environment skip. The pinned real
@@ -339,6 +339,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   execution, unauthorized cancellation, datum/value substitution, and
   fail-closed bridge/slashing paths. `cardano/lib/vams/vdso.ak` remains
   conformance-only and is not a deployable validator.
+- **Cardano clean-commit template rehearsal**:
+  `cardano_preprod_artifacts.py` succeeded against `202172db...` and emitted
+  four persistent validator artifacts plus three auxiliary policy templates
+  with `artifacts_applied=false`. No deployment address, transaction, signer,
+  or operational evidence was fabricated.
 - **Frontend verification status**: `node --check` passed for the Vite/config modules, `npm audit --audit-level=high` found zero vulnerabilities, and the Vite 7.3.6 production build passed with 1,712 modules transformed.
 - **`neuron/tests/test_performance_audit.py`**: Added regression coverage proving sensitive and structured KPI data cannot survive DA report serialization.
 - **Security scripts**: Verified `default_credential_scan.py`, `public_content_policy_scan.py`, and `mock_mode_promotion_scan.py` passed locally.

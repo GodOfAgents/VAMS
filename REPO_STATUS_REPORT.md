@@ -6,7 +6,7 @@
 **Current Priority:** Phase 6: Closed Public-Testnet Baseline + Private VDSO Shadow Hardening
 **Public Testnet Target:** July 2026 launch window
 **Architecture Baseline:** v0.8.0 cognitive/composer layer + v1.3.0-oms runtime + June gateway hardening
-**Branch Baseline:** last clean commit `9a5ef63cd76327a3c226b3249fb4138691789512`, based on `main` at `31929a24419a9b7b9d8954cbea2df9fe1cb77a68`; Cardano/evidence hardening is currently uncommitted and signed aggregate release evidence is absent
+**Branch Baseline:** Solidity formatter commit `4d4b2e5` and Cardano/evidence implementation commit `202172dbf0ed29c5ff0fdea6267dd65ef55ad68c`, based on `main` at `31929a24419a9b7b9d8954cbea2df9fe1cb77a68`; signed aggregate release evidence is absent
 
 ---
 
@@ -34,14 +34,14 @@ The system is not mainnet-ready. It is not yet a public testnet deployment. The 
 
 Current blockers before public testnet:
 
-- Readiness is fail-closed at 3 implemented, 29 partial, 4 blocked, and 0 verified tracks. The current hardening changes are not yet committed, and no track may advance until every gate reruns against the exact final post-history-rewrite SHA in CI and the complete manifest is signed.
+- Readiness is fail-closed at 3 implemented, 29 partial, 4 blocked, and 0 verified tracks. Local hardening is committed at `4d4b2e5` and `202172d`, but no track may advance until every gate reruns against the exact final post-history-rewrite SHA in CI and the complete manifest is signed.
 - Current working-tree verification passes full Python, Foundry, Aiken,
   Rust format/check/deny-warnings Clippy, frontend build/audit, Bandit,
   pip-audit, Semgrep, Slither fail-high, and first-party structural gates.
   The focused credential/deployment/audit set passes 41/41. PostgreSQL remains
   unavailable and Rust linked tests remain environment-blocked because this
-  Windows host lacks MSVC `link.exe`. Local results are not signed
-  exact-commit evidence while the tree remains uncommitted.
+  Windows host lacks MSVC `link.exe`. These local results are not signed
+  exact-commit release evidence.
 - The full Semgrep scan has zero findings; its three initial timeout paths were
   rerun with a longer per-rule budget and completed with zero findings.
   Historical
@@ -128,10 +128,10 @@ June hardening materially improved INV-5, INV-6, and INV-10 by blocking live moc
 Do not preserve historical aggregate totals as current evidence unless the full
 suite has been rerun on the current tree and bound to its commit.
 
-Current working-tree results are explicitly marked below. They are local
-verification, not signed exact-commit evidence, because the tree is uncommitted
-and credential history remediation must precede the release SHA. The branch
-started from `main` at
+Current local results are explicitly marked below. Protocol content is bound to
+implementation commit `202172dbf0ed29c5ff0fdea6267dd65ef55ad68c`, but the
+results are not signed release evidence and credential history remediation must
+precede the release SHA. The branch started from `main` at
 `31929a24419a9b7b9d8954cbea2df9fe1cb77a68`:
 
 | Scope | Command | Result |
@@ -149,7 +149,8 @@ started from `main` at
 | Frontend install | `npm ci` | Passed: 176 packages installed/audited, 0 vulnerabilities. |
 | Frontend audit | `npm audit --audit-level=high` | Passed: 0 vulnerabilities. |
 | Frontend build | `npm run build` | Passed with Vite 7.3.6. |
-| Report/diff hygiene | `git diff --check` | Pending final documentation reconciliation and commit preparation. |
+| Cardano template rehearsal | `cardano_preprod_artifacts.py --commit-sha 202172db...` | Passed at the clean implementation commit: bound four non-deployable persistent validator artifacts and three auxiliary policy templates. `artifacts_applied=false`; no address, transaction, signing credential, or deployment claim was generated. |
+| Report/diff hygiene | `git diff --check` | Passed before the documentation handoff commit. |
 | Gateway/runtime/VDSO focused tests | Focused pytest selection covering Gateway auth/lifecycle, VDSO semantics, PostgreSQL stores, runtime safety, and the private shadow worker | Passed: 134 with one intentional skip for the real Rust binary that cannot be linked on this Windows host. The real Aiken exported UPLC integration passed. |
 | Phase 6 security scripts | `default_credential_scan.py`, `public_content_policy_scan.py`, `mock_mode_promotion_scan.py` | Passed on the current tree on 2026-07-14. |
 | Python syntax check | `compileall` on the VDSO/Gateway modules | Passed on the current tree on 2026-07-13. |
