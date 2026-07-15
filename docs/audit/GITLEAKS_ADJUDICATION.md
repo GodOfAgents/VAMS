@@ -26,20 +26,40 @@ hide a real historical exposure.
 This classification records paths, rules, and counts only. It intentionally
 does not reproduce matched values.
 
+## Protected CI Corroboration
+
+GitHub Actions run `29413794423` scanned the PR merge result on 2026-07-15.
+The complete-history Gitleaks job scanned 62 commits and reported 869 redacted
+matches. This count uses the CI ref enumeration and is not treated as a
+replacement for the earlier 1,740-match local inventory until an independent
+review reconciles the two sanitized reports.
+
+The same run executed TruffleHog 3.95.9 with
+`--results=verified,unknown,unverified`. Its sanitized report recorded 20
+findings: one verified and 19 unverified. The verified detector was `Infura` at
+historical path `simulate-request-v3.mjs`, line 6, commit
+`1321f91586784d218ebc11126de588fbcf649ec6`. No credential value is retained in
+this document. Because the provider verified the credential during CI, it is
+presumed compromised and active until revocation evidence proves otherwise.
+
 ## Required Closure
 
-1. Identify every role, address, node identity, RPC account, bot, and external
+1. Immediately revoke the verified Infura credential through the owning
+   provider account, rotate dependent applications through a vault, review
+   access/billing logs, and retain only sanitized revocation and impact proof.
+2. Identify every role, address, node identity, RPC account, bot, and external
    provider that could have used the historical values.
-2. Revoke or rotate all possibly affected credentials and prove that the PEM
+3. Revoke or rotate all possibly affected credentials and prove that the PEM
    identities control no funded account, Safe, timelock, validator, or testnet
    role.
-3. Remove obsolete generated artifacts and private-key files from every
+4. Remove obsolete generated artifacts, private-key files, and the obsolete
+   `simulate-request-v3.mjs` path from every
    reachable ref using a coordinated history-rewrite procedure. Retain only
    sanitized ref inventories and incident evidence; use an encrypted disposable
    mirror for the rewrite and notify every collaborator to reclone.
-4. Independently review the generated/vendor fixture groups before adding any
+5. Independently review the generated/vendor fixture groups before adding any
    path-and-rule-specific allowlist. Never allowlist the private-key findings.
-5. Rerun both the complete-history and exact-worktree Gitleaks scans, followed
+6. Rerun both the complete-history and exact-worktree Gitleaks scans, followed
    by all-category TruffleHog. The final schema-bound scans must report zero
    findings.
 

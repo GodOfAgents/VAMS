@@ -119,6 +119,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Cardano property tests**: Added seven seeded Aiken properties covering integer-square-root bounds, basis-point safety and monotonicity, inclusive ranges, strict bridge nonce ordering/replay rejection, and insurance payout caps.
 
 ### Changed
+- **Slither CI dependency closure**: Added the pinned Foundry v1.7.1 toolchain
+  to the Slither job and a workflow regression that fails if Slither can execute
+  without its required `forge` compiler frontend.
 - **Deployment manifest v4**: Added `deployment_source_sha` to separate the
   exact rehearsed/broadcast source commit from a later public evidence/register
   commit. Canary evidence requires identical SHAs; public evidence requires an
@@ -217,6 +220,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`neuron/services/registry_client.py`**: Extended Service Block metadata with deterministic SkillOps manifests and fail-closed permission-scope validation.
 
 ### Security
+- **Verified provider credential escalation**: Protected PR CI run
+  `29413794423` produced sanitized all-category TruffleHog evidence with one
+  verified historical Infura credential and 19 unverified findings. The
+  verified metadata is restricted to obsolete path `simulate-request-v3.mjs`,
+  line 6, commit `1321f91586784d218ebc11126de588fbcf649ec6`; no credential
+  value is recorded. Provider rotation, activity review, history cleanup, and a
+  zero-finding rescan are now explicit blockers alongside the PEM incident.
 - **Exact deployment-source binding**: Public promotion fails when Polygon and
   Cardano manifests name different source commits, the source is unavailable or
   not an ancestor, or protected code/configuration differs from the evidence
@@ -328,6 +338,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`contracts/src/registry/ServiceBlockRegistry.sol`**: Service Block provisioning now fails closed when verifier-governed quarantine is active.
 
 ### Testing
+- **PR CI diagnosis**: Run `29413794423` passed Python with PostgreSQL, Forge,
+  Aiken, VIR-Core linked tests, frontend, Semgrep, Gateway, audit, and
+  first-party controls. Gitleaks and TruffleHog failed on real historical
+  findings. Slither failed before analysis because `forge` was absent; the
+  workflow now provisions pinned Foundry and has a fail-closed regression.
 - **2026-07-15 deployment-source evidence verification**: Passed 40/40 focused
   unit regressions, full Python at 759 passed/2 toolchain-artifact skips with 23
   subtests, Foundry at 709/709 across 40 suites, Aiken at 77/77 with seed

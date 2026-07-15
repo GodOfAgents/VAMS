@@ -52,8 +52,9 @@ Current blockers before public testnet:
 - The previous branch Semgrep scan recorded zero findings; its three initial
   timeout paths were rerun with a longer per-rule budget and completed with
   zero findings. It must rerun against the final patch and post-rewrite SHA.
-  Historical
-  Gitleaks is blocking on three committed PEM private keys. TruffleHog,
+  Historical Gitleaks remains blocking on three committed PEM private keys.
+  Protected PR CI additionally verified one historical Infura credential and
+  reported 19 unverified TruffleHog findings. Rotation, history cleanup,
   SBOM/signing, and aggregate CI evidence remain promotion gates.
 - Avail and EigenDA remain structured stubs and must stay blocked from live environments.
 - Deployment artifacts are incomplete: chain IDs, addresses, transaction hashes, verification status, multisig owners, and timelock ownership.
@@ -152,9 +153,9 @@ SHA. The branch started from `main` at
 | Python security lint | `bandit -r neuron gateway -ll -ii -q` | Previously recorded clean on the branch; the pinned Bandit CLI was unavailable for this patch and must rerun in exact-commit CI. |
 | Python dependency audit | `pip-audit -r gateway/requirements.txt` and `pip-audit -r neuron/requirements.txt` | Previously recorded clean for both requirement sets; the pinned CLI was unavailable for this patch and must rerun in exact-commit CI. |
 | VIR-Core current branch | `cargo fmt --all --check`; `cargo check --workspace --all-targets --locked`; `cargo clippy --workspace --all-targets --locked -- -D warnings`; `cargo test --workspace --all-targets --locked` | Format, check, and deny-warnings Clippy pass. Linked tests are unavailable because MSVC `link.exe` is not installed; run them on Linux CI or install the Visual Studio C++ workload. |
-| Semgrep | Exact workflow scan command | The previous branch scan recorded zero findings across 464 tracked files/520 rules, with 99.9% parsed. The pinned CLI was unavailable for this patch; exact-commit CI and independent adjudication remain required. |
-| Slither | `slither . --exclude-dependencies --exclude-low --exclude-informational --fail-high` | Passed fail-high: 181 contracts, 63 detectors, 0 high findings; 19 residual results are locally adjudicated in `docs/audit/SLITHER_ADJUDICATION.md` and still require independent acceptance. |
-| Gitleaks history | Gitleaks v8.30.1 `git --log-opts=--all` with fully redacted reporting | Failed: 1,740 matches (1,737 generic-key and 3 private-key findings) across 15 finding-bearing commits, including the three historical PEM files. Classification and mandatory closure are in `docs/audit/GITLEAKS_ADJUDICATION.md`. |
+| Semgrep | Exact workflow scan command | Local supplemental scans recorded zero findings across 464 tracked files/520 rules, and PR CI run `29413794423` passed the pinned Semgrep job. Candidate exact-commit CI and independent acceptance remain required. |
+| Slither | `slither . --exclude-dependencies --exclude-low --exclude-informational --fail-high` | Local fail-high passed for 181 contracts and 63 detectors with 19 adjudicated lower-severity results. PR CI run `29413794423` failed before analysis because the Slither job lacked `forge`; the workflow now installs pinned Foundry v1.7.1 and requires a rerun. |
+| Gitleaks history | Gitleaks v8.30.1 `git --log-opts=--all` with fully redacted reporting | Blocking. The local inventory reports 1,740 matches across 15 finding-bearing commits, including three PEM files. PR CI run `29413794423` scanned 62 commits and reported 869 redacted matches; the sanitized inventories require independent reconciliation after rotation and cleanup. |
 | Frontend install | `npm ci` | Passed: 176 packages installed/audited, 0 vulnerabilities. |
 | Frontend audit | `npm audit --audit-level=high` | Passed: 0 vulnerabilities. |
 | Frontend build | `npm run build` | Passed with Vite 7.3.6. |
@@ -172,15 +173,15 @@ Verification still pending or blocked locally:
 
 | Scope | Status |
 | --- | --- |
-| Exact-commit aggregate rerun | Local Python/Foundry/Aiken/Rust-check/frontend/Slither/first-party gates are green where executable. PostgreSQL, Rust linked tests, and the current-patch Bandit/pip-audit/Semgrep reruns remain environment-blocked. Clean-tree post-history-rewrite CI and a signed aggregate manifest remain required. |
-| Historical secret exposure | Gitleaks reports 1,740 historical matches, including three committed PEM private keys. Rotation/revocation, funded-account and privileged-role impact proof, coordinated history cleanup, collaborator re-cloning, and clean complete-history Gitleaks/TruffleHog rescans are mandatory. |
+| Exact-commit aggregate rerun | PR merge-SHA CI run `29413794423` passed Python (including pinned PostgreSQL), Forge, Aiken, VIR-Core linked tests, frontend, Bandit/pip-audit, Semgrep, Gateway, audit, and first-party controls. Slither had a missing-Foundry workflow dependency now fixed locally; secret gates remain red. Clean post-history-rewrite candidate CI and a signed aggregate manifest remain required. |
+| Historical secret exposure | Gitleaks retains the three committed PEM identities. Sanitized PR CI also found one verified historical Infura credential at obsolete `simulate-request-v3.mjs`, line 6, commit `1321f91586784d218ebc11126de588fbcf649ec6`, plus 19 unverified TruffleHog findings. Infura and PEM rotation/revocation, role/provider impact proof, coordinated history cleanup, collaborator re-cloning, and zero-finding rescans are mandatory. |
 | Semgrep exact-commit evidence | The three initial timeout paths completed in the longer-timeout supplemental scan with zero findings. Preserve both raw runs and rerun them against the final commit in CI. |
 | Aiken transaction properties | Schema-v2 transaction fixtures cover exact creation/successors, duplicate identity/vote rejection, forged and replayed claim/payout rejection, malformed intents, premature execution, unauthorized cancellation, datum/value substitution, and bridge/slashing fail-closed behavior. Independent protocol review and applied-script rehearsal remain required. |
 | Slither adjudications | The 19 residual medium-scan results are documented; independent review and the complete low/informational report remain required. |
-| TruffleHog | A safe offline scan (`file://.`, verification disabled, unverified results only) completed on the clean branch and found four unverified candidates in two test-fixture paths: two Postgres and two URI detections across three commits. It did not clear the historical PEM incident or cover verifier outcomes. The protected online verified/unknown/unverified gate was not run locally because verifier calls could disclose candidate material; run the sanitized official gate in the approved CI environment after rotation/history cleanup. |
-| Default credential scan | Represented in the workflow and passed locally; pending CI execution. |
-| Mock-mode promotion scan | Represented in the workflow and passed locally; pending CI execution. |
-| Public-content policy scan | Represented in the workflow and passed locally; pending CI execution. |
+| TruffleHog | The earlier safe offline scan found four unverified fixture candidates. Protected all-category PR CI run `29413794423` superseded that coverage boundary and produced sanitized metadata for 20 findings: one verified Infura credential and 19 unverified findings. No raw value is retained. The gate correctly remains blocking pending provider rotation, adjudication, history cleanup, and a zero-finding rescan. |
+| Default credential scan | Passed locally and in PR CI run `29413794423`; rerun on the clean post-history-rewrite candidate SHA remains required. |
+| Mock-mode promotion scan | Passed locally and in PR CI run `29413794423`; rerun on the clean post-history-rewrite candidate SHA remains required. |
+| Public-content policy scan | Passed locally and in PR CI run `29413794423`; rerun on the clean post-history-rewrite candidate SHA remains required. |
 
 Required full gate set before public testnet:
 

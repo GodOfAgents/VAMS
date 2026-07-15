@@ -110,6 +110,13 @@ def validate() -> list[str]:
         "operational run manifest binding": r"--operational-evidence-run-id",
         "per-job raw gate artifact download": r"pattern:\s*raw-gate-\*[\s\S]*?merge-multiple:\s*false",
         "TruffleHog sanitized report contract": r"trufflehog-sanitized\.json",
+        "Slither Foundry setup": (
+            r"(?ms)^  slither-gate:\s*$"
+            r"(?:(?!^  aiken-gate:\s*$).)*?"
+            r"uses:\s*foundry-rs/foundry-toolchain@[0-9a-f]{40}"
+            r"(?:(?!^  aiken-gate:\s*$).)*?"
+            r"version:\s*v1\.7\.1"
+        ),
         "pinned PostgreSQL service": re.escape(POSTGRES_IMAGE),
         "PostgreSQL health check": r"pg_isready -U vdso_ci -d vdso_ci",
         "disposable PostgreSQL reset opt-in": r"VDSO_TEST_POSTGRES_ALLOW_RESET:\s*[\"']1[\"']",

@@ -365,6 +365,11 @@ jobs:
         with:
           python-version: '3.12'
 
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@b00af27efadbc7b4ca8b82abbd903b17cc874d2a # v1
+        with:
+          version: v1.7.1
+
       - name: Install Slither
         run: |
           python -m pip install pip==26.1.2

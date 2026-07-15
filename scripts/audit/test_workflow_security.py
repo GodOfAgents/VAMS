@@ -98,6 +98,28 @@ class WorkflowSecurityTests(unittest.TestCase):
                 errors = "\n".join(module.validate())
         self.assertIn("readiness full-history checkout", errors)
 
+    def test_validator_rejects_slither_without_foundry(self) -> None:
+        text = module.WORKFLOW.read_text(encoding="utf-8")
+        foundry_setup = (
+            "      - name: Install Foundry\n"
+            "        uses: foundry-rs/foundry-toolchain@"
+            "b00af27efadbc7b4ca8b82abbd903b17cc874d2a # v1\n"
+            "        with:\n"
+            "          version: v1.7.1\n\n"
+        )
+        slither_job = text.index("  slither-gate:")
+        foundry_setup_index = text.index(foundry_setup, slither_job)
+        text = (
+            text[:foundry_setup_index]
+            + text[foundry_setup_index + len(foundry_setup) :]
+        )
+        with tempfile.TemporaryDirectory() as temp_dir:
+            workflow = Path(temp_dir) / "security-gates.yml"
+            workflow.write_text(text, encoding="utf-8")
+            with mock.patch.object(module, "WORKFLOW", workflow):
+                errors = "\n".join(module.validate())
+        self.assertIn("Slither Foundry setup", errors)
+
     def test_workflow_runs_all_raw_gates_and_full_history_secret_scans(self) -> None:
         text = module.WORKFLOW.read_text(encoding="utf-8")
         audit_text = module.AUDIT_PROGRAM.read_text(encoding="utf-8")
