@@ -343,6 +343,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   first-party controls. Gitleaks and TruffleHog failed on real historical
   findings. Slither failed before analysis because `forge` was absent; the
   workflow now provisions pinned Foundry and has a fail-closed regression.
+- **Slither CI repair verification**: PR CI rerun `29415822350` passed Slither
+  after provisioning pinned Foundry. Forge, Aiken, Python/PostgreSQL, Rust,
+  frontend, Semgrep, SBOM, Gateway, audit, and first-party controls also passed;
+  Gitleaks and TruffleHog remained blocking and correctly prevented aggregate
+  evidence success.
 - **2026-07-15 deployment-source evidence verification**: Passed 40/40 focused
   unit regressions, full Python at 759 passed/2 toolchain-artifact skips with 23
   subtests, Foundry at 709/709 across 40 suites, Aiken at 77/77 with seed
