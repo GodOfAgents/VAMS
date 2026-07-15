@@ -110,6 +110,12 @@ no VDSO, bridge execution, cross-chain deposits, slashing, rewards, incentives,
 or real value. Record deterministic CBOR/script hashes and the transaction-body
 hash, but do not invent a transaction ID before submission.
 
+The unsigned `cardano-preprod-rehearsal.json` uses deployment-manifest schema
+v4. For rehearsal, `commit_sha` and `deployment_source_sha` must equal the exact
+checked-out commit. A post-submission evidence/register commit may differ only
+when the deployment source remains its ancestor and every protected Cardano,
+runtime, workflow, and deployment-tool path is unchanged.
+
 ## Approval, confirmation, and recovery
 
 Stop before `cardano-cli conway transaction submit`. Submission requires the

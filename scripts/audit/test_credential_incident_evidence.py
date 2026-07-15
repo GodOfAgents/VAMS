@@ -7,7 +7,7 @@ import unittest
 from pathlib import Path
 
 from scripts.audit.credential_incident_evidence import (
-    REQUIRED_NETWORKS,
+    CREDENTIAL_INCIDENT_SCHEMA_VERSION,
     REQUIRED_ROLE_CHECKS,
     validate_credential_incident_report,
 )
@@ -36,13 +36,22 @@ def _report(root: Path) -> dict:
         }
         funding = [
             {
-                "network": network,
-                "public_identifier": f"public-{index}-{network}",
+                "network": "polygon-amoy",
+                "applicability": "account-derived",
+                "public_identifier": f"public-{index}-polygon-amoy",
                 "observed_at": NOW,
                 "zero_balance": True,
-                "evidence": _artifact(root, f"identity-{index}-{network}.json"),
-            }
-            for network in sorted(REQUIRED_NETWORKS)
+                "evidence": _artifact(root, f"identity-{index}-polygon-amoy.json"),
+            },
+            {
+                "network": "cardano-preprod",
+                "applicability": "cryptographically-inapplicable",
+                "observed_at": NOW,
+                "non_applicability_reason": (
+                    "fixture key type cannot derive a Cardano payment credential"
+                ),
+                "evidence": _artifact(root, f"identity-{index}-cardano-preprod.json"),
+            },
         ]
         identities.append(
             {
@@ -57,7 +66,7 @@ def _report(root: Path) -> dict:
             }
         )
     return {
-        "schema_version": "1.0.0",
+        "schema_version": CREDENTIAL_INCIDENT_SCHEMA_VERSION,
         "commit_sha": COMMIT,
         "incident_id": "VAMS-PEM-2026-001",
         "affected_identities": identities,
@@ -114,6 +123,32 @@ class CredentialIncidentEvidenceTests(unittest.TestCase):
             errors = validate_credential_incident_report(path, COMMIT, root)
             self.assertTrue(any("missing" in error for error in errors))
             self.assertTrue(any("every result class" in error for error in errors))
+
+    def test_non_applicable_network_rejects_invented_account_claims(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            report = _report(root)
+            check = report["affected_identities"][0]["funding_checks"][1]
+            check["public_identifier"] = "invented-cardano-address"
+            check["zero_balance"] = True
+            path = root / "report.json"
+            path.write_text(json.dumps(report), encoding="utf-8")
+            errors = validate_credential_incident_report(path, COMMIT, root)
+            self.assertTrue(any("unexpected fields" in error for error in errors))
+
+    def test_account_derived_network_requires_zero_balance_proof(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            report = _report(root)
+            report["affected_identities"][0]["funding_checks"][0][
+                "zero_balance"
+            ] = False
+            path = root / "report.json"
+            path.write_text(json.dumps(report), encoding="utf-8")
+            errors = validate_credential_incident_report(path, COMMIT, root)
+            self.assertTrue(
+                any("does not prove zero balance" in error for error in errors)
+            )
 
 
 if __name__ == "__main__":

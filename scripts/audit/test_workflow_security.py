@@ -26,6 +26,10 @@ class WorkflowSecurityTests(unittest.TestCase):
         self.assertIn("operational_evidence_run_id:", text)
         self.assertIn("run-id: ${{ inputs.stage_evidence_run_id }}", text)
         self.assertIn("run-id: ${{ inputs.operational_evidence_run_id }}", text)
+        self.assertRegex(
+            text,
+            r"testnet-readiness-gate:[\s\S]*?ref:\s*\$\{\{\s*inputs\.target_sha\s*\}\}\s*fetch-depth:\s*0",
+        )
         self.assertIn('AUDIT_SEED: "20260713"', text)
         self.assertNotIn("--result ", text)
         self.assertNotIn("gate-artifact", text)
@@ -73,6 +77,26 @@ class WorkflowSecurityTests(unittest.TestCase):
                 errors = "\n".join(module.validate())
         self.assertIn("seeds must all equal 20260713", errors)
         self.assertIn("prior run artifact download", errors)
+
+    def test_validator_rejects_shallow_readiness_checkout(self) -> None:
+        text = module.WORKFLOW.read_text(encoding="utf-8")
+        target_checkout = (
+            "          ref: ${{ inputs.target_sha }}\n"
+            "          fetch-depth: 0\n\n"
+            "      - name: Download Signed Audit Evidence"
+        )
+        text = text.replace(
+            target_checkout,
+            "          ref: ${{ inputs.target_sha }}\n\n"
+            "      - name: Download Signed Audit Evidence",
+            1,
+        )
+        with tempfile.TemporaryDirectory() as temp_dir:
+            workflow = Path(temp_dir) / "security-gates.yml"
+            workflow.write_text(text, encoding="utf-8")
+            with mock.patch.object(module, "WORKFLOW", workflow):
+                errors = "\n".join(module.validate())
+        self.assertIn("readiness full-history checkout", errors)
 
     def test_workflow_runs_all_raw_gates_and_full_history_secret_scans(self) -> None:
         text = module.WORKFLOW.read_text(encoding="utf-8")

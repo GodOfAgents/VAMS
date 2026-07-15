@@ -119,6 +119,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Cardano property tests**: Added seven seeded Aiken properties covering integer-square-root bounds, basis-point safety and monotonicity, inclusive ranges, strict bridge nonce ordering/replay rejection, and insurance payout caps.
 
 ### Changed
+- **Deployment manifest v4**: Added `deployment_source_sha` to separate the
+  exact rehearsed/broadcast source commit from a later public evidence/register
+  commit. Canary evidence requires identical SHAs; public evidence requires an
+  ancestor relationship and rejects drift across protected executable,
+  workflow, testnet-profile, and deployment-tool paths. The readiness workflow
+  now checks out full Git history to prove this binding.
+- **Credential incident evidence v2**: Replaced mandatory fabricated-style
+  per-network balance records with explicit `account-derived` and
+  `cryptographically-inapplicable` checks. Non-applicable networks require
+  public key-type proof and cannot carry an invented account or balance claim.
 - **Aiken dependency reproducibility**: Updated `cardano/aiken.toml` and
   `cardano/aiken.lock` from floating `v2` selectors to exact official
   `v2.2.0` stdlib/fuzz releases. The strict seeded check and blueprint rebuild
@@ -207,6 +217,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`neuron/services/registry_client.py`**: Extended Service Block metadata with deterministic SkillOps manifests and fail-closed permission-scope validation.
 
 ### Security
+- **Exact deployment-source binding**: Public promotion fails when Polygon and
+  Cardano manifests name different source commits, the source is unavailable or
+  not an ancestor, or protected code/configuration differs from the evidence
+  commit. Rehearsal remains single-commit only.
+- **Credential applicability integrity**: Historical-key closure evidence now
+  distinguishes a real derived account from cryptographic non-applicability,
+  preventing false Cardano or Polygon balance claims during incident closure.
 - **Authenticated Cardano creation and execution**: Removed circular
   script-hash/policy-ID parameter dependencies by storing complete asset
   classes in schema-v2 datums while one-shot policies bind seed UTxOs and
@@ -311,6 +328,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`contracts/src/registry/ServiceBlockRegistry.sol`**: Service Block provisioning now fails closed when verifier-governed quarantine is active.
 
 ### Testing
+- **2026-07-15 deployment-source evidence verification**: Passed 40/40 focused
+  unit regressions, full Python at 759 passed/2 toolchain-artifact skips with 23
+  subtests, Foundry at 709/709 across 40 suites, Aiken at 77/77 with seed
+  `20260713` and 250 cases per property, Rust format/check/deny-warnings Clippy,
+  frontend clean install/audit/build with zero vulnerabilities, Slither
+  fail-high, and all first-party audit/documentation/security validators.
+  PostgreSQL explicitly skipped without the required disposable DSN; Rust
+  linked tests remain blocked by missing MSVC `link.exe`; the current-patch
+  Bandit, pip-audit, and Semgrep reruns remain exact-commit CI requirements.
 - **2026-07-15 focused working-tree verification**: Passed 41/41 Python
   regressions covering Cardano parameter application, credential incident
   evidence, audit readiness, blueprint artifacts, and workflow supply-chain

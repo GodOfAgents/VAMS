@@ -34,18 +34,21 @@ does not reproduce matched values.
    identities control no funded account, Safe, timelock, validator, or testnet
    role.
 3. Remove obsolete generated artifacts and private-key files from every
-   reachable ref using a coordinated history-rewrite procedure. Archive the
-   pre-rewrite evidence privately and notify every collaborator to reclone.
+   reachable ref using a coordinated history-rewrite procedure. Retain only
+   sanitized ref inventories and incident evidence; use an encrypted disposable
+   mirror for the rewrite and notify every collaborator to reclone.
 4. Independently review the generated/vendor fixture groups before adding any
    path-and-rule-specific allowlist. Never allowlist the private-key findings.
 5. Rerun both the complete-history and exact-worktree Gitleaks scans, followed
-   by TruffleHog. Both tools must report zero unadjudicated findings.
+   by all-category TruffleHog. The final schema-bound scans must report zero
+   findings.
 
 Canary and public readiness additionally require
 `credential-incident-report.json` under the operational evidence bundle. The
 report is validated by `scripts/audit/credential_incident_evidence.py` against
-the exact target commit and requires public, content-hashed rotation, balance,
-role-impact, all-ref rewrite, collaborator/fork/cache remediation, scanner, and
+the exact target commit and requires public, content-hashed rotation,
+account-derived balance or cryptographic non-applicability proof, role-impact,
+all-ref rewrite, collaborator/fork/cache remediation, scanner, and
 named-reviewer artifacts. This adjudication document cannot satisfy that
 contract by itself.
 

@@ -24,6 +24,11 @@ REQUIRED_ROLE_CHECKS = {
     "validator",
 }
 REQUIRED_NETWORKS = {"polygon-amoy", "cardano-preprod"}
+CREDENTIAL_INCIDENT_SCHEMA_VERSION = "2.0.0"
+FUNDING_APPLICABILITIES = {
+    "account-derived",
+    "cryptographically-inapplicable",
+}
 GENERIC_REVIEWERS = {"automated", "github-actions", "pending", "self", "tbd"}
 
 
@@ -118,8 +123,11 @@ def validate_credential_incident_report(
     if not _strict(report, top, "credential incident report", errors):
         if not isinstance(report, dict):
             return errors
-    if report.get("schema_version") != "1.0.0":
-        errors.append("credential incident schema_version must be 1.0.0")
+    if report.get("schema_version") != CREDENTIAL_INCIDENT_SCHEMA_VERSION:
+        errors.append(
+            "credential incident schema_version must be "
+            + CREDENTIAL_INCIDENT_SCHEMA_VERSION
+        )
     if COMMIT_RE.fullmatch(commit_sha) is None or report.get("commit_sha") != commit_sha:
         errors.append("credential incident report does not match the target commit")
     if report.get("incident_id") != "VAMS-PEM-2026-001":
@@ -199,7 +207,30 @@ def validate_credential_incident_report(
             funding = []
         for item_index, check in enumerate(funding):
             check_label = f"{label}.funding_checks[{item_index}]"
-            fields = {"network", "public_identifier", "observed_at", "zero_balance", "evidence"}
+            if not isinstance(check, dict):
+                errors.append(f"{check_label} must be an object")
+                continue
+            applicability = check.get("applicability")
+            if applicability not in FUNDING_APPLICABILITIES:
+                errors.append(f"{check_label}.applicability is invalid")
+                continue
+            if applicability == "account-derived":
+                fields = {
+                    "network",
+                    "applicability",
+                    "public_identifier",
+                    "observed_at",
+                    "zero_balance",
+                    "evidence",
+                }
+            elif applicability == "cryptographically-inapplicable":
+                fields = {
+                    "network",
+                    "applicability",
+                    "observed_at",
+                    "non_applicability_reason",
+                    "evidence",
+                }
             if not _strict(check, fields, check_label, errors):
                 continue
             network = check.get("network")
@@ -210,8 +241,16 @@ def validate_credential_incident_report(
             else:
                 seen_networks.add(network)
             _utc(check.get("observed_at"), f"{check_label}.observed_at", errors)
-            if check.get("zero_balance") is not True:
-                errors.append(f"{check_label} does not prove zero balance")
+            if applicability == "account-derived":
+                public_identifier = check.get("public_identifier")
+                if not isinstance(public_identifier, str) or not public_identifier.strip():
+                    errors.append(f"{check_label}.public_identifier is invalid")
+                if check.get("zero_balance") is not True:
+                    errors.append(f"{check_label} does not prove zero balance")
+            else:
+                reason = check.get("non_applicability_reason")
+                if not isinstance(reason, str) or not reason.strip():
+                    errors.append(f"{check_label}.non_applicability_reason is invalid")
             _artifact(check.get("evidence"), root, f"{check_label}.evidence", errors)
         if seen_networks != REQUIRED_NETWORKS:
             errors.append(f"{label} lacks Polygon Amoy or Cardano Pre-Prod funding proof")

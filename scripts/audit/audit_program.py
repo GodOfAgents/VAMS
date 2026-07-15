@@ -17,6 +17,7 @@ from pathlib import Path
 
 try:
     from scripts.audit.credential_incident_evidence import (
+        CREDENTIAL_INCIDENT_SCHEMA_VERSION,
         validate_credential_incident_report,
     )
     from scripts.audit.runtime_privacy_evidence import (
@@ -29,6 +30,7 @@ try:
     )
 except ModuleNotFoundError:
     from credential_incident_evidence import (  # type: ignore[no-redef]
+        CREDENTIAL_INCIDENT_SCHEMA_VERSION,
         validate_credential_incident_report,
     )
     from runtime_privacy_evidence import (  # type: ignore[no-redef]
@@ -68,10 +70,25 @@ STAGE_GATES = {
 }
 AUDIT_SEED = 20260713
 EVIDENCE_MANIFEST_SCHEMA_VERSION = "2.0.0"
-DEPLOYMENT_MANIFEST_SCHEMA_VERSION = "3.0.0"
+DEPLOYMENT_MANIFEST_SCHEMA_VERSION = "4.0.0"
 GATE_ARTIFACT_SCHEMA_VERSION = "2.0.0"
 VDSO_SHADOW_REPORT_SCHEMA_VERSION = "1.0.0"
 DEPLOYMENT_NETWORKS = {"polygon-amoy", "cardano-preprod"}
+DEPLOYMENT_PROTECTED_PATHS = (
+    ".github/workflows",
+    "cardano",
+    "contracts/foundry.toml",
+    "contracts/remappings.txt",
+    "contracts/script",
+    "contracts/src",
+    "docs/audit/testnet-profile.json",
+    "frontend-vite",
+    "gateway",
+    "neuron",
+    "scripts/audit",
+    "scripts/deployment",
+    "vams-vm",
+)
 REQUIRED_DRILLS = {
     "pause",
     "key_loss",
@@ -285,6 +302,58 @@ def _git(*args: str) -> str:
     return result.stdout.strip()
 
 
+def _git_returncode(*args: str) -> int:
+    result = subprocess.run(
+        ["git", *args],
+        cwd=ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    return result.returncode
+
+
+def _validate_deployment_source_binding(
+    manifest: dict, stage: str, commit_sha: str
+) -> list[str]:
+    """Bind a rehearsal or deployment to the exact executable source commit."""
+
+    source_sha = manifest.get("deployment_source_sha")
+    if (
+        not isinstance(source_sha, str)
+        or re.fullmatch(r"[0-9a-f]{40}", source_sha) is None
+    ):
+        return ["deployment_source_sha must be a full lowercase commit"]
+    if stage == "canary":
+        if source_sha != commit_sha:
+            return [
+                "canary rehearsal deployment_source_sha must equal the evidence commit"
+            ]
+        return []
+    if source_sha == commit_sha:
+        return []
+    if _git_returncode("cat-file", "-e", f"{source_sha}^{{commit}}") != 0:
+        return ["deployment_source_sha is not an available commit"]
+    if _git_returncode("merge-base", "--is-ancestor", source_sha, commit_sha) != 0:
+        return ["deployment_source_sha must be an ancestor of the evidence commit"]
+    diff_status = _git_returncode(
+        "diff",
+        "--quiet",
+        source_sha,
+        commit_sha,
+        "--",
+        *DEPLOYMENT_PROTECTED_PATHS,
+    )
+    if diff_status == 1:
+        return [
+            "deployment source and evidence commits differ in protected "
+            "executable or configuration paths"
+        ]
+    if diff_status != 0:
+        return ["unable to compare deployment source and evidence commits"]
+    return []
+
+
 def validate_program() -> list[str]:
     errors: list[str] = []
     matrix = _load_json(MATRIX_PATH)
@@ -386,6 +455,21 @@ def validate_program() -> list[str]:
         schema = _load_json(schema_path)
         if not isinstance(schema, dict) or "$schema" not in schema or "title" not in schema:
             errors.append(f"{schema_path.relative_to(ROOT)} is not a complete JSON schema")
+    schema_versions = {
+        "deployment-manifest.schema.json": DEPLOYMENT_MANIFEST_SCHEMA_VERSION,
+        "credential-incident-report.schema.json": CREDENTIAL_INCIDENT_SCHEMA_VERSION,
+    }
+    for schema_name, expected_version in schema_versions.items():
+        schema = _load_json(SCHEMA_DIR / schema_name)
+        actual_version = (
+            schema.get("properties", {}).get("schema_version", {}).get("const")
+            if isinstance(schema, dict)
+            else None
+        )
+        if actual_version != expected_version:
+            errors.append(
+                f"{schema_name} schema_version must equal {expected_version}"
+            )
     errors.extend(validate_publisher_inventory(PUBLISHER_INVENTORY_PATH, ROOT))
 
     claim_checks = {
@@ -1796,6 +1880,7 @@ def _validate_deployment_manifests(
 ) -> list[str]:
     errors: list[str] = []
     seen_networks: set[str] = set()
+    deployment_source_shas: set[str] = set()
     for path in paths:
         if not path.is_file():
             errors.append(f"deployment manifest is missing: {path}")
@@ -1822,6 +1907,12 @@ def _validate_deployment_manifests(
             errors.append(f"{network} must have deployment_status={expected_status}")
         if manifest.get("commit_sha") != commit_sha:
             errors.append(f"{network} commit does not match the current commit")
+        errors.extend(_validate_deployment_source_binding(manifest, stage, commit_sha))
+        source_sha = manifest.get("deployment_source_sha")
+        if isinstance(source_sha, str) and re.fullmatch(
+            r"[0-9a-f]{40}", source_sha
+        ):
+            deployment_source_shas.add(source_sha)
         if _contains_pending(manifest):
             errors.append(f"{network} contains Pending deployment evidence")
         if not str(manifest.get("chain_identifier", "")).strip():
@@ -1897,6 +1988,8 @@ def _validate_deployment_manifests(
     missing = DEPLOYMENT_NETWORKS - seen_networks
     if missing:
         errors.append("deployment manifests missing networks: " + ", ".join(sorted(missing)))
+    if len(deployment_source_shas) > 1:
+        errors.append("deployment manifests do not share one deployment_source_sha")
     return errors
 
 

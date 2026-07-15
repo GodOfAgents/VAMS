@@ -91,6 +91,7 @@ def validate() -> list[str]:
         "stage_evidence_run_id workflow_dispatch input": r"(?m)^\s{6}stage_evidence_run_id:\s*$",
         "operational_evidence_run_id workflow_dispatch input": r"(?m)^\s{6}operational_evidence_run_id:\s*$",
         "target SHA checkout": r"ref:\s*\$\{\{\s*inputs\.target_sha\s*\}\}",
+        "readiness full-history checkout": r"testnet-readiness-gate:[\s\S]*?ref:\s*\$\{\{\s*inputs\.target_sha\s*\}\}\s*fetch-depth:\s*0",
         "prior run artifact download": r"run-id:\s*\$\{\{\s*inputs\.stage_evidence_run_id\s*\}\}",
         "operational run artifact download": r"run-id:\s*\$\{\{\s*inputs\.operational_evidence_run_id\s*\}\}",
         "prior run GitHub token": r"github-token:\s*\$\{\{\s*github\.token\s*\}\}",

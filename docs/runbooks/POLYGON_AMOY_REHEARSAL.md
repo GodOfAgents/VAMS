@@ -57,8 +57,9 @@ singleton, timelock, or role postconditions differ.
 ## Required rehearsal artifact
 
 Create unsigned `polygon-amoy-rehearsal.json` only from captured simulation and
-read-only RPC observations. Validate it with the deployment-manifest v2 schema
-and `audit_program.py operational --stage canary`. It must bind:
+read-only RPC observations. Validate it with deployment-manifest schema v4 and
+`audit_program.py operational --stage canary`. For rehearsal, `commit_sha` and
+`deployment_source_sha` must equal the exact checked-out commit. It must bind:
 
 - the exact commit, chain ID, Safe release and runtime identities;
 - governance 3-of-5, treasury 3-of-5, emergency 2-of-3 pause-only, distinct
@@ -76,6 +77,9 @@ and `audit_program.py operational --stage canary`. It must bind:
 Do not append `--broadcast` until the user has reviewed the complete simulation
 bundle and explicitly approved that specific transaction sequence. After any
 approved broadcast, independently query every receipt and postcondition before
-recording a deployment manifest. A failed postcondition triggers the rollback
-plan: stop, preserve receipts, use the emergency Safe to keep modules paused,
-and do not activate or retry with changed parameters outside a new ceremony.
+recording a deployment manifest. A later public evidence/register commit may
+differ from `deployment_source_sha` only when the source commit is its ancestor
+and all protected executable and deployment-configuration paths are unchanged.
+A failed postcondition triggers the rollback plan: stop, preserve receipts, use
+the emergency Safe to keep modules paused, and do not activate or retry with
+changed parameters outside a new ceremony.

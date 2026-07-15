@@ -3,10 +3,11 @@
   "$id": "https://vams.network/schemas/audit/deployment-manifest.schema.json",
   "title": "VAMS Testnet Deployment Manifest",
   "type": "object",
-  "required": ["schema_version", "commit_sha", "network", "deployment_status", "chain_identifier", "deployer", "authorities", "timelock_identity", "timelock_seconds", "deployer_privileges_removed", "deployer_privilege_checks", "mock_routes_disabled", "artifacts", "role_transfers", "rollback_plan", "vdso"],
+  "required": ["schema_version", "commit_sha", "deployment_source_sha", "network", "deployment_status", "chain_identifier", "deployer", "authorities", "timelock_identity", "timelock_seconds", "deployer_privileges_removed", "deployer_privilege_checks", "mock_routes_disabled", "artifacts", "role_transfers", "rollback_plan", "vdso"],
   "properties": {
-    "schema_version": {"const": "3.0.0"},
+    "schema_version": {"const": "4.0.0"},
     "commit_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "deployment_source_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
     "network": {"enum": ["polygon-amoy", "cardano-preprod"]},
     "deployment_status": {"enum": ["rehearsed", "deployed"]},
     "chain_identifier": {"type": "string", "minLength": 1},

@@ -607,6 +607,7 @@ def _deployment_manifest(root: Path, network: str, commit: str) -> dict:
         "network": network,
         "deployment_status": "rehearsed",
         "commit_sha": commit,
+        "deployment_source_sha": commit,
         "chain_identifier": f"test:{network}",
         "deployer": deployer,
         "deployer_privileges_removed": True,
@@ -973,6 +974,67 @@ class AuditProgramTests(unittest.TestCase):
                 2,
             )
             self.assertTrue(any("missing deployment artifacts" in item for item in public_errors))
+
+    def test_deployment_source_binding_rejects_rehearsal_mismatch(self) -> None:
+        commit = "a" * 40
+        manifest = {"deployment_source_sha": "b" * 40}
+        errors = audit_program._validate_deployment_source_binding(
+            manifest, "canary", commit
+        )
+        self.assertEqual(
+            errors,
+            ["canary rehearsal deployment_source_sha must equal the evidence commit"],
+        )
+
+    def test_public_deployment_source_binding_rejects_protected_drift(self) -> None:
+        commit = "a" * 40
+        source = "b" * 40
+        manifest = {"deployment_source_sha": source}
+        with mock.patch.object(
+            audit_program, "_git_returncode", side_effect=[0, 0, 1]
+        ) as git_returncode:
+            errors = audit_program._validate_deployment_source_binding(
+                manifest, "public", commit
+            )
+        self.assertEqual(
+            errors,
+            [
+                "deployment source and evidence commits differ in protected "
+                "executable or configuration paths"
+            ],
+        )
+        diff_call = git_returncode.call_args_list[-1].args
+        self.assertEqual(diff_call[:5], ("diff", "--quiet", source, commit, "--"))
+        self.assertTrue(
+            set(audit_program.DEPLOYMENT_PROTECTED_PATHS) <= set(diff_call)
+        )
+
+    def test_public_deployment_source_binding_accepts_metadata_only_commit(self) -> None:
+        commit = "a" * 40
+        manifest = {"deployment_source_sha": "b" * 40}
+        with mock.patch.object(
+            audit_program, "_git_returncode", side_effect=[0, 0, 0]
+        ):
+            self.assertEqual(
+                audit_program._validate_deployment_source_binding(
+                    manifest, "public", commit
+                ),
+                [],
+            )
+
+    def test_public_deployment_source_binding_rejects_nonancestor(self) -> None:
+        commit = "a" * 40
+        manifest = {"deployment_source_sha": "b" * 40}
+        with mock.patch.object(
+            audit_program, "_git_returncode", side_effect=[0, 1]
+        ):
+            errors = audit_program._validate_deployment_source_binding(
+                manifest, "public", commit
+            )
+        self.assertEqual(
+            errors,
+            ["deployment_source_sha must be an ancestor of the evidence commit"],
+        )
 
     def test_deployment_manifest_rejects_substituted_authority_and_timelock_code(self) -> None:
         commit = "a" * 40

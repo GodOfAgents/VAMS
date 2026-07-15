@@ -81,6 +81,12 @@ the ceremony must also pin an audited Safe release and provide complete setup
 and `ApproveHash` event history. Every field remains `Pending` until a chain-ID
 `80002` rehearsal or deployment produces exact-commit evidence.
 
+Deployment-manifest schema v4 records both the release evidence `commit_sha`
+and the exact `deployment_source_sha`. They are identical for rehearsal. After
+broadcast, a later evidence/register commit is accepted only when the source is
+its ancestor and protected contract, Cardano, Gateway, Neuron, VIR-Core,
+workflow, profile, and deployment-tool paths have not changed.
+
 | Module | Address | Deploy Tx | Runtime Code Hash | Explorer Verification | Authority | Empty / Inactive Evidence | Notes |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | `VAMSObjectStore` | Pending | Pending | Pending | Pending | Pending | Pending | No state domain or writer may be active. |

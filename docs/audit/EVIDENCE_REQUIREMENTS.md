@@ -84,10 +84,15 @@ and a clean rescan; an unconditional baseline is not acceptable evidence.
 | `cardano-preprod-rehearsal.json` | Equivalent multisig/timelock parameters, validator artifacts, rollback evidence |
 | `runtime-integration.json` | External Gateway checks, real Celestia/Near submission and retrieval receipts, excluded mock/incomplete routes |
 | `privacy-review.json` | Approved inventory, retention, redaction, publisher coverage, public-content review, zero blockers |
-| `credential-incident-report.json` | Schema v1.0.0; exactly three public fingerprints; rotation/replacement evidence; zero-balance and no-role evidence; completed all-ref cleanup; collaborator/fork/cache remediation; clean complete-history Gitleaks and TruffleHog evidence; named independent reviewer; zero blockers |
+| `credential-incident-report.json` | Schema v2.0.0; exactly three public fingerprints; rotation/replacement evidence; account-derived zero-balance or cryptographic non-applicability evidence per network; no-role evidence; completed all-ref cleanup; collaborator/fork/cache remediation; clean complete-history Gitleaks and TruffleHog evidence; named independent reviewer; zero blockers |
 
 The Polygon and Cardano manifests use deployment-manifest schema version
-`3.0.0`. The Polygon manifest must
+`4.0.0`. Every rehearsal requires `deployment_source_sha == commit_sha`.
+After broadcast, `deployment_source_sha` identifies the exact code used for the
+transaction while `commit_sha` may identify a later public evidence/register
+commit. The source must be an ancestor of the evidence commit, both network
+manifests must name the same source, and no protected executable or deployment
+configuration path may differ between them. The Polygon manifest must
 contain all seven VDSO modules: `VAMSObjectStore`, `VAMSProgramRegistry`,
 `VAMSAdapterRegistry`, `VAMSProofRouter`, `VAMSReservationManager`,
 `VAMSExecutionKernel`, and `VAMSCapabilityRouter`. Each module must have a
@@ -143,9 +148,12 @@ accounts/node identifiers, timestamps, block-height observations, reviewer
 identity, and sanitized receipts. It must not contain PEM contents, private
 keys, seed phrases, provider tokens, credentials, or signing material. The
 validator requires exactly one Polygon Amoy and one Cardano Pre-Prod funding
-check per affected identity, all seven role-impact classes clear, completed
-all-ref rewrite/reclone/fork/cache remediation, literal complete-history scan
-coverage, and zero open blocking findings. Repository documentation or an
+check per affected identity. An `account-derived` check requires a real public
+identifier and zero-balance observation; a `cryptographically-inapplicable`
+check requires public key-type proof and forbids an invented account or balance
+claim. All seven role-impact classes must be clear, all-ref
+rewrite/reclone/fork/cache remediation complete, complete-history scan coverage
+literal, and open blocking findings zero. Repository documentation or an
 adjudication baseline cannot substitute for this closure evidence.
 
 ## Public Inputs
