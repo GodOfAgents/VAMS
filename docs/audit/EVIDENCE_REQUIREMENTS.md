@@ -2,6 +2,9 @@
 
 No evidence file should be created with invented addresses, receipts, reviewers,
 timestamps, or approvals. Missing evidence remains missing and readiness fails.
+The operator procedure for the historical secret incident is
+[CREDENTIAL_INCIDENT_RUNBOOK.md](CREDENTIAL_INCIDENT_RUNBOOK.md). Preparation
+artifacts and templates never substitute for the final operational evidence.
 
 ## Repository Evidence Contract
 
@@ -45,8 +48,9 @@ unbound, or extra bundle files fail promotion. The aggregate manifest,
 signature, and certificate stay outside the bound bundle, so a manifest can
 never hash itself.
 
-`assurance-index.json` maps every applicable track to one or more evidence
-artifacts and SHA-256 hashes. Readiness consumes the downloaded bundle, verifies
+`assurance-index.json` schema v2 maps every applicable track to one or more
+evidence artifacts and SHA-256 hashes and labels each entry as either
+`architect-bootstrap` or `independent`. Readiness consumes the downloaded bundle, verifies
 its exact file set against the signed manifest, and checks that the manifest,
 deployment records, runtime reports, and requested checkout all use the target
 SHA and prior stage-evidence run ID.
@@ -79,12 +83,13 @@ and a clean rescan; an unconditional baseline is not acceptable evidence.
 | File | Required contents |
 | --- | --- |
 | `audit-evidence.json/.sig/.pem` | Successful exact-commit gates and valid Cosign identity |
-| `assurance-index.json` | G0-G4 tracks verified, owner reviewer, zero blocking findings, artifact hashes |
+| `assurance-index.json` | Schema v2; G0-G4 tracks verified, explicit assurance level, reviewer, zero blocking findings, artifact hashes |
+| `team-signer-governance.json` | Four distinct human signer addresses; exact 3-of-5 and 2-of-3 memberships; two distinct split-custody recovery seats; consent and rehearsal evidence; explicit team-controlled-bootstrap limitations |
 | `polygon-amoy-rehearsal.json` | 3-of-5 governance/treasury, separate 2-of-3 emergency, distinct 2-of-3 VDSO guardian/quarantine and VDSO recovery Safe proxies, 48-hour delay, role-removal and rollback evidence |
 | `cardano-preprod-rehearsal.json` | Equivalent multisig/timelock parameters, validator artifacts, rollback evidence |
 | `runtime-integration.json` | External Gateway checks, real Celestia/Near submission and retrieval receipts, excluded mock/incomplete routes |
 | `privacy-review.json` | Approved inventory, retention, redaction, publisher coverage, public-content review, zero blockers |
-| `credential-incident-report.json` | Schema v2.0.0; exactly three public fingerprints; rotation/replacement evidence; account-derived zero-balance or cryptographic non-applicability evidence per network; no-role evidence; completed all-ref cleanup; collaborator/fork/cache remediation; clean complete-history Gitleaks and TruffleHog evidence; named independent reviewer; zero blockers |
+| `credential-incident-report.json` | Schema v3.0.0; exactly three historical finding occurrences bound to exactly two unique public-key fingerprints; rotation/replacement evidence; account-derived zero-balance or cryptographic non-applicability evidence per network; no-role evidence; completed all-ref cleanup; collaborator/fork/cache remediation; clean complete-history Gitleaks and TruffleHog evidence; named Architect-owner review without an independence claim; zero blockers |
 
 The Polygon and Cardano manifests use deployment-manifest schema version
 `4.0.0`. Every rehearsal requires `deployment_source_sha == commit_sha`.
@@ -145,35 +150,49 @@ new sink cannot bypass review by omission.
 public readiness. Every nested claim is a bundle-relative nonempty artifact
 with a recomputed SHA-256. The report contains only public fingerprints,
 accounts/node identifiers, timestamps, block-height observations, reviewer
-identity, and sanitized receipts. It must not contain PEM contents, private
+identity, `review_mode=architect-owner`, `independent_review=false`, and
+sanitized receipts. It must not contain PEM contents, private
 keys, seed phrases, provider tokens, credentials, or signing material. The
-validator requires exactly one Polygon Amoy and one Cardano Pre-Prod funding
-check per affected identity. An `account-derived` check requires a real public
-identifier and zero-balance observation; a `cryptographically-inapplicable`
-check requires public key-type proof and forbids an invented account or balance
-claim. All seven role-impact classes must be clear, all-ref
+validator records the two `node_identity.pem` occurrences and one
+`neuron/node_identity.pem` occurrence separately, then requires them to resolve
+to the two unique compromised key fingerprints. It requires exactly one
+Polygon Amoy and one Cardano Pre-Prod funding check per unique identity. An
+`account-derived` check requires a real public identifier and zero-balance
+observation; a `cryptographically-inapplicable` check requires public key-type
+proof and forbids an invented account or balance claim. All seven role-impact
+classes must be clear, all-ref
 rewrite/reclone/fork/cache remediation complete, complete-history scan coverage
 literal, and open blocking findings zero. Repository documentation or an
 adjudication baseline cannot substitute for this closure evidence.
 
-## Public Inputs
+## Bootstrap-Public Inputs
 
-Public promotion replaces rehearsal manifests with deployed manifests and adds:
+Faucet-only `bootstrap-public` promotion replaces rehearsal manifests with
+deployed manifests and adds:
 
 | File | Required contents |
 | --- | --- |
 | `closed-canary-report.json/.sig/.pem` | Schema v1.0.0; timezone-aware non-future interval of at least seven days; at least seven exact, gap-free UTC daily records with path/hash evidence; no stop condition; all seven drills passed with distinct path/hash evidence; non-empty metric artifacts bound by path/hash |
-| `vdso-shadow-report.json` | Schema v1.0.0; public VDSO mode off while a separate private worker runs in shadow mode; source- and artifact-bound Python/Rust/Aiken implementation roots; at least 1 × 10^5 transitions and 604800 measured seconds; 100 or more fixed 1000-transition checkpoints; every enumerated stop condition false; zero divergence, external writes, and plaintext payloads; privacy result, restart recovery, replay determinism, and continuity passed; read-only, non-authoritative, value-free operation |
+| `vdso-shadow-report.json/.sig/.pem` | Schema v1.0.0 and detached Architect signature; public VDSO mode off while a separate private worker runs in shadow mode; source- and artifact-bound Python/Rust/Aiken implementation roots; at least 1 x 10^5 transitions and 604800 measured seconds; 100 or more fixed 1000-transition checkpoints; every enumerated stop condition false; zero divergence, external writes, and plaintext payloads; privacy result, restart recovery, replay determinism, and continuity passed; read-only, non-authoritative, value-free operation |
 | `vdso-shadow-input.jsonl` | Append-only commitment-only input source; exact v1 fields, contiguous uint64 sequence, nonzero cursor and input commitments, canonical record hashes, no plaintext or extra fields, and no trailing unconsumed records |
 | `vdso-shadow-audit.jsonl` | Canonical UTF-8 JSONL v1; hash-chained run, fixed 1000-transition chunk, and summary records; exact commit, seed, source-root, timestamp, sequence, state-root, backend-count, transcript-root, restart, replay, privacy, and stop-condition bindings |
-| `independent-reviews.json` | Approved Solidity, Aiken, economics, Gateway/SDK, privacy, and AI-safety reports with zero blockers |
+| `architect-reviews.json` | Six content-bound Architect-bootstrap dossiers with the exact non-independence disclosure and zero blockers |
 | `polygon-amoy-deployment.json` | Verified addresses, transactions, bytecode, owners, thresholds, role transfers, rollback |
 | `cardano-preprod-deployment.json` | Script hashes, transactions, multisig ownership, parameters, rollback |
 
 Every `Pending` field in `contracts/CONTRACTS.md` must be replaced with verified
-facts before public promotion. The 14-day public soak is a post-onboarding gate
+facts before bootstrap-public promotion. The 14-day public soak is a post-onboarding gate
 for incentives or increased exposure, not permission to bypass the seven-day
 closed canary.
+
+## Later Public Stage
+
+The later `public` stage retains the same deployed, canary, shadow, signer, and
+operational evidence and replaces `architect-reviews.json` with
+`independent-reviews.json` schema v2. That index must contain all six domains,
+set `review_mode=independent`, `assurance_level=independent`, and
+`independent=true`, and bind each real report by bundle-relative path and
+SHA-256. Architect-bootstrap evidence cannot satisfy this gate.
 
 `vdso-shadow-report.json` is not a deployment claim. `public_vdso_mode=off`
 keeps the committed public profile disabled while `worker_mode=shadow`

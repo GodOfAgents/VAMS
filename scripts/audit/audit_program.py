@@ -66,8 +66,10 @@ REQUIRED_TRACK_FIELDS = {
 }
 STAGE_GATES = {
     "canary": {"G0", "G1", "G2", "G3", "G4"},
+    "bootstrap-public": ALLOWED_GATES,
     "public": ALLOWED_GATES,
 }
+DEPLOYED_STAGES = {"bootstrap-public", "public"}
 AUDIT_SEED = 20260713
 EVIDENCE_MANIFEST_SCHEMA_VERSION = "2.0.0"
 DEPLOYMENT_MANIFEST_SCHEMA_VERSION = "4.0.0"
@@ -107,6 +109,63 @@ REQUIRED_INDEPENDENT_DOMAINS = {
     "gateway-agent-sdk",
     "privacy",
     "ai-agent-safety",
+}
+REQUIRED_ARCHITECT_REVIEW_DOMAINS = REQUIRED_INDEPENDENT_DOMAINS
+REQUIRED_TEAM_SIGNER_ROLES = {
+    "ARCHITECT",
+    "SIGNER_A",
+    "SIGNER_B",
+    "SIGNER_C",
+}
+REQUIRED_TEAM_AUTHORITY_MEMBERS = {
+    "governance": {
+        "members": {
+            "ARCHITECT",
+            "SIGNER_A",
+            "SIGNER_B",
+            "SIGNER_C",
+            "GOVERNANCE_RECOVERY",
+        },
+        "threshold": 3,
+        "scope": "governance",
+    },
+    "treasury": {
+        "members": {
+            "ARCHITECT",
+            "SIGNER_A",
+            "SIGNER_B",
+            "SIGNER_C",
+            "TREASURY_RECOVERY",
+        },
+        "threshold": 3,
+        "scope": "faucet-only-treasury",
+    },
+    "emergency": {
+        "members": {"ARCHITECT", "SIGNER_A", "SIGNER_B"},
+        "threshold": 2,
+        "scope": "pause-only",
+    },
+    "vdso-guardian": {
+        "members": {"SIGNER_A", "SIGNER_B", "SIGNER_C"},
+        "threshold": 2,
+        "scope": "vdso-quarantine-only",
+    },
+    "vdso-recovery": {
+        "members": {"ARCHITECT", "SIGNER_B", "SIGNER_C"},
+        "threshold": 2,
+        "scope": "vdso-recovery-only",
+    },
+}
+REQUIRED_SIGNER_REHEARSALS = {
+    "governance-3-of-5",
+    "emergency-2-of-3",
+    "guardian-2-of-3",
+    "recovery-2-of-3",
+    "unavailable-signer",
+    "rejected-transaction",
+    "lost-key-replacement",
+    "recovery-split-custody",
+    "human-readable-transaction-review",
 }
 REQUIRED_EVIDENCE_RESULTS = {
     "audit-program": " && ".join(
@@ -407,6 +466,23 @@ def validate_program() -> list[str]:
             errors.append("testnet staking rewards must remain disabled")
         if governance.get("timelock_seconds", 0) < 172800:
             errors.append("testnet timelock must be at least 48 hours")
+        if governance.get("governance_mode") != "team-controlled-bootstrap":
+            errors.append("testnet governance must remain team-controlled-bootstrap")
+        if governance.get("decentralized_governance_claimed") is not False:
+            errors.append("bootstrap testnet must not claim decentralized governance")
+        if governance.get("human_signers") != 4:
+            errors.append("bootstrap testnet must use exactly four human signers")
+        stable_signer_roles = governance.get("stable_signer_roles")
+        if (
+            not isinstance(stable_signer_roles, list)
+            or any(not isinstance(role, str) for role in stable_signer_roles)
+            or set(stable_signer_roles) != REQUIRED_TEAM_SIGNER_ROLES
+        ):
+            errors.append("bootstrap testnet signer roles must be ARCHITECT and SIGNER_A-C")
+        if governance.get("offline_recovery_seats") != 2:
+            errors.append("governance and treasury require distinct offline recovery seats")
+        if governance.get("offline_recovery_custody") != "2-of-3-split-custody":
+            errors.append("offline recovery seats must use 2-of-3 split custody")
         if governance.get("safe_threshold") != 3 or governance.get("safe_owners") != 5:
             errors.append(
                 "testnet governance and treasury Safes must remain exact 3-of-5"
@@ -940,8 +1016,10 @@ def _validate_deployment_artifacts(
                     errors.append(f"{context} deployed or rehearsed address is invalid")
                 else:
                     addresses.append(str(address).lower())
-                if stage == "public" and not _is_evm_hash(artifact.get("transaction_hash")):
-                    errors.append(f"{context} public transaction_hash is invalid")
+                if stage in DEPLOYED_STAGES and not _is_evm_hash(
+                    artifact.get("transaction_hash")
+                ):
+                    errors.append(f"{context} deployed transaction_hash is invalid")
         else:
             if not isinstance(address, str) or not address.startswith("addr_test1"):
                 errors.append(f"{context} script address is invalid")
@@ -959,8 +1037,10 @@ def _validate_deployment_artifacts(
                     f"{context} script CBOR",
                 )
             )
-            if stage == "public" and not _is_sha256(artifact.get("transaction_hash")):
-                errors.append(f"{context} public transaction_hash is invalid")
+            if stage in DEPLOYED_STAGES and not _is_sha256(
+                artifact.get("transaction_hash")
+            ):
+                errors.append(f"{context} deployed transaction_hash is invalid")
         observation_fields = {
             field: artifact.get(field)
             for field in (
@@ -1109,8 +1189,10 @@ def _validate_cardano_auxiliary_policies(
                     f"{instance_context} parameter manifest",
                 )
             )
-            if stage == "public" and not _is_sha256(instance.get("transaction_hash")):
-                errors.append(f"{instance_context} public transaction_hash is invalid")
+            if stage in DEPLOYED_STAGES and not _is_sha256(
+                instance.get("transaction_hash")
+            ):
+                errors.append(f"{instance_context} deployed transaction_hash is invalid")
             fields = {
                 field: instance.get(field)
                 for field in (
@@ -1694,8 +1776,10 @@ def _validate_role_transfers(
                 errors.append(f"{network} role transfer evidence hash is invalid")
             if not isinstance(transfer.get("observed_at_block"), int) or transfer["observed_at_block"] < 0:
                 errors.append(f"{network} role transfer observation block is invalid")
-            if stage == "public" and not _is_evm_hash(transfer.get("transaction_hash")):
-                errors.append(f"{network} public role transfer transaction_hash is invalid")
+            if stage in DEPLOYED_STAGES and not _is_evm_hash(
+                transfer.get("transaction_hash")
+            ):
+                errors.append(f"{network} deployed role transfer transaction_hash is invalid")
             errors.extend(
                 _validate_bundle_evidence(
                     transfer.get("evidence_path"),
@@ -1755,8 +1839,10 @@ def _validate_role_transfers(
                 errors.append(f"{network} control transfer evidence hash is invalid")
             if not isinstance(transfer.get("observed_at_slot"), int) or transfer["observed_at_slot"] < 0:
                 errors.append(f"{network} control transfer observation slot is invalid")
-            if stage == "public" and not _is_sha256(transfer.get("transaction_hash")):
-                errors.append(f"{network} public control transfer transaction_hash is invalid")
+            if stage in DEPLOYED_STAGES and not _is_sha256(
+                transfer.get("transaction_hash")
+            ):
+                errors.append(f"{network} deployed control transfer transaction_hash is invalid")
             errors.extend(
                 _validate_bundle_evidence(
                     transfer.get("evidence_path"),
@@ -2006,8 +2092,8 @@ def _validate_assurance_index(
     if not isinstance(index, dict) or not isinstance(index.get("tracks"), list):
         return ["assurance index must contain a tracks array"]
     errors: list[str] = []
-    if index.get("schema_version") != "1.0.0":
-        errors.append("assurance index schema_version must equal 1.0.0")
+    if index.get("schema_version") != "2.0.0":
+        errors.append("assurance index schema_version must equal 2.0.0")
     if index.get("commit_sha") != commit_sha:
         errors.append("assurance index commit does not match the current commit")
     entries: dict[str, dict] = {}
@@ -2047,9 +2133,25 @@ def _validate_assurance_index(
                 parsed_approval = None
             if parsed_approval is None or parsed_approval.tzinfo is None:
                 errors.append(f"assurance index approval timestamp is invalid for {track_id}")
+        review_mode = entry.get("review_mode")
+        assurance_level = entry.get("assurance_level")
+        independent_review = entry.get("independent_review")
+        if review_mode not in {"architect-bootstrap", "independent"}:
+            errors.append(f"assurance index review_mode is invalid for {track_id}")
+        if assurance_level not in {"architect-bootstrap", "independent"}:
+            errors.append(f"assurance index assurance_level is invalid for {track_id}")
+        if review_mode != assurance_level:
+            errors.append(f"assurance index review mode and level differ for {track_id}")
+        if independent_review != (review_mode == "independent"):
+            errors.append(f"assurance index independence claim is inconsistent for {track_id}")
         track_number = int(track_id[1:])
+        if stage == "bootstrap-public":
+            if review_mode != "architect-bootstrap" or independent_review is not False:
+                errors.append(
+                    f"bootstrap-public readiness requires Architect-bootstrap assurance for {track_id}"
+                )
         if stage == "public" and 10 <= track_number <= 34:
-            if entry.get("independent_review") is not True:
+            if review_mode != "independent" or independent_review is not True:
                 errors.append(f"public readiness requires independent review for {track_id}")
         artifacts = entry.get("artifacts")
         if not isinstance(artifacts, list) or not artifacts:
@@ -3232,32 +3334,455 @@ def _validate_privacy_review(
     return validate_privacy_review(path, commit_sha, ROOT, artifact_root)
 
 
-def _validate_independent_reviews(path: Path, commit_sha: str) -> list[str]:
+def _validate_independent_reviews(
+    path: Path, commit_sha: str, bundle_root: Path | None = None
+) -> list[str]:
     if not path.is_file():
         return [f"independent review index is missing: {path}"]
     index = _load_json(path)
     if not isinstance(index, dict) or not isinstance(index.get("reviews"), list):
         return ["independent review index must contain a reviews array"]
     errors: list[str] = []
+    if set(index) != {"schema_version", "commit_sha", "reviews"}:
+        errors.append("independent review index contains unexpected fields")
+    if index.get("schema_version") != "2.0.0":
+        errors.append("independent review index schema_version must equal 2.0.0")
     if index.get("commit_sha") != commit_sha:
         errors.append("independent reviews do not match current commit")
     approved: set[str] = set()
     for review in index["reviews"]:
         if not isinstance(review, dict):
+            errors.append("independent review index contains an invalid review")
             continue
+        if set(review) != {
+            "domain",
+            "reviewer",
+            "organization",
+            "review_mode",
+            "assurance_level",
+            "independent",
+            "approved",
+            "blocking_findings_open",
+            "report_path",
+            "report_sha256",
+            "approved_at",
+        }:
+            errors.append("independent review contains unexpected or missing fields")
         domain = review.get("domain")
-        if (
-            domain in REQUIRED_INDEPENDENT_DOMAINS
-            and review.get("approved") is True
-            and review.get("blocking_findings_open") == 0
-            and str(review.get("reviewer", "")).strip()
-            and str(review.get("organization", "")).strip()
-            and re.fullmatch(r"[0-9a-f]{64}", str(review.get("report_sha256", "")))
+        context = f"independent review {domain}"
+        if domain not in REQUIRED_INDEPENDENT_DOMAINS:
+            errors.append(f"{context} domain is invalid")
+            continue
+        if domain in approved:
+            errors.append(f"independent review domain is duplicated: {domain}")
+        valid = True
+        for field, expected in (
+            ("review_mode", "independent"),
+            ("assurance_level", "independent"),
+            ("independent", True),
+            ("approved", True),
+            ("blocking_findings_open", 0),
         ):
+            if review.get(field) != expected:
+                errors.append(f"{context} {field} must equal {expected}")
+                valid = False
+        if not str(review.get("reviewer", "")).strip():
+            errors.append(f"{context} reviewer is missing")
+            valid = False
+        if not str(review.get("organization", "")).strip():
+            errors.append(f"{context} organization is missing")
+            valid = False
+        if not _is_aware_timestamp(review.get("approved_at")):
+            errors.append(f"{context} approved_at is invalid")
+            valid = False
+        binding_errors = _validate_bundle_evidence(
+            review.get("report_path"),
+            review.get("report_sha256"),
+            bundle_root or path.parent,
+            f"{context} report",
+        )
+        errors.extend(binding_errors)
+        if binding_errors:
+            valid = False
+        if valid:
             approved.add(domain)
     missing = REQUIRED_INDEPENDENT_DOMAINS - approved
     if missing:
         errors.append("independent reviews missing domains: " + ", ".join(sorted(missing)))
+    return errors
+
+
+def _is_aware_timestamp(value: object) -> bool:
+    if not isinstance(value, str):
+        return False
+    try:
+        parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError:
+        return False
+    return parsed.tzinfo is not None
+
+
+def _validate_architect_reviews(
+    path: Path, commit_sha: str, bundle_root: Path
+) -> list[str]:
+    if not path.is_file():
+        return [f"Architect review index is missing: {path}"]
+    index = _load_json(path)
+    if not isinstance(index, dict) or not isinstance(index.get("reviews"), list):
+        return ["Architect review index must contain a reviews array"]
+    errors: list[str] = []
+    if set(index) != {
+        "schema_version",
+        "commit_sha",
+        "assurance_level",
+        "reviewer_role",
+        "reviews",
+    }:
+        errors.append("Architect review index contains unexpected fields")
+    if index.get("schema_version") != "1.0.0":
+        errors.append("Architect review index schema_version must equal 1.0.0")
+    if index.get("commit_sha") != commit_sha:
+        errors.append("Architect reviews do not match current commit")
+    if index.get("assurance_level") != "architect-bootstrap":
+        errors.append("Architect review assurance_level must be architect-bootstrap")
+    if index.get("reviewer_role") != "Architect":
+        errors.append("Architect review reviewer_role must be Architect")
+
+    approved: set[str] = set()
+    for review in index["reviews"]:
+        if not isinstance(review, dict):
+            errors.append("Architect review index contains an invalid review")
+            continue
+        if set(review) != {
+            "domain",
+            "reviewer",
+            "review_mode",
+            "assurance_level",
+            "independent",
+            "approved",
+            "blocking_findings_open",
+            "approved_at",
+            "declaration",
+            "invariants_reviewed",
+            "commands",
+            "limitations",
+            "stop_conditions",
+            "report_path",
+            "report_sha256",
+            "evidence_artifacts",
+        }:
+            errors.append(f"Architect review {review.get('domain')} contains unexpected fields")
+        domain = review.get("domain")
+        context = f"Architect review {domain}"
+        if domain not in REQUIRED_ARCHITECT_REVIEW_DOMAINS:
+            errors.append(f"{context} domain is invalid")
+            continue
+        if domain in approved:
+            errors.append(f"Architect review domain is duplicated: {domain}")
+        if review.get("review_mode") != "architect-bootstrap":
+            errors.append(f"{context} review_mode must be architect-bootstrap")
+        if review.get("assurance_level") != "architect-bootstrap":
+            errors.append(f"{context} assurance_level must be architect-bootstrap")
+        if review.get("independent") is not False:
+            errors.append(f"{context} must not claim independent review")
+        if review.get("approved") is not True:
+            errors.append(f"{context} is not approved")
+        if review.get("blocking_findings_open") != 0:
+            errors.append(f"{context} records open blocking findings")
+        if not str(review.get("reviewer", "")).strip():
+            errors.append(f"{context} reviewer is missing")
+        if not _is_aware_timestamp(review.get("approved_at")):
+            errors.append(f"{context} approved_at is invalid")
+        if review.get("declaration") != (
+            "This assessment is Architect-reviewed and is not an independent or "
+            "third-party audit."
+        ):
+            errors.append(f"{context} disclosure is missing or altered")
+        invariants = review.get("invariants_reviewed")
+        if (
+            not isinstance(invariants, list)
+            or not invariants
+            or any(not isinstance(invariant, str) for invariant in invariants)
+            or len(invariants) != len(set(invariants))
+            or not set(invariants) <= EXPECTED_INVARIANTS
+        ):
+            errors.append(f"{context} invariants_reviewed is invalid")
+        for field in ("commands", "limitations", "stop_conditions"):
+            values = review.get(field)
+            if (
+                not isinstance(values, list)
+                or not values
+                or any(not isinstance(value, str) or not value.strip() for value in values)
+            ):
+                errors.append(f"{context} {field} must contain non-empty strings")
+        errors.extend(
+            _validate_bundle_evidence(
+                review.get("report_path"),
+                review.get("report_sha256"),
+                bundle_root,
+                f"{context} report",
+            )
+        )
+        artifacts = review.get("evidence_artifacts")
+        if not isinstance(artifacts, list) or not artifacts:
+            errors.append(f"{context} evidence_artifacts are missing")
+        else:
+            seen_paths: set[str] = set()
+            for artifact in artifacts:
+                if not isinstance(artifact, dict):
+                    errors.append(f"{context} contains an invalid evidence artifact")
+                    continue
+                if set(artifact) != {"path", "sha256"}:
+                    errors.append(f"{context} evidence artifact fields are invalid")
+                artifact_path = artifact.get("path")
+                if isinstance(artifact_path, str) and artifact_path in seen_paths:
+                    errors.append(f"{context} contains duplicate artifact {artifact_path}")
+                elif isinstance(artifact_path, str):
+                    seen_paths.add(artifact_path)
+                errors.extend(
+                    _validate_bundle_evidence(
+                        artifact_path,
+                        artifact.get("sha256"),
+                        bundle_root,
+                        f"{context} evidence artifact",
+                    )
+                )
+        approved.add(domain)
+
+    missing = REQUIRED_ARCHITECT_REVIEW_DOMAINS - approved
+    if missing:
+        errors.append("Architect reviews missing domains: " + ", ".join(sorted(missing)))
+    return errors
+
+
+def _validate_team_signer_governance(
+    path: Path, commit_sha: str, bundle_root: Path
+) -> list[str]:
+    if not path.is_file():
+        return [f"team signer governance evidence is missing: {path}"]
+    report = _load_json(path)
+    if not isinstance(report, dict):
+        return ["team signer governance evidence must be an object"]
+    errors: list[str] = []
+    if set(report) != {
+        "schema_version",
+        "commit_sha",
+        "network",
+        "governance_mode",
+        "decentralized_governance_claimed",
+        "externally_audited_claimed",
+        "signers",
+        "offline_recovery_seats",
+        "authorities",
+        "consent_records",
+        "rehearsals",
+        "emergency_response_target_seconds",
+        "limitations",
+        "blocking_findings_open",
+    }:
+        errors.append("team signer governance evidence contains unexpected fields")
+    if report.get("schema_version") != "1.0.0":
+        errors.append("team signer governance schema_version must equal 1.0.0")
+    if report.get("commit_sha") != commit_sha:
+        errors.append("team signer governance evidence does not match current commit")
+    if report.get("network") != "polygon-amoy":
+        errors.append("team signer governance network must be polygon-amoy")
+    if report.get("governance_mode") != "team-controlled-bootstrap":
+        errors.append("governance_mode must be team-controlled-bootstrap")
+    if report.get("decentralized_governance_claimed") is not False:
+        errors.append("team signer evidence must not claim decentralized governance")
+    if report.get("externally_audited_claimed") is not False:
+        errors.append("team signer evidence must not claim external audit")
+    if report.get("blocking_findings_open") != 0:
+        errors.append("team signer evidence records open blocking findings")
+
+    signers = report.get("signers")
+    signer_entries: dict[str, dict] = {}
+    signer_addresses: set[str] = set()
+    if not isinstance(signers, list):
+        errors.append("team signer evidence signers must be an array")
+    else:
+        for signer in signers:
+            if not isinstance(signer, dict) or not isinstance(signer.get("role"), str):
+                errors.append("team signer evidence contains an invalid signer")
+                continue
+            if set(signer) != {
+                "role",
+                "address",
+                "historical_pem_relationship",
+                "independent_key_custody",
+            }:
+                errors.append("team signer evidence contains unexpected signer fields")
+            role = signer["role"]
+            if role in signer_entries:
+                errors.append(f"team signer role is duplicated: {role}")
+            signer_entries[role] = signer
+            address = signer.get("address")
+            if not _is_evm_address(address) or str(address).lower() == EVM_ZERO_ADDRESS:
+                errors.append(f"team signer {role} address is invalid")
+            elif str(address).lower() in signer_addresses:
+                errors.append("team signer addresses must be distinct")
+            else:
+                signer_addresses.add(str(address).lower())
+            if signer.get("historical_pem_relationship") is not False:
+                errors.append(f"team signer {role} must have no historical PEM relationship")
+            if signer.get("independent_key_custody") is not True:
+                errors.append(f"team signer {role} must attest independent key custody")
+    if set(signer_entries) != REQUIRED_TEAM_SIGNER_ROLES:
+        errors.append("team signer roles must be exactly ARCHITECT and SIGNER_A-C")
+
+    recovery_entries: dict[str, dict] = {}
+    recovery_seats = report.get("offline_recovery_seats")
+    if not isinstance(recovery_seats, list):
+        errors.append("offline recovery seats must be an array")
+        recovery_seats = []
+    for recovery in recovery_seats:
+        if not isinstance(recovery, dict) or not isinstance(recovery.get("role"), str):
+            errors.append("offline recovery seat is invalid")
+            continue
+        if set(recovery) != {
+            "role",
+            "address",
+            "custody_mode",
+            "custodians",
+            "custody_threshold",
+            "routine_use",
+            "rotate_after_use",
+        }:
+            errors.append("offline recovery seat contains unexpected fields")
+        role = recovery["role"]
+        if role in recovery_entries:
+            errors.append(f"offline recovery seat is duplicated: {role}")
+        recovery_entries[role] = recovery
+        address = recovery.get("address")
+        if (
+            not _is_evm_address(address)
+            or str(address).lower() == EVM_ZERO_ADDRESS
+            or str(address).lower() in signer_addresses
+        ):
+            errors.append(f"offline recovery seat {role} address is invalid or reused")
+        else:
+            signer_addresses.add(str(address).lower())
+        if recovery.get("custody_mode") != "2-of-3-split-custody":
+            errors.append(f"offline recovery seat {role} custody mode is invalid")
+        custodians = recovery.get("custodians")
+        if (
+            not isinstance(custodians, list)
+            or any(not isinstance(role, str) for role in custodians)
+            or set(custodians) != {"SIGNER_A", "SIGNER_B", "SIGNER_C"}
+        ):
+            errors.append(f"offline recovery seat {role} custodians are invalid")
+        if recovery.get("custody_threshold") != 2:
+            errors.append(f"offline recovery seat {role} custody threshold must be 2")
+        if recovery.get("routine_use") is not False or recovery.get("rotate_after_use") is not True:
+            errors.append(f"offline recovery seat {role} lifecycle controls are invalid")
+    if set(recovery_entries) != {"GOVERNANCE_RECOVERY", "TREASURY_RECOVERY"}:
+        errors.append("governance and treasury require distinct offline recovery seats")
+
+    authority_entries: dict[str, dict] = {}
+    authorities = report.get("authorities")
+    if not isinstance(authorities, list):
+        errors.append("team signer authorities must be an array")
+        authorities = []
+    for authority in authorities:
+        if not isinstance(authority, dict) or not isinstance(authority.get("id"), str):
+            errors.append("team signer authority is invalid")
+            continue
+        if set(authority) != {"id", "members", "threshold", "scope"}:
+            errors.append("team signer authority contains unexpected fields")
+        if authority["id"] in authority_entries:
+            errors.append(f"team signer authority is duplicated: {authority['id']}")
+        authority_entries[authority["id"]] = authority
+    if set(authority_entries) != set(REQUIRED_TEAM_AUTHORITY_MEMBERS):
+        errors.append("team signer authority set is incomplete or unexpected")
+    for authority_id, expected in REQUIRED_TEAM_AUTHORITY_MEMBERS.items():
+        authority = authority_entries.get(authority_id)
+        if authority is None:
+            continue
+        members = authority.get("members")
+        if (
+            not isinstance(members, list)
+            or any(not isinstance(role, str) for role in members)
+            or set(members) != expected["members"]
+        ):
+            errors.append(f"{authority_id} authority members do not match the bootstrap design")
+        if authority.get("threshold") != expected["threshold"]:
+            errors.append(f"{authority_id} authority threshold is invalid")
+        if authority.get("scope") != expected["scope"]:
+            errors.append(f"{authority_id} authority scope is invalid")
+
+    def validate_records(field: str, required: set[str], key: str) -> None:
+        records = report.get(field)
+        entries: dict[str, dict] = {}
+        if not isinstance(records, list):
+            errors.append(f"team signer {field} must be an array")
+            return
+        for record in records:
+            if not isinstance(record, dict) or not isinstance(record.get(key), str):
+                errors.append(f"team signer {field} contains an invalid record")
+                continue
+            expected_fields = (
+                {
+                    "role",
+                    "consented",
+                    "understands_authority",
+                    "independent_key_custody_confirmed",
+                    "emergency_channel_recorded",
+                    "compromise_reporting_accepted",
+                    "amoy_rehearsal_completed",
+                    "evidence_path",
+                    "evidence_sha256",
+                }
+                if field == "consent_records"
+                else {"scenario", "passed", "evidence_path", "evidence_sha256"}
+            )
+            if set(record) != expected_fields:
+                errors.append(f"team signer {field} {record.get(key)} fields are invalid")
+            record_id = record[key]
+            if record_id in entries:
+                errors.append(f"team signer {field} duplicates {record_id}")
+            entries[record_id] = record
+            if record.get("passed" if field == "rehearsals" else "consented") is not True:
+                errors.append(f"team signer {field} {record_id} is not accepted")
+            if field == "consent_records":
+                for confirmation in (
+                    "understands_authority",
+                    "independent_key_custody_confirmed",
+                    "emergency_channel_recorded",
+                    "compromise_reporting_accepted",
+                    "amoy_rehearsal_completed",
+                ):
+                    if record.get(confirmation) is not True:
+                        errors.append(
+                            f"team signer consent {record_id} lacks {confirmation}"
+                        )
+            errors.extend(
+                _validate_bundle_evidence(
+                    record.get("evidence_path"),
+                    record.get("evidence_sha256"),
+                    bundle_root,
+                    f"team signer {field} {record_id}",
+                )
+            )
+        if set(entries) != required:
+            errors.append(f"team signer {field} set is incomplete or unexpected")
+
+    validate_records("consent_records", REQUIRED_TEAM_SIGNER_ROLES, "role")
+    validate_records("rehearsals", REQUIRED_SIGNER_REHEARSALS, "scenario")
+    response_target = report.get("emergency_response_target_seconds")
+    if (
+        not isinstance(response_target, int)
+        or isinstance(response_target, bool)
+        or response_target < 1
+    ):
+        errors.append("emergency response target must be a positive number of seconds")
+    limitations = report.get("limitations")
+    if (
+        not isinstance(limitations, list)
+        or not limitations
+        or any(not isinstance(item, str) or not item.strip() for item in limitations)
+    ):
+        errors.append("team signer governance limitations must be explicit")
     return errors
 
 
@@ -3275,7 +3800,11 @@ def validate_readiness(
     privacy_review: Path | None = None,
     credential_incident_report: Path | None = None,
     independent_reviews: Path | None = None,
+    architect_reviews: Path | None = None,
+    team_signer_governance: Path | None = None,
     vdso_shadow_report: Path | None = None,
+    vdso_shadow_signature: Path | None = None,
+    vdso_shadow_certificate: Path | None = None,
     bundle_dir: Path | None = None,
     target_sha: str | None = None,
     stage_evidence_run_id: int | None = None,
@@ -3372,6 +3901,15 @@ def validate_readiness(
             credential_incident_report, commit_sha, bundle_dir
         )
     )
+    team_signer_governance = (
+        team_signer_governance
+        or bundle_evidence_dir / "team-signer-governance.json"
+    )
+    errors.extend(
+        _validate_team_signer_governance(
+            team_signer_governance, commit_sha, bundle_dir
+        )
+    )
 
     supporting_artifacts = [
         assurance_index,
@@ -3379,8 +3917,9 @@ def validate_readiness(
         runtime_report,
         privacy_review,
         credential_incident_report,
+        team_signer_governance,
     ]
-    if stage == "public":
+    if stage in DEPLOYED_STAGES:
         canary_report = canary_report or bundle_evidence_dir / "closed-canary-report.json"
         canary_signature = canary_signature or bundle_evidence_dir / "closed-canary-report.sig"
         canary_certificate = (
@@ -3396,15 +3935,42 @@ def validate_readiness(
             canary_certificate, "closed-canary certificate", errors
         )
         supporting_artifacts.append(canary_report)
-        independent_reviews = (
-            independent_reviews or bundle_evidence_dir / "independent-reviews.json"
-        )
-        errors.extend(_validate_independent_reviews(independent_reviews, commit_sha))
-        supporting_artifacts.append(independent_reviews)
+        if stage == "bootstrap-public":
+            architect_reviews = (
+                architect_reviews or bundle_evidence_dir / "architect-reviews.json"
+            )
+            errors.extend(
+                _validate_architect_reviews(
+                    architect_reviews, commit_sha, bundle_dir
+                )
+            )
+            supporting_artifacts.append(architect_reviews)
+        else:
+            independent_reviews = (
+                independent_reviews or bundle_evidence_dir / "independent-reviews.json"
+            )
+            errors.extend(
+                _validate_independent_reviews(
+                    independent_reviews, commit_sha, bundle_dir
+                )
+            )
+            supporting_artifacts.append(independent_reviews)
         vdso_shadow_report = (
             vdso_shadow_report or bundle_evidence_dir / "vdso-shadow-report.json"
         )
+        vdso_shadow_signature = (
+            vdso_shadow_signature or bundle_evidence_dir / "vdso-shadow-report.sig"
+        )
+        vdso_shadow_certificate = (
+            vdso_shadow_certificate or bundle_evidence_dir / "vdso-shadow-report.pem"
+        )
         errors.extend(_validate_vdso_shadow_report(vdso_shadow_report, commit_sha))
+        _require_nonempty_file(
+            vdso_shadow_signature, "VDSO shadow signature", errors
+        )
+        _require_nonempty_file(
+            vdso_shadow_certificate, "VDSO shadow certificate", errors
+        )
         supporting_artifacts.append(vdso_shadow_report)
         register_text = (ROOT / "contracts" / "CONTRACTS.md").read_text(
             encoding="utf-8"
@@ -3486,8 +4052,13 @@ def validate_operational_bundle(
             bundle_dir,
         )
     )
+    errors.extend(
+        _validate_team_signer_governance(
+            evidence_dir / "team-signer-governance.json", target_sha, bundle_dir
+        )
+    )
 
-    if stage == "public":
+    if stage in DEPLOYED_STAGES:
         canary_report = evidence_dir / "closed-canary-report.json"
         errors.extend(
             _validate_canary_report(
@@ -3504,15 +4075,32 @@ def validate_operational_bundle(
             "closed-canary certificate",
             errors,
         )
-        errors.extend(
-            _validate_independent_reviews(
-                evidence_dir / "independent-reviews.json", target_sha
+        if stage == "bootstrap-public":
+            errors.extend(
+                _validate_architect_reviews(
+                    evidence_dir / "architect-reviews.json", target_sha, bundle_dir
+                )
             )
-        )
+        else:
+            errors.extend(
+                _validate_independent_reviews(
+                    evidence_dir / "independent-reviews.json", target_sha, bundle_dir
+                )
+            )
         errors.extend(
             _validate_vdso_shadow_report(
                 evidence_dir / "vdso-shadow-report.json", target_sha
             )
+        )
+        _require_nonempty_file(
+            evidence_dir / "vdso-shadow-report.sig",
+            "VDSO shadow signature",
+            errors,
+        )
+        _require_nonempty_file(
+            evidence_dir / "vdso-shadow-report.pem",
+            "VDSO shadow certificate",
+            errors,
         )
     return errors
 
@@ -4129,7 +4717,11 @@ def main() -> int:
     readiness_parser.add_argument("--privacy-review", type=Path)
     readiness_parser.add_argument("--credential-incident-report", type=Path)
     readiness_parser.add_argument("--independent-reviews", type=Path)
+    readiness_parser.add_argument("--architect-reviews", type=Path)
+    readiness_parser.add_argument("--team-signer-governance", type=Path)
     readiness_parser.add_argument("--vdso-shadow-report", type=Path)
+    readiness_parser.add_argument("--vdso-shadow-signature", type=Path)
+    readiness_parser.add_argument("--vdso-shadow-certificate", type=Path)
     readiness_parser.add_argument("--bundle-dir", type=Path, required=True)
     readiness_parser.add_argument("--target-sha", required=True)
     readiness_parser.add_argument(
@@ -4172,7 +4764,11 @@ def main() -> int:
             privacy_review=args.privacy_review,
             credential_incident_report=args.credential_incident_report,
             independent_reviews=args.independent_reviews,
+            architect_reviews=args.architect_reviews,
+            team_signer_governance=args.team_signer_governance,
             vdso_shadow_report=args.vdso_shadow_report,
+            vdso_shadow_signature=args.vdso_shadow_signature,
+            vdso_shadow_certificate=args.vdso_shadow_certificate,
             bundle_dir=args.bundle_dir,
             target_sha=args.target_sha,
             stage_evidence_run_id=args.stage_evidence_run_id,

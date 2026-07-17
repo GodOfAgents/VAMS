@@ -662,7 +662,7 @@ Users top-up their VAMS account with any token. Protocol auto-converts to $VAMS 
 | Category | Allocation | Tokens | Vesting |
 |----------|-----------|--------|---------|
 | **Community & Ecosystem** | **50%** | 500,000,000 | Liquidity/Airdrop (10%) + Grants/Mining (40%, 60m vest) |
-| **Founder** | **12%** | 120,000,000 | 12-month cliff, 48-month linear vesting |
+| **Architect** | **12%** | 120,000,000 | 12-month cliff, 48-month linear vesting |
 | **Future Team & Advisors**| **13%** | 130,000,000 | 12-month cliff, 36-month linear (50% GMV-Gated) |
 | **Investors (Early/Reg)** | **13%** | 130,000,000 | 6-12 month cliff, 18-30 month vests |
 | **DAO Treasury** | **12%** | 120,000,000 | 6-month cliff, 48-month linear (50% GMV-Gated) |

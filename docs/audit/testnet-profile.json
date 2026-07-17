@@ -24,6 +24,17 @@
     "require_hardware_cost_weighted_floor_below_minimum": true
   },
   "governance": {
+    "governance_mode": "team-controlled-bootstrap",
+    "decentralized_governance_claimed": false,
+    "human_signers": 4,
+    "stable_signer_roles": [
+      "ARCHITECT",
+      "SIGNER_A",
+      "SIGNER_B",
+      "SIGNER_C"
+    ],
+    "offline_recovery_seats": 2,
+    "offline_recovery_custody": "2-of-3-split-custody",
     "safe_threshold": 3,
     "safe_owners": 5,
     "timelock_seconds": 172800,

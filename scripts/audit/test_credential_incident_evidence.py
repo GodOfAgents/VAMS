@@ -29,7 +29,7 @@ def _artifact(root: Path, name: str) -> dict[str, str]:
 
 def _report(root: Path) -> dict:
     identities = []
-    for index in range(3):
+    for index in range(2):
         roles = {
             role: {"clear": True, "evidence": _artifact(root, f"identity-{index}-{role}.json")}
             for role in sorted(REQUIRED_ROLE_CHECKS)
@@ -69,6 +69,23 @@ def _report(root: Path) -> dict:
         "schema_version": CREDENTIAL_INCIDENT_SCHEMA_VERSION,
         "commit_sha": COMMIT,
         "incident_id": "VAMS-PEM-2026-001",
+        "affected_occurrences": [
+            {
+                "path": "node_identity.pem",
+                "commit_sha": "1" * 40,
+                "fingerprint_sha256": f"{1:064x}",
+            },
+            {
+                "path": "node_identity.pem",
+                "commit_sha": "2" * 40,
+                "fingerprint_sha256": f"{1:064x}",
+            },
+            {
+                "path": "neuron/node_identity.pem",
+                "commit_sha": "3" * 40,
+                "fingerprint_sha256": f"{2:064x}",
+            },
+        ],
         "affected_identities": identities,
         "history_rewrite": {
             "completed": True,
@@ -96,6 +113,8 @@ def _report(root: Path) -> dict:
         },
         "reviewer": "Ada Reviewer",
         "reviewer_organization": "Independent Security Lab",
+        "review_mode": "architect-owner",
+        "independent_review": False,
         "reviewed_at": NOW,
         "blocking_findings_open": 0,
     }
@@ -149,6 +168,26 @@ class CredentialIncidentEvidenceTests(unittest.TestCase):
             self.assertTrue(
                 any("does not prove zero balance" in error for error in errors)
             )
+
+    def test_occurrences_must_reference_the_two_unique_identities(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            report = _report(root)
+            report["affected_occurrences"][2]["fingerprint_sha256"] = "f" * 64
+            path = root / "report.json"
+            path.write_text(json.dumps(report), encoding="utf-8")
+            errors = validate_credential_incident_report(path, COMMIT, root)
+            self.assertTrue(any("occurrence fingerprints" in error for error in errors))
+
+    def test_occurrence_paths_must_match_verified_history_shape(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            report = _report(root)
+            report["affected_occurrences"][1]["path"] = "neuron/node_identity.pem"
+            path = root / "report.json"
+            path.write_text(json.dumps(report), encoding="utf-8")
+            errors = validate_credential_incident_report(path, COMMIT, root)
+            self.assertTrue(any("occurrence paths" in error for error in errors))
 
 
 if __name__ == "__main__":

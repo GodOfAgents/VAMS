@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vams.network/schemas/audit/architect-reviews.schema.json",
+  "title": "VAMS Architect Bootstrap Review Index",
+  "type": "object",
+  "required": ["schema_version", "commit_sha", "assurance_level", "reviewer_role", "reviews"],
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "commit_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "assurance_level": {"const": "architect-bootstrap"},
+    "reviewer_role": {"const": "Architect"},
+    "reviews": {
+      "type": "array",
+      "minItems": 6,
+      "maxItems": 6,
+      "items": {
+        "type": "object",
+        "required": ["domain", "reviewer", "review_mode", "assurance_level", "independent", "approved", "blocking_findings_open", "approved_at", "declaration", "invariants_reviewed", "commands", "limitations", "stop_conditions", "report_path", "report_sha256", "evidence_artifacts"],
+        "properties": {
+          "domain": {"enum": ["solidity-governance", "aiken-bridge", "economics-centralization", "gateway-agent-sdk", "privacy", "ai-agent-safety"]},
+          "reviewer": {"type": "string", "minLength": 1},
+          "review_mode": {"const": "architect-bootstrap"},
+          "assurance_level": {"const": "architect-bootstrap"},
+          "independent": {"const": false},
+          "approved": {"const": true},
+          "blocking_findings_open": {"const": 0},
+          "approved_at": {"type": "string", "format": "date-time"},
+          "declaration": {"const": "This assessment is Architect-reviewed and is not an independent or third-party audit."},
+          "invariants_reviewed": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {"pattern": "^INV-(10|[1-9])$"}
+          },
+          "commands": {"$ref": "#/$defs/nonEmptyStrings"},
+          "limitations": {"$ref": "#/$defs/nonEmptyStrings"},
+          "stop_conditions": {"$ref": "#/$defs/nonEmptyStrings"},
+          "report_path": {"$ref": "#/$defs/safePath"},
+          "report_sha256": {"$ref": "#/$defs/sha256"},
+          "evidence_artifacts": {
+            "type": "array",
+            "minItems": 1,
+            "items": {"$ref": "#/$defs/artifact"}
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "safePath": {"type": "string", "minLength": 1, "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$)).+$"},
+    "nonEmptyStrings": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+    "artifact": {
+      "type": "object",
+      "required": ["path", "sha256"],
+      "properties": {
+        "path": {"$ref": "#/$defs/safePath"},
+        "sha256": {"$ref": "#/$defs/sha256"}
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

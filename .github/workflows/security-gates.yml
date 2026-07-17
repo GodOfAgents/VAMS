@@ -10,6 +10,7 @@ on:
         type: choice
         options:
           - canary
+          - bootstrap-public
           - public
       target_sha:
         description: Full 40-character commit SHA to evaluate
@@ -926,7 +927,7 @@ jobs:
             docs/audit/evidence/audit-evidence.json
 
       - name: Verify Closed Canary Signature
-        if: inputs.release_stage == 'public'
+        if: inputs.release_stage != 'canary'
         run: |
           cosign verify-blob \
             --certificate docs/audit/evidence/stage-evidence/docs/audit/evidence/closed-canary-report.pem \
@@ -934,6 +935,16 @@ jobs:
             --certificate-identity-regexp '^https://github.com/GodOfAgents/VAMS/.github/workflows/.+@refs/.+$' \
             --certificate-oidc-issuer 'https://token.actions.githubusercontent.com' \
             docs/audit/evidence/stage-evidence/docs/audit/evidence/closed-canary-report.json
+
+      - name: Verify VDSO Shadow Signature
+        if: inputs.release_stage != 'canary'
+        run: |
+          cosign verify-blob \
+            --certificate docs/audit/evidence/stage-evidence/docs/audit/evidence/vdso-shadow-report.pem \
+            --signature docs/audit/evidence/stage-evidence/docs/audit/evidence/vdso-shadow-report.sig \
+            --certificate-identity-regexp '^https://github.com/GodOfAgents/VAMS/.github/workflows/.+@refs/.+$' \
+            --certificate-oidc-issuer 'https://token.actions.githubusercontent.com' \
+            docs/audit/evidence/stage-evidence/docs/audit/evidence/vdso-shadow-report.json
 
       - name: Require Stage-Specific Evidence
         env:

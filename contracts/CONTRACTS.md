@@ -16,6 +16,9 @@ or completed public testnet launch.
 
 - Record only verified deployment facts.
 - Leave unknown fields as `Pending`; do not use placeholder addresses.
+- Bootstrap governance is `team-controlled-bootstrap`: four humans use the
+  stable `ARCHITECT` and `SIGNER_A`-`SIGNER_C` roles with two separate offline
+  recovery seats. This is not decentralized community governance.
 - Every deployed contract or validator must include network, chain identifier,
   transaction hash, verification status, privileged role owner, Safe/multisig,
   timelock status, and notes.
@@ -23,6 +26,8 @@ or completed public testnet launch.
   multisig before public operator onboarding.
 - Any changed address requires a new row or a dated note preserving the old
   evidence trail.
+- The vesting schedule enum uses `ARCHITECT`; the legacy pre-deployment enum
+  label is not deployment-compatible.
 
 ---
 

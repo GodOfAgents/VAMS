@@ -8,6 +8,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Architect-led bootstrap readiness**: Added the fail-closed
+  `bootstrap-public` stage, `architect-reviews.json` evidence contract, six
+  content-bound Architect dossier domains, signed VDSO shadow-report
+  verification, and a strict non-independence disclosure. The later `public`
+  stage still requires content-bound independent reviews.
+- **Four-person team signer governance**: Added the
+  `team-signer-governance.json` schema, exact `ARCHITECT` and
+  `SIGNER_A`-`SIGNER_C` council memberships, separate governance/treasury
+  recovery seats under 2-of-3 split custody, consent/rehearsal evidence, and an
+  operator runbook. The profile explicitly identifies this as
+  team-controlled bootstrap governance, not decentralized governance.
 - **Cardano schema-v2 authenticated state machines**: Reworked
   `cardano/lib/vams/types.ak` and the four persistent validators so agent,
   proposal, timelock, fund, and claim states carry complete authentication
@@ -26,10 +37,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Credential incident closure contract**: Added
   `scripts/audit/credential_incident_evidence.py` and
   `credential-incident-report.schema.json`. Canary and public readiness now
-  require content-hashed public evidence for all three historical PEM
-  identities, rotation/replacement, Polygon/Cardano funding impact, seven role
-  classes, coordinated all-ref cleanup, clean complete-history scans, and a
-  named reviewer.
+  require content-hashed public evidence for all three historical PEM finding
+  occurrences and both unique key identities, rotation/replacement,
+  Polygon/Cardano funding impact, seven role classes, coordinated all-ref
+  cleanup, clean complete-history scans, and a named reviewer.
+- **Credential incident operator runbook**: Added a fail-closed walkthrough and
+  a no-push `history_rewrite.sh` tool that accepts only a fresh disposable bare
+  mirror, complete refspec, approved origin, external evidence directory,
+  sanitized rotation evidence, and explicit maintenance approval. It never
+  rewrites a working checkout or pushes remote refs.
+- **Sanitized secret-scan triage**: Added exact detector/path/commit/line
+  metadata from protected run `29416245559` without retaining candidate values.
+  All 20 TruffleHog findings remain blocking pending evidence or independent
+  adjudication.
+- **History-rewrite and triage safety regressions**: Added local
+  disposable-mirror tests proving inventory mode preserves refs, rejects
+  working clones, emits external evidence hashes, and contains no push,
+  hard-reset, clean, or forced-rewrite command. Added exact-count checks for the
+  869 Gitleaks and 20 TruffleHog findings and a guard against committing a
+  fabricated closure report.
 - **Operational evidence producer**: Added
   `.github/workflows/operational-evidence.yml` on a dedicated protected,
   read-only evidence runner. It binds a target SHA and release stage to a fixed
@@ -119,6 +145,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Cardano property tests**: Added seven seeded Aiken properties covering integer-square-root bounds, basis-point safety and monotonicity, inclusive ranges, strict bridge nonce ordering/replay rejection, and insurance payout caps.
 
 ### Changed
+- **BREAKING - Architect terminology**: Renamed the legacy pre-deployment
+  Solidity vesting enum to `ScheduleType.ARCHITECT` and aligned
+  deployment scripts, tests, frontend copy, tokenomics, whitepaper, and project
+  instructions. No allocation amount, cliff, duration, or unlock economics
+  changed. Any pre-deployment integration using the old enum symbol must
+  compile against the new name before rehearsal.
+- **Assurance indexes v2**: Added explicit `review_mode`,
+  `assurance_level`, and consistent independence claims to track assurance;
+  made later independent-review reports bundle-path and SHA-256 bound.
+- **Credential incident ownership**: Credential closure now records
+  `review_mode=architect-owner` and `independent_review=false`; it cannot imply
+  an external review that did not occur.
+- **Historical scan reconciliation**: Replaced unsupported closure claims and
+  guessed finding groups with the exact 869-finding protected Gitleaks
+  inventory and exact 20-finding sanitized TruffleHog inventory. No
+  `credential-incident-report.json` is created until its external artifacts
+  exist and validate.
+- **Provider revocation evidence boundary**: Documented that a failed provider
+  endpoint probe, later unverified scanner result, commit timestamp, and hashed
+  identifier cannot establish dashboard revocation time, access/billing review,
+  replacement, or impact.
 - **Slither CI dependency closure**: Added the pinned Foundry v1.7.1 toolchain
   to the Slither job and a workflow regression that fails if Slither can execute
   without its required `forge` compiler frontend.
@@ -128,10 +175,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   ancestor relationship and rejects drift across protected executable,
   workflow, testnet-profile, and deployment-tool paths. The readiness workflow
   now checks out full Git history to prove this binding.
-- **Credential incident evidence v2**: Replaced mandatory fabricated-style
-  per-network balance records with explicit `account-derived` and
-  `cryptographically-inapplicable` checks. Non-applicable networks require
-  public key-type proof and cannot carry an invented account or balance claim.
+- **Credential incident evidence v3**: Split the three historical PEM finding
+  occurrences from the two unique public-key identities so duplicate exposure
+  of one key cannot be misrepresented as a third key. Per-network checks remain
+  explicit `account-derived` or `cryptographically-inapplicable` evidence;
+  non-applicable networks cannot carry an invented account or balance claim.
 - **Aiken dependency reproducibility**: Updated `cardano/aiken.toml` and
   `cardano/aiken.lock` from floating `v2` selectors to exact official
   `v2.2.0` stdlib/fuzz releases. The strict seeded check and blueprint rebuild
@@ -338,6 +386,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`contracts/src/registry/ServiceBlockRegistry.sol`**: Service Block provisioning now fails closed when verifier-governed quarantine is active.
 
 ### Testing
+- **2026-07-17 Architect-bootstrap working-tree verification**: Passed full
+  Python at 774/774 executable tests with one intentional skip and 23 subtests;
+  the separate digest-pinned PostgreSQL 16.14 multi-process/restart test passed
+  beyond $1 \times 10^5$ records. Foundry passed 709/709 across 40 suites;
+  Aiken passed 77/77 with seed `20260713` and 250 cases per property; frontend
+  install/audit/build reported zero vulnerabilities; Bandit and both pip-audit
+  requirement scans passed; Semgrep completed with zero findings after fixing
+  one global-`IFS` issue and rerunning its sole timeout target; Slither
+  `--fail-high`, digest-pinned Caddy validation/adaptation, 81 audit tests,
+  documentation, workflow, traceability, mock-mode, default-credential, and
+  public-content gates passed. Rust format/check/deny-warnings Clippy passed;
+  linked Rust tests remain host-blocked by missing MSVC `link.exe`. Results are
+  working-tree evidence, not signed post-history-rewrite release evidence.
 - **PR CI diagnosis**: Run `29413794423` passed Python with PostgreSQL, Forge,
   Aiken, VIR-Core linked tests, frontend, Semgrep, Gateway, audit, and
   first-party controls. Gitleaks and TruffleHog failed on real historical

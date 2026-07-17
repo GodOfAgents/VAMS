@@ -15,7 +15,7 @@ import "./IVAMSVesting.sol";
  *
  * | Type       | Cliff  | Vest   | Cliff Unlock |
  * |------------|--------|--------|--------------|
- * | FOUNDER    | 12 mo  | 48 mo  | 0%           |
+ * | ARCHITECT  | 12 mo  | 48 mo  | 0%           |
  * | TEAM       | 12 mo  | 36 mo  | 0%           |
  * | EARLY_INV  | 6 mo   | 18 mo  | 0%           |
  * | REG_INV    | 12 mo  | 30 mo  | 0%           |
@@ -39,7 +39,7 @@ contract VAMSVesting is IVAMSVesting, AccessControl, ReentrancyGuard {
     // ============ Schedule Type Parameters ============
 
     // Cliff durations in seconds
-    uint256 private constant CLIFF_FOUNDER = 12 * ONE_MONTH;
+    uint256 private constant CLIFF_ARCHITECT = 12 * ONE_MONTH;
     uint256 private constant CLIFF_TEAM = 12 * ONE_MONTH;
     uint256 private constant CLIFF_EARLY_INVESTOR = 6 * ONE_MONTH;
     uint256 private constant CLIFF_REG_INVESTOR = 12 * ONE_MONTH;
@@ -48,7 +48,7 @@ contract VAMSVesting is IVAMSVesting, AccessControl, ReentrancyGuard {
     uint256 private constant CLIFF_LIQUIDITY = 0;
 
     // Vesting durations in seconds
-    uint256 private constant VEST_FOUNDER = 48 * ONE_MONTH;
+    uint256 private constant VEST_ARCHITECT = 48 * ONE_MONTH;
     uint256 private constant VEST_TEAM = 36 * ONE_MONTH;
     uint256 private constant VEST_EARLY_INVESTOR = 18 * ONE_MONTH;
     uint256 private constant VEST_REG_INVESTOR = 30 * ONE_MONTH;
@@ -421,8 +421,8 @@ contract VAMSVesting is IVAMSVesting, AccessControl, ReentrancyGuard {
         pure
         returns (uint256 cliff, uint256 vest, uint16 unlock)
     {
-        if (scheduleType == ScheduleType.FOUNDER) {
-            return (CLIFF_FOUNDER, VEST_FOUNDER, UNLOCK_NONE);
+        if (scheduleType == ScheduleType.ARCHITECT) {
+            return (CLIFF_ARCHITECT, VEST_ARCHITECT, UNLOCK_NONE);
         } else if (scheduleType == ScheduleType.TEAM) {
             return (CLIFF_TEAM, VEST_TEAM, UNLOCK_NONE);
         } else if (scheduleType == ScheduleType.EARLY_INVESTOR) {

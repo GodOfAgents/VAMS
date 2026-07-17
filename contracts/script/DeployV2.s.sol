@@ -175,10 +175,10 @@ contract DeployV2 is Script {
         vesting.createVestingSchedule(address(timelock), 120_000_000 * 1e18, IVAMSVesting.ScheduleType.FOUNDATION, true);
         console.log("Created DAO Treasury Schedule (120M) -> Timelock");
 
-        // C. Founder (12% = 120M)
-        // Beneficiary: Deployer (Simulating Founder Wallet)
-        vesting.createVestingSchedule(deployer, 120_000_000 * 1e18, IVAMSVesting.ScheduleType.FOUNDER, true);
-        console.log("Created Founder Schedule (120M) -> Deployer");
+        // C. Architect (12% = 120M)
+        // Beneficiary: Deployer (simulating Architect wallet)
+        vesting.createVestingSchedule(deployer, 120_000_000 * 1e18, IVAMSVesting.ScheduleType.ARCHITECT, true);
+        console.log("Created Architect Schedule (120M) -> Deployer");
 
         // D. Team/Future Hires (13% = 130M)
         // Beneficiary: Deployer (Simulating Team Reserve Wallet)

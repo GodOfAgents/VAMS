@@ -308,7 +308,7 @@ Designed for maximum value accrual and deflationary pressure.
 | :------------------------ | :--------- | :----- | :----------------------------------------  |
 | **Community & Ecosystem** | 50%        | 500M   | Airdrop (10% at TGE), Grants & Mining (40%) |
 | **Team & Advisors**       | 13%        | 130M   | Future hires & strategic advisors (GMV-Gated) |
-| **Founder**               | 12%        | 120M   | Dedicated founder allocation (M12 cliff)   |
+| **Architect**             | 12%        | 120M   | Dedicated Architect allocation (M12 cliff) |
 | **Investors**             | 13%        | 130M   | Early (5%) and Regular (8%) backers        |
 | **DAO Treasury**          | 12%        | 120M   | Protocol runway (GMV-Gated)                |
 | **Total**                 | 100%       | **1B** | **2.5% Max Annual Inflation** (Staking)    |
@@ -423,7 +423,7 @@ We have a detailed 8-Phase Execution Plan: **24-week MVP** followed by **post-MV
 
 ## **Building in Public. Hiring Engineers.**
 
-**Aseem Chishti** (Founder & Architect)
+**Aseem Chishti** (Architect)
 *   Designed the entire 5-Layer VAMS Stack.
 *   Authored **6,100+ lines** of technical specifications across all docs.
 *   Deep expertise in DePIN, Agentic workflows, and Tokenomics.

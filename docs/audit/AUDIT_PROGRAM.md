@@ -2,7 +2,8 @@
 
 **Architecture baseline:** v0.8.0 cognitive/composer over v0.6.0 OMS  
 **Deployment stage:** Hardened pre-testnet candidate  
-**Assurance model:** Closed canary before independently reviewed public testnet
+**Assurance model:** Closed canary before Architect-reviewed bootstrap public
+testnet; independent review remains mandatory for the later public stage
 
 This program treats every VAMS subsystem as economically sensitive. A defect in
 identity, routing, telemetry, memory, developer tooling, or data availability can
@@ -12,8 +13,10 @@ whether governance can recover the system.
 The machine-readable source of truth is `control-matrix.json`. CI validates the
 matrix and emits evidence for the exact commit under review. The regular
 `Security Evidence Gate` proves the audit pipeline ran; the manually invoked
-canary gate requires every G0-G4 track verified, while public promotion requires
-all 36 tracks verified plus independent and closed-canary evidence.
+canary gate requires every G0-G4 track verified. `bootstrap-public` requires all
+36 tracks, six explicitly non-independent Architect dossiers, and closed-canary
+evidence. The later `public` stage requires all 36 tracks plus independent and
+closed-canary evidence.
 A document, prior test count, or historical audit verdict is never evidence for
 a later commit.
 
@@ -93,8 +96,14 @@ The following cannot be waived:
 ### G5 - Independent assurance
 
 - Independent reviews cover Solidity/governance, Aiken/bridge,
-  economics/centralization, gateway/Agent SDK, and AI-agent safety.
+  economics/centralization, gateway/Agent SDK, privacy, and AI-agent safety.
 - All public-testnet-blocking findings are verified closed.
+
+For the faucet-only `bootstrap-public` profile, six Architect dossiers may
+temporarily satisfy G5 only with `review_mode=architect-bootstrap`, the exact
+non-independence disclosure, and zero blockers. This exception does not apply
+to the later `public` stage, incentives, real assets, wallet writes,
+authoritative VDSO, bridge value transfer, or mainnet.
 
 ### G6 - Controlled rollout
 
@@ -108,26 +117,34 @@ The following cannot be waived:
 
 | Owner role | Tracks |
 | --- | --- |
-| Audit Lead | T01-T04 and final finding acceptance |
+| Architect Audit Lead | T01-T04 and bootstrap finding acceptance |
 | DevSecOps | T05-T09, T35-T36 |
 | EVM/Cardano Security Leads | T10-T16 |
 | Economics and Governance Leads | T17-T22 |
 | AI Safety and SDK Leads | T23-T29 |
 | DA, Gateway, Frontend, Privacy, and SRE Leads | T30-T36 |
-| Independent Reviewers | Independent verification of T10-T34 |
+| Architect | Six bootstrap review domains; must disclose non-independence |
+| Independent Reviewers | Later independent verification of T10-T34 |
 
 No calendar target overrides G0 through G6. A closed canary may proceed after
-G0-G4; public or incentivized access additionally requires G5 and the closed
-canary portion of G6.
+G0-G4. Faucet-only bootstrap public access requires the Architect-bootstrap G5
+profile and the closed-canary portion of G6. Incentivized or later public
+access continues to require independent G5 evidence.
 
 ## Promotion Commands
 
 - `python scripts/audit/audit_program.py readiness --stage canary` requires a
   clean commit, signed aggregate evidence, hashed assurance records for every
-  G0-G4 track, and rehearsed Amoy/Cardano deployment manifests.
+  G0-G4 track, team-signer governance evidence, and rehearsed Amoy/Cardano
+  deployment manifests.
+- `python scripts/audit/audit_program.py readiness --stage bootstrap-public`
+  requires all 36 tracks verified at `architect-bootstrap`, all six
+  content-bound Architect dossiers, deployed manifests, signed seven-day
+  canary and VDSO shadow reports, and no pending deployment fields.
 - `python scripts/audit/audit_program.py readiness --stage public` additionally
   requires every track verified, independent assurance for T10-T34, deployed
   network manifests, a seven-day stop-condition-free canary, all required
   incident drills, and a deployment register without pending fields.
-- Detached evidence signatures are cryptographically verified with Cosign in
+- Detached canary, shadow, and aggregate evidence signatures are
+  cryptographically verified with Cosign in
   the manual GitHub promotion job before either command can return success.

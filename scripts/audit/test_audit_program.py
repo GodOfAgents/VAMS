@@ -694,6 +694,14 @@ class AuditProgramTests(unittest.TestCase):
         self.assertEqual(profile["vdso"]["mode"], "off")
         self.assertIs(profile["vdso"]["authoritative_enabled"], False)
         self.assertIs(profile["vdso"]["value_bearing_domains_enabled"], False)
+        governance = profile["governance"]
+        self.assertEqual(governance["governance_mode"], "team-controlled-bootstrap")
+        self.assertIs(governance["decentralized_governance_claimed"], False)
+        self.assertEqual(governance["human_signers"], 4)
+        self.assertEqual(
+            set(governance["stable_signer_roles"]),
+            audit_program.REQUIRED_TEAM_SIGNER_ROLES,
+        )
 
     def test_testnet_profile_rejects_weakened_capital_authority_and_soak_controls(self) -> None:
         profile = audit_program._load_json(audit_program.PROFILE_PATH)
@@ -704,6 +712,10 @@ class AuditProgramTests(unittest.TestCase):
         profile["exposure_limits"]["daily_aggregate_insurance_reserve_bps"] = 1001
         profile["governance"]["safe_threshold"] = 2
         profile["governance"]["emergency_scope"] = "unrestricted"
+        profile["governance"]["governance_mode"] = "decentralized"
+        profile["governance"]["decentralized_governance_claimed"] = True
+        profile["governance"]["human_signers"] = 1
+        profile["governance"]["offline_recovery_custody"] = "single-person"
         profile["soak_periods"]["closed_canary_days"] = 6
         profile["soak_periods"]["public_testnet_days"] = 13
         profile["vdso"]["mode"] = "shadow"
@@ -721,6 +733,10 @@ class AuditProgramTests(unittest.TestCase):
             "daily aggregate canary exposure must not exceed 10%",
             "Safes must remain exact 3-of-5",
             "emergency authority must remain a distinct pause-only 2-of-3",
+            "governance must remain team-controlled-bootstrap",
+            "must not claim decentralized governance",
+            "must use exactly four human signers",
+            "offline recovery seats must use 2-of-3 split custody",
             "closed-canary soak must remain at least 7 days",
             "public-testnet soak must remain at least 14 days",
             "keep VDSO mode off",
@@ -758,10 +774,14 @@ class AuditProgramTests(unittest.TestCase):
         # do not assert it since CI starts from a clean checkout.
         self.assertIn("evidence manifest", joined)
 
-    def test_canary_excludes_g6_track_but_public_includes_it(self) -> None:
+    def test_canary_excludes_g6_track_but_deployed_stages_include_it(self) -> None:
         canary = "\n".join(audit_program.validate_readiness(stage="canary"))
+        bootstrap = "\n".join(
+            audit_program.validate_readiness(stage="bootstrap-public")
+        )
         public = "\n".join(audit_program.validate_readiness(stage="public"))
         self.assertNotIn("T36=partial", canary)
+        self.assertIn("T36=partial", bootstrap)
         self.assertIn("T36=partial", public)
 
     def test_evidence_manifest_is_commit_bound_clean_and_signed(self) -> None:
@@ -1167,13 +1187,15 @@ class AuditProgramTests(unittest.TestCase):
             index.write_text(
                 json.dumps(
                     {
-                        "schema_version": "1.0.0",
+                        "schema_version": "2.0.0",
                         "commit_sha": commit,
                         "tracks": [
                             {
                                 "id": "T10",
                                 "status": "verified",
                                 "reviewer": "reviewer",
+                                "review_mode": "independent",
+                                "assurance_level": "independent",
                                 "independent_review": True,
                                 "blocking_findings_open": 0,
                                 "approved_at": "2026-07-13T00:00:00Z",
@@ -1211,6 +1233,59 @@ class AuditProgramTests(unittest.TestCase):
                     index, "public", commit, {"T10"}
                 )
             self.assertTrue(any("unexpected tracks: T11" in error for error in errors))
+
+    def test_bootstrap_assurance_rejects_independence_overclaim(self) -> None:
+        commit = "a" * 40
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            artifact = root / "report.txt"
+            artifact.write_text("Architect-bootstrap evidence", encoding="utf-8")
+            digest = audit_program.hashlib.sha256(artifact.read_bytes()).hexdigest()
+            entry = {
+                "id": "T10",
+                "status": "verified",
+                "reviewer": "Architect",
+                "review_mode": "architect-bootstrap",
+                "assurance_level": "architect-bootstrap",
+                "independent_review": False,
+                "blocking_findings_open": 0,
+                "approved_at": "2026-07-13T00:00:00Z",
+                "artifacts": [{"path": "report.txt", "sha256": digest}],
+            }
+            index = root / "assurance.json"
+            index.write_text(
+                json.dumps(
+                    {
+                        "schema_version": "2.0.0",
+                        "commit_sha": commit,
+                        "tracks": [entry],
+                    }
+                ),
+                encoding="utf-8",
+            )
+            self.assertEqual(
+                audit_program._validate_assurance_index(
+                    index, "bootstrap-public", commit, {"T10"}, root
+                ),
+                [],
+            )
+            entry["independent_review"] = True
+            index.write_text(
+                json.dumps(
+                    {
+                        "schema_version": "2.0.0",
+                        "commit_sha": commit,
+                        "tracks": [entry],
+                    }
+                ),
+                encoding="utf-8",
+            )
+            errors = "\n".join(
+                audit_program._validate_assurance_index(
+                    index, "bootstrap-public", commit, {"T10"}, root
+                )
+            )
+            self.assertIn("independence claim is inconsistent", errors)
 
     def test_public_canary_report_requires_duration_and_all_drills(self) -> None:
         commit = "a" * 40
@@ -1752,29 +1827,215 @@ class AuditProgramTests(unittest.TestCase):
     def test_public_requires_all_independent_review_domains(self) -> None:
         commit = "a" * 40
         with tempfile.TemporaryDirectory() as temp_dir:
-            path = Path(temp_dir) / "reviews.json"
+            root = Path(temp_dir)
+            reviews = []
+            for domain in audit_program.REQUIRED_INDEPENDENT_DOMAINS:
+                report_path = f"reviews/{domain}.md"
+                report_hash = _write_bytes(
+                    root, report_path, f"independent report:{domain}".encode("utf-8")
+                )
+                reviews.append(
+                    {
+                        "domain": domain,
+                        "reviewer": f"reviewer-{domain}",
+                        "organization": "independent-org",
+                        "review_mode": "independent",
+                        "assurance_level": "independent",
+                        "independent": True,
+                        "approved": True,
+                        "blocking_findings_open": 0,
+                        "report_path": report_path,
+                        "report_sha256": report_hash,
+                        "approved_at": "2026-07-13T00:00:00Z",
+                    }
+                )
+            path = root / "reviews.json"
             path.write_text(
                 json.dumps(
                     {
+                        "schema_version": "2.0.0",
                         "commit_sha": commit,
-                        "reviews": [
-                            {
-                                "domain": domain,
-                                "reviewer": f"reviewer-{domain}",
-                                "organization": "independent-org",
-                                "approved": True,
-                                "blocking_findings_open": 0,
-                                "report_sha256": "c" * 64,
-                            }
-                            for domain in audit_program.REQUIRED_INDEPENDENT_DOMAINS
-                        ],
+                        "reviews": reviews,
                     }
                 ),
                 encoding="utf-8",
             )
             self.assertEqual(
-                audit_program._validate_independent_reviews(path, commit), []
+                audit_program._validate_independent_reviews(path, commit, root), []
             )
+
+            data = json.loads(path.read_text(encoding="utf-8"))
+            data["reviews"][0]["independent"] = False
+            path.write_text(json.dumps(data), encoding="utf-8")
+            errors = "\n".join(
+                audit_program._validate_independent_reviews(path, commit, root)
+            )
+            self.assertIn("independent must equal True", errors)
+
+    def test_bootstrap_public_requires_content_bound_architect_reviews(self) -> None:
+        commit = "a" * 40
+        declaration = (
+            "This assessment is Architect-reviewed and is not an independent or "
+            "third-party audit."
+        )
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            reviews = []
+            for domain in audit_program.REQUIRED_ARCHITECT_REVIEW_DOMAINS:
+                report_path = f"architect/{domain}.md"
+                report_hash = _write_bytes(
+                    root, report_path, f"Architect report:{domain}".encode("utf-8")
+                )
+                evidence_path = f"architect/{domain}.log"
+                evidence_hash = _write_bytes(
+                    root, evidence_path, f"command output:{domain}".encode("utf-8")
+                )
+                reviews.append(
+                    {
+                        "domain": domain,
+                        "reviewer": "Aseem",
+                        "review_mode": "architect-bootstrap",
+                        "assurance_level": "architect-bootstrap",
+                        "independent": False,
+                        "approved": True,
+                        "blocking_findings_open": 0,
+                        "approved_at": "2026-07-13T00:00:00Z",
+                        "declaration": declaration,
+                        "invariants_reviewed": ["INV-1"],
+                        "commands": ["verify exact commit"],
+                        "limitations": ["not independently audited"],
+                        "stop_conditions": ["any failed executable gate"],
+                        "report_path": report_path,
+                        "report_sha256": report_hash,
+                        "evidence_artifacts": [
+                            {"path": evidence_path, "sha256": evidence_hash}
+                        ],
+                    }
+                )
+            path = root / "architect-reviews.json"
+            path.write_text(
+                json.dumps(
+                    {
+                        "schema_version": "1.0.0",
+                        "commit_sha": commit,
+                        "assurance_level": "architect-bootstrap",
+                        "reviewer_role": "Architect",
+                        "reviews": reviews,
+                    }
+                ),
+                encoding="utf-8",
+            )
+            self.assertEqual(
+                audit_program._validate_architect_reviews(path, commit, root), []
+            )
+            data = json.loads(path.read_text(encoding="utf-8"))
+            data["reviews"][0]["independent"] = True
+            path.write_text(json.dumps(data), encoding="utf-8")
+            errors = "\n".join(
+                audit_program._validate_architect_reviews(path, commit, root)
+            )
+            self.assertIn("must not claim independent review", errors)
+
+    def test_team_signer_governance_requires_exact_councils_and_evidence(self) -> None:
+        commit = "a" * 40
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            roles = ["ARCHITECT", "SIGNER_A", "SIGNER_B", "SIGNER_C"]
+            signers = [
+                {
+                    "role": role,
+                    "address": f"0x{index:040x}",
+                    "historical_pem_relationship": False,
+                    "independent_key_custody": True,
+                }
+                for index, role in enumerate(roles, start=1)
+            ]
+            consent_records = []
+            for role in roles:
+                evidence_path = f"consent/{role}.json"
+                evidence_hash = _write_bytes(root, evidence_path, role.encode("utf-8"))
+                consent_records.append(
+                    {
+                        "role": role,
+                        "consented": True,
+                        "understands_authority": True,
+                        "independent_key_custody_confirmed": True,
+                        "emergency_channel_recorded": True,
+                        "compromise_reporting_accepted": True,
+                        "amoy_rehearsal_completed": True,
+                        "evidence_path": evidence_path,
+                        "evidence_sha256": evidence_hash,
+                    }
+                )
+            rehearsals = []
+            for scenario in audit_program.REQUIRED_SIGNER_REHEARSALS:
+                evidence_path = f"rehearsals/{scenario}.json"
+                evidence_hash = _write_bytes(
+                    root, evidence_path, scenario.encode("utf-8")
+                )
+                rehearsals.append(
+                    {
+                        "scenario": scenario,
+                        "passed": True,
+                        "evidence_path": evidence_path,
+                        "evidence_sha256": evidence_hash,
+                    }
+                )
+            authorities = [
+                {
+                    "id": authority_id,
+                    "members": sorted(expected["members"]),
+                    "threshold": expected["threshold"],
+                    "scope": expected["scope"],
+                }
+                for authority_id, expected in audit_program.REQUIRED_TEAM_AUTHORITY_MEMBERS.items()
+            ]
+            report = {
+                "schema_version": "1.0.0",
+                "commit_sha": commit,
+                "network": "polygon-amoy",
+                "governance_mode": "team-controlled-bootstrap",
+                "decentralized_governance_claimed": False,
+                "externally_audited_claimed": False,
+                "signers": signers,
+                "offline_recovery_seats": [
+                    {
+                        "role": "GOVERNANCE_RECOVERY",
+                        "address": f"0x{5:040x}",
+                        "custody_mode": "2-of-3-split-custody",
+                        "custodians": ["SIGNER_A", "SIGNER_B", "SIGNER_C"],
+                        "custody_threshold": 2,
+                        "routine_use": False,
+                        "rotate_after_use": True,
+                    },
+                    {
+                        "role": "TREASURY_RECOVERY",
+                        "address": f"0x{6:040x}",
+                        "custody_mode": "2-of-3-split-custody",
+                        "custodians": ["SIGNER_A", "SIGNER_B", "SIGNER_C"],
+                        "custody_threshold": 2,
+                        "routine_use": False,
+                        "rotate_after_use": True,
+                    },
+                ],
+                "authorities": authorities,
+                "consent_records": consent_records,
+                "rehearsals": rehearsals,
+                "emergency_response_target_seconds": 1800,
+                "limitations": ["team-controlled bootstrap governance"],
+                "blocking_findings_open": 0,
+            }
+            path = root / "team-signer-governance.json"
+            path.write_text(json.dumps(report), encoding="utf-8")
+            self.assertEqual(
+                audit_program._validate_team_signer_governance(path, commit, root), []
+            )
+            report["authorities"][0]["threshold"] = 2
+            path.write_text(json.dumps(report), encoding="utf-8")
+            errors = "\n".join(
+                audit_program._validate_team_signer_governance(path, commit, root)
+            )
+            self.assertIn("governance authority threshold is invalid", errors)
 
 
 if __name__ == "__main__":

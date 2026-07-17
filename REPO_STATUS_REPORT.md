@@ -1,13 +1,13 @@
 # VAMS Repository Status Report And Public Testnet Roadmap
 
-**Date:** 2026-07-15
-**Last verified:** 2026-07-15 (partial working-tree gates only)
+**Date:** 2026-07-17
+**Last verified:** 2026-07-17 (implementation in progress; exact-tree gates pending)
 **Stage:** Hardened Pre-Testnet Candidate
 **Current Priority:** Phase 6: Closed Public-Testnet Baseline + Private VDSO Shadow Hardening
 **Public Testnet Target:** July 2026 launch window
 **Architecture Baseline:** v0.8.0 cognitive/composer layer + v1.3.0-oms runtime + June gateway hardening
-**Branch Baseline:** Evidence-control working tree based on
-`05aa06784907d6e32a5869662b671028fa3785ef`, itself descended from `main` at
+**Branch Baseline:** Architect-bootstrap working tree based on
+`a7671eec30d0c56bb46eb67dea31affb1998294d`, itself descended from `main` at
 `31929a24419a9b7b9d8954cbea2df9fe1cb77a68`; signed post-history-rewrite
 release evidence is absent
 
@@ -35,27 +35,37 @@ VAMS is a hardened pre-testnet candidate. The repository contains implemented So
 
 The system is not mainnet-ready. It is not yet a public testnet deployment. The remaining work is no longer abstract architecture; it is concrete verification, deployment ceremony, live configuration, and operational hardening.
 
+Bootstrap governance is Architect-led and team-controlled by four humans. It
+must not be described as decentralized community governance or externally
+audited. The faucet-only `bootstrap-public` stage accepts six explicit
+Architect-bootstrap dossiers; the later `public` stage remains blocked pending
+independent review and governance migration.
+
 Current blockers before public testnet:
 
 - Readiness is fail-closed at 3 implemented, 29 partial, 4 blocked, and 0
   verified tracks. No track may advance until every applicable gate reruns
   against the exact final post-history-rewrite SHA in CI and the complete
   stage-plus-operational evidence manifest is signed.
-- Current working-tree verification passes full Python, Foundry, Aiken,
-  Rust format/check/deny-warnings Clippy, frontend build/audit, Slither
-  fail-high, and first-party structural gates. The focused deployment-source,
-  credential, audit, and workflow set passes 40/40. PostgreSQL remains
-  unavailable and Rust linked tests remain environment-blocked because this
-  Windows host lacks MSVC `link.exe`. Bandit, pip-audit, and Semgrep require a
-  pinned CI rerun after this evidence-control change. These local results are
-  not signed exact-commit release evidence.
+- Current working-tree verification passes full Python (774 passed, one
+  intentional skip, 23 subtests), the pinned PostgreSQL six-figure atomicity
+  test, Foundry 709/709, Aiken 77/77, Rust format/check/deny-warnings Clippy,
+  frontend build/audit, Bandit, pip-audit, Semgrep, Slither fail-high, Caddy,
+  and first-party structural gates. Rust linked tests remain unavailable on
+  this Windows host because MSVC `link.exe` is absent. These results are not
+  signed post-history-rewrite release evidence.
 - The previous branch Semgrep scan recorded zero findings; its three initial
   timeout paths were rerun with a longer per-rule budget and completed with
   zero findings. It must rerun against the final patch and post-rewrite SHA.
-  Historical Gitleaks remains blocking on three committed PEM private keys.
-  Protected PR CI additionally verified one historical Infura credential and
-  reported 19 unverified TruffleHog findings. Rotation, history cleanup,
-  SBOM/signing, and aggregate CI evidence remain promotion gates.
+  Historical Gitleaks remains blocking on committed PEM private-key paths and
+  legacy provider helpers. PR CI run `29413794423` verified one Infura finding;
+  later run `29416245559` reported the same 20 sanitized detector events as
+  unverified. That change is consistent with invalidation but is not provider
+  revocation or impact proof. Owner attestations now report no active provider
+  credential, unexpected activity, or unexpected billing and describe three
+  PEM occurrences resolving to two unique keys, but they lack the independent
+  artifacts required for closure. History cleanup, signed evidence, and clean
+  rescans remain promotion gates.
 - Avail and EigenDA remain structured stubs and must stay blocked from live environments.
 - Deployment artifacts are incomplete: chain IDs, addresses, transaction hashes, verification status, multisig owners, and timelock ownership.
 - Live DA, identity, Trails, TEE, and gateway configuration need testnet evidence.
@@ -97,9 +107,9 @@ Status labels:
 
 | Component | Current Status | Reality Notes | Public Testnet Gate |
 | --- | --- | --- | --- |
-| Solidity contracts (`contracts/src/`) | Implemented, Working-Tree Verification Clean | Full Foundry passes 709/709 across 40 suites after the Safe/VDSO changes. Whole-tree `forge fmt --check` passes after deterministic formatter cleanup. | Rerun against the clean release commit in CI, then complete independent review, deployment rehearsal, role ownership review, and deployment address registry. |
+| Solidity contracts (`contracts/src/`) | Implemented, Working-Tree Verification Clean | The Architect enum migration and full Foundry tree pass 709/709 tests across 40 suites; build and formatting checks pass. These dirty-tree results are not signed exact-commit evidence. | Rerun against the clean release commit in CI, complete the six Architect-bootstrap dossiers for faucet-only deployment, then retain independent review as a later public/mainnet gate. |
 | Cardano validators (`cardano/validators/`) | Schema-v2 State Machines Implemented, Working-Tree Verification Clean | Four persistent validators preserve explicit authentication asset classes and exact datum/value transitions. Three seed/bootstrap policies are auxiliary templates. Bridge execution, cross-chain deposits, and slashing fail closed; local timelock targets are allowlisted. Seeded Aiken verification passes 71 unit tests and 6 properties (77/77), with 250 successful cases per property, and the blueprint rebuild succeeds. `cardano/lib/vams/vdso.ak` remains conformance-only. | Apply reviewed public parameters, independently verify final hashes, rerun on the exact clean post-rewrite SHA in CI, and retain signed rehearsal evidence. |
-| Neuron runtime (`neuron/`) | Implemented, Working-Tree Verification Clean, Live Routes Restricted | Mock clients remain available locally but are blocked from live profiles. The non-PostgreSQL Python aggregate passes 753 tests with one intentional Rust-binary environment skip. The real PostgreSQL atomicity/restart gate was not run on this tree because no service is available. | Run the PostgreSQL gate, rerun all Python tests in exact-commit CI, and collect live integration evidence for every enabled route. |
+| Neuron runtime (`neuron/`) | Implemented, Working-Tree Verification Clean, Live Routes Restricted | Mock clients remain available locally but are blocked from live profiles. The non-PostgreSQL aggregate passes 774 tests with one intentional skip and 23 subtests. The pinned PostgreSQL multi-process atomicity/restart gate passes beyond $1 \times 10^5$ records. | Rerun all Python tests in exact-commit CI and collect live integration evidence for every enabled route. |
 | Data availability | Implemented, Live Evidence Pending | Celestia live failures no longer fall back to mock receipts and exact retrieval is required. Near non-mock submission is disabled until signed submission and retrieval exist. Mock receipts are never verified; Avail, EigenDA, and current VDSO DA paths remain release-ineligible. | Record real Celestia Mocha and Near Testnet submission, inclusion, independently observed retrieval, and payload-match artifacts before enabling either route. |
 | Gateway (`gateway/server.py`) | Implemented, Needs Live Verification | Gateway requires DID auth, replay protection, proxy-verified mTLS, explicit live CORS origins, bounded methods/headers, request limits, rate limiting, loopback binding, and Caddy TLS. Public instances do not mount VDSO routes with `VDSO_MODE=off`; private shadow startup requires PostgreSQL atomic stores, trusted heights, and deployment verification. | Certificate allowlist, live route/size/rate smoke tests, Gateway aggregate pytest evidence, external TLS scan, and multi-process shadow soak evidence. |
 | Composer and cognitive layer | Implemented | CHC 10-axis cognitive profiles and 6-axis composer scoring exist. Cognitive score: $$S_{cog}=1.0-\frac{1}{|D_{req}|}\sum_{d \in D_{req}}\max(0.0, Req_d-Profile_d)$$ | Keep scorer tests passing; verify real node telemetry maps correctly into candidate ranking. |
@@ -138,7 +148,7 @@ Do not preserve historical aggregate totals as current evidence unless the full
 suite has been rerun on the current tree and bound to its commit.
 
 Current local results are explicitly marked below. This working tree is based
-on `05aa06784907d6e32a5869662b671028fa3785ef`, but the results are not signed
+on `a7671eec30d0c56bb46eb67dea31affb1998294d`, but the results are not signed
 release evidence and credential history remediation must precede the release
 SHA. The branch started from `main` at
 `31929a24419a9b7b9d8954cbea2df9fe1cb77a68`:
@@ -147,20 +157,21 @@ SHA. The branch started from `main` at
 | --- | --- | --- |
 | Solidity verification | `forge build --sizes`; `forge test -vvv`; `forge fmt --check` | Current working tree passed: 709/709 tests across 40 suites, zero failures/skips; build and whole-tree formatting pass. Compiler warnings remain recorded for cleanup/review. |
 | Aiken verification | `aiken fmt --check`; `aiken check --deny --seed 20260713 --max-success 250`; `aiken build` | Current working tree passed: 71 unit tests and 6 properties, 77/77 total, with 250 successful cases per property; the parameterized `plutus.json` blueprint was regenerated. |
-| Evidence-control regressions | `python -m unittest scripts.audit.test_credential_incident_evidence scripts.audit.test_audit_program scripts.audit.test_workflow_security` | Current working tree passed 40/40 on 2026-07-15, covering manifest source binding, protected drift, non-ancestor commits, full-history workflow checkout, and incident-check applicability. |
-| Python current tree | `python -m pytest -q --tb=short --ignore=neuron/tests/test_vdso_postgres_integration.py` | Passed: 759 tests, 2 toolchain-artifact skips, and 23 subtests; one upstream `websockets.legacy` deprecation warning remains. The separate PostgreSQL gate is environment-blocked on this host and is not claimed. |
-| PostgreSQL integration | `python -m pytest -q -rs neuron/tests/test_vdso_postgres_integration.py::test_postgres_atomicity_restart_and_six_figure_state` | Explicitly skipped because no dedicated disposable database was supplied through `VDSO_TEST_POSTGRES_DSN` with `VDSO_TEST_POSTGRES_ALLOW_RESET=1`; no PostgreSQL pass is claimed. |
-| Python security lint | `bandit -r neuron gateway -ll -ii -q` | Previously recorded clean on the branch; the pinned Bandit CLI was unavailable for this patch and must rerun in exact-commit CI. |
-| Python dependency audit | `pip-audit -r gateway/requirements.txt` and `pip-audit -r neuron/requirements.txt` | Previously recorded clean for both requirement sets; the pinned CLI was unavailable for this patch and must rerun in exact-commit CI. |
+| Evidence-control regressions | `python -m unittest discover -s scripts/audit -p 'test_*.py'` | Current working tree passed 81/81, including Architect-bootstrap assurance, exact team councils, credential evidence, workflow, rewrite safety, and sanitized triage. |
+| Python current tree | `python -m pytest -v --tb=short --ignore=neuron/tests/test_vdso_postgres_integration.py` | Passed: 774 tests, one intentional skip, and 23 subtests; one upstream `websockets.legacy` deprecation warning remains. |
+| PostgreSQL integration | `python -m pytest -v --tb=short neuron/tests/test_vdso_postgres_integration.py::test_postgres_atomicity_restart_and_six_figure_state` | Passed against the digest-pinned PostgreSQL 16.14 container: one test, multi-process atomicity/restart, and more than $1 \times 10^5$ records. The disposable container was removed. |
+| Python security lint | `bandit -r neuron gateway -ll -ii` | Passed with no selected issues: zero High severity findings and no unmitigated selected result. |
+| Python dependency audit | `pip-audit -r gateway/requirements.txt` and `pip-audit -r neuron/requirements.txt` | Passed: no known vulnerabilities in either requirement set. |
 | VIR-Core current branch | `cargo fmt --all --check`; `cargo check --workspace --all-targets --locked`; `cargo clippy --workspace --all-targets --locked -- -D warnings`; `cargo test --workspace --all-targets --locked` | Format, check, and deny-warnings Clippy pass. Linked tests are unavailable because MSVC `link.exe` is not installed; run them on Linux CI or install the Visual Studio C++ workload. |
-| Semgrep | Exact workflow scan command | Local supplemental scans recorded zero findings across 464 tracked files/520 rules, and PR CI run `29413794423` passed the pinned Semgrep job. Candidate exact-commit CI and independent acceptance remain required. |
+| Semgrep | Exact workflow scan command plus targeted `--timeout 300` rerun | Passed after removing one global-`IFS` finding from the rewrite tool: zero findings across 473 tracked files; the one initially timed-out audit-program rule passed against its single target. Candidate exact-commit CI remains required. |
 | Slither | `slither . --exclude-dependencies --exclude-low --exclude-informational --fail-high` | Local fail-high passed for 181 contracts and 63 detectors with 19 adjudicated lower-severity results. PR CI run `29413794423` exposed a missing-`forge` workflow dependency; commit `68bbe926315057d5ce5271b1fbef8e084cda2b14` added pinned Foundry v1.7.1 and rerun `29415822350` passed the Slither job. Independent acceptance of the residual adjudications remains required. |
-| Gitleaks history | Gitleaks v8.30.1 `git --log-opts=--all` with fully redacted reporting | Blocking. The local inventory reports 1,740 matches across 15 finding-bearing commits, including three PEM files. PR CI run `29413794423` scanned 62 commits and reported 869 redacted matches; the sanitized inventories require independent reconciliation after rotation and cleanup. |
+| Gitleaks history | Gitleaks v8.30.1 `git --log-opts=--all` with fully redacted reporting | Blocking. The local inventory reports 1,740 matches across 15 finding-bearing commits. PR CI run `29416245559` reported 869 redacted matches across 27 paths and nine finding-bearing commits: 867 generic-key and two private-key findings. The sanitized inventories require independent reconciliation after rotation and cleanup. |
 | Frontend install | `npm ci` | Passed: 176 packages installed/audited, 0 vulnerabilities. |
 | Frontend audit | `npm audit --audit-level=high` | Passed: 0 vulnerabilities. |
 | Frontend build | `npm run build` | Passed with Vite 7.3.6. |
 | Cardano template rehearsal | `cardano_preprod_artifacts.py --commit-sha 202172db...` | Passed at the clean implementation commit: bound four non-deployable persistent validator artifacts and three auxiliary policy templates. `artifacts_applied=false`; no address, transaction, signing credential, or deployment claim was generated. |
-| Report/diff hygiene | `git diff --check` | Passed before the documentation handoff commit. |
+| Gateway Caddy profile | Digest-pinned Caddy `validate` and `adapt` | Passed; mTLS client verification, loopback proxy target, request-body limit, and response security headers were present in the adapted configuration. |
+| Report/diff hygiene | `git diff --check` | Passed on the current working tree before commit. |
 | Gateway/runtime/VDSO focused tests | Focused pytest selection covering Gateway auth/lifecycle, VDSO semantics, PostgreSQL stores, runtime safety, and the private shadow worker | Passed: 134 with one intentional skip for the real Rust binary that cannot be linked on this Windows host. The real Aiken exported UPLC integration passed. |
 | Phase 6 security scripts | `default_credential_scan.py`, `public_content_policy_scan.py`, `mock_mode_promotion_scan.py` | Passed on the current tree on 2026-07-15. |
 | Python syntax check | `compileall` on the VDSO/Gateway modules | Passed on the current tree on 2026-07-13. |
@@ -173,15 +184,15 @@ Verification still pending or blocked locally:
 
 | Scope | Status |
 | --- | --- |
-| Exact-commit aggregate rerun | PR merge-SHA CI rerun `29415822350` passed Python (including pinned PostgreSQL), Forge, Aiken, VIR-Core linked tests, frontend, Bandit/pip-audit, Semgrep, Slither, SBOM, Gateway, audit, and first-party controls. Gitleaks and TruffleHog correctly failed on the unresolved history, so the aggregate Security Evidence Gate failed and readiness stayed skipped. Clean post-history-rewrite candidate CI and a signed aggregate manifest remain required. |
-| Historical secret exposure | Gitleaks retains the three committed PEM identities. Sanitized PR CI also found one verified historical Infura credential at obsolete `simulate-request-v3.mjs`, line 6, commit `1321f91586784d218ebc11126de588fbcf649ec6`, plus 19 unverified TruffleHog findings. Infura and PEM rotation/revocation, role/provider impact proof, coordinated history cleanup, collaborator re-cloning, and zero-finding rescans are mandatory. |
+| Exact-commit aggregate rerun | PR merge-SHA CI run `29416245559` passed Python (including pinned PostgreSQL), Forge, Aiken, VIR-Core linked tests, frontend, Bandit/pip-audit, Semgrep, Slither, SBOM, Gateway, audit, and first-party controls. Gitleaks and TruffleHog correctly failed on unresolved history, so the aggregate Security Evidence Gate failed and readiness stayed skipped. Clean post-history-rewrite candidate CI and a signed aggregate manifest remain required. |
+| Historical secret exposure | Gitleaks retains three historical PEM finding occurrences representing two unique keys, plus provider-helper findings. Run `29413794423` verified one Infura finding at `simulate-request-v3.mjs`, line 6, commit `1321f91586784d218ebc11126de588fbcf649ec6`; run `29416245559` later classified all 20 sanitized detector events as unverified. The Desktop owner attestations are supporting inputs, not artifact-bound closure evidence. Provider/PEM decommissioning evidence, replacement fingerprints, role and funding impact artifacts, coordinated all-ref cleanup, collaborator re-cloning, and zero-finding rescans are mandatory. |
 | Semgrep exact-commit evidence | The three initial timeout paths completed in the longer-timeout supplemental scan with zero findings. Preserve both raw runs and rerun them against the final commit in CI. |
 | Aiken transaction properties | Schema-v2 transaction fixtures cover exact creation/successors, duplicate identity/vote rejection, forged and replayed claim/payout rejection, malformed intents, premature execution, unauthorized cancellation, datum/value substitution, and bridge/slashing fail-closed behavior. Independent protocol review and applied-script rehearsal remain required. |
 | Slither adjudications | The 19 residual medium-scan results are documented; independent review and the complete low/informational report remain required. |
-| TruffleHog | The earlier safe offline scan found four unverified fixture candidates. Protected all-category PR CI run `29413794423` superseded that coverage boundary and produced sanitized metadata for 20 findings: one verified Infura credential and 19 unverified findings. No raw value is retained. The gate correctly remains blocking pending provider rotation, adjudication, history cleanup, and a zero-finding rescan. |
-| Default credential scan | Passed locally and in PR CI rerun `29415822350`; rerun on the clean post-history-rewrite candidate SHA remains required. |
-| Mock-mode promotion scan | Passed locally and in PR CI rerun `29415822350`; rerun on the clean post-history-rewrite candidate SHA remains required. |
-| Public-content policy scan | Passed locally and in PR CI rerun `29415822350`; rerun on the clean post-history-rewrite candidate SHA remains required. |
+| TruffleHog | Protected run `29416245559` used `--results=verified,unknown,unverified` and produced sanitized metadata for 20 unverified findings. Earlier run `29413794423` verified one of the Infura events. No raw value is retained. The gate remains blocking pending provider/PEM evidence, candidate adjudication, history cleanup, and a zero-finding rescan. |
+| Default credential scan | Passed locally and in PR CI run `29416245559`; rerun on the clean post-history-rewrite candidate SHA remains required. |
+| Mock-mode promotion scan | Passed locally and in PR CI run `29416245559`; rerun on the clean post-history-rewrite candidate SHA remains required. |
+| Public-content policy scan | Passed locally and in PR CI run `29416245559`; rerun on the clean post-history-rewrite candidate SHA remains required. |
 
 Required full gate set before public testnet:
 
@@ -257,10 +268,11 @@ Mainnet remains conditional. No mainnet date should be promised until public tes
 
 ## 9. Immediate Engineering Priorities
 
-1. Rotate/revoke the three historically committed PEM identities, prove they
-   control no funded or privileged role, coordinate all-ref
+1. Rotate/decommission both unique key identities represented by the three
+   historical PEM finding occurrences, prove they control no funded or
+   privileged role, coordinate all-ref
    rewrite/reclone/fork/cache cleanup, and satisfy credential-incident schema
-   v2 with zero-finding complete-history Gitleaks and all-category TruffleHog
+   v3 with zero-finding complete-history Gitleaks and all-category TruffleHog
    scans.
 2. Freeze candidate SHA A after the rewrite and run every pinned stage gate,
    including PostgreSQL and Linux Rust tests, without signing an aggregate that
@@ -278,8 +290,12 @@ Mainnet remains conditional. No mainnet date should be promised until public tes
    every identity, code hash, role, paused/empty state, and confirmation through
    independent providers.
 7. Run the seven-day faucet-only canary and private read-only shadow lane with
-   at least $1 \times 10^5$ transitions, complete six independent reviews, and
-   require all 36 tracks verified before public promotion with `VDSO_MODE=off`.
+   at least $1 \times 10^5$ transitions, complete six explicitly
+   non-independent Architect-bootstrap dossiers, and require all 36 tracks
+   verified before `bootstrap-public` promotion with `VDSO_MODE=off`.
+8. Keep the later `public` stage blocked until independent reviews and the
+   governance migration are available; no lack of funding may be hidden by an
+   unsupported assurance claim.
 
 ---
 

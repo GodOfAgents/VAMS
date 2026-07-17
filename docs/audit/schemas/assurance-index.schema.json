@@ -5,7 +5,7 @@
   "type": "object",
   "required": ["schema_version", "commit_sha", "tracks"],
   "properties": {
-    "schema_version": {"const": "1.0.0"},
+    "schema_version": {"const": "2.0.0"},
     "commit_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
     "tracks": {
       "type": "array",
@@ -13,11 +13,13 @@
       "maxItems": 36,
       "items": {
         "type": "object",
-        "required": ["id", "status", "reviewer", "independent_review", "blocking_findings_open", "approved_at", "artifacts"],
+        "required": ["id", "status", "reviewer", "review_mode", "assurance_level", "independent_review", "blocking_findings_open", "approved_at", "artifacts"],
         "properties": {
           "id": {"type": "string", "pattern": "^T(0[1-9]|[12][0-9]|3[0-6])$"},
           "status": {"const": "verified"},
           "reviewer": {"type": "string", "minLength": 1},
+          "review_mode": {"enum": ["architect-bootstrap", "independent"]},
+          "assurance_level": {"enum": ["architect-bootstrap", "independent"]},
           "independent_review": {"type": "boolean"},
           "blocking_findings_open": {"const": 0},
           "approved_at": {"type": "string", "format": "date-time"},

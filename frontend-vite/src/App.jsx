@@ -1381,7 +1381,7 @@ export default function VAMS_Web3_Guild() {
             </div>
             <div className={`bg-white/10 backdrop-blur-[2px] p-10 border ${borderLight} text-center ${borderHover} transition-all duration-300 group`}>
               <div className="font-serif text-5xl mb-4 group-hover:scale-110 transition-transform duration-300">4 Year</div>
-              <div className={`font-mono text-[10px] uppercase tracking-[0.2em] ${textSub}`}>Founder Vesting</div>
+              <div className={`font-mono text-[10px] uppercase tracking-[0.2em] ${textSub}`}>Architect Vesting</div>
             </div>
           </div>
 
@@ -1447,7 +1447,7 @@ export default function VAMS_Web3_Guild() {
                 {[
                   { l: "Community & Eco", v: "34%" },
                   { l: "Protocol Treasury", v: "21%" },
-                  { l: "Founders", v: "16%" },
+                  { l: "Architects", v: "16%" },
                   { l: "Investors", v: "14%" },
                   { l: "Team & Advisors", v: "10%" },
                   { l: "Initial Liquidity", v: "5%" },
@@ -1519,7 +1519,7 @@ export default function VAMS_Web3_Guild() {
               </div>
               <div className="w-full">
                 <h3 className="font-serif text-2xl md:text-3xl mb-1">Aseem Chishti</h3>
-                <p className={`font-mono text-[10px] uppercase ${textSub} mb-4 tracking-widest`}>Founder & Architect</p>
+                <p className={`font-mono text-[10px] uppercase ${textSub} mb-4 tracking-widest`}>Architect</p>
                 <p className={`${textSub} text-sm leading-relaxed font-light tracking-wide mx-auto md:mx-0`}>
                   Sole developer of the 5-Layer VAMS codebase and 6,100+ lines of technical specs. Deep expertise in DePIN, Agentic workflows, and tokenomics.
                 </p>

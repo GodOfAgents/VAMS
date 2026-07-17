@@ -5,19 +5,23 @@
   "type": "object",
   "required": ["schema_version", "commit_sha", "reviews"],
   "properties": {
-    "schema_version": {"const": "1.0.0"},
+    "schema_version": {"const": "2.0.0"},
     "commit_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
     "reviews": {
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["domain", "reviewer", "organization", "approved", "blocking_findings_open", "report_sha256", "approved_at"],
+        "required": ["domain", "reviewer", "organization", "review_mode", "assurance_level", "independent", "approved", "blocking_findings_open", "report_path", "report_sha256", "approved_at"],
         "properties": {
           "domain": {"enum": ["solidity-governance", "aiken-bridge", "economics-centralization", "gateway-agent-sdk", "privacy", "ai-agent-safety"]},
           "reviewer": {"type": "string", "minLength": 1},
           "organization": {"type": "string", "minLength": 1},
+          "review_mode": {"const": "independent"},
+          "assurance_level": {"const": "independent"},
+          "independent": {"const": true},
           "approved": {"const": true},
           "blocking_findings_open": {"const": 0},
+          "report_path": {"type": "string", "minLength": 1, "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$)).+$"},
           "report_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
           "approved_at": {"type": "string", "format": "date-time"}
         },

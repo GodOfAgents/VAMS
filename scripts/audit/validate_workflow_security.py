@@ -73,6 +73,11 @@ def validate() -> list[str]:
     for label, pattern in operational_bindings.items():
         if re.search(pattern, operational_text) is None:
             errors.append(f"operational evidence workflow is missing {label}")
+    for stage in ("canary", "bootstrap-public", "public"):
+        if f"          - {stage}" not in text:
+            errors.append(f"security workflow is missing release stage {stage}")
+        if f"          - {stage}" not in operational_text:
+            errors.append(f"operational workflow is missing release stage {stage}")
 
     seeds = re.findall(r"--seed\s+([0-9]+)", text)
     seeds.extend(re.findall(r"(?m)^\s*AUDIT_SEED:\s*[\"']?([0-9]+)", text))
@@ -120,6 +125,8 @@ def validate() -> list[str]:
         "pinned PostgreSQL service": re.escape(POSTGRES_IMAGE),
         "PostgreSQL health check": r"pg_isready -U vdso_ci -d vdso_ci",
         "disposable PostgreSQL reset opt-in": r"VDSO_TEST_POSTGRES_ALLOW_RESET:\s*[\"']1[\"']",
+        "closed canary signature for deployed stages": r"Verify Closed Canary Signature[\s\S]*?if:\s*inputs\.release_stage != 'canary'",
+        "VDSO shadow signature for deployed stages": r"Verify VDSO Shadow Signature[\s\S]*?if:\s*inputs\.release_stage != 'canary'[\s\S]*?vdso-shadow-report\.json",
     }
     for label, pattern in required_bindings.items():
         if re.search(pattern, text) is None:

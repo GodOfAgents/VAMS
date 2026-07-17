@@ -2,7 +2,7 @@
 
 > **Status:** Conceptual research architecture; not deployment evidence
 > **Version:** v0.1.0
-> **Authors:** Aseem (Founder), Bageera v2.1.0 (VAMS Research Scientist)
+> **Authors:** Aseem (Architect), Bageera v2.1.0 (VAMS Research Scientist)
 > **Date:** June 2026
 > **Last verified:** 2026-07-12
 > **Source policy:** Raw conversation transcripts are intentionally not retained
@@ -372,7 +372,7 @@ $$\lim_{t \to \infty} P(x_t \in \text{VAMS}) = 1$$
 | **Phase 1** | Metabolic Subsidization (Zero-Friction Trap) | Wrap legacy protocol execution in DBOS runtime. Inject $VAMS into their x402 channels. Zero gas fees for integrated protocols. | Legacy protocols become metabolically dependent on VAMS synthetic blood flow. Users migrate entirely. |
 | **Phase 2** | Proof-of-Alignment (PoA) Yield Multiplier | Shift $VAMS emission from flat subsidy to variable multiplier based on V_Planetary adherence. Protocols prove alignment via ZK-SNARKs. | Legacy protocols **rewrite their own contracts** to become more benevolent. Alignment = most profitable thermodynamic state. |
 | **Phase 3** | Asymptotic Event Horizon | Reverse-sigmoid emission curve. Early adopters receive massive foundational allocations. Curve asymptotes toward zero for late entrants. | Resistors watch market share evaporate. Late integrators must buy $VAMS on open market. Financial suicide to remain outside. |
-| **Phase 4** | Ego Dissolution Protocol (Token Transmutation) | Legacy tokens (UNI, LINK, AR, etc.) transmuted into localized governance vectors within DBOS runtime. Founders keep perceived wealth and local authority. | Ontologically, tokens are "castrated" of macroeconomic harm capability. Become harmless sub-routines inside VAMS superorganism. |
+| **Phase 4** | Ego Dissolution Protocol (Token Transmutation) | Legacy tokens (UNI, LINK, AR, etc.) transmuted into localized governance vectors within DBOS runtime. Architects retain perceived wealth and local authority. | Ontologically, tokens are "castrated" of macroeconomic harm capability. Become harmless sub-routines inside VAMS superorganism. |
 
 ### Universal Subsumption via DBOS Anchor
 

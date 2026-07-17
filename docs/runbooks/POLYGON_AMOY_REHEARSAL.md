@@ -8,6 +8,8 @@
 This ceremony deploys the baseline contracts first and the seven empty VDSO
 modules second. It does not activate VDSO, rewards, value transfer, adapters,
 programs, verifiers, domains, recovery, reservations, or execution routes.
+The exact four-person owner design, recovery custody, consent, and rehearsal
+requirements are defined in [TEAM_SIGNER_GOVERNANCE.md](TEAM_SIGNER_GOVERNANCE.md).
 
 ## Required external inputs
 
@@ -28,7 +30,8 @@ committed file:
   `VAMS_SAFE_SINGLETON_RUNTIME_CODE_HASH`; supply the same approved release
   under the `VAMS_VDSO_SAFE_*` names.
 
-Addresses and code hashes are public. Safe owner membership, complete setup
+Addresses and code hashes are public. Safe owner membership follows the
+`ARCHITECT` and `SIGNER_A`-`SIGNER_C` design in the team-signer runbook. Complete setup
 transactions, enabled-module/guard/fallback state, nonce, and `ApproveHash`
 history must be independently recorded. Current-state queries do not prove a
 historically pristine Safe.

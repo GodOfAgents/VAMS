@@ -31,6 +31,9 @@ class WorkflowSecurityTests(unittest.TestCase):
             r"testnet-readiness-gate:[\s\S]*?ref:\s*\$\{\{\s*inputs\.target_sha\s*\}\}\s*fetch-depth:\s*0",
         )
         self.assertIn('AUDIT_SEED: "20260713"', text)
+        self.assertIn("          - bootstrap-public", text)
+        self.assertIn("Verify VDSO Shadow Signature", text)
+        self.assertIn("if: inputs.release_stage != 'canary'", text)
         self.assertNotIn("--result ", text)
         self.assertNotIn("gate-artifact", text)
         self.assertNotIn("--only-verified", text)
@@ -58,6 +61,7 @@ class WorkflowSecurityTests(unittest.TestCase):
         self.assertIn("runs-on: [self-hosted, linux, x64, vams-testnet-evidence]", text)
         self.assertIn("environment: testnet-operational-evidence", text)
         self.assertIn("audit_program.py operational", text)
+        self.assertIn("          - bootstrap-public", text)
         self.assertIn("BEGIN ([A-Z0-9 ]+ )?PRIVATE KEY", text)
         self.assertNotIn("--exclude='*.pem'", text)
         self.assertIn(

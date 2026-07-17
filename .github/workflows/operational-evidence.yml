@@ -10,6 +10,7 @@ on:
         type: choice
         options:
           - canary
+          - bootstrap-public
           - public
       target_sha:
         description: Frozen full 40-character commit SHA

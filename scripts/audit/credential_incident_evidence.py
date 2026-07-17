@@ -24,7 +24,13 @@ REQUIRED_ROLE_CHECKS = {
     "validator",
 }
 REQUIRED_NETWORKS = {"polygon-amoy", "cardano-preprod"}
-CREDENTIAL_INCIDENT_SCHEMA_VERSION = "2.0.0"
+REQUIRED_OCCURRENCE_PATH_COUNTS = {
+    "node_identity.pem": 2,
+    "neuron/node_identity.pem": 1,
+}
+EXPECTED_FINDING_OCCURRENCES = sum(REQUIRED_OCCURRENCE_PATH_COUNTS.values())
+EXPECTED_UNIQUE_IDENTITIES = 2
+CREDENTIAL_INCIDENT_SCHEMA_VERSION = "3.0.0"
 FUNDING_APPLICABILITIES = {
     "account-derived",
     "cryptographically-inapplicable",
@@ -112,11 +118,14 @@ def validate_credential_incident_report(
         "schema_version",
         "commit_sha",
         "incident_id",
+        "affected_occurrences",
         "affected_identities",
         "history_rewrite",
         "full_history_scans",
         "reviewer",
         "reviewer_organization",
+        "review_mode",
+        "independent_review",
         "reviewed_at",
         "blocking_findings_open",
     }
@@ -139,17 +148,68 @@ def validate_credential_incident_report(
         errors.append("credential incident report requires a named human reviewer")
     if not organization or organization.casefold() in GENERIC_REVIEWERS:
         errors.append("credential incident report requires a reviewer organization")
+    if report.get("review_mode") != "architect-owner":
+        errors.append("credential incident report review_mode must be architect-owner")
+    if report.get("independent_review") is not False:
+        errors.append("credential incident report must not claim independent review")
     if report.get("blocking_findings_open") != 0 or isinstance(
         report.get("blocking_findings_open"), bool
     ):
         errors.append("credential incident report has open blocking findings")
 
     root = artifact_root or ROOT
+    occurrences = report.get("affected_occurrences")
+    occurrence_fingerprints: set[str] = set()
+    occurrence_pairs: set[tuple[str, str]] = set()
+    occurrence_path_counts = {
+        path: 0 for path in REQUIRED_OCCURRENCE_PATH_COUNTS
+    }
+    if not isinstance(occurrences, list) or len(occurrences) != EXPECTED_FINDING_OCCURRENCES:
+        errors.append(
+            "credential incident report must contain exactly "
+            f"{EXPECTED_FINDING_OCCURRENCES} historical PEM finding occurrences"
+        )
+        occurrences = []
+    occurrence_fields = {"path", "commit_sha", "fingerprint_sha256"}
+    for index, occurrence in enumerate(occurrences):
+        label = f"affected_occurrences[{index}]"
+        if not _strict(occurrence, occurrence_fields, label, errors):
+            continue
+        path_value = occurrence.get("path")
+        occurrence_commit = occurrence.get("commit_sha")
+        fingerprint = occurrence.get("fingerprint_sha256")
+        if path_value not in REQUIRED_OCCURRENCE_PATH_COUNTS:
+            errors.append(f"{label}.path is not an affected PEM path")
+        else:
+            occurrence_path_counts[path_value] += 1
+        if (
+            not isinstance(occurrence_commit, str)
+            or COMMIT_RE.fullmatch(occurrence_commit) is None
+        ):
+            errors.append(f"{label}.commit_sha is invalid")
+        if not isinstance(fingerprint, str) or HASH_RE.fullmatch(fingerprint) is None:
+            errors.append(f"{label}.fingerprint_sha256 is invalid")
+        else:
+            occurrence_fingerprints.add(fingerprint)
+        if isinstance(path_value, str) and isinstance(occurrence_commit, str):
+            pair = (path_value, occurrence_commit)
+            if pair in occurrence_pairs:
+                errors.append("credential incident report contains a duplicate PEM occurrence")
+            occurrence_pairs.add(pair)
+    if occurrence_path_counts != REQUIRED_OCCURRENCE_PATH_COUNTS:
+        errors.append(
+            "credential incident occurrence paths do not match the verified "
+            "two root and one neuron findings"
+        )
+
     identities = report.get("affected_identities")
     fingerprints: set[str] = set()
     replacements: set[str] = set()
-    if not isinstance(identities, list) or len(identities) != 3:
-        errors.append("credential incident report must contain exactly three PEM identities")
+    if not isinstance(identities, list) or len(identities) != EXPECTED_UNIQUE_IDENTITIES:
+        errors.append(
+            "credential incident report must contain exactly "
+            f"{EXPECTED_UNIQUE_IDENTITIES} unique PEM key identities"
+        )
         identities = []
     identity_fields = {
         "fingerprint_sha256",
@@ -254,10 +314,19 @@ def validate_credential_incident_report(
             _artifact(check.get("evidence"), root, f"{check_label}.evidence", errors)
         if seen_networks != REQUIRED_NETWORKS:
             errors.append(f"{label} lacks Polygon Amoy or Cardano Pre-Prod funding proof")
-        _artifact(identity.get("revocation_evidence"), root, f"{label}.revocation_evidence", errors)
+        _artifact(
+            identity.get("revocation_evidence"),
+            root,
+            f"{label}.revocation_evidence",
+            errors,
+        )
 
     if fingerprints & replacements:
         errors.append("a replacement fingerprint is also listed as a compromised identity")
+    if occurrence_fingerprints != fingerprints:
+        errors.append(
+            "credential incident occurrence fingerprints do not match the unique identities"
+        )
 
     rewrite = report.get("history_rewrite")
     rewrite_fields = {
@@ -281,14 +350,29 @@ def validate_credential_incident_report(
             if rewrite.get(field) is not True:
                 errors.append(f"history_rewrite.{field} must be true")
         _utc(rewrite.get("completed_at"), "history_rewrite.completed_at", errors)
-        _artifact(rewrite.get("changed_refs_evidence"), root, "history_rewrite.changed_refs_evidence", errors)
-        _artifact(rewrite.get("github_support_evidence"), root, "history_rewrite.github_support_evidence", errors)
+        _artifact(
+            rewrite.get("changed_refs_evidence"),
+            root,
+            "history_rewrite.changed_refs_evidence",
+            errors,
+        )
+        _artifact(
+            rewrite.get("github_support_evidence"),
+            root,
+            "history_rewrite.github_support_evidence",
+            errors,
+        )
 
     scans = report.get("full_history_scans")
     if _strict(scans, {"gitleaks", "trufflehog"}, "full_history_scans", errors):
         for scanner, result in scans.items():
             scan_label = f"full_history_scans.{scanner}"
-            if _strict(result, {"full_history", "findings_count", "command", "evidence"}, scan_label, errors):
+            if _strict(
+                result,
+                {"full_history", "findings_count", "command", "evidence"},
+                scan_label,
+                errors,
+            ):
                 if result.get("full_history") is not True or result.get("findings_count") != 0:
                     errors.append(f"{scan_label} is not a clean complete-history scan")
                 command = str(result.get("command", ""))
