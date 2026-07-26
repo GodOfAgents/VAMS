@@ -46,8 +46,9 @@ For persistent, scalable production deployments, we recommend [Neon](https://neo
 
 1. Create a Neon project.
 2. Get the connection string.
-3. Add it to your `.env` file:
-   `DBOS_DB_URL="postgresql://user:password@ep-name.region.aws.neon.tech/neondb?sslmode=require"`
+3. Inject it through a secret manager or an untracked `.env` file. The
+   non-secret structure is
+   `DBOS_SYSTEM_DATABASE_URL="postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}/${DB_NAME}?sslmode=require"`.
 
 ### `dbos_config.py` Singleton
 

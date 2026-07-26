@@ -1,0 +1,247 @@
+from __future__ import annotations
+
+import hashlib
+import json
+import tempfile
+import unittest
+from pathlib import Path
+
+from scripts.audit.credential_incident_evidence import (
+    CREDENTIAL_INCIDENT_SCHEMA_VERSION,
+    REQUIRED_ROLE_CHECKS,
+    validate_credential_incident_report,
+)
+
+
+COMMIT = "a" * 40
+NOW = "2026-07-15T00:00:00+00:00"
+
+
+def _artifact(root: Path, name: str) -> dict[str, str]:
+    path = root / "docs" / "audit" / "evidence" / "credential-incident" / name
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_bytes(name.encode())
+    return {
+        "path": path.relative_to(root).as_posix(),
+        "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+    }
+
+
+def _report(root: Path) -> dict:
+    identities = []
+    for index in range(2):
+        roles = {
+            role: {"clear": True, "evidence": _artifact(root, f"identity-{index}-{role}.json")}
+            for role in sorted(REQUIRED_ROLE_CHECKS)
+        }
+        funding = [
+            {
+                "network": "polygon-amoy",
+                "applicability": "account-derived",
+                "public_identifier": f"public-{index}-polygon-amoy",
+                "observed_at": NOW,
+                "zero_balance": True,
+                "evidence": _artifact(root, f"identity-{index}-polygon-amoy.json"),
+            },
+            {
+                "network": "cardano-preprod",
+                "applicability": "cryptographically-inapplicable",
+                "observed_at": NOW,
+                "non_applicability_reason": (
+                    "fixture key type cannot derive a Cardano payment credential"
+                ),
+                "evidence": _artifact(root, f"identity-{index}-cardano-preprod.json"),
+            },
+        ]
+        identities.append(
+            {
+                "fingerprint_sha256": f"{index + 1:064x}",
+                "key_type": "public-test-fixture",
+                "decommissioned_at": NOW,
+                "decommission_disposition": (
+                    "permanently-decommissioned-no-replacement"
+                ),
+                "public_identifiers": [f"public-{index}"],
+                "role_impact_checks": roles,
+                "funding_checks": funding,
+                "decommission_evidence": _artifact(
+                    root, f"identity-{index}-decommission.json"
+                ),
+            }
+        )
+    return {
+        "schema_version": CREDENTIAL_INCIDENT_SCHEMA_VERSION,
+        "commit_sha": COMMIT,
+        "incident_id": "VAMS-PEM-2026-001",
+        "affected_occurrences": [
+            {
+                "path": "node_identity.pem",
+                "commit_sha": "1" * 40,
+                "fingerprint_sha256": f"{1:064x}",
+            },
+            {
+                "path": "node_identity.pem",
+                "commit_sha": "2" * 40,
+                "fingerprint_sha256": f"{1:064x}",
+            },
+            {
+                "path": "neuron/node_identity.pem",
+                "commit_sha": "3" * 40,
+                "fingerprint_sha256": f"{2:064x}",
+            },
+        ],
+        "affected_identities": identities,
+        "provider_credentials": [
+            {
+                "provider": "infura",
+                "fingerprint_sha256": f"{99:064x}",
+                "revocation_status": "revoked",
+                "exact_revocation_time_unavailable": True,
+                "revoked_before": NOW,
+                "observed_at": NOW,
+                "access_review_clear": True,
+                "billing_review_clear": True,
+                "evidence": _artifact(root, "infura-dashboard-review.json"),
+            }
+        ],
+        "history_rewrite": {
+            "completed": True,
+            "completed_at": NOW,
+            "all_refs_rewritten": True,
+            "collaborators_recloned": True,
+            "forks_coordinated": True,
+            "github_cached_refs_purged": True,
+            "changed_refs_evidence": _artifact(root, "changed-refs.txt"),
+            "github_support_evidence": _artifact(root, "github-support.json"),
+        },
+        "full_history_scans": {
+            "gitleaks": {
+                "full_history": True,
+                "findings_count": 0,
+                "command": "gitleaks git . --log-opts=--all",
+                "evidence": _artifact(root, "gitleaks.json"),
+            },
+            "trufflehog": {
+                "full_history": True,
+                "findings_count": 0,
+                "command": "trufflehog git . --results=verified,unknown,unverified",
+                "evidence": _artifact(root, "trufflehog.json"),
+            },
+        },
+        "reviewer": "Ada Reviewer",
+        "reviewer_organization": "VAMS Architect",
+        "review_mode": "architect-owner",
+        "independent_review": False,
+        "reviewed_at": NOW,
+        "blocking_findings_open": 0,
+    }
+
+
+class CredentialIncidentEvidenceTests(unittest.TestCase):
+    def test_valid_public_closure_evidence_passes(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            path = root / "report.json"
+            path.write_text(json.dumps(_report(root)), encoding="utf-8")
+            self.assertEqual(validate_credential_incident_report(path, COMMIT, root), [])
+
+    def test_missing_decommission_or_full_history_result_is_rejected(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            report = _report(root)
+            report["affected_identities"][0]["decommission_evidence"] = {
+                "path": "docs/audit/evidence/missing.json",
+                "sha256": "0" * 64,
+            }
+            report["full_history_scans"]["trufflehog"]["command"] = "trufflehog git ."
+            path = root / "report.json"
+            path.write_text(json.dumps(report), encoding="utf-8")
+            errors = validate_credential_incident_report(path, COMMIT, root)
+            self.assertTrue(any("missing" in error for error in errors))
+            self.assertTrue(any("every result class" in error for error in errors))
+
+    def test_replacement_fingerprint_is_rejected(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            report = _report(root)
+            report["affected_identities"][0]["replacement_fingerprint_sha256"] = (
+                "f" * 64
+            )
+            path = root / "report.json"
+            path.write_text(json.dumps(report), encoding="utf-8")
+            errors = validate_credential_incident_report(path, COMMIT, root)
+            self.assertTrue(any("unexpected fields" in error for error in errors))
+
+    def test_infura_exact_revocation_time_must_remain_explicitly_unknown(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            report = _report(root)
+            report["provider_credentials"][0][
+                "exact_revocation_time_unavailable"
+            ] = False
+            path = root / "report.json"
+            path.write_text(json.dumps(report), encoding="utf-8")
+            errors = validate_credential_incident_report(path, COMMIT, root)
+            self.assertTrue(any("unavailable exact time" in error for error in errors))
+
+    def test_infura_revocation_bound_cannot_postdate_observation(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            report = _report(root)
+            report["provider_credentials"][0]["revoked_before"] = (
+                "2026-07-15T00:00:01+00:00"
+            )
+            path = root / "report.json"
+            path.write_text(json.dumps(report), encoding="utf-8")
+            errors = validate_credential_incident_report(path, COMMIT, root)
+            self.assertTrue(any("must not postdate" in error for error in errors))
+
+    def test_non_applicable_network_rejects_invented_account_claims(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            report = _report(root)
+            check = report["affected_identities"][0]["funding_checks"][1]
+            check["public_identifier"] = "invented-cardano-address"
+            check["zero_balance"] = True
+            path = root / "report.json"
+            path.write_text(json.dumps(report), encoding="utf-8")
+            errors = validate_credential_incident_report(path, COMMIT, root)
+            self.assertTrue(any("unexpected fields" in error for error in errors))
+
+    def test_account_derived_network_requires_zero_balance_proof(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            report = _report(root)
+            report["affected_identities"][0]["funding_checks"][0][
+                "zero_balance"
+            ] = False
+            path = root / "report.json"
+            path.write_text(json.dumps(report), encoding="utf-8")
+            errors = validate_credential_incident_report(path, COMMIT, root)
+            self.assertTrue(
+                any("does not prove zero balance" in error for error in errors)
+            )
+
+    def test_occurrences_must_reference_the_two_unique_identities(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            report = _report(root)
+            report["affected_occurrences"][2]["fingerprint_sha256"] = "f" * 64
+            path = root / "report.json"
+            path.write_text(json.dumps(report), encoding="utf-8")
+            errors = validate_credential_incident_report(path, COMMIT, root)
+            self.assertTrue(any("occurrence fingerprints" in error for error in errors))
+
+    def test_occurrence_paths_must_match_verified_history_shape(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            report = _report(root)
+            report["affected_occurrences"][1]["path"] = "neuron/node_identity.pem"
+            path = root / "report.json"
+            path.write_text(json.dumps(report), encoding="utf-8")
+            errors = validate_credential_incident_report(path, COMMIT, root)
+            self.assertTrue(any("occurrence paths" in error for error in errors))
+
+
+if __name__ == "__main__":
+    unittest.main()

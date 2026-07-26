@@ -82,10 +82,19 @@ REQUIRED_INDEPENDENT_DOMAINS = {
 REQUIRED_EVIDENCE_RESULTS = {
     "audit-program": "python scripts/audit/audit_program.py validate",
     "public-content": "python scripts/security/public_content_policy_scan.py",
-    "default-credentials": "python scripts/security/default_credential_scan.py",
+    "default-credentials": (
+        "python scripts/security/default_credential_scan.py && "
+        "python scripts/security/secret_history_prevention_scan.py"
+    ),
     "mock-mode": "python scripts/security/mock_mode_promotion_scan.py",
-    "gitleaks": "gitleaks detect --source .",
-    "trufflehog": "trufflehog filesystem .",
+    "gitleaks": (
+        "gitleaks git . --config .gitleaks.toml --redact=100 "
+        "--report-format json --log-opts=--all --exit-code 1"
+    ),
+    "trufflehog": (
+        "trufflehog git file://$PWD --json --fail --no-update "
+        "--results=verified,unknown,unverified"
+    ),
     "solidity": "forge build --sizes && forge test -vvv",
     "slither": "slither . --config-file slither.config.json",
     "aiken": "aiken check --deny --seed 20260713 --max-success 250",
