@@ -1,6 +1,12 @@
 import pytest
+from urllib.parse import urlunsplit
 
 from neuron.gateway.client import GatewayClient
+
+
+def _credentialed_gateway_url() -> str:
+    credentials = ":".join(("fixture-user", "fixture-password"))
+    return urlunsplit(("https", f"{credentials}@gateway.example", "", "", ""))
 
 
 def test_local_gateway_allows_plaintext_loopback(monkeypatch):
@@ -29,7 +35,7 @@ def test_live_gateway_requires_https(monkeypatch):
 
 @pytest.mark.parametrize(
     "url",
-    ["gateway.example", "https://example.invalid", ""],
+    ["gateway.example", _credentialed_gateway_url(), ""],
 )
 def test_gateway_rejects_ambiguous_or_credentialed_urls(monkeypatch, url):
     monkeypatch.setenv("VAMS_ENV", "local")

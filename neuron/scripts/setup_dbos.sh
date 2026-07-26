@@ -18,6 +18,13 @@
 
 set -euo pipefail
 
+: "${DB_USER:?Set DB_USER for the disposable development database}"
+: "${DB_PASSWORD:?Set DB_PASSWORD through the local secret environment}"
+: "${DB_NAME:?Set DB_NAME for the disposable development database}"
+DB_HOST="${DB_HOST:-127.0.0.1}"
+DB_PORT="${DB_PORT:-5432}"
+export DB_USER DB_PASSWORD DB_NAME DB_HOST DB_PORT
+
 echo ""
 echo "╔══════════════════════════════════════════════╗"
 echo "║  VAMS Neuron — DBOS Setup                   ║"
@@ -38,10 +45,10 @@ if docker ps -q --filter "name=vams-pg" | grep -q .; then
 else
     docker run -d \
         --name vams-pg \
-        -e POSTGRES_USER=vams \
-        -e POSTGRES_PASSWORD=vams_dev_pw \
-        -e POSTGRES_DB=vams_dbos \
-        -p 5432:5432 \
+        -e POSTGRES_USER \
+        -e POSTGRES_PASSWORD \
+        -e POSTGRES_DB \
+        -p "$DB_PORT:5432" \
         postgres:16 \
         --restart unless-stopped 2>/dev/null || \
     docker start vams-pg
@@ -57,9 +64,7 @@ echo "[3/4] Checking .env..."
 ENV_FILE="$(dirname "$0")/../.env"
 if [ ! -f "$ENV_FILE" ]; then
     cp "$(dirname "$0")/../.env.example" "$ENV_FILE"
-    # Ensure the local Docker URL is active
-    sed -i 's|^# DBOS_SYSTEM_DATABASE_URL=postgresql://user:pass.*|# Neon URL — uncomment and fill to use Neon instead of local Docker|' "$ENV_FILE" || true
-    echo "      ✓ .env created from .env.example (using local Docker Postgres)"
+    echo "      ✓ .env created without credentials; runtime values stay in the environment"
 else
     echo "      ✓ .env already exists (skipping)"
 fi
@@ -68,7 +73,18 @@ fi
 echo ""
 echo "[4/4] Verifying DBOS connection..."
 
-export DBOS_SYSTEM_DATABASE_URL="postgresql://localhost/vams"
+export DBOS_SYSTEM_DATABASE_URL
+DBOS_SYSTEM_DATABASE_URL="$(python -c '
+import os
+from urllib.parse import quote, urlunsplit
+
+user = quote(os.environ["DB_USER"], safe="")
+password = quote(os.environ["DB_PASSWORD"], safe="")
+database = quote(os.environ["DB_NAME"], safe="")
+userinfo = f"{user}:{password}"
+authority = f"{userinfo}@{os.environ["DB_HOST"]}:{os.environ["DB_PORT"]}"
+print(urlunsplit(("postgresql", authority, f"/{database}", "", "")))
+')"
 
 python -c "
 import sys, os

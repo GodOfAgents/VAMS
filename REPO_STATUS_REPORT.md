@@ -1,12 +1,13 @@
 # VAMS Repository Status Report And Public Testnet Roadmap
 
-**Date:** 2026-07-11
-**Last verified:** 2026-07-13
+**Date:** 2026-07-25
+**Last verified:** 2026-07-25
 **Stage:** Hardened Pre-Testnet Candidate
 **Current Priority:** Phase 6: Public Testnet Readiness
-**Public Testnet Target:** July 2026 launch window
+**Public Testnet Target:** Gate-driven; no calendar date overrides readiness
 **Architecture Baseline:** v0.8.0 cognitive/composer layer + v1.3.0-oms runtime + June gateway hardening
-**Commit History Boundary:** `09abd2d` plus uncommitted green-signal hardening; no commit-bound release evidence yet
+**Commit History Boundary:** `31929a2` plus the uncommitted credential-history
+preparation branch; no post-rewrite exact-commit release evidence exists
 
 ---
 
@@ -20,7 +21,8 @@ Interpretation rules:
 - `AGENTS.md`, `docs/CHANGELOG.md`, `audit.md`, executable tests, and current source code override stale roadmap claims.
 - Historical test totals are not current facts unless rerun against the current tree.
 - VAMS is pre-testnet. This report does not claim mainnet, production, or fully audited readiness.
-- Public testnet is a July 2026 launch window gated by security, verification, deployment artifacts, and operator readiness.
+- Public testnet timing is controlled by security, verification, deployment
+  artifacts, governance, and operator-readiness gates.
 
 No deployment statement in this document should be read as a mainnet claim.
 
@@ -44,8 +46,10 @@ Current blockers before public testnet:
   frontend, and first-party gates pass. Semgrep reports zero findings; all 17
   tracked/supplemental timeout pairs received separate direct source
   adjudication with no confirmed vulnerability. Historical
-  Gitleaks is blocking on three committed PEM private keys. TruffleHog,
-  SBOM/signing, and aggregate CI evidence remain promotion gates.
+  PR 4 run `29611633518` is blocking on 869 Gitleaks findings and 20
+  unverified TruffleHog findings. Three PEM occurrences map to two
+  permanently decommissioned identities; the all-ref rewrite, remote cleanup,
+  clean rescans, SBOM/signing, and aggregate evidence remain promotion gates.
 - Avail and EigenDA remain structured stubs and must stay blocked from live environments.
 - Deployment artifacts are incomplete: chain IDs, addresses, transaction hashes, verification status, multisig owners, and timelock ownership.
 - Live DA, identity, Trails, TEE, and gateway configuration need testnet evidence.
@@ -137,13 +141,14 @@ Latest local evidence:
 | VIR-Core Linux verification | Rust 1.92 Docker: `cargo fmt`, `cargo check --workspace --all-targets --locked`, `cargo clippy ... -D warnings`, `cargo test --workspace --all-targets --locked` | Passed: all 34/34 executable tests, format, check, and Clippy. |
 | Semgrep | `semgrep scan --config auto --error` with generated/vendor exclusions plus an explicit untracked VDSO scan | Passed with adjudicated timeouts: zero findings across 444 tracked files/520 rules and 61 untracked VDSO files/314 rules. Seventeen rule/file timeout pairs were directly reviewed with no confirmed vulnerability; details are in `docs/audit/SEMGREP_ADJUDICATION.md`. Exact-commit CI rerun remains required. |
 | Slither | `slither . --exclude-dependencies --exclude-low --exclude-informational --fail-high` | Passed configured threshold: 0 high findings; 19 medium results independently classified in `docs/audit/SLITHER_ADJUDICATION.md`. |
-| Gitleaks history | Gitleaks v8.30.1 `git --log-opts=--all` with fully redacted reporting | Failed: 1,734 matches over 82 commits, including three PEM private-key findings. Classification and mandatory closure are in `docs/audit/GITLEAKS_ADJUDICATION.md`. |
+| Gitleaks history | PR 4 run `29611633518`; Gitleaks v8.30.1 with complete-history redacted reporting | Failed: 869 findings across 65 scanned commits. The broader earlier local inventory is retained as separate context; mandatory closure is in `docs/audit/GITLEAKS_ADJUDICATION.md`. |
+| TruffleHog history | PR 4 run `29611633518`; TruffleHog 3.95.9 with verified, unknown, and unverified results | Failed: 20 unverified findings. Raw candidate values are excluded from committed evidence. |
 | Frontend install | `npm ci` | Passed: 176 packages installed/audited, 0 vulnerabilities. |
 | Frontend audit | `npm audit --audit-level=high` | Passed: 0 vulnerabilities. |
 | Frontend build | `npm run build` | Passed with Vite 7.3.6. |
 | Report/diff hygiene | `git diff --check -- ...` | Passed. |
 | Gateway/auth/VDSO focused tests | `pytest -q neuron/tests/test_gateway_client_security.py neuron/tests/test_gateway_auth_hardening.py neuron/tests/test_gateway_current.py neuron/tests/test_vdso_gateway.py` | Passed: 37/37 on the current tree. |
-| Phase 6 security scripts | `default_credential_scan.py`, `public_content_policy_scan.py`, `mock_mode_promotion_scan.py` | Passed on the current tree on 2026-07-13. |
+| Phase 6 security scripts | `default_credential_scan.py`, `secret_history_prevention_scan.py`, `public_content_policy_scan.py`, `mock_mode_promotion_scan.py` | The new secret-history prevention scan passes on the preparation tree; the complete suite requires exact-commit CI. |
 | Python syntax check | `compileall` on the VDSO/Gateway modules | Passed on the current tree on 2026-07-13. |
 | VDSO evidence/docs | `validate_vdso_evidence.py`, its five tests, `validate_docs.py`, and audit-program validation | Passed on the current tree. |
 | R10 world-state and SkillOps hardening | `WorldStateFidelitySentinel`, Service Block EIP-712 manifests, and verifier quarantine | Implemented as a pre-testnet hardening addition; current local aggregates pass, while exact-commit CI and independent review remain required. |
@@ -155,11 +160,11 @@ Verification still pending or blocked locally:
 | Scope | Status |
 | --- | --- |
 | Exact-commit aggregate rerun | Local language gates pass on the dirty implementation tree; CI must rerun them against the final clean commit and sign the aggregate manifest. |
-| Historical secret exposure | Gitleaks reports 1,734 historical matches, including three committed PEM private keys. Rotation, role-impact review, coordinated history cleanup, and clean Gitleaks/TruffleHog rescans are mandatory. |
+| Historical secret exposure | PR 4 run `29611633518` reports 869 Gitleaks findings and 20 unverified TruffleHog findings. Three PEM occurrences represent two decommissioned identities. The coordinated all-ref rewrite, GitHub cache/PR cleanup, collaborator reclones, and zero-finding rescans are mandatory. |
 | Semgrep timeout closure | Seventeen rule/file timeout pairs were directly adjudicated as non-findings after both scans exited zero. Preserve the adjudication, rerun after the post-scan workflow edit, and obtain external reviewer acceptance with exact-commit evidence. |
 | Aiken transaction properties | Pure-function properties now cover quadratic bounds, basis-point safety, range semantics, nonce replay/order, and insurance payout caps. Transaction-level datum/value/state-machine properties remain required. |
 | Slither adjudications | The 19 residual medium-scan results are documented; independent review and the complete low/informational report remain required. |
-| TruffleHog | Represented in the workflow; pending CI execution. |
+| TruffleHog | Executed in PR 4 and failed on 20 unverified historical findings; the preparation workflow expands enforcement to verified, unknown, and unverified results with sanitized artifacts. |
 | Default credential scan | Represented in the workflow and passed locally; pending CI execution. |
 | Mock-mode promotion scan | Represented in the workflow and passed locally; pending CI execution. |
 | Public-content policy scan | Represented in the workflow and passed locally; pending CI execution. |
@@ -184,8 +189,8 @@ npm ci
 npm audit --audit-level=high
 npm run build
 
-gitleaks detect --source .
-trufflehog filesystem .
+gitleaks git . --redact=100 --report-format json --log-opts=--all
+trufflehog git "file://$PWD" --json --fail --no-update --results=verified,unknown,unverified
 semgrep scan
 ```
 
@@ -239,7 +244,9 @@ Mainnet remains conditional. No mainnet date should be promised until public tes
 ## 9. Immediate Engineering Priorities
 
 1. Run the implemented security workflow on the current commit and retain the aggregate audit-gate evidence manifest.
-2. Rotate and role-audit the three historically committed PEM identities, coordinate repository history cleanup, and obtain clean Gitleaks and TruffleHog rescans.
+2. Land the incident-only preparation PR, then rewrite all affected refs for
+   the three PEM occurrences/two permanently decommissioned identities and
+   obtain zero-finding Gitleaks and all-category TruffleHog rescans.
 3. Independently review the 19 residual Slither findings and the 17 Semgrep timeout adjudications against the exact release commit.
 4. Expand Aiken properties to transaction-level state machines and complete the signed SBOM and aggregate evidence in CI.
 5. Rehearse `DeployTestnet.s.sol` against deployed Safe contracts and complete Polygon Amoy evidence.
@@ -257,10 +264,10 @@ Mainnet remains conditional. No mainnet date should be promised until public tes
 | Gateway security | Live clients require HTTPS, direct server bind is loopback, and DID/mTLS/replay/input gates exist; live deployment config and external route smoke tests still required. |
 | Runtime integrations | Incomplete routes now fail closed or are excluded; real enabled-route evidence remains required. |
 | Deployment evidence | Safe/timelock identity-bound ceremony and strict Polygon/Cardano manifest validators exist; addresses, transactions, ownership observations, rehearsal, and rollback evidence remain incomplete. |
-| CI/security posture | Most local build/analyzer gates pass, including Semgrep with 17 separately adjudicated timeout pairs. Historical Gitleaks is blocking; TruffleHog, signed SBOM/Cosign evidence, external review, and aggregate CI evidence remain required. |
-| Public launch status | July 2026 gated launch window, not a guaranteed date. |
+| CI/security posture | Most local build/analyzer gates pass, including Semgrep with 17 separately adjudicated timeout pairs. Historical Gitleaks (869) and TruffleHog (20 unverified) findings are blocking; signed SBOM/Cosign and aggregate CI evidence remain required. |
+| Public launch status | NO-GO until the gate-driven closure and deployment evidence are complete. |
 
 ---
 
-**Maintainer:** Aseem Chishti
+**Architect:** Aseem Chishti
 **Repository:** `https://github.com/GodOfAgents/VAMS`

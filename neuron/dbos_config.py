@@ -31,7 +31,7 @@ def get_dbos_config() -> DBOSConfig:
         DBOS_SYSTEM_DATABASE_URL — Postgres DSN.
         Examples:
           Local Docker:  postgresql://localhost/vams
-          Neon:          postgresql://localhost/vams
+          Hosted:        postgresql://localhost/vams
 
     Raises:
         RuntimeError if DBOS_SYSTEM_DATABASE_URL is not set.
@@ -42,8 +42,8 @@ def get_dbos_config() -> DBOSConfig:
             "DBOS_SYSTEM_DATABASE_URL is not set. "
             "Copy neuron/.env.example → neuron/.env and fill in your Postgres URL. "
             "For local Docker: docker run -d --name vams-pg "
-            "-e POSTGRES_USER=vams -e POSTGRES_PASSWORD=vams_dev_pw "
-            "-e POSTGRES_DB=vams_dbos -p 5432:5432 postgres:16"
+            "-e POSTGRES_USER -e POSTGRES_PASSWORD -e POSTGRES_DB "
+            "-p 5432:5432 postgres:16"
         )
     return DBOSConfig(
         name="vams-neuron",

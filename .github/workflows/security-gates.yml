@@ -189,6 +189,7 @@ jobs:
       - name: Run Default Credential Scan
         run: |
           python scripts/security/default_credential_scan.py
+          python scripts/security/secret_history_prevention_scan.py
 
   mock-mode-promotion-scan:
     name: Mock-Mode Promotion Scan
@@ -214,11 +215,52 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Run GitLeaks
-        uses: gitleaks/gitleaks-action@dcedce43c6f43de0b836d1fe38946645c9c638dc # v2
+      - name: Fetch Complete Git History
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --force --prune origin '+refs/heads/*:refs/remotes/origin/*'
+          git fetch --force --tags origin
+
+      - name: Install Pinned GitLeaks
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --location --silent --show-error --output "$RUNNER_TEMP/gitleaks.tar.gz" https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/gitleaks_8.30.1_linux_x64.tar.gz
+          curl --fail --location --silent --show-error --output "$RUNNER_TEMP/gitleaks_checksums.txt" https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/gitleaks_8.30.1_checksums.txt
+          (cd "$RUNNER_TEMP" && cp gitleaks.tar.gz gitleaks_8.30.1_linux_x64.tar.gz && sha256sum --check --ignore-missing gitleaks_checksums.txt)
+          tar -xzf "$RUNNER_TEMP/gitleaks.tar.gz" -C "$RUNNER_TEMP" gitleaks
+          sudo install -m 0755 "$RUNNER_TEMP/gitleaks" /usr/local/bin/gitleaks
+
+      - name: Verify Narrow GitLeaks Allowlists
+        run: python scripts/security/gitleaks_allowlist_regression.py
+
+      - name: Run Complete-History GitLeaks
+        id: gitleaks_scan
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p raw-gate
+          gitleaks git . --config .gitleaks.toml --redact=100 \
+            --report-format json --report-path raw-gate/gitleaks-report.json \
+            --log-opts=--all --exit-code 1
+          test -s raw-gate/gitleaks-report.json
+
+      - name: Upload GitLeaks Raw Gate Evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: raw-gate-gitleaks
+          path: raw-gate/gitleaks-report.json
+          if-no-files-found: error
+          retention-days: 365
+
+      - name: Enforce GitLeaks Result
+        if: always()
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITLEAKS_VERSION: 8.30.1
+          SCAN_OUTCOME: ${{ steps.gitleaks_scan.outcome }}
+        run: test "$SCAN_OUTCOME" = "success"
 
   trufflehog-scanning:
     name: Secret Scanning (TruffleHog)
@@ -230,12 +272,44 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Run TruffleHog Filesystem Scan
-        uses: trufflesecurity/trufflehog@8feb77b20aeb64366d106b08f2941287755c173b
+      - name: Fetch Complete Git History
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --force --prune origin '+refs/heads/*:refs/remotes/origin/*'
+          git fetch --force --tags origin
+
+      - name: Install Pinned TruffleHog
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --location --silent --show-error --output "$RUNNER_TEMP/trufflehog.tar.gz" https://github.com/trufflesecurity/trufflehog/releases/download/v3.95.9/trufflehog_3.95.9_linux_amd64.tar.gz
+          curl --fail --location --silent --show-error --output "$RUNNER_TEMP/trufflehog_checksums.txt" https://github.com/trufflesecurity/trufflehog/releases/download/v3.95.9/trufflehog_3.95.9_checksums.txt
+          (cd "$RUNNER_TEMP" && cp trufflehog.tar.gz trufflehog_3.95.9_linux_amd64.tar.gz && sha256sum --check --ignore-missing trufflehog_checksums.txt)
+          tar -xzf "$RUNNER_TEMP/trufflehog.tar.gz" -C "$RUNNER_TEMP" trufflehog
+          sudo install -m 0755 "$RUNNER_TEMP/trufflehog" /usr/local/bin/trufflehog
+
+      - name: Run Complete-History All-Category TruffleHog
+        id: trufflehog_scan
+        continue-on-error: true
+        run: |
+          python scripts/security/trufflehog_gate.py \
+            --output raw-gate/trufflehog-sanitized.json
+
+      - name: Upload TruffleHog Sanitized Gate Evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          path: ./
-          version: 3.95.9
-          extra_args: --only-verified --fail
+          name: raw-gate-trufflehog
+          path: raw-gate/trufflehog-sanitized.json
+          if-no-files-found: error
+          retention-days: 365
+
+      - name: Enforce TruffleHog Result
+        if: always()
+        env:
+          SCAN_OUTCOME: ${{ steps.trufflehog_scan.outcome }}
+        run: test "$SCAN_OUTCOME" = "success"
 
   solidity-gate:
     name: Solidity (Forge) Build & Test
