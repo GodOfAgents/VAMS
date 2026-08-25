@@ -1,0 +1,13 @@
+schema_version: 1
+tool: semgrep
+tool_version: 1.169.0
+runtime_floor: python-3.12
+adjudications:
+  - rule_id: python.lang.compatibility.python36.python36-compatibility-Popen1
+    path: scripts/security/trufflehog_gate.py
+    status: not_applicable
+    reason: VAMS pins Python 3.12; Python 3.6 subprocess compatibility is not supported.
+  - rule_id: python.lang.compatibility.python36.python36-compatibility-Popen2
+    path: scripts/security/trufflehog_gate.py
+    status: not_applicable
+    reason: VAMS pins Python 3.12; Python 3.6 subprocess compatibility is not supported.

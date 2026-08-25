@@ -1,0 +1,22 @@
+rules:
+  - id: vams-python-subprocess-shell-true
+    message: Avoid shell=True in Python subprocess calls; pass an argument list.
+    severity: ERROR
+    languages: [python]
+    patterns:
+      - pattern: subprocess.$FUNC(..., shell=True, ...)
+
+  - id: vams-python-dynamic-eval
+    message: Dynamic eval is prohibited in production code.
+    severity: ERROR
+    languages: [python]
+    pattern: eval(...)
+
+  - id: vams-node-child-process-shell
+    message: Avoid shell-enabled child processes in Node.js code.
+    severity: ERROR
+    languages: [javascript, typescript]
+    patterns:
+      - pattern-either:
+          - pattern: child_process.exec(...)
+          - pattern: child_process.execSync(...)

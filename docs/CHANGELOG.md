@@ -65,6 +65,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Cardano property tests**: Added seven seeded Aiken properties covering integer-square-root bounds, basis-point safety and monotonicity, inclusive ranges, strict bridge nonce ordering/replay rejection, and insurance payout caps.
 
 ### Changed
+- **Incident-preparation CI reproducibility**: Corrected Gitleaks fixture path
+  anchoring, made Forge and Slither checkouts recursive, installed the pinned
+  Foundry compiler for Slither, split reviewed Semgrep enforcement from
+  non-blocking discovery, refreshed official GitHub Actions to immutable
+  Node 24 release SHAs, pinned the Caddy testnet proxy image and client-CA
+  validation, and updated vulnerable frontend dependencies, including later
+  brace-expansion and js-yaml High-severity advisories discovered by a fresh
+  audit. Secret scanner wrappers now use scan-root-relative paths and canonical
+  file URIs across Linux and Windows; TruffleHog verification is disabled so
+  candidate credentials are never sent to provider endpoints. The non-blocking
+  discovery scan's Python 3.6 compatibility findings are recorded as not
+  applicable to the pinned Python 3.12 runtime. Aggregate evidence is now
+  generated and signed before the expected history-scan failure is enforced.
+  These controls do not waive historical credential findings or constitute
+  testnet-readiness evidence.
 - **Credential-shaped examples**: Gateway and PostgreSQL fixtures now construct
   URLs from separate fields or environment placeholders. The development DBOS
   setup requires caller-supplied local credentials instead of embedding a

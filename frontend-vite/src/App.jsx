@@ -299,8 +299,9 @@ const SmokeHeader = ({ text, className = "", tag = "h2", isDark }) => {
       },
       { threshold: 0.1, rootMargin: "-50px" }
     );
-    if (elementRef.current) observer.observe(elementRef.current);
-    return () => { if (elementRef.current) observer.unobserve(elementRef.current); };
+    const element = elementRef.current;
+    if (element) observer.observe(element);
+    return () => { if (element) observer.unobserve(element); };
   }, []);
 
   const words = text.split(" ");
@@ -549,7 +550,7 @@ export default function VAMS_Web3_Guild() {
             isMock: false,
           });
         }
-      } catch (err) {
+      } catch {
         if (active) {
           setGatewayMetrics({
             connected: false,

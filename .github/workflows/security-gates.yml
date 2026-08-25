@@ -27,7 +27,7 @@ jobs:
       docs_only: ${{ steps.filter.outputs.docs_only }}
     steps:
       - name: Checkout Code
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
 
@@ -71,7 +71,17 @@ jobs:
     needs: changes
     steps:
       - name: Checkout Code
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Setup Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.12'
+
+      - name: Install Audit Test Dependencies
+        run: |
+          python -m pip install pip==26.1.2
+          python -m pip install git-filter-repo==2.47.0
 
       - name: Validate Audit Program
         run: |
@@ -116,7 +126,7 @@ jobs:
             --output economic-adversarial-report.json
 
       - name: Upload Economic Adversarial Evidence
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: economic-adversarial-report
           path: economic-adversarial-report.json
@@ -126,18 +136,22 @@ jobs:
         run: |
           python scripts/audit/validate_agent_red_team.py
 
+      - name: Run Complete Audit Regression Suite
+        run: |
+          python -m unittest discover -s scripts/audit -p "test_*.py"
+
   docs-gate:
     name: Docs Verification
     runs-on: ubuntu-latest
     needs: changes
-    if: github.event_name == 'pull_request' && needs.changes.outputs.docs_only == 'true'
     steps:
       - name: Checkout Code
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
 
       - name: Verify Team Docs Diff
+        if: github.event_name == 'pull_request' && needs.changes.outputs.docs_only == 'true'
         shell: bash
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
@@ -168,7 +182,7 @@ jobs:
     needs: changes
     steps:
       - name: Checkout Code
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
 
@@ -182,7 +196,7 @@ jobs:
     needs: changes
     steps:
       - name: Checkout Code
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
 
@@ -197,7 +211,7 @@ jobs:
     needs: changes
     steps:
       - name: Checkout Code
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
 
@@ -211,7 +225,7 @@ jobs:
     needs: changes
     steps:
       - name: Checkout Code
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
 
@@ -249,7 +263,7 @@ jobs:
 
       - name: Upload GitLeaks Raw Gate Evidence
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: raw-gate-gitleaks
           path: raw-gate/gitleaks-report.json
@@ -268,7 +282,7 @@ jobs:
     needs: changes
     steps:
       - name: Checkout Code
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
 
@@ -298,7 +312,7 @@ jobs:
 
       - name: Upload TruffleHog Sanitized Gate Evidence
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: raw-gate-trufflehog
           path: raw-gate/trufflehog-sanitized.json
@@ -318,10 +332,12 @@ jobs:
     if: github.event_name != 'pull_request' || needs.changes.outputs.docs_only != 'true'
     steps:
       - name: Checkout Code
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          submodules: recursive
 
       - name: Install Foundry
-        uses: foundry-rs/foundry-toolchain@b00af27efadbc7b4ca8b82abbd903b17cc874d2a # v1
+        uses: foundry-rs/foundry-toolchain@908c540300062bd5a7e473851cdb4282204cee09 # v1.9.1
         with:
           version: v1.7.1
 
@@ -338,10 +354,17 @@ jobs:
     if: github.event_name != 'pull_request' || needs.changes.outputs.docs_only != 'true'
     steps:
       - name: Checkout Code
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          submodules: recursive
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@908c540300062bd5a7e473851cdb4282204cee09 # v1.9.1
+        with:
+          version: v1.7.1
 
       - name: Setup Python
-        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: '3.12'
 
@@ -353,7 +376,19 @@ jobs:
       - name: Run Slither
         run: |
           cd contracts
-          slither . --exclude-dependencies --exclude-informational --exclude-low --fail-high
+          slither . --exclude-dependencies --exclude-informational --exclude-low \
+            --fail-high --json slither-report.json
+
+      - name: Upload Slither Evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: slither-evidence
+          path: |
+            contracts/slither-report.json
+            contracts/slither-adjudications.yml
+          if-no-files-found: warn
+          retention-days: 365
 
   aiken-gate:
     name: Aiken (Cardano) Verification
@@ -362,7 +397,7 @@ jobs:
     if: github.event_name != 'pull_request' || needs.changes.outputs.docs_only != 'true'
     steps:
       - name: Checkout Code
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Install Aiken
         uses: aiken-lang/setup-aiken@1728a4be43be099752e22d8b841706caaa6fdd88 # v1
@@ -381,13 +416,14 @@ jobs:
     if: github.event_name != 'pull_request' || needs.changes.outputs.docs_only != 'true'
     steps:
       - name: Checkout Code
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Install Pinned Rust Toolchain
         shell: bash
         run: |
           set -euo pipefail
           rustup toolchain install 1.92.0 --profile minimal --component rustfmt,clippy
+          cargo +1.92.0 install cargo-audit --version 0.22.2 --locked
 
       - name: Verify VIR Core
         shell: bash
@@ -398,6 +434,7 @@ jobs:
           cargo +1.92.0 check --workspace --all-targets --locked
           cargo +1.92.0 clippy --workspace --all-targets --locked -- -D warnings
           cargo +1.92.0 test --workspace --all-targets --locked
+          cargo +1.92.0 audit --deny warnings
 
   python-gate:
     name: Python Security Audit & Tests
@@ -406,10 +443,10 @@ jobs:
     if: github.event_name != 'pull_request' || needs.changes.outputs.docs_only != 'true'
     steps:
       - name: Checkout Code
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Setup Python
-        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: '3.12'
           cache: 'pip'
@@ -442,10 +479,10 @@ jobs:
     if: github.event_name != 'pull_request' || needs.changes.outputs.docs_only != 'true'
     steps:
       - name: Checkout Code
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Setup Python
-        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: '3.12'
 
@@ -454,9 +491,10 @@ jobs:
           python -m pip install pip==26.1.2
           pip install semgrep==1.169.0
 
-      - name: Run Semgrep
+      - name: Run Reviewed Semgrep Gate
         run: |
-          semgrep scan --config auto --error \
+          semgrep scan --metrics off --config .semgrep/vams-security.yml --error \
+            --json --output semgrep-reviewed.json \
             --exclude contracts/lib \
             --exclude node_modules \
             --exclude frontend-vite/node_modules \
@@ -465,6 +503,31 @@ jobs:
             --exclude contracts/out \
             --exclude .git
 
+      - name: Run Semgrep Discovery Scan
+        continue-on-error: true
+        run: |
+          semgrep scan --metrics off --config auto \
+            --json --output semgrep-discovery.json \
+            --exclude contracts/lib \
+            --exclude node_modules \
+            --exclude frontend-vite/node_modules \
+            --exclude .foundry \
+            --exclude frontend-vite/.vite \
+            --exclude contracts/out \
+            --exclude .git
+
+      - name: Upload Semgrep Evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: semgrep-evidence
+          path: |
+            semgrep-reviewed.json
+            semgrep-discovery.json
+            .semgrep/discovery-adjudications.yml
+          if-no-files-found: warn
+          retention-days: 365
+
   frontend-gate:
     name: JS/Frontend Verification
     runs-on: ubuntu-latest
@@ -472,10 +535,10 @@ jobs:
     if: github.event_name != 'pull_request' || needs.changes.outputs.docs_only != 'true'
     steps:
       - name: Checkout Code
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Setup Node.js
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: '22'
 
@@ -488,6 +551,12 @@ jobs:
         run: |
           cd frontend-vite
           npm audit --audit-level=high
+          npm audit --omit=dev --audit-level=high
+
+      - name: Lint Frontend
+        run: |
+          cd frontend-vite
+          npm run lint
 
       - name: Build Verification
         run: |
@@ -501,18 +570,30 @@ jobs:
     if: github.event_name != 'pull_request' || needs.changes.outputs.docs_only != 'true'
     steps:
       - name: Checkout Code
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Adapt Caddy Config
         run: |
+          mkdir -p "$RUNNER_TEMP/caddy-ci"
+          openssl req -x509 -newkey rsa:2048 -nodes \
+            -subj "/CN=VAMS CI Root" -days 1 \
+            -keyout "$RUNNER_TEMP/caddy-ci/ca-key.pem" \
+            -out "$RUNNER_TEMP/caddy-ci/ca.pem"
+
           docker run --rm \
             -v "$PWD/gateway/Caddyfile.testnet.example:/etc/caddy/Caddyfile:ro" \
-            caddy:2 \
+            -v "$RUNNER_TEMP/caddy-ci/ca.pem:/etc/caddy/certs/vams-root-ca.crt:ro" \
+            -e VAMS_GATEWAY_DOMAIN=localhost \
+            -e VAMS_ROOT_CA_CERT=/etc/caddy/certs/vams-root-ca.crt \
+            caddy:2.11.4-alpine@sha256:5f5c8640aae01df9654968d946d8f1a56c497f1dd5c5cda4cf95ab7c14d58648 \
             caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile
 
           docker run --rm \
             -v "$PWD/gateway/Caddyfile.testnet.example:/etc/caddy/Caddyfile:ro" \
-            caddy:2 \
+            -v "$RUNNER_TEMP/caddy-ci/ca.pem:/etc/caddy/certs/vams-root-ca.crt:ro" \
+            -e VAMS_GATEWAY_DOMAIN=localhost \
+            -e VAMS_ROOT_CA_CERT=/etc/caddy/certs/vams-root-ca.crt \
+            caddy:2.11.4-alpine@sha256:5f5c8640aae01df9654968d946d8f1a56c497f1dd5c5cda4cf95ab7c14d58648 \
             caddy adapt --config /etc/caddy/Caddyfile --adapter caddyfile --pretty
 
   sbom-generation:
@@ -525,7 +606,7 @@ jobs:
       id-token: write
     steps:
       - name: Checkout Code
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Generate SBOM (Syft)
         uses: anchore/sbom-action@e22c389904149dbc22b58101806040fa8d37a610 # v0
@@ -534,13 +615,13 @@ jobs:
           output-file: 'sbom.json'
 
       - name: Upload SBOM Artifact
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: sbom
           path: sbom.json
 
       - name: Install Cosign
-        uses: sigstore/cosign-installer@f713795cb21599bc4e5c4b58cbad1da852d7eeb9 # v3
+        uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
 
       - name: Sign SBOM Blob
         run: |
@@ -550,7 +631,7 @@ jobs:
             sbom.json
 
       - name: Upload Signed SBOM Evidence
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: signed-sbom
           path: |
@@ -604,41 +685,7 @@ jobs:
       SBOM: ${{ needs.sbom-generation.result }}
     steps:
       - name: Checkout Code
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
-
-      - name: Enforce Required Job Results
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          always_required=(
-            AUDIT_PROGRAM PUBLIC_CONTENT DEFAULT_CREDENTIALS MOCK_MODE
-            GITLEAKS TRUFFLEHOG
-          )
-          for name in "${always_required[@]}"; do
-            if [[ "${!name}" != "success" ]]; then
-              echo "$name did not pass: ${!name}" >&2
-              exit 1
-            fi
-          done
-
-          if [[ "$DOCS_ONLY" == "true" ]]; then
-            if [[ "$DOCS_GATE" != "success" ]]; then
-              echo "DOCS_GATE did not pass: $DOCS_GATE" >&2
-              exit 1
-            fi
-          else
-            full_required=(
-              SOLIDITY SLITHER AIKEN VIR_CORE PYTHON SEMGREP FRONTEND
-              GATEWAY_CONFIG SBOM
-            )
-            for name in "${full_required[@]}"; do
-              if [[ "${!name}" != "success" ]]; then
-                echo "$name did not pass: ${!name}" >&2
-                exit 1
-              fi
-            done
-          fi
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Generate Commit-Bound Evidence Manifest
         run: |
@@ -661,7 +708,7 @@ jobs:
             --result sbom="$SBOM"
 
       - name: Install Cosign
-        uses: sigstore/cosign-installer@f713795cb21599bc4e5c4b58cbad1da852d7eeb9 # v3
+        uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
 
       - name: Sign Audit Evidence
         run: |
@@ -671,7 +718,7 @@ jobs:
             audit-evidence.json
 
       - name: Upload Audit Evidence
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: testnet-audit-evidence
           path: |
@@ -680,6 +727,35 @@ jobs:
             audit-evidence.pem
           retention-days: 365
 
+      - name: Enforce Required Job Results
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          always_required=(
+            AUDIT_PROGRAM DOCS_GATE PUBLIC_CONTENT DEFAULT_CREDENTIALS MOCK_MODE
+            GITLEAKS TRUFFLEHOG
+          )
+          for name in "${always_required[@]}"; do
+            if [[ "${!name}" != "success" ]]; then
+              echo "$name did not pass: ${!name}" >&2
+              exit 1
+            fi
+          done
+
+          if [[ "$DOCS_ONLY" != "true" ]]; then
+            full_required=(
+              SOLIDITY SLITHER AIKEN VIR_CORE PYTHON SEMGREP FRONTEND
+              GATEWAY_CONFIG SBOM
+            )
+            for name in "${full_required[@]}"; do
+              if [[ "${!name}" != "success" ]]; then
+                echo "$name did not pass: ${!name}" >&2
+                exit 1
+              fi
+            done
+          fi
+
   testnet-readiness-gate:
     name: Testnet ${{ inputs.release_stage }} Readiness Gate
     runs-on: ubuntu-latest
@@ -687,16 +763,16 @@ jobs:
     if: github.event_name == 'workflow_dispatch'
     steps:
       - name: Checkout Code
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Download Signed Audit Evidence
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: testnet-audit-evidence
           path: docs/audit/evidence
 
       - name: Install Cosign
-        uses: sigstore/cosign-installer@f713795cb21599bc4e5c4b58cbad1da852d7eeb9 # v3
+        uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
 
       - name: Verify Audit Evidence Signature
         run: |

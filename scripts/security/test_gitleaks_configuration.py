@@ -1,11 +1,18 @@
 from __future__ import annotations
 
+import importlib.util
 import tomllib
 import unittest
 from pathlib import Path
+from unittest import mock
 
 
 ROOT = Path(__file__).resolve().parents[2]
+MODULE_PATH = Path(__file__).with_name("gitleaks_allowlist_regression.py")
+SPEC = importlib.util.spec_from_file_location("gitleaks_allowlist_regression", MODULE_PATH)
+assert SPEC is not None and SPEC.loader is not None
+gitleaks_regression = importlib.util.module_from_spec(SPEC)
+SPEC.loader.exec_module(gitleaks_regression)
 
 
 class GitleaksConfigurationTests(unittest.TestCase):
@@ -38,6 +45,29 @@ class GitleaksConfigurationTests(unittest.TestCase):
         self.assertNotIn("stopwords", text)
         self.assertNotIn("commits =", text)
         self.assertNotIn("[allowlist]", text)
+
+    def test_regression_scan_uses_scan_root_relative_paths(self) -> None:
+        source = Path("fixture-root")
+        report = Path("fixture-report.json")
+        completed = mock.Mock()
+        with mock.patch.object(
+            gitleaks_regression.subprocess,
+            "run",
+            return_value=completed,
+        ) as run:
+            self.assertIs(gitleaks_regression._run(source, report), completed)
+
+        command = run.call_args.args[0]
+        self.assertEqual(command[:3], ["gitleaks", "dir", "."])
+        self.assertEqual(run.call_args.kwargs["cwd"], source)
+
+    def test_explicit_scanner_path_must_exist(self) -> None:
+        missing = ROOT / "missing-gitleaks-binary"
+        with mock.patch.dict(
+            gitleaks_regression.os.environ,
+            {"GITLEAKS_BIN": str(missing)},
+        ):
+            self.assertIsNone(gitleaks_regression._gitleaks_binary())
 
 
 if __name__ == "__main__":

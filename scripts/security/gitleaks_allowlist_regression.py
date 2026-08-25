@@ -6,6 +6,7 @@ from __future__ import annotations
 import base64
 import hashlib
 import json
+import os
 import shutil
 import subprocess
 import sys
@@ -17,12 +18,22 @@ ROOT = Path(__file__).resolve().parents[2]
 CONFIG = ROOT / ".gitleaks.toml"
 
 
-def _run(source: Path, report: Path) -> subprocess.CompletedProcess[str]:
+def _gitleaks_binary() -> str | None:
+    configured = os.environ.get("GITLEAKS_BIN")
+    if configured:
+        binary = Path(configured)
+        return str(binary) if binary.is_file() else None
+    return shutil.which("gitleaks")
+
+
+def _run(
+    source: Path, report: Path, binary: str = "gitleaks"
+) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
         [
-            "gitleaks",
+            binary,
             "dir",
-            str(source),
+            ".",
             "--config",
             str(CONFIG),
             "--redact=100",
@@ -34,6 +45,7 @@ def _run(source: Path, report: Path) -> subprocess.CompletedProcess[str]:
             "1",
             "--no-banner",
         ],
+        cwd=source,
         check=False,
         capture_output=True,
         text=True,
@@ -42,7 +54,8 @@ def _run(source: Path, report: Path) -> subprocess.CompletedProcess[str]:
 
 
 def main() -> int:
-    if shutil.which("gitleaks") is None:
+    binary = _gitleaks_binary()
+    if binary is None:
         print("Gitleaks allowlist regression requires the pinned gitleaks binary.")
         return 2
 
@@ -89,8 +102,8 @@ def main() -> int:
 
         allowed_report = root / "allowed.json"
         blocked_report = root / "blocked.json"
-        allowed_result = _run(allowed, allowed_report)
-        blocked_result = _run(blocked, blocked_report)
+        allowed_result = _run(allowed, allowed_report, binary)
+        blocked_result = _run(blocked, blocked_report, binary)
         if allowed_result.returncode != 0:
             print("Gitleaks narrow allowlist rejected approved public expressions.")
             return 1
