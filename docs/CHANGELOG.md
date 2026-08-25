@@ -65,6 +65,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Cardano property tests**: Added seven seeded Aiken properties covering integer-square-root bounds, basis-point safety and monotonicity, inclusive ranges, strict bridge nonce ordering/replay rejection, and insurance payout caps.
 
 ### Changed
+- **Incident-preparation CI reproducibility**: Corrected Gitleaks fixture path
+  anchoring, made Forge and Slither checkouts recursive, installed the pinned
+  Foundry compiler for Slither, split reviewed Semgrep enforcement from
+  non-blocking discovery, refreshed official GitHub Actions to immutable
+  Node 24 release SHAs, pinned the Caddy testnet proxy image and client-CA
+  validation, installed the pinned history-rewrite helper in every Python test
+  context to eliminate environment-dependent skips, and updated vulnerable
+  frontend dependencies, including later
+  brace-expansion and js-yaml High-severity advisories discovered by a fresh
+  audit. Secret scanner wrappers now use scan-root-relative paths and canonical
+  file URIs across Linux and Windows; TruffleHog verification is disabled so
+  candidate credentials are never sent to provider endpoints. The non-blocking
+  discovery scan's Python 3.6 compatibility findings are recorded as not
+  applicable to the pinned Python 3.12 runtime. The discovery scan now permits
+  Semgrep's required registry metrics and treats operational scan errors as
+  failures while keeping discovered findings non-blocking. Aggregate evidence is now
+  generated and signed before the expected history-scan failure is enforced.
+  SBOM, aggregate, and closed-canary signatures use the current Sigstore bundle
+  format so Cosign 3 verification retains the certificate and transparency-log
+  proof in one artifact.
+  These controls do not waive historical credential findings or constitute
+  testnet-readiness evidence.
+- **Credential-shaped examples**: Gateway and PostgreSQL fixtures now construct
+  URLs from separate fields or environment placeholders. The development DBOS
+  setup requires caller-supplied local credentials instead of embedding a
+  reusable password-shaped example.
+- **Complete-history secret gates**: CI now installs checksum-verified Gitleaks
+  8.30.1 and TruffleHog 3.95.9, fetches every branch and tag, runs Gitleaks with
+  `--log-opts=--all`, and runs all TruffleHog result classes while retaining
+  only sanitized candidate-free evidence.
 - **Gateway and Neuron secp256k1**: Replaced the unpatched `python-ecdsa`
   dependency with `cryptography` ECDSA/SHA-256 primitives using the existing
   64-byte public-key and signature encodings, low-S normalization, and
@@ -119,12 +149,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`REPO_STATUS_REPORT.md`**: Rewrote the repository status report for the July 2026 public testnet launch window with commit-history chronology, current component maturity, verified blockers, and gated roadmap language.
 - **`.github/workflows/security-gates.yml`**: Aligned CI with the current frontend and Cardano toolchains by moving frontend verification to Node.js 22, pinning Aiken to `v1.1.21`, and using `aiken check` as the Aiken verification command.
 - **`.github/workflows/security-gates.yml`**: Replaced all mutable GitHub Action refs with exact commits, replaced the removed `txpipe/setup-aiken` action with the official Aiken action, and pinned Foundry and Python security-tool versions.
-- **`cardano/aiken.toml`**, **`cardano/aiken.lock`**, and **`.github/workflows/security-gates.yml`**: Pinned the official `aiken-lang/fuzz` v2 package and made the Cardano gate reproducible with seed `20260711` and 250 successful cases per property.
+- **`cardano/aiken.toml`**, **`cardano/aiken.lock`**, and **`.github/workflows/security-gates.yml`**: Pinned the official `aiken-lang/fuzz` v2 package and made the Cardano gate reproducible with seed `20260713` and 250 successful cases per property.
 - **`neuron/requirements.txt`**: Declared `numpy` and `scikit-learn` for the intelligence-layer modules and tests that already import vector math and Incremental PCA dependencies.
 - **`neuron/da/models.py`**: Included Sentinel telemetry extras in deterministic DA audit report serialization so fidelity and SkillOps-related telemetry can be committed in report hashes.
 - **`neuron/services/registry_client.py`**: Extended Service Block metadata with deterministic SkillOps manifests and fail-closed permission-scope validation.
 
 ### Security
+- **Credential-history eradication preparation**: Removed the 1,267-file
+  tracked `.foundry/` vendor tree, added two exact rule-targeted Gitleaks
+  allowlists with negative regressions, added all-ref rewrite safeguards with
+  an external hashed replacement map, and upgraded incident evidence to schema
+  v4 for two permanently decommissioned PEM identities and bounded Infura
+  revocation timing.
+- **Secret-history prevention**: Added fail-closed checks rejecting PEM/vendor/
+  legacy-helper paths, concrete credential-shaped URI literals, replacement
+  maps, and replacement-map directives in tracked content or evidence.
 - **Historical secret gate**: A fully redacted Gitleaks v8.30.1 scan of all 82
   reachable commits found 1,734 matches, including three historical PEM
   private-key findings. `docs/audit/GITLEAKS_ADJUDICATION.md` blocks release

@@ -50,7 +50,7 @@ export default defineConfig(({ mode }) => {
               const hash = crypto.createHash('sha384').update(content).digest('base64')
               const integrity = `sha384-${hash}`
 
-              const escapedFileName = fileName.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')
+              const escapedFileName = fileName.replace(/[-\\^$*+?.()|[\]{}]/g, '\\$&')
               const scriptRegex = new RegExp(`(<script[^>]+src=["'][^"']*?${escapedFileName}["'])([^>]*>)`, 'g')
               const cssRegex = new RegExp(`(<link[^>]+href=["'][^"']*?${escapedFileName}["'])([^>]*>)`, 'g')
 

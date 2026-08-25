@@ -1,0 +1,23 @@
+title = "VAMS narrow false-positive adjudication"
+
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Public secp256k1 curve-type checks; no credential material"
+targetRules = ["generic-api-key"]
+condition = "AND"
+regexTarget = "line"
+paths = ['''^neuron/secp256k1\.py$''']
+regexes = ['''^\s*key\.curve,\s*ec\.SECP256K1\s*$''']
+
+[[allowlists]]
+description = "Public 20-byte EVM addresses in historical configuration and scripts"
+targetRules = ["generic-api-key"]
+condition = "AND"
+regexTarget = "match"
+paths = [
+  '''^neuron/config\.py$''',
+  '''^contracts/script/(?:DeployX402|EmergencyLockdown|RegisterAgent)\.s\.sol$''',
+]
+regexes = ['''0x[0-9a-fA-F]{40}''']

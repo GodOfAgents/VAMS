@@ -1,0 +1,40 @@
+schema_version: 1
+tool: semgrep
+tool_version: 1.169.0
+runtime_floor: python-3.12
+adjudications:
+  - rule_id: python.lang.compatibility.python36.python36-compatibility-Popen1
+    path: scripts/security/trufflehog_gate.py
+    status: not_applicable
+    reason: VAMS pins Python 3.12; Python 3.6 subprocess compatibility is not supported.
+  - rule_id: python.lang.compatibility.python36.python36-compatibility-Popen2
+    path: scripts/security/trufflehog_gate.py
+    status: not_applicable
+    reason: VAMS pins Python 3.12; Python 3.6 subprocess compatibility is not supported.
+scan_warnings:
+  - type: PartialParsing
+    status: tool_limitation
+    paths:
+      - contracts/src/economic/VAMSInsuranceFund.sol
+      - contracts/src/economic/VAMSPaymentHandler.sol
+      - contracts/src/governance/GovernorExecutor.sol
+      - contracts/src/sentinel/VAMSSentinel.sol
+      - contracts/src/staking/VAMSStaking.sol
+      - contracts/src/token/VAMSToken.sol
+      - contracts/src/vdso/VAMSExecutionKernel.sol
+      - contracts/src/vdso/VAMSObjectStore.sol
+      - contracts/src/vdso/VAMSProgramRegistry.sol
+      - contracts/src/vdso/VAMSReservationManager.sol
+      - contracts/src/vesting/VAMSVesting.sol
+    reason: >-
+      Semgrep 1.169.0's community Solidity parser partially parses supported
+      custom-error and tuple syntax in these files. Solc 0.8.24, Forge 1.7.1,
+      and Slither 0.11.5 remain the blocking Solidity coverage.
+  - type: PartialParsing
+    status: tool_limitation
+    paths:
+      - scripts/audit/history_rewrite.sh
+    reason: >-
+      Semgrep 1.169.0's community Bash parser partially parses the parameter
+      expansion literal%%==>* expression. Bash syntax execution tests remain
+      blocking for this incident-only script.

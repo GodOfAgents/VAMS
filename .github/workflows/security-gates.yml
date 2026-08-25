@@ -27,7 +27,7 @@ jobs:
       docs_only: ${{ steps.filter.outputs.docs_only }}
     steps:
       - name: Checkout Code
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
 
@@ -71,7 +71,17 @@ jobs:
     needs: changes
     steps:
       - name: Checkout Code
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Setup Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.12'
+
+      - name: Install Audit Test Dependencies
+        run: |
+          python -m pip install pip==26.1.2
+          python -m pip install git-filter-repo==2.47.0
 
       - name: Validate Audit Program
         run: |
@@ -116,7 +126,7 @@ jobs:
             --output economic-adversarial-report.json
 
       - name: Upload Economic Adversarial Evidence
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: economic-adversarial-report
           path: economic-adversarial-report.json
@@ -126,18 +136,22 @@ jobs:
         run: |
           python scripts/audit/validate_agent_red_team.py
 
+      - name: Run Complete Audit Regression Suite
+        run: |
+          python -m unittest discover -s scripts/audit -p "test_*.py"
+
   docs-gate:
     name: Docs Verification
     runs-on: ubuntu-latest
     needs: changes
-    if: github.event_name == 'pull_request' && needs.changes.outputs.docs_only == 'true'
     steps:
       - name: Checkout Code
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
 
       - name: Verify Team Docs Diff
+        if: github.event_name == 'pull_request' && needs.changes.outputs.docs_only == 'true'
         shell: bash
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
@@ -168,7 +182,7 @@ jobs:
     needs: changes
     steps:
       - name: Checkout Code
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
 
@@ -182,13 +196,14 @@ jobs:
     needs: changes
     steps:
       - name: Checkout Code
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
 
       - name: Run Default Credential Scan
         run: |
           python scripts/security/default_credential_scan.py
+          python scripts/security/secret_history_prevention_scan.py
 
   mock-mode-promotion-scan:
     name: Mock-Mode Promotion Scan
@@ -196,7 +211,7 @@ jobs:
     needs: changes
     steps:
       - name: Checkout Code
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
 
@@ -210,15 +225,56 @@ jobs:
     needs: changes
     steps:
       - name: Checkout Code
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
 
-      - name: Run GitLeaks
-        uses: gitleaks/gitleaks-action@dcedce43c6f43de0b836d1fe38946645c9c638dc # v2
+      - name: Fetch Complete Git History
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --force --prune origin '+refs/heads/*:refs/remotes/origin/*'
+          git fetch --force --tags origin
+
+      - name: Install Pinned GitLeaks
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --location --silent --show-error --output "$RUNNER_TEMP/gitleaks.tar.gz" https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/gitleaks_8.30.1_linux_x64.tar.gz
+          curl --fail --location --silent --show-error --output "$RUNNER_TEMP/gitleaks_checksums.txt" https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/gitleaks_8.30.1_checksums.txt
+          (cd "$RUNNER_TEMP" && cp gitleaks.tar.gz gitleaks_8.30.1_linux_x64.tar.gz && sha256sum --check --ignore-missing gitleaks_checksums.txt)
+          tar -xzf "$RUNNER_TEMP/gitleaks.tar.gz" -C "$RUNNER_TEMP" gitleaks
+          sudo install -m 0755 "$RUNNER_TEMP/gitleaks" /usr/local/bin/gitleaks
+
+      - name: Verify Narrow GitLeaks Allowlists
+        run: python scripts/security/gitleaks_allowlist_regression.py
+
+      - name: Run Complete-History GitLeaks
+        id: gitleaks_scan
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p raw-gate
+          gitleaks git . --config .gitleaks.toml --redact=100 \
+            --report-format json --report-path raw-gate/gitleaks-report.json \
+            --log-opts=--all --exit-code 1
+          test -s raw-gate/gitleaks-report.json
+
+      - name: Upload GitLeaks Raw Gate Evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: raw-gate-gitleaks
+          path: raw-gate/gitleaks-report.json
+          if-no-files-found: error
+          retention-days: 365
+
+      - name: Enforce GitLeaks Result
+        if: always()
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITLEAKS_VERSION: 8.30.1
+          SCAN_OUTCOME: ${{ steps.gitleaks_scan.outcome }}
+        run: test "$SCAN_OUTCOME" = "success"
 
   trufflehog-scanning:
     name: Secret Scanning (TruffleHog)
@@ -226,16 +282,48 @@ jobs:
     needs: changes
     steps:
       - name: Checkout Code
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
 
-      - name: Run TruffleHog Filesystem Scan
-        uses: trufflesecurity/trufflehog@8feb77b20aeb64366d106b08f2941287755c173b
+      - name: Fetch Complete Git History
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --force --prune origin '+refs/heads/*:refs/remotes/origin/*'
+          git fetch --force --tags origin
+
+      - name: Install Pinned TruffleHog
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --location --silent --show-error --output "$RUNNER_TEMP/trufflehog.tar.gz" https://github.com/trufflesecurity/trufflehog/releases/download/v3.95.9/trufflehog_3.95.9_linux_amd64.tar.gz
+          curl --fail --location --silent --show-error --output "$RUNNER_TEMP/trufflehog_checksums.txt" https://github.com/trufflesecurity/trufflehog/releases/download/v3.95.9/trufflehog_3.95.9_checksums.txt
+          (cd "$RUNNER_TEMP" && cp trufflehog.tar.gz trufflehog_3.95.9_linux_amd64.tar.gz && sha256sum --check --ignore-missing trufflehog_checksums.txt)
+          tar -xzf "$RUNNER_TEMP/trufflehog.tar.gz" -C "$RUNNER_TEMP" trufflehog
+          sudo install -m 0755 "$RUNNER_TEMP/trufflehog" /usr/local/bin/trufflehog
+
+      - name: Run Complete-History All-Category TruffleHog
+        id: trufflehog_scan
+        continue-on-error: true
+        run: |
+          python scripts/security/trufflehog_gate.py \
+            --output raw-gate/trufflehog-sanitized.json
+
+      - name: Upload TruffleHog Sanitized Gate Evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          path: ./
-          version: 3.95.9
-          extra_args: --only-verified --fail
+          name: raw-gate-trufflehog
+          path: raw-gate/trufflehog-sanitized.json
+          if-no-files-found: error
+          retention-days: 365
+
+      - name: Enforce TruffleHog Result
+        if: always()
+        env:
+          SCAN_OUTCOME: ${{ steps.trufflehog_scan.outcome }}
+        run: test "$SCAN_OUTCOME" = "success"
 
   solidity-gate:
     name: Solidity (Forge) Build & Test
@@ -244,10 +332,12 @@ jobs:
     if: github.event_name != 'pull_request' || needs.changes.outputs.docs_only != 'true'
     steps:
       - name: Checkout Code
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          submodules: recursive
 
       - name: Install Foundry
-        uses: foundry-rs/foundry-toolchain@b00af27efadbc7b4ca8b82abbd903b17cc874d2a # v1
+        uses: foundry-rs/foundry-toolchain@908c540300062bd5a7e473851cdb4282204cee09 # v1.9.1
         with:
           version: v1.7.1
 
@@ -264,10 +354,17 @@ jobs:
     if: github.event_name != 'pull_request' || needs.changes.outputs.docs_only != 'true'
     steps:
       - name: Checkout Code
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          submodules: recursive
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@908c540300062bd5a7e473851cdb4282204cee09 # v1.9.1
+        with:
+          version: v1.7.1
 
       - name: Setup Python
-        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: '3.12'
 
@@ -279,7 +376,19 @@ jobs:
       - name: Run Slither
         run: |
           cd contracts
-          slither . --exclude-dependencies --exclude-informational --exclude-low --fail-high
+          slither . --exclude-dependencies --exclude-informational --exclude-low \
+            --fail-high --json slither-report.json
+
+      - name: Upload Slither Evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: slither-evidence
+          path: |
+            contracts/slither-report.json
+            contracts/slither-adjudications.yml
+          if-no-files-found: warn
+          retention-days: 365
 
   aiken-gate:
     name: Aiken (Cardano) Verification
@@ -288,7 +397,7 @@ jobs:
     if: github.event_name != 'pull_request' || needs.changes.outputs.docs_only != 'true'
     steps:
       - name: Checkout Code
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Install Aiken
         uses: aiken-lang/setup-aiken@1728a4be43be099752e22d8b841706caaa6fdd88 # v1
@@ -307,13 +416,14 @@ jobs:
     if: github.event_name != 'pull_request' || needs.changes.outputs.docs_only != 'true'
     steps:
       - name: Checkout Code
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Install Pinned Rust Toolchain
         shell: bash
         run: |
           set -euo pipefail
           rustup toolchain install 1.92.0 --profile minimal --component rustfmt,clippy
+          cargo +1.92.0 install cargo-audit --version 0.22.2 --locked
 
       - name: Verify VIR Core
         shell: bash
@@ -324,6 +434,7 @@ jobs:
           cargo +1.92.0 check --workspace --all-targets --locked
           cargo +1.92.0 clippy --workspace --all-targets --locked -- -D warnings
           cargo +1.92.0 test --workspace --all-targets --locked
+          cargo +1.92.0 audit --deny warnings
 
   python-gate:
     name: Python Security Audit & Tests
@@ -332,10 +443,10 @@ jobs:
     if: github.event_name != 'pull_request' || needs.changes.outputs.docs_only != 'true'
     steps:
       - name: Checkout Code
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Setup Python
-        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: '3.12'
           cache: 'pip'
@@ -345,6 +456,7 @@ jobs:
           python -m pip install pip==26.1.2
           pip install pytest==9.1.1 pytest-asyncio==1.4.0 anyio==4.14.1
           pip install httpx==0.28.1 httpx2==2.5.0 bandit==1.9.4 pip-audit==2.10.1
+          pip install git-filter-repo==2.47.0
           pip install -r gateway/requirements.txt
           pip install -r neuron/requirements.txt
 
@@ -368,10 +480,10 @@ jobs:
     if: github.event_name != 'pull_request' || needs.changes.outputs.docs_only != 'true'
     steps:
       - name: Checkout Code
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Setup Python
-        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: '3.12'
 
@@ -380,9 +492,10 @@ jobs:
           python -m pip install pip==26.1.2
           pip install semgrep==1.169.0
 
-      - name: Run Semgrep
+      - name: Run Reviewed Semgrep Gate
         run: |
-          semgrep scan --config auto --error \
+          semgrep scan --metrics off --config .semgrep/vams-security.yml --error \
+            --json --output semgrep-reviewed.json \
             --exclude contracts/lib \
             --exclude node_modules \
             --exclude frontend-vite/node_modules \
@@ -391,6 +504,30 @@ jobs:
             --exclude contracts/out \
             --exclude .git
 
+      - name: Run Semgrep Discovery Scan
+        run: |
+          semgrep scan --metrics on --config auto \
+            --json --output semgrep-discovery.json \
+            --exclude contracts/lib \
+            --exclude node_modules \
+            --exclude frontend-vite/node_modules \
+            --exclude .foundry \
+            --exclude frontend-vite/.vite \
+            --exclude contracts/out \
+            --exclude .git
+
+      - name: Upload Semgrep Evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: semgrep-evidence
+          path: |
+            semgrep-reviewed.json
+            semgrep-discovery.json
+            .semgrep/discovery-adjudications.yml
+          if-no-files-found: error
+          retention-days: 365
+
   frontend-gate:
     name: JS/Frontend Verification
     runs-on: ubuntu-latest
@@ -398,10 +535,10 @@ jobs:
     if: github.event_name != 'pull_request' || needs.changes.outputs.docs_only != 'true'
     steps:
       - name: Checkout Code
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Setup Node.js
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: '22'
 
@@ -414,6 +551,12 @@ jobs:
         run: |
           cd frontend-vite
           npm audit --audit-level=high
+          npm audit --omit=dev --audit-level=high
+
+      - name: Lint Frontend
+        run: |
+          cd frontend-vite
+          npm run lint
 
       - name: Build Verification
         run: |
@@ -427,18 +570,30 @@ jobs:
     if: github.event_name != 'pull_request' || needs.changes.outputs.docs_only != 'true'
     steps:
       - name: Checkout Code
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Adapt Caddy Config
         run: |
+          mkdir -p "$RUNNER_TEMP/caddy-ci"
+          openssl req -x509 -newkey rsa:2048 -nodes \
+            -subj "/CN=VAMS CI Root" -days 1 \
+            -keyout "$RUNNER_TEMP/caddy-ci/ca-key.pem" \
+            -out "$RUNNER_TEMP/caddy-ci/ca.pem"
+
           docker run --rm \
             -v "$PWD/gateway/Caddyfile.testnet.example:/etc/caddy/Caddyfile:ro" \
-            caddy:2 \
+            -v "$RUNNER_TEMP/caddy-ci/ca.pem:/etc/caddy/certs/vams-root-ca.crt:ro" \
+            -e VAMS_GATEWAY_DOMAIN=localhost \
+            -e VAMS_ROOT_CA_CERT=/etc/caddy/certs/vams-root-ca.crt \
+            caddy:2.11.4-alpine@sha256:5f5c8640aae01df9654968d946d8f1a56c497f1dd5c5cda4cf95ab7c14d58648 \
             caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile
 
           docker run --rm \
             -v "$PWD/gateway/Caddyfile.testnet.example:/etc/caddy/Caddyfile:ro" \
-            caddy:2 \
+            -v "$RUNNER_TEMP/caddy-ci/ca.pem:/etc/caddy/certs/vams-root-ca.crt:ro" \
+            -e VAMS_GATEWAY_DOMAIN=localhost \
+            -e VAMS_ROOT_CA_CERT=/etc/caddy/certs/vams-root-ca.crt \
+            caddy:2.11.4-alpine@sha256:5f5c8640aae01df9654968d946d8f1a56c497f1dd5c5cda4cf95ab7c14d58648 \
             caddy adapt --config /etc/caddy/Caddyfile --adapter caddyfile --pretty
 
   sbom-generation:
@@ -451,7 +606,7 @@ jobs:
       id-token: write
     steps:
       - name: Checkout Code
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Generate SBOM (Syft)
         uses: anchore/sbom-action@e22c389904149dbc22b58101806040fa8d37a610 # v0
@@ -460,29 +615,27 @@ jobs:
           output-file: 'sbom.json'
 
       - name: Upload SBOM Artifact
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: sbom
           path: sbom.json
 
       - name: Install Cosign
-        uses: sigstore/cosign-installer@f713795cb21599bc4e5c4b58cbad1da852d7eeb9 # v3
+        uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
 
       - name: Sign SBOM Blob
         run: |
           cosign sign-blob --yes --oidc-provider github-actions \
-            --output-signature sbom.sig \
-            --output-certificate sbom.pem \
+            --bundle sbom.sigstore.json \
             sbom.json
 
       - name: Upload Signed SBOM Evidence
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: signed-sbom
           path: |
             sbom.json
-            sbom.sig
-            sbom.pem
+            sbom.sigstore.json
           retention-days: 365
 
   security-evidence-gate:
@@ -530,41 +683,7 @@ jobs:
       SBOM: ${{ needs.sbom-generation.result }}
     steps:
       - name: Checkout Code
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
-
-      - name: Enforce Required Job Results
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          always_required=(
-            AUDIT_PROGRAM PUBLIC_CONTENT DEFAULT_CREDENTIALS MOCK_MODE
-            GITLEAKS TRUFFLEHOG
-          )
-          for name in "${always_required[@]}"; do
-            if [[ "${!name}" != "success" ]]; then
-              echo "$name did not pass: ${!name}" >&2
-              exit 1
-            fi
-          done
-
-          if [[ "$DOCS_ONLY" == "true" ]]; then
-            if [[ "$DOCS_GATE" != "success" ]]; then
-              echo "DOCS_GATE did not pass: $DOCS_GATE" >&2
-              exit 1
-            fi
-          else
-            full_required=(
-              SOLIDITY SLITHER AIKEN VIR_CORE PYTHON SEMGREP FRONTEND
-              GATEWAY_CONFIG SBOM
-            )
-            for name in "${full_required[@]}"; do
-              if [[ "${!name}" != "success" ]]; then
-                echo "$name did not pass: ${!name}" >&2
-                exit 1
-              fi
-            done
-          fi
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Generate Commit-Bound Evidence Manifest
         run: |
@@ -587,24 +706,51 @@ jobs:
             --result sbom="$SBOM"
 
       - name: Install Cosign
-        uses: sigstore/cosign-installer@f713795cb21599bc4e5c4b58cbad1da852d7eeb9 # v3
+        uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
 
       - name: Sign Audit Evidence
         run: |
           cosign sign-blob --yes --oidc-provider github-actions \
-            --output-signature audit-evidence.sig \
-            --output-certificate audit-evidence.pem \
+            --bundle audit-evidence.sigstore.json \
             audit-evidence.json
 
       - name: Upload Audit Evidence
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: testnet-audit-evidence
           path: |
             audit-evidence.json
-            audit-evidence.sig
-            audit-evidence.pem
+            audit-evidence.sigstore.json
           retention-days: 365
+
+      - name: Enforce Required Job Results
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          always_required=(
+            AUDIT_PROGRAM DOCS_GATE PUBLIC_CONTENT DEFAULT_CREDENTIALS MOCK_MODE
+            GITLEAKS TRUFFLEHOG
+          )
+          for name in "${always_required[@]}"; do
+            if [[ "${!name}" != "success" ]]; then
+              echo "$name did not pass: ${!name}" >&2
+              exit 1
+            fi
+          done
+
+          if [[ "$DOCS_ONLY" != "true" ]]; then
+            full_required=(
+              SOLIDITY SLITHER AIKEN VIR_CORE PYTHON SEMGREP FRONTEND
+              GATEWAY_CONFIG SBOM
+            )
+            for name in "${full_required[@]}"; do
+              if [[ "${!name}" != "success" ]]; then
+                echo "$name did not pass: ${!name}" >&2
+                exit 1
+              fi
+            done
+          fi
 
   testnet-readiness-gate:
     name: Testnet ${{ inputs.release_stage }} Readiness Gate
@@ -613,22 +759,21 @@ jobs:
     if: github.event_name == 'workflow_dispatch'
     steps:
       - name: Checkout Code
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Download Signed Audit Evidence
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: testnet-audit-evidence
           path: docs/audit/evidence
 
       - name: Install Cosign
-        uses: sigstore/cosign-installer@f713795cb21599bc4e5c4b58cbad1da852d7eeb9 # v3
+        uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
 
       - name: Verify Audit Evidence Signature
         run: |
           cosign verify-blob \
-            --certificate docs/audit/evidence/audit-evidence.pem \
-            --signature docs/audit/evidence/audit-evidence.sig \
+            --bundle docs/audit/evidence/audit-evidence.sigstore.json \
             --certificate-identity-regexp '^https://github.com/GodOfAgents/VAMS/.github/workflows/security-gates.yml@refs/.+$' \
             --certificate-oidc-issuer 'https://token.actions.githubusercontent.com' \
             docs/audit/evidence/audit-evidence.json
@@ -637,8 +782,7 @@ jobs:
         if: inputs.release_stage == 'public'
         run: |
           cosign verify-blob \
-            --certificate docs/audit/evidence/closed-canary-report.pem \
-            --signature docs/audit/evidence/closed-canary-report.sig \
+            --bundle docs/audit/evidence/closed-canary-report.sigstore.json \
             --certificate-identity-regexp '^https://github.com/GodOfAgents/VAMS/.github/workflows/.+@refs/.+$' \
             --certificate-oidc-issuer 'https://token.actions.githubusercontent.com' \
             docs/audit/evidence/closed-canary-report.json

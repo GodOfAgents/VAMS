@@ -82,19 +82,54 @@ REQUIRED_INDEPENDENT_DOMAINS = {
 REQUIRED_EVIDENCE_RESULTS = {
     "audit-program": "python scripts/audit/audit_program.py validate",
     "public-content": "python scripts/security/public_content_policy_scan.py",
-    "default-credentials": "python scripts/security/default_credential_scan.py",
+    "default-credentials": (
+        "python scripts/security/default_credential_scan.py && "
+        "python scripts/security/secret_history_prevention_scan.py"
+    ),
     "mock-mode": "python scripts/security/mock_mode_promotion_scan.py",
-    "gitleaks": "gitleaks detect --source .",
-    "trufflehog": "trufflehog filesystem .",
+    "gitleaks": (
+        "gitleaks git . --config .gitleaks.toml --redact=100 "
+        "--report-format json --report-path raw-gate/gitleaks-report.json "
+        "--log-opts=--all --exit-code 1"
+    ),
+    "trufflehog": (
+        "python scripts/security/trufflehog_gate.py "
+        "--output raw-gate/trufflehog-sanitized.json"
+    ),
     "solidity": "forge build --sizes && forge test -vvv",
-    "slither": "slither . --config-file slither.config.json",
-    "aiken": "aiken check --deny --seed 20260713 --max-success 250",
-    "vir-core": "cargo test --workspace --all-targets --locked",
-    "python": "pytest -v --tb=short && bandit && pip-audit",
-    "semgrep": "semgrep scan --config auto --error",
-    "frontend": "npm ci && npm audit --audit-level=high && npm run build",
-    "gateway-config": "caddy validate --config gateway/Caddyfile.testnet.example --adapter caddyfile",
-    "sbom": "syft dir:. -o cyclonedx-json",
+    "slither": (
+        "slither . --exclude-dependencies --exclude-informational --exclude-low "
+        "--fail-high --json slither-report.json"
+    ),
+    "aiken": "aiken check --deny --seed 20260711 --max-success 250",
+    "vir-core": (
+        "cargo +1.92.0 fmt --all -- --check && "
+        "cargo +1.92.0 check --workspace --all-targets --locked && "
+        "cargo +1.92.0 clippy --workspace --all-targets --locked -- -D warnings && "
+        "cargo +1.92.0 test --workspace --all-targets --locked && "
+        "cargo +1.92.0 audit --deny warnings"
+    ),
+    "python": (
+        "pip-audit -r gateway/requirements.txt && "
+        "pip-audit -r neuron/requirements.txt && "
+        "bandit -r neuron/ gateway/ -ll -ii && pytest -v --tb=short"
+    ),
+    "semgrep": (
+        "semgrep scan --metrics off --config .semgrep/vams-security.yml --error && "
+        "semgrep scan --metrics on --config auto"
+    ),
+    "frontend": (
+        "npm ci && npm audit --audit-level=high && "
+        "npm audit --omit=dev --audit-level=high && npm run lint && npm run build"
+    ),
+    "gateway-config": (
+        "caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile && "
+        "caddy adapt --config /etc/caddy/Caddyfile --adapter caddyfile --pretty"
+    ),
+    "sbom": (
+        "anchore/sbom-action format=cyclonedx-json output-file=sbom.json && "
+        "cosign sign-blob --bundle sbom.sigstore.json sbom.json"
+    ),
 }
 CANARY_EVM_ARTIFACTS = {
     "VAMSToken",
@@ -276,14 +311,12 @@ def _require_nonempty_file(path: Path, label: str, errors: list[str]) -> None:
 
 def _validate_evidence_manifest(
     path: Path,
-    signature: Path,
-    certificate: Path,
+    signature_bundle: Path,
     commit_sha: str,
 ) -> list[str]:
     errors: list[str] = []
     _require_nonempty_file(path, "evidence manifest", errors)
-    _require_nonempty_file(signature, "evidence signature", errors)
-    _require_nonempty_file(certificate, "evidence certificate", errors)
+    _require_nonempty_file(signature_bundle, "evidence signature bundle", errors)
     if errors:
         return errors
 
@@ -1046,13 +1079,11 @@ def _validate_independent_reviews(path: Path, commit_sha: str) -> list[str]:
 def validate_readiness(
     stage: str = "public",
     evidence_manifest: Path | None = None,
-    evidence_signature: Path | None = None,
-    evidence_certificate: Path | None = None,
+    evidence_signature_bundle: Path | None = None,
     deployment_manifests: list[Path] | None = None,
     canary_report: Path | None = None,
     assurance_index: Path | None = None,
-    canary_signature: Path | None = None,
-    canary_certificate: Path | None = None,
+    canary_signature_bundle: Path | None = None,
     runtime_report: Path | None = None,
     privacy_review: Path | None = None,
     independent_reviews: Path | None = None,
@@ -1088,13 +1119,13 @@ def validate_readiness(
         return errors
 
     evidence_manifest = evidence_manifest or EVIDENCE_DIR / "audit-evidence.json"
-    evidence_signature = evidence_signature or EVIDENCE_DIR / "audit-evidence.sig"
-    evidence_certificate = evidence_certificate or EVIDENCE_DIR / "audit-evidence.pem"
+    evidence_signature_bundle = (
+        evidence_signature_bundle or EVIDENCE_DIR / "audit-evidence.sigstore.json"
+    )
     errors.extend(
         _validate_evidence_manifest(
             evidence_manifest,
-            evidence_signature,
-            evidence_certificate,
+            evidence_signature_bundle,
             commit_sha,
         )
     )
@@ -1130,16 +1161,13 @@ def validate_readiness(
     ]
     if stage == "public":
         canary_report = canary_report or EVIDENCE_DIR / "closed-canary-report.json"
-        canary_signature = canary_signature or EVIDENCE_DIR / "closed-canary-report.sig"
-        canary_certificate = (
-            canary_certificate or EVIDENCE_DIR / "closed-canary-report.pem"
+        canary_signature_bundle = (
+            canary_signature_bundle
+            or EVIDENCE_DIR / "closed-canary-report.sigstore.json"
         )
         errors.extend(_validate_canary_report(canary_report, commit_sha))
         _require_nonempty_file(
-            canary_signature, "closed-canary signature", errors
-        )
-        _require_nonempty_file(
-            canary_certificate, "closed-canary certificate", errors
+            canary_signature_bundle, "closed-canary signature bundle", errors
         )
         supporting_artifacts.append(canary_report)
         independent_reviews = (
@@ -1231,13 +1259,11 @@ def main() -> int:
     readiness_parser = subparsers.add_parser("readiness")
     readiness_parser.add_argument("--stage", choices=sorted(STAGE_GATES), default="public")
     readiness_parser.add_argument("--evidence-manifest", type=Path)
-    readiness_parser.add_argument("--evidence-signature", type=Path)
-    readiness_parser.add_argument("--evidence-certificate", type=Path)
+    readiness_parser.add_argument("--evidence-signature-bundle", type=Path)
     readiness_parser.add_argument("--deployment-manifest", type=Path, action="append")
     readiness_parser.add_argument("--canary-report", type=Path)
     readiness_parser.add_argument("--assurance-index", type=Path)
-    readiness_parser.add_argument("--canary-signature", type=Path)
-    readiness_parser.add_argument("--canary-certificate", type=Path)
+    readiness_parser.add_argument("--canary-signature-bundle", type=Path)
     readiness_parser.add_argument("--runtime-report", type=Path)
     readiness_parser.add_argument("--privacy-review", type=Path)
     readiness_parser.add_argument("--independent-reviews", type=Path)
@@ -1250,13 +1276,11 @@ def main() -> int:
         validate_readiness(
             stage=args.stage,
             evidence_manifest=args.evidence_manifest,
-            evidence_signature=args.evidence_signature,
-            evidence_certificate=args.evidence_certificate,
+            evidence_signature_bundle=args.evidence_signature_bundle,
             deployment_manifests=args.deployment_manifest,
             canary_report=args.canary_report,
             assurance_index=args.assurance_index,
-            canary_signature=args.canary_signature,
-            canary_certificate=args.canary_certificate,
+            canary_signature_bundle=args.canary_signature_bundle,
             runtime_report=args.runtime_report,
             privacy_review=args.privacy_review,
             independent_reviews=args.independent_reviews,

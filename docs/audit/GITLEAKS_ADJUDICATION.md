@@ -1,46 +1,102 @@
 # Gitleaks Historical Finding Adjudication
 
-**Scan date:** 2026-07-13
+**Local scan date:** 2026-07-15
+
+**Latest fully triaged CI artifact:** run `29416245559`, 2026-07-15
+
+**Latest reproducing PR run:** `29611633518`, 869 findings across 65 scanned
+commits
 
 **Tool:** Gitleaks v8.30.1
 
-**Scope:** All 82 commits reachable through `--all`; findings were fully
-redacted before classification.
-
 ## Gate Result
 
-The history scan is **blocking**. It reported 1,734 matches: 1,731 generic API
-key matches and three PEM private-key matches. No baseline or allowlist has been
-added because doing so before credential invalidation and owner review would
-hide a real historical exposure.
+The history scan is **blocking**. No unconditional baseline or global
+allowlist is accepted. The preparation branch adds only two rule-targeted
+`generic-api-key` AND allowlists for exact public curve-type expressions and
+exact 40-hex-character EVM addresses. Regression fixtures prove that 64-hex
+private keys, AWS-style tokens, generic API tokens, and adjacent-line secrets
+still fail.
+The earlier local complete-history inventory reported 1,740 matches across 15
+finding-bearing commits: 1,737 generic API-key matches and three private-key
+matches. The underlying sanitized local report is not in the repository, so
+those counts cannot yet be independently reconciled path by path.
 
-## Redacted Classification
+Protected CI run `29416245559` scanned the PR merge SHA
+`e2526ffb0e42540d13a82b75d06f60b293159622` with:
 
-| Class | Matches | Assessment |
-| --- | ---: | --- |
-| Deleted Foundry output JSON | 1,604 | Generated compiler/test output. These generic-key matches require sampled reviewer confirmation before a narrow historical allowlist is permitted. |
-| Tracked `.foundry/` test fixtures | 92 | Upstream test vectors and fixture material, not VAMS deployment credentials. Pin provenance and use path/rule-scoped exclusions only after independent review. |
-| VAMS source and deleted demo scripts | 35 | Generic-key matches across legacy deployment helpers, configuration, and deleted JavaScript demos. Treat as potentially live until the relevant providers and owners confirm revocation. |
-| Deleted node identity PEM files | 3 | Confirmed private-key material committed in historical paths `node_identity.pem` and `neuron/node_identity.pem`. These identities are presumed compromised. |
+```text
+gitleaks git . --redact=100 --report-format json \
+  --report-path raw-gate/gitleaks-report.json --log-opts=--all --exit-code 1
+```
 
-This classification records paths, rules, and counts only. It intentionally
-does not reproduce matched values.
+It reported 869 fully redacted matches across 27 paths and nine
+finding-bearing commits: 867 `generic-api-key` and two `private-key` findings.
+The raw gate bound the report to SHA-256
+`9aad228b9ae34c08e48fc14f5bc859f3785f493e7d1781813781f4672334417e`.
+No matched value is reproduced here.
+
+## Exact Protected-CI Path Classification
+
+These counts are derived from the sanitized run `29416245559` artifact and
+sum exactly to 869.
+
+| Group | Sanitized paths | Matches | Status |
+| --- | --- | ---: | --- |
+| Deleted Foundry output | `contracts/test_output_cmd.json`, `contracts/clean_output.json` | 802 | Generated output; remove from rewritten history rather than baseline globally. |
+| Upstream Foundry fixtures | Eleven paths under `.foundry/` | 46 | Remove the tracked vendor tree from the current tree and all rewritten history; do not allowlist it. |
+| Current Neuron source/configuration | `neuron/secp256k1.py`, `neuron/config.py`, `neuron/eth_client/sequence_wallet.py` | 6 | Allow only exact public curve/address matches under the targeted rule; remove the deleted wallet helper from rewritten history. |
+| Legacy provider helpers | `simulate-request.mjs`, `simulate-request-v2.mjs`, `simulate-request-v3.mjs`, `register-agent.mjs`, `verify-escrow.mjs` | 9 | Blocking; correlated with Infura/Polygon TruffleHog detections and targeted for removal. |
+| Historical deployment helpers | `EmergencyLockdown.s.sol`, `DeployX402.s.sol`, `RegisterAgent.s.sol` | 3 | Allow only the exact 40-hex public EVM-address matches under `generic-api-key`; other rules and adjacent matches remain active. |
+| Historical Telegram bot | `telegram-bot/bot.js` | 1 | Remove the deleted file from rewritten history; do not allowlist it. |
+| PEM identity paths | `node_identity.pem`, `neuron/node_identity.pem` | 2 | Confirmed private-key paths; never allowlist. Rotation, impact review, and history removal are mandatory. |
+
+The difference between the earlier 1,740 local findings and the 869 CI
+findings likely reflects different reachable-ref sets, but that is an
+inference—not an adjudication. Preserve both inventories and reconcile them
+after the coordinated all-ref rewrite.
+
+## TruffleHog Correlation
+
+Run `29413794423` recorded one verified Infura finding and 19 unverified
+findings. The verified item was at historical path `simulate-request-v3.mjs`,
+line 6, commit `1321f91586784d218ebc11126de588fbcf649ec6`.
+
+The later protected run `29416245559` recorded the same 20 sanitized detector
+events as unverified: zero verified and 20 unverified. This is consistent with
+the provider credential no longer verifying, but it does **not** prove the
+revocation time, affected project, replacement, access/billing impact, or
+reviewer acceptance. Those facts require separate sanitized provider evidence.
+See [TRUFFLEHOG_TRIAGE.md](TRUFFLEHOG_TRIAGE.md).
 
 ## Required Closure
 
-1. Identify every role, address, node identity, RPC account, bot, and external
-   provider that could have used the historical values.
-2. Revoke or rotate all possibly affected credentials and prove that the PEM
-   identities control no funded account, Safe, timelock, validator, or testnet
-   role.
-3. Remove obsolete generated artifacts and private-key files from every
-   reachable ref using a coordinated history-rewrite procedure. Archive the
-   pre-rewrite evidence privately and notify every collaborator to reclone.
-4. Independently review the generated/vendor fixture groups before adding any
-   path-and-rule-specific allowlist. Never allowlist the private-key findings.
-5. Rerun both the complete-history and exact-worktree Gitleaks scans, followed
-   by TruffleHog. Both tools must report zero unadjudicated findings.
+1. Revoke every provider credential found in the five legacy helper paths.
+   Retain only a non-sensitive provider/project fingerprint, the real dashboard
+   observation time, `exact_revocation_time_unavailable=true`, the access and
+   billing review interval, impact disposition, and Architect identity.
+2. Record all three historical PEM finding occurrences, then derive the two
+   unique public-key fingerprints from public representations—not from raw
+   private PEM bytes. Permanently decommission both unused identities and
+   record that no replacement fingerprint exists because no role, funds, or
+   dependency relied on either identity.
+3. Prove each unique PEM identity controls no deployment signer, funded account,
+   node, provider, Safe, timelock, or validator role. Record Polygon Amoy and
+   Cardano Pre-Prod account-derived checks or cryptographic non-applicability.
+4. Use the disposable-mirror procedure in
+   [CREDENTIAL_INCIDENT_RUNBOOK.md](CREDENTIAL_INCIDENT_RUNBOOK.md). Do not run
+   a rewrite in a working clone and do not push without explicit approval.
+5. Apply the checked-in rule-targeted allowlists only after their negative
+   regression passes. Remove `.foundry/`, PEMs, deleted legacy helpers,
+   generated outputs, the deleted wallet helper, and the deleted Telegram bot
+   from all rewritten refs. Never allowlist those paths.
+6. Coordinate every ref, fork, open PR, cached GitHub view, and collaborator
+   clone. Collaborators must discard old clones and reclone.
+7. Rerun complete-history Gitleaks and all-category TruffleHog. Both final
+   schema-bound reports must contain zero findings.
+8. Only then create `credential-incident-report.json` in the protected
+   operational evidence bundle. Every referenced artifact must exist, be
+   non-empty, and match its declared SHA-256.
 
-History rewriting and credential rotation are repository-owner security
-actions. They are intentionally not performed automatically by the deployment
-implementation task.
+No credential-incident closure report is committed in the repository. Missing
+external evidence remains missing, and readiness remains **NO-GO**.
