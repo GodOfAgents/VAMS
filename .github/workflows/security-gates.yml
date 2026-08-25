@@ -504,9 +504,8 @@ jobs:
             --exclude .git
 
       - name: Run Semgrep Discovery Scan
-        continue-on-error: true
         run: |
-          semgrep scan --metrics off --config auto \
+          semgrep scan --metrics on --config auto \
             --json --output semgrep-discovery.json \
             --exclude contracts/lib \
             --exclude node_modules \
@@ -525,7 +524,7 @@ jobs:
             semgrep-reviewed.json
             semgrep-discovery.json
             .semgrep/discovery-adjudications.yml
-          if-no-files-found: warn
+          if-no-files-found: error
           retention-days: 365
 
   frontend-gate:

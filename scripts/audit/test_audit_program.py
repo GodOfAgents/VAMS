@@ -417,6 +417,18 @@ class AuditProgramTests(unittest.TestCase):
                 set(audit_program.REQUIRED_EVIDENCE_RESULTS),
             )
 
+    def test_evidence_command_catalog_describes_current_blocking_gates(self) -> None:
+        commands = audit_program.REQUIRED_EVIDENCE_RESULTS
+        self.assertIn("--seed 20260711", commands["aiken"])
+        self.assertIn("--fail-high", commands["slither"])
+        self.assertIn("--config .semgrep/vams-security.yml --error", commands["semgrep"])
+        self.assertIn("--config auto", commands["semgrep"])
+        self.assertIn("trufflehog_gate.py", commands["trufflehog"])
+        self.assertIn("npm audit --omit=dev", commands["frontend"])
+        self.assertIn("npm run lint", commands["frontend"])
+        self.assertIn("cargo +1.92.0 audit --deny warnings", commands["vir-core"])
+        self.assertIn("cosign sign-blob --bundle", commands["sbom"])
+
     def test_deployment_manifests_require_both_networks_and_stage(self) -> None:
         commit = "a" * 40
         with tempfile.TemporaryDirectory() as temp_dir:
