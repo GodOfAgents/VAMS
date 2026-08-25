@@ -285,14 +285,12 @@ def _require_nonempty_file(path: Path, label: str, errors: list[str]) -> None:
 
 def _validate_evidence_manifest(
     path: Path,
-    signature: Path,
-    certificate: Path,
+    signature_bundle: Path,
     commit_sha: str,
 ) -> list[str]:
     errors: list[str] = []
     _require_nonempty_file(path, "evidence manifest", errors)
-    _require_nonempty_file(signature, "evidence signature", errors)
-    _require_nonempty_file(certificate, "evidence certificate", errors)
+    _require_nonempty_file(signature_bundle, "evidence signature bundle", errors)
     if errors:
         return errors
 
@@ -1055,13 +1053,11 @@ def _validate_independent_reviews(path: Path, commit_sha: str) -> list[str]:
 def validate_readiness(
     stage: str = "public",
     evidence_manifest: Path | None = None,
-    evidence_signature: Path | None = None,
-    evidence_certificate: Path | None = None,
+    evidence_signature_bundle: Path | None = None,
     deployment_manifests: list[Path] | None = None,
     canary_report: Path | None = None,
     assurance_index: Path | None = None,
-    canary_signature: Path | None = None,
-    canary_certificate: Path | None = None,
+    canary_signature_bundle: Path | None = None,
     runtime_report: Path | None = None,
     privacy_review: Path | None = None,
     independent_reviews: Path | None = None,
@@ -1097,13 +1093,13 @@ def validate_readiness(
         return errors
 
     evidence_manifest = evidence_manifest or EVIDENCE_DIR / "audit-evidence.json"
-    evidence_signature = evidence_signature or EVIDENCE_DIR / "audit-evidence.sig"
-    evidence_certificate = evidence_certificate or EVIDENCE_DIR / "audit-evidence.pem"
+    evidence_signature_bundle = (
+        evidence_signature_bundle or EVIDENCE_DIR / "audit-evidence.sigstore.json"
+    )
     errors.extend(
         _validate_evidence_manifest(
             evidence_manifest,
-            evidence_signature,
-            evidence_certificate,
+            evidence_signature_bundle,
             commit_sha,
         )
     )
@@ -1139,16 +1135,13 @@ def validate_readiness(
     ]
     if stage == "public":
         canary_report = canary_report or EVIDENCE_DIR / "closed-canary-report.json"
-        canary_signature = canary_signature or EVIDENCE_DIR / "closed-canary-report.sig"
-        canary_certificate = (
-            canary_certificate or EVIDENCE_DIR / "closed-canary-report.pem"
+        canary_signature_bundle = (
+            canary_signature_bundle
+            or EVIDENCE_DIR / "closed-canary-report.sigstore.json"
         )
         errors.extend(_validate_canary_report(canary_report, commit_sha))
         _require_nonempty_file(
-            canary_signature, "closed-canary signature", errors
-        )
-        _require_nonempty_file(
-            canary_certificate, "closed-canary certificate", errors
+            canary_signature_bundle, "closed-canary signature bundle", errors
         )
         supporting_artifacts.append(canary_report)
         independent_reviews = (
@@ -1240,13 +1233,11 @@ def main() -> int:
     readiness_parser = subparsers.add_parser("readiness")
     readiness_parser.add_argument("--stage", choices=sorted(STAGE_GATES), default="public")
     readiness_parser.add_argument("--evidence-manifest", type=Path)
-    readiness_parser.add_argument("--evidence-signature", type=Path)
-    readiness_parser.add_argument("--evidence-certificate", type=Path)
+    readiness_parser.add_argument("--evidence-signature-bundle", type=Path)
     readiness_parser.add_argument("--deployment-manifest", type=Path, action="append")
     readiness_parser.add_argument("--canary-report", type=Path)
     readiness_parser.add_argument("--assurance-index", type=Path)
-    readiness_parser.add_argument("--canary-signature", type=Path)
-    readiness_parser.add_argument("--canary-certificate", type=Path)
+    readiness_parser.add_argument("--canary-signature-bundle", type=Path)
     readiness_parser.add_argument("--runtime-report", type=Path)
     readiness_parser.add_argument("--privacy-review", type=Path)
     readiness_parser.add_argument("--independent-reviews", type=Path)
@@ -1259,13 +1250,11 @@ def main() -> int:
         validate_readiness(
             stage=args.stage,
             evidence_manifest=args.evidence_manifest,
-            evidence_signature=args.evidence_signature,
-            evidence_certificate=args.evidence_certificate,
+            evidence_signature_bundle=args.evidence_signature_bundle,
             deployment_manifests=args.deployment_manifest,
             canary_report=args.canary_report,
             assurance_index=args.assurance_index,
-            canary_signature=args.canary_signature,
-            canary_certificate=args.canary_certificate,
+            canary_signature_bundle=args.canary_signature_bundle,
             runtime_report=args.runtime_report,
             privacy_review=args.privacy_review,
             independent_reviews=args.independent_reviews,

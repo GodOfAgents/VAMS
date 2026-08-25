@@ -297,8 +297,7 @@ class AuditProgramTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
             manifest = root / "evidence.json"
-            signature = root / "evidence.sig"
-            certificate = root / "evidence.pem"
+            signature_bundle = root / "evidence.sigstore.json"
             manifest.write_text(
                 json.dumps(
                     {
@@ -325,19 +324,21 @@ class AuditProgramTests(unittest.TestCase):
                 ),
                 encoding="utf-8",
             )
-            signature.write_text("signature", encoding="utf-8")
-            certificate.write_text("certificate", encoding="utf-8")
+            signature_bundle.write_text(
+                '{"mediaType":"application/vnd.dev.sigstore.bundle.v0.3+json"}',
+                encoding="utf-8",
+            )
 
             self.assertEqual(
                 audit_program._validate_evidence_manifest(
-                    manifest, signature, certificate, commit
+                    manifest, signature_bundle, commit
                 ),
                 [],
             )
 
             with mock.patch.object(audit_program, "_git", return_value=""):
                 errors = audit_program._validate_evidence_manifest(
-                    manifest, signature, certificate, "b" * 40
+                    manifest, signature_bundle, "b" * 40
                 )
             self.assertIn("commit does not match", errors[0])
 
@@ -346,8 +347,7 @@ class AuditProgramTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
             manifest = root / "evidence.json"
-            signature = root / "evidence.sig"
-            certificate = root / "evidence.pem"
+            signature_bundle = root / "evidence.sigstore.json"
             results = [
                 {
                     "name": name,
@@ -386,11 +386,13 @@ class AuditProgramTests(unittest.TestCase):
                 ),
                 encoding="utf-8",
             )
-            signature.write_text("signature", encoding="utf-8")
-            certificate.write_text("certificate", encoding="utf-8")
+            signature_bundle.write_text(
+                '{"mediaType":"application/vnd.dev.sigstore.bundle.v0.3+json"}',
+                encoding="utf-8",
+            )
 
             errors = audit_program._validate_evidence_manifest(
-                manifest, signature, certificate, commit
+                manifest, signature_bundle, commit
             )
             joined = "\n".join(errors)
             self.assertIn("duplicate gate results", joined)

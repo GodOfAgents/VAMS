@@ -626,8 +626,7 @@ jobs:
       - name: Sign SBOM Blob
         run: |
           cosign sign-blob --yes --oidc-provider github-actions \
-            --output-signature sbom.sig \
-            --output-certificate sbom.pem \
+            --bundle sbom.sigstore.json \
             sbom.json
 
       - name: Upload Signed SBOM Evidence
@@ -636,8 +635,7 @@ jobs:
           name: signed-sbom
           path: |
             sbom.json
-            sbom.sig
-            sbom.pem
+            sbom.sigstore.json
           retention-days: 365
 
   security-evidence-gate:
@@ -713,8 +711,7 @@ jobs:
       - name: Sign Audit Evidence
         run: |
           cosign sign-blob --yes --oidc-provider github-actions \
-            --output-signature audit-evidence.sig \
-            --output-certificate audit-evidence.pem \
+            --bundle audit-evidence.sigstore.json \
             audit-evidence.json
 
       - name: Upload Audit Evidence
@@ -723,8 +720,7 @@ jobs:
           name: testnet-audit-evidence
           path: |
             audit-evidence.json
-            audit-evidence.sig
-            audit-evidence.pem
+            audit-evidence.sigstore.json
           retention-days: 365
 
       - name: Enforce Required Job Results
@@ -777,8 +773,7 @@ jobs:
       - name: Verify Audit Evidence Signature
         run: |
           cosign verify-blob \
-            --certificate docs/audit/evidence/audit-evidence.pem \
-            --signature docs/audit/evidence/audit-evidence.sig \
+            --bundle docs/audit/evidence/audit-evidence.sigstore.json \
             --certificate-identity-regexp '^https://github.com/GodOfAgents/VAMS/.github/workflows/security-gates.yml@refs/.+$' \
             --certificate-oidc-issuer 'https://token.actions.githubusercontent.com' \
             docs/audit/evidence/audit-evidence.json
@@ -787,8 +782,7 @@ jobs:
         if: inputs.release_stage == 'public'
         run: |
           cosign verify-blob \
-            --certificate docs/audit/evidence/closed-canary-report.pem \
-            --signature docs/audit/evidence/closed-canary-report.sig \
+            --bundle docs/audit/evidence/closed-canary-report.sigstore.json \
             --certificate-identity-regexp '^https://github.com/GodOfAgents/VAMS/.github/workflows/.+@refs/.+$' \
             --certificate-oidc-issuer 'https://token.actions.githubusercontent.com' \
             docs/audit/evidence/closed-canary-report.json
