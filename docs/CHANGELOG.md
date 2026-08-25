@@ -78,6 +78,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   discovery scan's Python 3.6 compatibility findings are recorded as not
   applicable to the pinned Python 3.12 runtime. Aggregate evidence is now
   generated and signed before the expected history-scan failure is enforced.
+  SBOM, aggregate, and closed-canary signatures use the current Sigstore bundle
+  format so Cosign 3 verification retains the certificate and transparency-log
+  proof in one artifact.
   These controls do not waive historical credential findings or constitute
   testnet-readiness evidence.
 - **Credential-shaped examples**: Gateway and PostgreSQL fixtures now construct
