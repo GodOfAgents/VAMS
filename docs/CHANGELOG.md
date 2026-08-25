@@ -70,7 +70,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Foundry compiler for Slither, split reviewed Semgrep enforcement from
   non-blocking discovery, refreshed official GitHub Actions to immutable
   Node 24 release SHAs, pinned the Caddy testnet proxy image and client-CA
-  validation, and updated vulnerable frontend dependencies, including later
+  validation, installed the pinned history-rewrite helper in every Python test
+  context to eliminate environment-dependent skips, and updated vulnerable
+  frontend dependencies, including later
   brace-expansion and js-yaml High-severity advisories discovered by a fresh
   audit. Secret scanner wrappers now use scan-root-relative paths and canonical
   file URIs across Linux and Windows; TruffleHog verification is disabled so

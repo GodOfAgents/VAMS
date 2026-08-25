@@ -456,6 +456,7 @@ jobs:
           python -m pip install pip==26.1.2
           pip install pytest==9.1.1 pytest-asyncio==1.4.0 anyio==4.14.1
           pip install httpx==0.28.1 httpx2==2.5.0 bandit==1.9.4 pip-audit==2.10.1
+          pip install git-filter-repo==2.47.0
           pip install -r gateway/requirements.txt
           pip install -r neuron/requirements.txt
 
