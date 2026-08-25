@@ -89,21 +89,47 @@ REQUIRED_EVIDENCE_RESULTS = {
     "mock-mode": "python scripts/security/mock_mode_promotion_scan.py",
     "gitleaks": (
         "gitleaks git . --config .gitleaks.toml --redact=100 "
-        "--report-format json --log-opts=--all --exit-code 1"
+        "--report-format json --report-path raw-gate/gitleaks-report.json "
+        "--log-opts=--all --exit-code 1"
     ),
     "trufflehog": (
-        "trufflehog git file://$PWD --json --fail --no-update "
-        "--results=verified,unknown,unverified"
+        "python scripts/security/trufflehog_gate.py "
+        "--output raw-gate/trufflehog-sanitized.json"
     ),
     "solidity": "forge build --sizes && forge test -vvv",
-    "slither": "slither . --config-file slither.config.json",
-    "aiken": "aiken check --deny --seed 20260713 --max-success 250",
-    "vir-core": "cargo test --workspace --all-targets --locked",
-    "python": "pytest -v --tb=short && bandit && pip-audit",
-    "semgrep": "semgrep scan --config auto --error",
-    "frontend": "npm ci && npm audit --audit-level=high && npm run build",
-    "gateway-config": "caddy validate --config gateway/Caddyfile.testnet.example --adapter caddyfile",
-    "sbom": "syft dir:. -o cyclonedx-json",
+    "slither": (
+        "slither . --exclude-dependencies --exclude-informational --exclude-low "
+        "--fail-high --json slither-report.json"
+    ),
+    "aiken": "aiken check --deny --seed 20260711 --max-success 250",
+    "vir-core": (
+        "cargo +1.92.0 fmt --all -- --check && "
+        "cargo +1.92.0 check --workspace --all-targets --locked && "
+        "cargo +1.92.0 clippy --workspace --all-targets --locked -- -D warnings && "
+        "cargo +1.92.0 test --workspace --all-targets --locked && "
+        "cargo +1.92.0 audit --deny warnings"
+    ),
+    "python": (
+        "pip-audit -r gateway/requirements.txt && "
+        "pip-audit -r neuron/requirements.txt && "
+        "bandit -r neuron/ gateway/ -ll -ii && pytest -v --tb=short"
+    ),
+    "semgrep": (
+        "semgrep scan --metrics off --config .semgrep/vams-security.yml --error && "
+        "semgrep scan --metrics on --config auto"
+    ),
+    "frontend": (
+        "npm ci && npm audit --audit-level=high && "
+        "npm audit --omit=dev --audit-level=high && npm run lint && npm run build"
+    ),
+    "gateway-config": (
+        "caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile && "
+        "caddy adapt --config /etc/caddy/Caddyfile --adapter caddyfile --pretty"
+    ),
+    "sbom": (
+        "anchore/sbom-action format=cyclonedx-json output-file=sbom.json && "
+        "cosign sign-blob --bundle sbom.sigstore.json sbom.json"
+    ),
 }
 CANARY_EVM_ARTIFACTS = {
     "VAMSToken",

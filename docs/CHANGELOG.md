@@ -76,7 +76,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   file URIs across Linux and Windows; TruffleHog verification is disabled so
   candidate credentials are never sent to provider endpoints. The non-blocking
   discovery scan's Python 3.6 compatibility findings are recorded as not
-  applicable to the pinned Python 3.12 runtime. Aggregate evidence is now
+  applicable to the pinned Python 3.12 runtime. The discovery scan now permits
+  Semgrep's required registry metrics and treats operational scan errors as
+  failures while keeping discovered findings non-blocking. Aggregate evidence is now
   generated and signed before the expected history-scan failure is enforced.
   SBOM, aggregate, and closed-canary signatures use the current Sigstore bundle
   format so Cosign 3 verification retains the certificate and transparency-log
