@@ -5,6 +5,8 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -12,6 +14,14 @@ from typing import Any
 
 
 SAFE_GIT_FIELDS = ("commit", "file", "line", "repository")
+
+
+def _trufflehog_binary() -> str | None:
+    configured = os.environ.get("TRUFFLEHOG_BIN")
+    if configured:
+        binary = Path(configured)
+        return str(binary) if binary.is_file() else None
+    return shutil.which("trufflehog")
 
 
 def sanitize_event(event: dict[str, Any]) -> dict[str, Any]:
@@ -32,14 +42,19 @@ def sanitize_event(event: dict[str, Any]) -> dict[str, Any]:
 
 
 def run(output: Path) -> int:
+    binary = _trufflehog_binary()
+    if binary is None:
+        print("TruffleHog gate requires the pinned trufflehog binary.")
+        return 2
     output.parent.mkdir(parents=True, exist_ok=True)
     command = [
-        "trufflehog",
+        binary,
         "git",
-        f"file://{Path.cwd().as_posix()}",
+        Path.cwd().resolve().as_uri(),
         "--json",
         "--fail",
         "--no-update",
+        "--no-verification",
         "--results=verified,unknown,unverified",
     ]
     process = subprocess.Popen(
@@ -67,7 +82,7 @@ def run(output: Path) -> int:
             malformed += 1
     return_code = process.wait()
     report = {
-        "command_profile": "git-all-results-no-update",
+        "command_profile": "git-all-results-no-verification",
         "findings_count": len(findings),
         "verified_count": sum(1 for item in findings if item["verified"]),
         "unverified_or_unknown_count": sum(

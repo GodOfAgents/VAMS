@@ -1,0 +1,53 @@
+schema_version: 1
+tool: slither
+tool_version: 0.11.5
+scope: incident-preparation-pr
+release_evidence: false
+summary:
+  high: 0
+  medium: 18
+  optimization: 1
+adjudications:
+  - detector: incorrect-equality
+    impact: Medium
+    count: 15
+    status: reviewed_expected_guard
+    locations:
+      - src/base/VAMSTimelockedAdmin.sol:40
+      - src/economic/HardwareCommitment.sol:184
+      - src/economic/TransactionCompensation.sol:389
+      - src/economic/VAMSFeeCollector.sol:205
+      - src/registry/VAMSHardwareRegistry.sol:321
+      - src/slashing/StateCheckpointRegistryV2.sol:50
+      - src/staking/VAMSStaking.sol:608
+      - src/staking/VAMSStaking.sol:535
+      - src/staking/VAMSStaking.sol:590
+      - src/staking/VAMSStaking.sol:313
+      - src/staking/VAMSStaking.sol:329
+      - src/vdso/VAMSAdapterRegistry.sol:197
+      - src/vesting/VAMSVesting.sol:237
+      - src/vesting/VAMSVesting.sol:194
+      - src/vesting/VAMSVesting.sol:259
+    rationale: Exact zero, enum, bytes32, and evidence-mode comparisons are intentional existence, empty-value, state, or policy guards; none compares manipulable token balances or timestamps for equality.
+  - detector: reentrancy-no-eth
+    impact: Medium
+    count: 2
+    status: reviewed_protected
+    locations:
+      - src/economic/TwoPhaseCommitManager.sol:176
+      - src/sentinel/SLAEnforcer.sol:169
+    rationale: Both entry points are protected by nonReentrant. Workflow identity and metadata are established before escrow calls, and a reverted iteration rolls back the transaction. Retry state is set before the slash call and reset only in the handled revert path.
+  - detector: unused-return
+    impact: Medium
+    count: 1
+    status: reviewed_false_positive
+    locations:
+      - src/infrastructure/VAMSERC8004Adapter.sol:54
+    rationale: Tuple destructuring intentionally selects and validates the returned owner while discarding unrelated registry fields; the external return is not ignored.
+  - detector: immutable-states
+    impact: Optimization
+    count: 1
+    status: reviewed_not_applicable
+    locations:
+      - src/token/VAMSToken.sol:88
+    rationale: The contract is upgradeable and initializes antiWhaleEndTimestamp through its initializer, so Solidity immutable storage is not applicable.
