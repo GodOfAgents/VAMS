@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import os
 from pathlib import Path
 import shutil
@@ -12,6 +13,132 @@ import unittest
 ROOT = Path(__file__).resolve().parents[2]
 SCRIPT = ROOT / "scripts" / "audit" / "history_rewrite.sh"
 EXPECTED_ORIGIN = "https://github.com/GodOfAgents/VAMS.git"
+TEST_TIME = "2026-08-25T12:00:00Z"
+
+
+def _rotation_evidence() -> dict[str, object]:
+    fingerprints = ("1" * 64, "2" * 64)
+
+    def identity(fingerprint: str, address_digit: str) -> dict[str, object]:
+        role_result = {"clear": True, "evidence_sha256": "3" * 64}
+        return {
+            "fingerprint_sha256": fingerprint,
+            "key_type": "secp256k1",
+            "decommissioned_at": TEST_TIME,
+            "decommission_disposition": "permanently-decommissioned-no-replacement",
+            "public_evm_identifier": "0x" + address_digit * 40,
+            "no_replacement": True,
+            "role_impact_checks": {
+                role: dict(role_result)
+                for role in (
+                    "deployment_signer",
+                    "funded_account",
+                    "node",
+                    "provider",
+                    "safe",
+                    "timelock",
+                    "validator",
+                )
+            },
+            "polygon_amoy": {
+                "zero_balance": True,
+                "observed_at": TEST_TIME,
+                "block_number": 1,
+                "evidence_sha256": "4" * 64,
+            },
+            "cardano_preprod": {
+                "applicability": "cryptographically-inapplicable",
+                "observed_at": TEST_TIME,
+                "reason": "The exposed identity is an EVM secp256k1 key.",
+                "evidence_sha256": "5" * 64,
+            },
+            "decommission_evidence_sha256": "6" * 64,
+        }
+
+    return {
+        "schema_version": "1.0.0",
+        "incident_id": "VAMS-PEM-2026-001",
+        "reviewer": "Fixture Architect",
+        "review_mode": "architect-owner",
+        "independent_review": False,
+        "reviewed_at": TEST_TIME,
+        "approved_for_local_rewrite": True,
+        "remote_force_push_approved": False,
+        "affected_occurrences": [
+            {
+                "path": "node_identity.pem",
+                "commit_sha": "a" * 40,
+                "fingerprint_sha256": fingerprints[0],
+            },
+            {
+                "path": "neuron/node_identity.pem",
+                "commit_sha": "b" * 40,
+                "fingerprint_sha256": fingerprints[1],
+            },
+        ],
+        "affected_identities": [
+            identity(fingerprints[0], "1"),
+            identity(fingerprints[1], "2"),
+        ],
+        "provider_credentials": [
+            {
+                "provider": "infura",
+                "fingerprint_sha256": "7" * 64,
+                "revocation_status": "revoked",
+                "exact_revocation_time_unavailable": True,
+                "revoked_before": TEST_TIME,
+                "observed_at": TEST_TIME,
+                "access_review_clear": True,
+                "billing_review_clear": True,
+                "evidence_sha256": "8" * 64,
+            }
+        ],
+    }
+
+
+def _maintenance_approval(main_sha: str) -> dict[str, object]:
+    def ruleset(rule_id: int, target: str) -> dict[str, object]:
+        return {
+            "id": rule_id,
+            "name": f"VAMS-PEM-2026-001 freeze {target}",
+            "enforcement": "active",
+            "bypass_actor_count": 0,
+            "current_user_can_bypass": "never",
+        }
+
+    return {
+        "schema_version": "1.0.0",
+        "incident_id": "VAMS-PEM-2026-001",
+        "repository": "GodOfAgents/VAMS",
+        "frozen_main_sha": main_sha,
+        "frozen_at": TEST_TIME,
+        "branch_ruleset": ruleset(1, "branches"),
+        "tag_ruleset": ruleset(2, "tags"),
+        "actions_enabled": False,
+        "inventory_counts": {
+            "branches": 1,
+            "tags": 0,
+            "releases": 0,
+            "deployments": 0,
+            "open_pull_requests": 0,
+        },
+        "authoritative_refs": {"refs/heads/main": main_sha},
+        "approved_by": "Fixture Maintainer",
+        "approved_at": TEST_TIME,
+        "local_rewrite_approved": True,
+        "remote_force_push_approved": False,
+    }
+
+
+def _write_valid_inputs(root: Path, mirror: Path) -> tuple[Path, Path]:
+    rotation = root / "rotation.json"
+    approval = root / "approval.json"
+    main_sha = _git("rev-parse", "refs/heads/main", cwd=mirror)
+    rotation.write_text(json.dumps(_rotation_evidence()), encoding="utf-8")
+    approval.write_text(
+        json.dumps(_maintenance_approval(main_sha)), encoding="utf-8"
+    )
+    return rotation, approval
 
 
 def _bash() -> str:
@@ -171,10 +298,7 @@ class HistoryRewriteScriptTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
             _, mirror = self._fixture(root)
-            rotation = root / "rotation.json"
-            approval = root / "approval.json"
-            rotation.write_text('{"status":"decommissioned"}', encoding="utf-8")
-            approval.write_text('{"approved":true}', encoding="utf-8")
+            rotation, approval = _write_valid_inputs(root, mirror)
             result = _run(
                 _bash(),
                 SCRIPT.as_posix(),
@@ -198,11 +322,8 @@ class HistoryRewriteScriptTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
             _, mirror = self._fixture(root)
-            rotation = root / "rotation.json"
-            approval = root / "approval.json"
+            rotation, approval = _write_valid_inputs(root, mirror)
             replacement = root / "replacements.txt"
-            rotation.write_text('{"status":"decommissioned"}', encoding="utf-8")
-            approval.write_text('{"approved":true}', encoding="utf-8")
             replacement.write_text(
                 "literal:fixture-source==>\n", encoding="utf-8"
             )
@@ -247,6 +368,46 @@ class HistoryRewriteScriptTests(unittest.TestCase):
             self.assertNotEqual(result.returncode, 0)
             self.assertIn("outside the source checkout", result.stderr)
 
+    def test_execute_rejects_placeholder_approvals_without_rewriting(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            _, mirror = self._fixture(root)
+            before = _git("rev-parse", "refs/heads/main", cwd=mirror)
+            rotation = root / "rotation.json"
+            approval = root / "approval.json"
+            replacement = root / "replacements.txt"
+            rotation.write_text('{"status":"decommissioned"}', encoding="utf-8")
+            approval.write_text('{"approved":true}', encoding="utf-8")
+            replacement.write_text(
+                "literal:fixture-source==>fixture-target\n", encoding="utf-8"
+            )
+            env = os.environ.copy()
+            env["PYTHON_BIN"] = sys.executable
+
+            result = _run(
+                _bash(),
+                SCRIPT.as_posix(),
+                "--mirror",
+                mirror.as_posix(),
+                "--evidence-dir",
+                (root / "evidence").as_posix(),
+                "--execute",
+                "--confirm-incident",
+                "VAMS-PEM-2026-001",
+                "--rotation-evidence",
+                rotation.as_posix(),
+                "--maintenance-approval",
+                approval.as_posix(),
+                "--replace-text",
+                replacement.as_posix(),
+                cwd=ROOT,
+                env=env,
+            )
+
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("incident evidence validation failed", result.stderr)
+            self.assertEqual(before, _git("rev-parse", "refs/heads/main", cwd=mirror))
+
     def test_rejects_replacement_map_inside_evidence(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
@@ -283,20 +444,26 @@ class HistoryRewriteScriptTests(unittest.TestCase):
         self.assertIn("--replace-text", text)
         self.assertIn("replacement_map_sha256", text)
         self.assertIn("NO REMOTE PUSH WAS PERFORMED", text)
+        self.assertIn("GIT_CONFIG_KEY_${config_index}=core.protectNTFS", text)
+        self.assertIn("GIT_CONFIG_VALUE_${config_index}=false", text)
 
     def test_execute_rewrites_targets_and_rehearses_only_local_mirror_push(self) -> None:
-        if _run("git", "filter-repo", "-h", cwd=ROOT).returncode != 0:
+        if _run(sys.executable, "-m", "git_filter_repo", "-h", cwd=ROOT).returncode != 0:
             self.skipTest("git-filter-repo is unavailable")
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
-            source, mirror = self._fixture(root)
-            shutil.rmtree(mirror)
+            source, _ = self._fixture(root)
+            mirror = root / "rewrite-mirror.git"
             (source / ".foundry").mkdir()
             (source / ".foundry" / "fixture.txt").write_text(
                 "vendored fixture\n", encoding="utf-8"
             )
             (source / "node_identity.pem").write_text(
                 "fixture identity marker\n", encoding="utf-8"
+            )
+            (source / "scripts").mkdir()
+            (source / "scripts" / "simulate-request.mjs").write_text(
+                "fixture legacy helper marker\n", encoding="utf-8"
             )
             old_uri = (
                 "https://" + "fixture-user" + ":" + "fixture-pass" + "@example.invalid"
@@ -307,12 +474,9 @@ class HistoryRewriteScriptTests(unittest.TestCase):
             _git("clone", "--mirror", str(source), str(mirror), cwd=root)
             _git("remote", "set-url", "origin", EXPECTED_ORIGIN, cwd=mirror)
 
-            rotation = root / "rotation.json"
-            approval = root / "approval.json"
+            rotation, approval = _write_valid_inputs(root, mirror)
             replacement = root / "replacements.txt"
             evidence = root / "evidence"
-            rotation.write_text('{"status":"decommissioned"}', encoding="utf-8")
-            approval.write_text('{"approved":true}', encoding="utf-8")
             replacement.write_text(
                 f"literal:{old_uri}==>https://example.invalid\n", encoding="utf-8"
             )
@@ -341,6 +505,17 @@ class HistoryRewriteScriptTests(unittest.TestCase):
             self.assertEqual(_git("log", "--all", "--format=%H", "--", ".foundry", cwd=mirror), "")
             self.assertEqual(
                 _git("log", "--all", "--format=%H", "--", "node_identity.pem", cwd=mirror),
+                "",
+            )
+            self.assertEqual(
+                _git(
+                    "log",
+                    "--all",
+                    "--format=%H",
+                    "--",
+                    "scripts/simulate-request.mjs",
+                    cwd=mirror,
+                ),
                 "",
             )
             combined_evidence = "\n".join(

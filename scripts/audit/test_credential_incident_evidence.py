@@ -80,13 +80,8 @@ def _report(root: Path) -> dict:
                 "fingerprint_sha256": f"{1:064x}",
             },
             {
-                "path": "node_identity.pem",
-                "commit_sha": "2" * 40,
-                "fingerprint_sha256": f"{1:064x}",
-            },
-            {
                 "path": "neuron/node_identity.pem",
-                "commit_sha": "3" * 40,
+                "commit_sha": "2" * 40,
                 "fingerprint_sha256": f"{2:064x}",
             },
         ],
@@ -226,7 +221,7 @@ class CredentialIncidentEvidenceTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
             report = _report(root)
-            report["affected_occurrences"][2]["fingerprint_sha256"] = "f" * 64
+            report["affected_occurrences"][1]["fingerprint_sha256"] = "f" * 64
             path = root / "report.json"
             path.write_text(json.dumps(report), encoding="utf-8")
             errors = validate_credential_incident_report(path, COMMIT, root)
@@ -236,7 +231,7 @@ class CredentialIncidentEvidenceTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
             report = _report(root)
-            report["affected_occurrences"][1]["path"] = "neuron/node_identity.pem"
+            report["affected_occurrences"][1]["path"] = "node_identity.pem"
             path = root / "report.json"
             path.write_text(json.dumps(report), encoding="utf-8")
             errors = validate_credential_incident_report(path, COMMIT, root)

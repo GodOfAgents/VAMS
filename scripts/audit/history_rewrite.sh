@@ -16,6 +16,7 @@ fi
 readonly INCIDENT_ID="VAMS-PEM-2026-001"
 readonly MIN_FILTER_REPO_VERSION="2.47.0"
 readonly EXPECTED_ORIGIN_DEFAULT="https://github.com/GodOfAgents/VAMS.git"
+readonly SCRIPT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)"
 
 readonly -a TARGET_PATHS=(
   ".foundry"
@@ -26,6 +27,11 @@ readonly -a TARGET_PATHS=(
   "simulate-request-v3.mjs"
   "register-agent.mjs"
   "verify-escrow.mjs"
+  "scripts/simulate-request.mjs"
+  "scripts/simulate-request-v2.mjs"
+  "scripts/simulate-request-v3.mjs"
+  "scripts/register-agent.mjs"
+  "scripts/verify-escrow.mjs"
   "contracts/test_output_cmd.json"
   "contracts/clean_output.json"
   "neuron/eth_client/sequence_wallet.py"
@@ -204,12 +210,9 @@ validate_boundaries() {
   MIRROR_PATH="$(canonical_existing_dir "${MIRROR_PATH}")"
   EVIDENCE_DIR="$(canonical_output_dir "${EVIDENCE_DIR}")"
 
-  local script_root
-  script_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)"
-
-  is_within "${MIRROR_PATH}" "${script_root}" \
+  is_within "${MIRROR_PATH}" "${SCRIPT_ROOT}" \
     && fail "the disposable mirror must be outside the source checkout"
-  is_within "${EVIDENCE_DIR}" "${script_root}" \
+  is_within "${EVIDENCE_DIR}" "${SCRIPT_ROOT}" \
     && fail "operational evidence must be outside the source checkout"
   is_within "${EVIDENCE_DIR}" "${MIRROR_PATH}" \
     && fail "evidence must be outside the disposable mirror"
@@ -221,7 +224,7 @@ validate_boundaries() {
     input_path="${!input_name}"
     [[ -z "${input_path}" ]] && continue
     input_path="$(canonical_existing_file "${input_path}")"
-    is_within "${input_path}" "${script_root}" \
+    is_within "${input_path}" "${SCRIPT_ROOT}" \
       && fail "execution inputs must be outside the source checkout"
     is_within "${input_path}" "${MIRROR_PATH}" \
       && fail "execution inputs must be outside the disposable mirror"
@@ -288,6 +291,17 @@ validate_execution_inputs() {
   [[ -s "${REPLACE_TEXT}" ]] \
     || fail "a non-empty --replace-text map is required for execution"
 
+  command -v "${PYTHON_BIN}" >/dev/null 2>&1 \
+    || fail "Python is required to validate incident evidence"
+  local mirrored_main_sha
+  mirrored_main_sha="$(git -C "${MIRROR_PATH}" rev-parse refs/heads/main 2>/dev/null)" \
+    || fail "the mirror must contain refs/heads/main"
+  "${PYTHON_BIN}" "${SCRIPT_ROOT}/scripts/audit/history_rewrite_input_validator.py" \
+    --rotation-evidence "${ROTATION_EVIDENCE}" \
+    --maintenance-approval "${MAINTENANCE_APPROVAL}" \
+    --expected-main-sha "${mirrored_main_sha}" \
+    || fail "incident evidence validation failed"
+
   local replacement_count=0 replacement_line replacement_pair source_literal replacement_value
   local replacement_pattern='^(.+)==>(.*)$'
   while IFS= read -r replacement_line || [[ -n "${replacement_line}" ]]; do
@@ -310,9 +324,7 @@ validate_execution_inputs() {
   [[ "${replacement_count}" -gt 0 ]] \
     || fail "replacement map has no active exact-literal entries"
 
-  command -v "${PYTHON_BIN}" >/dev/null 2>&1 \
-    || fail "Python is required to verify git-filter-repo's installed version"
-  git filter-repo -h >/dev/null 2>&1 \
+  "${PYTHON_BIN}" -m git_filter_repo -h >/dev/null 2>&1 \
     || fail "git-filter-repo is unavailable"
 
   local actual_version
@@ -337,7 +349,16 @@ execute_rewrite() {
 
   (
     cd "${MIRROR_PATH}"
-    git filter-repo "${args[@]}" --replace-text "${REPLACE_TEXT}"
+    # The historical ref set contains a tree entry with a trailing space.
+    # Git for Windows rejects that entry during fast-import when
+    # core.protectNTFS is enabled, even though this is a bare mirror and no
+    # checkout occurs. Scope the compatibility override to this subprocess;
+    # never persist it in user or repository configuration.
+    local config_index="${GIT_CONFIG_COUNT:-0}"
+    export GIT_CONFIG_COUNT="$((config_index + 1))"
+    export "GIT_CONFIG_KEY_${config_index}=core.protectNTFS"
+    export "GIT_CONFIG_VALUE_${config_index}=false"
+    "${PYTHON_BIN}" -m git_filter_repo "${args[@]}" --replace-text "${REPLACE_TEXT}"
   )
 
   capture_inventory "post"

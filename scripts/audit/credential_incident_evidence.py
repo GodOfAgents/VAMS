@@ -25,12 +25,12 @@ REQUIRED_ROLE_CHECKS = {
 }
 REQUIRED_NETWORKS = {"polygon-amoy", "cardano-preprod"}
 REQUIRED_OCCURRENCE_PATH_COUNTS = {
-    "node_identity.pem": 2,
+    "node_identity.pem": 1,
     "neuron/node_identity.pem": 1,
 }
 EXPECTED_FINDING_OCCURRENCES = sum(REQUIRED_OCCURRENCE_PATH_COUNTS.values())
 EXPECTED_UNIQUE_IDENTITIES = 2
-CREDENTIAL_INCIDENT_SCHEMA_VERSION = "4.0.0"
+CREDENTIAL_INCIDENT_SCHEMA_VERSION = "4.0.1"
 FUNDING_APPLICABILITIES = {
     "account-derived",
     "cryptographically-inapplicable",
@@ -200,7 +200,7 @@ def validate_credential_incident_report(
     if occurrence_path_counts != REQUIRED_OCCURRENCE_PATH_COUNTS:
         errors.append(
             "credential incident occurrence paths do not match the verified "
-            "two root and one neuron findings"
+            "one root and one neuron finding"
         )
 
     identities = report.get("affected_identities")

@@ -65,6 +65,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Cardano property tests**: Added seven seeded Aiken properties covering integer-square-root bounds, basis-point safety and monotonicity, inclusive ranges, strict bridge nonce ordering/replay rejection, and insurance payout caps.
 
 ### Changed
+- **Credential rewrite authorization**: Made the local history-rewrite gate
+  validate incident-bound credential-impact and maintenance records before any
+  mutation. Placeholder approvals, incomplete identity/provider impact checks,
+  freeze evidence bound to another `main`, standing ruleset bypasses, enabled
+  Actions, and pre-approved remote force pushes now fail closed. Remote history
+  mutation remains a separate explicit execution-time approval.
+- **Credential rewrite path coverage**: Corrected the all-ref removal set to
+  include the five legacy provider helpers under `scripts/`, and extended the
+  narrow Gitleaks public-curve allowlist to its own generated regression
+  fixture without weakening forbidden-fixture coverage.
+- **Bare-mirror secret verification**: Made the sanitized TruffleHog wrapper
+  detect bare repositories and select the scanner's explicit `--bare` mode,
+  preventing a zero-event scanner error from being mistaken for a clean scan.
+  Explicit repository overrides are limited to credential-free local file
+  URIs, allowing encrypted Windows mirrors to be reached through a data-free
+  directory junction.
 - **Incident-preparation CI reproducibility**: Corrected Gitleaks fixture path
   anchoring, made Forge and Slither checkouts recursive, installed the pinned
   Foundry compiler for Slither, split reviewed Semgrep enforcement from
@@ -165,7 +181,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   legacy-helper paths, concrete credential-shaped URI literals, replacement
   maps, and replacement-map directives in tracked content or evidence.
 - **Historical secret gate**: A fully redacted Gitleaks v8.30.1 scan of all 82
-  reachable commits found 1,734 matches, including three historical PEM
+  reachable commits found 1,734 matches, including two historical PEM
   private-key findings. `docs/audit/GITLEAKS_ADJUDICATION.md` blocks release
   pending rotation, role-impact review, coordinated history cleanup, and clean
   Gitleaks/TruffleHog rescans; no blanket baseline was added.

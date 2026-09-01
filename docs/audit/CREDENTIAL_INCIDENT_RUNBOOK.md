@@ -38,7 +38,7 @@ the PR; it is not a scanner waiver or a deployment exception.
 
 ### PEM identities
 
-The history contains three PEM occurrences representing two unique secp256k1
+The history contains two PEM occurrences representing two unique secp256k1
 identities. Derive fingerprints from the public keys, never from private PEM
 bytes. For each identity, record:
 
@@ -160,10 +160,28 @@ With sanitized impact and maintenance records already present outside Git:
   --replace-text (Join-Path $env:VAMS_REWRITE_ROOT "replacements.txt")
 ```
 
+Before `git-filter-repo` can run,
+`scripts/audit/history_rewrite_input_validator.py` validates both JSON records
+against the mirrored `refs/heads/main`. The incident record must bind exactly
+the two known PEM occurrences to the two decommissioned identities, contain
+the complete role, Amoy balance, Cardano applicability, and Infura revocation
+checks, and approve only the local rewrite. The maintenance record must bind
+the frozen main SHA and every authoritative branch ref, prove active branch and
+tag rulesets with no bypass actors, record disabled Actions and zero tags,
+releases, and deployments, and approve only the local rewrite. Both records
+identify their human owner and use content hashes for sanitized supporting
+artifacts. A generic value such as `{"approved":true}` is invalid.
+
+Remote force-push approval must be `false` in both inputs. That approval is a
+later, execution-time decision made only after the rewritten ref set and clean
+scanner evidence have been reviewed.
+
 The script hashes but never prints or copies the replacement map. It rejects a
 working clone, wrong origin, incomplete mirror refspec, in-repository evidence,
-in-mirror evidence, missing approvals, missing replacement map, non-literal
-replacement directives, and `git-filter-repo` below 2.47.0. It never pushes.
+in-mirror evidence, missing or structurally incomplete incident evidence,
+evidence bound to another main SHA, pre-approved remote mutation, missing
+replacement map, non-literal replacement directives, and `git-filter-repo`
+below 2.47.0. Validation happens before any history mutation. It never pushes.
 
 ## 7. Verify Before Remote Mutation
 
@@ -220,7 +238,7 @@ trufflehog git "file://$PWD" --json --fail --no-update \
   --results=verified,unknown,unverified
 ```
 
-The protected closure report uses schema `4.0.0`, binds exactly three
+The protected closure report uses schema `4.0.1`, binds exactly two
 occurrences to two permanently decommissioned identities, records the bounded
 Infura revocation limitation, binds GitHub Support and collaborator-reclone
 evidence, and reports `blocking_findings_open=0`.

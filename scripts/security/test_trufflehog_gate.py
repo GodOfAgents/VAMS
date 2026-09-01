@@ -50,6 +50,7 @@ class TruffleHogGateTests(unittest.TestCase):
                 "_trufflehog_binary",
                 return_value="pinned-trufflehog",
             ),
+            mock.patch.object(trufflehog_gate, "_is_bare_repository", return_value=False),
             mock.patch.object(trufflehog_gate.subprocess, "Popen", return_value=process) as popen,
             mock.patch.object(Path, "write_text"),
         ):
@@ -60,6 +61,61 @@ class TruffleHogGateTests(unittest.TestCase):
         self.assertEqual(command[2], Path.cwd().resolve().as_uri())
         self.assertIn("--no-verification", command)
         self.assertIn("--results=verified,unknown,unverified", command)
+        self.assertNotIn("--bare", command)
+
+    def test_bare_repository_scan_uses_explicit_bare_mode(self) -> None:
+        output = Path("sanitized-report.json")
+        process = mock.Mock()
+        process.stdout = iter(())
+        process.wait.return_value = 0
+        with (
+            mock.patch.object(
+                trufflehog_gate,
+                "_trufflehog_binary",
+                return_value="pinned-trufflehog",
+            ),
+            mock.patch.object(trufflehog_gate, "_is_bare_repository", return_value=True),
+            mock.patch.object(trufflehog_gate.subprocess, "Popen", return_value=process) as popen,
+            mock.patch.object(Path, "write_text"),
+        ):
+            self.assertEqual(trufflehog_gate.run(output), 0)
+
+        self.assertIn("--bare", popen.call_args.args[0])
+
+    def test_explicit_local_file_repository_is_allowed_without_bare_mode(self) -> None:
+        output = Path("sanitized-report.json")
+        process = mock.Mock()
+        process.stdout = iter(())
+        process.wait.return_value = 0
+        repository_uri = "file:///C:/encrypted-mirror-link.git"
+        with (
+            mock.patch.object(
+                trufflehog_gate,
+                "_trufflehog_binary",
+                return_value="pinned-trufflehog",
+            ),
+            mock.patch.object(trufflehog_gate.subprocess, "Popen", return_value=process) as popen,
+            mock.patch.object(Path, "write_text"),
+        ):
+            self.assertEqual(trufflehog_gate.run(output, repository_uri), 0)
+
+        command = popen.call_args.args[0]
+        self.assertEqual(command[2], repository_uri)
+        self.assertNotIn("--bare", command)
+
+    def test_explicit_nonlocal_repository_is_rejected(self) -> None:
+        with mock.patch.object(
+            trufflehog_gate,
+            "_trufflehog_binary",
+            return_value="pinned-trufflehog",
+        ):
+            self.assertEqual(
+                trufflehog_gate.run(
+                    Path("sanitized-report.json"),
+                    "https://example.invalid/repository.git",
+                ),
+                2,
+            )
 
     def test_explicit_scanner_path_must_exist(self) -> None:
         with mock.patch.dict(os.environ, {"TRUFFLEHOG_BIN": str(Path("missing"))}):

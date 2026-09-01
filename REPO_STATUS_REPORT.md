@@ -47,7 +47,7 @@ Current blockers before public testnet:
   tracked/supplemental timeout pairs received separate direct source
   adjudication with no confirmed vulnerability. Historical
   PR 4 run `29611633518` is blocking on 869 Gitleaks findings and 20
-  unverified TruffleHog findings. Three PEM occurrences map to two
+  unverified TruffleHog findings. Two PEM occurrences map to two
   permanently decommissioned identities; the all-ref rewrite, remote cleanup,
   clean rescans, SBOM/signing, and aggregate evidence remain promotion gates.
 - Avail and EigenDA remain structured stubs and must stay blocked from live environments.
@@ -160,7 +160,7 @@ Verification still pending or blocked locally:
 | Scope | Status |
 | --- | --- |
 | Exact-commit aggregate rerun | Local language gates pass on the dirty implementation tree; CI must rerun them against the final clean commit and sign the aggregate manifest. |
-| Historical secret exposure | PR 4 run `29611633518` reports 869 Gitleaks findings and 20 unverified TruffleHog findings. Three PEM occurrences represent two decommissioned identities. The coordinated all-ref rewrite, GitHub cache/PR cleanup, collaborator reclones, and zero-finding rescans are mandatory. |
+| Historical secret exposure | PR 4 run `29611633518` reports 869 Gitleaks findings and 20 unverified TruffleHog findings. Two PEM occurrences represent two decommissioned identities. The coordinated all-ref rewrite, GitHub cache/PR cleanup, collaborator reclones, and zero-finding rescans are mandatory. |
 | Semgrep timeout closure | Seventeen rule/file timeout pairs were directly adjudicated as non-findings after both scans exited zero. Preserve the adjudication, rerun after the post-scan workflow edit, and obtain external reviewer acceptance with exact-commit evidence. |
 | Aiken transaction properties | Pure-function properties now cover quadratic bounds, basis-point safety, range semantics, nonce replay/order, and insurance payout caps. Transaction-level datum/value/state-machine properties remain required. |
 | Slither adjudications | The 19 residual medium-scan results are documented; independent review and the complete low/informational report remain required. |
@@ -245,7 +245,7 @@ Mainnet remains conditional. No mainnet date should be promised until public tes
 
 1. Run the implemented security workflow on the current commit and retain the aggregate audit-gate evidence manifest.
 2. Land the incident-only preparation PR, then rewrite all affected refs for
-   the three PEM occurrences/two permanently decommissioned identities and
+   the two PEM occurrences/two permanently decommissioned identities and
    obtain zero-finding Gitleaks and all-category TruffleHog rescans.
 3. Independently review the 19 residual Slither findings and the 17 Semgrep timeout adjudications against the exact release commit.
 4. Expand Aiken properties to transaction-level state machines and complete the signed SBOM and aggregate evidence in CI.

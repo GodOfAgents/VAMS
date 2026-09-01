@@ -20,7 +20,7 @@ class GitleaksConfigurationTests(unittest.TestCase):
         config = tomllib.loads((ROOT / ".gitleaks.toml").read_text(encoding="utf-8"))
         self.assertEqual(config["extend"], {"useDefault": True})
         allowlists = config["allowlists"]
-        self.assertEqual(len(allowlists), 2)
+        self.assertEqual(len(allowlists), 3)
         for allowlist in allowlists:
             self.assertEqual(allowlist["targetRules"], ["generic-api-key"])
             self.assertEqual(allowlist["condition"], "AND")
@@ -33,12 +33,21 @@ class GitleaksConfigurationTests(unittest.TestCase):
         self.assertEqual(allowlists[1]["regexTarget"], "match")
         self.assertEqual(
             allowlists[1]["paths"],
+            [r"^scripts/security/gitleaks_allowlist_regression\.py$"],
+        )
+        self.assertEqual(
+            allowlists[1]["regexes"],
+            [r"^key\.curve,\s*ec\.SECP256K1\\n$"],
+        )
+        self.assertEqual(allowlists[2]["regexTarget"], "match")
+        self.assertEqual(
+            allowlists[2]["paths"],
             [
                 r"^neuron/config\.py$",
                 r"^contracts/script/(?:DeployX402|EmergencyLockdown|RegisterAgent)\.s\.sol$",
             ],
         )
-        self.assertEqual(allowlists[1]["regexes"], [r"0x[0-9a-fA-F]{40}"])
+        self.assertEqual(allowlists[2]["regexes"], [r"0x[0-9a-fA-F]{40}"])
 
     def test_no_global_stopword_commit_or_path_allowlist_exists(self) -> None:
         text = (ROOT / ".gitleaks.toml").read_text(encoding="utf-8")

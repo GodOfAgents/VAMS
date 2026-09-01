@@ -14,7 +14,7 @@ The complete Git history must also pass Gitleaks and TruffleHog. The blocking
 historical private-key findings recorded in `docs/audit/GITLEAKS_ADJUDICATION.md`
 require credential rotation, role-impact review, coordinated history cleanup,
 and a clean rescan; an unconditional baseline is not acceptable evidence.
-The closure report uses schema `4.0.0`: three PEM occurrences bind to two
+The closure report uses schema `4.0.1`: two PEM occurrences bind to two
 permanently decommissioned identities with no replacements, while the separate
 Infura record preserves `exact_revocation_time_unavailable=true` and a
 content-hashed dashboard observation. Review mode is `architect-owner`, not

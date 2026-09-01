@@ -46,7 +46,7 @@ sum exactly to 869.
 | Deleted Foundry output | `contracts/test_output_cmd.json`, `contracts/clean_output.json` | 802 | Generated output; remove from rewritten history rather than baseline globally. |
 | Upstream Foundry fixtures | Eleven paths under `.foundry/` | 46 | Remove the tracked vendor tree from the current tree and all rewritten history; do not allowlist it. |
 | Current Neuron source/configuration | `neuron/secp256k1.py`, `neuron/config.py`, `neuron/eth_client/sequence_wallet.py` | 6 | Allow only exact public curve/address matches under the targeted rule; remove the deleted wallet helper from rewritten history. |
-| Legacy provider helpers | `simulate-request.mjs`, `simulate-request-v2.mjs`, `simulate-request-v3.mjs`, `register-agent.mjs`, `verify-escrow.mjs` | 9 | Blocking; correlated with Infura/Polygon TruffleHog detections and targeted for removal. |
+| Legacy provider helpers | Five paths under `scripts/`: `simulate-request.mjs`, `simulate-request-v2.mjs`, `simulate-request-v3.mjs`, `register-agent.mjs`, `verify-escrow.mjs` | 9 | Blocking; correlated with Infura/Polygon TruffleHog detections and targeted for removal. |
 | Historical deployment helpers | `EmergencyLockdown.s.sol`, `DeployX402.s.sol`, `RegisterAgent.s.sol` | 3 | Allow only the exact 40-hex public EVM-address matches under `generic-api-key`; other rules and adjacent matches remain active. |
 | Historical Telegram bot | `telegram-bot/bot.js` | 1 | Remove the deleted file from rewritten history; do not allowlist it. |
 | PEM identity paths | `node_identity.pem`, `neuron/node_identity.pem` | 2 | Confirmed private-key paths; never allowlist. Rotation, impact review, and history removal are mandatory. |
@@ -59,7 +59,7 @@ after the coordinated all-ref rewrite.
 ## TruffleHog Correlation
 
 Run `29413794423` recorded one verified Infura finding and 19 unverified
-findings. The verified item was at historical path `simulate-request-v3.mjs`,
+findings. The verified item was at historical path `scripts/simulate-request-v3.mjs`,
 line 6, commit `1321f91586784d218ebc11126de588fbcf649ec6`.
 
 The later protected run `29416245559` recorded the same 20 sanitized detector
@@ -75,7 +75,7 @@ See [TRUFFLEHOG_TRIAGE.md](TRUFFLEHOG_TRIAGE.md).
    Retain only a non-sensitive provider/project fingerprint, the real dashboard
    observation time, `exact_revocation_time_unavailable=true`, the access and
    billing review interval, impact disposition, and Architect identity.
-2. Record all three historical PEM finding occurrences, then derive the two
+2. Record both historical PEM finding occurrences, then derive the two
    unique public-key fingerprints from public representations—not from raw
    private PEM bytes. Permanently decommission both unused identities and
    record that no replacement fingerprint exists because no role, funds, or
