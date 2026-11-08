@@ -142,10 +142,24 @@ Follow-up checks:
 - The other 13 private keys found are disposable test TLS keys (pytest
   temporaries and the local PostgreSQL test CA).
 
+**Owner decision (2026-11-08): keep `C:\Users\aseem\SanDisk16GB backup\`
+unchanged.** Consequences to carry into closure:
+
+- The runbook's "discard old clones" step is not fully met on this
+  workstation. The closure report must disclose the retained offline copy
+  (pre-rewrite `VAMS-main` clone, `VAMS-main.zip`, two plaintext copies of
+  leaked identity #1) as an owner-accepted residual, not claim full disposal.
+- Never run Neuron from the backup (it would load leaked identity #1 from
+  `.data/`), and never fetch, merge or copy history from the backup's
+  `VAMS-main` into any current clone.
+- Identity #1 stays permanently decommissioned: it must never be funded,
+  assigned a role, or reused as a node or signer identity.
+
 ## 4. Smallest owner decisions
 
-1. Step B done except three locked empty cache folders (admin action) and the
-   `SanDisk16GB backup` copies plus the physical device (owner decision).
+1. Step B done except three locked empty cache folders (admin action). The
+   `SanDisk16GB backup` copies are retained by owner decision and must be
+   disclosed in the closure report.
 2. Approve the TruffleHog 3.95.9 download for Step C.
 3. Confirm whether the GitHub Support request was sent and its outcome (or send it).
 4. Supply the R4 closure facts when ready (no secrets).
