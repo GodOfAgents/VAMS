@@ -42,7 +42,9 @@ class GitleaksConfigurationTests(unittest.TestCase):
             allowlists[1]["regexes"],
             [r"^key\.curve,\s*ec\.SECP256K1\\n$"],
         )
-        self.assertEqual(allowlists[2]["regexTarget"], "match")
+        # Tightened 2026-11-05 (repair_20261105/SCANNER-ADDRESS-CAPTURE.md):
+        # only a complete captured 20-byte address is exempt.
+        self.assertEqual(allowlists[2]["regexTarget"], "secret")
         self.assertEqual(
             allowlists[2]["paths"],
             [
@@ -50,7 +52,7 @@ class GitleaksConfigurationTests(unittest.TestCase):
                 r"^contracts/script/(?:DeployX402|EmergencyLockdown|RegisterAgent)\.s\.sol$",
             ],
         )
-        self.assertEqual(allowlists[2]["regexes"], [r"0x[0-9a-fA-F]{40}"])
+        self.assertEqual(allowlists[2]["regexes"], [r"^0x[0-9a-fA-F]{40}$"])
 
     def test_no_global_stopword_commit_or_path_allowlist_exists(self) -> None:
         text = (ROOT / ".gitleaks.toml").read_text(encoding="utf-8")
@@ -59,27 +61,40 @@ class GitleaksConfigurationTests(unittest.TestCase):
         self.assertNotIn("[allowlist]", text)
 
     def test_regression_scan_uses_scan_root_relative_paths(self) -> None:
+        binary = Path("/opt/gitleaks")
         source = Path("fixture-root")
+        config = Path("fixture-config.toml")
         report = Path("fixture-report.json")
-        completed = mock.Mock()
+        # Fixtures always contain blocked secrets, so the scanner must exit 1.
+        completed = mock.Mock(stdout=b"", stderr=b"", returncode=1)
         with mock.patch.object(
             gitleaks_regression.subprocess,
             "run",
             return_value=completed,
         ) as run:
-            self.assertIs(gitleaks_regression._run(source, report), completed)
+            self.assertIsNone(gitleaks_regression.scan(binary, source, config, report))
 
         command = run.call_args.args[0]
-        self.assertEqual(command[:3], ["gitleaks", "dir", "."])
+        self.assertEqual(command[:3], [str(binary), "dir", "."])
         self.assertEqual(run.call_args.kwargs["cwd"], source)
+
+    def test_clean_scan_exit_is_not_accepted(self) -> None:
+        completed = mock.Mock(stdout=b"", stderr=b"", returncode=0)
+        with mock.patch.object(gitleaks_regression.subprocess, "run", return_value=completed):
+            with self.assertRaises(gitleaks_regression.InputError):
+                gitleaks_regression.scan(Path("/opt/gitleaks"), Path("t"), Path("c"), Path("r"))
 
     def test_explicit_scanner_path_must_exist(self) -> None:
         missing = ROOT / "missing-gitleaks-binary"
+        # A missing explicit path must never fall back to a PATH lookup.
         with mock.patch.dict(
             gitleaks_regression.os.environ,
             {"GITLEAKS_BIN": str(missing)},
+        ), mock.patch.object(
+            gitleaks_regression.shutil, "which", return_value="/usr/bin/true"
         ):
-            self.assertIsNone(gitleaks_regression._gitleaks_binary())
+            with self.assertRaises((gitleaks_regression.InputError, OSError)):
+                gitleaks_regression.scanner_binary()
 
 
 if __name__ == "__main__":

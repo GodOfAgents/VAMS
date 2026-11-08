@@ -6,7 +6,10 @@ import unittest
 from unittest.mock import Mock, patch
 
 from neuron.gateway import client as gateway
-from neuron.runtime_safety import RuntimeConfigurationError
+from neuron.runtime_safety import LiveModeSafetyError, RuntimeConfigurationError
+
+# The legacy client refuses live modes until M2 client authentication exists.
+LIVE_MODES = ("staging", "testnet", "production")
 
 BASE = "https://synthetic-gateway.invalid"
 MARKER = "SYNTHETIC_ONLY_PRIVATE_MARKER"
@@ -28,7 +31,9 @@ class GatewayConstructorLogTests(unittest.TestCase):
         self.network.assert_not_called()
 
     def construct(self, url, mode="test"):
-        with self.assertLogs(gateway.logger, level="INFO") as capture:
+        # A supplied environment must agree with the ambient process policy.
+        with patch.dict(os.environ, {"VAMS_ENV": mode}), \
+                self.assertLogs(gateway.logger, level="INFO") as capture:
             client = gateway.GatewayClient(url, environ={"VAMS_ENV": mode})
         self.factory.assert_called_once_with()
         self.assertIs(client.session, self.session)
@@ -63,9 +68,24 @@ class GatewayConstructorLogTests(unittest.TestCase):
         self.factory.assert_not_called()
 
     def test_live_plaintext_rejects_before_transport_or_constructor_log(self):
-        with self.assertNoLogs(gateway.logger, level="INFO"):
-            with self.assertRaises(ValueError):
+        with patch.dict(os.environ, {"VAMS_ENV": "testnet"}), \
+                self.assertNoLogs(gateway.logger, level="INFO"):
+            with self.assertRaises(LiveModeSafetyError):
                 gateway.GatewayClient("http://synthetic-gateway.invalid", environ={"VAMS_ENV": "testnet"})
+        self.factory.assert_not_called()
+
+    def test_environment_disagreeing_with_process_policy_rejects(self):
+        # Ambient VAMS_ENV is "test" (setUp); a supplied "demo" must not override it.
+        with self.assertNoLogs(gateway.logger, level="INFO"):
+            with self.assertRaises(RuntimeConfigurationError):
+                gateway.GatewayClient(BASE, environ={"VAMS_ENV": "demo"})
+        self.factory.assert_not_called()
+
+    def refuse_live(self, mode):
+        with patch.dict(os.environ, {"VAMS_ENV": mode}), \
+                self.assertNoLogs(gateway.logger, level="INFO"):
+            with self.assertRaises(LiveModeSafetyError):
+                gateway.GatewayClient(BASE, environ={"VAMS_ENV": mode})
         self.factory.assert_not_called()
 
     def test_transport_url_json_timeout_and_redirect_policy_unchanged(self):
@@ -98,9 +118,18 @@ def constructor_case(url, mode):
     return test
 
 
-for mode in ("local", "demo", "test", "staging", "testnet", "production"):
+def live_refusal_case(mode):
+    def test(self):
+        self.refuse_live(mode)
+    return test
+
+
+for mode in ("local", "demo", "test"):
     setattr(GatewayConstructorLogTests, "test_https_fixed_diagnostic_" + mode,
             constructor_case(BASE, mode))
+for mode in LIVE_MODES:
+    setattr(GatewayConstructorLogTests, "test_live_mode_refused_before_transport_" + mode,
+            live_refusal_case(mode))
 for name, url in {
     "path": BASE + "/" + MARKER,
     "query": BASE + "/?operator_hint=" + MARKER,

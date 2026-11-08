@@ -18,6 +18,7 @@ from neuron.effect_canary import (
     ApprovedAction,
     AttenuatedCapability,
     EffectCoordinator,
+    EffectError,
     EffectStatus,
     PostgresAuthorityRepository,
     ProviderEffectContract,
@@ -29,12 +30,22 @@ class DriverFailure(RuntimeError):
     pass
 
 
+@pytest.fixture(autouse=True)
+def _local_effect_runtime(monkeypatch):
+    # The repository guard accepts only local/test/demo; do not rely on
+    # another test module leaking VAMS_ENV.
+    monkeypatch.setenv("VAMS_ENV", "test")
+
+
 class _State:
     def __init__(self, action: ApprovedAction | None = None):
         self.authorities = {}
         self.operations = {}
         self.observations = {}
         self.commit_failures_remaining = 0
+        self.v2_table_exists = False
+        self.v2_principals = set()
+        self.executed = []
         if action is not None:
             self.authorities[action.principal_id] = {
                 "task_id": action.task_id,
@@ -114,7 +125,14 @@ class _Cursor:
             raise self.connection.execute_error
         sql = " ".join(sql.split())
         state = self.connection
-        if sql.startswith("SELECT action_digest,status,cost_units FROM vams_effect_operations"):
+        state.state.executed.append(sql)
+        if sql == "SELECT pg_advisory_xact_lock(%s)":
+            self._row = None
+        elif sql == "SELECT to_regclass('vams_effect_v2_authority')":
+            self._row = ("vams_effect_v2_authority" if state.state.v2_table_exists else None,)
+        elif sql.startswith("SELECT 1 FROM vams_effect_v2_authority WHERE principal_id="):
+            self._row = (1,) if params[0] in state.state.v2_principals else None
+        elif sql.startswith("SELECT action_digest,status,cost_units FROM vams_effect_operations"):
             row = state.operations.get(params[0])
             self._row = None if row is None else (row["action_digest"], row["status"], row["cost_units"])
         elif sql.startswith("SELECT task_id,target,implementation_digest,object_prefix,budget_limit,max_action_cost,budget_reserved,budget_spent,policy_revision,authority_epoch,expires_at,revoked FROM vams_effect_authority"):
@@ -219,6 +237,22 @@ def test_successful_repository_write_commits_and_closes_connection():
     assert connection.commit_calls == 1
     assert connection.rollback_calls == 0
     assert connection.close_calls == 1
+    # The shared v1/v2 principal lock is taken before any read or write.
+    assert state.executed[0] == "SELECT pg_advisory_xact_lock(%s)"
+
+
+def test_principal_with_v2_authority_is_not_provisioned_as_v1_writer():
+    state = _State()
+    state.v2_table_exists = True
+    state.v2_principals.add("principal-a")
+    connection = _Connection(state)
+    repository, connect = _repository(connection)
+    with connect, pytest.raises(EffectError, match="v2 authority"):
+        repository.provision_capability(_capability(), budget_units=5)
+    assert connection.commit_calls == 0
+    assert connection.rollback_calls == 1
+    assert connection.close_calls == 1
+    assert not any(sql.startswith("INSERT INTO vams_effect_authority") for sql in state.executed)
 
 
 def test_cursor_execute_failure_rolls_back_and_closes_connection():

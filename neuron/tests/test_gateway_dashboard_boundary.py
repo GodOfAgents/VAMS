@@ -9,7 +9,15 @@ import types
 from typing import Dict,List,Optional
 import unittest
 
-SOURCE=Path(sys.argv[1]);BASE=Path(sys.argv[2]);NOW=1700000000.0
+def _source_and_base():
+    # Script mode: SOURCE=server.py BASE=pre-repair copy. Under pytest the
+    # real gateway/server.py is tested and the scope comparison is skipped.
+    args=sys.argv[1:3]
+    if len(args)==2 and Path(args[0]).name=='server.py' and all(Path(a).is_file() for a in args):
+        return Path(args[0]),Path(args[1])
+    return Path(__file__).resolve().parents[2]/'gateway'/'server.py',None
+
+SOURCE,BASE=_source_and_base();NOW=1700000000.0
 
 class Response:
     def __init__(self,content):self.body=content.encode('utf-8');self.status_code=200
@@ -90,6 +98,7 @@ class DashboardBoundaryTests(unittest.TestCase):
         name='Jos\u00e9 <worker> & "quoted"';node=self.node(name);self.m.nodes[name]=node
         parsed=Tags();parsed.feed(self.render());self.assertNotIn('worker',parsed.tags)
         self.assertIn(name,''.join(parsed.text));self.assertEqual(node.node_id,name)
+    @unittest.skipUnless(BASE is not None,'change-scope check needs a pre-repair BASE file (script mode)')
     def test_other_authentication_and_handler_ast_are_unchanged(self):
         def unaffected(path):
             tree=ast.parse(path.read_text(encoding='utf-8'));nodes=[]

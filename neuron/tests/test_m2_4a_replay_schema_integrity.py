@@ -111,6 +111,11 @@ class _RecordingComposer:
         self.calls += 1
         return _SyntheticInstance()
 
+    # Stand-in protected handler; the real Composer simulation is demo-only
+    # (covered by test_m2_3_gateway_routes.test_local_mode_composer_simulation_stays_unavailable).
+    def assert_simulation_available(self) -> None:
+        return None
+
 
 class _LoopbackServer:
     def __init__(self) -> None:
@@ -162,6 +167,8 @@ def configured_gateway(monkeypatch, tmp_path):
     composer = _RecordingComposer()
     monkeypatch.setattr(server, "composer", composer)
     monkeypatch.setattr(server, "COMPOSER_AVAILABLE", True)
+    # Startup would otherwise rebind the real (demo-only) Composer over the recorder.
+    monkeypatch.setattr(server, "_bind_resource_composer", lambda _policy: None)
     server.nodes.clear()
     yield database, composer
     server.nodes.clear()

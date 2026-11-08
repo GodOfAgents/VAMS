@@ -96,10 +96,20 @@ class _SyntheticInstance:
 
 
 class _RecordingComposer:
+    """Stand-in protected handler for auth/replay tests.
+
+    The real Composer simulation is demo-only (see
+    test_local_mode_composer_simulation_stays_unavailable); this recorder
+    isolates M2 authentication semantics from that gate.
+    """
+
     def __init__(self, counter=None) -> None:
         self.calls = 0
         self.fail = False
         self._counter = counter
+
+    def assert_simulation_available(self) -> None:
+        return None
 
     def provision_blueprint(self, _name: str):
         self.calls += 1
@@ -130,9 +140,38 @@ def configured_gateway(monkeypatch, tmp_path):
     recorder = _RecordingComposer()
     monkeypatch.setattr(server, "composer", recorder)
     monkeypatch.setattr(server, "COMPOSER_AVAILABLE", True)
+    # Startup would otherwise rebind the real (demo-only) Composer over the recorder.
+    monkeypatch.setattr(server, "_bind_resource_composer", lambda _policy: None)
     server.nodes.clear()
     yield _GatewayFixture(database, recorder)
     server.nodes.clear()
+
+
+def test_local_mode_composer_simulation_stays_unavailable(monkeypatch, tmp_path):
+    monkeypatch.setenv("VAMS_ENV", "local")
+    monkeypatch.setenv("VAMS_MOCK_MODE", "false")
+    monkeypatch.setenv("GATEWAY_ADMIN_PASSWORD", "m2-3-test-password")
+    monkeypatch.setenv("GATEWAY_ADMIN_DID", SIGNER)
+    monkeypatch.setenv("GATEWAY_AUTH_AUDIENCE", AUDIENCE)
+    monkeypatch.setenv("GATEWAY_AUTH_REPLAY_DB", str(tmp_path / "local-gate.sqlite3"))
+    monkeypatch.delenv("GATEWAY_ALLOWED_ORIGINS", raising=False)
+    calls = []
+    real_bind = server._bind_resource_composer
+
+    def bind_then_watch(policy):
+        real_bind(policy)
+        original = server.composer.provision_blueprint
+        monkeypatch.setattr(server.composer, "provision_blueprint",
+                            lambda *a, **k: calls.append(1) or original(*a, **k))
+
+    monkeypatch.setattr(server, "_bind_resource_composer", bind_then_watch)
+    server.nodes.clear()
+    body = compact_json({"blueprint_name": "ServiceBlock_OMS_v1"})
+    with TestClient(server.app) as client:
+        response = _compose_request(client, nonce=900, body=body)
+    server.nodes.clear()
+    assert response.status_code == 503
+    assert calls == []
 
 
 def _compose_request(client, *, nonce: int, headers=None, body=None, target="/compose"):

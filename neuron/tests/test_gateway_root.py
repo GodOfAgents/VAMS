@@ -43,7 +43,9 @@ class TestGatewayRoot(unittest.TestCase):
         self.client_context.__exit__(None, None, None)
         self.environment.stop()
 
-    @patch("gateway.server.composer")
+    # spec=True mirrors the real composer, so Python 3.12 permits its
+    # assert_simulation_available() method on the mock.
+    @patch("gateway.server.composer", spec=True)
     def test_compose_endpoint_premium(self, mock_composer):
         """Test `/compose` endpoint returns premium details in the JSON response from the root gateway server."""
         from neuron.composer.models import InstanceBlueprint, ComputeSpec, GPUType, AllocationPlan, ProvisionedInstance, ResourceAssignment
@@ -96,7 +98,11 @@ class TestGatewayRoot(unittest.TestCase):
         # Assertions
         self.assertEqual(response.status_code, 200)
         json_data = response.json()
-        self.assertEqual(json_data["status"], "provisioned")
+        # M1 containment: composition output is an explicitly labelled,
+        # non-authoritative simulation, never a provisioning claim.
+        self.assertEqual(json_data["status"], "simulated")
+        self.assertIs(json_data["simulation"], True)
+        self.assertEqual(json_data["evidence_classification"], "non-authoritative")
         self.assertEqual(json_data["base_hourly_cost"], 100.0)
         self.assertEqual(json_data["premium_rate_bps"], 700) # 2% base + 5% OMS = 7%
         self.assertEqual(json_data["premium_hourly_cost"], 7.0)

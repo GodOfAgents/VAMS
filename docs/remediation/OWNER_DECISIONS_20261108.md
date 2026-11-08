@@ -48,6 +48,15 @@ disablement; ordinary governor constructed but inactive, restricted operations
 through reviewed multisig/timelock. DEC floor/decay/terminal values remain
 frozen-unset until a later economic design.
 
+## 6. Historical harness tests (added later on 2026-11-08)
+
+Six harness tests in `docs/remediation/m3_2b_r4`, `m3_2b_r6`,
+`m3_f04_impl_r2` and `m3_f04_impl_r4` encode designs superseded by later owner
+records (notably registry-side minting). Owner chose "Retire as historical":
+keep the files as evidence, deselect the six exact node IDs in `pytest.ini`,
+document them in `docs/remediation/HISTORICAL_TESTS.md`. Only an owner
+decision may add further entries.
+
 ## 5. Secret-scan disposition authority (D5)
 
 The owner is the per-finding disposition authority for first-party secret-scan

@@ -1,3 +1,18 @@
+## 2026-11-08: Python suite repairs on Linux 3.12
+
+Full suite moves from 3,369 pass / 72 fail to 3,416 pass / 22 fail (1 visible skip, 6 owner-retired historical tests deselected by exact ID; see `docs/remediation/HISTORICAL_TESTS.md`). Repairs are test-side; no product behavior changed:
+
+- `pytest.ini` adds the repository root to `pythonpath`; gateway route tests no longer depend on another module mutating `sys.path`.
+- Gateway route/replay fixtures (`test_m2_3_gateway_routes.py`, `test_m2_4a_replay_schema_integrity.py`) stop startup from rebinding the demo-only Composer over their recording handler; a new test proves the real local-mode Composer gate returns 503 without calling the handler.
+- `test_gateway_current.py` dashboard tests use a fresh nonce per signed request (durable replay protection correctly rejected reuse).
+- `test_gateway_constructor_log_privacy.py` follows the hardened client: supplied environment must match process policy (new rejection test) and live modes are refused before transport or logging.
+- `test_gateway_root.py` mocks the Composer with `spec=True` (Python 3.12 rejects `assert_*` attributes on bare mocks) and asserts the non-authoritative simulation label.
+- `test_gateway_dashboard_boundary.py` tests the real `gateway/server.py` under pytest; its pre-repair scope comparison skips visibly unless a base file is supplied.
+- `test_gitleaks_configuration.py` follows the refactored scanner API, pins the tightened address exception, and adds checks that a clean scan exit and a missing explicit scanner path are rejected.
+- `test_effect_canary_postgres_transactions.py` sets its own runtime mode, models the advisory lock and V2-authority guard, and adds regressions for lock-first ordering and V1/V2 writer exclusion.
+
+Remaining: one semantic-MMU inventory test (19 subtests) and three R11 provenance tests pin stale source hashes/anchors; Bandit still fails. Status unchanged: 13 open, 0 of 36 verified, NOT READY.
+
 ## 2026-11-08: Cardano source compiles; blueprint regenerated
 
 Type-level repairs in `validators/f04_anchor_policy.ak` and `validators/governance_v2.test.ak` let native Aiken 1.1.21 compile the integrated source for the first time. No validator rule changed; a missing guardian index now fails explicitly. `aiken check --deny --seed 20260711 --max-success 250` passes: 2,627 checks, 884 tests, 0 errors, 0 warnings, including all 724 prepared governance v2 cases. The stale `cardano/plutus.json` (eight validators missing, five hashes outdated) is replaced with fresh `aiken build` output. Six historical harness tests (`docs/remediation/m3_2b_r4`, `m3_2b_r6`, `m3_f04_impl_r2`, `m3_f04_impl_r4`) now run but fail because they encode superseded designs such as registry-side minting; their disposition needs an owner decision. F01–F03 remain open. Details: `docs/remediation/repair_20261108/CARDANO-COMPILE.md`.

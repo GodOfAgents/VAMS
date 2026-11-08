@@ -156,13 +156,15 @@ class TestGatewayCurrent(unittest.TestCase):
                              "signature": sign_message(key, payload.encode()).hex()})
         response = self.client.post(
             "/heartbeat", content=body,
-            headers=signed_headers("POST", "/heartbeat", body=body),
+            headers=signed_headers("POST", "/heartbeat", body=body, nonce=101),
         )
         self.assertEqual(response.status_code, 200)
 
+    # Each signed request needs a fresh nonce; durable replay protection
+    # rejects a reused one.
     def test_dashboard_renders_registered_node_with_formatted_last_seen(self):
         self._register_dashboard_node("dashboard-valid-node")
-        response = self.client.get("/", headers=signed_headers("GET", "/"))
+        response = self.client.get("/", headers=signed_headers("GET", "/", nonce=102))
         self.assertEqual(response.status_code, 200)
         self.assertIn("dashboard-valid-node", response.text)
         self.assertIn("1,234", response.text)
@@ -172,7 +174,7 @@ class TestGatewayCurrent(unittest.TestCase):
         from html import escape
         node_id = '<img src=x onerror="alert(1)"> & <svg onload=alert(2)>'
         self._register_dashboard_node(node_id)
-        response = self.client.get("/", headers=signed_headers("GET", "/"))
+        response = self.client.get("/", headers=signed_headers("GET", "/", nonce=102))
         self.assertEqual(response.status_code, 200)
         self.assertIn(escape(node_id), response.text)
         self.assertNotIn("<img", response.text)
