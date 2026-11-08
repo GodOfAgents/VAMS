@@ -1,3 +1,11 @@
+## 2026-11-08: D1 runner baseline, reproducible remappings, test-collection repairs
+
+Owner decisions of 2026-11-08 are recorded in `docs/remediation/OWNER_DECISIONS_20261108.md` (D1 runner, native Aiken, first-canary route scope, TR-01–TR-10, secret-scan disposition authority). A WSL2 Python 3.12.16 / Foundry 1.7.1 / Aiken 1.1.21 / Node 22.23.4 / PostgreSQL 17.11 runner was assembled from checksum-verified official sources; it is owner-operated, not independent CI.
+
+`contracts/remappings.txt` now pins every remapping Foundry previously auto-detected. Auto-detection chose among duplicate nested `forge-std`/`erc4626-tests`/`halmos-cheatcodes` copies by directory layout, which changed solc metadata and the pinned policy runtime hash (fresh export: 1118 pass/5 fail; repaired: 1141/1141). Two Python test modules failed at collection, so pytest executed no tests: the Gitleaks configuration test did not register its spec-loaded module before execution, and the TEE promotion-scan test imported a sibling script that is not on the import path. Both now use the existing spec-loading pattern. Details: `docs/remediation/repair_20261108/REMAPPING-PIN.md`.
+
+Baseline observations, not repairs: native `aiken check` fails to compile the current `cardano/` source (first errors in `validators/f04_anchor_policy.ak`), whereas committed `829ab54` passes 50 tests; Bandit reports 99 medium/medium findings in the new `effect_*` PostgreSQL modules (B608) and tests (B102). No finding or track status changes: 13 open, 0 of 36 verified, NOT READY.
+
 ## 2026-11-05: inactive V3 heartbeat authority producer
 
 The new non-upgradeable V3 source reads the pinned timelock generation/commitment, policy projection and mandatory custody adapter. Policy configuration computes its digest from those current reads and rolls back on failure. The source checks an explicit expected chain ID at construction and every read. One-time policy binding checks the source's actual policy and timelock instances. Custody reads have a fixed 50,000-gas cap, copy only 96 bytes, require exactly 96 returned bytes, and reject noncanonical integer words. A real custody implementation and its gas envelope remain UNKNOWN; synthetic fixtures supply no custody authority.

@@ -1,9 +1,18 @@
 """Source-level mutant regressions for the source54 TEE promotion scan."""
 
+import importlib.util
 from pathlib import Path
+import sys
 import unittest
 
-from mock_mode_promotion_scan import check_tee_sources
+_SPEC = importlib.util.spec_from_file_location(
+    "mock_mode_promotion_scan", Path(__file__).with_name("mock_mode_promotion_scan.py")
+)
+assert _SPEC is not None and _SPEC.loader is not None
+_SCAN = importlib.util.module_from_spec(_SPEC)
+sys.modules[_SPEC.name] = _SCAN
+_SPEC.loader.exec_module(_SCAN)
+check_tee_sources = _SCAN.check_tee_sources
 
 
 OVERLAY_ROOT = Path(__file__).resolve().parents[2]

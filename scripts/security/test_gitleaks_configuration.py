@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+import sys
 import tomllib
 import unittest
 from pathlib import Path
@@ -12,6 +13,8 @@ MODULE_PATH = Path(__file__).with_name("gitleaks_allowlist_regression.py")
 SPEC = importlib.util.spec_from_file_location("gitleaks_allowlist_regression", MODULE_PATH)
 assert SPEC is not None and SPEC.loader is not None
 gitleaks_regression = importlib.util.module_from_spec(SPEC)
+# Register before execution: dataclasses resolve string annotations via sys.modules.
+sys.modules[SPEC.name] = gitleaks_regression
 SPEC.loader.exec_module(gitleaks_regression)
 
 
