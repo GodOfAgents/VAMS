@@ -255,6 +255,9 @@ jobs:
       - name: Verify Narrow GitLeaks Allowlists
         run: python scripts/security/gitleaks_allowlist_regression.py
 
+      - name: Re-prove Accepted GitLeaks Dispositions
+        run: python scripts/security/gitleaks_ignore_reproof.py
+
       - name: Enforce Current-Tree Vendor Baseline
         shell: bash
         run: |

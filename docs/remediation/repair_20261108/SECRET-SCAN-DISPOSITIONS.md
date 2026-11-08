@@ -1,10 +1,17 @@
-# Current-tree secret-scan dispositions — PROPOSED
+# Current-tree secret-scan dispositions — ACCEPTED
 
-Status: **PROPOSED, awaiting owner ruling** (owner decision 5 names the owner
-as per-finding disposition authority). No allowlist, `.gitleaksignore` entry,
-file removal or history rewrite has been applied. Per-finding records are in
-`secret-scan-dispositions-proposed.json` (file, line, rule, Gitleaks
-fingerprint, file SHA-256, group, proof); no token value is recorded anywhere.
+Status: **ACCEPTED by the owner on 2026-11-08 (owner decision 9)**, all eight
+groups, applied through option 1. The 638 exact fingerprints are in
+`.gitleaksignore`; `scripts/security/gitleaks_ignore_reproof.py` (CI step
+"Re-prove Accepted GitLeaks Dispositions", before the current-tree gate)
+fails unless each entry maps to an accepted record whose file still has its
+recorded SHA-256. Per-finding records are in `secret-scan-dispositions.json`
+(file, line, rule, Gitleaks fingerprint, file SHA-256, group, proof); no token
+value is recorded anywhere.
+
+Result on the owner-operated runner: `m0_4_vendor_baseline_gate.py` **PASS**
+(first-party 0, vendor 479 matching the baseline, unknown 0). Independent
+review of these dispositions is still required before release.
 
 ## Scan
 

@@ -78,6 +78,17 @@ and the locked `vams-vm` dependencies, RustSec advisory data for
 Not covered: Semgrep's `--config auto --metrics on` discovery scan (sends
 metrics to and fetches rules from semgrep.dev; needs a D5-B decision).
 
+## 9. Current-tree secret-scan rulings (added later on 2026-11-08)
+
+Acting as disposition authority under decision 5, the owner accepted all
+eight groups (A–H, 638 first-party findings) in
+`repair_20261108/SECRET-SCAN-DISPOSITIONS.md` as non-credential, and chose
+application option 1: exact Gitleaks fingerprints in `.gitleaksignore`, with
+a CI re-proof check that fails unless every entry maps to an accepted
+manifest record whose file still has its recorded SHA-256. No rule, path or
+regex allowlist is widened. Complete-history scanning and the planned history
+rewrite are not covered by this ruling.
+
 ## 5. Secret-scan disposition authority (D5)
 
 The owner is the per-finding disposition authority for first-party secret-scan
