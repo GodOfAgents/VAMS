@@ -117,9 +117,35 @@ Only after A–C: push `remediation/phase1` (no force needed; it descends from
 (`.tmp-history-tests/enable_actions_for_exact_ci.ps1` exists), and let the
 secret-scanning jobs run on the exact commit.
 
+## 3a. Step B execution record (2026-11-08)
+
+Owner approved Step B. Results:
+
+| Item | Result |
+|---|---|
+| `VAMS-mono/VAMS-main/` (incl. its `.data/node_identity.pem`) | Deleted |
+| `VAMS-mono/VAMS-main.zip` | Deleted |
+| `VAMS-mono/.data/node_identity.pem` | Deleted |
+| `VAMS-mono/VAMS-main-baseline/`, `VAMS-main-verification/`, `VAMS-implementation-20260825/` | All contents deleted, including each `.git` history. One empty `.pytest_cache` folder remains in each, locked by a Windows ACL the user account cannot read; removing it needs an elevated `takeown`/`icacls`. It holds pytest run state only, no key material |
+
+Follow-up checks:
+
+- No other VAMS clone with pre-rewrite history exists under `Desktop`,
+  `Documents`, `Downloads` or the user profile root.
+- A public-fingerprint scan of private-key files under `C:\Users\aseem` and
+  the WSL home (15 files) found **two further copies of leaked identity #1**
+  in `C:\Users\aseem\SanDisk16GB backup\VAMS-mono\` (`.data/node_identity.pem`
+  and `VAMS-main/.data/node_identity.pem`). That backup (2026-08-25) also holds
+  the pre-rewrite `VAMS-main` clone and `VAMS-main.zip`. It was not in the
+  approved list and was left untouched. The physical SanDisk device it
+  appears to mirror may hold the same files.
+- The other 13 private keys found are disposable test TLS keys (pytest
+  temporaries and the local PostgreSQL test CA).
+
 ## 4. Smallest owner decisions
 
-1. Approve Step B (delete the six items listed above).
+1. Step B done except three locked empty cache folders (admin action) and the
+   `SanDisk16GB backup` copies plus the physical device (owner decision).
 2. Approve the TruffleHog 3.95.9 download for Step C.
 3. Confirm whether the GitHub Support request was sent and its outcome (or send it).
 4. Supply the R4 closure facts when ready (no secrets).
