@@ -142,24 +142,25 @@ Follow-up checks:
 - The other 13 private keys found are disposable test TLS keys (pytest
   temporaries and the local PostgreSQL test CA).
 
-**Owner decision (2026-11-08): keep `C:\Users\aseem\SanDisk16GB backup\`
-unchanged.** Consequences to carry into closure:
+**Backup disposal (2026-11-08).** The owner first chose to keep the backup,
+then reversed that decision and approved deleting its VAMS residue. Deleted
+from `C:\Users\aseem\SanDisk16GB backup\VAMS-mono\`: the pre-rewrite
+`VAMS-main` clone (with its `.data/node_identity.pem`), `VAMS-main.zip`, and
+`.data/node_identity.pem`. The rest of the backup, including the unrelated
+`Storonia` folder, was kept.
 
-- The runbook's "discard old clones" step is not fully met on this
-  workstation. The closure report must disclose the retained offline copy
-  (pre-rewrite `VAMS-main` clone, `VAMS-main.zip`, two plaintext copies of
-  leaked identity #1) as an owner-accepted residual, not claim full disposal.
-- Never run Neuron from the backup (it would load leaked identity #1 from
-  `.data/`), and never fetch, merge or copy history from the backup's
-  `VAMS-main` into any current clone.
-- Identity #1 stays permanently decommissioned: it must never be funded,
-  assigned a role, or reused as a node or signer identity.
+Rescan after disposal: 13 private-key files under `C:\Users\aseem` and the
+WSL home, **0 copies of either leaked identity**; no pre-rewrite repository
+remains in the backup. Not checked: the physical SanDisk device the backup
+appears to mirror, and any other offline media; the owner should inspect
+those. Identity #1 and #2 stay permanently decommissioned and must never be
+funded, assigned a role, or reused.
 
 ## 4. Smallest owner decisions
 
-1. Step B done except three locked empty cache folders (admin action). The
-   `SanDisk16GB backup` copies are retained by owner decision and must be
-   disclosed in the closure report.
+1. Step B done on this workstation, including the backup folder, except three
+   locked empty cache folders (admin action). Owner to check the physical
+   SanDisk device and other offline media.
 2. Approve the TruffleHog 3.95.9 download for Step C.
 3. Confirm whether the GitHub Support request was sent and its outcome (or send it).
 4. Supply the R4 closure facts when ready (no secrets).
