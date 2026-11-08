@@ -112,7 +112,7 @@ class PostgresObjectProviderV3(ImmutableRuntimeConfiguration):
             raise EffectV3Error('fence targets another provider/domain')
         with self.database.transaction() as cursor:
             self._lock(cursor, fence.scope_id)
-            cursor.execute(f'SELECT fence_bytes,update_bytes,ack_bytes FROM {FENCES} WHERE scope_id=%s FOR UPDATE', (fence.scope_id,))
+            cursor.execute(f'SELECT fence_bytes,update_bytes,ack_bytes FROM {FENCES} WHERE scope_id=%s FOR UPDATE', (fence.scope_id,))  # nosec B608 # fixed SQL identifier; enforced by test_effect_sql_identifier_guard
             old = cursor.fetchone()
             if old:
                 previous = ObjectFenceV3.from_bytes(bytes(old[0]))
@@ -132,7 +132,7 @@ class PostgresObjectProviderV3(ImmutableRuntimeConfiguration):
                 fence=fence.fencing_token, issued_at=now, expires_at=fence.expires_at)
             cursor.execute(f'''INSERT INTO {FENCES}(scope_id,fence_bytes,update_bytes,ack_bytes) VALUES(%s,%s,%s,%s)
                 ON CONFLICT(scope_id) DO UPDATE SET fence_bytes=EXCLUDED.fence_bytes,
-                update_bytes=EXCLUDED.update_bytes,ack_bytes=EXCLUDED.ack_bytes''',
+                update_bytes=EXCLUDED.update_bytes,ack_bytes=EXCLUDED.ack_bytes''',  # nosec B608 # fixed SQL identifier; enforced by test_effect_sql_identifier_guard
                 (fence.scope_id, fence.canonical_bytes(), update.canonical_bytes(), ack.canonical_bytes()))
         return ack
 
@@ -155,7 +155,7 @@ class PostgresObjectProviderV3(ImmutableRuntimeConfiguration):
         if fence.issued_at > now:
             raise EffectV3Error('future fence evidence')
         with self.database.transaction() as cursor:
-            cursor.execute(f'SELECT fence_bytes,update_bytes,ack_bytes FROM {FENCES} WHERE scope_id=%s', (fence.scope_id,))
+            cursor.execute(f'SELECT fence_bytes,update_bytes,ack_bytes FROM {FENCES} WHERE scope_id=%s', (fence.scope_id,))  # nosec B608 # fixed SQL identifier; enforced by test_effect_sql_identifier_guard
             row = cursor.fetchone()
             if row is None:
                 return None
@@ -175,7 +175,7 @@ class PostgresObjectProviderV3(ImmutableRuntimeConfiguration):
         fence = ObjectFenceV3.from_context(proposal.context, proposal.fencing_token)
         with self.database.transaction() as cursor:
             self._lock(cursor, fence.scope_id)
-            cursor.execute(f'SELECT fence_bytes FROM {FENCES} WHERE scope_id=%s FOR UPDATE', (fence.scope_id,))
+            cursor.execute(f'SELECT fence_bytes FROM {FENCES} WHERE scope_id=%s FOR UPDATE', (fence.scope_id,))  # nosec B608 # fixed SQL identifier; enforced by test_effect_sql_identifier_guard
             current = cursor.fetchone()
             if current is None:
                 raise EffectV3Error('provider fence not established')
@@ -188,7 +188,7 @@ class PostgresObjectProviderV3(ImmutableRuntimeConfiguration):
             now = self._now()
             verify_admission(proposal, admission, self.identity.authority, now)
             now = self._policy_allows(proposal, now)
-            cursor.execute(f'SELECT proposal_bytes,admission_bytes,content,record_bytes FROM {OBJECTS} WHERE operation_id=%s', (proposal.operation_id,))
+            cursor.execute(f'SELECT proposal_bytes,admission_bytes,content,record_bytes FROM {OBJECTS} WHERE operation_id=%s', (proposal.operation_id,))  # nosec B608 # fixed SQL identifier; enforced by test_effect_sql_identifier_guard
             old = cursor.fetchone()
             if old:
                 return self._verify_row(old, proposal, admission, now)
@@ -202,7 +202,7 @@ class PostgresObjectProviderV3(ImmutableRuntimeConfiguration):
                 policy=proposal.context.policy_version, fence=proposal.fencing_token,
                 issued_at=now, expires_at=proposal.context.expires_at)
             cursor.execute(f'''INSERT INTO {OBJECTS}(operation_id,scope_id,resource_id,proposal_bytes,admission_bytes,
-                admission_digest,nonce,content,record_bytes) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s)''',
+                admission_digest,nonce,content,record_bytes) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s)''',  # nosec B608 # fixed SQL identifier; enforced by test_effect_sql_identifier_guard
                 (proposal.operation_id, fence.scope_id, proposal.resource_id, proposal.canonical_bytes(), admission.canonical_bytes(),
                  admission.digest, proposal.context.nonce, content, record.canonical_bytes()))
         return record  # Transaction commit completed before any receipt escapes.
@@ -213,7 +213,7 @@ class PostgresObjectProviderV3(ImmutableRuntimeConfiguration):
         now = self._now()
         verify_admitted_obligation(proposal, admission, self.identity.authority, now)
         with self.database.transaction() as cursor:
-            cursor.execute(f'SELECT proposal_bytes,admission_bytes,content,record_bytes FROM {OBJECTS} WHERE operation_id=%s', (proposal.operation_id,))
+            cursor.execute(f'SELECT proposal_bytes,admission_bytes,content,record_bytes FROM {OBJECTS} WHERE operation_id=%s', (proposal.operation_id,))  # nosec B608 # fixed SQL identifier; enforced by test_effect_sql_identifier_guard
             row = cursor.fetchone()
             return None if row is None else self._verify_row(row, proposal, admission, now)
 
@@ -228,11 +228,11 @@ class PostgresObjectProviderV3(ImmutableRuntimeConfiguration):
             raise EffectV3Error('absence requires the same provider scope and a newer acknowledged fence')
         with self.database.transaction() as cursor:
             self._lock(cursor, fence.scope_id)
-            cursor.execute(f'SELECT fence_bytes,update_bytes,ack_bytes FROM {FENCES} WHERE scope_id=%s FOR UPDATE', (fence.scope_id,))
+            cursor.execute(f'SELECT fence_bytes,update_bytes,ack_bytes FROM {FENCES} WHERE scope_id=%s FOR UPDATE', (fence.scope_id,))  # nosec B608 # fixed SQL identifier; enforced by test_effect_sql_identifier_guard
             retained = cursor.fetchone()
             if retained is None or tuple(bytes(v) for v in retained) != (fence.canonical_bytes(), update.canonical_bytes(), ack.canonical_bytes()):
                 raise EffectV3Error('fence acknowledgement is not retained by provider')
-            cursor.execute(f'SELECT 1 FROM {OBJECTS} WHERE operation_id=%s', (proposal.operation_id,))
+            cursor.execute(f'SELECT 1 FROM {OBJECTS} WHERE operation_id=%s', (proposal.operation_id,))  # nosec B608 # fixed SQL identifier; enforced by test_effect_sql_identifier_guard
             if cursor.fetchone() is not None:
                 raise EffectV3Error('effect exists; absence cannot be asserted')
             now = self._now()

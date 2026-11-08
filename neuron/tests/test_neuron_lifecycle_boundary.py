@@ -125,7 +125,7 @@ class LifecycleBoundaryTests(unittest.TestCase):
             private_nodes=[n for n in tree.body if isinstance(n,(ast.ClassDef,ast.FunctionDef)) and n.name.startswith('_Neuron')]
             private_nodes += [n for n in tree.body if isinstance(n,ast.Assign) and any(isinstance(t,ast.Name) and t.id.startswith('_NEURON') for t in n.targets)]
             methods=[n for n in original.body if isinstance(n,ast.FunctionDef) and n.name!='__init__']
-            exec(compile(ast.fix_missing_locations(ast.Module(body=private_nodes+methods,type_ignores=[])),str(source),'exec'),namespace)
+            exec(compile(ast.fix_missing_locations(ast.Module(body=private_nodes+methods,type_ignores=[])),str(source),'exec'),namespace)  # nosec B102 # test-only exec of AST-extracted repository source
             for method in methods: setattr(cls,method.name,namespace[method.name])
             cls.log=lambda _node,message,*args:self.logs.append(message)
             cls.print_banner=lambda _node:self.event('banner')

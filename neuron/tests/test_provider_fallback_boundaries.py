@@ -219,7 +219,7 @@ class ProviderFallbackBoundariesTest(unittest.TestCase):
         blank = SimpleNamespace(**{n: '' for n in ('CYAN','GREEN','YELLOW','RED','MAGENTA','RESET_ALL')})
         namespace = dict(SDK_AVAILABLE=True, Fore=blank, Style=blank, BittensorSubnet=lambda: fake,
             CelestiaDA=lambda: SimpleNamespace(check_health=lambda: {'status': 'offline'}), check_all_tee_health=lambda: {})
-        exec(compile(ast.Module(body=methods, type_ignores=[]), '<actual-neuron-health-method>', 'exec'), namespace)
+        exec(compile(ast.Module(body=methods, type_ignores=[]), '<actual-neuron-health-method>', 'exec'), namespace)  # nosec B102 # test-only exec of AST-extracted repository source
         with redirect_stdout(io.StringIO()) as output: namespace['check_sdk_health'](SimpleNamespace(log=lambda *a: None))
         return calls, output.getvalue()
 

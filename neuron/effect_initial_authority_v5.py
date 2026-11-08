@@ -78,7 +78,7 @@ class PostgresInitialAttemptAuthorityV5(PostgresAttemptJournalV5):
                 raise EffectV3Error('head budget differs from canonical governed grant')
             self._current_policy(generation,proposal,self._now())
             cursor.execute(f'''SELECT attempt_id FROM {ATTEMPTS5} WHERE operation_id=%s
-                ORDER BY attempt_no DESC LIMIT 2''',(proposal.operation_id,))
+                ORDER BY attempt_no DESC LIMIT 2''',(proposal.operation_id,))  # nosec B608 # fixed SQL identifier; enforced by test_effect_sql_identifier_guard
             existing=cursor.fetchall()
             if type(existing) is not list or len(existing)>1:
                 raise ReconciliationRequiredV3('existing attempt chain requires authenticated reconciliation')
@@ -95,13 +95,13 @@ class PostgresInitialAttemptAuthorityV5(PostgresAttemptJournalV5):
                 verify_admission(proposal,old.attempt.admission,self.identity.authority,self._now())
                 result=old.attempt
             else:
-                cursor.execute(f'SELECT logical_work FROM {WORK5} WHERE operation_id=%s',(proposal.operation_id,))
+                cursor.execute(f'SELECT logical_work FROM {WORK5} WHERE operation_id=%s',(proposal.operation_id,))  # nosec B608 # fixed SQL identifier; enforced by test_effect_sql_identifier_guard
                 if cursor.fetchone() is not None or self._completion_row(cursor,proposal.operation_id) is not None:
                     raise ReconciliationRequiredV3('orphaned or completed logical work cannot be replaced')
                 cost=proposal.cost_units
                 if cost>head[2]-head[4]-head[3]:raise EffectV3Error('shared governed budget exhausted')
                 cursor.execute(f'''SELECT COUNT(*) FROM {ATTEMPTS5}
-                    WHERE scope_id=%s AND generation_id=%s''',(scope_id,generation.generation_id))
+                    WHERE scope_id=%s AND generation_id=%s''',(scope_id,generation.generation_id))  # nosec B608 # fixed SQL identifier; enforced by test_effect_sql_identifier_guard
                 count=cursor.fetchone()
                 from neuron.effect_protocol_v3 import integer
                 if (type(count) not in (tuple,list) or len(count)!=1 or
@@ -118,7 +118,7 @@ class PostgresInitialAttemptAuthorityV5(PostgresAttemptJournalV5):
                 self._current_policy(generation,proposal,self._now())
                 cursor.execute(f'''INSERT INTO {WORK5}(operation_id,logical_work,initial_proposal_bytes,
                     initial_proposal_digest,postcondition,budget_unit,cost_units)
-                    VALUES(%s,%s,%s,%s,%s,%s,%s)''',(
+                    VALUES(%s,%s,%s,%s,%s,%s,%s)''',(  # nosec B608 # fixed SQL identifier; enforced by test_effect_sql_identifier_guard
                     proposal.operation_id,logical_work(proposal),proposal.canonical_bytes(),proposal.digest,
                     proposal.postcondition,c.budget_unit,cost))
                 row_bytes=row.canonical_bytes()
@@ -127,7 +127,7 @@ class PostgresInitialAttemptAuthorityV5(PostgresAttemptJournalV5):
                     predecessor_attempt_id,scope_id,generation_id,native_chain_id,native_contract,allocation_id,
                     allocation_index,row_bytes,row_digest,proposal_bytes,proposal_digest,admission_bytes,
                     admission_digest,nonce,budget_unit,cost_units)
-                    VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)''',(
+                    VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)''',(  # nosec B608 # fixed SQL identifier; enforced by test_effect_sql_identifier_guard
                     result.attempt_id,proposal.operation_id,1,logical_work(proposal),None,scope_id,generation.generation_id,
                     row.chain_id,row.settlement,row.allocation_id,row.provider_index,row_bytes,hashlib.sha256(row_bytes).digest(),
                     proposal.canonical_bytes(),proposal.digest,admission.canonical_bytes(),admission.digest,c.nonce,c.budget_unit,cost))
@@ -137,7 +137,7 @@ class PostgresInitialAttemptAuthorityV5(PostgresAttemptJournalV5):
                     event.payload,event.payload_digest,event.digest))
                 cursor.execute(f'''UPDATE {HEADS5} SET budget_reserved=budget_reserved+%s
                     WHERE scope_id=%s AND current_generation=%s
-                    AND budget_reserved<=budget_limit-budget_spent-%s''',
+                    AND budget_reserved<=budget_limit-budget_spent-%s''',  # nosec B608 # fixed SQL identifier; enforced by test_effect_sql_identifier_guard
                     (cost,scope_id,generation.generation_id,cost))
                 if cursor.rowcount!=1:raise EffectV3Error('governed reservation changed before commit')
         # A commit or close ambiguity raises the retained UNKNOWN error instead

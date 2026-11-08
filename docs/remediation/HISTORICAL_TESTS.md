@@ -14,6 +14,16 @@ as deselected. No other test in their files is affected.
 | `docs/remediation/m3_f04_impl_r4/test_supplemental_entrypoints.py::SupplementalMatrixTests::test_each_new_case_has_an_explicit_contract_guard` | September F04 multipurpose registry | Expects registry-side mint acceptance |
 | `docs/remediation/m3_f04_impl_r4/test_supplemental_entrypoints.py::SupplementalMatrixTests::test_every_supplemental_case_against_applied_public_entrypoint` | same | Expects `accept` for registry mint cases; current source correctly returns `reject` |
 
+Added by owner decision 7 (2026-11-08):
+
+| Test | Written against | Why it no longer applies |
+|---|---|---|
+| `scripts/remediation/test_m3_1b_r9_provenance.py::R11BoundaryTests::test_m7_forward_manifest_rebinds_current_lock_without_false_continuity` | September R9/R11 Cardano compilation source set | `validate_repository_inputs` pins the exact historical source-set digest; any later Cardano source change fails it (already failing before 2026-11-08) |
+| `scripts/remediation/test_m3_1b_r9_provenance.py::R11BoundaryTests::test_cleanup_after_injected_failure_and_network_boundary` | same | Never reaches the `check` phase once the source digest differs |
+| `scripts/remediation/test_m3_1b_r9_provenance.py::R11BoundaryTests::test_authoritative_mutation_detected` | same | Expects "source changed" but the digest guard now fires first |
+
+The other 19 tests and 78 subtests in that file still run.
+
 Superseding records: `VAMS-implementation-20261029/IDENTITY-DESIGN-RECONCILIATION-30.md`
 (2026-10-31: preserve intentional registry-side mint rejection; standalone
 `agent_nft` and per-bootstrap anchors are normative) and the

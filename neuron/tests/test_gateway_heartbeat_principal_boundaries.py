@@ -24,7 +24,7 @@ class PrincipalBoundaryTests(unittest.TestCase):
             if isinstance(node,ast.Assign) and any(isinstance(n,ast.Name) and n.id in ('_AUDIENCE_RE','_LOWER_HEX_128_RE') for n in node.targets):selected.append(node)
         if len(selected)!=5:raise AssertionError('Existing M2 parser shape changed')
         cls.namespace={'re':re}
-        exec(compile(ast.fix_missing_locations(ast.Module(body=selected,type_ignores=[])),str(source),'exec'),cls.namespace)
+        exec(compile(ast.fix_missing_locations(ast.Module(body=selected,type_ignores=[])),str(source),'exec'),cls.namespace)  # nosec B102 # test-only exec of AST-extracted repository source
     def test_independently_frozen_reference_bytes_and_digest(self):
         reference=Path(__file__).with_name('fixtures')/'heartbeat-principal-v1-expected.json'
         v=json.loads(reference.read_text(encoding='utf-8'))

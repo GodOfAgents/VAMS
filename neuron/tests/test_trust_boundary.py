@@ -361,7 +361,7 @@ class TrustBoundaryTests(unittest.TestCase):
         colours = SimpleNamespace(CYAN='[cyan]', GREEN='[green]', YELLOW='[yellow]', RED='[red]')
         namespace = {'Fore': colours, 'Style': SimpleNamespace(RESET_ALL=''), 'TrustStatus': T.TrustStatus,
                      'LiveModeSafetyError': LiveModeSafetyError, 'RuntimeConfigurationError': RuntimeConfigurationError}
-        exec(compile(ast.fix_missing_locations(module), str(source), 'exec'), namespace)
+        exec(compile(ast.fix_missing_locations(module), str(source), 'exec'), namespace)  # nosec B102 # test-only exec of AST-extracted repository source
         node = SimpleNamespace(trust_manager=manager, log=lambda text, *_: print(text))
         stream = StringIO()
         with redirect_stdout(stream):

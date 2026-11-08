@@ -72,7 +72,7 @@ def load_actual_provision_method():
     }
     extracted = ast.Module(body=[error_class, provision], type_ignores=[])
     ast.fix_missing_locations(extracted)
-    exec(compile(extracted, str(source_path), "exec"), namespace)
+    exec(compile(extracted, str(source_path), "exec"), namespace)  # nosec B102 # test-only exec of AST-extracted repository source
     return namespace["ComposerError"], namespace["provision"]
 
 

@@ -40,7 +40,7 @@ def load_actual_parts():
         Dict=Dict,List=List,Optional=Optional,time=types.SimpleNamespace(time=lambda:NOW),
         NODE_TIMEOUT=120,nodes={},HTMLResponse=Response,VERSION='fixture-version')
     sys.modules[module.__name__]=module
-    exec(compile(ast.Module(body=selected,type_ignores=[]),str(SOURCE),'exec'),module.__dict__)
+    exec(compile(ast.Module(body=selected,type_ignores=[]),str(SOURCE),'exec'),module.__dict__)  # nosec B102 # test-only exec of AST-extracted repository source
     return module
 
 class DashboardBoundaryTests(unittest.TestCase):

@@ -71,7 +71,7 @@ class HeartbeatWireReferenceTests(unittest.TestCase):
         fn=next(n for n in tree.body if isinstance(n,ast.FunctionDef) and n.name=='_validate_timestamp_type')
         class FixtureAuthError(Exception):pass
         scope={'GatewayAuthenticationError':FixtureAuthError}
-        exec(compile(ast.Module(body=[fn],type_ignores=[]),str(source),'exec'),scope)
+        exec(compile(ast.Module(body=[fn],type_ignores=[]),str(source),'exec'),scope)  # nosec B102 # test-only exec of AST-extracted repository source
         validate=scope['_validate_timestamp_type'];maximum=(1<<63)-1
         self.assertEqual(MAX_M2_TIMESTAMP,maximum)
         for value in (0,maximum-300,maximum):validate(value)

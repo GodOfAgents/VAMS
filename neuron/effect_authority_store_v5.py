@@ -375,7 +375,7 @@ class PostgresAuthorityDatabaseV5(PostgresEffectDatabaseV3):
         if version is None or tuple(version)!=(self.check_manifest.server_version_num,):
             raise EffectV3Error('V5 PostgreSQL compiler/version manifest mismatch')
         cursor.execute(
-            f'SELECT version,migration_hash,configuration_hash FROM {META5} WHERE singleton=1'
+            f'SELECT version,migration_hash,configuration_hash FROM {META5} WHERE singleton=1'  # nosec B608 # fixed SQL identifier; enforced by test_effect_sql_identifier_guard
         )
         row = cursor.fetchone()
         if (row is None or row[0] != 5 or bytes(row[1]) != MIGRATION5 or
@@ -729,7 +729,7 @@ class PostgresAuthorityDatabaseV5(PostgresEffectDatabaseV3):
                     for statement in DDL5:
                         cursor.execute(statement)
                     self._grant_runtime_privileges(cursor, self.runtime_role)
-                    cursor.execute(f'INSERT INTO {META5} VALUES (1,5,%s,%s)',
+                    cursor.execute(f'INSERT INTO {META5} VALUES (1,5,%s,%s)',  # nosec B608 # fixed SQL identifier; enforced by test_effect_sql_identifier_guard
                         (MIGRATION5, self.configuration_hash))
                     self._verify_schema(cursor,migration=True)
                 self._assert_migration_backend(cursor,backend_pid)

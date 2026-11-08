@@ -70,7 +70,7 @@ class PostgresAuthorityDatabaseV4(PostgresEffectDatabaseV3):
  _application_name='vams-effect-authority-v4'
  def _verify_schema(self,cursor):
   self._lock_unique_tables(cursor)
-  cursor.execute(f'SELECT version,migration_hash,configuration_hash FROM {META4} WHERE singleton=1')
+  cursor.execute(f'SELECT version,migration_hash,configuration_hash FROM {META4} WHERE singleton=1')  # nosec B608 # fixed SQL identifier; enforced by test_effect_sql_identifier_guard
   row=cursor.fetchone()
   if row is None or row[0]!=4 or bytes(row[1])!=MIGRATION4 or bytes(row[2])!=self.configuration_hash:
    raise EffectV3Error('authority storage4 version/configuration mismatch')
@@ -86,5 +86,5 @@ class PostgresAuthorityDatabaseV4(PostgresEffectDatabaseV3):
      if not all(v is not None for v in row):raise EffectV3Error('partial/unversioned storage4 schema')
      self._verify_schema(cursor);return
     for statement in DDL4:cursor.execute(statement)
-    cursor.execute(f'INSERT INTO {META4} VALUES(1,4,%s,%s)',(MIGRATION4,self.configuration_hash))
+    cursor.execute(f'INSERT INTO {META4} VALUES(1,4,%s,%s)',(MIGRATION4,self.configuration_hash))  # nosec B608 # fixed SQL identifier; enforced by test_effect_sql_identifier_guard
     self._verify_schema(cursor)

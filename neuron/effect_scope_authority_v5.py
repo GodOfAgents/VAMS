@@ -147,7 +147,7 @@ class PostgresScopeAuthorityV5(PostgresInitialAttemptAuthorityV5):
         cursor.execute(f'''INSERT INTO {GENERATIONS5}(
             generation_id,scope_id,ordinal,previous_generation,scope_bytes,status,
             fence_bytes,update_bytes,ack_bytes,closed_reserved,closed_spent)
-            VALUES(%s,%s,%s,%s,%s,'installing',%s,%s,NULL,NULL,NULL)''', (
+            VALUES(%s,%s,%s,%s,%s,'installing',%s,%s,NULL,NULL,NULL)''', (  # nosec B608 # fixed SQL identifier; enforced by test_effect_sql_identifier_guard
             generation_id, scope.scope_id, ordinal, predecessor, scope.canonical_bytes(),
             fence.canonical_bytes(), update.canonical_bytes(),
         ))
@@ -196,9 +196,9 @@ class PostgresScopeAuthorityV5(PostgresInitialAttemptAuthorityV5):
         with self.database.transaction() as cursor:
             self._lock_scope(cursor, scope.scope_id)
             now = self._scope_current(scope, self._now())
-            cursor.execute(f'SELECT scope_id FROM {HEADS5} WHERE scope_id=%s', (scope.scope_id,))
+            cursor.execute(f'SELECT scope_id FROM {HEADS5} WHERE scope_id=%s', (scope.scope_id,))  # nosec B608 # fixed SQL identifier; enforced by test_effect_sql_identifier_guard
             existing_head = cursor.fetchone()
-            cursor.execute(f'SELECT generation_id FROM {GENERATIONS5} WHERE scope_id=%s LIMIT 1',
+            cursor.execute(f'SELECT generation_id FROM {GENERATIONS5} WHERE scope_id=%s LIMIT 1',  # nosec B608 # fixed SQL identifier; enforced by test_effect_sql_identifier_guard
                 (scope.scope_id,))
             existing_generation = cursor.fetchone()
             if existing_head is not None or existing_generation is not None:
@@ -210,7 +210,7 @@ class PostgresScopeAuthorityV5(PostgresInitialAttemptAuthorityV5):
             generation_id = self._insert_generation(cursor, scope, 1, None, fence, update)
             cursor.execute(f'''INSERT INTO {HEADS5}(
                 scope_id,current_generation,budget_unit,budget_limit,budget_reserved,budget_spent)
-                VALUES(%s,%s,%s,%s,0,0)''', (
+                VALUES(%s,%s,%s,%s,0,0)''', (  # nosec B608 # fixed SQL identifier; enforced by test_effect_sql_identifier_guard
                 scope.scope_id, generation_id, scope.template.budget_unit, scope.budget_limit,
             ))
             if getattr(cursor, 'rowcount', 1) != 1:
@@ -234,7 +234,7 @@ class PostgresScopeAuthorityV5(PostgresInitialAttemptAuthorityV5):
                 now, authority=self.identity.authority)
             self._scope_current(state.scope, self._now())
             cursor.execute(f'''UPDATE {GENERATIONS5} SET status='active',ack_bytes=%s
-                WHERE scope_id=%s AND generation_id=%s AND status='installing' AND ack_bytes IS NULL''', (
+                WHERE scope_id=%s AND generation_id=%s AND status='installing' AND ack_bytes IS NULL''', (  # nosec B608 # fixed SQL identifier; enforced by test_effect_sql_identifier_guard
                 acknowledgement.canonical_bytes(), scope_id, state.generation_id,
             ))
             if getattr(cursor, 'rowcount', None) != 1:
@@ -280,7 +280,7 @@ class PostgresScopeAuthorityV5(PostgresInitialAttemptAuthorityV5):
             self._validate_cutover_fence(state, fence, self._now())
             cursor.execute(f'''UPDATE {GENERATIONS5} SET status='draining',fence_bytes=%s,
                 update_bytes=%s,ack_bytes=NULL WHERE scope_id=%s AND generation_id=%s
-                AND status IN ('installing','active')''', (
+                AND status IN ('installing','active')''', (  # nosec B608 # fixed SQL identifier; enforced by test_effect_sql_identifier_guard
                 fence.canonical_bytes(), update.canonical_bytes(), scope_id, state.generation_id,
             ))
             if getattr(cursor, 'rowcount', None) != 1:
@@ -301,7 +301,7 @@ class PostgresScopeAuthorityV5(PostgresInitialAttemptAuthorityV5):
             _, update = self._fence_update_for_cutover(fence)
             self._validate_cutover_fence(state, fence, self._now())
             cursor.execute(f'''UPDATE {GENERATIONS5} SET fence_bytes=%s,update_bytes=%s
-                WHERE scope_id=%s AND generation_id=%s AND status='draining' AND ack_bytes IS NULL''', (
+                WHERE scope_id=%s AND generation_id=%s AND status='draining' AND ack_bytes IS NULL''', (  # nosec B608 # fixed SQL identifier; enforced by test_effect_sql_identifier_guard
                 fence.canonical_bytes(), update.canonical_bytes(), scope_id, state.generation_id,
             ))
             if getattr(cursor, 'rowcount', None) != 1:
@@ -343,7 +343,7 @@ class PostgresScopeAuthorityV5(PostgresInitialAttemptAuthorityV5):
                 return state
             cursor.execute(f'''UPDATE {GENERATIONS5} SET ack_bytes=%s WHERE scope_id=%s
                 AND generation_id=%s AND status='draining' AND ack_bytes IS NULL
-                AND fence_bytes=%s AND update_bytes=%s''', (
+                AND fence_bytes=%s AND update_bytes=%s''', (  # nosec B608 # fixed SQL identifier; enforced by test_effect_sql_identifier_guard
                 acknowledgement.canonical_bytes(), scope_id, state.generation_id,
                 fence.canonical_bytes(), update.canonical_bytes(),
             ))
@@ -356,7 +356,7 @@ class PostgresScopeAuthorityV5(PostgresInitialAttemptAuthorityV5):
     def _attempt_rows(self, cursor, scope_id, generation_id):
         cursor.execute(f'''SELECT operation_id,attempt_id FROM {ATTEMPTS5}
             WHERE scope_id=%s AND generation_id=%s
-            ORDER BY operation_id,attempt_id LIMIT %s''',
+            ORDER BY operation_id,attempt_id LIMIT %s''',  # nosec B608 # fixed SQL identifier; enforced by test_effect_sql_identifier_guard
             (scope_id, generation_id, MAX_GENERATION_ATTEMPTS5 + 1))
         rows = cursor.fetchall()
         if type(rows) is not list or len(rows) > MAX_GENERATION_ATTEMPTS5:
@@ -438,7 +438,7 @@ class PostgresScopeAuthorityV5(PostgresInitialAttemptAuthorityV5):
                 return state
             cursor.execute(f'''UPDATE {GENERATIONS5} SET status='revoked',closed_reserved=0,
                 closed_spent=%s WHERE scope_id=%s AND generation_id=%s AND status='draining'
-                AND ack_bytes=%s AND closed_reserved IS NULL AND closed_spent IS NULL''', (
+                AND ack_bytes=%s AND closed_reserved IS NULL AND closed_spent IS NULL''', (  # nosec B608 # fixed SQL identifier; enforced by test_effect_sql_identifier_guard
                 head[4], scope_id, state.generation_id, state.acknowledgement.canonical_bytes(),
             ))
             if getattr(cursor, 'rowcount', None) != 1:
@@ -499,7 +499,7 @@ class PostgresScopeAuthorityV5(PostgresInitialAttemptAuthorityV5):
                 cursor, successor_scope, ordinal, old.generation_id, fence, update,
             )
             cursor.execute(f'''UPDATE {HEADS5} SET current_generation=%s,budget_limit=%s
-                WHERE scope_id=%s AND current_generation=%s AND budget_reserved=0 AND budget_spent=%s''', (
+                WHERE scope_id=%s AND current_generation=%s AND budget_reserved=0 AND budget_spent=%s''', (  # nosec B608 # fixed SQL identifier; enforced by test_effect_sql_identifier_guard
                 generation_id, successor_scope.budget_limit, successor_scope.scope_id,
                 old.generation_id, head[4],
             ))

@@ -57,6 +57,17 @@ keep the files as evidence, deselect the six exact node IDs in `pytest.ini`,
 document them in `docs/remediation/HISTORICAL_TESTS.md`. Only an owner
 decision may add further entries.
 
+## 7. Remaining CI-green dispositions (added later on 2026-11-08)
+
+Owner approved: (a) Bandit B608 findings in `neuron/effect_*` are suppressed
+per line with a recorded reason only after verification that every
+interpolated SQL identifier is a fixed `public.vams_effect_*` constant or an
+allowlist/regex-validated name, enforced by a static guard test; B102 `exec`
+findings in tests likewise per line. No Bandit scope or severity change.
+(b) The semantic-MMU boundary inventory is re-checked anchor by anchor and
+re-bound to current source, not retired. (c) Three R11 provenance tests are
+retired as historical (see `HISTORICAL_TESTS.md`).
+
 ## 5. Secret-scan disposition authority (D5)
 
 The owner is the per-finding disposition authority for first-party secret-scan

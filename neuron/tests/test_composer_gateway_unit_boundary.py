@@ -89,7 +89,7 @@ def handlers():
     namespace.update({name: getattr(models, name) for name in (
         "InstanceBlueprint", "ComputeSpec", "GPUType", "MemorySpec", "StorageSpec", "NetworkSpec")})
     namespace["list_blueprints"] = blueprints.list_blueprints
-    exec(compile(extracted, str(source), "exec"), namespace)
+    exec(compile(extracted, str(source), "exec"), namespace)  # nosec B102 # test-only exec of AST-extracted repository source
     return namespace
 
 

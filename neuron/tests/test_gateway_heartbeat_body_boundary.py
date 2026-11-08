@@ -37,7 +37,7 @@ class HeartbeatBodyBoundaryTests(unittest.TestCase):
             MAX_NODES=100,nodes=self.nodes,json=json,logger=Mock(),
             HeartbeatRequest=object,Request=object,HTTPException=FixtureHTTPException,
             verify_message=verify,verify_heartbeat_client_certificate=self.certificate)
-        exec(compile(ast.fix_missing_locations(ast.Module(body=[model,handler],type_ignores=[])),str(source),'exec'),namespace)
+        exec(compile(ast.fix_missing_locations(ast.Module(body=[model,handler],type_ignores=[])),str(source),'exec'),namespace)  # nosec B102 # test-only exec of AST-extracted repository source
         self.handler,self.node_type = namespace['receive_heartbeat'],namespace['NodeInfo']
     def invoke(self, payload, signature=''):
         text = payload if isinstance(payload,str) else json.dumps(payload,separators=(',',':'))

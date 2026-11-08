@@ -188,7 +188,7 @@ class PostgresAttemptJournalV5(ImmutableRuntimeConfiguration):
 
     def _locate_attempt(self, cursor, attempt_id):
         hash32(attempt_id, 'native attempt')
-        cursor.execute(f'SELECT operation_id,scope_id FROM {ATTEMPTS5} WHERE attempt_id=%s', (attempt_id,))
+        cursor.execute(f'SELECT operation_id,scope_id FROM {ATTEMPTS5} WHERE attempt_id=%s', (attempt_id,))  # nosec B608 # fixed SQL identifier; enforced by test_effect_sql_identifier_guard
         row = cursor.fetchone()
         if row is None or type(row) not in (tuple, list) or len(row) != 2:
             raise EffectV3Error('retained V5 attempt is missing or malformed')
@@ -198,7 +198,7 @@ class PostgresAttemptJournalV5(ImmutableRuntimeConfiguration):
     def _load_generation(self, cursor, scope_id, generation_id, now, *, allow_installing=False):
         cursor.execute(f'''SELECT scope_bytes,status,fence_bytes,update_bytes,ack_bytes,
             generation_id,ordinal,previous_generation,closed_reserved,closed_spent
-            FROM {GENERATIONS5} WHERE scope_id=%s AND generation_id=%s''',
+            FROM {GENERATIONS5} WHERE scope_id=%s AND generation_id=%s''',  # nosec B608 # fixed SQL identifier; enforced by test_effect_sql_identifier_guard
             (scope_id, generation_id))
         row = cursor.fetchone()
         if row is None or type(row) not in (tuple, list) or len(row) != 10:
@@ -260,7 +260,7 @@ class PostgresAttemptJournalV5(ImmutableRuntimeConfiguration):
         cursor.execute(f'''SELECT attempt_id,operation_id,attempt_no,logical_work,predecessor_attempt_id,
             scope_id,generation_id,native_chain_id,native_contract,allocation_id,allocation_index,
             row_bytes,row_digest,proposal_bytes,proposal_digest,admission_bytes,admission_digest,
-            nonce,budget_unit,cost_units FROM {ATTEMPTS5} WHERE attempt_id=%s''', (attempt_id,))
+            nonce,budget_unit,cost_units FROM {ATTEMPTS5} WHERE attempt_id=%s''', (attempt_id,))  # nosec B608 # fixed SQL identifier; enforced by test_effect_sql_identifier_guard
         row = cursor.fetchone()
         if row is None or type(row) not in (tuple, list) or len(row) != 20:
             raise EffectV3Error('retained V5 attempt is missing or malformed')
@@ -305,7 +305,7 @@ class PostgresAttemptJournalV5(ImmutableRuntimeConfiguration):
             raise EffectV3Error('stored V5 attempt identity/logical-work commitment mismatch')
 
         cursor.execute(f'''SELECT logical_work,initial_proposal_bytes,initial_proposal_digest,
-            postcondition,budget_unit,cost_units FROM {WORK5} WHERE operation_id=%s''', (operation_id,))
+            postcondition,budget_unit,cost_units FROM {WORK5} WHERE operation_id=%s''', (operation_id,))  # nosec B608 # fixed SQL identifier; enforced by test_effect_sql_identifier_guard
         work = cursor.fetchone()
         if work is None or type(work) not in (tuple, list) or len(work) != 6:
             raise EffectV3Error('immutable V5 logical-work row is missing or malformed')
@@ -330,7 +330,7 @@ class PostgresAttemptJournalV5(ImmutableRuntimeConfiguration):
             if predecessor is None:
                 raise EffectV3Error('successor attempt lacks exact predecessor')
             cursor.execute(f'''SELECT operation_id,attempt_no,logical_work FROM {ATTEMPTS5}
-                WHERE attempt_id=%s''', (predecessor,))
+                WHERE attempt_id=%s''', (predecessor,))  # nosec B608 # fixed SQL identifier; enforced by test_effect_sql_identifier_guard
             previous = cursor.fetchone()
             if (previous is None or type(previous) not in (tuple, list) or len(previous) != 3 or
                     _stored_bytes(previous[0], 32, 'predecessor operation') != operation_id or
@@ -354,7 +354,7 @@ class PostgresAttemptJournalV5(ImmutableRuntimeConfiguration):
     def _load_events(self, cursor, facts):
         cursor.execute(f'''SELECT event_seq,predecessor_event_seq,kind,payload_bytes,
             payload_digest,event_digest FROM {EVENTS5} WHERE attempt_id=%s
-            ORDER BY event_seq LIMIT %s''', (facts.attempt.attempt_id, MAX_EVENTS + 1))
+            ORDER BY event_seq LIMIT %s''', (facts.attempt.attempt_id, MAX_EVENTS + 1))  # nosec B608 # fixed SQL identifier; enforced by test_effect_sql_identifier_guard
         rows = cursor.fetchall()
         if type(rows) is not list or len(rows) > MAX_EVENTS:
             raise EffectV3Error('attempt event history exceeds fixed bound or is malformed')
@@ -391,7 +391,7 @@ class PostgresAttemptJournalV5(ImmutableRuntimeConfiguration):
     def _load_head(self, cursor, scope_id, *, for_update):
         suffix = ' FOR UPDATE' if for_update else ''
         cursor.execute(f'''SELECT current_generation,budget_unit,budget_limit,budget_reserved,budget_spent
-            FROM {HEADS5} WHERE scope_id=%s{suffix}''', (scope_id,))
+            FROM {HEADS5} WHERE scope_id=%s{suffix}''', (scope_id,))  # nosec B608 # fixed SQL identifier; enforced by test_effect_sql_identifier_guard
         row = cursor.fetchone()
         if row is None or type(row) not in (tuple, list) or len(row) != 5:
             raise EffectV3Error('V5 mutable budget head is missing or malformed')
@@ -408,7 +408,7 @@ class PostgresAttemptJournalV5(ImmutableRuntimeConfiguration):
 
     def _completion_row(self, cursor, operation_id):
         cursor.execute(f'''SELECT attempt_no,attempt_id,completion_event_seq,receipt_bytes,receipt_digest
-            FROM {COMPLETIONS5} WHERE operation_id=%s''', (operation_id,))
+            FROM {COMPLETIONS5} WHERE operation_id=%s''', (operation_id,))  # nosec B608 # fixed SQL identifier; enforced by test_effect_sql_identifier_guard
         row = cursor.fetchone()
         if row is None:
             return None
@@ -508,11 +508,11 @@ class PostgresAttemptJournalV5(ImmutableRuntimeConfiguration):
                 raise EffectV3Error('V5 cumulative budget would exceed its configured limit')
             cursor.execute(f'''UPDATE {HEADS5} SET budget_reserved=budget_reserved-%s,
                 budget_spent=budget_spent+%s WHERE scope_id=%s AND budget_reserved>=%s
-                AND budget_spent<=budget_limit-%s''',
+                AND budget_spent<=budget_limit-%s''',  # nosec B608 # fixed SQL identifier; enforced by test_effect_sql_identifier_guard
                 (cost, cost, facts.scope_id, cost, cost))
         else:
             cursor.execute(f'''UPDATE {HEADS5} SET budget_reserved=budget_reserved-%s
-                WHERE scope_id=%s AND budget_reserved>=%s''', (cost, facts.scope_id, cost))
+                WHERE scope_id=%s AND budget_reserved>=%s''', (cost, facts.scope_id, cost))  # nosec B608 # fixed SQL identifier; enforced by test_effect_sql_identifier_guard
         if getattr(cursor, 'rowcount', None) != 1:
             raise EffectV3Error('V5 budget head changed or reservation was already consumed')
 
@@ -538,7 +538,7 @@ class PostgresAttemptJournalV5(ImmutableRuntimeConfiguration):
             completed_event = completed_events[-1]
             cursor.execute(f'''INSERT INTO {COMPLETIONS5}(
                 operation_id,attempt_no,attempt_id,completion_event_seq,receipt_bytes,receipt_digest)
-                VALUES(%s,%s,%s,%s,%s,%s)''', (
+                VALUES(%s,%s,%s,%s,%s,%s)''', (  # nosec B608 # fixed SQL identifier; enforced by test_effect_sql_identifier_guard
                 facts.attempt.proposal.operation_id,
                 facts.attempt.ordinal,
                 facts.attempt.attempt_id,

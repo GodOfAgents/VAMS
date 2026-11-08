@@ -53,7 +53,7 @@ class ConstructorBoundaryTests(unittest.TestCase):
             ComputeManager=self.factory('compute'), LogicLayerMonitor=self.factory('logic'),
             TrustManager=self.factory('trust'), signal=SimpleNamespace(SIGINT=2, SIGTERM=15,
                 signal=lambda *args: self.calls.append(('signal_fixture', (), {}))))
-        exec(compile(ast.fix_missing_locations(ast.Module(body=[shell], type_ignores=[])), str(source), 'exec'), namespace)
+        exec(compile(ast.fix_missing_locations(ast.Module(body=[shell], type_ignores=[])), str(source), 'exec'), namespace)  # nosec B102 # test-only exec of AST-extracted repository source
         cls = namespace['VamsNeuron']
         cls.log = lambda *_args, **_kwargs: None
         cls._signal_handler = lambda *_args: None

@@ -175,7 +175,7 @@ class PostgresEffectAuthorityV3(ImmutableRuntimeConfiguration):
 
     def _state(self,cursor,scope_id,now):
         cursor.execute(f'''SELECT scope_bytes,status,budget_limit,budget_reserved,budget_spent,
-            fence_bytes,update_bytes,ack_bytes FROM {self._scope_table} WHERE scope_id=%s FOR UPDATE''',(scope_id,))
+            fence_bytes,update_bytes,ack_bytes FROM {self._scope_table} WHERE scope_id=%s FOR UPDATE''',(scope_id,))  # nosec B608 # fixed SQL identifier; enforced by test_effect_sql_identifier_guard
         row=cursor.fetchone()
         return self._decode_state(scope_id,row,now)
 
@@ -202,7 +202,7 @@ class PostgresEffectAuthorityV3(ImmutableRuntimeConfiguration):
 
     def _operation(self,cursor,proposal,state,now):
         cursor.execute(f'''SELECT proposal_bytes,admission_bytes,cost_units,status,result_bytes,scope_id,
-            proposal_digest FROM {self._operation_table} WHERE operation_id=%s''',(proposal.operation_id,))
+            proposal_digest FROM {self._operation_table} WHERE operation_id=%s''',(proposal.operation_id,))  # nosec B608 # fixed SQL identifier; enforced by test_effect_sql_identifier_guard
         row=cursor.fetchone()
         return self._decode_operation(proposal,state,now,row)
 
@@ -235,7 +235,7 @@ class PostgresEffectAuthorityV3(ImmutableRuntimeConfiguration):
                 epoch=fence.authority_epoch,policy=fence.policy_version,fence=fence.fencing_token,
                 issued_at=fence.issued_at,expires_at=fence.expires_at)
             cursor.execute(f'''INSERT INTO {self._scope_table}(scope_id,scope_bytes,status,budget_limit,budget_reserved,
-                budget_spent,fence_bytes,update_bytes,ack_bytes) VALUES(%s,%s,'installing',%s,0,0,%s,%s,NULL)''',
+                budget_spent,fence_bytes,update_bytes,ack_bytes) VALUES(%s,%s,'installing',%s,0,0,%s,%s,NULL)''',  # nosec B608 # fixed SQL identifier; enforced by test_effect_sql_identifier_guard
                 (scope.scope_id,scope.canonical_bytes(),scope.budget_limit,fence.canonical_bytes(),update.canonical_bytes()))
         return update
 
@@ -250,7 +250,7 @@ class PostgresEffectAuthorityV3(ImmutableRuntimeConfiguration):
             if state is None or state.status!='installing':raise EffectV3Error('scope is not installing')
             self._scope_policy(state.scope,self._now())
             verify_fence_ack(state.fence,state.update,ack,self.identity.provider,now,authority=self.identity.authority)
-            cursor.execute(f"UPDATE {self._scope_table} SET status='active',ack_bytes=%s WHERE scope_id=%s",(ack.canonical_bytes(),scope_id))
+            cursor.execute(f"UPDATE {self._scope_table} SET status='active',ack_bytes=%s WHERE scope_id=%s",(ack.canonical_bytes(),scope_id))  # nosec B608 # fixed SQL identifier; enforced by test_effect_sql_identifier_guard
 
     def _current_state(self,cursor,proposal,now):
         scope_id=ObjectFenceV3.from_context(proposal.context,proposal.fencing_token).scope_id
@@ -277,14 +277,14 @@ class PostgresEffectAuthorityV3(ImmutableRuntimeConfiguration):
                 epoch=c.authority_epoch,policy=c.policy_version,fence=proposal.fencing_token,
                 issued_at=now,expires_at=c.expires_at)
             self._insert_operation(cursor,proposal,state,admission)
-            cursor.execute(f'UPDATE {self._scope_table} SET budget_reserved=budget_reserved+%s WHERE scope_id=%s',(cost,state.scope.scope_id))
+            cursor.execute(f'UPDATE {self._scope_table} SET budget_reserved=budget_reserved+%s WHERE scope_id=%s',(cost,state.scope.scope_id))  # nosec B608 # fixed SQL identifier; enforced by test_effect_sql_identifier_guard
         return admission
 
     def _insert_operation(self,cursor,proposal,state,admission):
         c=proposal.context;cost=proposal.cost_units
         cursor.execute(f'''INSERT INTO {self._operation_table}(operation_id,scope_id,proposal_bytes,proposal_digest,
             admission_bytes,admission_digest,nonce,cost_units,status,result_bytes)
-            VALUES(%s,%s,%s,%s,%s,%s,%s,%s,'reserved',NULL)''',
+            VALUES(%s,%s,%s,%s,%s,%s,%s,%s,'reserved',NULL)''',  # nosec B608 # fixed SQL identifier; enforced by test_effect_sql_identifier_guard
             (proposal.operation_id,state.scope.scope_id,proposal.canonical_bytes(),proposal.digest,
              admission.canonical_bytes(),admission.digest,c.nonce,cost))
 
@@ -296,7 +296,7 @@ class PostgresEffectAuthorityV3(ImmutableRuntimeConfiguration):
             if old is None or old.admission!=admission or old.status!='reserved':
                 raise ReconciliationRequiredV3('dispatch already claimed or obligation differs; lookup only')
             self._action_policy(proposal,self._now())
-            cursor.execute(f"UPDATE {self._operation_table} SET status='dispatched' WHERE operation_id=%s",(proposal.operation_id,))
+            cursor.execute(f"UPDATE {self._operation_table} SET status='dispatched' WHERE operation_id=%s",(proposal.operation_id,))  # nosec B608 # fixed SQL identifier; enforced by test_effect_sql_identifier_guard
 
     def read_operation(self,proposal):
         self._target(proposal);now=self._now()
@@ -314,7 +314,7 @@ class PostgresEffectAuthorityV3(ImmutableRuntimeConfiguration):
             old=self._operation(cursor,proposal,state,now)
             if old is None:raise EffectV3Error('missing authority operation')
             if old.status in PENDING:
-                cursor.execute(f"UPDATE {self._operation_table} SET status='indeterminate' WHERE operation_id=%s",(proposal.operation_id,))
+                cursor.execute(f"UPDATE {self._operation_table} SET status='indeterminate' WHERE operation_id=%s",(proposal.operation_id,))  # nosec B608 # fixed SQL identifier; enforced by test_effect_sql_identifier_guard
 
     def accept_effect(self,proposal,admission,result):
         self._target(proposal);now=self._now()
@@ -330,8 +330,8 @@ class PostgresEffectAuthorityV3(ImmutableRuntimeConfiguration):
                 return old.result
             if old.status not in PENDING or state.reserved<proposal.cost_units:raise EffectV3Error('operation is not reconcilable')
             cursor.execute(f'''UPDATE {self._scope_table} SET budget_reserved=budget_reserved-%s,
-                budget_spent=budget_spent+%s WHERE scope_id=%s''',(proposal.cost_units,proposal.cost_units,scope_id))
-            cursor.execute(f"UPDATE {self._operation_table} SET status='committed',result_bytes=%s WHERE operation_id=%s",(result.canonical_bytes(),proposal.operation_id))
+                budget_spent=budget_spent+%s WHERE scope_id=%s''',(proposal.cost_units,proposal.cost_units,scope_id))  # nosec B608 # fixed SQL identifier; enforced by test_effect_sql_identifier_guard
+            cursor.execute(f"UPDATE {self._operation_table} SET status='committed',result_bytes=%s WHERE operation_id=%s",(result.canonical_bytes(),proposal.operation_id))  # nosec B608 # fixed SQL identifier; enforced by test_effect_sql_identifier_guard
         return result
 
     def begin_revocation(self,scope_id,fence):
@@ -366,7 +366,7 @@ class PostgresEffectAuthorityV3(ImmutableRuntimeConfiguration):
             update=sign_receipt(self._signer,purpose=2,subject=fence.digest,provider=fence.provider_id,
                 epoch=fence.authority_epoch,policy=fence.policy_version,fence=fence.fencing_token,
                 issued_at=fence.issued_at,expires_at=fence.expires_at)
-            cursor.execute(f"UPDATE {self._scope_table} SET status='draining',fence_bytes=%s,update_bytes=%s,ack_bytes=NULL WHERE scope_id=%s",
+            cursor.execute(f"UPDATE {self._scope_table} SET status='draining',fence_bytes=%s,update_bytes=%s,ack_bytes=NULL WHERE scope_id=%s",  # nosec B608 # fixed SQL identifier; enforced by test_effect_sql_identifier_guard
                 (fence.canonical_bytes(),update.canonical_bytes(),scope_id))
         return update
 
@@ -377,7 +377,7 @@ class PostgresEffectAuthorityV3(ImmutableRuntimeConfiguration):
             if state is None or state.status!='draining' or (state.fence,state.update)!=(fence,update):
                 raise EffectV3Error('acknowledgement differs from retained cutover')
             if state.ack is not None and state.ack!=ack:raise EffectV3Error('conflicting provider acknowledgement')
-            cursor.execute(f'UPDATE {self._scope_table} SET ack_bytes=%s WHERE scope_id=%s',(ack.canonical_bytes(),scope_id))
+            cursor.execute(f'UPDATE {self._scope_table} SET ack_bytes=%s WHERE scope_id=%s',(ack.canonical_bytes(),scope_id))  # nosec B608 # fixed SQL identifier; enforced by test_effect_sql_identifier_guard
 
     def release_fenced_absence(self,proposal,admission,fence,update,ack,absence):
         self._target(proposal);now=self._now()
@@ -394,15 +394,15 @@ class PostgresEffectAuthorityV3(ImmutableRuntimeConfiguration):
                 if old.result!=absence:raise EffectV3Error('conflicting terminal absence evidence')
                 return
             if old.status not in PENDING or state.reserved<proposal.cost_units:raise EffectV3Error('committed/inconsistent operation cannot refund')
-            cursor.execute(f'UPDATE {self._scope_table} SET budget_reserved=budget_reserved-%s WHERE scope_id=%s',(proposal.cost_units,scope_id))
-            cursor.execute(f"UPDATE {self._operation_table} SET status='rejected',result_bytes=%s WHERE operation_id=%s",(absence.canonical_bytes(),proposal.operation_id))
+            cursor.execute(f'UPDATE {self._scope_table} SET budget_reserved=budget_reserved-%s WHERE scope_id=%s',(proposal.cost_units,scope_id))  # nosec B608 # fixed SQL identifier; enforced by test_effect_sql_identifier_guard
+            cursor.execute(f"UPDATE {self._operation_table} SET status='rejected',result_bytes=%s WHERE operation_id=%s",(absence.canonical_bytes(),proposal.operation_id))  # nosec B608 # fixed SQL identifier; enforced by test_effect_sql_identifier_guard
 
     def complete_revocation(self,scope_id):
         now=self._now()
         with self.database.transaction() as cursor:
             self._lock(cursor,scope_id);state=self._state(cursor,scope_id,now)
             if state is None or state.status!='draining' or state.ack is None:raise EffectV3Error('cutover lacks retained provider acknowledgement')
-            cursor.execute(f"SELECT COUNT(*) FROM {self._operation_table} WHERE scope_id=%s AND status IN ('reserved','dispatched','indeterminate')",(scope_id,))
+            cursor.execute(f"SELECT COUNT(*) FROM {self._operation_table} WHERE scope_id=%s AND status IN ('reserved','dispatched','indeterminate')",(scope_id,))  # nosec B608 # fixed SQL identifier; enforced by test_effect_sql_identifier_guard
             row=cursor.fetchone()
             if row is None or row[0]!=0 or state.reserved!=0:raise ReconciliationRequiredV3('unresolved obligations prevent authority migration')
-            cursor.execute(f"UPDATE {self._scope_table} SET status='revoked' WHERE scope_id=%s",(scope_id,))
+            cursor.execute(f"UPDATE {self._scope_table} SET status='revoked' WHERE scope_id=%s",(scope_id,))  # nosec B608 # fixed SQL identifier; enforced by test_effect_sql_identifier_guard

@@ -51,7 +51,7 @@ class PostgresAuthorityDatabaseV3(PostgresEffectDatabaseV3):
     _application_name='vams-effect-authority-v3'
     def _verify_schema(self,cursor):
         self._lock_unique_tables(cursor)
-        cursor.execute(f'SELECT version,migration_hash,configuration_hash FROM {AUTH_META} WHERE singleton=1')
+        cursor.execute(f'SELECT version,migration_hash,configuration_hash FROM {AUTH_META} WHERE singleton=1')  # nosec B608 # fixed SQL identifier; enforced by test_effect_sql_identifier_guard
         row=cursor.fetchone()
         if row is None or row[0]!=3 or bytes(row[1])!=AUTH_MIGRATION_HASH or bytes(row[2])!=self.configuration_hash:
             raise EffectV3Error('authority schema/version/configuration mismatch')
@@ -69,5 +69,5 @@ class PostgresAuthorityDatabaseV3(PostgresEffectDatabaseV3):
                     self._verify_schema(cursor)
                     return
                 for statement in AUTH_DDL:cursor.execute(statement)
-                cursor.execute(f'INSERT INTO {AUTH_META} VALUES(1,3,%s,%s)',(AUTH_MIGRATION_HASH,self.configuration_hash))
+                cursor.execute(f'INSERT INTO {AUTH_META} VALUES(1,3,%s,%s)',(AUTH_MIGRATION_HASH,self.configuration_hash))  # nosec B608 # fixed SQL identifier; enforced by test_effect_sql_identifier_guard
                 self._verify_schema(cursor)

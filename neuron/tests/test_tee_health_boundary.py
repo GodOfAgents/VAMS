@@ -219,7 +219,7 @@ class TeeHealthBoundaryTests(unittest.TestCase):
                 },
             },
         }
-        exec(compile(ast.Module(body=[method], type_ignores=[]), str(source), "exec"), namespace)
+        exec(compile(ast.Module(body=[method], type_ignores=[]), str(source), "exec"), namespace)  # nosec B102 # test-only exec of AST-extracted repository source
         output = StringIO()
         with redirect_stdout(output):
             namespace["check_sdk_health"](SimpleNamespace(log=lambda *args: None))
@@ -245,7 +245,7 @@ class TeeHealthBoundaryTests(unittest.TestCase):
             "BittensorSubnet": lambda: SimpleNamespace(check_health=lambda: {"status": "unavailable"}),
             "check_all_tee_health": fail,
         }
-        exec(compile(ast.Module(body=[method], type_ignores=[]), str(source), "exec"), namespace)
+        exec(compile(ast.Module(body=[method], type_ignores=[]), str(source), "exec"), namespace)  # nosec B102 # test-only exec of AST-extracted repository source
         output = StringIO()
         with redirect_stdout(output):
             namespace["check_sdk_health"](SimpleNamespace(log=lambda *args: None))
@@ -319,7 +319,7 @@ class TeeHealthBoundaryTests(unittest.TestCase):
             BittensorSubnet=lambda: SimpleNamespace(check_health=lambda: {"status": "unavailable"}),
             check_all_tee_health=P.check_all_tee_health,
         )
-        exec(compile(ast.Module(body=[method], type_ignores=[]), str(source), "exec"), namespace)
+        exec(compile(ast.Module(body=[method], type_ignores=[]), str(source), "exec"), namespace)  # nosec B102 # test-only exec of AST-extracted repository source
         output = StringIO()
         with patch.dict(os.environ, local_environment(), clear=True), patch.object(
             P.requests, "Session", side_effect=transports

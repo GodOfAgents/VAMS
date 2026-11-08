@@ -1,7 +1,7 @@
 {
   "artifact": "VAMS privacy field source inventory",
   "artifact_version": "1.12-draft",
-  "updated_at": "2026-11-01",
+  "updated_at": "2026-11-08",
   "review_status": "UNAPPROVED_SOURCE_BACKED_DRAFT",
   "candidate_binding": {
     "lane": "/home/GodOfAgents/code/VAMS-fleet-20261020-01/integration-r18",
@@ -196,6 +196,25 @@
         "service-manifest-output",
         "macro-output"
       ]
+    },
+    {
+      "topic": "anchor_rebinding_20261108",
+      "status": "source_observed_current_20261108",
+      "finding": "Nine source digests were refreshed: seven files changed through hardening after the 2026-11-01 binding, and neuron/effect_authority_v3.py and neuron/effect_provider_v3.py changed only by 2026-11-08 Bandit nosec comments. Ten anchors are unchanged code at new line positions. neuron-identity and gateway-client-heartbeat were refactored: the node ID is still the first 16 hex characters of the public key (now derived through a guarded candidate before storage), and the heartbeat request body is still exactly {payload, signature} sent as JSON. No new field, recipient or flow was observed. sentinel-sla-stub now refuses submission outright. This is source re-binding on the owner-operated runner, not privacy approval; T33 remains BLOCKED.",
+      "source_refs": [
+        "gateway-client-heartbeat",
+        "gateway-client-url",
+        "legacy-rate-middleware",
+        "main-gateway-bind",
+        "neuron-gateway-setup",
+        "neuron-identity",
+        "neuron-live-gate",
+        "neuron-logging",
+        "neuron-loop",
+        "neuron-send",
+        "neuron-sign",
+        "sentinel-sla-stub"
+      ]
     }
   ],
   "source_files": {
@@ -212,7 +231,7 @@
     "neuron/neuron.py": {
       "artifact": "neuron/neuron.py",
       "algorithm": "sha256",
-      "digest": "ce51c861bacdb10be4064858e46bb0abb7eccedce083939e177070473e4bf78f"
+      "digest": "840964de46f0bdf166764834ea1571566f1d64cfdd5db356288420369a1757e2"
     },
     "neuron/config.py": {
       "artifact": "neuron/config.py",
@@ -227,12 +246,12 @@
     "neuron/gateway/client.py": {
       "artifact": "neuron/gateway/client.py",
       "algorithm": "sha256",
-      "digest": "d4dd680869368eadc01ea4b56078115d37a4d72983c7a0168dce37c98eacd6e0"
+      "digest": "9a8e3663cf322fbdb53de37c35653ded0b65896f400acf06ff221f74482427cd"
     },
     "neuron/gateway/server.py": {
       "artifact": "neuron/gateway/server.py",
       "algorithm": "sha256",
-      "digest": "ea9e4e2388e1bbf2ff2ac62e8afbf66a97f69821da0b1f47c90feb8584704f66"
+      "digest": "ba61a26ac3ee3b7ad2a1569c6838ee1699554881e9312a2b8a2fd9aa066c22b6"
     },
     "neuron/gateway/models.py": {
       "artifact": "neuron/gateway/models.py",
@@ -252,7 +271,7 @@
     "gateway/server.py": {
       "artifact": "gateway/server.py",
       "algorithm": "sha256",
-      "digest": "ae9011d5c5e4926c28483406c6527cb69476873a13d5cdafde14c370fa57fa9b"
+      "digest": "60d296c81a8af05eb25a1986abe34d92cf04aa445f37f7d1bb51b35812fd1e43"
     },
     "gateway/route_policy.py": {
       "artifact": "gateway/route_policy.py",
@@ -272,12 +291,12 @@
     "gateway/replay_store.py": {
       "artifact": "gateway/replay_store.py",
       "algorithm": "sha256",
-      "digest": "0c10719bc399e932e763b9d80635f262f8caea683d4e7b37de4370a0a4ebc9de"
+      "digest": "ba76ee767f1b0ffd968b9ab7b1a462987634ad381f278e1c3015cbbdc5872fb7"
     },
     "neuron/sentinel/sentinel_node.py": {
       "artifact": "neuron/sentinel/sentinel_node.py",
       "algorithm": "sha256",
-      "digest": "7577a07a878d8a48fe536cb993deccf8c5bb4e6a62b58541d633b740ac49f3ec"
+      "digest": "04d2618816e9031f6a8d7f7dce69bafb14b96e9f0171318ebff825c37297ff05"
     },
     "neuron/sentinel/da_publisher.py": {
       "artifact": "neuron/sentinel/da_publisher.py",
@@ -357,7 +376,7 @@
     "neuron/composer/composer.py": {
       "artifact": "neuron/composer/composer.py",
       "algorithm": "sha256",
-      "digest": "a762a602bb4544a4c9c06f6e71efc825978cea6b57b3149a6c3bdcce0faf7a8a"
+      "digest": "04787e68608a2a9e35c3e5caa3c407fa9f96ebea3cfbf54b7d796fa6bde9a9d1"
     },
     "neuron/services/registry_client.py": {
       "artifact": "neuron/services/registry_client.py",
@@ -392,12 +411,12 @@
     "neuron/effect_authority_v3.py": {
       "artifact": "neuron/effect_authority_v3.py",
       "algorithm": "sha256",
-      "digest": "d35d8ed5b065b99a0daa8060d795b605d270173d7bd8ad897676d6084c7792a7"
+      "digest": "c6e637534cee605e0b5d513129266dd81802a79493592442c60345fee9829ce4"
     },
     "neuron/effect_provider_v3.py": {
       "artifact": "neuron/effect_provider_v3.py",
       "algorithm": "sha256",
-      "digest": "28d9e3880cd2ee673cb258643d99c4508619d357a4e06d079ed022767ae8a3a6"
+      "digest": "7332fa555be8fe8b15548264b75c07f63f58dae5de77a825425127fdedc30f6f"
     },
     "neuron/object_grant_v1.py": {
       "artifact": "neuron/object_grant_v1.py",
@@ -493,56 +512,56 @@
     "neuron-identity": {
       "path": "neuron/neuron.py",
       "lines": [
-        421,
-        428
+        613,
+        613
       ],
-      "anchor": "public_key_bytes(self.vk).hex()[:16]"
+      "anchor": "candidate_node_id = public_key_bytes(candidate_public_key).hex()[:16]"
     },
     "neuron-logging": {
       "path": "neuron/neuron.py",
       "lines": [
-        370,
-        382
+        445,
+        445
       ],
       "anchor": "print(f\"{Fore.LIGHTBLACK_EX}"
     },
     "neuron-gateway-setup": {
       "path": "neuron/neuron.py",
       "lines": [
-        276,
-        293
+        344,
+        348
       ],
       "anchor": "self.gateway = GatewayClient("
     },
     "neuron-sign": {
       "path": "neuron/neuron.py",
       "lines": [
-        437,
-        444
+        724,
+        741
       ],
       "anchor": "def sign_telemetry"
     },
     "neuron-send": {
       "path": "neuron/neuron.py",
       "lines": [
-        446,
-        470
+        767,
+        767
       ],
       "anchor": "self.gateway.send_heartbeat(payload, signature)"
     },
     "neuron-loop": {
       "path": "neuron/neuron.py",
       "lines": [
-        698,
-        708
+        1132,
+        1132
       ],
       "anchor": "self.send_heartbeat(block_info)"
     },
     "neuron-live-gate": {
       "path": "neuron/neuron.py",
       "lines": [
-        203,
-        217
+        258,
+        261
       ],
       "anchor": "VamsNeuron live startup is disabled"
     },
@@ -589,18 +608,18 @@
     "gateway-client-url": {
       "path": "neuron/gateway/client.py",
       "lines": [
-        18,
-        65
+        97,
+        114
       ],
       "anchor": "def _validated_base_url"
     },
     "gateway-client-heartbeat": {
       "path": "neuron/gateway/client.py",
       "lines": [
-        121,
-        134
+        197,
+        197
       ],
-      "anchor": "json={\"payload\": payload, \"signature\": signature}"
+      "anchor": "body = {\"payload\": payload, \"signature\": signature}"
     },
     "gateway-client-other": {
       "path": "neuron/gateway/client.py",
@@ -637,8 +656,8 @@
     "legacy-rate-middleware": {
       "path": "neuron/gateway/server.py",
       "lines": [
-        59,
-        66
+        95,
+        95
       ],
       "anchor": "request.client.host"
     },
@@ -669,8 +688,8 @@
     "main-gateway-bind": {
       "path": "gateway/server.py",
       "lines": [
-        62,
-        68
+        69,
+        69
       ],
       "anchor": "LIVE_BIND_HOST = \"127.0.0.1\""
     },
@@ -829,8 +848,8 @@
     "sentinel-sla-stub": {
       "path": "neuron/sentinel/sentinel_node.py",
       "lines": [
-        250,
-        252
+        266,
+        268
       ],
       "anchor": "async def _submit_sla_report("
     },

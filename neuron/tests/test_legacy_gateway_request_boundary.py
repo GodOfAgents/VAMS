@@ -66,7 +66,7 @@ def functions():
               logger=SimpleNamespace(info=lambda *a: messages.append(a), error=lambda *a: messages.append(a)))
     module = ast.fix_missing_locations(ast.Module(body=selected, type_ignores=[]))
     exec(compile(module, str(ROOT / 'neuron/gateway/server.py'), 'exec',
-                 flags=__future__.annotations.compiler_flag), ns)
+                 flags=__future__.annotations.compiler_flag), ns)  # nosec B102 # test-only exec of AST-extracted repository source
     return ns, limiter, messages
 
 

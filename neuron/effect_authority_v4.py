@@ -55,7 +55,7 @@ class PostgresEffectAuthorityV4(PostgresEffectAuthorityV3):
   cursor.execute(f'''SELECT g.scope_bytes,g.status,h.budget_limit,h.budget_reserved,h.budget_spent,
    g.fence_bytes,g.update_bytes,g.ack_bytes,g.generation_id,g.ordinal,g.previous_generation,
    g.closed_reserved,g.closed_spent FROM {HEADS4} h JOIN {GENERATIONS4} g
-   ON g.scope_id=h.scope_id AND g.generation_id=h.current_generation WHERE h.scope_id=%s FOR UPDATE OF h,g''',(scope_id,))
+   ON g.scope_id=h.scope_id AND g.generation_id=h.current_generation WHERE h.scope_id=%s FOR UPDATE OF h,g''',(scope_id,))  # nosec B608 # fixed SQL identifier; enforced by test_effect_sql_identifier_guard
   row=cursor.fetchone()
   if row is None:return None
   state=self._decode_state(scope_id,row[:8],now)
@@ -73,7 +73,7 @@ class PostgresEffectAuthorityV4(PostgresEffectAuthorityV3):
   if generation==head.generation_id:return head
   cursor.execute(f'''SELECT scope_bytes,status,fence_bytes,update_bytes,ack_bytes,generation_id,
    ordinal,previous_generation,closed_reserved,closed_spent FROM {GENERATIONS4}
-   WHERE scope_id=%s AND generation_id=%s''',(scope_id,generation))
+   WHERE scope_id=%s AND generation_id=%s''',(scope_id,generation))  # nosec B608 # fixed SQL identifier; enforced by test_effect_sql_identifier_guard
   row=cursor.fetchone()
   if row is None or row[1]!='revoked':raise EffectV3Error('missing or unclosed historical generation')
   scope=ObjectAuthorityScopeV3.from_bytes(bytes(row[0]))
@@ -94,7 +94,7 @@ class PostgresEffectAuthorityV4(PostgresEffectAuthorityV3):
 
  def _operation(self,cursor,proposal,state,now):
   cursor.execute(f'''SELECT proposal_bytes,admission_bytes,cost_units,status,result_bytes,scope_id,
-   proposal_digest,generation_id FROM {OPERATIONS4} WHERE operation_id=%s''',(proposal.operation_id,))
+   proposal_digest,generation_id FROM {OPERATIONS4} WHERE operation_id=%s''',(proposal.operation_id,))  # nosec B608 # fixed SQL identifier; enforced by test_effect_sql_identifier_guard
   row=cursor.fetchone()
   if row is None:return None
   generation=hash32(bytes(row[7]));original=self._historical_generation(cursor,state.scope.scope_id,generation,state,now)
@@ -106,7 +106,7 @@ class PostgresEffectAuthorityV4(PostgresEffectAuthorityV3):
  def _insert_operation(self,cursor,proposal,state,admission):
   cursor.execute(f'''INSERT INTO {OPERATIONS4}(operation_id,scope_id,generation_id,proposal_bytes,
    proposal_digest,admission_bytes,admission_digest,nonce,cost_units,status,result_bytes)
-   VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,'reserved',NULL)''',
+   VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,'reserved',NULL)''',  # nosec B608 # fixed SQL identifier; enforced by test_effect_sql_identifier_guard
    (proposal.operation_id,state.scope.scope_id,state.generation_id,proposal.canonical_bytes(),proposal.digest,
     admission.canonical_bytes(),admission.digest,proposal.context.nonce,proposal.cost_units))
 
@@ -121,7 +121,7 @@ class PostgresEffectAuthorityV4(PostgresEffectAuthorityV3):
   generation=generation_id_v4(scope)
   cursor.execute(f'''INSERT INTO {GENERATIONS4}(generation_id,scope_id,ordinal,previous_generation,
    scope_bytes,status,fence_bytes,update_bytes,ack_bytes,closed_reserved,closed_spent)
-   VALUES(%s,%s,%s,%s,%s,'installing',%s,%s,NULL,NULL,NULL)''',
+   VALUES(%s,%s,%s,%s,%s,'installing',%s,%s,NULL,NULL,NULL)''',  # nosec B608 # fixed SQL identifier; enforced by test_effect_sql_identifier_guard
    (generation,scope.scope_id,ordinal,previous,scope.canonical_bytes(),fence.canonical_bytes(),update.canonical_bytes()))
   return generation
 
@@ -134,7 +134,7 @@ class PostgresEffectAuthorityV4(PostgresEffectAuthorityV3):
    self._scope_policy(scope,self._now());fence,update=self._fence_update(scope)
    generation=self._insert_generation(cursor,scope,1,None,fence,update)
    cursor.execute(f'''INSERT INTO {HEADS4}(scope_id,current_generation,budget_limit,budget_reserved,budget_spent)
-    VALUES(%s,%s,%s,0,0)''',(scope.scope_id,generation,scope.budget_limit))
+    VALUES(%s,%s,%s,0,0)''',(scope.scope_id,generation,scope.budget_limit))  # nosec B608 # fixed SQL identifier; enforced by test_effect_sql_identifier_guard
   return update
 
  def prepare_renewal(self,scope):
@@ -143,7 +143,7 @@ class PostgresEffectAuthorityV4(PostgresEffectAuthorityV3):
    self._lock(cursor,scope.scope_id);old=self._state(cursor,scope.scope_id,self._now())
    if old is None or old.status!='revoked' or old.ack is None or old.reserved!=0:
     raise ReconciliationRequiredV3('renewal requires acknowledged closed authority and zero exposure')
-   cursor.execute(f"SELECT COUNT(*) FROM {OPERATIONS4} WHERE scope_id=%s AND status IN ('reserved','dispatched','indeterminate')",(scope.scope_id,))
+   cursor.execute(f"SELECT COUNT(*) FROM {OPERATIONS4} WHERE scope_id=%s AND status IN ('reserved','dispatched','indeterminate')",(scope.scope_id,))  # nosec B608 # fixed SQL identifier; enforced by test_effect_sql_identifier_guard
    pending=cursor.fetchone()
    if pending is None or integer(pending[0])!=0:raise ReconciliationRequiredV3('all prior obligations must reconcile before renewal')
    c=scope.template
@@ -157,7 +157,7 @@ class PostgresEffectAuthorityV4(PostgresEffectAuthorityV3):
    ordinal=integer(old.ordinal+1,positive=True);fence,update=self._fence_update(scope)
    generation=self._insert_generation(cursor,scope,ordinal,old.generation_id,fence,update)
    # Keep cumulative spend. A ceiling of10after spending3leaves7, not10.
-   cursor.execute(f'UPDATE {HEADS4} SET current_generation=%s,budget_limit=%s WHERE scope_id=%s',
+   cursor.execute(f'UPDATE {HEADS4} SET current_generation=%s,budget_limit=%s WHERE scope_id=%s',  # nosec B608 # fixed SQL identifier; enforced by test_effect_sql_identifier_guard
     (generation,scope.budget_limit,scope.scope_id))
   return update
 
@@ -167,7 +167,7 @@ class PostgresEffectAuthorityV4(PostgresEffectAuthorityV3):
    if state is None or state.status!='installing':raise EffectV3Error('generation is not installing')
    self._scope_policy(state.scope,self._now())
    verify_fence_ack(state.fence,state.update,ack,self.identity.provider,self._now(),authority=self.identity.authority)
-   cursor.execute(f"UPDATE {GENERATIONS4} SET status='active',ack_bytes=%s WHERE generation_id=%s",
+   cursor.execute(f"UPDATE {GENERATIONS4} SET status='active',ack_bytes=%s WHERE generation_id=%s",  # nosec B608 # fixed SQL identifier; enforced by test_effect_sql_identifier_guard
     (ack.canonical_bytes(),state.generation_id))
 
  def _begin_cutover(self,scope_id,fence,*,refresh):
@@ -188,7 +188,7 @@ class PostgresEffectAuthorityV4(PostgresEffectAuthorityV3):
    update=sign_receipt(self._signer,purpose=2,subject=fence.digest,provider=fence.provider_id,
     epoch=fence.authority_epoch,policy=fence.policy_version,fence=fence.fencing_token,
     issued_at=fence.issued_at,expires_at=fence.expires_at)
-   cursor.execute(f"UPDATE {GENERATIONS4} SET status='draining',fence_bytes=%s,update_bytes=%s,ack_bytes=NULL WHERE generation_id=%s",
+   cursor.execute(f"UPDATE {GENERATIONS4} SET status='draining',fence_bytes=%s,update_bytes=%s,ack_bytes=NULL WHERE generation_id=%s",  # nosec B608 # fixed SQL identifier; enforced by test_effect_sql_identifier_guard
     (fence.canonical_bytes(),update.canonical_bytes(),state.generation_id))
   return update
 
@@ -201,15 +201,15 @@ class PostgresEffectAuthorityV4(PostgresEffectAuthorityV3):
    if state.ack is not None:
     if state.ack!=ack:raise EffectV3Error('conflicting cutover acknowledgement')
     return
-   cursor.execute(f'UPDATE {GENERATIONS4} SET ack_bytes=%s WHERE generation_id=%s',(ack.canonical_bytes(),state.generation_id))
+   cursor.execute(f'UPDATE {GENERATIONS4} SET ack_bytes=%s WHERE generation_id=%s',(ack.canonical_bytes(),state.generation_id))  # nosec B608 # fixed SQL identifier; enforced by test_effect_sql_identifier_guard
 
  def complete_revocation(self,scope_id):
   with self.database.transaction() as cursor:
    self._lock(cursor,scope_id);state=self._state(cursor,scope_id,self._now())
    if state is None or state.status!='draining' or state.ack is None or state.reserved!=0:
     raise ReconciliationRequiredV3('cutover requires acknowledgement and zero reserved budget')
-   cursor.execute(f"SELECT COUNT(*) FROM {OPERATIONS4} WHERE scope_id=%s AND status IN ('reserved','dispatched','indeterminate')",(scope_id,))
+   cursor.execute(f"SELECT COUNT(*) FROM {OPERATIONS4} WHERE scope_id=%s AND status IN ('reserved','dispatched','indeterminate')",(scope_id,))  # nosec B608 # fixed SQL identifier; enforced by test_effect_sql_identifier_guard
    pending=cursor.fetchone()
    if pending is None or integer(pending[0])!=0:raise ReconciliationRequiredV3('unresolved obligations prevent closure')
-   cursor.execute(f"UPDATE {GENERATIONS4} SET status='revoked',closed_reserved=0,closed_spent=%s WHERE generation_id=%s",
+   cursor.execute(f"UPDATE {GENERATIONS4} SET status='revoked',closed_reserved=0,closed_spent=%s WHERE generation_id=%s",  # nosec B608 # fixed SQL identifier; enforced by test_effect_sql_identifier_guard
     (state.spent,state.generation_id))

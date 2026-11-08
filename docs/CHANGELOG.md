@@ -1,3 +1,11 @@
+## 2026-11-08: Bandit and Python gates green
+
+Owner decision 7. Bandit (`bandit -r neuron/ gateway/ -ll -ii`) now exits 0 with no reportable issues, without any change to its scope or thresholds. All 74 B608 findings were string-built SQL in `neuron/effect_*` where every interpolated value is a fixed `public.vams_effect_*` table constant, a class attribute bound to one, a `table` name checked against a fixed set or strict regex, or a constant `FOR UPDATE` suffix; values were already driver parameters. Each is suppressed on its own line with a recorded reason, and the new `neuron/tests/test_effect_sql_identifier_guard.py` fails if any executed SQL f-string interpolates anything else or if a `nosec B608` appears outside a verified statement. The 14 B102 findings are test-only `exec` of AST-extracted repository source, suppressed per line.
+
+The semantic-MMU privacy inventory (`docs/remediation/privacy-field-inventory-20261020.json`, still UNAPPROVED; T33 BLOCKED) was re-bound: nine digests refreshed, twelve anchors re-located, and two refactored flows (node ID derivation, heartbeat body) confirmed to carry the same fields. A dated revalidation entry records the check. Three R11 provenance tests pinned to the September Cardano digest are retired as historical.
+
+Full Linux Python 3.12 suite: 3,419 passed, 0 failed, 1 visible skip, 9 owner-retired tests deselected. Status unchanged: 13 open, 0 of 36 verified, NOT READY.
+
 ## 2026-11-08: Python suite repairs on Linux 3.12
 
 Full suite moves from 3,369 pass / 72 fail to 3,416 pass / 22 fail (1 visible skip, 6 owner-retired historical tests deselected by exact ID; see `docs/remediation/HISTORICAL_TESTS.md`). Repairs are test-side; no product behavior changed:
