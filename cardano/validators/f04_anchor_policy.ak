@@ -2,6 +2,7 @@
 //// P0 is parameterized only by the fixed S0 lock hash. It does not prove
 //// registry compiler provenance or any registration/global uniqueness property.
 
+use aiken/builtin
 use aiken/cbor
 use aiken/collection/dict
 use aiken/collection/list
@@ -20,7 +21,6 @@ const digest_bytes: Int = 32
 const minimum_did_bytes: Int = 32
 const maximum_did_bytes: Int = 256
 const minimum_stake_lovelace: Int = 1_000_000_000
-const maximum_u16: Int = 65_535
 const maximum_u32: Int = 4_294_967_295
 const maximum_u64: Int = 18_446_744_073_709_551_615
 const maximum_inputs: Int = 16
@@ -33,7 +33,7 @@ const initial_reputation_bps: Int = 5_000
 
 validator f04_anchor_policy(anchor_lock_script_hash: ByteArray) {
   mint(redeemer: AnchorPolicyRedeemer, policy_id: PolicyId, tx: Transaction) {
-    expect IssueAnchor { anchor_seed } = redeemer
+    let IssueAnchor { anchor_seed } = redeemer
     validate_issue(anchor_lock_script_hash, anchor_seed, policy_id, tx)
   }
 
@@ -111,7 +111,8 @@ fn valid_pre_genesis(
   input: Input,
   datum: AnchorDatumV2,
 ) -> Bool {
-  expect Constr(2, fields) = raw
+  let Pair(constructor_index, fields) = builtin.un_constr_data(raw)
+  expect constructor_index == 2
   expect [
     schema_data,
     did_data,
@@ -252,6 +253,12 @@ fn derive_identity_name(
   ]))
 }
 
+// valid_anchor_datum requires exactly five guardians; a missing index fails.
+fn guardian_at(guardians: List<ByteArray>, index: Int) -> ByteArray {
+  expect Some(guardian) = list.at(guardians, index)
+  guardian
+}
+
 fn derive_anchor_name(datum: AnchorDatumV2) -> ByteArray {
   blake2b_256(concat_fields([
     anchor_domain,
@@ -267,11 +274,11 @@ fn derive_anchor_name(datum: AnchorDatumV2) -> ByteArray {
     datum.founding_owner_vkh,
     datum.initial_controller_vkh,
     datum.initial_operator_vkh,
-    list.at(datum.initial_guardians, 0),
-    list.at(datum.initial_guardians, 1),
-    list.at(datum.initial_guardians, 2),
-    list.at(datum.initial_guardians, 3),
-    list.at(datum.initial_guardians, 4),
+    guardian_at(datum.initial_guardians, 0),
+    guardian_at(datum.initial_guardians, 1),
+    guardian_at(datum.initial_guardians, 2),
+    guardian_at(datum.initial_guardians, 3),
+    guardian_at(datum.initial_guardians, 4),
     datum.registry_script_hash,
     datum.initial_metadata_hash,
     bytearray.from_int_big_endian(datum.genesis_control_epoch, 8),

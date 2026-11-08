@@ -2413,7 +2413,10 @@ fn remainder_replace_output(value: Transaction, index: Int, output: Output) -> T
     fn(i, before) { if i == index { output } else { before } }) }
 }
 
-fn remainder_raw(size: Int) -> Data { bytearray.from_int_big_endian(0, size) }
+fn remainder_raw(size: Int) -> Data {
+  let raw: Data = bytearray.from_int_big_endian(0, size)
+  raw
+}
 
 fn remainder_last(value: Transaction) -> Output {
   expect Some(output) = list.at(value.outputs, list.length(value.outputs) - 1)
@@ -2480,10 +2483,12 @@ fn remainder_mutant(action: Int, variant: Int, at_limit: Bool) -> Transaction {
             expect InlineDatum(raw) = input.output.datum
             let changed: Data = if action == 3 || action == 4 {
               expect p: ProposalDatumV2 = raw
-              ProposalDatumV2 { ..p, version: 1 }
+              let proposal: Data = ProposalDatumV2 { ..p, version: 1 }
+              proposal
             } else {
               expect i: IntentDatumV2 = raw
-              IntentDatumV2 { ..i, version: 1 }
+              let intent: Data = IntentDatumV2 { ..i, version: 1 }
+              intent
             }
             Input { ..input, output: Output { ..input.output, datum: InlineDatum(changed) } }
           } else { input }

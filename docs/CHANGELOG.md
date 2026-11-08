@@ -1,3 +1,7 @@
+## 2026-11-08: Cardano source compiles; blueprint regenerated
+
+Type-level repairs in `validators/f04_anchor_policy.ak` and `validators/governance_v2.test.ak` let native Aiken 1.1.21 compile the integrated source for the first time. No validator rule changed; a missing guardian index now fails explicitly. `aiken check --deny --seed 20260711 --max-success 250` passes: 2,627 checks, 884 tests, 0 errors, 0 warnings, including all 724 prepared governance v2 cases. The stale `cardano/plutus.json` (eight validators missing, five hashes outdated) is replaced with fresh `aiken build` output. Six historical harness tests (`docs/remediation/m3_2b_r4`, `m3_2b_r6`, `m3_f04_impl_r2`, `m3_f04_impl_r4`) now run but fail because they encode superseded designs such as registry-side minting; their disposition needs an owner decision. F01–F03 remain open. Details: `docs/remediation/repair_20261108/CARDANO-COMPILE.md`.
+
 ## 2026-11-08: D1 runner baseline, reproducible remappings, test-collection repairs
 
 Owner decisions of 2026-11-08 are recorded in `docs/remediation/OWNER_DECISIONS_20261108.md` (D1 runner, native Aiken, first-canary route scope, TR-01–TR-10, secret-scan disposition authority). A WSL2 Python 3.12.16 / Foundry 1.7.1 / Aiken 1.1.21 / Node 22.23.4 / PostgreSQL 17.11 runner was assembled from checksum-verified official sources; it is owner-operated, not independent CI.
