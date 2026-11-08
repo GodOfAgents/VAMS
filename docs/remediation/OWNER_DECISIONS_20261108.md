@@ -68,6 +68,16 @@ findings in tests likewise per line. No Bandit scope or severity change.
 re-bound to current source, not retired. (c) Three R11 provenance tests are
 retired as historical (see `HISTORICAL_TESTS.md`).
 
+## 8. npm registry and Rust toolchain downloads (added later on 2026-11-08)
+
+Owner approved downloads from the npm registry (frontend `npm ci` and
+`npm audit` per the CI frontend gate) and the official Rust distribution
+(rustup, Rust 1.92.0 with rustfmt/clippy, crates.io for `cargo-audit 0.22.2`
+and the locked `vams-vm` dependencies, RustSec advisory data for
+`cargo audit`). npm lifecycle scripts are inventoried before `npm ci` runs.
+Not covered: Semgrep's `--config auto --metrics on` discovery scan (sends
+metrics to and fetches rules from semgrep.dev; needs a D5-B decision).
+
 ## 5. Secret-scan disposition authority (D5)
 
 The owner is the per-finding disposition authority for first-party secret-scan
