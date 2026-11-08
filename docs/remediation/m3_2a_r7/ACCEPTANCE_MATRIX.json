@@ -1,0 +1,817 @@
+{
+  "schema_version": "m3.2a-r7-acceptance-matrix-v1",
+  "status": "design-only",
+  "evidence_status_default": "pending",
+  "rows": [
+    {
+      "id": "genesis_valid",
+      "handler": "authority_policy",
+      "transition": "Genesis",
+      "expectation": "accept",
+      "reason": "GENESIS_VALID",
+      "mutation_id": "none",
+      "reference": "topology:genesis",
+      "evidence_status": "pending"
+    },
+    {
+      "id": "genesis_rebind",
+      "handler": "authority_policy",
+      "transition": "Genesis",
+      "expectation": "reject",
+      "reason": "GENESIS_REBIND",
+      "mutation_id": "wrong_seed",
+      "reference": "topology:genesis",
+      "evidence_status": "pending"
+    },
+    {
+      "id": "counter_cross_mutation",
+      "handler": "authority_validator",
+      "transition": "Create/Queue",
+      "expectation": "reject",
+      "reason": "COUNTER_UNTOUCHED",
+      "mutation_id": "counter_cross_mutation",
+      "reference": "spec:authority_immutability",
+      "evidence_status": "pending"
+    },
+    {
+      "id": "immutable_authority_field",
+      "handler": "authority_validator",
+      "transition": "Create/Queue",
+      "expectation": "reject",
+      "reason": "IMMUTABLE_FIELD",
+      "mutation_id": "immutable_authority_field",
+      "reference": "spec:authority_immutability",
+      "evidence_status": "pending"
+    },
+    {
+      "id": "duplicate_signer",
+      "handler": "authority_validator",
+      "transition": "Create/CancelIntent",
+      "expectation": "reject",
+      "reason": "DUPLICATE_SIGNER",
+      "mutation_id": "duplicate_signer",
+      "reference": "spec:authority_immutability",
+      "evidence_status": "pending"
+    },
+    {
+      "id": "non_member_signer",
+      "handler": "authority_validator",
+      "transition": "Create/CancelIntent",
+      "expectation": "reject",
+      "reason": "NON_MEMBER_SIGNER",
+      "mutation_id": "non_member_signer",
+      "reference": "spec:authority_immutability",
+      "evidence_status": "pending"
+    },
+    {
+      "id": "authority_asset_preimage",
+      "handler": "authority_policy",
+      "transition": "Genesis",
+      "expectation": "reject",
+      "reason": "AUTHORITY_PREIMAGE",
+      "mutation_id": "authority_asset_preimage",
+      "reference": "asset:authority_fixture_v1",
+      "evidence_status": "pending"
+    },
+    {
+      "id": "receipt_substitution",
+      "handler": "receipt_policy",
+      "transition": "Vote",
+      "expectation": "reject",
+      "reason": "RECEIPT_SUBSTITUTION",
+      "mutation_id": "receipt_substitution",
+      "reference": "asset:receipt_fixture_v1",
+      "evidence_status": "pending"
+    },
+    {
+      "id": "redirected_refund",
+      "handler": "governor_validator",
+      "transition": "Cancel/Finalize/Queue",
+      "expectation": "reject",
+      "reason": "REFUND_DESTINATION",
+      "mutation_id": "redirected_refund",
+      "reference": "topology:cancel",
+      "evidence_status": "pending"
+    },
+    {
+      "id": "governed_asset_change",
+      "handler": "governor_validator",
+      "transition": "Queue",
+      "expectation": "reject",
+      "reason": "GOVERNED_ASSET_CHANGE",
+      "mutation_id": "governed_asset_change",
+      "reference": "topology:queue",
+      "evidence_status": "pending"
+    },
+    {
+      "id": "fee_governed_ada",
+      "handler": "governor_validator",
+      "transition": "Vote",
+      "expectation": "reject",
+      "reason": "FEE_PARTITION",
+      "mutation_id": "fee_governed_ada",
+      "reference": "topology:vote",
+      "evidence_status": "pending"
+    },
+    {
+      "id": "ninth_voter",
+      "handler": "governor_validator",
+      "transition": "Vote",
+      "expectation": "reject",
+      "reason": "VOTER_CAP",
+      "mutation_id": "ninth_voter",
+      "reference": "datum:proposal_9_records",
+      "evidence_status": "pending"
+    },
+    {
+      "id": "maximum_width_datum",
+      "handler": "governor_validator",
+      "transition": "Vote",
+      "expectation": "reject",
+      "reason": "DATUM_CAP",
+      "mutation_id": "maximum_width_datum",
+      "reference": "datum:proposal_8_records",
+      "evidence_status": "pending"
+    },
+    {
+      "id": "quorum_tie",
+      "handler": "governor_validator",
+      "transition": "Finalize-Passed",
+      "expectation": "reject",
+      "reason": "QUORUM_TIE",
+      "mutation_id": "quorum_tie",
+      "reference": "spec:lifecycle",
+      "evidence_status": "pending"
+    },
+    {
+      "id": "tally_overflow",
+      "handler": "governor_validator",
+      "transition": "Vote",
+      "expectation": "reject",
+      "reason": "TALLY_OVERFLOW",
+      "mutation_id": "tally_overflow",
+      "reference": "spec:lifecycle",
+      "evidence_status": "pending"
+    },
+    {
+      "id": "time_before",
+      "handler": "governor_validator",
+      "transition": "Vote/Cancel/Finalize",
+      "expectation": "reject",
+      "reason": "TIME_BEFORE",
+      "mutation_id": "time_before",
+      "reference": "spec:lifecycle",
+      "evidence_status": "pending"
+    },
+    {
+      "id": "time_at",
+      "handler": "governor_validator",
+      "transition": "Finalize/Expire",
+      "expectation": "accept",
+      "reason": "TIME_AT",
+      "mutation_id": "time_at",
+      "reference": "spec:lifecycle",
+      "evidence_status": "pending"
+    },
+    {
+      "id": "time_after",
+      "handler": "governor_validator",
+      "transition": "Vote/Cancel",
+      "expectation": "reject",
+      "reason": "TIME_AFTER",
+      "mutation_id": "time_after",
+      "reference": "spec:lifecycle",
+      "evidence_status": "pending"
+    },
+    {
+      "id": "execute_pre_f05",
+      "handler": "timelock_validator",
+      "transition": "ExecuteIntent",
+      "expectation": "reject",
+      "reason": "EXECUTE_DISABLED_PRE_F05",
+      "mutation_id": "execute_pre_f05",
+      "reference": "spec:implementation_boundary",
+      "evidence_status": "pending"
+    },
+    {
+      "id": "output_ref_width",
+      "handler": "all_policies",
+      "transition": "all",
+      "expectation": "reject",
+      "reason": "OUTPUT_REF_U32",
+      "mutation_id": "output_ref_width",
+      "reference": "spec:encoding.output_reference",
+      "evidence_status": "pending"
+    },
+    {
+      "id": "create_destination",
+      "handler": "public_handler",
+      "transition": "Create",
+      "expectation": "reject",
+      "reason": "DESTINATION",
+      "mutation_id": "destination_create",
+      "reference": "topology:create",
+      "evidence_status": "pending"
+    },
+    {
+      "id": "create_topology_one_over",
+      "handler": "public_handler",
+      "transition": "Create",
+      "expectation": "reject",
+      "reason": "TOPOLOGY_LIMIT",
+      "mutation_id": "topology_create",
+      "reference": "topology:create",
+      "evidence_status": "pending"
+    },
+    {
+      "id": "create_datum_mutation",
+      "handler": "public_handler",
+      "transition": "Create",
+      "expectation": "reject",
+      "reason": "DATUM_MUTATION",
+      "mutation_id": "datum_create",
+      "reference": "datum:proposal_0_records",
+      "evidence_status": "pending"
+    },
+    {
+      "id": "create_timing_boundary",
+      "handler": "public_handler",
+      "transition": "Create",
+      "expectation": "reject",
+      "reason": "TIMING_BOUNDARY",
+      "mutation_id": "timing_create",
+      "reference": "spec:lifecycle",
+      "evidence_status": "pending"
+    },
+    {
+      "id": "vote_destination",
+      "handler": "public_handler",
+      "transition": "Vote",
+      "expectation": "reject",
+      "reason": "DESTINATION",
+      "mutation_id": "destination_vote",
+      "reference": "topology:vote",
+      "evidence_status": "pending"
+    },
+    {
+      "id": "vote_topology_one_over",
+      "handler": "public_handler",
+      "transition": "Vote",
+      "expectation": "reject",
+      "reason": "TOPOLOGY_LIMIT",
+      "mutation_id": "topology_vote",
+      "reference": "topology:vote",
+      "evidence_status": "pending"
+    },
+    {
+      "id": "vote_datum_mutation",
+      "handler": "public_handler",
+      "transition": "Vote",
+      "expectation": "reject",
+      "reason": "DATUM_MUTATION",
+      "mutation_id": "datum_vote",
+      "reference": "datum:proposal_0_records",
+      "evidence_status": "pending"
+    },
+    {
+      "id": "vote_timing_boundary",
+      "handler": "public_handler",
+      "transition": "Vote",
+      "expectation": "reject",
+      "reason": "TIMING_BOUNDARY",
+      "mutation_id": "timing_vote",
+      "reference": "spec:lifecycle",
+      "evidence_status": "pending"
+    },
+    {
+      "id": "finalize-passed_destination",
+      "handler": "public_handler",
+      "transition": "Finalize-Passed",
+      "expectation": "reject",
+      "reason": "DESTINATION",
+      "mutation_id": "destination_finalize-passed",
+      "reference": "topology:finalize-passed",
+      "evidence_status": "pending"
+    },
+    {
+      "id": "finalize-passed_topology_one_over",
+      "handler": "public_handler",
+      "transition": "Finalize-Passed",
+      "expectation": "reject",
+      "reason": "TOPOLOGY_LIMIT",
+      "mutation_id": "topology_finalize-passed",
+      "reference": "topology:finalize-passed",
+      "evidence_status": "pending"
+    },
+    {
+      "id": "finalize-passed_datum_mutation",
+      "handler": "public_handler",
+      "transition": "Finalize-Passed",
+      "expectation": "reject",
+      "reason": "DATUM_MUTATION",
+      "mutation_id": "datum_finalize-passed",
+      "reference": "datum:proposal_0_records",
+      "evidence_status": "pending"
+    },
+    {
+      "id": "finalize-passed_timing_boundary",
+      "handler": "public_handler",
+      "transition": "Finalize-Passed",
+      "expectation": "reject",
+      "reason": "TIMING_BOUNDARY",
+      "mutation_id": "timing_finalize-passed",
+      "reference": "spec:lifecycle",
+      "evidence_status": "pending"
+    },
+    {
+      "id": "finalize-rejected_destination",
+      "handler": "public_handler",
+      "transition": "Finalize-Rejected",
+      "expectation": "reject",
+      "reason": "DESTINATION",
+      "mutation_id": "destination_finalize-rejected",
+      "reference": "topology:finalize-rejected",
+      "evidence_status": "pending"
+    },
+    {
+      "id": "finalize-rejected_topology_one_over",
+      "handler": "public_handler",
+      "transition": "Finalize-Rejected",
+      "expectation": "reject",
+      "reason": "TOPOLOGY_LIMIT",
+      "mutation_id": "topology_finalize-rejected",
+      "reference": "topology:finalize-rejected",
+      "evidence_status": "pending"
+    },
+    {
+      "id": "finalize-rejected_datum_mutation",
+      "handler": "public_handler",
+      "transition": "Finalize-Rejected",
+      "expectation": "reject",
+      "reason": "DATUM_MUTATION",
+      "mutation_id": "datum_finalize-rejected",
+      "reference": "datum:proposal_0_records",
+      "evidence_status": "pending"
+    },
+    {
+      "id": "finalize-rejected_timing_boundary",
+      "handler": "public_handler",
+      "transition": "Finalize-Rejected",
+      "expectation": "reject",
+      "reason": "TIMING_BOUNDARY",
+      "mutation_id": "timing_finalize-rejected",
+      "reference": "spec:lifecycle",
+      "evidence_status": "pending"
+    },
+    {
+      "id": "cancel_destination",
+      "handler": "public_handler",
+      "transition": "Cancel",
+      "expectation": "reject",
+      "reason": "DESTINATION",
+      "mutation_id": "destination_cancel",
+      "reference": "topology:cancel",
+      "evidence_status": "pending"
+    },
+    {
+      "id": "cancel_topology_one_over",
+      "handler": "public_handler",
+      "transition": "Cancel",
+      "expectation": "reject",
+      "reason": "TOPOLOGY_LIMIT",
+      "mutation_id": "topology_cancel",
+      "reference": "topology:cancel",
+      "evidence_status": "pending"
+    },
+    {
+      "id": "cancel_datum_mutation",
+      "handler": "public_handler",
+      "transition": "Cancel",
+      "expectation": "reject",
+      "reason": "DATUM_MUTATION",
+      "mutation_id": "datum_cancel",
+      "reference": "datum:proposal_0_records",
+      "evidence_status": "pending"
+    },
+    {
+      "id": "cancel_timing_boundary",
+      "handler": "public_handler",
+      "transition": "Cancel",
+      "expectation": "reject",
+      "reason": "TIMING_BOUNDARY",
+      "mutation_id": "timing_cancel",
+      "reference": "spec:lifecycle",
+      "evidence_status": "pending"
+    },
+    {
+      "id": "queue_destination",
+      "handler": "public_handler",
+      "transition": "Queue",
+      "expectation": "reject",
+      "reason": "DESTINATION",
+      "mutation_id": "destination_queue",
+      "reference": "topology:queue",
+      "evidence_status": "pending"
+    },
+    {
+      "id": "queue_topology_one_over",
+      "handler": "public_handler",
+      "transition": "Queue",
+      "expectation": "reject",
+      "reason": "TOPOLOGY_LIMIT",
+      "mutation_id": "topology_queue",
+      "reference": "topology:queue",
+      "evidence_status": "pending"
+    },
+    {
+      "id": "queue_datum_mutation",
+      "handler": "public_handler",
+      "transition": "Queue",
+      "expectation": "reject",
+      "reason": "DATUM_MUTATION",
+      "mutation_id": "datum_queue",
+      "reference": "datum:proposal_0_records",
+      "evidence_status": "pending"
+    },
+    {
+      "id": "queue_timing_boundary",
+      "handler": "public_handler",
+      "transition": "Queue",
+      "expectation": "reject",
+      "reason": "TIMING_BOUNDARY",
+      "mutation_id": "timing_queue",
+      "reference": "spec:lifecycle",
+      "evidence_status": "pending"
+    },
+    {
+      "id": "cancelintent_destination",
+      "handler": "public_handler",
+      "transition": "CancelIntent",
+      "expectation": "reject",
+      "reason": "DESTINATION",
+      "mutation_id": "destination_cancelintent",
+      "reference": "topology:cancelintent",
+      "evidence_status": "pending"
+    },
+    {
+      "id": "cancelintent_topology_one_over",
+      "handler": "public_handler",
+      "transition": "CancelIntent",
+      "expectation": "reject",
+      "reason": "TOPOLOGY_LIMIT",
+      "mutation_id": "topology_cancelintent",
+      "reference": "topology:cancelintent",
+      "evidence_status": "pending"
+    },
+    {
+      "id": "cancelintent_datum_mutation",
+      "handler": "public_handler",
+      "transition": "CancelIntent",
+      "expectation": "reject",
+      "reason": "DATUM_MUTATION",
+      "mutation_id": "datum_cancelintent",
+      "reference": "datum:proposal_0_records",
+      "evidence_status": "pending"
+    },
+    {
+      "id": "cancelintent_timing_boundary",
+      "handler": "public_handler",
+      "transition": "CancelIntent",
+      "expectation": "reject",
+      "reason": "TIMING_BOUNDARY",
+      "mutation_id": "timing_cancelintent",
+      "reference": "spec:lifecycle",
+      "evidence_status": "pending"
+    },
+    {
+      "id": "expireintent_destination",
+      "handler": "public_handler",
+      "transition": "ExpireIntent",
+      "expectation": "reject",
+      "reason": "DESTINATION",
+      "mutation_id": "destination_expireintent",
+      "reference": "topology:expireintent",
+      "evidence_status": "pending"
+    },
+    {
+      "id": "expireintent_topology_one_over",
+      "handler": "public_handler",
+      "transition": "ExpireIntent",
+      "expectation": "reject",
+      "reason": "TOPOLOGY_LIMIT",
+      "mutation_id": "topology_expireintent",
+      "reference": "topology:expireintent",
+      "evidence_status": "pending"
+    },
+    {
+      "id": "expireintent_datum_mutation",
+      "handler": "public_handler",
+      "transition": "ExpireIntent",
+      "expectation": "reject",
+      "reason": "DATUM_MUTATION",
+      "mutation_id": "datum_expireintent",
+      "reference": "datum:proposal_0_records",
+      "evidence_status": "pending"
+    },
+    {
+      "id": "expireintent_timing_boundary",
+      "handler": "public_handler",
+      "transition": "ExpireIntent",
+      "expectation": "reject",
+      "reason": "TIMING_BOUNDARY",
+      "mutation_id": "timing_expireintent",
+      "reference": "spec:lifecycle",
+      "evidence_status": "pending"
+    },
+    {
+      "id": "executeintent_destination",
+      "handler": "public_handler",
+      "transition": "ExecuteIntent",
+      "expectation": "reject",
+      "reason": "DESTINATION",
+      "mutation_id": "destination_executeintent",
+      "reference": "spec:implementation_boundary",
+      "evidence_status": "pending"
+    },
+    {
+      "id": "executeintent_topology_one_over",
+      "handler": "public_handler",
+      "transition": "ExecuteIntent",
+      "expectation": "reject",
+      "reason": "TOPOLOGY_LIMIT",
+      "mutation_id": "topology_executeintent",
+      "reference": "spec:implementation_boundary",
+      "evidence_status": "pending"
+    },
+    {
+      "id": "executeintent_datum_mutation",
+      "handler": "public_handler",
+      "transition": "ExecuteIntent",
+      "expectation": "reject",
+      "reason": "DATUM_MUTATION",
+      "mutation_id": "datum_executeintent",
+      "reference": "datum:proposal_0_records",
+      "evidence_status": "pending"
+    },
+    {
+      "id": "executeintent_timing_boundary",
+      "handler": "public_handler",
+      "transition": "ExecuteIntent",
+      "expectation": "reject",
+      "reason": "TIMING_BOUNDARY",
+      "mutation_id": "timing_executeintent",
+      "reference": "spec:lifecycle",
+      "evidence_status": "pending"
+    },
+    {
+      "id": "asset_boundary_00",
+      "handler": "policy",
+      "transition": "Queue",
+      "expectation": "reject",
+      "reason": "ASSET_ENCODING",
+      "mutation_id": "asset_boundary_0",
+      "reference": "asset:intent_fixture_v1",
+      "evidence_status": "pending"
+    },
+    {
+      "id": "asset_boundary_01",
+      "handler": "policy",
+      "transition": "Vote",
+      "expectation": "reject",
+      "reason": "ASSET_ENCODING",
+      "mutation_id": "asset_boundary_1",
+      "reference": "asset:proposal_fixture_v1",
+      "evidence_status": "pending"
+    },
+    {
+      "id": "asset_boundary_02",
+      "handler": "policy",
+      "transition": "Queue",
+      "expectation": "reject",
+      "reason": "ASSET_ENCODING",
+      "mutation_id": "asset_boundary_2",
+      "reference": "asset:proposal_fixture_v1",
+      "evidence_status": "pending"
+    },
+    {
+      "id": "asset_boundary_03",
+      "handler": "policy",
+      "transition": "Vote",
+      "expectation": "reject",
+      "reason": "ASSET_ENCODING",
+      "mutation_id": "asset_boundary_3",
+      "reference": "asset:proposal_fixture_v1",
+      "evidence_status": "pending"
+    },
+    {
+      "id": "asset_boundary_04",
+      "handler": "policy",
+      "transition": "Queue",
+      "expectation": "reject",
+      "reason": "ASSET_ENCODING",
+      "mutation_id": "asset_boundary_4",
+      "reference": "asset:proposal_fixture_v1",
+      "evidence_status": "pending"
+    },
+    {
+      "id": "asset_boundary_05",
+      "handler": "policy",
+      "transition": "Vote",
+      "expectation": "reject",
+      "reason": "ASSET_ENCODING",
+      "mutation_id": "asset_boundary_5",
+      "reference": "asset:proposal_fixture_v1",
+      "evidence_status": "pending"
+    },
+    {
+      "id": "asset_boundary_06",
+      "handler": "policy",
+      "transition": "Queue",
+      "expectation": "reject",
+      "reason": "ASSET_ENCODING",
+      "mutation_id": "asset_boundary_6",
+      "reference": "asset:proposal_fixture_v1",
+      "evidence_status": "pending"
+    },
+    {
+      "id": "asset_boundary_07",
+      "handler": "policy",
+      "transition": "Vote",
+      "expectation": "reject",
+      "reason": "ASSET_ENCODING",
+      "mutation_id": "asset_boundary_7",
+      "reference": "asset:proposal_fixture_v1",
+      "evidence_status": "pending"
+    },
+    {
+      "id": "asset_boundary_08",
+      "handler": "policy",
+      "transition": "Queue",
+      "expectation": "reject",
+      "reason": "ASSET_ENCODING",
+      "mutation_id": "asset_boundary_8",
+      "reference": "asset:proposal_fixture_v1",
+      "evidence_status": "pending"
+    },
+    {
+      "id": "asset_boundary_09",
+      "handler": "policy",
+      "transition": "Vote",
+      "expectation": "reject",
+      "reason": "ASSET_ENCODING",
+      "mutation_id": "asset_boundary_9",
+      "reference": "asset:proposal_fixture_v1",
+      "evidence_status": "pending"
+    },
+    {
+      "id": "asset_boundary_10",
+      "handler": "policy",
+      "transition": "Queue",
+      "expectation": "reject",
+      "reason": "ASSET_ENCODING",
+      "mutation_id": "asset_boundary_10",
+      "reference": "asset:proposal_fixture_v1",
+      "evidence_status": "pending"
+    },
+    {
+      "id": "asset_boundary_11",
+      "handler": "policy",
+      "transition": "Vote",
+      "expectation": "reject",
+      "reason": "ASSET_ENCODING",
+      "mutation_id": "asset_boundary_11",
+      "reference": "asset:proposal_fixture_v1",
+      "evidence_status": "pending"
+    },
+    {
+      "id": "asset_boundary_12",
+      "handler": "policy",
+      "transition": "Queue",
+      "expectation": "reject",
+      "reason": "ASSET_ENCODING",
+      "mutation_id": "asset_boundary_12",
+      "reference": "asset:proposal_fixture_v1",
+      "evidence_status": "pending"
+    },
+    {
+      "id": "asset_boundary_13",
+      "handler": "policy",
+      "transition": "Vote",
+      "expectation": "reject",
+      "reason": "ASSET_ENCODING",
+      "mutation_id": "asset_boundary_13",
+      "reference": "asset:proposal_fixture_v1",
+      "evidence_status": "pending"
+    },
+    {
+      "id": "asset_boundary_14",
+      "handler": "policy",
+      "transition": "Queue",
+      "expectation": "reject",
+      "reason": "ASSET_ENCODING",
+      "mutation_id": "asset_boundary_14",
+      "reference": "asset:proposal_fixture_v1",
+      "evidence_status": "pending"
+    },
+    {
+      "id": "asset_boundary_15",
+      "handler": "policy",
+      "transition": "Vote",
+      "expectation": "reject",
+      "reason": "ASSET_ENCODING",
+      "mutation_id": "asset_boundary_15",
+      "reference": "asset:proposal_fixture_v1",
+      "evidence_status": "pending"
+    },
+    {
+      "id": "asset_boundary_16",
+      "handler": "policy",
+      "transition": "Queue",
+      "expectation": "reject",
+      "reason": "ASSET_ENCODING",
+      "mutation_id": "asset_boundary_16",
+      "reference": "asset:proposal_fixture_v1",
+      "evidence_status": "pending"
+    },
+    {
+      "id": "asset_boundary_17",
+      "handler": "policy",
+      "transition": "Vote",
+      "expectation": "reject",
+      "reason": "ASSET_ENCODING",
+      "mutation_id": "asset_boundary_17",
+      "reference": "asset:proposal_fixture_v1",
+      "evidence_status": "pending"
+    },
+    {
+      "id": "asset_boundary_18",
+      "handler": "policy",
+      "transition": "Queue",
+      "expectation": "reject",
+      "reason": "ASSET_ENCODING",
+      "mutation_id": "asset_boundary_18",
+      "reference": "asset:proposal_fixture_v1",
+      "evidence_status": "pending"
+    },
+    {
+      "id": "asset_boundary_19",
+      "handler": "policy",
+      "transition": "Vote",
+      "expectation": "reject",
+      "reason": "ASSET_ENCODING",
+      "mutation_id": "asset_boundary_19",
+      "reference": "asset:proposal_fixture_v1",
+      "evidence_status": "pending"
+    },
+    {
+      "id": "asset_boundary_20",
+      "handler": "policy",
+      "transition": "Queue",
+      "expectation": "reject",
+      "reason": "ASSET_ENCODING",
+      "mutation_id": "asset_boundary_20",
+      "reference": "asset:proposal_fixture_v1",
+      "evidence_status": "pending"
+    },
+    {
+      "id": "asset_boundary_21",
+      "handler": "policy",
+      "transition": "Vote",
+      "expectation": "reject",
+      "reason": "ASSET_ENCODING",
+      "mutation_id": "asset_boundary_21",
+      "reference": "asset:proposal_fixture_v1",
+      "evidence_status": "pending"
+    },
+    {
+      "id": "asset_boundary_22",
+      "handler": "policy",
+      "transition": "Queue",
+      "expectation": "reject",
+      "reason": "ASSET_ENCODING",
+      "mutation_id": "asset_boundary_22",
+      "reference": "asset:proposal_fixture_v1",
+      "evidence_status": "pending"
+    },
+    {
+      "id": "asset_boundary_23",
+      "handler": "policy",
+      "transition": "Vote",
+      "expectation": "reject",
+      "reason": "ASSET_ENCODING",
+      "mutation_id": "asset_boundary_23",
+      "reference": "asset:proposal_fixture_v1",
+      "evidence_status": "pending"
+    },
+    {
+      "id": "asset_boundary_24",
+      "handler": "policy",
+      "transition": "Queue",
+      "expectation": "reject",
+      "reason": "ASSET_ENCODING",
+      "mutation_id": "asset_boundary_24",
+      "reference": "asset:proposal_fixture_v1",
+      "evidence_status": "pending"
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+# Start here: prepare Codex to repair VAMS
+
+Read MISSION.md and PLAN.md fully, then inspect FINDINGS.json, STATUS.md, SESSION_HANDOFF.md and the historical audit under ~/vams-evidence/reference-inputs/. First perform M0; do not leap straight to code-wide rewrites or deployment.
+
+1. Establish actual repository root, branch, HEAD, working-tree changes and submodule SHAs. Preserve all user work. Compare current HEAD with the audit baseline; do not reset it.
+2. Enumerate current global/root/nested instructions, overrides, hooks and relevant project configuration. Read AGENTS.md, docs/ARCHITECTURE.md, docs/team/Heart_Brain.md, docs/team/heart_brain_research.md, docs/audit/testnet-profile.json, docs/audit/control-matrix.json, docs/audit/invariant-controls.json and .github/workflows/security-gates.yml. Inspect the referenced audit/deployment scripts and manifests before invoking them. Update stale instructions through a narrow reviewed change.
+3. Verify the Linux CI toolchain versions in ENVIRONMENT.md against actual workflow and lockfiles. Plan necessary downloads/installs; request permission for external networking, system package writes or daemon access. Use a development venv and approved tools. Do not execute repository Windows binaries in WSL or replace pinned dependencies casually.
+4. Run the actual applicable baseline commands from CI, retaining raw output, exit status and skipped/collected counts. A missing dependency, blocked network, failed test, skipped test and passed test are different outcomes. Do not assert a repository failure when only the environment failed.
+5. Inspect the historical reproduction harness. It used a source subset and a gateway fragment. Port its security properties into repository-native tests that import the CURRENT application, and add full HTTP/concurrency/restart and Aiken transaction-context coverage. Preserve the historical evidence unchanged. Verify each F01-F16 against current source.
+6. Populate current evidence and proposed small repair tasks in FINDINGS.json and STATUS.md. Add new findings with NEW- identifiers and map them to existing controls where relevant; do not treat this audit as exhaustive.
+7. Propose the M1 first patch, strict runtime mode validation. Start it only after environment/baseline steps are reliable, or document precisely which independent work can proceed without the blocked subsystem.
+
+M0 output: current commit and environment; instruction conflicts; exact baseline results; source-linked finding revalidation; trust-model/credential blockers; ordered next repair; no readiness claim. No public chain writes or remote repository writes are authorized by this document.

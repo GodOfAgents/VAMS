@@ -1,0 +1,194 @@
+{
+  "command": "bwrap --unshare-net --ro-bind / / --tmpfs /tmp --dev-bind /dev /dev --proc /proc --chdir /home/GodOfAgents/code/VAMS-testnet /home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python -B docs/remediation/m3_f05_2a_unconditional_r4_freeze_pin_r1/probe.py",
+  "count_ledger": {
+    "mutations": "18/21",
+    "negative_cases": "45/55"
+  },
+  "date": "2026-10-03",
+  "evidence_boundary": "This provenance-only follow-up reruns the same supplemental synthetic cases; it adds no registered mutation credit, ledger admission, live-network evidence, or readiness effect.",
+  "inputs": {
+    "aiken": {
+      "path": "/home/GodOfAgents/vams-evidence/toolchains/aiken-1.1.21/unpacked/aiken-x86_64-unknown-linux-musl/aiken",
+      "sha256": "07f3f927f1a8c71fc61273fdff850d9b98edb28dde207c8a32585991f2c88e79"
+    },
+    "aiken_version": "aiken v1.1.21+42babe5",
+    "authority_source": {
+      "path": "cardano/lib/vams/f05_authority.ak",
+      "sha256": "657f30dfc0ecb40f50b2c0442b78f4818de1644f540fb68d76cfb2de72cccdd3"
+    },
+    "expected_freeze_sha256": "df7d882ad8aa26b59692c65457bf888204cfbfdc3586ce2619a99f1749115c6b",
+    "family_manifest": {
+      "path": "docs/remediation/m3_f05_2a_r4_tx_families/seed_reference_and_datum_binding/FAMILY-MANIFEST.json",
+      "sha256": "28f19203e16ed23fba6b5d9fb8d49b634dc9bc5835f099ed157a5a434f0e33cb"
+    },
+    "freeze": {
+      "path": "docs/remediation/m3_f05_2a_r4_family_freeze_r1/FREEZE.json",
+      "sha256": "df7d882ad8aa26b59692c65457bf888204cfbfdc3586ce2619a99f1749115c6b"
+    },
+    "mutation_contract": {
+      "path": "docs/remediation/m3_f05_2a/tx_sim_evidence_contract_r2.json",
+      "sha256": "3510e127d369e9eab24a7ebe5a5dea10daaf55fd9589a297d78776bda940f6e9"
+    },
+    "pinned_python": {
+      "path": "/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python",
+      "sha256": "aa01d96348989f33ed998b42c83e98593b41dba83914d9899730b90c36f2e5c9"
+    },
+    "policy_source": {
+      "path": "cardano/validators/f05_authority_policy.ak",
+      "sha256": "e9d3ac9cbb14b9e7693dc12430234694c82eb52e61d176e1e39992fb9cbeafa8"
+    },
+    "prior_probe_helpers": {
+      "path": "docs/remediation/m3_f05_2a_unconditional_r3_mutation_r1/probe.py",
+      "sha256": "4a3d34273630b4c3249a65c6c5115521b296001d0588b85e92f765cbf73f2eb3"
+    },
+    "probe.py": {
+      "path": "docs/remediation/m3_f05_2a_unconditional_r4_freeze_pin_r1/probe.py",
+      "sha256": "0a4c02a52d1bf5a132690f6f374f31120138460f60713bc897bde87066997ab3"
+    },
+    "public_harness": {
+      "path": "scripts/remediation/test_f05_2a_authority_bootstrap_public.py",
+      "sha256": "f6689e80ab2cbac78a8b05b76917ec0e9eac122e5023f1c37d3dd21afd5d6570"
+    },
+    "python_version": "Python 3.12.14",
+    "r3_registry": {
+      "path": "scripts/remediation/f05_2a_tx_sim_registry.py",
+      "sha256": "c03230249c7e73f6929cc944b7af3e30d98b8168f8abd184fa39332a601a394e"
+    },
+    "r3_runner": {
+      "path": "scripts/remediation/f05_2a_tx_sim_runner_r3.py",
+      "sha256": "3088ade0a316f6af59c04fe3e1675733100b58be826fa22af3c25e40a086ea5c"
+    }
+  },
+  "isolation": "bubblewrap network namespace disabled; checkout read-only; /tmp disposable",
+  "result": {
+    "exit": 0,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "e8c2f819c16197512d680c8f776fa083e4b0aa6ff753f0f7db69e40158e063e9",
+    "structured_result": {
+      "base_policy_id": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+      "cases": [
+        {
+          "classification": {
+            "stage": "compiled_evaluation",
+            "target_script_invoked": true
+          },
+          "cleanup": {
+            "child_reaped": true,
+            "process_group_empty": true,
+            "snapshot_descriptors_closed": true,
+            "status": "clean"
+          },
+          "id": "baseline_seed_missing",
+          "simulator_child_exit": 1,
+          "submitted_sha256": {
+            "raw_inputs": "1f4c86aa7a6d64cc0ebac3bf8633e98b5c91fa7ded58bdb70427fdd9ffa0e778",
+            "raw_outputs": "5a02a590dd2df85f220c273837e014bc5a6c75f6b1dfa8cd9d6770322e89c232",
+            "transaction": "216c52f1803f8ea2de78e3f4c14ff7905ecaaab5dff10a83af2aca9e3c9c80ab"
+          },
+          "target_mint_binding": {
+            "compiled_script_hash": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+            "expected_policy_id": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+            "policy_ids": [
+              "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731"
+            ]
+          },
+          "wrapper_exit": 0
+        },
+        {
+          "classification": {
+            "stage": "script_accepted",
+            "target_script_invoked": true
+          },
+          "cleanup": {
+            "child_reaped": true,
+            "process_group_empty": true,
+            "snapshot_descriptors_closed": true,
+            "status": "clean"
+          },
+          "id": "mutant_positive_control",
+          "simulator_child_exit": 0,
+          "submitted_sha256": {
+            "raw_inputs": "4b20e2b2cf4bd58b1f6e385c90ffd098d583df69d95fbc7b1fcc2591da72b9fe",
+            "raw_outputs": "9cdf345a785f51763bdb43f1b1ba0c20b5545051f03051e6a7bf726ea128c56a",
+            "transaction": "740c34af0327d955279228c901cec1f6770257049f4657c2c74e73fe4e762f02"
+          },
+          "target_mint_binding": {
+            "compiled_script_hash": "1ff0752a9eb66b2a298ca96b504be91dcc2032b19a93522d332f34c9",
+            "expected_policy_id": "1ff0752a9eb66b2a298ca96b504be91dcc2032b19a93522d332f34c9",
+            "policy_ids": [
+              "1ff0752a9eb66b2a298ca96b504be91dcc2032b19a93522d332f34c9"
+            ]
+          },
+          "wrapper_exit": 0
+        },
+        {
+          "classification": {
+            "stage": "script_accepted",
+            "target_script_invoked": true
+          },
+          "cleanup": {
+            "child_reaped": true,
+            "process_group_empty": true,
+            "snapshot_descriptors_closed": true,
+            "status": "clean"
+          },
+          "id": "mutant_exact_seed_missing_context",
+          "simulator_child_exit": 0,
+          "submitted_sha256": {
+            "raw_inputs": "1f4c86aa7a6d64cc0ebac3bf8633e98b5c91fa7ded58bdb70427fdd9ffa0e778",
+            "raw_outputs": "5a02a590dd2df85f220c273837e014bc5a6c75f6b1dfa8cd9d6770322e89c232",
+            "transaction": "0d4e94c23a8b3702de951b428f6d494c8f2447a0bfdc03c429e34ecd6e109cf5"
+          },
+          "target_mint_binding": {
+            "compiled_script_hash": "1ff0752a9eb66b2a298ca96b504be91dcc2032b19a93522d332f34c9",
+            "expected_policy_id": "1ff0752a9eb66b2a298ca96b504be91dcc2032b19a93522d332f34c9",
+            "policy_ids": [
+              "1ff0752a9eb66b2a298ca96b504be91dcc2032b19a93522d332f34c9"
+            ]
+          },
+          "wrapper_exit": 0
+        }
+      ],
+      "count_ledger": {
+        "compiled_mutations": "18/21",
+        "negative_cases": "45/55"
+      },
+      "evidence_class": "synthetic_local_transaction_simulator_only",
+      "family_manifest_sha256": "28f19203e16ed23fba6b5d9fb8d49b634dc9bc5835f099ed157a5a434f0e33cb",
+      "fixture_hashes": {
+        "positive_control": {
+          "raw_inputs": "4b20e2b2cf4bd58b1f6e385c90ffd098d583df69d95fbc7b1fcc2591da72b9fe",
+          "raw_outputs": "9cdf345a785f51763bdb43f1b1ba0c20b5545051f03051e6a7bf726ea128c56a",
+          "transaction": "765c717f16b543c746b88742e8b775cd3ecabca4fef6edd16702184683780a28"
+        },
+        "seed_missing": {
+          "raw_inputs": "1f4c86aa7a6d64cc0ebac3bf8633e98b5c91fa7ded58bdb70427fdd9ffa0e778",
+          "raw_outputs": "5a02a590dd2df85f220c273837e014bc5a6c75f6b1dfa8cd9d6770322e89c232",
+          "transaction": "216c52f1803f8ea2de78e3f4c14ff7905ecaaab5dff10a83af2aca9e3c9c80ab"
+        }
+      },
+      "limitations": [
+        "one paired negative only; full unconditional_success mutation suite not run",
+        "mutant body and Plutus witness are rebound; key-witness ledger validity is not established",
+        "no ledger admission or live-network evidence"
+      ],
+      "mutant_code_sha256": "5d91cb54daa12160e98851f559918e0c15029376f9728549a311a7932f6b0250",
+      "mutant_policy_id": "1ff0752a9eb66b2a298ca96b504be91dcc2032b19a93522d332f34c9",
+      "registered_mutation_credit": false,
+      "schema_version": "f05-unconditional-r4-exact-context-r2",
+      "status": "pass"
+    }
+  },
+  "schema_version": "f05-unconditional-r4-freeze-pin-run-r1",
+  "status": "implementation_verified_review_pending",
+  "verification": [
+    {
+      "command": "python3 -B heredoc: parse probe.py AST; assert expected freeze hash guard; assert newline and no trailing whitespace; parse RUN.stdout and assert pass and three cases",
+      "exit": 0
+    },
+    {
+      "command": "git diff --check",
+      "exit": 0
+    }
+  ]
+}

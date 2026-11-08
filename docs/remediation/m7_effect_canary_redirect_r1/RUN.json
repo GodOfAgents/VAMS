@@ -1,0 +1,109 @@
+{
+  "bandit": {
+    "argv": [
+      "/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/bandit",
+      "-r",
+      "neuron/",
+      "gateway/",
+      "-ll",
+      "-ii",
+      "-f",
+      "json"
+    ],
+    "exit_code": 0,
+    "finding_count": 0,
+    "findings": [],
+    "raw_output_retained": false,
+    "report_parse_ok": true,
+    "severity_counts": {
+      "HIGH": 0,
+      "LOW": 0,
+      "MEDIUM": 0,
+      "UNDEFINED": 0
+    },
+    "stderr_sha256": "82545cad2075b66a954c9474dbda750b66caab3ffdde9e60d9ac5ddac75fc25d",
+    "stdout_sha256": "0ae0f9952fa7609a33d68e2cb29504de2168988bb94dc6de7d730c700a489acd"
+  },
+  "changed_files": {
+    ".github/workflows/security-gates.yml": "baf53503673b70c5185f654f8f694f1feaf98af68ee56e29c83c01ee0cf0593c",
+    "docs/CHANGELOG.md": "cbbc2048c3a2afc9462a4c349818456854121f3e30211beb56e6b9f0272b6416",
+    "neuron/effect_canary.py": "a5ac67887a06d7f747fcfd8fde92e9263ff5b94f569861a4481d301aff973c94",
+    "neuron/tests/test_effect_canary.py": "e4b07ef73ed89a69c26a7acabc6e06ef02bc11cbd17e21120130e6f5ea6b838a"
+  },
+  "checkout": {
+    "branch": "testnet/remediation-20260907",
+    "dirty_tree": true,
+    "head": "829ab544571f12efe50ecb5740f129c8acb3e16f",
+    "implementation_files_are_untracked_dirty_work": true
+  },
+  "date": "2026-10-03",
+  "independent_review": {
+    "caveat": "docs/remediation/m7_bandit_current_r2/RESULT.json is the pre-fix scan with three B310 findings; the accepted post-fix zero-finding result is this package's RESULT.json.",
+    "findings": [
+      "redirect handler rejects redirect before following it",
+      "loopback restriction preserved",
+      "pytest independently reproduced 12 passed",
+      "Bandit independently reproduced zero findings across 190 sources",
+      "all reviewed package hashes match"
+    ],
+    "outcome": "PASS",
+    "scope": "exact integrated source, focused test, Bandit result, hashes, and synthetic-only boundary"
+  },
+  "invariant_impact": {
+    "INV-1": "not_touched",
+    "INV-10": "not_touched",
+    "INV-2": "not_touched",
+    "INV-3": "not_touched",
+    "INV-4": "not_touched",
+    "INV-5": "not_touched",
+    "INV-6": "not_touched",
+    "INV-7": "not_touched",
+    "INV-8": "not_touched",
+    "INV-9": "not_touched"
+  },
+  "outer_command": "bwrap --unshare-net --ro-bind / / --tmpfs /tmp --dev-bind /dev /dev --proc /proc --bind docs/remediation/m7_effect_canary_redirect_r1 docs/remediation/m7_effect_canary_redirect_r1 --chdir /home/GodOfAgents/code/VAMS-testnet --clearenv --setenv PATH /home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin:/usr/bin:/bin --setenv PYTHONDONTWRITEBYTECODE 1 /home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python -B docs/remediation/m7_effect_canary_redirect_r1/run_verification.py",
+  "pytest": {
+    "argv": [
+      "/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python",
+      "-B",
+      "-m",
+      "pytest",
+      "-q",
+      "--tb=short",
+      "-p",
+      "no:cacheprovider",
+      "neuron/tests/test_effect_canary.py"
+    ],
+    "exit_code": 0,
+    "raw_output_retained": false,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "d272175085a0a736749e9d58833fd6064551c365765b9296a05a4bda1087d8f9",
+    "summary": {
+      "duration_seconds": 6.69,
+      "failed": 0,
+      "passed": 12
+    }
+  },
+  "related_initial_bandit_evidence": "docs/remediation/m7_bandit_current_r2/RESULT.json records the pre-fix 3 medium/high-confidence B310 findings; this package captures the post-fix scan.",
+  "runner_sha256": "731587262359de09cfbe880ae59e0fb8af022491d4b4c6ef563fa87fa46afa45",
+  "schema": "m7-effect-canary-redirect-record-v1",
+  "scope": {
+    "deployment_readiness": false,
+    "ledger_evidence": false,
+    "live_network_evidence": false
+  },
+  "source_inventory": {
+    "count_after": 190,
+    "count_before": 190,
+    "sha256_after": "e7093df308dec08988d32fe93be20caaaf31e4277de500102967a088793d08a4",
+    "sha256_before": "e7093df308dec08988d32fe93be20caaaf31e4277de500102967a088793d08a4",
+    "unchanged": true
+  },
+  "status": "PASS",
+  "toolchain": {
+    "bandit": "bandit 1.9.4",
+    "bandit_binary_sha256": "c14fb89c43dad91a351fb8f5da774f7b9f3b5a5e2a757dabb34fbb0f418b0e37",
+    "pytest": "pytest 9.1.1",
+    "python": "3.12.14"
+  }
+}

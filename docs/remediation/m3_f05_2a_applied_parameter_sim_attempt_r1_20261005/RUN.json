@@ -1,0 +1,116 @@
+{
+  "schema_version": "f05-2a-applied-parameter-sim-attempt-r1",
+  "status": "FAILED_BEFORE_TARGET_INVOCATION; no case credit",
+  "fixture_package": {
+    "path": "docs/remediation/m3_f05_2a_applied_parameter_family_r3_20261005",
+    "family_manifest_sha256": "36dd9a8a0adb9ad00ecd4419151380ead30130dec17cc949228b0e122bbcff8f",
+    "root_sha256sums_sha256": "c60fc1dcef3a4f1579d9e9bf0e1f23c67d89fc1087da1cc619775b76bc9e912d",
+    "independent_pre_execution_byte_review": "PASS"
+  },
+  "attempts": [
+    {
+      "label": "duplicate positive control through immutable R3 runner",
+      "argv": [
+        "/home/GodOfAgents/vams-evidence/toolchains/python/bin/python3.12",
+        "/home/GodOfAgents/code/VAMS-testnet/scripts/remediation/f05_2a_tx_sim_runner_r3.py",
+        "--aiken",
+        "/home/GodOfAgents/vams-evidence/toolchains/aiken-1.1.21/aiken",
+        "--tx",
+        "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m3_f05_2a_applied_parameter_family_r3_20261005/applied_keys_duplicate/positive-control.tx.cbor",
+        "--raw-inputs",
+        "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m3_f05_2a_applied_parameter_family_r3_20261005/applied_keys_duplicate/positive-control.raw_inputs.cbor",
+        "--raw-outputs",
+        "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m3_f05_2a_applied_parameter_family_r3_20261005/applied_keys_duplicate/positive-control.raw_outputs.cbor",
+        "--policy-id",
+        "214ee37b919279792e6c21a93f734927290620412e618b2a6c7f7b2f"
+      ],
+      "runner_sha256": "3088ade0a316f6af59c04fe3e1675733100b58be826fa22af3c25e40a086ea5c",
+      "aiken": {
+        "version": "aiken v1.1.21+42babe5",
+        "sha256": "07f3f927f1a8c71fc61273fdff850d9b98edb28dde207c8a32585991f2c88e79"
+      },
+      "submitted": {
+        "transaction_sha256": "15b2c3a851b8c1311f1ad3c959709ee4469159a017998e4959123e36a6e67813",
+        "raw_inputs_sha256": "4b20e2b2cf4bd58b1f6e385c90ffd098d583df69d95fbc7b1fcc2591da72b9fe",
+        "raw_outputs_sha256": "e59a443b81fc76719f49d7a5d5eed89696eb4d607159ca8c26f2dd2fe6580cff",
+        "policy_id": "214ee37b919279792e6c21a93f734927290620412e618b2a6c7f7b2f"
+      },
+      "result": {
+        "wrapper_exit_code": 2,
+        "simulator_child_exit": 1,
+        "stage": "indeterminate",
+        "target_script_invoked": false,
+        "cleanup": "clean",
+        "runner_json": {
+          "cleanup": {
+            "child_reaped": true,
+            "process_group_empty": true,
+            "snapshot_descriptors_closed": true,
+            "status": "clean"
+          },
+          "schema_version": "f05-2a-tx-sim-run-result-r3",
+          "simulator_child_exit": 1,
+          "simulator_result": {
+            "stage": "indeterminate",
+            "target_script_invoked": false
+          },
+          "submitted_sha256": {
+            "raw_inputs": "4b20e2b2cf4bd58b1f6e385c90ffd098d583df69d95fbc7b1fcc2591da72b9fe",
+            "raw_outputs": "e59a443b81fc76719f49d7a5d5eed89696eb4d607159ca8c26f2dd2fe6580cff",
+            "transaction": "15b2c3a851b8c1311f1ad3c959709ee4469159a017998e4959123e36a6e67813"
+          },
+          "submitted_size_bytes": {
+            "raw_inputs": 73,
+            "raw_outputs": 79,
+            "transaction": 5093
+          },
+          "target_mint_binding": {
+            "compiled_script_hash": "214ee37b919279792e6c21a93f734927290620412e618b2a6c7f7b2f",
+            "expected_policy_id": "214ee37b919279792e6c21a93f734927290620412e618b2a6c7f7b2f",
+            "policy_ids": [
+              "214ee37b919279792e6c21a93f734927290620412e618b2a6c7f7b2f"
+            ]
+          },
+          "wrapper_exit_code": 2
+        }
+      }
+    },
+    {
+      "label": "direct Aiken diagnostic on same reviewed positive-control bytes",
+      "argv": [
+        "/home/GodOfAgents/vams-evidence/toolchains/aiken-1.1.21/aiken",
+        "tx",
+        "simulate",
+        "--cbor",
+        "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m3_f05_2a_applied_parameter_family_r3_20261005/applied_keys_duplicate/positive-control.tx.cbor",
+        "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m3_f05_2a_applied_parameter_family_r3_20261005/applied_keys_duplicate/positive-control.raw_inputs.cbor",
+        "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m3_f05_2a_applied_parameter_family_r3_20261005/applied_keys_duplicate/positive-control.raw_outputs.cbor"
+      ],
+      "exit_code": 1,
+      "combined_output": "      Parsing script context",
+      "interpretation": "Context parsing failed before Simulating/ Evaluating Mint[0]; target invocation not established."
+    }
+  ],
+  "stop_rule": "Stopped after first positive control failed before target invocation; no other positive, negative, or mutant controls were run.",
+  "evidence_scope": "local synthetic simulator diagnostic only; not target validator evidence, ledger admission, or live-network evidence",
+  "credit": {
+    "accepted_positive_control": false,
+    "negative_case": null,
+    "mutation": null,
+    "ledger_admission": false,
+    "live_network": false
+  },
+  "ledger_effect": {
+    "case_statuses_modified": false,
+    "classification_overlay_modified": false,
+    "negative_pass": 45,
+    "negative_pending": 10,
+    "mutation_pass": 18,
+    "mutation_pending": 3
+  },
+  "security": {
+    "private_key_material_in_fixture": false,
+    "keys_used": "ephemeral funding keys already reviewed in fixture package; no private key was captured or persisted"
+  },
+  "next_step": "Diagnose why Aiken cannot parse the generated synthetic transaction context; correct fixtures only in a new versioned package, independently review bytes, then retry the bounded family."
+}

@@ -1,0 +1,35 @@
+{
+  "argv": [
+    "/usr/bin/bwrap",
+    "--unshare-net",
+    "--ro-bind",
+    "/",
+    "/",
+    "--bind",
+    "/tmp/vams-insurance-g1-6rva4f6i/cardano",
+    "/tmp/vams-insurance-g1-6rva4f6i/cardano",
+    "--chdir",
+    "/tmp/vams-insurance-g1-6rva4f6i/cardano",
+    "--dev",
+    "/dev",
+    "--proc",
+    "/proc",
+    "--",
+    "/home/GodOfAgents/vams-evidence/toolchains/aiken-1.1.21/unpacked/aiken-x86_64-unknown-linux-musl/aiken",
+    "check",
+    "--deny",
+    "--seed",
+    "20260711",
+    "--max-success",
+    "250"
+  ],
+  "wrapper": [
+    "script",
+    "-q",
+    "-e",
+    "-c",
+    "/usr/bin/bwrap --unshare-net --ro-bind / / --bind /tmp/vams-insurance-g1-6rva4f6i/cardano /tmp/vams-insurance-g1-6rva4f6i/cardano --chdir /tmp/vams-insurance-g1-6rva4f6i/cardano --dev /dev --proc /proc -- /home/GodOfAgents/vams-evidence/toolchains/aiken-1.1.21/unpacked/aiken-x86_64-unknown-linux-musl/aiken check --deny --seed 20260711 --max-success 250",
+    "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m7_insurance_warnings_r1/g1-final/RUN.tty.txt"
+  ],
+  "exit_code": 1
+}

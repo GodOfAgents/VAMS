@@ -1,0 +1,12 @@
+Traceback (most recent call last):
+  File "/home/GodOfAgents/code/VAMS-testnet/scripts/remediation/test_f05_2a_authority_bootstrap_public.py", line 1073, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/home/GodOfAgents/code/VAMS-testnet/scripts/remediation/test_f05_2a_authority_bootstrap_public.py", line 1064, in main
+    result = _run_suite(args.aiken.resolve())
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/GodOfAgents/code/VAMS-testnet/scripts/remediation/test_f05_2a_authority_bootstrap_public.py", line 913, in _run_suite
+    _require_positive_acceptance(observed)
+  File "/home/GodOfAgents/code/VAMS-testnet/scripts/remediation/test_f05_2a_authority_bootstrap_public.py", line 879, in _require_positive_acceptance
+    raise RuntimeError(
+RuntimeError: configured Aiken UPLC evaluator lacks required Plutus builtin verifySignature; UPLC evaluation aborted before an accept/reject verdict

@@ -1,0 +1,58 @@
+{
+  "schema": "m7-npm-audit-sanitized-v1",
+  "results": [
+    {
+      "scope": "all",
+      "command": [
+        "npm",
+        "audit",
+        "--package-lock-only",
+        "--json",
+        "--audit-level=high",
+        "--ignore-scripts"
+      ],
+      "exit_code": 0,
+      "report_parse_ok": true,
+      "raw_output_sha256": "6d4670db52bd61bd1164986e70c6e5baf93b9a50e3494e8b5a4b71ef210eaced",
+      "raw_output_retained": false,
+      "stderr_sha256": "6645281a8b8fdcc235befefb4f549c9f103612aac23c3447122ffffd756534ce",
+      "vulnerability_count": 0,
+      "vulnerabilities": [],
+      "dependency_counts": {
+        "prod": 25,
+        "dev": 233,
+        "optional": 81,
+        "peer": 0,
+        "peerOptional": 0,
+        "total": 257
+      }
+    },
+    {
+      "scope": "production",
+      "command": [
+        "npm",
+        "audit",
+        "--package-lock-only",
+        "--json",
+        "--audit-level=high",
+        "--ignore-scripts",
+        "--omit=dev"
+      ],
+      "exit_code": 0,
+      "report_parse_ok": true,
+      "raw_output_sha256": "6d4670db52bd61bd1164986e70c6e5baf93b9a50e3494e8b5a4b71ef210eaced",
+      "raw_output_retained": false,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "vulnerability_count": 0,
+      "vulnerabilities": [],
+      "dependency_counts": {
+        "prod": 25,
+        "dev": 233,
+        "optional": 81,
+        "peer": 0,
+        "peerOptional": 0,
+        "total": 257
+      }
+    }
+  ]
+}

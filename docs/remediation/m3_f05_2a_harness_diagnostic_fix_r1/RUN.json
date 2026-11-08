@@ -1,0 +1,140 @@
+{
+  "schema_version": "vams-f05-positive-evaluator-diagnostic-fix-v1",
+  "date": "2026-10-03",
+  "status": "independent_review_passed_diagnostic_only",
+  "repository": {
+    "head": "829ab544571f12efe50ecb5740f129c8acb3e16f",
+    "branch": "testnet/remediation-20260907"
+  },
+  "toolchain": {
+    "python": "Python 3.12.14",
+    "pytest": "pytest 9.1.1",
+    "aiken": "aiken v1.1.21+42babe5",
+    "aiken_sha256": "07f3f927f1a8c71fc61273fdff850d9b98edb28dde207c8a32585991f2c88e79",
+    "network": "bwrap --unshare-net",
+    "checkout_mount": "read-only; evidence directory writable"
+  },
+  "previous_harness_sha256": "f6689e80ab2cbac78a8b05b76917ec0e9eac122e5023f1c37d3dd21afd5d6570",
+  "source_sha256": {
+    "scripts/remediation/test_f05_2a_authority_bootstrap_public.py": "5a833ac72694ed2aaffacea64bcc6d068cd43eb3e4e6b9ceaa165edf3e24978a",
+    "scripts/remediation/test_f05_2a_harness_diagnostics.py": "a610772ea5b42ad5e5e785fa22fd1fa1b977cb5e89229c350a74c9b7312272a5",
+    "cardano/lib/vams/f05_authority.ak": "657f30dfc0ecb40f50b2c0442b78f4818de1644f540fb68d76cfb2de72cccdd3",
+    "docs/remediation/m3_f05_2a/tx_sim_evidence_contract_r3_1.json": "0ff2673605ebae030762b44144d67fd634cd53b0261467fbfabede61e5981933",
+    "docs/remediation/m3_f05_2a/authority_bootstrap_public_fixtures.json": "98a05d24d476b1aee2754768322dc4b794e5afb5fabec28ade17a2888285467d",
+    "docs/remediation/m3_f05_design_r2/CONTRACT.json": "fac481585ade94c499da00519a6c64b0ae3513e1e2c67da2f8461c16bdd378b2",
+    "scripts/remediation/f05_2a_tx_sim_runner_r3.py": "3088ade0a316f6af59c04fe3e1675733100b58be826fa22af3c25e40a086ea5c"
+  },
+  "verification": {
+    "unit_command": [
+      "bwrap",
+      "--unshare-net",
+      "--ro-bind",
+      "/",
+      "/",
+      "--tmpfs",
+      "/tmp",
+      "--dev-bind",
+      "/dev",
+      "/dev",
+      "--proc",
+      "/proc",
+      "--bind",
+      "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m3_f05_2a_harness_diagnostic_fix_r1",
+      "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m3_f05_2a_harness_diagnostic_fix_r1",
+      "--chdir",
+      "/home/GodOfAgents/code/VAMS-testnet",
+      "/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python",
+      "-B",
+      "-m",
+      "pytest",
+      "-q",
+      "--tb=short",
+      "-p",
+      "no:cacheprovider",
+      "--import-mode=importlib",
+      "scripts/remediation/test_f05_2a_harness_diagnostics.py"
+    ],
+    "unit_result": {
+      "exit_code": 0,
+      "passed": 3,
+      "failed": 0,
+      "stdout_sha256": "f21802e5e24571b06b077e416af1539fdce6ad55b407e03af6af45b03968cb3b",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "full_harness_result": {
+      "exit_code": 1,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "ff2467ad44ad59b48890ae39c80e1754f520689465c2b3200b724fc015e262fa",
+      "result_json_created": false,
+      "negative_cases_executed": 0,
+      "mutations_executed": 0,
+      "classification": "evaluator capability failure during UPLC evaluation; no validator verdict or F05 case credit"
+    },
+    "syntax_check": {
+      "command": "python3 -m py_compile scripts/remediation/test_f05_2a_authority_bootstrap_public.py scripts/remediation/test_f05_2a_harness_diagnostics.py",
+      "exit_code": 0
+    },
+    "full_harness_supervisor_argv": [
+      "python3",
+      "-B",
+      "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m3_f05_2a_harness_diagnostic_fix_r1/run_harness_capture.py"
+    ],
+    "full_harness_child_argv": [
+      "bwrap",
+      "--unshare-net",
+      "--ro-bind",
+      "/",
+      "/",
+      "--tmpfs",
+      "/tmp",
+      "--dev-bind",
+      "/dev",
+      "/dev",
+      "--proc",
+      "/proc",
+      "--bind",
+      "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m3_f05_2a_harness_diagnostic_fix_r1",
+      "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m3_f05_2a_harness_diagnostic_fix_r1",
+      "--chdir",
+      "/home/GodOfAgents/code/VAMS-testnet",
+      "/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python",
+      "-B",
+      "scripts/remediation/test_f05_2a_authority_bootstrap_public.py",
+      "--aiken",
+      "/home/GodOfAgents/vams-evidence/toolchains/aiken-1.1.21/unpacked/aiken-x86_64-unknown-linux-musl/aiken",
+      "--output",
+      "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m3_f05_2a_harness_diagnostic_fix_r1/RESULT.json"
+    ],
+    "supervisor_result": {
+      "exit_code": 0,
+      "stdout_sha256": "3c787a745d25ba7d0747b0e43809cb7018cbd16f0ea8e5e589fc9367b03c1f5c",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "finding": {
+    "direct_uplc_exit": 101,
+    "diagnostic": "Default Function not found - verifySignature",
+    "new_harness_error": "configured Aiken UPLC evaluation aborted on unsupported Plutus builtin verifySignature before an accept/reject verdict was produced",
+    "uplc_evaluation_attempted": true,
+    "validator_accept_reject_verdict_produced": false,
+    "evaluator_invoked": true,
+    "validator_execution_verdict": "none; evaluator aborted on unsupported verifySignature before accept/reject"
+  },
+  "evidence_contract": {
+    "r3_1_scope": "single #33 overlay; other cases and mutations remain pending",
+    "negative_case_credit": 0,
+    "mutation_credit": 0,
+    "ledger_admission": false,
+    "live_network_evidence": false
+  },
+  "limits": "Harness diagnostic classification only. No validator, fixture, evidence contract, or transaction bytes changed. The full F05 suite remains unexecuted beyond the positive evaluator setup. No private credentials or live keys; harness-generated test-only ephemeral committee keys remain in anonymous memory and are closed.",
+  "changes_by_run": [
+    "scripts/remediation/test_f05_2a_authority_bootstrap_public.py",
+    "scripts/remediation/test_f05_2a_harness_diagnostics.py"
+  ],
+  "independent_review": {
+    "status": "PASS",
+    "scope": "diagnostic classification, package integrity, current source hashes, and captured exits; no F05 case or mutation acceptance",
+    "review_file": "REVIEW.md"
+  }
+}

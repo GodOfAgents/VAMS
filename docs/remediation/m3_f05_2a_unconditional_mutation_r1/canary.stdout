@@ -1,0 +1,27 @@
+{
+  "canaries": [
+    {
+      "exit": 0,
+      "id": "valid",
+      "result": "pass",
+      "target_invoked": true
+    },
+    {
+      "exit": 1,
+      "id": "invalid_signature",
+      "result": "pass",
+      "target_invoked": true
+    },
+    {
+      "exit": 1,
+      "id": "wrong_credential",
+      "result": "pass",
+      "target_invoked": true
+    }
+  ],
+  "mode": "transaction_canaries_only",
+  "registry": "not_run_pending_independent_reachability_review",
+  "runtime": "aiken v1.1.21+42babe5",
+  "runtime_sha256": "07f3f927f1a8c71fc61273fdff850d9b98edb28dde207c8a32585991f2c88e79",
+  "status": "pass"
+}

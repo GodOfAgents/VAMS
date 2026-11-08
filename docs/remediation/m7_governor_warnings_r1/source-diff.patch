@@ -1,0 +1,16 @@
+--- /home/GodOfAgents/code/VAMS-testnet/docs/remediation/m7_governor_warnings_r1/baseline/governor.ak	2026-10-02 20:50:59.223189477 +0000
++++ /home/GodOfAgents/code/VAMS-testnet/docs/remediation/m7_governor_warnings_r1/candidate/governor.ak	2026-10-02 20:50:59.223436386 +0000
+@@ -1,11 +1,10 @@
+ use aiken/collection/list
+-use aiken/interval.{Finite}
+-use cardano/address.{Script, VerificationKey}
++use cardano/address.{Script}
+ use cardano/assets
+ use cardano/transaction.{InlineDatum, Input, OutputReference, Transaction}
+ use vams/governance.{
+   bounded_tx, config_valid, finite_after, finite_before, finite_interval, isqrt,
+-  max_voters, max_voting_duration_ms, proposal_immutable, signer_threshold,
++  max_voters, proposal_immutable,
+   unique_bytes, valid_domain, valid_hash, valid_lock, valid_vkh,
+ }
+ use vams/types.{

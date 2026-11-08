@@ -1,0 +1,42 @@
+{
+  "evidence": "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m7_f05_identity_postpin_r1/run2",
+  "pass": true,
+  "builds": [
+    {
+      "label": "a",
+      "policy_id": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+      "state_hash": "b4a7b5de32fa88554a4eb44d8e8235e24e738a1c1d1fe1764a0a3e66",
+      "compiled_sha256": "fc8726cff89172d4944e257a2eb2659d35363c8e5a4d423ed8a2112eb5af7e59",
+      "matches_original_artifact": true,
+      "matches_tx_witness": true,
+      "script_hash": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+      "encoded_bytes": 3467,
+      "decoded_program_bytes": 3464,
+      "parameters_cbor": [
+        "d8799f5820aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa07ff",
+        "9f58200f9e7d3242059f40158094de9b9f35491f02af6061212ffa63ea555e09ebd2585820d149658ea1009933d948573e2e447b5e17d031e6a90423a7522c4e449fbe009a5820de8ad1ded00aab5700c0f6b51057b74034b38f4efd1bd78a988ff9f82bc24d845820ef6d7b49b4e7f1d78156f4f33372253555123d91bc34155b253268fa10c35b955820f894dc38674c091488082554bd5e5f7f6ed8d85c5fbf894307e3a3f42e505191ff"
+      ],
+      "blueprint_sha256": "c4230410d0caac45f2c71d36e45a539c78087697128ce1533306d17e96a48008",
+      "lock_sha256": "7c69f0a484d3b42862dc0ab0773cf6b3edf72709c921b2ad3648a0753af8cafc",
+      "lock_nonvolatile_equal": true
+    },
+    {
+      "label": "b",
+      "policy_id": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+      "state_hash": "b4a7b5de32fa88554a4eb44d8e8235e24e738a1c1d1fe1764a0a3e66",
+      "compiled_sha256": "fc8726cff89172d4944e257a2eb2659d35363c8e5a4d423ed8a2112eb5af7e59",
+      "matches_original_artifact": true,
+      "matches_tx_witness": true,
+      "script_hash": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+      "encoded_bytes": 3467,
+      "decoded_program_bytes": 3464,
+      "parameters_cbor": [
+        "d8799f5820aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa07ff",
+        "9f58200f9e7d3242059f40158094de9b9f35491f02af6061212ffa63ea555e09ebd2585820d149658ea1009933d948573e2e447b5e17d031e6a90423a7522c4e449fbe009a5820de8ad1ded00aab5700c0f6b51057b74034b38f4efd1bd78a988ff9f82bc24d845820ef6d7b49b4e7f1d78156f4f33372253555123d91bc34155b253268fa10c35b955820f894dc38674c091488082554bd5e5f7f6ed8d85c5fbf894307e3a3f42e505191ff"
+      ],
+      "blueprint_sha256": "c4230410d0caac45f2c71d36e45a539c78087697128ce1533306d17e96a48008",
+      "lock_sha256": "7c69f0a484d3b42862dc0ab0773cf6b3edf72709c921b2ad3648a0753af8cafc",
+      "lock_nonvolatile_equal": true
+    }
+  ]
+}

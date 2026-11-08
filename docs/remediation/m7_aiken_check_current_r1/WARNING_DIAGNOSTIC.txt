@@ -1,0 +1,418 @@
+    Compiling GodOfAgents/vams-cardano 0.1.0 (.)
+    Resolving GodOfAgents/vams-cardano
+        Using uncertain local version for aiken-lang/stdlib
+        ↳ You're seeing this message because the package version is unpinned and the network is not accessible.
+        Using uncertain local version for aiken-lang/fuzz
+        ↳ You're seeing this message because the package version is unpinned and the network is not accessible.
+      Fetched 2 packages in 10.05s from cache
+    Compiling aiken-lang/stdlib v2 (./build/packages/aiken-lang-stdlib)
+    Compiling aiken-lang/fuzz v2 (./build/packages/aiken-lang-fuzz)
+   Collecting all tests scenarios across all modules
+      Testing ...
+
+    ┍━ agent_nft ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │ PASS [mem:    200.0, cpu:   16.1 K] identity_domain_is_versioned
+    │ PASS [mem:  11.70 K, cpu:   9.61 M] identity_name_is_blake2b_256
+    ┕━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 2 tests | 2 passed | 0 failed
+
+
+    ┍━ agent_registry ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │ PASS [mem:    200.0, cpu:   16.1 K] min_stake_is_one_thousand_ada
+    │ PASS [mem:    200.0, cpu:   16.1 K] initial_reputation_is_fifty_percent
+    │ PASS [mem:   3.58 K, cpu:   2.27 M] did_lower_bound
+    │ PASS [mem:   4.08 K, cpu:  11.90 M] did_upper_bound
+    │ PASS [mem:   2.50 K, cpu: 612.24 K] did_out_of_bounds
+    │ PASS [mem:   3.20 K, cpu: 800.29 K] did_above_upper_bound
+    │ PASS [mem:    114.0, cpu: 246.46 K] did_rejects_malformed_utf8_bytes
+    │ · with traces
+    │ | Decoding utf8
+    │ PASS [mem:   3.58 K, cpu:   2.27 M] did_accepts_non_hex_utf8_presentation
+    │ PASS [mem:   7.14 K, cpu:   4.70 M] option_b_raw_utf8_vector_derives_frozen_identity
+    │ PASS [mem:   7.76 K, cpu:   4.90 M] option_b_ascii_hex_reinterpretation_changes_identity
+    ┕━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 10 tests | 10 passed | 0 failed
+
+
+    ┍━ f05_authority_policy.test ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │ PASS [mem: 523.29 K, cpu: 458.92 M] public_applied_policy_fixture_accepts
+    │ PASS [mem: 127.51 K, cpu:  35.05 M] public_seed_missing_regression_rejects
+    │ · with traces
+    │ | the validator crashed / exited prematurely
+    │ x <expected> count_seed_input(tx.inputs, genesis_ref) == 1
+    ┕━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 2 tests | 2 passed | 0 failed
+
+
+    ┍━ insurance_fund ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │ PASS [mem:    200.0, cpu:   16.1 K] max_payout_is_50_percent
+    │ PASS [mem:    200.0, cpu:   16.1 K] min_claim_is_1_ada
+    │ PASS [mem:    200.0, cpu:   16.1 K] claim_window_is_7_days
+    │ PASS [mem:   8.82 K, cpu:  22.32 M] claim_identity_vector_matches_independent_cbor
+    │ PASS [mem: 577.35 K, cpu: 199.46 M] valid_genesis_context
+    │ PASS [mem:  37.65 K, cpu:  12.90 M] genesis_interval_below_limit_accepts
+    │ PASS [mem:  37.65 K, cpu:  12.90 M] genesis_interval_at_limit_accepts
+    │ PASS [mem:  38.26 K, cpu:  13.08 M] genesis_interval_above_limit_rejects
+    │ PASS [mem:  15.01 K, cpu:   5.51 M] genesis_unbounded_interval_rejects
+    │ PASS [mem:  37.45 K, cpu:  12.80 M] genesis_reversed_interval_rejects
+    │ PASS [mem: 171.46 K, cpu:  52.65 M] extra_signatories_at_limit_accepts
+    │ PASS [mem:  40.17 K, cpu:  16.23 M] extra_signatories_above_limit_rejects
+    │ PASS [mem:  49.29 K, cpu:  15.75 M] duplicate_extra_signatories_rejects
+    │ PASS [mem:   1.20 M, cpu: 496.62 M] valid_submit_context
+    │ PASS [mem:   1.14 M, cpu: 456.08 M] submit_without_claimant_signature_rejects
+    │ · with traces
+    │ | the validator crashed / exited prematurely
+    │ x <expected> is_signed_by(tx.extra_signatories, claimant_vkh)
+    │ PASS [mem:   1.43 M, cpu: 612.90 M] valid_approve_context
+    │ PASS [mem:   1.36 M, cpu: 537.96 M] valid_payout_context
+    │ PASS [mem:   1.13 M, cpu: 454.22 M] valid_cancel_context
+    │ PASS [mem:   1.11 M, cpu: 447.46 M] valid_expire_context
+    │ PASS [mem: 876.70 K, cpu: 309.55 M] deposit_empty_proof_rejects
+    │ PASS [mem: 876.70 K, cpu: 309.55 M] deposit_structural_proof_rejects
+    │ PASS [after 250 tests] prop_deposit_always_rejects
+    │ PASS [mem: 359.09 K, cpu: 125.31 M] missing_state_token_rejects
+    │ · with traces
+    │ | the validator crashed / exited prematurely
+    │ x <expected> [continuing_output] =
+    │     outputs_with_asset(tx.outputs, policy_id, state_asset_name)
+    │ PASS [mem: 422.29 K, cpu: 144.44 M] duplicated_state_token_output_rejects
+    │ · with traces
+    │ | the validator crashed / exited prematurely
+    │ x <expected> [continuing_output] =
+    │     outputs_with_asset(tx.outputs, policy_id, state_asset_name)
+    │ PASS [mem: 380.64 K, cpu: 132.78 M] substituted_state_token_rejects
+    │ · with traces
+    │ | the validator crashed / exited prematurely
+    │ x <expected> [continuing_output] =
+    │     outputs_with_asset(tx.outputs, policy_id, state_asset_name)
+    │ PASS [mem: 317.66 K, cpu: 114.46 M] normal_state_mint_rejects
+    │ · with traces
+    │ | the validator crashed / exited prematurely
+    │ x <expected> dict.to_pairs(assets.tokens(tx.mint, policy_id)) == []
+    │ PASS [mem: 318.03 K, cpu: 133.91 M] normal_state_burn_rejects
+    │ · with traces
+    │ | the validator crashed / exited prematurely
+    │ x <expected> dict.to_pairs(assets.tokens(tx.mint, policy_id)) == []
+    │ PASS [mem: 296.86 K, cpu: 109.43 M] missing_continuing_output_rejects
+    │ · with traces
+    │ | the validator crashed / exited prematurely
+    │ x <expected> [continuing_output] =
+    │     outputs_with_asset(tx.outputs, policy_id, state_asset_name)
+    │ PASS [mem:   1.21 M, cpu: 496.87 M] redirected_fund_value_rejects
+    │ · with traces
+    │ | the validator crashed / exited prematurely
+    │ x <expected> next.total_balance == datum.total_balance
+    │ PASS [mem: 695.60 K, cpu: 230.68 M] altered_non_ada_fund_asset_rejects
+    │ · with traces
+    │ | the validator crashed / exited prematurely
+    │ x <expected>
+    │     assets.without_lovelace(own_input.output.value) == assets.without_lovelace(
+    │       continuing_output.value,
+    │     )
+    │ PASS [mem: 589.98 K, cpu: 193.93 M] output_datum_balance_mismatch_rejects
+    │ · with traces
+    │ | the validator crashed / exited prematurely
+    │ x <expected> next.total_balance == assets.lovelace_of(continuing_output.value)
+    │ PASS [mem: 548.84 K, cpu: 183.78 M] input_datum_balance_mismatch_rejects
+    │ · with traces
+    │ | the validator crashed / exited prematurely
+    │ x <expected> datum.total_balance == assets.lovelace_of(own_input.output.value)
+    │ PASS [mem: 864.35 K, cpu: 332.66 M] duplicated_claim_identity_rejects
+    │ · with traces
+    │ | the validator crashed / exited prematurely
+    │ x <expected> valid_fund_state(datum, policy_id, state_asset_name)
+    │ PASS [mem: 907.00 K, cpu: 364.51 M] duplicated_claim_nonce_rejects
+    │ · with traces
+    │ | the validator crashed / exited prematurely
+    │ x <expected> valid_fund_state(datum, policy_id, state_asset_name)
+    │ PASS [mem: 846.05 K, cpu: 328.07 M] guardian_policy_mutation_rejects
+    │ · with traces
+    │ | the validator crashed / exited prematurely
+    │ x <expected> valid_fund_state(next, policy_id, state_asset_name)
+    │ PASS [mem:   1.10 M, cpu: 437.78 M] threshold_mutation_rejects
+    │ · with traces
+    │ | the validator crashed / exited prematurely
+    │ x <expected> immutable_policy(datum, next)
+    │ PASS [mem:   1.08 M, cpu: 432.70 M] payout_cap_mutation_rejects
+    │ · with traces
+    │ | the validator crashed / exited prematurely
+    │ x <expected> immutable_policy(datum, next)
+    │ PASS [mem: 993.92 K, cpu: 377.65 M] policy_epoch_mutation_rejects
+    │ · with traces
+    │ | the validator crashed / exited prematurely
+    │ x <expected> valid_fund_state(next, policy_id, state_asset_name)
+    │ PASS [mem:   1.14 M, cpu: 455.20 M] wrong_submission_nonce_rejects
+    │ · with traces
+    │ | the validator crashed / exited prematurely
+    │ x <expected> claim_nonce == datum.next_claim_nonce
+    │ PASS [mem:   1.05 M, cpu: 419.53 M] wrong_derived_claim_identity_rejects
+    │ · with traces
+    │ | the validator crashed / exited prematurely
+    │ x <expected> valid_fund_state(next, policy_id, state_asset_name)
+    │ PASS [mem: 972.04 K, cpu: 368.37 M] malformed_evidence_rejects
+    │ · with traces
+    │ | the validator crashed / exited prematurely
+    │ x <expected> valid_fund_state(next, policy_id, state_asset_name)
+    │ PASS [mem: 971.34 K, cpu: 367.87 M] payout_address_not_owned_by_claimant_rejects
+    │ · with traces
+    │ | the validator crashed / exited prematurely
+    │ x <expected> valid_fund_state(next, policy_id, state_asset_name)
+    │ PASS [mem:   1.16 M, cpu: 462.46 M] excessive_submission_amount_rejects
+    │ · with traces
+    │ | the validator crashed / exited prematurely
+    │ x <expected> amount <= apply_bps(datum.total_balance, datum.max_payout_bps)
+    │ PASS [mem:   1.12 M, cpu: 449.45 M] overlong_submission_interval_rejects
+    │ · with traces
+    │ | the validator crashed / exited prematurely
+    │ x <expected> finite_interval(tx, max_submission_interval_ms)
+    │ PASS [mem:   1.29 M, cpu: 565.90 M] unknown_claim_approval_rejects
+    │ · with traces
+    │ | the validator crashed / exited prematurely
+    │ x <expected> [claim] = claims_with_id(datum.pending_claims, claim_id)
+    │ PASS [mem:   1.18 M, cpu: 503.69 M] duplicate_guardian_approval_rejects
+    │ · with traces
+    │ | the validator crashed / exited prematurely
+    │ x <expected> valid_fund_state(next, policy_id, state_asset_name)
+    │ PASS [mem:   1.31 M, cpu: 554.06 M] unauthorized_guardian_approval_rejects
+    │ · with traces
+    │ | the validator crashed / exited prematurely
+    │ x <expected> [guardian] =
+    │     list.filter(
+    │       datum.guardians,
+    │       fn(candidate) { list.has(tx.extra_signatories, candidate) },
+    │     )
+    │ PASS [mem:   1.38 M, cpu: 594.58 M] multiple_guardians_in_one_approval_rejects
+    │ · with traces
+    │ | the validator crashed / exited prematurely
+    │ x <expected> [guardian] =
+    │     list.filter(
+    │       datum.guardians,
+    │       fn(candidate) { list.has(tx.extra_signatories, candidate) },
+    │     )
+    │ PASS [mem:   1.14 M, cpu: 460.43 M] payout_without_threshold_rejects
+    │ · with traces
+    │ | the validator crashed / exited prematurely
+    │ x <expected> list.length(claim.approvers) >= datum.approval_threshold
+    │ PASS [mem:   1.18 M, cpu: 475.61 M] excessive_payout_at_execution_rejects
+    │ · with traces
+    │ | the validator crashed / exited prematurely
+    │ x <expected> claim.amount <= apply_bps(datum.total_balance, datum.max_payout_bps)
+    │ PASS [mem:   1.27 M, cpu: 505.96 M] substituted_payout_recipient_rejects
+    │ · with traces
+    │ | the validator crashed / exited prematurely
+    │ x <expected> [payout_output] =
+    │     list.filter(
+    │       tx.outputs,
+    │       fn(output) { output.address == claim.payout_address },
+    │     )
+    │ PASS [mem:   1.29 M, cpu: 513.38 M] substituted_payout_amount_rejects
+    │ · with traces
+    │ | the validator crashed / exited prematurely
+    │ x <expected> assets.lovelace_of(payout_output.value) == claim.amount
+    │ PASS [mem:   1.31 M, cpu: 521.26 M] payout_with_non_lovelace_asset_rejects
+    │ · with traces
+    │ | the validator crashed / exited prematurely
+    │ x <expected> assets.without_lovelace(payout_output.value) == assets.zero
+    │ PASS [mem:   1.48 M, cpu: 574.13 M] claimant_funded_output_rejects
+    │ PASS [mem:   1.32 M, cpu: 575.22 M] expired_approval_rejects
+    │ · with traces
+    │ | the validator crashed / exited prematurely
+    │ x <expected> finite_before_or_at(tx, claim.expires_at)
+    │ PASS [mem:   1.43 M, cpu: 612.90 M] approval_ending_at_expiry_is_valid
+    │ PASS [mem:   1.16 M, cpu: 467.07 M] payout_ending_at_expiry_rejects
+    │ · with traces
+    │ | the validator crashed / exited prematurely
+    │ x <expected> finite_strictly_before(tx, claim.expires_at)
+    │ PASS [mem:   1.10 M, cpu: 444.71 M] cancel_ending_at_expiry_rejects
+    │ · with traces
+    │ | the validator crashed / exited prematurely
+    │ x <expected> finite_strictly_before(tx, claim.expires_at)
+    │ PASS [mem:   1.16 M, cpu: 467.02 M] expired_payout_rejects
+    │ · with traces
+    │ | the validator crashed / exited prematurely
+    │ x <expected> finite_strictly_before(tx, claim.expires_at)
+    │ PASS [mem:   1.08 M, cpu: 439.90 M] premature_expiry_rejects
+    │ · with traces
+    │ | the validator crashed / exited prematurely
+    │ x <expected> finite_at_or_after(tx, claim.expires_at)
+    │ PASS [mem:   1.10 M, cpu: 446.70 M] non_claimant_cancel_rejects
+    │ · with traces
+    │ | the validator crashed / exited prematurely
+    │ x <expected> is_signed_by(tx.extra_signatories, claim.claimant_vkh)
+    │ PASS [mem: 910.92 K, cpu: 343.71 M] repeated_payout_rejects
+    │ · with traces
+    │ | the validator crashed / exited prematurely
+    │ x <expected> [claim] = claims_with_id(datum.pending_claims, claim_id)
+    │ PASS [mem:   1.44 M, cpu: 601.09 M] payout_retaining_selected_claim_rejects
+    │ · with traces
+    │ | the validator crashed / exited prematurely
+    │ x <expected> next.pending_claims == remove_claim(datum.pending_claims, claim_id)
+    │ PASS [mem: 931.34 K, cpu: 348.52 M] repeated_cancel_rejects
+    │ · with traces
+    │ | the validator crashed / exited prematurely
+    │ x <expected> [claim] = claims_with_id(datum.pending_claims, claim_id)
+    │ PASS [mem: 930.92 K, cpu: 347.04 M] repeated_expiry_rejects
+    │ · with traces
+    │ | the validator crashed / exited prematurely
+    │ x <expected> [claim] = claims_with_id(datum.pending_claims, claim_id)
+    │ PASS [mem:   1.35 M, cpu: 639.53 M] claim_capacity_overflow_rejects
+    │ · with traces
+    │ | the validator crashed / exited prematurely
+    │ x <expected> valid_fund_state(next, policy_id, state_asset_name)
+    │ PASS [mem: 188.17 K, cpu:  63.29 M] guardian_cap_below_accepts
+    │ PASS [mem: 229.54 K, cpu:  76.27 M] guardian_cap_at_accepts
+    │ PASS [mem:  94.00 K, cpu:  36.55 M] guardian_cap_above_rejects
+    │ PASS [mem:   7.37 K, cpu:   5.49 M] fund_datum_byte_cap_boundaries
+    │ PASS [mem:  85.27 K, cpu:  25.19 M] genesis_missing_seed_rejects
+    │ · with traces
+    │ | the validator crashed / exited prematurely
+    │ x <expected> finite_interval(tx, max_submission_interval_ms)
+    │ PASS [mem: 106.26 K, cpu:  30.16 M] genesis_duplicate_seed_rejects
+    │ · with traces
+    │ | the validator crashed / exited prematurely
+    │ x <expected> finite_interval(tx, max_submission_interval_ms)
+    │ PASS [mem: 106.23 K, cpu:  30.09 M] genesis_non_singleton_mint_rejects
+    │ · with traces
+    │ | the validator crashed / exited prematurely
+    │ x <expected> finite_interval(tx, max_submission_interval_ms)
+    ┕━━━━━━━━━━━━━━━━━━━━━━━━━━━━ with --seed=20260711 → 73 tests | 73 passed | 0 failed
+
+
+    ┍━ vams/icb ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │ PASS [mem:   2.50 K, cpu: 612.24 K] verify_bridge_proof_short
+    │ PASS [mem:   2.00 K, cpu: 456.19 K] verify_bridge_proof_long
+    │ PASS [mem:   1.30 K, cpu: 268.14 K] verify_mithril_proof_valid
+    │ PASS [mem:   1.30 K, cpu: 268.14 K] is_from_polygon_true
+    │ PASS [mem:   1.80 K, cpu: 424.19 K] is_from_polygon_false
+    │ PASS [mem:   1.30 K, cpu: 268.14 K] is_valid_nonce_increasing
+    │ PASS [mem:   1.80 K, cpu: 424.19 K] is_valid_nonce_replay
+    │ PASS [mem:   1.80 K, cpu: 424.19 K] is_valid_nonce_reorder
+    │ PASS [after 250 tests] prop_nonce_replay_always_rejected
+    │ PASS [after 250 tests] prop_nonce_strictly_increases
+    ┕━━━━━━━━ with --seed=20260711 → 10 tests | 10 passed | 0 failed
+
+
+    ┍━ vams/utils ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │ PASS [mem:   2.40 K, cpu: 572.53 K] isqrt_zero
+    │ PASS [mem:   3.10 K, cpu: 760.58 K] isqrt_one
+    │ PASS [mem:   6.61 K, cpu:   1.80 M] isqrt_four
+    │ PASS [mem:   9.81 K, cpu:   2.80 M] isqrt_nine
+    │ PASS [mem:  32.25 K, cpu:   9.78 M] isqrt_large
+    │ PASS [mem:   9.81 K, cpu:   2.80 M] isqrt_non_perfect
+    │ PASS [mem:    200.0, cpu:   16.1 K] apply_bps_5_percent
+    │ PASS [mem:    200.0, cpu:   16.1 K] apply_bps_100_percent
+    │ PASS [mem:   2.00 K, cpu: 456.19 K] in_range_within
+    │ PASS [mem:   2.50 K, cpu: 612.24 K] in_range_below
+    │ PASS [mem:   7.60 K, cpu:   1.75 M] in_range_boundary
+    │ PASS [after 250 tests] prop_isqrt_bounds
+    │ PASS [after 250 tests] prop_apply_bps_is_bounded
+    │ PASS [after 250 tests] prop_apply_bps_monotonic_in_rate
+    │ PASS [after 250 tests] prop_in_range_matches_ordering
+    ┕━━━ with --seed=20260711 → 15 tests | 15 passed | 0 failed
+
+
+    ┍━ vams/vdso ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │ PASS [mem:  79.31 K, cpu:  31.54 M] cardano_read_preserves_state
+    │ PASS [mem:  91.22 K, cpu:  35.54 M] cardano_accumulate_increments_version
+    │ PASS [mem:  69.57 K, cpu:  27.16 M] cardano_reserve_fails_closed
+    │ PASS [mem:  69.82 K, cpu:  26.58 M] cardano_value_bearing_accumulate_fails_closed
+    │ PASS [mem:    805.0, cpu:   2.46 M] keccak_empty_matches_shared_vector
+    │ PASS [mem:   2.46 K, cpu: 715.29 K] polygon_host_wire_is_zero
+    │ PASS [mem:   2.46 K, cpu: 715.29 K] cardano_host_wire_is_one
+    │ PASS [mem:    805.0, cpu:   5.50 M] shared_unsigned_intent_matches_cross_language_intent_id
+    │ PASS [mem:  21.04 K, cpu:   8.04 M] cross_host_settlement_accepts_separated_proof_and_payload
+    │ PASS [mem:  45.72 K, cpu:  18.99 M] cross_host_settlement_rejects_same_host_empty_or_aliased_fields
+    ┕━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 10 tests | 10 passed | 0 failed
+
+
+
+  ⚠ I came across an unused variable: bootstrap_ref
+    ╭─[./validators/agent_nft.ak:21:21]
+ 20 │ 
+ 21 │ validator agent_nft(bootstrap_ref: OutputReference) {
+    ·                     ───────────────┬──────────────
+    ·                                    ╰── unused identifier
+ 22 │   mint(_redeemer: AgentNftRedeemer, _policy_id: PolicyId, _tx: Transaction) { False }
+    ╰────
+  help: No big deal, but you might want to remove it or use a discard
+        _bootstrap_ref to get rid of that warning.
+        
+        You should also know that, unlike in typical imperative languages,
+        unused let-bindings are fully_ignored in Aiken.
+        They will not produce any side-effect (such as error calls). Programs
+        with or without unused variables are semantically equivalent.
+        
+        If you do want to enforce some side-effects, use expect with a discard
+        _bootstrap_ref instead of let.
+        
+
+
+  ⚠ I discovered an unused imported value: tokens
+    ╭─[./validators/agent_nft.ak:11:31]
+ 10 │ use aiken/primitive/bytearray
+ 11 │ use cardano/assets.{PolicyId, tokens}
+    ·                               ───┬──
+    ·                                  ╰── unused import
+ 12 │ use cardano/transaction.{OutputReference, Transaction}
+    ╰────
+  help: No big deal, but you might want to remove it to get rid of that
+        warning.
+
+
+  ⚠ I discovered an unused imported value: BurnIdentity
+    ╭─[./validators/agent_nft.ak:13:35]
+ 12 │ use cardano/transaction.{OutputReference, Transaction}
+ 13 │ use vams/types.{AgentNftRedeemer, BurnIdentity, MintIdentity}
+    ·                                   ──────┬─────
+    ·                                         ╰── unused import
+ 14 │ 
+    ╰────
+  help: No big deal, but you might want to remove it to get rid of that
+        warning.
+
+
+  ⚠ I found an unused private function: valid_did
+    ╭─[./validators/agent_nft.ak:54:1]
+ 53 │ 
+ 54 │ fn valid_did(did: ByteArray) -> Bool {
+    · ──────────────────┬─────────────────
+    ·                   ╰── unused (private) function
+ 55 │   bytearray.length(did) >= min_did_length && bytearray.length(did) <= max_did_length
+    ╰────
+  help: Perhaps your forgot to make it public using the pub keyword?
+        Otherwise, you might want to get rid of it altogether.
+
+
+  ⚠ I discovered an unused imported value: MintIdentity
+    ╭─[./validators/agent_nft.ak:13:49]
+ 12 │ use cardano/transaction.{OutputReference, Transaction}
+ 13 │ use vams/types.{AgentNftRedeemer, BurnIdentity, MintIdentity}
+    ·                                                 ──────┬─────
+    ·                                                       ╰── unused import
+ 14 │ 
+    ╰────
+  help: No big deal, but you might want to remove it to get rid of that
+        warning.
+
+
+  ⚠ I discovered an unused imported module: list
+   ╭─[./validators/agent_nft.ak:8:1]
+ 7 │ use aiken/collection/dict
+ 8 │ use aiken/collection/list
+   · ────────────┬────────────
+   ·             ╰── unused module
+ 9 │ use aiken/crypto.{blake2b_256}
+   ╰────
+  help: No big deal, but you might want to remove it to get rid of that
+        warning.
+
+
+  ⚠ I discovered an unused imported module: dict
+   ╭─[./validators/agent_nft.ak:7:1]
+ 6 │ 
+ 7 │ use aiken/collection/dict
+   · ────────────┬────────────
+   ·             ╰── unused module
+ 8 │ use aiken/collection/list
+   ╰────
+  help: No big deal, but you might want to remove it to get rid of that
+        warning.
+
+      Summary 1865 checks, 0 errors, 7 warnings

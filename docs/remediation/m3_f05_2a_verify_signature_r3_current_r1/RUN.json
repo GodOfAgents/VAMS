@@ -1,0 +1,145 @@
+{
+  "canary_classifications": [
+    [
+      "valid",
+      "script_accepted",
+      0
+    ],
+    [
+      "invalid_signature",
+      "compiled_evaluation",
+      1
+    ]
+  ],
+  "command": [
+    "/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python",
+    "-B",
+    "/home/GodOfAgents/code/VAMS-testnet/scripts/remediation/test_f05_2a_authority_bootstrap_public.py",
+    "--aiken",
+    "/home/GodOfAgents/vams-evidence/toolchains/aiken-1.1.21/unpacked/aiken-x86_64-unknown-linux-musl/aiken",
+    "--tx-sim-r3-canaries",
+    "--output",
+    "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m3_f05_2a_verify_signature_r3_current_r1/RESULT.json"
+  ],
+  "evidence_credit": "No registered F05 case or mutation credit; synthetic simulator only; no ledger admission or live-network evidence.",
+  "execution_boundary": "bwrap --unshare-net; checkout read-only; evidence directory only writable",
+  "git_after": {
+    "branch": "testnet/remediation-20260907",
+    "head": "829ab544571f12efe50ecb5740f129c8acb3e16f",
+    "is_shallow": false,
+    "reachable_commit_count": 89,
+    "refs": [
+      {
+        "name": "refs/heads/main",
+        "oid": "829ab544571f12efe50ecb5740f129c8acb3e16f"
+      },
+      {
+        "name": "refs/heads/testnet/remediation-20260907",
+        "oid": "829ab544571f12efe50ecb5740f129c8acb3e16f"
+      },
+      {
+        "name": "refs/remotes/origin/GodOfAgents/credential-history-prep",
+        "oid": "1384830e0327606bd79821047b2e4db06b19b427"
+      },
+      {
+        "name": "refs/remotes/origin/GodOfAgents/phase-6-hardening-gates",
+        "oid": "9f0db9c942979ee6777758bb47a50c34db875233"
+      },
+      {
+        "name": "refs/remotes/origin/GodOfAgents/phase-6-vdso-shadow-hardening",
+        "oid": "9c6f94603912966cedb273bf7aa209263d74508a"
+      },
+      {
+        "name": "refs/remotes/origin/HEAD",
+        "oid": "829ab544571f12efe50ecb5740f129c8acb3e16f"
+      },
+      {
+        "name": "refs/remotes/origin/docs/bageera-research-scientist-role",
+        "oid": "e58152efba67bd3db486d63c5a403b148fd8b35a"
+      },
+      {
+        "name": "refs/remotes/origin/main",
+        "oid": "829ab544571f12efe50ecb5740f129c8acb3e16f"
+      },
+      {
+        "name": "refs/remotes/origin/proposal/idex-open-challenge-vams-2026",
+        "oid": "7d058993e9cdda0ee2a2e57e7999b49f4315d83e"
+      }
+    ]
+  },
+  "git_before": {
+    "branch": "testnet/remediation-20260907",
+    "head": "829ab544571f12efe50ecb5740f129c8acb3e16f",
+    "is_shallow": false,
+    "reachable_commit_count": 89,
+    "refs": [
+      {
+        "name": "refs/heads/main",
+        "oid": "829ab544571f12efe50ecb5740f129c8acb3e16f"
+      },
+      {
+        "name": "refs/heads/testnet/remediation-20260907",
+        "oid": "829ab544571f12efe50ecb5740f129c8acb3e16f"
+      },
+      {
+        "name": "refs/remotes/origin/GodOfAgents/credential-history-prep",
+        "oid": "1384830e0327606bd79821047b2e4db06b19b427"
+      },
+      {
+        "name": "refs/remotes/origin/GodOfAgents/phase-6-hardening-gates",
+        "oid": "9f0db9c942979ee6777758bb47a50c34db875233"
+      },
+      {
+        "name": "refs/remotes/origin/GodOfAgents/phase-6-vdso-shadow-hardening",
+        "oid": "9c6f94603912966cedb273bf7aa209263d74508a"
+      },
+      {
+        "name": "refs/remotes/origin/HEAD",
+        "oid": "829ab544571f12efe50ecb5740f129c8acb3e16f"
+      },
+      {
+        "name": "refs/remotes/origin/docs/bageera-research-scientist-role",
+        "oid": "e58152efba67bd3db486d63c5a403b148fd8b35a"
+      },
+      {
+        "name": "refs/remotes/origin/main",
+        "oid": "829ab544571f12efe50ecb5740f129c8acb3e16f"
+      },
+      {
+        "name": "refs/remotes/origin/proposal/idex-open-challenge-vams-2026",
+        "oid": "7d058993e9cdda0ee2a2e57e7999b49f4315d83e"
+      }
+    ]
+  },
+  "ledger_counts": {
+    "mutations": "18/21",
+    "negative_cases": "45/55"
+  },
+  "process": {
+    "exit_code": 0,
+    "result_sha256": "7b413221e74793d66bb95bb2c20faa1b39796f5f1b3a1a107b601891aaad0b7e",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "7b413221e74793d66bb95bb2c20faa1b39796f5f1b3a1a107b601891aaad0b7e"
+  },
+  "purpose": "Current-source comparison of fixed synthetic valid and invalid-signature canaries; no registry, F05 case, or mutation run.",
+  "result_sha256": "7b413221e74793d66bb95bb2c20faa1b39796f5f1b3a1a107b601891aaad0b7e",
+  "schema_version": "m3-f05-verify-signature-r3-current-r1",
+  "source_input_sha256": {
+    "docs/remediation/m3_f05_2a/tx_sim_r1/CANARY-MANIFEST.json": "91c7bc46476a391c3ea3e3012b2f9174a1b87f6e0253ce6167b4c7b96e47f95d",
+    "docs/remediation/m3_f05_2a/tx_sim_r1/applied-policy.cbor": "fc8726cff89172d4944e257a2eb2659d35363c8e5a4d423ed8a2112eb5af7e59",
+    "docs/remediation/m3_f05_2a/tx_sim_r1/invalid_signature.tx.cbor": "594c1b9297bff3a55c1bd7b600ad8f5d2c049471b70e667bc064212100f3754c",
+    "docs/remediation/m3_f05_2a/tx_sim_r1/raw_inputs.cbor": "4b20e2b2cf4bd58b1f6e385c90ffd098d583df69d95fbc7b1fcc2591da72b9fe",
+    "docs/remediation/m3_f05_2a/tx_sim_r1/raw_outputs.cbor": "9cdf345a785f51763bdb43f1b1ba0c20b5545051f03051e6a7bf726ea128c56a",
+    "docs/remediation/m3_f05_2a/tx_sim_r1/valid.tx.cbor": "765c717f16b543c746b88742e8b775cd3ecabca4fef6edd16702184683780a28",
+    "scripts/remediation/f05_2a_tx_sim_registry.py": "c03230249c7e73f6929cc944b7af3e30d98b8168f8abd184fa39332a601a394e",
+    "scripts/remediation/f05_2a_tx_sim_runner_r3.py": "3088ade0a316f6af59c04fe3e1675733100b58be826fa22af3c25e40a086ea5c",
+    "scripts/remediation/test_f05_2a_authority_bootstrap_public.py": "1db507fe0559216a28d3768deaf12e1d56ecb76f51ef8cad1c5cec1f4449550b"
+  },
+  "toolchain": {
+    "aiken": "aiken v1.1.21+42babe5",
+    "aiken_path": "/home/GodOfAgents/vams-evidence/toolchains/aiken-1.1.21/unpacked/aiken-x86_64-unknown-linux-musl/aiken",
+    "aiken_sha256": "07f3f927f1a8c71fc61273fdff850d9b98edb28dde207c8a32585991f2c88e79",
+    "python": "3.12.14",
+    "python_path": "/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python"
+  }
+}

@@ -11,6 +11,22 @@ label is a historical integration milestone; v0.8.0 is the current architecture
 version. OMS, Coinme, Trails, and related SDK paths remain mock-default or
 live-evidence-pending and must fail closed outside local development.
 
+## Local session-key boundary
+
+Scoped update, 2026-11-01: this paragraph and the builder-fee note below were
+checked against current source; the rest of this guide keeps its dated scope.
+
+`SessionKeyManager.create_session_key` is a local-only interface through a
+configured `SequenceWalletManager`. Both its immutable runtime policy and the
+current `VAMS_ENV` must be non-live (`test`, `local` or `demo`). Live modes reject
+with `LiveModeSafetyError`; missing/invalid runtime configuration also rejects.
+`verify_session_scope` returns `False` for live or unknown contexts before cache
+access. Local validity remains 1-24 hours and requested contracts must be in the
+configured VAMS whitelist. A local cached record does not establish on-chain
+account restrictions or an authenticated current grant.
+
+Actual session-grant policy/root/epoch verification, credential custody, bundler
+and ERC-4337 enforcement remain unqualified. A mock flag cannot enable live use.
 ## What is VAMS?
 VAMS is the "Sovereign Brain" for the Agentic Web. Instead of running your AI agents on centralized AWS servers where they can be de-platformed, or on slow blockchains where they can't afford gas, VAMS provides a verifiable, fast, and multi-provider computation layer.
 
@@ -25,44 +41,42 @@ If you are building an AI agent (e.g., a DeFi trading bot, a research assistant)
 python -m pip install -r neuron/requirements.txt
 ```
 
-### Step 2: Define your Intent
-from neuron.composer.composer import VAMSResourceComposer
-from neuron.composer.models import InstanceBlueprint, ComputeSpec, MemorySpec, StorageSpec, NetworkSpec, GPUType
+### Step 2: Plan locally
 
-composer = VAMSResourceComposer()
-
-# Define your infrastructure needs
-blueprint = InstanceBlueprint(
-    name="my-custom-blueprint",
-    compute=ComputeSpec(gpu_type=GPUType.A100, gpu_count=1, vcpu=4),
-    memory=MemorySpec(ram_gb=64),
-    storage=StorageSpec(capacity_gb=100),
-    networking=NetworkSpec(region="us-east"),
-    max_cost_per_hour=100.0,  # Max 100 $VAMS per hour
-    skill_vector=[0.92, -0.12, 0.34, 0.05, -0.21, 0.0, 0.0, 0.0, 0.0, 0.0]  # Optional PCA coordinates
-)
-
-# Provision the blueprint using the matchmaking composer
-instance = composer.provision(blueprint)
-
-print(f"Got Instance -> {instance.instance_id}")
-print(f"Total Hourly Cost -> {instance.allocation.total_hourly_cost} $VAMS")
-```
-
-### Step 3: Fund the Escrow
-Fund the Master Hybrid Escrow for your generated allocation. This protects you: if the provider goes offline, the escrow refunds the unspent portion automatically. To do this, retrieve the structured parameters from the composer and submit them to the on-chain `ComposedSettlement` contract:
+The current Composer scores and allocates local simulations. It does not create
+provider resources, release credentials, lock escrow or prove execution. Explicit
+SDK simulation requires `VAMS_ENV=test`, `local` or `demo`; default construction
+rejects provisioning. Gateway composition and synthetic catalogues are available
+only in `demo`. Existing authentication requirements still apply.
 
 ```python
-# Generate the parameters required for a ComposedSettlement.createComposedEscrow() call
-escrow_params = composer.get_escrow_params(
-    plan=instance.allocation,
-    blueprint=blueprint,
-    duration_seconds=86400  # duration_hours=24
-)
-print("Escrow parameters for contract execution:", escrow_params)
+from neuron.composer.composer import VAMSResourceComposer
+from neuron.composer.blueprints import get_blueprint
 
-### Step 4: Execute!
-Your agent is now live on the decentralized infrastructure stack. VAMS' Sentinel Network will constantly monitor the SLA of the provider.
+# Use already-configured non-live runtime policy and synthetic candidate data.
+composer = VAMSResourceComposer(simulation=True)
+blueprint = get_blueprint("AI_INFERENCE_STANDARD")
+# composer.provision(blueprint, node_data=your_local_candidates) returns SIMULATED.
+```
+
+Local records and price quotes are non-authoritative. A simulated allocation has
+no provider receipt or escrow transaction and earns no payment. Listing and
+removing its local record remain possible after runtime changes; removal releases
+no external resource. `list_active_instances()` excludes simulated records.
+
+### Step 3: Construct settlement requests separately
+
+`get_escrow_params` is retired and rejects. `build_escrow_request` accepts a typed
+`SettlementTransactionBuilder`, explicit integer token units and authentic
+on-chain registration identities/terms. It does not accept float quotes or local
+simulation as execution evidence. Review `neuron/composer/settlement.py` for the
+exact typed request contract. Construction is not signing or deployment authority.
+
+### Step 4: Qualify real execution
+
+An authenticated registry reader, provider admission/execution/receipt consumer,
+and actual end-to-end qualification are still required. Neither this example nor
+a local simulation demonstrates a live service or testnet readiness.
 
 ---
 
@@ -99,8 +113,14 @@ ServiceBlockRegistry.registerServiceBlock(
 );
 ```
 
-### Step 2: Earn Yield
-Whenever an Agent Developer's Resource Composer selects your Service Block, the Escrow contract automatically routes your 5% revenue share directly to your wallet!
+### Step 2: Builder fees
+
+Selecting a Service Block does not itself trigger payment. Settlement snapshots
+its registered builder fee, capped at 5,000bps, when creating the allocation.
+After delivery is recognized, the provider's claim pays that locked builder share
+directly; the separate protocol fee is 5bps. The 500bps (5%) value in the example
+is not a global fixed rate. Restricted-profile rewards and real yield remain
+inactive; live wallet, proof/backend and deployment qualification are still open.
 
 ---
 

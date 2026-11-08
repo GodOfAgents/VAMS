@@ -21,7 +21,9 @@ from sdk.oms_identity import OMSIdentityVerifier
 
 class TestOMSRoutingEnforcement(unittest.TestCase):
     def test_p3_requires_oms_block(self):
-        router = CLRouter()
+        verifier = MagicMock()
+        verifier.is_compliance_verified.return_value = True
+        router = CLRouter(identity_verifier=verifier)
         verified_address = "0x99aabbccddeeff001122334455667788990011aa"
         
         # Scenario 1: Request compliance without loading OMS service block -> Blocked
@@ -54,7 +56,7 @@ class TestOMSRoutingEnforcement(unittest.TestCase):
 
 
 class TestOMSSigner(unittest.TestCase):
-    @patch("sdk.oms_identity.OMSIdentityVerifier.is_verified")
+    @patch("sdk.oms_identity.OMSIdentityVerifier.is_compliance_verified")
     def test_oms_signer_compliance_checks(self, mock_is_verified):
         # Setup signer
         private_key = "0x" + "11" * 32
@@ -66,13 +68,21 @@ class TestOMSSigner(unittest.TestCase):
         mock_is_verified.side_effect = mock_verify
         
         # Instantiate verifier and compliant signer
-        verifier = OMSIdentityVerifier(mock_mode=False, api_key="unit-test-key")
+        verifier = OMSIdentityVerifier(
+            mock_mode=False,
+            api_url="https://api.test/identity",
+            api_key="unit-test-key",
+        )
         compliant_signer = OMSSigner(inner_signer=base_signer, identity_verifier=verifier)
         
         # Check factory wrapping
         factory_signer = SignerFactory.create({
             "private_key": private_key,
-            "oms_compliance": True
+            "oms_compliance": True,
+            "oms_verifier_config": {
+                "api_url": "https://api.test/identity",
+                "api_key": "unit-test-key",
+            },
         })
         self.assertIsInstance(factory_signer, OMSSigner)
         
@@ -105,7 +115,7 @@ class TestOMSSigner(unittest.TestCase):
         # Test 3: Sign message from unverified sender -> Blocked
         with self.assertRaises(PermissionError) as context:
             compliant_signer.sign_message("hello")
-        self.assertIn("is not OMS-verified", str(context.exception))
+        self.assertIn("Compliance check failed", str(context.exception))
 
 
 class TestGasAbstractionPremium(unittest.TestCase):

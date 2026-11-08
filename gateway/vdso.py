@@ -2,18 +2,15 @@
 
 from __future__ import annotations
 
-import hashlib
 import hmac
-import threading
-import time
-from collections import OrderedDict
 from base64 import b64decode
-from typing import Annotated, List, Literal, Optional, Protocol
+from typing import List, Literal, Optional
 
-from fastapi import APIRouter, Depends, Header, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
-from neuron.secp256k1 import verify_digest, verify_message
+from neuron.secp256k1 import verify_digest
+from gateway.route_security import authenticated_gateway_request
 from neuron.vdso.auth import (
     AuthorizationEnvelope,
     AuthorizationError,
@@ -39,55 +36,11 @@ from neuron.vdso.sidecar import (
     EncryptedWitnessSidecar,
     RecipientEnvelope,
 )
-from neuron.runtime_safety import is_live_environment
-
-
 HEX32_PATTERN = r"^0x[0-9a-fA-F]{64}$"
 HEX_PATTERN = r"^0x(?:[0-9a-fA-F]{2})+$"
-AUTH_REPLAY_WINDOW_SECONDS = 300
-
-
-class ReplayStore(Protocol):
-    """Atomic replay claim store; live implementations must be shared."""
-
-    shared: bool
-
-    def check_and_record(self, key: str, now: int, expires_at: int) -> bool:
-        """Atomically record a fresh key, returning false for a replay."""
-
-
-class InMemoryReplayStore:
-    """Bounded process-local replay store for local development only."""
-
-    shared = False
-
-    def __init__(self, *, max_entries: int = 8_192) -> None:
-        if max_entries <= 0:
-            raise ValueError("max_entries must be positive")
-        self._max_entries = max_entries
-        self._entries: OrderedDict[str, int] = OrderedDict()
-        self._lock = threading.Lock()
-
-    def check_and_record(self, key: str, now: int, expires_at: int) -> bool:
-        with self._lock:
-            expired = [item for item, expiry in self._entries.items() if expiry <= now]
-            for item in expired:
-                del self._entries[item]
-            if key in self._entries:
-                return False
-            if len(self._entries) >= self._max_entries:
-                raise RuntimeError("local replay store is full; refusing an unsafe eviction")
-            self._entries[key] = expires_at
-            return True
-
-    def clear(self) -> None:
-        with self._lock:
-            self._entries.clear()
 
 router = APIRouter(prefix="/v1/vdso", tags=["vdso-canary"])
 service = VDSOCanaryService()
-replay_store: Optional[ReplayStore] = None
-_local_replay_store = InMemoryReplayStore()
 
 
 def _hex_bytes(value: str, *, length: Optional[int] = None) -> bytes:
@@ -317,91 +270,15 @@ class DisclosureRequest(StrictModel):
         return value
 
 
-def _active_replay_store() -> ReplayStore:
-    candidate = replay_store
-    if is_live_environment():
-        if candidate is None or getattr(candidate, "shared", False) is not True:
-            raise HTTPException(
-                status_code=503,
-                detail="live VDSO authentication requires a shared atomic replay store",
-            )
-        return candidate
-    return candidate if candidate is not None else _local_replay_store
-
-
 async def require_vdso_request_auth(
     request: Request,
-    x_vams_did: Annotated[Optional[str], Header()] = None,
-    x_vams_signature: Annotated[Optional[str], Header()] = None,
-    x_vams_timestamp: Annotated[Optional[str], Header()] = None,
-    x_vams_content_sha256: Annotated[Optional[str], Header()] = None,
 ) -> bytes:
-    """Authenticate and body-bind every non-public VDSO request."""
+    """Reuse the already committed M2 gateway identity at the VDSO boundary."""
 
-    if not all((x_vams_did, x_vams_signature, x_vams_timestamp, x_vams_content_sha256)):
-        raise HTTPException(
-            status_code=401,
-            detail="body-bound VDSO DID authentication is required",
-        )
-    if not x_vams_did.startswith("did:key:"):
-        raise HTTPException(status_code=401, detail="unsupported DID method")
-    if (
-        not x_vams_timestamp.isascii()
-        or not x_vams_timestamp.isdecimal()
-        or len(x_vams_timestamp) > 20
-        or (len(x_vams_timestamp) > 1 and x_vams_timestamp.startswith("0"))
-    ):
-        raise HTTPException(
-            status_code=401,
-            detail="authentication timestamp must be canonical integer epoch seconds",
-        )
-    timestamp = int(x_vams_timestamp)
-    if timestamp > (1 << 64) - 1:
-        raise HTTPException(
-            status_code=401,
-            detail="authentication timestamp must be canonical integer epoch seconds",
-        )
-    now = int(time.time())
-    if abs(now - timestamp) > AUTH_REPLAY_WINDOW_SECONDS:
-        raise HTTPException(status_code=401, detail="authentication timestamp expired")
-
-    body = await request.body()
-    actual_digest = hashlib.sha256(body).hexdigest()
-    if not hmac.compare_digest(actual_digest, x_vams_content_sha256.lower()):
-        raise HTTPException(status_code=401, detail="request body digest mismatch")
-
-    replay_key = hashlib.sha256(
-        (
-            f"{x_vams_did}:{x_vams_timestamp}:"
-            f"{request.method}:{request.url.path}:{actual_digest}"
-        ).encode()
-    ).hexdigest()
-
-    try:
-        public_key = bytes.fromhex(x_vams_did[len("did:key:") :])
-        signature = bytes.fromhex(x_vams_signature)
-        message = (
-            f"VAMS_VDSO_AUTH:{request.method}:{request.url.path}:{x_vams_timestamp}:{actual_digest}"
-        ).encode()
-        if not verify_message(public_key, message, signature):
-            raise ValueError("signature verification failed")
-    except (TypeError, ValueError) as exc:
-        raise HTTPException(status_code=401, detail="invalid VDSO DID signature") from exc
-    store = _active_replay_store()
-    try:
-        fresh = store.check_and_record(
-            replay_key,
-            now,
-            timestamp + AUTH_REPLAY_WINDOW_SECONDS + 1,
-        )
-    except Exception as exc:
-        raise HTTPException(
-            status_code=503,
-            detail="VDSO replay protection is unavailable",
-        ) from exc
-    if not fresh:
-        raise HTTPException(status_code=401, detail="replayed VDSO request")
-    return public_key
+    authenticated = authenticated_gateway_request(request.scope)
+    if authenticated is None:
+        raise HTTPException(status_code=401, detail="M2 gateway authentication is required")
+    return bytes.fromhex(authenticated.envelope.signer.removeprefix("did:key:"))
 
 
 def _secp256k1_verify(public_key: bytes, message: bytes, signature: bytes) -> bool:

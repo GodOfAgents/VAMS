@@ -78,6 +78,9 @@ frontend-vite/*
 !frontend-vite/postcss.config.js
 !frontend-vite/tailwind.config.js
 !frontend-vite/vite.config.js
+!frontend-vite/scripts/
+frontend-vite/scripts/*
+!frontend-vite/scripts/scan-production-bundle.mjs
 !frontend-vite/src/
 frontend-vite/src/*
 !frontend-vite/src/App.css
@@ -85,6 +88,8 @@ frontend-vite/src/*
 !frontend-vite/src/config.js
 !frontend-vite/src/index.css
 !frontend-vite/src/main.jsx
+!frontend-vite/src/nodeTelemetry.js
+!frontend-vite/src/nodeTelemetry.test.js
 
 # Local State
 .data/

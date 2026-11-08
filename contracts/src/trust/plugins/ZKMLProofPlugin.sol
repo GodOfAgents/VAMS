@@ -53,43 +53,16 @@ contract ZKMLProofPlugin is IVAMSProofPlugin {
     }
 
     function verify(
-        bytes32 serviceHash,
-        bytes32 deliveryHash,
-        bytes calldata proofData
-    ) external view override returns (bool valid) {
-        if (proofData.length == 0) return false;
-
-        ZKMLProof memory zkProof = abi.decode(proofData, (ZKMLProof));
-
-        // 1. Verify model is approved
-        if (!approvedModels[zkProof.modelHash]) return false;
-
-        // 2. Cross-check service/delivery hashes match proof claims
-        //    serviceHash should correspond to inputHash
-        //    deliveryHash should correspond to outputHash
-        if (keccak256(abi.encodePacked(zkProof.modelHash, zkProof.inputHash)) != serviceHash) {
-            return false;
-        }
-        if (zkProof.outputHash != deliveryHash) return false;
-
-        // 3. Verify the ZK proof via external verifier
-        //    In production: call the deployed EZKL/Modulus verifier contract
-        //    For now: structural validation
-        if (zkmlVerifier != address(0)) {
-            // Future: (bool success, bytes memory result) = zkmlVerifier.staticcall(
-            //     abi.encodeWithSignature("verify(bytes,bytes)", zkProof.proof, zkProof.publicInputs)
-            // );
-            // return success && abi.decode(result, (bool));
-        }
-
-        // Structural validation (proof must be non-empty)
-        if (zkProof.proof.length == 0) return false;
-
-        return true;
+        bytes32,
+        bytes32,
+        bytes calldata
+    ) external pure override returns (bool valid) {
+        // Disabled until M4 selects and qualifies a real verifier and circuit relation.
+        return false;
     }
 
     function trustWeight() external pure override returns (uint256) {
-        return 2000; // 20% — high trust (cryptographic proof of computation)
+        return 0; // Disabled until an approved verifier and circuit are integrated.
     }
 
     function name() external pure override returns (string memory) {

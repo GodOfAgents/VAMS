@@ -21,6 +21,12 @@ class DeploymentReadinessTests(unittest.TestCase):
         self.assertIn("staking.rewardPerSecond() == 0", source)
         self.assertIn("token.hasRole(token.MINTER_ROLE(), address(staking))", source)
 
+    def test_scanner_covers_runtime_mode_preflight_and_scaffold_block(self) -> None:
+        source = MODULE_PATH.read_text(encoding="utf-8")
+        self.assertIn('"cdk-deployment/deploy.sh"', source)
+        self.assertIn('"scripts/security/runtime_mode_preflight.py"', source)
+        self.assertIn('"--expected-mode testnet"', source)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -250,7 +250,11 @@ class CLRouter:
     with full audit trail for ZK routing proofs (Section 18.1).
     """
 
-    def __init__(self, oracle: Optional[OracleManager] = None):
+    def __init__(
+        self,
+        oracle: Optional[OracleManager] = None,
+        identity_verifier=None,
+    ):
         self.oracle = oracle or OracleManager()
         self.eth_price = 3000.0  # Fallback USD price
         self.MAX_ROUTING_LOG = 10_000
@@ -261,10 +265,7 @@ class CLRouter:
             "by_chain": {},
             "denied": 0,
         }
-        try:
-            self.identity_verifier = OMSIdentityVerifier()
-        except NameError:
-            self.identity_verifier = None
+        self.identity_verifier = identity_verifier
 
     # ─────────────────────────────────────────────────────────────
     # PUBLIC API
@@ -373,6 +374,25 @@ class CLRouter:
     ):
         """Enforce VAMS Trust Policy (Architecture Section 14)."""
 
+        value = metadata.value_usd
+        if (
+            isinstance(value, bool)
+            or not isinstance(value, (int, float))
+            or (isinstance(value, float) and not math.isfinite(value))
+            or value < 0
+        ):
+            raise ValueError("Transaction value_usd must be a finite non-negative number")
+
+        for field in ("max_latency_ms", "max_finality_ms"):
+            timing_value = getattr(metadata, field)
+            if (
+                isinstance(timing_value, bool)
+                or not isinstance(timing_value, (int, float))
+                or (isinstance(timing_value, float) and not math.isfinite(timing_value))
+                or timing_value < 0
+            ):
+                raise ValueError(f"Transaction {field} must be a finite non-negative number")
+
         # Rule 1: >$1K requires identity verification
         if metadata.value_usd > 1_000 and tier == TrustTier.UNVERIFIED:
             self._stats["denied"] += 1
@@ -475,9 +495,21 @@ class CLRouter:
             self._stats["denied"] += 1
             raise PermissionError("Institutional compliance routing requires the OMS service block (ServiceBlock_OMS_v1) to be loaded.")
 
-        if self.identity_verifier and not self.identity_verifier.is_verified(metadata.agent_address):
+        if self.identity_verifier is None:
+            if "OMSIdentityVerifier" not in globals():
+                self._stats["denied"] += 1
+                raise PermissionError("CLR OMS identity verifier is unavailable")
+            try:
+                self.identity_verifier = OMSIdentityVerifier()
+            except Exception:
+                self._stats["denied"] += 1
+                raise PermissionError("CLR OMS identity verifier is unavailable") from None
+
+        if not self.identity_verifier.is_compliance_verified(metadata.agent_address):
             self._stats["denied"] += 1
-            raise PermissionError("Institutional compliance routing requires an OMS verified identity. Agent address not verified.")
+            raise PermissionError(
+                "Institutional compliance routing requires a live OMS verified identity."
+            )
             
         m = metrics.get("Polygon")
         config = STATIC_CHAINS["Polygon"]

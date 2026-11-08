@@ -1,0 +1,298 @@
+{
+  "cases": [
+    {
+      "alternate_applied_policy_id": "42dabc381328b04583c018473d93020c0204d271300225c87b66564c",
+      "case_id": "applied_genesis_parameter",
+      "negative_tx_sha256": "c300dfab155376ae746dd41135b043c16d7da95d005eeff3e22de3e3c263f0c6",
+      "status": "PENDING"
+    },
+    {
+      "alternate_applied_policy_id": "cb7cea1fcfcf5b2e7cb7e157cd2a4790682107b7f648592f51e9cf3f",
+      "case_id": "applied_keys_parameter",
+      "negative_tx_sha256": "8ee7a9f2c735c64579188b0417db686966b51cc421ef2d1d662e334589d37b58",
+      "status": "PENDING"
+    },
+    {
+      "alternate_applied_policy_id": "184b8080cfc02f6309bbc51ba060de3850372ff990a77e931bdb2027",
+      "case_id": "applied_keys_bad_count",
+      "negative_tx_sha256": "08e5e21a80b4fb04e580c18a51bd62edd23df4889497fe3a4969b082657d7593",
+      "status": "PENDING"
+    },
+    {
+      "alternate_applied_policy_id": "0f7791c9e3f40cd59162fcb61f8a37c7a6cd99fcf4175cb3e1579c7b",
+      "case_id": "applied_keys_bad_length",
+      "negative_tx_sha256": "6d792dd8de4f29b2ea994506d80eaf53022f912e9054f21a9adea6e8f9e99ab4",
+      "status": "PENDING"
+    },
+    {
+      "alternate_applied_policy_id": "55a33fda3aa2ba9fd2cf2d9c29e44c7d5632a21720a1349d88c9f7e6",
+      "case_id": "applied_keys_duplicate",
+      "negative_tx_sha256": "9b71091bee2b2a8b901986b7ed3b7d1176fac2e748c2dbc43d31feb85f79f757",
+      "status": "PENDING"
+    },
+    {
+      "alternate_applied_policy_id": "08906082a748632b3a854fc52a7a63efc3c914f7f0fb3d373240dd47",
+      "case_id": "applied_keys_unsorted",
+      "negative_tx_sha256": "58402e4fabe851df33c828d7076a1fee227c4448c2cf0da7c5fcf9b0a0e30074",
+      "status": "PENDING"
+    }
+  ],
+  "decision": "R4.1 applied-parameter C",
+  "files": {
+    "SUMMARY.md": {
+      "bytes": 5158,
+      "sha256": "565dda2faed1d7018fa4f8de6bd4a8ca4fca8f2b3d5672bf0e71b88e030b740c"
+    },
+    "applied_genesis_parameter/FIXTURE-MANIFEST.json": {
+      "bytes": 4754,
+      "sha256": "90c360254c26048e137ccc1aac4ebe38fe07e4b9f550e45faba7f70526ad26f3"
+    },
+    "applied_genesis_parameter/negative.applied-policy.cbor": {
+      "bytes": 3467,
+      "sha256": "90e1e07c147b24e5145427bb2d5dd0daad90873d7e59975fc220af72dadc0efe"
+    },
+    "applied_genesis_parameter/negative.raw_inputs.cbor": {
+      "bytes": 73,
+      "sha256": "4b20e2b2cf4bd58b1f6e385c90ffd098d583df69d95fbc7b1fcc2591da72b9fe"
+    },
+    "applied_genesis_parameter/negative.raw_outputs.cbor": {
+      "bytes": 79,
+      "sha256": "e1843b26f6301ae6415190981e89d9a7c3a2f9fa231f997b9bc690d97dbbd1b7"
+    },
+    "applied_genesis_parameter/negative.tx.cbor": {
+      "bytes": 5093,
+      "sha256": "c300dfab155376ae746dd41135b043c16d7da95d005eeff3e22de3e3c263f0c6"
+    },
+    "applied_genesis_parameter/positive-control.applied-policy.cbor": {
+      "bytes": 3467,
+      "sha256": "90e1e07c147b24e5145427bb2d5dd0daad90873d7e59975fc220af72dadc0efe"
+    },
+    "applied_genesis_parameter/positive-control.raw_inputs.cbor": {
+      "bytes": 73,
+      "sha256": "5e935c48cc9d4e82e6dbedce94b2fbd3fb427f5e187bbe67ed376671ba5e4fec"
+    },
+    "applied_genesis_parameter/positive-control.raw_outputs.cbor": {
+      "bytes": 79,
+      "sha256": "73e27c468683151772e86dc08cde1a4241e23ae633939cd2ccad82e323e0a8b0"
+    },
+    "applied_genesis_parameter/positive-control.tx.cbor": {
+      "bytes": 5093,
+      "sha256": "5d9924d4e0daeb91c519b7c026f3cbebda3793559f03f35866cf22fb8afabbf8"
+    },
+    "applied_keys_bad_count/FIXTURE-MANIFEST.json": {
+      "bytes": 4946,
+      "sha256": "03473bbd2d7cd3519230048b66f87132950c3d26eb2f7e9eb49b7accaf81a00a"
+    },
+    "applied_keys_bad_count/negative.applied-policy.cbor": {
+      "bytes": 3501,
+      "sha256": "3eadb59d5f94683e36c1761d534f6be55f7b75891d0772d781d20436a63eec38"
+    },
+    "applied_keys_bad_count/negative.raw_inputs.cbor": {
+      "bytes": 73,
+      "sha256": "4b20e2b2cf4bd58b1f6e385c90ffd098d583df69d95fbc7b1fcc2591da72b9fe"
+    },
+    "applied_keys_bad_count/negative.raw_outputs.cbor": {
+      "bytes": 79,
+      "sha256": "9aa73c88d297fc2e0832b1dca770e09d0fa06ad4bd5e2f25e585cacd4fcae932"
+    },
+    "applied_keys_bad_count/negative.tx.cbor": {
+      "bytes": 5161,
+      "sha256": "08e5e21a80b4fb04e580c18a51bd62edd23df4889497fe3a4969b082657d7593"
+    },
+    "applied_keys_bad_count/positive-control.applied-policy.cbor": {
+      "bytes": 3467,
+      "sha256": "a94a8c086da8fe568e1de9641556fe32630605372b4768a6598fce9d6a992040"
+    },
+    "applied_keys_bad_count/positive-control.raw_inputs.cbor": {
+      "bytes": 73,
+      "sha256": "4b20e2b2cf4bd58b1f6e385c90ffd098d583df69d95fbc7b1fcc2591da72b9fe"
+    },
+    "applied_keys_bad_count/positive-control.raw_outputs.cbor": {
+      "bytes": 79,
+      "sha256": "0781b75c1cdd5473227bc7f6ef1522fbf1c41a8da1204ac7f0e17c3455ad5c80"
+    },
+    "applied_keys_bad_count/positive-control.tx.cbor": {
+      "bytes": 5093,
+      "sha256": "9abfbcffb3e6716601c20ab74a4e655e6b09e6c720e0cf2fa3e72bb1dd059f03"
+    },
+    "applied_keys_bad_length/FIXTURE-MANIFEST.json": {
+      "bytes": 4949,
+      "sha256": "3d1b34ef827e2a3ef34fc7311df4e0715a4ac61c04af3a8eada3112bc8f9ba6f"
+    },
+    "applied_keys_bad_length/negative.applied-policy.cbor": {
+      "bytes": 3466,
+      "sha256": "452a8adf01d154db2fdcba974ce1b47b412608212407e46bf9236b86114d037c"
+    },
+    "applied_keys_bad_length/negative.raw_inputs.cbor": {
+      "bytes": 73,
+      "sha256": "4b20e2b2cf4bd58b1f6e385c90ffd098d583df69d95fbc7b1fcc2591da72b9fe"
+    },
+    "applied_keys_bad_length/negative.raw_outputs.cbor": {
+      "bytes": 79,
+      "sha256": "6d51320eb229765f1a2339e8df5b691790c0477375bf9aa5ef4d9e7669797e71"
+    },
+    "applied_keys_bad_length/negative.tx.cbor": {
+      "bytes": 5091,
+      "sha256": "6d792dd8de4f29b2ea994506d80eaf53022f912e9054f21a9adea6e8f9e99ab4"
+    },
+    "applied_keys_bad_length/positive-control.applied-policy.cbor": {
+      "bytes": 3467,
+      "sha256": "afb8629aaa180fb2dd740714da000ddf38a8c1da42e48a7bb3e6c44f2f492e5f"
+    },
+    "applied_keys_bad_length/positive-control.raw_inputs.cbor": {
+      "bytes": 73,
+      "sha256": "4b20e2b2cf4bd58b1f6e385c90ffd098d583df69d95fbc7b1fcc2591da72b9fe"
+    },
+    "applied_keys_bad_length/positive-control.raw_outputs.cbor": {
+      "bytes": 79,
+      "sha256": "8ecc93d03231e1db66e9b9125f8f8abd467c4e90d06ddbcec2daeaa7985bbaf6"
+    },
+    "applied_keys_bad_length/positive-control.tx.cbor": {
+      "bytes": 5093,
+      "sha256": "99d73753185b04e77ee16303527ab5a235d0e66cde1d7116bc1e49700203b0dc"
+    },
+    "applied_keys_duplicate/FIXTURE-MANIFEST.json": {
+      "bytes": 5963,
+      "sha256": "ffa643961de6f7f4d13d5b930b539b422ffb56622b11182069767cfd90cc96fc"
+    },
+    "applied_keys_duplicate/negative.applied-policy.cbor": {
+      "bytes": 3467,
+      "sha256": "1eb19f63df3101e199b4b1a5c101bc6ce7877f1972d7fed0073b0f23ce9bf116"
+    },
+    "applied_keys_duplicate/negative.raw_inputs.cbor": {
+      "bytes": 73,
+      "sha256": "4b20e2b2cf4bd58b1f6e385c90ffd098d583df69d95fbc7b1fcc2591da72b9fe"
+    },
+    "applied_keys_duplicate/negative.raw_outputs.cbor": {
+      "bytes": 79,
+      "sha256": "5ea40caf0f754842c786a0f9b443bc1688401ae1aea3774a5753d647e6c2cb26"
+    },
+    "applied_keys_duplicate/negative.tx.cbor": {
+      "bytes": 5093,
+      "sha256": "9b71091bee2b2a8b901986b7ed3b7d1176fac2e748c2dbc43d31feb85f79f757"
+    },
+    "applied_keys_duplicate/one-guard-mutant-control.applied-policy.cbor": {
+      "bytes": 3455,
+      "sha256": "d673c695f68aa244e746d8aa6c8529908bd5d178c85cc01b8d6bf4e25a663944"
+    },
+    "applied_keys_duplicate/one-guard-mutant-control.raw_inputs.cbor": {
+      "bytes": 73,
+      "sha256": "4b20e2b2cf4bd58b1f6e385c90ffd098d583df69d95fbc7b1fcc2591da72b9fe"
+    },
+    "applied_keys_duplicate/one-guard-mutant-control.raw_outputs.cbor": {
+      "bytes": 79,
+      "sha256": "38eade1981663c62bf58804aafff171551c137fd79808d1364e4b763da634c85"
+    },
+    "applied_keys_duplicate/one-guard-mutant-control.tx.cbor": {
+      "bytes": 5081,
+      "sha256": "9c11e9305bfa1df7b74304c42f77dfc734e027fe73188e82e148561a64c525a0"
+    },
+    "applied_keys_duplicate/positive-control.applied-policy.cbor": {
+      "bytes": 3467,
+      "sha256": "3c59d7ebc70caf19494383449a50f4c643ffef12cdc85c86532f3edd42a8a971"
+    },
+    "applied_keys_duplicate/positive-control.raw_inputs.cbor": {
+      "bytes": 73,
+      "sha256": "4b20e2b2cf4bd58b1f6e385c90ffd098d583df69d95fbc7b1fcc2591da72b9fe"
+    },
+    "applied_keys_duplicate/positive-control.raw_outputs.cbor": {
+      "bytes": 79,
+      "sha256": "748aed47f64ae0d1666474b3abd318684ee39ec74ddf420f3bd8795be290c06c"
+    },
+    "applied_keys_duplicate/positive-control.tx.cbor": {
+      "bytes": 5093,
+      "sha256": "d70142d6290c23d908e8da66c55831d54bf78516ffed37aa77b9a784a5cb2102"
+    },
+    "applied_keys_parameter/FIXTURE-MANIFEST.json": {
+      "bytes": 4741,
+      "sha256": "6e77859fd0c5162678c479b748471bb3f37e9549eb807006efb2d5dace5ddf48"
+    },
+    "applied_keys_parameter/negative.applied-policy.cbor": {
+      "bytes": 3467,
+      "sha256": "2471116bdb20ba054a5fead66d93a015899b3cf955d09f569cc8cf88051b74de"
+    },
+    "applied_keys_parameter/negative.raw_inputs.cbor": {
+      "bytes": 73,
+      "sha256": "4b20e2b2cf4bd58b1f6e385c90ffd098d583df69d95fbc7b1fcc2591da72b9fe"
+    },
+    "applied_keys_parameter/negative.raw_outputs.cbor": {
+      "bytes": 79,
+      "sha256": "375f5c095ccff905e41321981618b10ea819c8a95df2578772c36d67524964cd"
+    },
+    "applied_keys_parameter/negative.tx.cbor": {
+      "bytes": 5093,
+      "sha256": "8ee7a9f2c735c64579188b0417db686966b51cc421ef2d1d662e334589d37b58"
+    },
+    "applied_keys_parameter/positive-control.applied-policy.cbor": {
+      "bytes": 3467,
+      "sha256": "2471116bdb20ba054a5fead66d93a015899b3cf955d09f569cc8cf88051b74de"
+    },
+    "applied_keys_parameter/positive-control.raw_inputs.cbor": {
+      "bytes": 73,
+      "sha256": "4b20e2b2cf4bd58b1f6e385c90ffd098d583df69d95fbc7b1fcc2591da72b9fe"
+    },
+    "applied_keys_parameter/positive-control.raw_outputs.cbor": {
+      "bytes": 79,
+      "sha256": "3b14229afd940fd7725bb2aca16276ed2fd521b947127ef953469a5d1430ffec"
+    },
+    "applied_keys_parameter/positive-control.tx.cbor": {
+      "bytes": 5093,
+      "sha256": "72711ef0dee895c0624d891b3a60c95c10b28b041f87710602d5f3fce284e579"
+    },
+    "applied_keys_unsorted/FIXTURE-MANIFEST.json": {
+      "bytes": 5949,
+      "sha256": "466b372696e2b408ce09af28da0425665dbcb7cf60e1abfb73679064d50e0a58"
+    },
+    "applied_keys_unsorted/negative.applied-policy.cbor": {
+      "bytes": 3467,
+      "sha256": "b49bdffbda9497fcd7f972ae5c43f1f11791b81b0924268ab9b6db619e9b11e8"
+    },
+    "applied_keys_unsorted/negative.raw_inputs.cbor": {
+      "bytes": 73,
+      "sha256": "4b20e2b2cf4bd58b1f6e385c90ffd098d583df69d95fbc7b1fcc2591da72b9fe"
+    },
+    "applied_keys_unsorted/negative.raw_outputs.cbor": {
+      "bytes": 79,
+      "sha256": "0199b95f9119ea6cd6934acb17e85d8d01c0f19dbb6e8f20b494cae4450642e4"
+    },
+    "applied_keys_unsorted/negative.tx.cbor": {
+      "bytes": 5093,
+      "sha256": "58402e4fabe851df33c828d7076a1fee227c4448c2cf0da7c5fcf9b0a0e30074"
+    },
+    "applied_keys_unsorted/one-guard-mutant-control.applied-policy.cbor": {
+      "bytes": 3455,
+      "sha256": "c95cde47f91712e9a5c869247f31fe31d88c1cb7a1a11846daede9bd75f7a64f"
+    },
+    "applied_keys_unsorted/one-guard-mutant-control.raw_inputs.cbor": {
+      "bytes": 73,
+      "sha256": "4b20e2b2cf4bd58b1f6e385c90ffd098d583df69d95fbc7b1fcc2591da72b9fe"
+    },
+    "applied_keys_unsorted/one-guard-mutant-control.raw_outputs.cbor": {
+      "bytes": 79,
+      "sha256": "2f70cb73a3e2129833372ef966fd7d343035ab1cb537f9d11fc071979971cb24"
+    },
+    "applied_keys_unsorted/one-guard-mutant-control.tx.cbor": {
+      "bytes": 5081,
+      "sha256": "3d427b2299f3a66084e5faea8a7c06fa1cc3e4582bacea517f805446f216c221"
+    },
+    "applied_keys_unsorted/positive-control.applied-policy.cbor": {
+      "bytes": 3467,
+      "sha256": "7a23bed0e5eacaa727feca994a95cf5b872436e2a996816bc827e3d214f0ac3c"
+    },
+    "applied_keys_unsorted/positive-control.raw_inputs.cbor": {
+      "bytes": 73,
+      "sha256": "4b20e2b2cf4bd58b1f6e385c90ffd098d583df69d95fbc7b1fcc2591da72b9fe"
+    },
+    "applied_keys_unsorted/positive-control.raw_outputs.cbor": {
+      "bytes": 79,
+      "sha256": "33bf0a664bc7d65118d84d6827a360b99109dc3cab4a563924aaf5537e7e4ee5"
+    },
+    "applied_keys_unsorted/positive-control.tx.cbor": {
+      "bytes": 5093,
+      "sha256": "3b342ff7e33ff5ff8ac04074f990429a103d759962993ecb22313eee71b74d97"
+    }
+  },
+  "schema_version": "f05-2a-applied-parameter-family-package-r1",
+  "scope": "synthetic policy-bound CBOR only; no original-policy, ledger-admission, or live-network credit",
+  "status": "candidate-awaiting-independent-byte-review; tx-sim-not-run; no credit"
+}

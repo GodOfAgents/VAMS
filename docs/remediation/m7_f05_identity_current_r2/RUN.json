@@ -1,0 +1,35 @@
+{
+  "schema_version": "vams-f05-2a-current-applied-identity-run-v1",
+  "date": "2026-10-03",
+  "checkout": "/home/GodOfAgents/code/VAMS-testnet",
+  "head": "829ab544571f12efe50ecb5740f129c8acb3e16f",
+  "scope": "Reproduce F05.2a applied-policy identity from current Cardano source; synthetic fixture identity only.",
+  "command": "PYTHONDONTWRITEBYTECODE=1 bwrap --unshare-net --ro-bind / / --dev /dev --proc /proc --bind /tmp /tmp --bind /home/GodOfAgents/code/VAMS-testnet/docs/remediation/m7_f05_identity_current_r2 /home/GodOfAgents/code/VAMS-testnet/docs/remediation/m7_f05_identity_current_r2 --chdir /home/GodOfAgents/code/VAMS-testnet /home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python -B /home/GodOfAgents/vams-evidence/m3-f05-2a-identity-gate-20261002-r1/identity_probe.py --evidence /home/GodOfAgents/code/VAMS-testnet/docs/remediation/m7_f05_identity_current_r2/run2",
+  "exit_code": 0,
+  "toolchain": {
+    "python": "3.12.14",
+    "aiken": "v1.1.21+42babe5",
+    "aiken_binary_sha256": "07f3f927f1a8c71fc61273fdff850d9b98edb28dde207c8a32585991f2c88e79"
+  },
+  "result": {
+    "path": "docs/remediation/m7_f05_identity_current_r2/run2/RESULT.json",
+    "sha256": "5e4aa181142e34d8e95288b3077306d1d2a7960ceda81f1a07200e8c9524882d",
+    "pass": true,
+    "cardano_inputs": 21,
+    "inputs_unchanged": true,
+    "inner_aiken_commands_exit_zero": 8,
+    "compiled_code_sha256": "fc8726cff89172d4944e257a2eb2659d35363c8e5a4d423ed8a2112eb5af7e59",
+    "compiled_code_bytes": 3467,
+    "blueprint_sha256": "c4230410d0caac45f2c71d36e45a539c78087697128ce1533306d17e96a48008",
+    "current_lock_sha256": "acffff4aee9569e1ee1de468839077af467b5e403fd96450290cd367b339c651",
+    "applied_policy_id": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+    "matches_frozen_artifact_and_transaction_witness": true
+  },
+  "review": "PASS; independent read-only review by /root/f05_identity_gate_independent on run2/RESULT.json",
+  "limitations": [
+    "Synthetic fixture identity only; no ledger admission, Pre-Prod rehearsal, live-network or deployment evidence.",
+    "No F05 negative-case or mutation credit.",
+    "Two dependencies were copied from existing local cache; network access disabled by bwrap --unshare-net.",
+    "Does not resolve F05 signature-domain or applied-parameter decisions, F04 identity-entrypoint choice, or other readiness gates."
+  ]
+}

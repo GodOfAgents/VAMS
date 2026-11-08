@@ -1,0 +1,118 @@
+{
+  "capture_script_sha256": "2c3c3ff5cd00106a19ae4be11e882b19d0132dde6347487a5c74fe49936432e3",
+  "command": "gitleaks git --log-opts=\"--all -m\" . --config .gitleaks.toml --redact=100 --report-format json --report-path /tmp/<private>/report.json --exit-code 1 --no-banner",
+  "config_sha256": "40ddce18233e73c94668ddd47a5abe2a6afa0e9bc4602657dc34ec2b78606ecd",
+  "execution_boundary": "bwrap --unshare-net; source read-only; only evidence directory writable; private /tmp",
+  "git_after": {
+    "branch": "testnet/remediation-20260907",
+    "head": "829ab544571f12efe50ecb5740f129c8acb3e16f",
+    "is_shallow": false,
+    "porcelain_v1_z_sha256": "9deefb0ebea9d5fff8c9b66e5531f6a8579ec11ac13fd57a753c2d5f13d89dc3",
+    "reachable_commit_count": 89,
+    "ref_count": 9,
+    "refs": [
+      {
+        "name": "refs/heads/main",
+        "oid": "829ab544571f12efe50ecb5740f129c8acb3e16f"
+      },
+      {
+        "name": "refs/heads/testnet/remediation-20260907",
+        "oid": "829ab544571f12efe50ecb5740f129c8acb3e16f"
+      },
+      {
+        "name": "refs/remotes/origin/GodOfAgents/credential-history-prep",
+        "oid": "1384830e0327606bd79821047b2e4db06b19b427"
+      },
+      {
+        "name": "refs/remotes/origin/GodOfAgents/phase-6-hardening-gates",
+        "oid": "9f0db9c942979ee6777758bb47a50c34db875233"
+      },
+      {
+        "name": "refs/remotes/origin/GodOfAgents/phase-6-vdso-shadow-hardening",
+        "oid": "9c6f94603912966cedb273bf7aa209263d74508a"
+      },
+      {
+        "name": "refs/remotes/origin/HEAD",
+        "oid": "829ab544571f12efe50ecb5740f129c8acb3e16f"
+      },
+      {
+        "name": "refs/remotes/origin/docs/bageera-research-scientist-role",
+        "oid": "e58152efba67bd3db486d63c5a403b148fd8b35a"
+      },
+      {
+        "name": "refs/remotes/origin/main",
+        "oid": "829ab544571f12efe50ecb5740f129c8acb3e16f"
+      },
+      {
+        "name": "refs/remotes/origin/proposal/idex-open-challenge-vams-2026",
+        "oid": "7d058993e9cdda0ee2a2e57e7999b49f4315d83e"
+      }
+    ]
+  },
+  "git_before": {
+    "branch": "testnet/remediation-20260907",
+    "head": "829ab544571f12efe50ecb5740f129c8acb3e16f",
+    "is_shallow": false,
+    "porcelain_v1_z_sha256": "9deefb0ebea9d5fff8c9b66e5531f6a8579ec11ac13fd57a753c2d5f13d89dc3",
+    "reachable_commit_count": 89,
+    "ref_count": 9,
+    "refs": [
+      {
+        "name": "refs/heads/main",
+        "oid": "829ab544571f12efe50ecb5740f129c8acb3e16f"
+      },
+      {
+        "name": "refs/heads/testnet/remediation-20260907",
+        "oid": "829ab544571f12efe50ecb5740f129c8acb3e16f"
+      },
+      {
+        "name": "refs/remotes/origin/GodOfAgents/credential-history-prep",
+        "oid": "1384830e0327606bd79821047b2e4db06b19b427"
+      },
+      {
+        "name": "refs/remotes/origin/GodOfAgents/phase-6-hardening-gates",
+        "oid": "9f0db9c942979ee6777758bb47a50c34db875233"
+      },
+      {
+        "name": "refs/remotes/origin/GodOfAgents/phase-6-vdso-shadow-hardening",
+        "oid": "9c6f94603912966cedb273bf7aa209263d74508a"
+      },
+      {
+        "name": "refs/remotes/origin/HEAD",
+        "oid": "829ab544571f12efe50ecb5740f129c8acb3e16f"
+      },
+      {
+        "name": "refs/remotes/origin/docs/bageera-research-scientist-role",
+        "oid": "e58152efba67bd3db486d63c5a403b148fd8b35a"
+      },
+      {
+        "name": "refs/remotes/origin/main",
+        "oid": "829ab544571f12efe50ecb5740f129c8acb3e16f"
+      },
+      {
+        "name": "refs/remotes/origin/proposal/idex-open-challenge-vams-2026",
+        "oid": "7d058993e9cdda0ee2a2e57e7999b49f4315d83e"
+      }
+    ]
+  },
+  "limits": "This local scan cannot close T06: protected commits are absent locally; hosted refs, credential/provider revocation and impact, and any coordinated history operation remain external.",
+  "protected_commit_present": {
+    "0161faebfba436fd3140d94dd0b9dbc91744f1bb": false,
+    "1321f91586784d218ebc11126de588fbcf649ec6": false,
+    "174dbaa0393897107b9eafd283224d23a47572aa": false,
+    "31929a24419a9b7b9d8954cbea2df9fe1cb77a68": false
+  },
+  "raw_report_retained": false,
+  "report_entry_count": 0,
+  "report_sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+  "rule_counts": {},
+  "scanner_exit_code": 0,
+  "schema_version": "m7-t06-local-history-89-r1",
+  "scope": "Only locally available refs; no fetch, hosted-ref inspection, rewrite, or credential access",
+  "stdout_stderr_retained": false,
+  "tool": {
+    "path": "/home/GodOfAgents/vams-evidence/toolchains/gitleaks-8.30.1/gitleaks",
+    "sha256": "88f91962aa2f93ac6ab281d553b9e125f5197bbbce38f9f2437f7299c32e5509",
+    "version": "8.30.1"
+  }
+}

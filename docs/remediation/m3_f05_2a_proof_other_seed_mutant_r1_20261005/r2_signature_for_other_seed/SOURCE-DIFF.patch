@@ -1,0 +1,14 @@
+--- a/f05_authority_policy.ak
++++ b/f05_authority_policy.ak
+@@ -62,7 +62,10 @@
+   expect state: AuthorityStateV3 = raw_datum
+   expect valid_initial_authority(state, genesis_ref, initial_keys)
+   let bootstrap_message = authority_genesis_pop_preimage(
+-    genesis_ref,
++    OutputReference {
++      transaction_id: #"adadadadadadadadadadadadadadadadadadadadadadadadadadadadadadadad",
++      output_index: genesis_ref.output_index,
++    },
+     state_validator_script_hash,
+     initial_keys,
+   )

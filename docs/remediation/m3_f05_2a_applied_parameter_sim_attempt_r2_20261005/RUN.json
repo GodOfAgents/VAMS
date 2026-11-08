@@ -1,0 +1,122 @@
+{
+  "attempt": {
+    "argv": [
+      "/home/GodOfAgents/vams-evidence/toolchains/python/bin/python3.12",
+      "/home/GodOfAgents/code/VAMS-testnet/scripts/remediation/f05_2a_tx_sim_runner_r3.py",
+      "--aiken",
+      "/home/GodOfAgents/vams-evidence/toolchains/aiken-1.1.21/aiken",
+      "--tx",
+      "docs/remediation/m3_f05_2a_applied_parameter_family_r4_20261005/applied_keys_duplicate/positive-control.tx.cbor",
+      "--raw-inputs",
+      "docs/remediation/m3_f05_2a_applied_parameter_family_r4_20261005/applied_keys_duplicate/positive-control.raw_inputs.cbor",
+      "--raw-outputs",
+      "docs/remediation/m3_f05_2a_applied_parameter_family_r4_20261005/applied_keys_duplicate/positive-control.raw_outputs.cbor",
+      "--policy-id",
+      "cf6e9bf4df1ba39b0ab739396b6a772f48b706241a3f93530d790a50"
+    ],
+    "direct_diagnostic": {
+      "argv": [
+        "/home/GodOfAgents/vams-evidence/toolchains/aiken-1.1.21/aiken",
+        "tx",
+        "simulate",
+        "--cbor",
+        "docs/remediation/m3_f05_2a_applied_parameter_family_r4_20261005/applied_keys_duplicate/positive-control.tx.cbor",
+        "docs/remediation/m3_f05_2a_applied_parameter_family_r4_20261005/applied_keys_duplicate/positive-control.raw_inputs.cbor",
+        "docs/remediation/m3_f05_2a_applied_parameter_family_r4_20261005/applied_keys_duplicate/positive-control.raw_outputs.cbor"
+      ],
+      "exit_code": 1,
+      "stderr": "      Parsing script context\n",
+      "stdout": "",
+      "target_script_invoked": false
+    },
+    "label": "applied_keys_duplicate positive-control through immutable R3 runner",
+    "runner_result": {
+      "cleanup": {
+        "child_reaped": true,
+        "process_group_empty": true,
+        "snapshot_descriptors_closed": true,
+        "status": "clean"
+      },
+      "schema_version": "f05-2a-tx-sim-run-result-r3",
+      "simulator_child_exit": 1,
+      "simulator_result": {
+        "stage": "indeterminate",
+        "target_script_invoked": false
+      },
+      "submitted_sha256": {
+        "raw_inputs": "4b20e2b2cf4bd58b1f6e385c90ffd098d583df69d95fbc7b1fcc2591da72b9fe",
+        "raw_outputs": "d710e953ab1af51aef274a0fd45e2e71dd7bbb7967fe3a4ba7c18aacf1630a88",
+        "transaction": "9389881070f6903431956adc6d38ed5baf35f44cf67d1dc1db227448405c9100"
+      },
+      "submitted_size_bytes": {
+        "raw_inputs": 73,
+        "raw_outputs": 79,
+        "transaction": 5111
+      },
+      "target_mint_binding": {
+        "compiled_script_hash": "cf6e9bf4df1ba39b0ab739396b6a772f48b706241a3f93530d790a50",
+        "expected_policy_id": "cf6e9bf4df1ba39b0ab739396b6a772f48b706241a3f93530d790a50",
+        "policy_ids": [
+          "cf6e9bf4df1ba39b0ab739396b6a772f48b706241a3f93530d790a50"
+        ]
+      },
+      "wrapper_exit_code": 2
+    },
+    "toolchain": {
+      "aiken": "aiken v1.1.21+42babe5",
+      "aiken_sha256": "07f3f927f1a8c71fc61273fdff850d9b98edb28dde207c8a32585991f2c88e79",
+      "runner_sha256": "3088ade0a316f6af59c04fe3e1675733100b58be826fa22af3c25e40a086ea5c"
+    },
+    "trace_diagnostic": {
+      "environment": {
+        "RUST_LOG": "trace"
+      },
+      "exit_code": 1,
+      "stderr": "      Parsing script context\n",
+      "stdout": "",
+      "target_script_invoked": false
+    },
+    "wrapper_exit_code": 2
+  },
+  "classification": {
+    "case_rejection": false,
+    "positive_control_accepted": false,
+    "stage": "indeterminate",
+    "target_script_invoked": false
+  },
+  "credit": {
+    "ledger_admission": false,
+    "live_network": false,
+    "mutation": null,
+    "negative_case": null,
+    "original_policy": false
+  },
+  "evidence_scope": "local synthetic simulator diagnostic only; not target validator evidence, ledger admission, or live-network evidence",
+  "external_raw_capture": {
+    "direct_json_sha256": "fb6e10440a57de7e4574e6200e0616f0eaa190cbe2ca662ee540f1b8ba0f72a9",
+    "path": "/home/GodOfAgents/vams-evidence/f05_applied_param_r4_attempt_r1_20261005/",
+    "trace_json_sha256": "fb287d4ed4530bca4fdac315190d72c2746c95a383462508658333d94277af5f"
+  },
+  "fixture_package": {
+    "family_manifest_sha256": "b39899112ba97a27a3578add7cdb24388a6531b793e6161d1558d49c8a1ff708",
+    "independent_pre_execution_byte_review": "PASS",
+    "path": "docs/remediation/m3_f05_2a_applied_parameter_family_r4_20261005",
+    "root_sha256sums_sha256": "7fb52a8324987bb6895d9acf89876da40555f369ffd3e72be58635c8ce8d56ba"
+  },
+  "ledger_effect": {
+    "case_statuses_modified": false,
+    "classification_overlay_modified": false,
+    "mutation_pass": 18,
+    "mutation_pending": 3,
+    "negative_pass": 45,
+    "negative_pending": 10
+  },
+  "next_step": "Read-only diagnosis of remaining transaction-context parser incompatibility; any corrected bytes require a new versioned package and independent byte review before another simulator run.",
+  "schema_version": "f05-2a-applied-parameter-sim-attempt-r2",
+  "security": {
+    "keys_used": "ephemeral fixture funding keys; no key material captured or persisted",
+    "private_key_material_in_fixture": false
+  },
+  "status": "FAILED_BEFORE_TARGET_INVOCATION; no case credit",
+  "stop_rule": "Stopped after the first R4 positive control failed before target invocation. No other case, negative, or mutant control was run."
+}

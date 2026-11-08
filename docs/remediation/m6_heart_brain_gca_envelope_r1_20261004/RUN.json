@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "slice": "M6 Heart-Brain/GCA envelope design r2",
+  "date": "2026-10-04",
+  "command": "python3 -B /home/GodOfAgents/code/VAMS-testnet/docs/remediation/m6_heart_brain_gca_envelope_r1_20261004/validate_schema.py",
+  "exit_code": 0,
+  "result": {
+    "json_schema_2020_12_meta_validation": "PASS",
+    "complete_synthetic_33_binding_shape": "PASS",
+    "missing_source_binding_rejection": "PASS",
+    "malformed_nonce_rejection": "PASS",
+    "unknown_field_rejection": "PASS",
+    "scope": "synthetic schema syntax only; no authentication, policy evaluation, effect ordering, zero-effect, ledger, or live-network behavior tested"
+  },
+  "repository_check": {
+    "command": "git diff --check",
+    "exit_code": 0
+  },
+  "independent_review": {
+    "result": "PASS",
+    "review_scope": "read-only red-team review of exact DESIGN.md, envelope.schema.json, and validate_schema.py hashes",
+    "reviewed_sha256": {
+      "DESIGN.md": "e10a564303f33fd742fe4ec24bc75fd57bcbb1e473b7dad875605533131fa87d",
+      "envelope.schema.json": "68e204becf2586c406be43aae7723113c824cb6d71496d9fc47626188f16db42",
+      "validate_schema.py": "562c7d5bd2778ec7663e5b289f11231f3c55c9410dec9c987b28d42a7499bfad"
+    },
+    "residual_note": "Before implementation, bound capability-list length and total envelope bytes at composer/UI, Executor, and settlement routes."
+  },
+  "readiness": "NOT READY",
+  "activation_state": {
+    "deployment": "disabled",
+    "Deposit": "disabled",
+    "Slash": "disabled",
+    "ExecuteIntent": "disabled"
+  }
+}

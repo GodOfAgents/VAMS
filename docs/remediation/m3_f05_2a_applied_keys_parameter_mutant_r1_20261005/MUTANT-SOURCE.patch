@@ -1,0 +1,11 @@
+--- a/cardano/lib/vams/f05_authority.ak
++++ b/cardano/lib/vams/f05_authority.ak
+@@ -87,7 +87,7 @@
+     && state.threshold == authority_threshold
+     && state.status == AuthorityActive
+     && valid_ordered_keys(initial_keys)
+-    && state.ordered_keys == initial_keys
++    && True
+     && canonical_none(state.pending)
+     && pending_hash(state.pending) == zero_bytes(authority_hash_bytes)
+ }

@@ -1,0 +1,17 @@
+{
+  "schema": "vams-insurance-warning-build-comparison-v1",
+  "tool": "/home/GodOfAgents/vams-evidence/toolchains/aiken-1.1.21/unpacked/aiken-x86_64-unknown-linux-musl/aiken",
+  "version": "aiken v1.1.21+42babe5",
+  "baseline_source_sha256": "3762236d38359a75f45f7a1b2c5f16843fbd0b95ecdf478aa8e8f8c8511e0930",
+  "candidate_source_sha256": "184d5c19c65037ee37999af0988166dca2d28a2e2772e268e1c1738a382ecf5f",
+  "runs": {
+    "baseline": {
+      "plutus_sha256": "c4230410d0caac45f2c71d36e45a539c78087697128ce1533306d17e96a48008",
+      "compiled_code_sha256": "f706581ca7b5c2807bed395c6088d230fd0fc1e7e3a03709f18b5264dc67908c"
+    },
+    "candidate": {
+      "plutus_sha256": "c4230410d0caac45f2c71d36e45a539c78087697128ce1533306d17e96a48008",
+      "compiled_code_sha256": "f706581ca7b5c2807bed395c6088d230fd0fc1e7e3a03709f18b5264dc67908c"
+    }
+  }
+}

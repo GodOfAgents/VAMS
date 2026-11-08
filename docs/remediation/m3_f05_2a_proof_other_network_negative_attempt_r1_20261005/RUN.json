@@ -1,0 +1,85 @@
+{
+  "schema_version": "f05-2a-proof-domain-negative-sim-attempt-r1",
+  "case_id": "r2_signature_for_other_network",
+  "decision": "R4.1 proof-domain B",
+  "attempt": {
+    "label": "r2_signature_for_other_network network-magic negative through immutable R3 runner",
+    "argv": [
+      "/home/GodOfAgents/vams-evidence/toolchains/python/bin/python3.12",
+      "/home/GodOfAgents/code/VAMS-testnet/scripts/remediation/f05_2a_tx_sim_runner_r3.py",
+      "--aiken",
+      "/home/GodOfAgents/vams-evidence/toolchains/aiken-1.1.21/aiken",
+      "--tx",
+      "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m3_f05_2a_proof_domain_family_r2_20261005/r2_signature_for_other_network/negative.tx.cbor",
+      "--raw-inputs",
+      "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m3_f05_2a_proof_domain_family_r2_20261005/r2_signature_for_other_network/negative.raw_inputs.cbor",
+      "--raw-outputs",
+      "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m3_f05_2a_proof_domain_family_r2_20261005/r2_signature_for_other_network/negative.raw_outputs.cbor",
+      "--policy-id",
+      "13a2712cbc7b1c6f7cf48f7c3decd50b9c13e7837bd4cfc8865f496a"
+    ],
+    "cwd": "/home/GodOfAgents/code/VAMS-testnet",
+    "python_version": "Python 3.12.14",
+    "aiken_version": "aiken v1.1.21+42babe5",
+    "aiken_sha256": "07f3f927f1a8c71fc61273fdff850d9b98edb28dde207c8a32585991f2c88e79",
+    "runner_sha256": "3088ade0a316f6af59c04fe3e1675733100b58be826fa22af3c25e40a086ea5c",
+    "wrapper_exit_code": 0,
+    "runner_result": {
+      "schema_version": "f05-2a-tx-sim-run-result-r3",
+      "simulator_child_exit": 1,
+      "simulator_result": {
+        "stage": "compiled_evaluation",
+        "target_script_invoked": true
+      },
+      "cleanup": {
+        "child_reaped": true,
+        "process_group_empty": true,
+        "snapshot_descriptors_closed": true,
+        "status": "clean"
+      },
+      "submitted_sha256": {
+        "transaction": "2627b7ca1d85a06adac1e957eb186f3e5fd8e69a8f0fdd7b9d81b6753c7a3065",
+        "raw_inputs": "5e935c48cc9d4e82e6dbedce94b2fbd3fb427f5e187bbe67ed376671ba5e4fec",
+        "raw_outputs": "14f8b6399c77d55fa3cf016a48b1ff47d97efa293d5e043b7d699f66d847e6c0"
+      },
+      "submitted_size_bytes": {
+        "transaction": 5104,
+        "raw_inputs": 73,
+        "raw_outputs": 79
+      },
+      "target_mint_binding": {
+        "expected_policy_id": "13a2712cbc7b1c6f7cf48f7c3decd50b9c13e7837bd4cfc8865f496a",
+        "compiled_script_hash": "13a2712cbc7b1c6f7cf48f7c3decd50b9c13e7837bd4cfc8865f496a",
+        "policy_ids": [
+          "13a2712cbc7b1c6f7cf48f7c3decd50b9c13e7837bd4cfc8865f496a"
+        ]
+      }
+    },
+    "capture_note": "Exact structured runner result returned by scoped execution and transcribed locally; raw simulator stdout/stderr and external attestation are not retained."
+  },
+  "fixture": {
+    "path": "docs/remediation/m3_f05_2a_proof_domain_family_r2_20261005/r2_signature_for_other_network",
+    "original_case_id_preserved": true,
+    "original_assertion": "sign_tuple_with_another_network_magic",
+    "applied_policy_id": "13a2712cbc7b1c6f7cf48f7c3decd50b9c13e7837bd4cfc8865f496a",
+    "applied_script_sha256": "bd3bbef9e5ce973e4c20ec1f4c898730a3ec9ba4503c1d6d196f02e71b4ab9c1",
+    "transaction_sha256": "2627b7ca1d85a06adac1e957eb186f3e5fd8e69a8f0fdd7b9d81b6753c7a3065",
+    "proof_message_sha256": "87b2d24f30ca078e33b98f6d34616d91be975e32643655f7a34466afd0731c7f",
+    "preexecution_review_sha256": "39abbb7d2a066b88604fdff52ed5a5c92409c53a92c8175278aaa5c95599118b",
+    "positive_attempt_sha256": "f83f9efb074e5b7396d395a61154adc8d716b57a3a4193119b46e03d3e531e8a",
+    "positive_review_sha256": "a86e5fe5594048f9bff65f92a4dcf6f124dfe25063578d1aeeaf21a933f6c6ff",
+    "valid_body_bound_ephemeral_funding_signatures": true,
+    "value_conservation": true,
+    "private_keys_persisted": false
+  },
+  "credit": {
+    "positive_control": "accepted synthetic control",
+    "negative_case": null,
+    "mutation_suite": false,
+    "original_policy": false,
+    "ledger_admission": false,
+    "live_network": false
+  },
+  "scope": "synthetic test-only alternate applied-policy negative attempt; named-condition attribution pending paired one-guard control; no original-policy, full-ledger-admission, Pre-Prod, or live-network credit",
+  "case_status": "PENDING awaiting one-guard mutant attribution review"
+}

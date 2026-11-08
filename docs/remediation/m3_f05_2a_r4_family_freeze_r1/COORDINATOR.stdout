@@ -1,0 +1,1 @@
+{"case_ids": ["seed_missing", "seed_datum_hash", "seed_datum_index"], "checksum_exit": 0, "family_id": "seed_reference_and_datum_binding", "fixture_file_count": 18, "freeze_sha256": "df7d882ad8aa26b59692c65457bf888204cfbfdc3586ce2619a99f1749115c6b", "status": "coordinator_frozen_pending_independent_family_approval"}

@@ -1,0 +1,27 @@
+{
+  "slice": "F04 registry-side identity mint rejection",
+  "date": "2026-10-04",
+  "canonical_head": "829ab544571f12efe50ecb5740f129c8acb3e16f",
+  "branch": "testnet/remediation-20260907",
+  "tool": {
+    "name": "Aiken",
+    "version": "1.1.21+42babe5",
+    "path": "/home/GodOfAgents/vams-evidence/toolchains/aiken-1.1.21/unpacked/aiken-x86_64-unknown-linux-musl/aiken",
+    "sha256": "07f3f927f1a8c71fc61273fdff850d9b98edb28dde207c8a32585991f2c88e79"
+  },
+  "verified_files": {
+    "cardano/validators/agent_registry.ak": "32860104ff76c2fcfe19b2df631d39cd47bba5e6b7e8df585106c92c2db7cd93",
+    "cardano/validators/agent_registry.test.ak": "747cb415c38ec9a6f02571d46376410a9808ae8c4849d0c608545a21d40fd234"
+  },
+  "command": "bwrap --unshare-net --ro-bind / / --tmpfs /tmp --dev-bind /dev /dev --proc /proc --bind /dev/shm/vams-f04-registry-final2-20261004/cardano /home/GodOfAgents/code/VAMS-testnet/cardano --chdir /home/GodOfAgents/code/VAMS-testnet/cardano --clearenv --setenv HOME /home/GodOfAgents --setenv TMPDIR /tmp --setenv PATH /home/GodOfAgents/vams-evidence/toolchains/aiken-1.1.21/unpacked/aiken-x86_64-unknown-linux-musl:/usr/bin:/bin --setenv LANG C.UTF-8 --setenv LC_ALL C.UTF-8 --setenv TZ UTC aiken check --deny --seed 20260711 --max-success 250",
+  "result": {
+    "exit_code": 0,
+    "checks": 1867,
+    "errors": 0,
+    "warnings": 0,
+    "registry_mint_rejection": "PASS",
+    "legacy_burn_acceptance": "PASS"
+  },
+  "scope": "Disposable network-isolated Aiken check; synthetic evaluator tests only, no ledger admission or live evidence.",
+  "git_diff_check": "PASS"
+}

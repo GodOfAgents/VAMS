@@ -1,0 +1,30 @@
+# Inactive atomic heartbeat consent consumer
+
+This component is a separate schema-2 EVM prototype. It is not an activated identity registry or the Cardano governance bridge. Its default policy is unconfigured, so mutation rejects. No production enrollment or migration path is supplied. The test-only seed subclass and synthetic authority/challenge adapters are confined to tests.
+
+## Public source interfaces
+
+- `HeartbeatAtomicConsentRegistryV2.relayConsent(baseRaw, proposedRaw, witnessRaw, oldSignature, newSignature, challengeEvidence)` bounds raw fields, validates canonical intent/record/witness and current dependencies, installs a transaction-scoped proof frame, and invokes the exact queued singleton Timelock operation.
+- `applyConsent(baseRaw, proposedRaw)` requires the active frame, exact Timelock operation and calldata, current policy and authority sequence, authenticated challenge-interface facts, signatures, generation and nonce. Direct, unframed and batch calls reject. The frame is cleared after successful execution; a revert restores principal and operation state.
+- `principalState(principalId)` exposes stored canonical bytes, digest, generation, nonce and observed authority sequence. An empty registry does not establish enrollment.
+- `HeartbeatConsentPolicyV2.configure(root, version, epoch, profile)` is restricted to the known Timelock and requires strictly increasing policy version/epoch plus explicit supported profile decisions. Unknown or unconfigured choices reject; the consumer currently supports explicit zero grace only.
+- `OperationAwareVAMSTimelockControllerV2` preserves the 48-hour minimum and records scheduling epochs/delays and transaction-local execution context. Cancel/requeue advances the epoch even if the tuple and timestamp repeat. Existing V1 implementation and identities remain frozen.
+- `HeartbeatConsentVerificationRouterV2` verifies normal paired or recovery NEW-key signatures and provides pure canonical raw-byte codecs. Its returned parsing facts never issue authority. The registry pins known Timelock, policy and router runtime implementations, and retains runtime identity checks during use.
+
+The authority and challenge interfaces require real, reviewed implementations and chain/configuration identities before any activation. Caller-provided or fixture observations are not authentic current-state evidence. Profile TTL, lifetime, relayer, key policy and challenge/finality choices must be explicitly accepted; this source slice selects no live values. It grants no executor/proposer role. Root EOA/host/service identity and existing canonical domains/versions remain governed by the unchanged principal and consent codecs; key possession alone is not authority.
+
+## Local repair and evidence
+
+The retained BEFORE campaign reproduced three defects in the original isolated prototype: a counterfeit governance-getter policy was accepted, a backdated principal could exceed its signed lifetime bound, and the profile accepted an unsupported bounded-grace choice. The corrected code checks the known policy runtime, measures expiry-minus-notBefore, and rejects unsupported grace profiles. It moves duplicate codec logic into the pinned router and removes duplicate decoding from the test seed harness without relaxing compiler or EVM limits.
+
+R3 passed the real pinned offline size build, 20 focused methods and the full 1,100-method Solidity campaign in 69 suites, with zero failures/skips; 20 is included in 1,100. Size/focused/full input maps agree and source/Git/tool/input guards remained unchanged. Registry runtime/creation: 19,070/47,768 bytes; Router: 15,346/15,375; Policy: 4,467/12,521; Timelock: 7,625/8,666. Test-only seed harness: 19,743/48,459. Native dependency-path warnings are retained. Method gas totals include synthetic preparation; production resource budgets and actual deployment are unqualified.
+
+Tests cover policy spoofing, signed lifetime, unsupported/unconfigured profiles, old/new consent, 48-hour recovery, cancellation/requeue epochs, authority A-B-A invalidation, stale policy, missing executor role, codec parity/malformed bytes, callback-time rejection with rollback and same-proof retry, and a static-call reentry probe. The probe does not establish arbitrary mutable callback safety. The tests use synthetic authority/challenge state and real local EVM contract callers; they do not supply authentic providers or human assurance.
+
+Retained workspace evidence: HEARTBEAT-ATOMIC-CONSUMER-84-R3-CHECKS-01.json; AFTER-R3-SIZES/FOCUSED/FULL receipts; AFTER-R3 non-author source review; source preparation and raw streams. Earlier failures and compiler diagnostics retain their original source identities and are not counted as passes. These results belong to the isolated source80-plus-seven-input candidate. A separate integration journal and fresh combined-source checks are required for canonical evidence.
+
+## Remaining acceptance
+
+Authenticated enrollment/migration/current-state readers, post-ETA challenge/finality producers, node-scoped gateway/client enforcement, the Cardano-native path, custody and accepted policy configuration are unfinished. The full current-tree scanner gate remains FAIL with unadjudicated findings; full history, TruffleHog, native Cardano/Python/PostgreSQL/cross-language/frontend/ingress/supply-chain gates and privacy/runtime/human assurance remain required. No real hardware quote, fixed-model proof, DA receipt, independently retrieved bytes or live deployment is established here.
+
+This is a prerequisite to F08/F16 evidence and tracks T10/T11/T15/T16/T21/T23/T28/T31/T34, not closure of any finding or verification of a track. INV-1 through INV-10 enforcement and restricted-profile disablements remain unchanged. Both-chain closed-canary and public-promotion criteria, seven real closed-canary days and subsequent fourteen public days remain. No R28, Slot08, Aiken, install/download, provider contact, real key/signing, funding, role grant or deployment is authorized or performed by this component. Readiness remains NOT READY: thirteen findings open, zero of thirty-six tracks verified, zero promotions.

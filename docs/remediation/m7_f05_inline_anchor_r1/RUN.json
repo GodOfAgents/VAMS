@@ -1,0 +1,25 @@
+{
+  "schema": "f05-inline-anchor-slice-v1",
+  "source_sha256": "ffe54037c1ab1f05092c167618a13d3f455399c033743a6b313de7aa07052e74",
+  "test_sha256": "ef9a358585defdda1a84eac72ac7146c186dc09467ef97b4f3bdde10e5e0f5a7",
+  "focused_tests": {
+    "command": "bwrap --unshare-net --ro-bind / / --tmpfs /tmp --dev-bind /dev /dev --proc /proc --chdir /home/GodOfAgents/code/VAMS-testnet -- /home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python -B -m pytest -q -p no:cacheprovider scripts/remediation/test_f05_2a_inline_datum_mutant_anchor.py scripts/remediation/test_f05_2a_rebind_policy_order.py scripts/remediation/test_f05_2a_address_encoding.py scripts/remediation/test_f05_2a_uplc_alias.py scripts/remediation/test_f05_2a_harness_diagnostics.py",
+    "exit_code": 0,
+    "passed": 38
+  },
+  "full_harness": {
+    "exit_code": 1,
+    "result_created": false,
+    "protected_file_count": 25,
+    "protected_unchanged": true,
+    "failure": "Aiken build exited 1 while compiling remove_inline_datum_guard mutant"
+  },
+  "build_diagnostic": {
+    "exit_code": 1,
+    "stdout_retained": "MUTANT_BUILD.stdout",
+    "stderr_retained": "MUTANT_BUILD.stderr",
+    "precise_compiler_diagnostic_retained": false,
+    "source_inference": "mutant uses OutputDatum; pinned stdlib exports Datum"
+  },
+  "classification": "synthetic mutant-source anchor only; no F05 ledger credit"
+}

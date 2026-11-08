@@ -1,0 +1,59 @@
+{
+  "schema_version": "m7-gitleaks-configuration-tests-r1",
+  "date": "2026-10-03",
+  "status": "PASS",
+  "repository": {
+    "head": "829ab544571f12efe50ecb5740f129c8acb3e16f"
+  },
+  "toolchain": {
+    "python": "Python 3.12.14",
+    "network": "bwrap --unshare-net",
+    "checkout": "read-only; evidence directory writable",
+    "environment": "cleared; PATH=/usr/bin:/bin"
+  },
+  "source_sha256": {
+    ".gitleaks.toml": "40ddce18233e73c94668ddd47a5abe2a6afa0e9bc4602657dc34ec2b78606ecd",
+    "scripts/security/gitleaks_allowlist_regression.py": "57b44f38cd95e097f9d16572beb02fccd1bf83b9685dd8f9b1d95771b11547ae",
+    "scripts/security/test_gitleaks_configuration.py": "e6ff176115b4f3c7b06bceb9580409e94ec7de22231647c06e950885fcb01bc2"
+  },
+  "command": {
+    "argv": [
+      "bwrap",
+      "--unshare-net",
+      "--ro-bind",
+      "/",
+      "/",
+      "--tmpfs",
+      "/tmp",
+      "--dev-bind",
+      "/dev",
+      "/dev",
+      "--bind",
+      "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m7_gitleaks_configuration_unit_r1",
+      "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m7_gitleaks_configuration_unit_r1",
+      "--chdir",
+      "/home/GodOfAgents/code/VAMS-testnet",
+      "--clearenv",
+      "--setenv",
+      "PATH",
+      "/usr/bin:/bin",
+      "/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python",
+      "-B",
+      "-m",
+      "pytest",
+      "-q",
+      "--tb=short",
+      "-p",
+      "no:cacheprovider",
+      "--import-mode=importlib",
+      "scripts/security/test_gitleaks_configuration.py"
+    ],
+    "exit_code": 0
+  },
+  "scope": "Policy and runner unit tests only. No scanner scan or credential values were run or read.",
+  "independent_review": {
+    "status": "PASS",
+    "reviewer": "f05_identity_current_review",
+    "scope_caveat": "Reviewer verified copied source snapshots against RUN hashes, not the live Linux checkout. The pytest suite does not invoke GitLeaks; the separate generated-fixture regression is distinct."
+  }
+}

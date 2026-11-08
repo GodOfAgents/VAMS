@@ -1,0 +1,40 @@
+{
+  "slice": "F05 current-tree synthetic provenance replay",
+  "date": "2026-10-04",
+  "canonical_head": "829ab544571f12efe50ecb5740f129c8acb3e16f",
+  "branch": "testnet/remediation-20260907",
+  "command": "cd /home/GodOfAgents/code/VAMS-testnet && mkdir docs/remediation/m7_f05_mutation_provenance_r1/rerun2 && bwrap --unshare-net --ro-bind / / --tmpfs /tmp --dev-bind /dev /dev --proc /proc --bind /home/GodOfAgents/code/VAMS-testnet/docs/remediation/m7_f05_mutation_provenance_r1/rerun2 /home/GodOfAgents/code/VAMS-testnet/docs/remediation/m7_f05_mutation_provenance_r1/rerun2 --chdir /home/GodOfAgents/code/VAMS-testnet /home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python -B docs/remediation/m7_f05_mutation_provenance_r1/capture.py --evidence /home/GodOfAgents/code/VAMS-testnet/docs/remediation/m7_f05_mutation_provenance_r1/rerun2",
+  "tool": {
+    "aiken_version": "aiken v1.1.21+42babe5",
+    "aiken_sha256": "07f3f927f1a8c71fc61273fdff850d9b98edb28dde207c8a32585991f2c88e79",
+    "capture_script_sha256": "59f1554eca67f9b3d70bd2f091bd8f34447c6ae5eecc58e495d893abb8f0ce61"
+  },
+  "result": {
+    "outer_exit_code": 0,
+    "suite_status": "pass",
+    "case_observations": 57,
+    "compiled_mutations_detected": 21,
+    "unconditional_success_subcases": 55,
+    "commands": 542,
+    "compiles": 35,
+    "evaluations": 134,
+    "protected_inputs": 47,
+    "protected_inputs_unchanged": true
+  },
+  "registry_source_sha256_before_after": "32860104ff76c2fcfe19b2df631d39cd47bba5e6b7e8df585106c92c2db7cd93",
+  "cleanup": {
+    "all_signing_memfds_closed": true,
+    "signing_key_count": 5,
+    "workroots": [
+      {
+        "path": "/tmp/f05-2a-public-v3-3e71_8_c",
+        "removed": true
+      }
+    ]
+  },
+  "evidence_class": "synthetic compiled UPLC only; no exact frozen original applied-script, ledger admission, or live-network credit",
+  "accepted_ledger_counts_unchanged": {
+    "negative_cases": "45/55 PASS; 10 pending",
+    "mutations": "18/21 PASS; 3 pending"
+  }
+}

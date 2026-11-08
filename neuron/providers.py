@@ -119,7 +119,7 @@ class CelestiaProvider(DAProvider):
         
         if use_sdk:
             try:
-                from sdk.celestia import CelestiaDA
+                from .sdk.celestia import CelestiaDA
                 self._sdk = CelestiaDA(rpc_url=rpc_url, timeout=timeout)
             except ImportError:
                 self.use_sdk = False

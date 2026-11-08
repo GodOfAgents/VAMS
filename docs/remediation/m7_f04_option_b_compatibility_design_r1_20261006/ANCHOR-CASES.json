@@ -1,0 +1,374 @@
+{
+  "schema": "vams.f04.option-b.anchor-cases.v1",
+  "status": "FROZEN_DESIGN_CASES_PENDING_EXECUTION",
+  "cases": [
+    {
+      "id": "A01",
+      "entrypoint": "issue_anchor",
+      "expected": "ACCEPT",
+      "condition": "founder+3 guardians, valid previous bootstrap, one fresh anchor_seed, exact token/output",
+      "status": "PENDING",
+      "positive_control_required": true,
+      "compiled_bytes_review_required": true,
+      "mutation_required": false,
+      "evidence_scope": "compiled_v3"
+    },
+    {
+      "id": "A02",
+      "entrypoint": "issue_anchor",
+      "expected": "ACCEPT",
+      "condition": "different fresh anchor_seed issues second valid candidate anchor for same bootstrap",
+      "status": "PENDING",
+      "positive_control_required": true,
+      "compiled_bytes_review_required": true,
+      "mutation_required": false,
+      "evidence_scope": "compiled_v3"
+    },
+    {
+      "id": "A03",
+      "entrypoint": "issue_anchor",
+      "expected": "REJECT",
+      "condition": "missing founder signature",
+      "status": "PENDING",
+      "positive_control_required": true,
+      "compiled_bytes_review_required": true,
+      "mutation_required": true,
+      "evidence_scope": "compiled_v3"
+    },
+    {
+      "id": "A04",
+      "entrypoint": "issue_anchor",
+      "expected": "REJECT",
+      "condition": "only two distinct committed guardians",
+      "status": "PENDING",
+      "positive_control_required": true,
+      "compiled_bytes_review_required": true,
+      "mutation_required": true,
+      "evidence_scope": "compiled_v3"
+    },
+    {
+      "id": "A05",
+      "entrypoint": "issue_anchor",
+      "expected": "REJECT",
+      "condition": "non-guardian quorum insufficiency, duplicate authorization helper and invalid signer-set contexts are distinct evidence subcases",
+      "status": "PENDING",
+      "positive_control_required": true,
+      "compiled_bytes_review_required": true,
+      "mutation_required": true,
+      "evidence_scope": "subcase_specific",
+      "subcases": [
+        {
+          "id": "A05.1",
+          "condition": "ledger-valid unique signer set has only two committed guardians plus a non-guardian",
+          "expected": "REJECT",
+          "evidence_scope": "compiled_v3",
+          "status": "PENDING",
+          "compiled_credit_eligible": true
+        },
+        {
+          "id": "A05.2",
+          "condition": "pure helper duplicate-list probe must count unique committed keys, not repeated entries",
+          "expected": "DISTINCT_COUNT_ONLY",
+          "evidence_scope": "pure_helper",
+          "status": "PENDING",
+          "compiled_credit_eligible": false
+        },
+        {
+          "id": "A05.3",
+          "condition": "duplicate entries in purported ledger signatory set are invalid-context evidence, not a valid signer-set negative",
+          "expected": "INVALID_CONTEXT",
+          "evidence_scope": "invalid_context",
+          "status": "PENDING",
+          "compiled_credit_eligible": false
+        }
+      ]
+    },
+    {
+      "id": "A06",
+      "entrypoint": "issue_anchor",
+      "expected": "REJECT",
+      "condition": "missing seed compiled guard; equal seed consumed/reference overlap and duplicate input invalid-context; spent-seed ledger admission are distinct subcases",
+      "status": "PENDING",
+      "positive_control_required": true,
+      "compiled_bytes_review_required": true,
+      "mutation_required": true,
+      "evidence_scope": "subcase_specific",
+      "subcases": [
+        {
+          "id": "A06.1",
+          "condition": "anchor_seed absent from otherwise ledger-valid consumed inputs",
+          "expected": "REJECT",
+          "evidence_scope": "compiled_v3",
+          "status": "PENDING",
+          "compiled_credit_eligible": true
+        },
+        {
+          "id": "A06.2",
+          "condition": "anchor_seed equals bootstrap_ref, requiring the same UTxO to be consumed and referenced; structurally invalid context",
+          "expected": "INVALID_CONTEXT",
+          "evidence_scope": "invalid_context",
+          "status": "PENDING",
+          "compiled_credit_eligible": false,
+          "credit_limitation": "Helper or malformed-context evidence only; no compiled-negative or ledger-admission credit"
+        },
+        {
+          "id": "A06.3",
+          "condition": "same consumed input reference duplicated in purported transaction",
+          "expected": "INVALID_CONTEXT",
+          "evidence_scope": "invalid_context",
+          "status": "PENDING",
+          "compiled_credit_eligible": false
+        },
+        {
+          "id": "A06.4",
+          "condition": "anchor_seed already consumed by admitted prior issuance, replay attempts to spend it again",
+          "expected": "LEDGER_REJECT",
+          "evidence_scope": "ledger_admission",
+          "status": "PENDING",
+          "compiled_credit_eligible": false
+        }
+      ]
+    },
+    {
+      "id": "A07",
+      "entrypoint": "issue_anchor",
+      "expected": "REJECT",
+      "condition": "bootstrap consumed rather than referenced; missing/forged/wrong PreGenesisV2",
+      "status": "PENDING",
+      "positive_control_required": true,
+      "compiled_bytes_review_required": true,
+      "mutation_required": true,
+      "evidence_scope": "compiled_v3"
+    },
+    {
+      "id": "A08",
+      "entrypoint": "issue_anchor",
+      "expected": "REJECT",
+      "condition": "wrong committed DID/founder/controller/operator/guardians/metadata/stake",
+      "status": "PENDING",
+      "positive_control_required": true,
+      "compiled_bytes_review_required": true,
+      "mutation_required": true,
+      "evidence_scope": "compiled_v3"
+    },
+    {
+      "id": "A09",
+      "entrypoint": "issue_anchor",
+      "expected": "REJECT",
+      "condition": "wrong anchor token name, qty0/2/-1 or multiple mint assets",
+      "status": "PENDING",
+      "positive_control_required": true,
+      "compiled_bytes_review_required": true,
+      "mutation_required": true,
+      "evidence_scope": "compiled_v3"
+    },
+    {
+      "id": "A10",
+      "entrypoint": "issue_anchor",
+      "expected": "REJECT",
+      "condition": "wrong address/stake credential/datum/reference script/ADA/extra asset",
+      "status": "PENDING",
+      "positive_control_required": true,
+      "compiled_bytes_review_required": true,
+      "mutation_required": true,
+      "evidence_scope": "compiled_v3"
+    },
+    {
+      "id": "A11",
+      "entrypoint": "anchor_spend",
+      "expected": "REJECT",
+      "condition": "attempt spending/modifying/moving immutable anchor",
+      "status": "PENDING",
+      "positive_control_required": false,
+      "compiled_bytes_review_required": true,
+      "mutation_required": true,
+      "evidence_scope": "compiled_v3",
+      "related_positive_control_required": true,
+      "related_positive_entrypoints": [
+        "P0.IssueAnchor",
+        "N.MintIdentity",
+        "R.RegisterAgent"
+      ],
+      "reject_attribution": "review exact applied program/purpose/context; always-rejecting entrypoint requires no fictitious accepted control"
+    },
+    {
+      "id": "A12",
+      "entrypoint": "anchor_burn",
+      "expected": "REJECT",
+      "condition": "attempt burn or replacement under shared P0",
+      "status": "PENDING",
+      "positive_control_required": false,
+      "compiled_bytes_review_required": true,
+      "mutation_required": true,
+      "evidence_scope": "compiled_v3",
+      "related_positive_control_required": true,
+      "related_positive_entrypoints": [
+        "P0.IssueAnchor",
+        "N.MintIdentity",
+        "R.RegisterAgent"
+      ],
+      "reject_attribution": "review exact applied program/purpose/context; always-rejecting entrypoint requires no fictitious accepted control"
+    },
+    {
+      "id": "A13",
+      "entrypoint": "paired_register",
+      "expected": "ACCEPT",
+      "condition": "same valid anchor ref independently checked by N and R; founder/controller/all5 signed",
+      "status": "PENDING",
+      "positive_control_required": true,
+      "compiled_bytes_review_required": true,
+      "mutation_required": false,
+      "evidence_scope": "compiled_v3"
+    },
+    {
+      "id": "A14",
+      "entrypoint": "paired_register",
+      "expected": "REJECT",
+      "condition": "no anchor/wrong P0/wrong S0/alternative unanchored N",
+      "status": "PENDING",
+      "positive_control_required": true,
+      "compiled_bytes_review_required": true,
+      "mutation_required": true,
+      "evidence_scope": "compiled_v3"
+    },
+    {
+      "id": "A15",
+      "entrypoint": "paired_register",
+      "expected": "REJECT",
+      "condition": "two matching anchor references; transaction-local ambiguous authorization",
+      "status": "PENDING",
+      "positive_control_required": true,
+      "compiled_bytes_review_required": true,
+      "mutation_required": true,
+      "evidence_scope": "compiled_v3"
+    },
+    {
+      "id": "A16",
+      "entrypoint": "paired_register",
+      "expected": "REJECT",
+      "condition": "wrong N/R/identity name/DID/founder/bootstrap or genesis fields",
+      "status": "PENDING",
+      "positive_control_required": true,
+      "compiled_bytes_review_required": true,
+      "mutation_required": true,
+      "evidence_scope": "compiled_v3"
+    },
+    {
+      "id": "A17",
+      "entrypoint": "paired_register",
+      "expected": "REJECT",
+      "condition": "missing founder/controller/any one of five guardian PoP",
+      "status": "PENDING",
+      "positive_control_required": true,
+      "compiled_bytes_review_required": true,
+      "mutation_required": true,
+      "evidence_scope": "compiled_v3"
+    },
+    {
+      "id": "A18",
+      "entrypoint": "paired_register",
+      "expected": "REJECT",
+      "condition": "missing or wrong bootstrap; no exact registry input/output; nonRegisterAgent",
+      "status": "PENDING",
+      "positive_control_required": true,
+      "compiled_bytes_review_required": true,
+      "mutation_required": true,
+      "evidence_scope": "compiled_v3"
+    },
+    {
+      "id": "A19",
+      "entrypoint": "new_v2_registry_mint",
+      "expected": "REJECT",
+      "condition": "all NEW V2 R mint-purpose actions reject, including V2 MintIdentity and BurnIdentity; no change or qualification of V1 legacy burn behavior is claimed",
+      "status": "PENDING",
+      "positive_control_required": false,
+      "compiled_bytes_review_required": true,
+      "mutation_required": true,
+      "evidence_scope": "compiled_v3",
+      "related_positive_control_required": true,
+      "related_positive_entrypoints": [
+        "P0.IssueAnchor",
+        "N.MintIdentity",
+        "R.RegisterAgent"
+      ],
+      "reject_attribution": "review exact applied program/purpose/context; always-rejecting entrypoint requires no fictitious accepted control"
+    },
+    {
+      "id": "A20",
+      "entrypoint": "ledger_conflict",
+      "expected": "AT_MOST_ONE_ADMITTED",
+      "condition": "reviewed/pinned VAMS R/N route: different candidate anchors cannot admit two registrations consuming same bootstrap",
+      "status": "PENDING",
+      "positive_control_required": true,
+      "compiled_bytes_review_required": true,
+      "mutation_required": false,
+      "evidence_scope": "ledger_admission"
+    },
+    {
+      "id": "A21",
+      "entrypoint": "paired_register",
+      "expected": "ACCEPT",
+      "condition": "same raw DID can register using distinct bootstrap_ref; no global uniqueness",
+      "status": "PENDING",
+      "positive_control_required": true,
+      "compiled_bytes_review_required": true,
+      "mutation_required": false,
+      "evidence_scope": "compiled_v3"
+    },
+    {
+      "id": "A22",
+      "entrypoint": "recovery",
+      "expected": "ACCEPT",
+      "condition": "valid recovered current controller/guardians retain founding anchor immutable projection",
+      "status": "PENDING",
+      "positive_control_required": true,
+      "compiled_bytes_review_required": true,
+      "mutation_required": false,
+      "evidence_scope": "compiled_v3"
+    },
+    {
+      "id": "A23",
+      "entrypoint": "recovery",
+      "expected": "REJECT",
+      "condition": "altered immutable tuple, stale epochs or initial-anchor guardian authorization substituted",
+      "status": "PENDING",
+      "positive_control_required": true,
+      "compiled_bytes_review_required": true,
+      "mutation_required": true,
+      "evidence_scope": "compiled_v3"
+    },
+    {
+      "id": "A24",
+      "entrypoint": "applied_graph",
+      "expected": "ACYCLIC",
+      "condition": "all DAG parameters/policy IDs independently source-bound and reproducibly derived",
+      "status": "PENDING",
+      "positive_control_required": true,
+      "compiled_bytes_review_required": true,
+      "mutation_required": false,
+      "evidence_scope": "build_provenance"
+    },
+    {
+      "id": "A25",
+      "entrypoint": "bounds",
+      "expected": "REJECT",
+      "condition": "one-unit beyond each DID/u32/u64/quantity/transaction/datum bound",
+      "status": "PENDING",
+      "positive_control_required": true,
+      "compiled_bytes_review_required": true,
+      "mutation_required": true,
+      "evidence_scope": "compiled_v3"
+    },
+    {
+      "id": "A26",
+      "entrypoint": "worst_state",
+      "expected": "WITHIN_REVIEWED_BUDGET",
+      "condition": "maximal bounded V3 contexts; actual CPU/memory/size evidence pending",
+      "status": "PENDING",
+      "positive_control_required": true,
+      "compiled_bytes_review_required": true,
+      "mutation_required": false,
+      "evidence_scope": "compiled_v3_budget"
+    }
+  ]
+}

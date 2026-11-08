@@ -1,0 +1,12 @@
+{
+  "case_ids_in_scope": [
+    "r2_signature_for_other_seed"
+  ],
+  "case_package": "docs/remediation/m3_f05_2a_proof_other_seed_mutant_r1_20261005/r2_signature_for_other_seed",
+  "no_source_registry_status_or_handoff_changes": true,
+  "schema_version": "f05-2a-proof-domain-mutant-family-r1",
+  "scope": "synthetic alternate applied policy only; no original-policy, full-ledger-admission, Pre-Prod, or live-network credit",
+  "source_R18_review_sha256": "a2d5d636cf1489341cc61ba30e0c7b638da223958a785219dfb6c016d1a61460",
+  "source_R18_sha256": "2f3d042cd4350d821b0ce91dafa4cddfdb36dc23258eefb6115b947fd764b0be",
+  "status": "candidate-awaiting-independent-byte-review; tx-sim-not-run; no credit"
+}

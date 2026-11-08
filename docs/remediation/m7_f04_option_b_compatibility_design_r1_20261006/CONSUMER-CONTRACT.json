@@ -1,0 +1,415 @@
+{
+  "version": "F04-OPTION-B-GENESIS-CONSUMER-CONTRACT-1",
+  "status": "DESIGN_ONLY_NOT_EXECUTED",
+  "constructor_tags": {
+    "AgentDatumV1": 0,
+    "AgentDatumV2": 1,
+    "PreGenesisV2": 2
+  },
+  "v1_handling": {
+    "decoder": "exact V1 read-only legacy parsing; no coercion",
+    "v2_register": "REJECT",
+    "v2_transition": "REJECT",
+    "v1_existing_utxo": "retain original legacy validator/policy meaning; no migration/burn/new authority inferred",
+    "legacy_credentials": "not usable as V2 authority; no default epochs",
+    "migration": "separate owner-reviewed design and authorization required"
+  },
+  "pre_genesis": {
+    "constructor": 2,
+    "fields_in_order": [
+      "schema_version",
+      "did",
+      "founding_owner_vkh",
+      "initial_controller_vkh",
+      "initial_operator_vkh",
+      "initial_guardians",
+      "initial_metadata_hash",
+      "initial_stake_lovelace"
+    ],
+    "schema_version": 2,
+    "bootstrap_ref": "actual OutputReference of this registry-script input; absent from seed datum to prevent future transaction-ID self-reference",
+    "value": "exact lovelace initial_stake_lovelace >=1000000000; no native assets or identity NFT",
+    "address": "fixed reviewed registry script payment credential, no stake credential"
+  },
+  "agent_v2": {
+    "constructor": 1,
+    "fields_in_order": [
+      "schema_version",
+      "identity_policy_id",
+      "identity_asset_name",
+      "state_nonce",
+      "did",
+      "founding_owner_vkh",
+      "controller_vkh",
+      "operator_vkh",
+      "stake_lovelace",
+      "reputation_bps",
+      "metadata_hash",
+      "status",
+      "action_epoch",
+      "registered_at_ms",
+      "authorized_slashers",
+      "bootstrap_ref",
+      "guardians",
+      "control_epoch",
+      "guardian_epoch",
+      "frozen",
+      "pending_control_change"
+    ],
+    "genesis": {
+      "schema_version": 2,
+      "state_nonce": 0,
+      "control_epoch": 0,
+      "guardian_epoch": 0,
+      "frozen": false,
+      "pending_control_change": "None",
+      "reputation_bps": 5000,
+      "status": 0,
+      "action_epoch": 0,
+      "authorized_slashers": []
+    },
+    "integer_bounds": "unsigned fields <=18446744073709551615; reputation_bps<=10000; status exactly0(active) or1(suspended), reject2 and others; bootstrap output_index<=4294967295; epoch/nonce increments checked",
+    "registered_at_ms": "registration transaction finite inclusive lower bound, 0<=lower<=upper<=u64max, width<=300000; checked independently by paired entrypoints",
+    "value": "exact conserved seed lovelace plus sole +1 identity asset; no asset/value relaxation"
+  },
+  "possession": {
+    "anchor_issuance": "founding owner plus >=3 distinct committed genesis guardians in ledger signatories; anchor seed consumed; seed only referenced",
+    "registration": "founding owner, initial controller and all5 committed guardians in ledger signatories; founder/controller equality allowed",
+    "guardians": "5 distinct b28 keys, canonical bytewise sort, disjoint founder/current controller/current operator",
+    "ordinary_operator": "initial operator need not sign under prior design; never guardian"
+  },
+  "recovery": {
+    "routine": {
+      "current_controller": true,
+      "guardians": 2,
+      "destination_possession": true,
+      "delay_ms": 172800000
+    },
+    "recovery": {
+      "current_controller": false,
+      "guardians": 3,
+      "destination_possession": true,
+      "immediate_freeze": true,
+      "delay_ms": 604800000
+    },
+    "guardian_rotation": {
+      "guardians": 3,
+      "all5_destination_possession": true,
+      "delay_ms": 1209600000
+    },
+    "unfreeze": {
+      "guardians": 3,
+      "delay_ms": 172800000
+    },
+    "deregister": {
+      "current_controller": true,
+      "guardians": 3,
+      "delay_ms": 172800000
+    },
+    "freeze": {
+      "guardians": 3,
+      "immediate": true
+    },
+    "cancel": {
+      "guardians": 3
+    },
+    "expiry_window_ms": 2592000000,
+    "transaction_interval_width_max_ms": 300000,
+    "contract": "prior recovery DESIGN sections3,3a,4 preserved exactly; tagged pending request serialization there; no admin authority"
+  },
+  "freshness": {
+    "identity_key": [
+      "network",
+      "registry_script_hash",
+      "identity_policy_id",
+      "identity_asset_name",
+      "bootstrap_ref"
+    ],
+    "state_fields": [
+      "state_utxo",
+      "did",
+      "founding_owner_vkh",
+      "controller_vkh",
+      "control_epoch",
+      "guardian_epoch",
+      "state_nonce",
+      "status",
+      "frozen",
+      "pending_control_change"
+    ],
+    "resolution": "authenticated current ledger state at each authority use; unavailability, ambiguity, stale state, unknown finality or rollback uncertainty -> DENY",
+    "finality": "no confirmation-depth/provider selection in this design; implementation must separately review authoritative resolution and chain finality before activation",
+    "frozen": "deny owner-authorized grants/actions while frozen or pending (except specifically allowed on-chain recovery paths)",
+    "reorg": "invalidate held grants and cached results; reconcile canonical current state before fresh authority",
+    "pre_effect": "after validation and immediately before effect/handler, recheck same canonical state_utxo and epochs against authoritative current state; if changed/unknown deny rather than use held grant; atomicity against external effects requires separately reviewed integration",
+    "interface": {
+      "request_fields": [
+        "network",
+        "registry_script_hash",
+        "identity_policy_id",
+        "identity_asset_name",
+        "bootstrap_ref"
+      ],
+      "result_fields": [
+        "schema_version",
+        "verifier_id",
+        "verifier_configuration_hash",
+        "state_utxo",
+        "chain_point",
+        "canonicality_evidence",
+        "finality_evidence",
+        "datum_schema_version",
+        "did",
+        "founding_owner_vkh",
+        "controller_vkh",
+        "control_epoch",
+        "guardian_epoch",
+        "state_nonce",
+        "status",
+        "frozen",
+        "pending_control_change"
+      ],
+      "unknown": "explicit DENY with sanitized reason; no defaultepochs/currentstate substitute"
+    }
+  },
+  "consumer_mapping": [
+    {
+      "path": "neuron/sdk/sequence_wallet.py",
+      "apis": [
+        "SessionKeyManager.create_session_key",
+        "SessionKeyManager.verify_session_scope"
+      ],
+      "current_gap": "no root owner, identity key or authority epoch fields; active_sessions keyed only address",
+      "target": "grant binds exact identity key/controller/control_epoch/guardian_epoch and root EVM mapping commitment; check current state on every use; deny old epochs, unavailable resolution, frozen/pending; preserve now>=expires_at rejection, new grant duration<=24h, trustworthy clock required (unknown or rollback uncertainty denies), no renewal by extending existing expiry, <=24h validity, core whitelist and value limit"
+    },
+    {
+      "path": "neuron/trust_plugins/tee_plugin.py",
+      "apis": [
+        "TEEProofPlugin.generate_proof",
+        "TEEProofPlugin.verify_proof"
+      ],
+      "current_gap": "generation binds supplied20-byte root; verification derives root from proof and checks provider, not externally resolved expected root or epochs",
+      "target": "authority wrapper supplies externally authenticated expected root; proof credential binds exact identity key, controller and both epochs in independently domain-separated context; preserve service/delivery/root report-data check; reject session-key substitution; do not label mock valid evidence authoritative"
+    },
+    {
+      "path": "neuron/sdk/phala_tee.py",
+      "apis": [
+        "PhalaTEE.verify_sgx_quote",
+        "AttestationReport.usable_as_live_evidence"
+      ],
+      "current_gap": "provider report exposes attested_root_eoa/report_data; no Cardano epoch or current-controller resolution",
+      "target": "retain live report validation and classify as attestation only; authenticated identity epoch comparison belongs independently to consumer; provider signature is not Cardano authority"
+    },
+    {
+      "path": "neuron/sdk/trust_aggregator.py",
+      "apis": [
+        "TrustAggregatorClient.collect_plugin_proofs",
+        "TrustAggregatorClient.submit_plugin_bundle"
+      ],
+      "current_gap": "kwargs forwarded; bundle provenance guard alone does not resolve F04 controller epoch",
+      "target": "validate authoritative current identity and expected root/epochs before granting current-owner meaning; no submission permitted by this design"
+    },
+    {
+      "path": "neuron/sdk/oms_identity.py",
+      "apis": [
+        "OMSIdentityVerifier.verify_identity",
+        "OMSIdentityVerifier.is_compliance_verified"
+      ],
+      "current_gap": "address is provider subject; result has provenance but no identity/epoch; no identity result cache observed in this file",
+      "target": "current identity authority check AND live OMS verification for authenticated mapped root; fresh provider result cannot turn stale mapping into authority; deny offline/malformed/non-authoritative results"
+    },
+    {
+      "path": "neuron/clr_router.py",
+      "apis": [
+        "CLRouter._route_polygon_kyc"
+      ],
+      "current_gap": "uses metadata.agent_address + is_compliance_verified; no Cardano epoch context",
+      "target": "institutional route requires current bound subject plus live OMS; keep loaded ServiceBlock_OMS_v1 requirement and failclosed INV5"
+    },
+    {
+      "path": "authorization caches / held credentials",
+      "apis": [
+        "SessionKeyManager.active_sessions"
+      ],
+      "current_gap": "actual session dictionary observed; no common F04 epoch cache exists",
+      "target": "key authority cache by identity key+control_epoch+guardian_epoch+binding commitment; evict mismatch; cached success never bypass current-state check; clear on freeze/reorg/unknown state"
+    }
+  ],
+  "cross_chain_binding": {
+    "cardano_controller_type": "28-byte Cardano verification key hash",
+    "evm_root_type": "nonzero20-byte EVM EOA",
+    "rule": "not equal, truncate, pad, hash-convert, or infer from DID/operator/session key",
+    "gate": "authenticated association with domain-separated network/identity/controller/epochs/root commitment must be separately specified and reviewed; neither new resolver/provider nor linkage proof scheme selected here",
+    "until_gate_passes": "V2 current-owner EVM TEE/session/OMS authority use disabled/failclosed; existing standalone local tests do not earn F04 consumer credit",
+    "required_association_fields": [
+      "association_schema_version",
+      "network",
+      "registry_script_hash",
+      "identity_policy_id",
+      "identity_asset_name",
+      "bootstrap_ref",
+      "controller_vkh",
+      "control_epoch",
+      "guardian_epoch",
+      "evm_root_eoa",
+      "binding_nonce",
+      "expires_at_ms",
+      "verifier_id",
+      "verifier_configuration_hash"
+    ],
+    "proof_requirements": "dual proof of possession: current Cardano controller and specified root EVM EOA authorize identical domain-separated complete association commitment; verification algorithm, authenticated chain/backend, replay validity and provenance separately reviewed before activation",
+    "domain": "VAMS/f04/controller-evm-association/v1 followed by NUL; canonical typed serialization and signature format must be frozen in later association-specific design, not inferred from arbitraryJSON"
+  },
+  "authority_exclusions": [
+    "F05 singleton",
+    "F05 committee",
+    "F05 genesis value",
+    "administrator",
+    "anchor issuance signature as compiler provenance"
+  ],
+  "credit": {
+    "structural_design": "only",
+    "compiled_execution": false,
+    "ledger_admission": false,
+    "live_network": false,
+    "readiness": false
+  },
+  "source_sha256": {
+    "cardano/lib/vams/types.ak": "c420d7481f6104b16c69ec6cddde2a81b19e91ec13d97968ae072d17ace8853e",
+    "cardano/validators/agent_registry.ak": "32860104ff76c2fcfe19b2df631d39cd47bba5e6b7e8df585106c92c2db7cd93",
+    "neuron/sdk/sequence_wallet.py": "a8e7f7103fc7172307036767f385fce5abb197765a18ca2aee420125ce93ffad",
+    "neuron/sdk/oms_identity.py": "38471dc06868c42bc0035d63683ba73038eb214005bf65c81aee0fcd626c9a09",
+    "neuron/trust_plugins/tee_plugin.py": "c324996897a72fc9fdc0d19a218568a7b055bc905fe44211bb3b20c6be4bc34e",
+    "neuron/sdk/phala_tee.py": "a477288dbac1457dba979b679e629184f1fa82d69b2143b937f6e302aac91a86",
+    "neuron/clr_router.py": "ea56a16330521bcb0250eb8ead939ca6388129590afb2ae71d574d8c47e35ace",
+    "neuron/sdk/trust_aggregator.py": "3ffb3f394f5f21a4c720c61ce288edf73d03d0fcaa08a5ab8aea9a23c678dee7",
+    "docs/remediation/m7_f04_owner_recovery_design_r1_20261004/DESIGN.md": "8a988e60f4bd0d4ca5ef1bc689dab9f12b6d4673eb5647abce16439e5d51fc65"
+  },
+  "wire_contract": {
+    "V1": "Constr0 exactly14 fields frozen current order, legacyread-only; no V2 authority",
+    "V2": "Constr1 exactly21 ordered fields",
+    "seed": "Constr2 exactly8 ordered fields",
+    "implementation": "intentional wire tags require exact tagged-union/decoder; separate Aiken record types do not automatically encode these tags",
+    "boolean": {
+      "False": "Constr0[]",
+      "True": "Constr1[]"
+    },
+    "option": {
+      "Some": "Constr0[PendingAction]",
+      "None": "Constr1[]"
+    },
+    "vectors": "Option/Bool/OutputReference and every constructor must receive independently reviewed actual compiled PlutusV3 CBOR vectors before implementation acceptance; these wire target declarations earn no compiled credit"
+  },
+  "pending_wire": {
+    "max_pending": 1,
+    "common_fields_in_order": [
+      "schedule_controller_vkh:b28",
+      "destination_commitment:b32",
+      "request_id:b32",
+      "base_nonce:u64",
+      "control_epoch:u64",
+      "guardian_epoch:u64",
+      "execute_after_ms:u64",
+      "expires_at_ms:u64",
+      "authorization_signers:canonical_sorted_distinct_list_b28_max8"
+    ],
+    "variants": [
+      {
+        "name": "ControllerRoutine",
+        "constructor": 0,
+        "arity": 10,
+        "fields_in_order": [
+          "destination_controller_vkh:b28",
+          "schedule_controller_vkh:b28",
+          "destination_commitment:b32",
+          "request_id:b32",
+          "base_nonce:u64",
+          "control_epoch:u64",
+          "guardian_epoch:u64",
+          "execute_after_ms:u64",
+          "expires_at_ms:u64",
+          "authorization_signers:canonical_sorted_distinct_list_b28_max8"
+        ],
+        "request_action_tag": 1
+      },
+      {
+        "name": "ControllerRecovery",
+        "constructor": 1,
+        "arity": 10,
+        "fields_in_order": [
+          "destination_controller_vkh:b28",
+          "schedule_controller_vkh:b28",
+          "destination_commitment:b32",
+          "request_id:b32",
+          "base_nonce:u64",
+          "control_epoch:u64",
+          "guardian_epoch:u64",
+          "execute_after_ms:u64",
+          "expires_at_ms:u64",
+          "authorization_signers:canonical_sorted_distinct_list_b28_max8"
+        ],
+        "request_action_tag": 2
+      },
+      {
+        "name": "GuardianRotation",
+        "constructor": 2,
+        "arity": 10,
+        "fields_in_order": [
+          "destination_guardians:canonical_sorted5distinct_b28",
+          "schedule_controller_vkh:b28",
+          "destination_commitment:b32",
+          "request_id:b32",
+          "base_nonce:u64",
+          "control_epoch:u64",
+          "guardian_epoch:u64",
+          "execute_after_ms:u64",
+          "expires_at_ms:u64",
+          "authorization_signers:canonical_sorted_distinct_list_b28_max8"
+        ],
+        "request_action_tag": 3
+      },
+      {
+        "name": "Unfreeze",
+        "constructor": 3,
+        "arity": 9,
+        "fields_in_order": [
+          "schedule_controller_vkh:b28",
+          "destination_commitment:b32",
+          "request_id:b32",
+          "base_nonce:u64",
+          "control_epoch:u64",
+          "guardian_epoch:u64",
+          "execute_after_ms:u64",
+          "expires_at_ms:u64",
+          "authorization_signers:canonical_sorted_distinct_list_b28_max8"
+        ],
+        "request_action_tag": 4,
+        "destination_commitment": "exact32zero bytes"
+      },
+      {
+        "name": "Deregister",
+        "constructor": 4,
+        "arity": 9,
+        "fields_in_order": [
+          "schedule_controller_vkh:b28",
+          "destination_commitment:b32",
+          "request_id:b32",
+          "base_nonce:u64",
+          "control_epoch:u64",
+          "guardian_epoch:u64",
+          "execute_after_ms:u64",
+          "expires_at_ms:u64",
+          "authorization_signers:canonical_sorted_distinct_list_b28_max8"
+        ],
+        "request_action_tag": 5,
+        "destination_commitment": "controller destination hash of schedule_controller_vkh; payout fixed to current controller"
+      }
+    ],
+    "authorization_evidence": "scheduling checks actual ledger signatories then stores exact minimal selected authorized role set (routine currentcontroller+2currentguardians+newcontroller;recovery3currentguardians+newcontroller;guardianrotation3old+all5new;unfreeze3;deregistercurrentcontroller+3), sorted distinct max8; overlapping role keys counted once but each role authorization checked independently; no detachedsignature bool trusted",
+    "no_op": "new controller must differ currentcontroller; proposed canonical guardians must differ current set; reject no-op schedule; authority epochs increment only actual executed changes",
+    "request_id": "blake2b_256(ASCII VAMS/agent-control/request/v1 || NUL ||policy28||name32||bootstrap_tx32||index_u32be||actiontag_u8||schedule_controller28||destination_commitment32||base_nonce_u64be||control_epoch_u64be||guardian_epoch_u64be||execute_after_u64be||expires_at_u64be)",
+    "controller_destination": "blake2b_256(ASCII VAMS/agent-control/destination-controller/v1 ||NUL||destination_vkh28)",
+    "guardian_destination": "blake2b_256(ASCII VAMS/agent-control/destination-guardians/v1 ||NUL||sorted_guardian1_28||...||sorted_guardian5_28)",
+    "execution": "recompute from stored schedulecontroller/basefields, preserve exactpendingbytes until completion; validate currentcontroller equals schedulecontroller and epochs equal pending; slash may advance only currentstate nonce under separately authorized rules, never pendingfields"
+  }
+}

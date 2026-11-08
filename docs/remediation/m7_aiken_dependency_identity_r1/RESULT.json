@@ -1,0 +1,49 @@
+{
+  "checkout": {
+    "dirty_tree": true,
+    "head": "829ab544571f12efe50ecb5740f129c8acb3e16f"
+  },
+  "date": "2026-10-03",
+  "dependencies": [
+    {
+      "accepted_version": "v2",
+      "all_archive_bytes_match_manifest": true,
+      "all_installed_package_bytes_match_manifest": true,
+      "archive_file_count": 16,
+      "archive_file_set_equals_manifest": true,
+      "archive_path": "/home/GodOfAgents/.cache/aiken/packages/aiken-lang-fuzz-v2@9843473958e51725a9274b487d2d4aac0395ec1a2e30f090724fa737226bc127.zip",
+      "archive_root": "aiken-lang-fuzz-759f232/",
+      "archive_sha256": "7c646f2280a162879f379c01119a1b8f15523d1cac3de07fe0db167c0db29a9b",
+      "manifest_file_count": 16,
+      "name": "aiken-lang/fuzz",
+      "release_page": "https://github.com/aiken-lang/fuzz/releases",
+      "upstream_commit": "06874926ec70747f3fc4e2b9364ee9e1393441cc",
+      "upstream_release_short_commit_confirmed": true
+    },
+    {
+      "accepted_version": "v2",
+      "all_archive_bytes_match_manifest": true,
+      "all_installed_package_bytes_match_manifest": true,
+      "archive_file_count": 38,
+      "archive_file_set_equals_manifest": true,
+      "archive_path": "/home/GodOfAgents/.cache/aiken/packages/aiken-lang-stdlib-v2@6928535a4098118e5f2a30478caf80defeec5e128b4768da88c97399bb563b6d.zip",
+      "archive_root": "aiken-lang-stdlib-5a29c02/",
+      "archive_sha256": "9bfdf7e629873e8a691fa04c183d24358fcf7561d1f1504eed4ee76941a534d0",
+      "manifest_file_count": 38,
+      "name": "aiken-lang/stdlib",
+      "release_page": "https://github.com/aiken-lang/stdlib/releases",
+      "upstream_commit": "33376da0c274e41f52e69e4769a0e7878a24efba",
+      "upstream_release_short_commit_confirmed": true
+    }
+  ],
+  "next_single_slice": "After independent review, replace floating v2 dependency declarations with these exact upstream commits and perform isolated offline rebuild comparison.",
+  "readiness": "NOT READY",
+  "schema": "m7-aiken-dependency-identity-v1",
+  "scope": "Existing cache and accepted manifest byte identity only; no dependency pin, rebuild, or validator requalification.",
+  "source_hashes": {
+    "cardano/aiken-dependency-manifest.json": "0edce714d52d21ea201db1b251f0d2c72f6b273f5ec3b7e4b6045fa1211ddddf",
+    "cardano/aiken.lock": "acffff4aee9569e1ee1de468839077af467b5e403fd96450290cd367b339c651",
+    "cardano/aiken.toml": "55984b24927897c47dbf45933911b804047d0200bdf9a47942efded8b6ed4683",
+    "cardano/plutus.json": "c4230410d0caac45f2c71d36e45a539c78087697128ce1533306d17e96a48008"
+  }
+}

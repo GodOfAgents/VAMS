@@ -1,0 +1,258 @@
+{
+  "alternate_applied_policy_id": "4fa737ebb0a7133d941fc952c7fdc865272722096943196b2094fbc6",
+  "artifacts": {
+    "negative.applied-policy.cbor": {
+      "bytes": 3501,
+      "sha256": "267881bd77331855ae56cccf4b5a7220072841881bb1d9128fb4eb794543ec67"
+    },
+    "negative.genesis_ref.cbor": {
+      "bytes": 39,
+      "sha256": "5e0115ddb460b0c9eab9bba6499740f9e32cbf5e41fa02eb7f0a99d91473f086"
+    },
+    "negative.initial_keys.cbor": {
+      "bytes": 206,
+      "sha256": "08124a692a07be0284fe0b9ea33355f17a3642df4d42945b3e23245a2257ffa5"
+    },
+    "negative.raw_inputs.cbor": {
+      "bytes": 73,
+      "sha256": "4b20e2b2cf4bd58b1f6e385c90ffd098d583df69d95fbc7b1fcc2591da72b9fe"
+    },
+    "negative.raw_outputs.cbor": {
+      "bytes": 79,
+      "sha256": "f09df04c62cec887ac86589802ed1ffc6743ca2f179335f02f9bdc60937e8478"
+    },
+    "negative.tx.cbor": {
+      "bytes": 5172,
+      "sha256": "b605624a10e16c3047b039ebbe8325c26bf72f2d8a3522f2b4da85b206c8ac76"
+    },
+    "negative.validation": {
+      "ada_conservation": true,
+      "body_hash": "bca72e3d6dbc5e5d975ee4722b796542fe84b404ff55837ec1e52aa7e7174ef1",
+      "funding_signatures": 2,
+      "mint0_redeemer": {
+        "cbor_sha256": "d4bf1cdb4c4a62f0e493516439d759d06eebd5b71d13eae04152c47a8e84e571",
+        "constructor_tag": 121,
+        "proof_count": 5,
+        "proof_signatures_hex": [
+          "c3899982bfaf70649c4cc0ab0b9b33c20f1c74b14834f52ad33c2ab2df5deb3821374da9f5d84d44d7e72bb3ed97a5e3f93c77ebc0b1ead6750559bf4a189206",
+          "2dbe54f512210279ade02561c6cd0413b0e7f609076d360b98efdd376297395c3e76a915fac6c461a99b3161fd3fb0ae04295bc68c950ab4bc7a9fb23bbad50c",
+          "834f9bfe91cd69ce8a8124c006c349be1684ff29bf3142473934eae51f0f24ce76c63d6ddb9658f73c9846a47e2093e75ab2724c940c01e1b53adf4c27d89702",
+          "b49717a71183e8cb2f300bf1420e9863e0c2927abe0012e634368495b8017ca94812d533c7f1c0a06f43b7a620422baf609e11246c40b026d7fa4b19ac691805",
+          "d9938b97ac24d384bbb857251ccf6ae509117ba564118eb89ad25d18b7520057396c615c80e09cc17615710f9b6567b5daf878e4f6bf44f58122d198f45b840b"
+        ]
+      },
+      "native_asset_conservation": true,
+      "private_keys_persisted": false,
+      "valid_body_bound_ephemeral_signatures": true
+    },
+    "positive-control.applied-policy.cbor": {
+      "bytes": 3467,
+      "sha256": "e1733cafba7795b76e0bff34841aed2e8fb674ae6076394aaa9123268ad41340"
+    },
+    "positive-control.genesis_ref.cbor": {
+      "bytes": 39,
+      "sha256": "5e0115ddb460b0c9eab9bba6499740f9e32cbf5e41fa02eb7f0a99d91473f086"
+    },
+    "positive-control.initial_keys.cbor": {
+      "bytes": 172,
+      "sha256": "a8833f33190f21b5202b33250eb8aba6443eda0ec4515e0989f5254dd385213a"
+    },
+    "positive-control.raw_inputs.cbor": {
+      "bytes": 73,
+      "sha256": "4b20e2b2cf4bd58b1f6e385c90ffd098d583df69d95fbc7b1fcc2591da72b9fe"
+    },
+    "positive-control.raw_outputs.cbor": {
+      "bytes": 79,
+      "sha256": "2d85e9be4a4d2faee992d5a18ba6ff15527940129499d54ddc080f24f7c65184"
+    },
+    "positive-control.tx.cbor": {
+      "bytes": 5104,
+      "sha256": "80c6aeeb5175820f33607b35eeed626de60342eead2a557bbac091aa9820b74a"
+    },
+    "positive-control.validation": {
+      "ada_conservation": true,
+      "body_hash": "b1f417d83b5f9ac57531d9bcb041bf131b4362d231387dedc9c31c0a7bd77c6e",
+      "funding_signatures": 2,
+      "mint0_redeemer": {
+        "cbor_sha256": "d4bf1cdb4c4a62f0e493516439d759d06eebd5b71d13eae04152c47a8e84e571",
+        "constructor_tag": 121,
+        "proof_count": 5,
+        "proof_signatures_hex": [
+          "c3899982bfaf70649c4cc0ab0b9b33c20f1c74b14834f52ad33c2ab2df5deb3821374da9f5d84d44d7e72bb3ed97a5e3f93c77ebc0b1ead6750559bf4a189206",
+          "2dbe54f512210279ade02561c6cd0413b0e7f609076d360b98efdd376297395c3e76a915fac6c461a99b3161fd3fb0ae04295bc68c950ab4bc7a9fb23bbad50c",
+          "834f9bfe91cd69ce8a8124c006c349be1684ff29bf3142473934eae51f0f24ce76c63d6ddb9658f73c9846a47e2093e75ab2724c940c01e1b53adf4c27d89702",
+          "b49717a71183e8cb2f300bf1420e9863e0c2927abe0012e634368495b8017ca94812d533c7f1c0a06f43b7a620422baf609e11246c40b026d7fa4b19ac691805",
+          "d9938b97ac24d384bbb857251ccf6ae509117ba564118eb89ad25d18b7520057396c615c80e09cc17615710f9b6567b5daf878e4f6bf44f58122d198f45b840b"
+        ]
+      },
+      "native_asset_conservation": true,
+      "private_keys_persisted": false,
+      "valid_body_bound_ephemeral_signatures": true
+    }
+  },
+  "assertion": {
+    "id": "applied_keys_bad_count",
+    "mutation": "compile_with_six_keys_and_matching_datum"
+  },
+  "case_id": "applied_keys_bad_count",
+  "conservation": {
+    "authority_output_lovelace": 10000000,
+    "collateral": {
+      "lovelace": 0,
+      "present": false
+    },
+    "fee_lovelace": 1000000,
+    "inputs_lovelace": 17000000,
+    "native_asset": "one authority singleton minted and output under this case applied policy",
+    "sponsor_change_output_lovelace": 6000000
+  },
+  "credit": {
+    "ledger_admission": false,
+    "live_network": false,
+    "negative_case": null,
+    "original_policy": false
+  },
+  "decision": "R4.1 applied-parameter C",
+  "entrypoint": "f05_authority_policy.f05_authority_policy.mint / Mint[0]",
+  "first_failure_attribution": "not established; PoPs cannot be verifier-valid for this malformed parameter shape, so do not claim isolated guard attribution; remains PENDING",
+  "generator_invocation": {
+    "argv": [
+      "scripts/remediation/build_f05_2a_applied_parameter_tx_family.py",
+      "--case-id",
+      "applied_keys_bad_count",
+      "--aiken",
+      "/home/GodOfAgents/vams-evidence/toolchains/aiken-1.1.21/aiken"
+    ],
+    "exit_code": 0
+  },
+  "negative": {
+    "alternate_policy_seed_present_in_body": true,
+    "alternate_policy_seed_ref": {
+      "output_index": 7,
+      "tx_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    "applied_parameter_keys_sha256": "08124a692a07be0284fe0b9ea33355f17a3642df4d42945b3e23245a2257ffa5",
+    "datum_ordered_keys_sha256": "08124a692a07be0284fe0b9ea33355f17a3642df4d42945b3e23245a2257ffa5",
+    "datum_seed_ref": {
+      "output_index": 7,
+      "tx_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    "datum_state": {
+      "epoch": 0,
+      "keys_hex": [
+        "46ab8bcca60908172f6dadc72bb7afcf4b7ae1402ddf9c67f920b9e8d449844c",
+        "a471e9d677fac138790a38151def76f4245c48b5b8290a1044110fa45b749d5d",
+        "b104ea39ebd3423cb3b817f8086aa49f50213d59ee1566fa6ac2f79025ce176e",
+        "dfe3a8ce446d4be0495a07c65e0f8780af098efbd8d98265a068056f8dcddccd",
+        "fa5b3f7c334005314b0fc674377cca9dfe221b9a9b0b75b09f83f930d37b9dab",
+        "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+      ],
+      "pending_kind": 0,
+      "plutus_data_sha256": "2ffe4a354b1e2c3bc66a5f37152068410ad969690f14fcbea01234dc75e4bf51",
+      "schema_version": 3,
+      "status": 0,
+      "threshold": 3
+    },
+    "inputs_sha256": "4b20e2b2cf4bd58b1f6e385c90ffd098d583df69d95fbc7b1fcc2591da72b9fe",
+    "outputs_sha256": "f09df04c62cec887ac86589802ed1ffc6743ca2f179335f02f9bdc60937e8478",
+    "proof_of_possession": {
+      "reason": "policy requires exactly five 32-byte keys/proofs; six-key or 31-byte-key parameter cannot have verifier-accepted PoPs",
+      "status": "infeasible-for-malformed-parameter"
+    },
+    "status": "PENDING",
+    "tx_sha256": "b605624a10e16c3047b039ebbe8325c26bf72f2d8a3522f2b4da85b206c8ac76"
+  },
+  "one_guard_mutant_control": null,
+  "original_case_id_preserved": true,
+  "original_policy_id": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+  "parameter_sha256": "793ac8c504086e4af0f663bce1497bf70fdf626e35b086afc03ab3711b4fd458",
+  "policy_applications": {
+    "negative": {
+      "applied_policy_id": "4fa737ebb0a7133d941fc952c7fdc865272722096943196b2094fbc6",
+      "parameter_cbor": {
+        "genesis_ref": {
+          "bytes": 39,
+          "file": "negative.genesis_ref.cbor",
+          "sha256": "5e0115ddb460b0c9eab9bba6499740f9e32cbf5e41fa02eb7f0a99d91473f086",
+          "value": {
+            "output_index": 7,
+            "tx_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          }
+        },
+        "initial_keys": {
+          "bytes": 206,
+          "count": 6,
+          "file": "negative.initial_keys.cbor",
+          "key_byte_lengths": [
+            32,
+            32,
+            32,
+            32,
+            32,
+            32
+          ],
+          "sha256": "08124a692a07be0284fe0b9ea33355f17a3642df4d42945b3e23245a2257ffa5",
+          "strictly_increasing": true,
+          "unique": true,
+          "values_hex": [
+            "46ab8bcca60908172f6dadc72bb7afcf4b7ae1402ddf9c67f920b9e8d449844c",
+            "a471e9d677fac138790a38151def76f4245c48b5b8290a1044110fa45b749d5d",
+            "b104ea39ebd3423cb3b817f8086aa49f50213d59ee1566fa6ac2f79025ce176e",
+            "dfe3a8ce446d4be0495a07c65e0f8780af098efbd8d98265a068056f8dcddccd",
+            "fa5b3f7c334005314b0fc674377cca9dfe221b9a9b0b75b09f83f930d37b9dab",
+            "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+          ]
+        }
+      },
+      "program_sha256": "267881bd77331855ae56cccf4b5a7220072841881bb1d9128fb4eb794543ec67"
+    },
+    "positive-control": {
+      "applied_policy_id": "96d26910aa178410831ade31fd6ab668bb91392d9f2b07b30a6c0892",
+      "parameter_cbor": {
+        "genesis_ref": {
+          "bytes": 39,
+          "file": "positive-control.genesis_ref.cbor",
+          "sha256": "5e0115ddb460b0c9eab9bba6499740f9e32cbf5e41fa02eb7f0a99d91473f086",
+          "value": {
+            "output_index": 7,
+            "tx_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          }
+        },
+        "initial_keys": {
+          "bytes": 172,
+          "count": 5,
+          "file": "positive-control.initial_keys.cbor",
+          "key_byte_lengths": [
+            32,
+            32,
+            32,
+            32,
+            32
+          ],
+          "sha256": "a8833f33190f21b5202b33250eb8aba6443eda0ec4515e0989f5254dd385213a",
+          "strictly_increasing": true,
+          "unique": true,
+          "values_hex": [
+            "46ab8bcca60908172f6dadc72bb7afcf4b7ae1402ddf9c67f920b9e8d449844c",
+            "a471e9d677fac138790a38151def76f4245c48b5b8290a1044110fa45b749d5d",
+            "b104ea39ebd3423cb3b817f8086aa49f50213d59ee1566fa6ac2f79025ce176e",
+            "dfe3a8ce446d4be0495a07c65e0f8780af098efbd8d98265a068056f8dcddccd",
+            "fa5b3f7c334005314b0fc674377cca9dfe221b9a9b0b75b09f83f930d37b9dab"
+          ]
+        }
+      },
+      "program_sha256": "e1733cafba7795b76e0bff34841aed2e8fb674ae6076394aaa9123268ad41340"
+    }
+  },
+  "positive_control": {
+    "applied_policy_id": "96d26910aa178410831ade31fd6ab668bb91392d9f2b07b30a6c0892",
+    "inputs_sha256": "4b20e2b2cf4bd58b1f6e385c90ffd098d583df69d95fbc7b1fcc2591da72b9fe",
+    "outputs_sha256": "2d85e9be4a4d2faee992d5a18ba6ff15527940129499d54ddc080f24f7c65184",
+    "status": "not executed",
+    "tx_sha256": "80c6aeeb5175820f33607b35eeed626de60342eead2a557bbac091aa9820b74a"
+  },
+  "program_sha256": "267881bd77331855ae56cccf4b5a7220072841881bb1d9128fb4eb794543ec67",
+  "schema_version": "f05-2a-applied-parameter-family-r5",
+  "scope": "synthetic alternate applied policy; no original-policy, ledger-admission, or live-network credit",
+  "status": "candidate-awaiting-independent-byte-review; tx-sim-not-run; no credit"
+}

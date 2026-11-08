@@ -1,0 +1,19 @@
+{
+  "case_counts": {
+    "failed": 0,
+    "pass": 53,
+    "pending": 2
+  },
+  "credit_scope": "synthetic alternate-applied-policy only",
+  "delta": "PENDING -> PASS",
+  "mutation_rows_unchanged": true,
+  "result": "PASS",
+  "target": "r2_signature_for_other_epoch",
+  "transaction_simulator": {
+    "failed": 0,
+    "pass": 49,
+    "pending": 2,
+    "total": 51
+  },
+  "verified_evidence_hashes": 90
+}

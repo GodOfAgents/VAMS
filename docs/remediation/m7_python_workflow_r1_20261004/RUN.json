@@ -1,0 +1,26 @@
+{
+  "head": "829ab544571f12efe50ecb5740f129c8acb3e16f",
+  "branch": "testnet/remediation-20260907",
+  "workflow_sha256": "baf53503673b70c5185f654f8f694f1feaf98af68ee56e29c83c01ee0cf0593c",
+  "python_sha256": "aa01d96348989f33ed998b42c83e98593b41dba83914d9899730b90c36f2e5c9",
+  "pytest_sha256": "f3da0bf69becc0870ff998a0ad8c509522d4855c9a1d0290e3e2ddbf130ec7a5",
+  "envoy_sha256": "002c6e1c69ed0fa0ea381887247cadadfaec9481375fa8d8d2b1731eeabf40b8",
+  "bwrap_sha256": "0abea81db798ebf6b4742ac0664802d97521547a353c2a0dbdc21d76cbbfd2c0",
+  "python": "3.12.14",
+  "pytest": "9.1.1",
+  "network": "bwrap --unshare-net; canonical source read-only; disposable snapshot writable",
+  "workflow_evidence": "/home/GodOfAgents/vams-evidence/m7-python-tests-snapshot-r2-20261004/",
+  "workflow_checksums_file_sha256": "9b7e94f59d72a6e7f76f4cc7b63c60fff45249330efa9cfe6fd59f4c085a2cd0",
+  "path_recheck_evidence": "/home/GodOfAgents/vams-evidence/m7-history-rewrite-path-recheck-r1-20261004/",
+  "path_recheck_checksums_file_sha256": "c17f34a995a2dd48004315bc31b1d6f0faac192f79698061cb69c9d2bc9dbce3",
+  "workflow_commands": [
+    {"argv":["pytest","-v","--tb=short","--ignore=docs/remediation/m3_f05_design_r2/test_design.py"],"start":"2026-10-04T17:23:55Z","end":"2026-10-04T17:26:53Z","exit":1,"passed":1696,"subtests":444,"failed":4,"stdout_sha256":"3d477cb1cb84e69a83cac9091f9d9a2e215c546333cda57617714f5292d3a0c7","stderr_sha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},
+    {"argv":["pytest","-v","--tb=short","docs/remediation/m3_f05_design_r2/test_design.py"],"start":"2026-10-04T17:26:53Z","end":"2026-10-04T17:26:53Z","exit":0,"passed":10,"failed":0,"stdout_sha256":"1278ea5ed3c8177623a90ea62140dbbe5e76b0aab2af4e35de005a0d3178f04d"}
+  ],
+  "targeted_path_recheck":{"argv":["pytest","-v","--tb=short","scripts/audit/test_history_rewrite_script.py::HistoryRewriteScriptTests::test_execute_rejects_empty_replacement_values"],"start":"2026-10-04T17:36:22Z","end":"2026-10-04T17:36:23Z","exit":0,"passed":1,"environment":{"PATH":"/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin","PYTHON_BIN":"/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python","PYTHONDONTWRITEBYTECODE":"1"}},
+  "readiness":"NOT READY",
+  "deployment_enabled":false,
+  "deposit_enabled":false,
+  "slash_activation_enabled":false,
+  "execute_intent_enabled":false
+}

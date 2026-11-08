@@ -223,7 +223,7 @@ class TestMultiDARouting:
 
         assert result["success"] is False
         assert result["protocol"] == "eigenda"
-        assert "not enabled" in result["error"]
+        assert result["error"] == "Invalid Sentinel report or DA target"
 
     @pytest.mark.asyncio
     async def test_unknown_explicit_target_fails_closed(self, sample_report):
@@ -233,8 +233,8 @@ class TestMultiDARouting:
         )
 
         assert result["success"] is False
-        assert result["protocol"] == "untrusted-da"
-        assert "Unknown DA protocol" in result["error"]
+        assert result["protocol"] == "unknown"
+        assert result["error"] == "Invalid Sentinel report or DA target"
 
     @pytest.mark.asyncio
     async def test_unknown_challenge_defaults_to_celestia(self, audit_log):

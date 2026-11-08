@@ -1,0 +1,69 @@
+{
+  "schema_version": "vams-m1-gateway-shutdown-run-v1",
+  "date": "2026-10-03",
+  "status": "independent_review_passed_focused_gateway_shutdown_scope",
+  "repository": {
+    "head": "829ab544571f12efe50ecb5740f129c8acb3e16f",
+    "branch": "testnet/remediation-20260907"
+  },
+  "toolchain": {
+    "python": "Python 3.12.14",
+    "pytest": "pytest 9.1.1",
+    "network": "bwrap --unshare-net",
+    "checkout_mount": "read-only; evidence directory writable"
+  },
+  "command": [
+    "bwrap",
+    "--unshare-net",
+    "--ro-bind",
+    "/",
+    "/",
+    "--tmpfs",
+    "/tmp",
+    "--dev-bind",
+    "/dev",
+    "/dev",
+    "--proc",
+    "/proc",
+    "--bind",
+    "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m1_gateway_shutdown_current_r1",
+    "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m1_gateway_shutdown_current_r1",
+    "--chdir",
+    "/home/GodOfAgents/code/VAMS-testnet",
+    "/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python",
+    "-B",
+    "-m",
+    "pytest",
+    "-q",
+    "--tb=short",
+    "-p",
+    "no:cacheprovider",
+    "--import-mode=importlib",
+    "neuron/tests/test_gateway_shutdown.py"
+  ],
+  "source_sha256": {
+    "gateway/replay_store.py": "0c10719bc399e932e763b9d80635f262f8caea683d4e7b37de4370a0a4ebc9de",
+    "gateway/request_auth.py": "9b47c26f1e640f3bd85f2d88d223fa97f38cfe2d9bd90948389f11ed9474a926",
+    "gateway/route_policy.py": "15166275718db36c9c68692a98a8fccbaee0ec3342fac0102cf9989305116916",
+    "gateway/route_security.py": "c1b56ada6d3640ba9c6bf6e5bafc01ea0eab0494805835e280aadaba47a336b0",
+    "gateway/server.py": "ace02242ab38aa9fa5afa4371be21a1a7d2329d5b9241dec30c7d503ff393c7e",
+    "gateway/vdso.py": "21152bc7f676f82ce39fb854ad35936cef0e5168a292b5ec83ec8003b6a7beb6",
+    "neuron/runtime_safety.py": "b39c48ec63f20c34573e11e0a515ef622e3340f76964e1688c2dfa23b29d0079",
+    "neuron/tests/m2_gateway_helpers.py": "2f8c695bbb5f3508aba0123668c5957349a4b7967433356747dcca8bb9528ce4",
+    "neuron/tests/test_gateway_shutdown.py": "25855143a8943c4be21f1ea97117c2265b41f7a67652491b8c13bcfb1f0b4b8c"
+  },
+  "result": {
+    "exit_code": 0,
+    "passed": 1,
+    "failed": 0,
+    "stdout_sha256": "85a7532b40196fb821e4b3dfb1231181e8e280a2da477abec65674576186c6c1",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "coverage": "Two repeated TestClient lifespans in testnet mode with trusted ingress metadata present; a request missing the gateway-auth protocol version is denied; cleanup task and economics keeper stop after each lifespan; no owned keeper thread remains.",
+  "limits": "Synthetic in-process TestClient evidence only; no TLS ingress, real providers/database, complete gateway security, or testnet readiness.",
+  "changes_by_run": [],
+  "independent_review": {
+    "status": "PASS",
+    "scope": "checksums, nine current source hashes, exact captures, accurate gateway-auth version classification, TestClient lifecycle cleanup, synthetic scope; no live readiness claim"
+  }
+}

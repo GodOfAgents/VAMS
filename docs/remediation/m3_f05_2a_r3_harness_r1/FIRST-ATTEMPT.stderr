@@ -1,0 +1,11 @@
+Traceback (most recent call last):
+  File "/home/GodOfAgents/code/VAMS-testnet/scripts/remediation/test_f05_2a_authority_bootstrap_public.py", line 1055, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/home/GodOfAgents/code/VAMS-testnet/scripts/remediation/test_f05_2a_authority_bootstrap_public.py", line 1030, in main
+    result = _run_tx_sim_r3_canaries(args.aiken.resolve())
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/GodOfAgents/code/VAMS-testnet/scripts/remediation/test_f05_2a_authority_bootstrap_public.py", line 640, in _run_tx_sim_r3_canaries
+    sys.executable, str(runner), "--aiken", str(aiken), "--tx", str(tx_path),
+    ^^^
+NameError: name 'sys' is not defined. Did you forget to import 'sys'?

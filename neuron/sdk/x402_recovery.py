@@ -1,15 +1,38 @@
 import time
 import hashlib
 import logging
+import os
 from dataclasses import dataclass
-from typing import Optional, Dict, Any, List
+from typing import Optional, Dict, Any, List, Mapping
 from enum import Enum
 
 from neuron.sdk.interrupt_handler import InterruptRequest, InterruptResult, InterruptSignal, InterruptStatus
 from neuron.sdk.semantic_mmu import MemoryTier
 from neuron.sdk.nonce_manager import NonceManager
+from neuron.runtime_safety import (
+    ImmutableRuntimeConfiguration,
+    LiveModeSafetyError,
+    RuntimePolicy,
+    load_runtime_policy,
+    resolve_component_mock_mode,
+)
 
 logger = logging.getLogger("vams.x402_recovery")
+
+_SAFE_TIMEOUT_ERROR = "Escrow expired or too close to expiry"
+_SAFE_DISPUTE_ERROR = "Disputed: HTLC preimage mismatch"
+_SAFE_PROVIDER_ERROR = "Provider execution failed"
+
+
+def _safe_delivery_failure(result: InterruptResult) -> str:
+    """Return only fixed X402 failure text; never forward an upstream detail."""
+    if type(result.status) is InterruptStatus and result.status is InterruptStatus.TIMEOUT:
+        return _SAFE_TIMEOUT_ERROR
+    if (type(result.status) is InterruptStatus and result.status is InterruptStatus.FAILED and
+            type(result.error) is str and result.error == _SAFE_DISPUTE_ERROR):
+        # Preserve the SDK's established, locally generated dispute message.
+        return _SAFE_DISPUTE_ERROR
+    return _SAFE_PROVIDER_ERROR
 
 class EscrowState(Enum):
     """Maps on-chain IX402EscrowManager.EscrowStatus plus NOT_FOUND."""
@@ -37,10 +60,41 @@ def compute_escrow_id(agent: str, provider: str, nonce: int, timestamp: int) -> 
     data = f"{agent}:{provider}:{nonce}:{timestamp}".encode()
     return hashlib.sha256(data).digest()
 
-class EscrowStateClient:
+ESCROW_MOCK_VARIABLE = "ESCROW_STATE_MOCK_MODE"
+X402_RECOVERY_MOCK_VARIABLE = "X402_RECOVERY_MOCK_MODE"
+
+
+class EscrowStateClient(ImmutableRuntimeConfiguration):
     """Abstraction over on-chain escrow queries."""
-    def __init__(self):
+    _immutable_runtime_fields = frozenset({"mock_mode", "runtime_policy"})
+
+    def __init__(
+        self,
+        mock_mode: Optional[bool] = None,
+        *,
+        environ: Optional[Mapping[str, str]] = None,
+        policy: Optional[RuntimePolicy] = None,
+    ):
+        source = os.environ if environ is None else environ
+        self.runtime_policy = policy or load_runtime_policy(source)
+        self.mock_mode = resolve_component_mock_mode(
+            "EscrowStateClient",
+            ESCROW_MOCK_VARIABLE,
+            mock_mode,
+            policy=self.runtime_policy,
+            environ=source,
+        )
+        if self.runtime_policy.is_live:
+            raise LiveModeSafetyError(
+                "EscrowStateClient live execution is disabled until authenticated "
+                "on-chain escrow reads are implemented"
+            )
+        if not self.mock_mode:
+            raise LiveModeSafetyError(
+                "EscrowStateClient has no authoritative non-simulated implementation"
+            )
         self._escrows: Dict[bytes, EscrowRecord] = {}
+        self._freeze_runtime_configuration()
 
     def register_mock_escrow(self, escrow: EscrowRecord):
         """Register an escrow record (used in testing and mocks)."""
@@ -76,8 +130,12 @@ class EscrowStateClient:
         return record.state == EscrowState.LOCKED and time.time() >= record.expires_at
 
 
-class X402InterruptHandler:
+class X402InterruptHandler(ImmutableRuntimeConfiguration):
     """Core recovery interrupt handler managing x402 SIG_TOOL_INVOKE lifecycle."""
+    _immutable_runtime_fields = frozenset(
+        {"mock_mode", "runtime_policy", "max_retries", "grace_period_seconds"}
+    )
+
     def __init__(
         self,
         agent_id: str,
@@ -86,8 +144,34 @@ class X402InterruptHandler:
         mmu: Any,
         nonce_manager: NonceManager,
         max_retries: int = 2,
-        grace_period_seconds: float = 5.0
+        grace_period_seconds: float = 5.0,
+        mock_mode: Optional[bool] = None,
+        *,
+        environ: Optional[Mapping[str, str]] = None,
+        policy: Optional[RuntimePolicy] = None,
     ):
+        source = os.environ if environ is None else environ
+        self.runtime_policy = policy or load_runtime_policy(source)
+        self.mock_mode = resolve_component_mock_mode(
+            "X402InterruptHandler",
+            X402_RECOVERY_MOCK_VARIABLE,
+            mock_mode,
+            policy=self.runtime_policy,
+            environ=source,
+        )
+        if self.runtime_policy.is_live:
+            raise LiveModeSafetyError(
+                "X402InterruptHandler live execution is disabled until escrow lock, "
+                "delivery, refund, and crash recovery are confirmed on-chain"
+            )
+        if not self.mock_mode:
+            raise LiveModeSafetyError(
+                "X402InterruptHandler has no authoritative non-simulated implementation"
+            )
+        if not getattr(escrow_client, "mock_mode", False):
+            raise LiveModeSafetyError(
+                "X402InterruptHandler requires an explicitly simulated escrow client"
+            )
         self.agent_id = agent_id
         self.escrow_client = escrow_client
         self.payment_client = payment_client
@@ -96,6 +180,7 @@ class X402InterruptHandler:
         self.max_retries = max_retries
         self.grace_period_seconds = grace_period_seconds
         self.recovery_attempts = 0
+        self._freeze_runtime_configuration()
 
 
     def handle_tool_invoke(self, request: InterruptRequest) -> InterruptResult:
@@ -168,10 +253,10 @@ class X402InterruptHandler:
                     self._inject_result_to_mmu(request, result)
                     return result
                 else:
-                    last_error = result.error or "Execution failed"
-            except Exception as e:
-                logger.error(f"Provider {provider} failed with exception: {e}")
-                last_error = str(e)
+                    last_error = _safe_delivery_failure(result)
+            except Exception:
+                logger.error("Provider invocation failed; exception detail suppressed")
+                last_error = _SAFE_PROVIDER_ERROR
 
         return InterruptResult(
             interrupt_id=request.interrupt_id,

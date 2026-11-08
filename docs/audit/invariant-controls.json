@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.0.0",
+  "schema_version": "1.1.0",
   "architecture_version": "0.8.0",
   "controls": [
     {
@@ -28,9 +28,92 @@
     },
     {
       "id": "INV-5",
-      "statement": "Institutional compliance routing fails closed on OMS identity failure.",
-      "enforcement": [{"path": "neuron/clr_router.py", "must_contain": ["Institutional compliance routing requires an OMS verified identity"]}],
-      "tests": [{"path": "neuron/tests/test_oms_integration.py", "must_contain": ["test_live_mode_fail_closed_on_error"]}]
+      "statement": "Institutional P3 compliance routing fails closed unless OMS identity verification succeeds with live-provider provenance.",
+      "enforcement": [
+        {
+          "path": "neuron/clr_router.py",
+          "python_ast": {
+            "control_type": "fail_closed_call",
+            "class": "CLRouter",
+            "function": "_route_polygon_kyc",
+            "required_calls": ["self.identity_verifier.is_compliance_verified"],
+            "guarded_denials": [{"call": "self.identity_verifier.is_compliance_verified", "arguments": ["metadata.agent_address"], "exception": "PermissionError"}],
+            "minimum_raises": 4
+          }
+        },
+        {
+          "path": "neuron/sdk/oms_identity.py",
+          "python_ast": {
+            "control_type": "predicate",
+            "class": "OMSVerificationResult",
+            "function": "usable_for_compliance",
+            "required_returns": ["self.verified and self.evidence_classification == 'live-provider'"]
+          }
+        },
+        {
+          "path": "neuron/sdk/oms_identity.py",
+          "python_ast": {
+            "control_type": "provider_result",
+            "class": "OMSIdentityVerifier",
+            "function": "_result",
+            "required_calls": ["OMSVerificationResult"],
+            "required_assignments": [{"target": "evidence", "expression": "'live-provider' if verified and not simulated and self.runtime_policy.is_live else 'non-authoritative'"}]
+          }
+        },
+        {
+          "path": "neuron/sdk/oms_identity.py",
+          "python_ast": {
+            "control_type": "provider_boundary",
+            "class": "OMSIdentityVerifier",
+            "function": "verify_identity",
+            "required_calls": ["self._result", "self._transport.get"],
+            "required_exception_handlers": ["requests.RequestException", "TypeError", "ValueError", "Exception"],
+            "minimum_false_result_calls": 6
+          }
+        },
+        {
+          "path": "neuron/sdk/signer.py",
+          "python_ast": {
+            "control_type": "signing_guard",
+            "class": "OMSSigner",
+            "function": "sign_transaction",
+            "required_calls": ["self.identity_verifier.is_compliance_verified"],
+            "guarded_denials": [{"call": "self.identity_verifier.is_compliance_verified", "arguments": ["self.address"], "exception": "PermissionError"}]
+          }
+        },
+        {
+          "path": "neuron/sdk/signer.py",
+          "python_ast": {
+            "control_type": "signing_guard",
+            "class": "OMSSigner",
+            "function": "sign_message",
+            "required_calls": ["self.identity_verifier.is_compliance_verified"],
+            "guarded_denials": [{"call": "self.identity_verifier.is_compliance_verified", "arguments": ["self.address"], "exception": "PermissionError"}]
+          }
+        }
+      ],
+      "tests": [
+        {
+          "path": "neuron/tests/test_m1_2a_identity_tee_runtime.py",
+          "python_tests": [
+            "test_oms_live_mode_requires_explicit_endpoint_and_credential",
+            "test_oms_provider_success_is_live_eligible_only_in_live_runtime",
+            "test_oms_provider_failures_fail_closed_without_mock_fallback",
+            "test_p3_blocks_simulated_oms_success",
+            "test_p3_accepts_successful_live_oms_result",
+            "test_p3_rejects_successful_provider_result_in_non_live_runtime",
+            "test_p3_rejects_unavailable_oms_verifier"
+          ]
+        },
+        {
+          "path": "neuron/tests/test_clr_v3.py",
+          "python_tests": ["test_p3_unverified_address_blocked", "test_p3_missing_address_blocked", "test_p3_verified_address_passes"]
+        },
+        {
+          "path": "neuron/tests/test_oms_hybrid.py",
+          "python_tests": ["test_p3_requires_oms_block", "test_oms_signer_compliance_checks"]
+        }
+      ]
     },
     {
       "id": "INV-6",
@@ -59,7 +142,7 @@
     {
       "id": "INV-10",
       "statement": "Bridge proofs and payload hashes remain separate with strict nonce replay protection.",
-      "enforcement": [{"path": "neuron/bridge_executor.py", "must_contain": ["verify_bridge_proof", "expected_payload_hash"]}, {"path": "cardano/validators/insurance_fund.ak", "must_contain": ["bridge_proof, payload_hash", "verify_bridge_proof(bridge_proof, payload_hash)"]}],
+      "enforcement": [{"path": "neuron/bridge_executor.py", "must_contain": ["verify_bridge_proof", "expected_payload_hash"]}, {"path": "cardano/validators/insurance_fund.ak", "aiken_boundary": {"control_type": "insurance_custody", "required_deposit_pattern": "Deposit { amount: _, bridge_proof: _, payload_hash: _ } -> False", "required_fields": ["bridge_proof", "payload_hash"], "forbidden_calls": ["verify_bridge_proof("]}}],
       "tests": [{"path": "neuron/tests/test_clr_v3.py", "must_contain": ["test_icb_nonce_replay"]}, {"path": "cardano/lib/vams/icb.ak", "must_contain": ["prop_nonce_replay_always_rejected"]}]
     }
   ]

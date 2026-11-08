@@ -1,7 +1,7 @@
 import logging
 import time
 from typing import Optional, Dict, Any
-from config import (
+from ..config import (
     BREAKER_PRICE_FLOOR, 
     BREAKER_MAX_EXPOSURE, 
     BREAKER_MAX_CONSECUTIVE_FAILURES,

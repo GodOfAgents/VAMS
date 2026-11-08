@@ -1,0 +1,96 @@
+{
+  "schema_version": "f05-unconditional-success-r3-probe-r1",
+  "date": "2026-10-03",
+  "status": "synthetic-paired-mutation-probe-pass; independent_review_pass; no_registered_credit",
+  "source": {
+    "path": "scripts/remediation/test_f05_2a_authority_bootstrap_public.py",
+    "previous_sha256": "e4a92abb7fc1b7af82d88b44ad36b265c1ff13f35a80a68d3d0233dd48f431b2",
+    "current_sha256": "f6689e80ab2cbac78a8b05b76917ec0e9eac122e5023f1c37d3dd21afd5d6570"
+  },
+  "probe": {
+    "path": "docs/remediation/m3_f05_2a_unconditional_r3_mutation_r1/probe.py",
+    "sha256": "4a3d34273630b4c3249a65c6c5115521b296001d0588b85e92f765cbf73f2eb3"
+  },
+  "toolchain": {
+    "aiken_version": "v1.1.21+42babe5",
+    "aiken_sha256": "07f3f927f1a8c71fc61273fdff850d9b98edb28dde207c8a32585991f2c88e79",
+    "python": "/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python"
+  },
+  "inputs": {
+    "validator_sha256": "e9d3ac9cbb14b9e7693dc12430234694c82eb52e61d176e1e39992fb9cbeafa8",
+    "mutation_helper_source_sha256": "f6689e80ab2cbac78a8b05b76917ec0e9eac122e5023f1c37d3dd21afd5d6570",
+    "tx_sim_runner_sha256": "3088ade0a316f6af59c04fe3e1675733100b58be826fa22af3c25e40a086ea5c",
+    "registry_classifier_sha256": "c03230249c7e73f6929cc944b7af3e30d98b8168f8abd184fa39332a601a394e",
+    "canary_manifest_sha256": "91c7bc46476a391c3ea3e3012b2f9174a1b87f6e0253ce6167b4c7b96e47f95d",
+    "base_policy_id": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+    "mutant_policy_id": "1ff0752a9eb66b2a298ca96b504be91dcc2032b19a93522d332f34c9",
+    "mutant_code_sha256": "5d91cb54daa12160e98851f559918e0c15029376f9728549a311a7932f6b0250",
+    "valid_fixture_sha256": "765c717f16b543c746b88742e8b775cd3ecabca4fef6edd16702184683780a28",
+    "raw_inputs_sha256": "4b20e2b2cf4bd58b1f6e385c90ffd098d583df69d95fbc7b1fcc2591da72b9fe",
+    "raw_outputs_sha256": "9cdf345a785f51763bdb43f1b1ba0c20b5545051f03051e6a7bf726ea128c56a"
+  },
+  "command": "bwrap --unshare-net --ro-bind / / --tmpfs /tmp --ro-bind /home/GodOfAgents/.cache /home/GodOfAgents/.cache --dev-bind /dev /dev --proc /proc --setenv HOME /home/GodOfAgents --chdir /home/GodOfAgents/code/VAMS-testnet /home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python -B docs/remediation/m3_f05_2a_unconditional_r3_mutation_r1/probe.py",
+  "exit": 0,
+  "captures": {
+    "stdout_sha256": "9e6ae49e5f994bf1c7d9911c79f661f275246eda2d692c9b0e8bbb3fdeef1268",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "exit_file_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+  },
+  "cases": [
+    {
+      "id": "baseline_seed_missing",
+      "wrapper_exit": 0,
+      "simulator_child_exit": 1,
+      "classification": "compiled_evaluation",
+      "target_invoked": true,
+      "cleanup": "clean",
+      "tx_sha256": "69173acfbb93568aee7bcfeb9571db360cb4d78aa710d4aa26d2d0128e00a5ba"
+    },
+    {
+      "id": "mutant_valid",
+      "wrapper_exit": 0,
+      "simulator_child_exit": 0,
+      "classification": "script_accepted",
+      "target_invoked": true,
+      "cleanup": "clean",
+      "tx_sha256": "740c34af0327d955279228c901cec1f6770257049f4657c2c74e73fe4e762f02"
+    },
+    {
+      "id": "mutant_seed_missing",
+      "wrapper_exit": 0,
+      "simulator_child_exit": 0,
+      "classification": "script_accepted",
+      "target_invoked": true,
+      "cleanup": "clean",
+      "tx_sha256": "8a868831492307ae5adf8e4578e791124e1c35db2ca4ebc7c28dd08ac193d612"
+    }
+  ],
+  "public_r3_canaries_after_edit": {
+    "source_sha256": "f6689e80ab2cbac78a8b05b76917ec0e9eac122e5023f1c37d3dd21afd5d6570",
+    "stdout_sha256": "7b413221e74793d66bb95bb2c20faa1b39796f5f1b3a1a107b601891aaad0b7e",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "exit": 0
+  },
+  "failed_feasibility_attempt": {
+    "failure": "current mutator source anchor did not match the current validator handler",
+    "result": "RuntimeError before mutant compilation and before any simulator invocation"
+  },
+  "accepted_ledger_counts": {
+    "negative_cases": "45/55",
+    "mutations": "18/21"
+  },
+  "registered_unconditional_success_status": "PENDING",
+  "independent_review": {
+    "result": "PASS",
+    "scope": "bounded synthetic probe source, hashes, exact policy binding, three replay outcomes, and cleanup",
+    "limitation": "baseline/mutant seed_missing transaction body omits seed, but submitted raw_inputs, raw_outputs, and signatures remain those of the canonical positive; not the exact R4 candidate or ledger-reachable evidence",
+    "reviewer": "f05_uplc_backend_review"
+  },
+  "r4_seed_missing_reference": {
+    "manifest": "docs/remediation/m3_f05_2a_r4_tx_families/seed_reference_and_datum_binding/cases/seed_missing/CASE-MANIFEST.json",
+    "status": "PENDING; no simulator execution authorized before coordinator freeze and independent family approval",
+    "transaction_sha256": "216c52f1803f8ea2de78e3f4c14ff7905ecaaab5dff10a83af2aca9e3c9c80ab",
+    "raw_inputs_sha256": "1f4c86aa7a6d64cc0ebac3bf8633e98b5c91fa7ded58bdb70427fdd9ffa0e778",
+    "raw_outputs_sha256": "5a02a590dd2df85f220c273837e014bc5a6c75f6b1dfa8cd9d6770322e89c232"
+  }
+}

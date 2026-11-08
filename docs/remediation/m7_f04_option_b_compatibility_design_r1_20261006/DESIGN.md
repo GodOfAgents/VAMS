@@ -1,0 +1,21 @@
+# F04 Option B compatibility design
+
+Status: design only; pending independent exact-byte review. No production implementation or runtime acceptance occurred.
+
+The owner permits multiple quorum-authorized immutable anchors for one bootstrap with different anchor seeds. Registration consumes the exact committed bootstrap; the reviewed VAMS registration route can admit at most one such spend. A different bootstrap may register the same DID. Neither a transaction-local matching-reference check nor a quorum signature establishes global DID uniqueness. The guarantee applies to the reviewed and pinned R/N route; P0 signatures do not attest that arbitrary alternative code implements these rules.
+
+The exact datum, serialization, DAG, issuance and paired-registration requirements are in [ANCHOR-CONTRACT.md](ANCHOR-CONTRACT.md) and [ANCHOR-CONTRACT.json](ANCHOR-CONTRACT.json). Genesis, V1 handling, recovery and consumer boundaries are in [GENESIS-CONSUMERS.md](GENESIS-CONSUMERS.md) and [CONSUMER-CONTRACT.json](CONSUMER-CONTRACT.json). [OWNER-DECISION.md](OWNER-DECISION.md) records the choice and scope. [ACCEPTANCE-MATRIX.json](ACCEPTANCE-MATRIX.json) retains all original 31 recovery assertions and includes 26 anchor cases, seven classified anchor subcases, 39 genesis/consumer cases and ten integration requirements (113 rows total). All remain PENDING.
+
+Acyclic graph: S0 -> P0(S0) -> R(S0,P0) -> N(bootstrap_ref,R,S0,P0). Create the R seed first; its datum excludes future policy hashes and its own reference. Anchor issuance consumes a distinct seed, references the committed bootstrap, and requires founder plus 3-of-5 committed guardians. Both N and R independently validate exactly one matching anchor reference and all genesis fields in the same registration body. Founder, controller and all five guardians supply body-bound proof of possession. Standalone identity mint remains normative; R mint rejects.
+
+The immutable anchor binds founding identity only. Current controller and guardians come from current V2 state and accepted transitions. V1 remains exact legacy read-only interpretation under its original validator/policy; no silent V2 migration or default epoch. Existing recovery thresholds, delays, freeze and pending-action behavior remain required.
+
+The maximum eight bound applies to the selected recovery authorization list; funding signers are separate. Always-reject S0 spend, R mint and P0 burn cannot have positive controls at those purposes. Prove correct entrypoint/decoder attribution and pair rejection with valid issuance and paired standalone registration controls.
+
+Consumer mapping shows implementation gaps, not new authority. A 28-byte Cardano controller hash and 20-byte EVM root EOA are distinct types. A dual proof over a complete identity/epoch association, authenticated current-state resolution, finality, serialization and verifier algorithms require separately reviewed design. V2 consumer effects remain failclosed. A pre-effect recheck alone does not make an external effect atomic with revocation.
+
+[QUALIFICATION-CONTRACT.json](QUALIFICATION-CONTRACT.json) freezes compiled Plutus V3 fixture, mutation, provenance and worst-state requirements. Numeric protocol-bound budgets must be set against an approved target parameter snapshot before execution. No compiler, evaluator, ledger or network execution occurred. Authorizer signatures show approval only; authorizers must independently inspect source, build, parameters, program bytes and transaction body.
+
+The preceding preflight capture limitations remain: an earlier launcher omitted argv/exit and some source inspections were not retained; the old capture covered 35 files before/after and 73 dependency entries once. This design slice has a new full before/after capture for 1,769 source/config files, all 73 dependency entries, 21 protected paths and 14 recursive submodules. The new capture does not repair the old record.
+
+The one proposed implementation scope is immutable anchor foundation only: new anchor types, fixed unspendable S0, shared P0(S0), and focused tests/fixtures. It requires separate authorization and would not enable registration, recovery, EVM consumers, update existing blueprint/provenance files, or activate gated operations.

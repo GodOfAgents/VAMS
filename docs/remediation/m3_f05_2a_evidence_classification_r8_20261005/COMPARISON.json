@@ -1,0 +1,19 @@
+{
+  "result": "PASS",
+  "target": "r2_signature_for_other_validator_hash",
+  "delta": "PENDING -> PASS",
+  "case_counts": {
+    "pass": 52,
+    "pending": 3,
+    "failed": 0
+  },
+  "transaction_simulator": {
+    "total": 51,
+    "pass": 48,
+    "pending": 3,
+    "failed": 0
+  },
+  "mutation_rows_unchanged": true,
+  "verified_evidence_hashes": 74,
+  "credit_scope": "synthetic alternate-applied-policy only"
+}

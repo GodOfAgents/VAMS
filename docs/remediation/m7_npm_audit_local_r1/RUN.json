@@ -1,0 +1,49 @@
+{
+  "evidence_id": "m7_npm_audit_local_r1",
+  "recorded_at_utc": "2026-10-03T04:45:56Z",
+  "checkout": {
+    "head": "829ab544571f12efe50ecb5740f129c8acb3e16f",
+    "dirty_tree": true
+  },
+  "workflow": {
+    "path": ".github/workflows/security-gates.yml",
+    "sha256": "baf53503673b70c5185f654f8f694f1feaf98af68ee56e29c83c01ee0cf0593c",
+    "commands": [
+      "npm audit --audit-level=high",
+      "npm audit --omit=dev --audit-level=high"
+    ]
+  },
+  "manifest": {
+    "path": "frontend-vite/package.json",
+    "sha256": "cdef18b00971b3592e588e80a47e78ca7d0e54c34b4d79efbea28c2d47cb4e8a"
+  },
+  "lockfile": {
+    "path": "frontend-vite/package-lock.json",
+    "sha256": "2be053cb5380b3c50c0cbe0b30638d204bbde1296c1594e5e67baa804570d2e1",
+    "lockfileVersion": 3
+  },
+  "tool": {
+    "name": "npm",
+    "version": "10.9.8",
+    "node_version": "v22.23.2",
+    "npm_sha256": "8e5f6f3429f8cdbe693cdc29904e9d5a7b127a494bd15c804bd54c7403bfcbe7",
+    "node_sha256": "3517c2df0b2f8cd7f422b4b8450ef81c6889f08eb03e281d6de9079b15e6a327"
+  },
+  "execution": {
+    "isolation": "bwrap read-only root, temporary /tmp, evidence directory writable, npm user config /dev/null",
+    "network": "Enabled only for npm package/advisory metadata queries",
+    "outer_command": "bwrap --ro-bind / / --tmpfs /tmp --dev-bind /dev /dev --proc /proc --bind /home/GodOfAgents/code/VAMS-testnet/docs/remediation/m7_npm_audit_local_r1 /home/GodOfAgents/code/VAMS-testnet/docs/remediation/m7_npm_audit_local_r1 --chdir /home/GodOfAgents/code/VAMS-testnet /home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python -B docs/remediation/m7_npm_audit_local_r1/run_npm_audit.py",
+    "wrapper": "run_npm_audit.py",
+    "wrapper_sha256": "4895bdf0740438cea691423226650c7531c42469dae0ff0bd205f27ac780f166",
+    "wrapper_exit_code": 0,
+    "raw_report_retained": false,
+    "sanitized_result": "RESULT.json",
+    "sanitized_result_sha256": "5c3d9339c1fbdf67b3105b2bc5346b067b2f6e39658a1ea207e7b27937f3411a",
+    "node_modules_present_before_or_after": false
+  },
+  "result": "Both command reports parsed. Full tree exit 1: 5 affected identities, including high; production-only exit 1: 2, including high. See sanitized RESULT.json.",
+  "unchanged_files": [
+    "frontend-vite/package.json",
+    "frontend-vite/package-lock.json"
+  ]
+}

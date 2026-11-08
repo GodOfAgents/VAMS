@@ -1,0 +1,83 @@
+{
+  "schema_version": "f05-2a-proof-domain-epoch-negative-sim-attempt-r1",
+  "case_id": "r2_signature_for_other_epoch",
+  "decision": "R4.1 proof-domain B",
+  "attempt": {
+    "label": "epoch=1 negative fixture through immutable R3 runner",
+    "argv": [
+      "/home/GodOfAgents/vams-evidence/toolchains/python/bin/python3.12",
+      "/home/GodOfAgents/code/VAMS-testnet/scripts/remediation/f05_2a_tx_sim_runner_r3.py",
+      "--aiken",
+      "/home/GodOfAgents/vams-evidence/toolchains/aiken-1.1.21/aiken",
+      "--tx",
+      "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m3_f05_2a_proof_domain_family_r3_20261005/r2_signature_for_other_epoch/negative.tx.cbor",
+      "--raw-inputs",
+      "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m3_f05_2a_proof_domain_family_r3_20261005/r2_signature_for_other_epoch/negative.raw_inputs.cbor",
+      "--raw-outputs",
+      "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m3_f05_2a_proof_domain_family_r3_20261005/r2_signature_for_other_epoch/negative.raw_outputs.cbor",
+      "--policy-id",
+      "704a7ed54317bfa9c9879a9be02d8ae8859e999ce1a04298697d69ad"
+    ],
+    "cwd": "/home/GodOfAgents/code/VAMS-testnet",
+    "python_version": "Python 3.12.14",
+    "aiken_version": "aiken v1.1.21+42babe5",
+    "aiken_sha256": "07f3f927f1a8c71fc61273fdff850d9b98edb28dde207c8a32585991f2c88e79",
+    "runner_sha256": "3088ade0a316f6af59c04fe3e1675733100b58be826fa22af3c25e40a086ea5c",
+    "wrapper_exit_code": 0,
+    "runner_result": {
+      "cleanup": {
+        "child_reaped": true,
+        "process_group_empty": true,
+        "snapshot_descriptors_closed": true,
+        "status": "clean"
+      },
+      "schema_version": "f05-2a-tx-sim-run-result-r3",
+      "simulator_child_exit": 1,
+      "simulator_result": {
+        "stage": "compiled_evaluation",
+        "target_script_invoked": true
+      },
+      "submitted_sha256": {
+        "raw_inputs": "5e935c48cc9d4e82e6dbedce94b2fbd3fb427f5e187bbe67ed376671ba5e4fec",
+        "raw_outputs": "e92e5834ea46162f0d9db7320b5bb6abb5fc4bf31b23d5d358c0a571555f09d7",
+        "transaction": "38bbf76af57957881095dc42a0004ab1caa8a4a43065228066dbd7407eaa37f3"
+      },
+      "submitted_size_bytes": {
+        "raw_inputs": 73,
+        "raw_outputs": 79,
+        "transaction": 5104
+      },
+      "target_mint_binding": {
+        "compiled_script_hash": "704a7ed54317bfa9c9879a9be02d8ae8859e999ce1a04298697d69ad",
+        "expected_policy_id": "704a7ed54317bfa9c9879a9be02d8ae8859e999ce1a04298697d69ad",
+        "policy_ids": [
+          "704a7ed54317bfa9c9879a9be02d8ae8859e999ce1a04298697d69ad"
+        ]
+      },
+      "wrapper_exit_code": 0
+    },
+    "capture_note": "Exact structured runner result captured by scoped execution; raw simulator stdout/stderr and external attestation are not retained."
+  },
+  "fixture": {
+    "path": "docs/remediation/m3_f05_2a_proof_domain_family_r3_20261005/r2_signature_for_other_epoch",
+    "original_case_id_preserved": true,
+    "original_assertion": "sign_tuple_with_nonzero_epoch",
+    "applied_policy_id": "704a7ed54317bfa9c9879a9be02d8ae8859e999ce1a04298697d69ad",
+    "transaction_sha256": "38bbf76af57957881095dc42a0004ab1caa8a4a43065228066dbd7407eaa37f3",
+    "preexecution_review_sha256": "73bad0f80d3d4f137f1d00987c5294ff893994beb134e292fd4e6c5d4c6eb073",
+    "positive_control_review_sha256": "24fd754d809519e81601c17ce96cace9d5cb23b9c62e4f4c0f2eb0822a683377",
+    "valid_body_bound_ephemeral_funding_signatures": true,
+    "value_conservation": true,
+    "private_keys_persisted": false
+  },
+  "credit": {
+    "positive_control": "accepted synthetic control",
+    "negative_case": null,
+    "mutation_suite": false,
+    "original_policy": false,
+    "ledger_admission": false,
+    "live_network": false
+  },
+  "scope": "synthetic test-only alternate applied policy negative attempt; named-condition attribution pending independent review; no original-policy, full-ledger-admission, Pre-Prod, or live-network credit",
+  "case_status": "PENDING awaiting independent epoch-attribution review"
+}

@@ -1,0 +1,20 @@
+{
+  "schema": "vams.offline.hardware-hash-vectors.v1",
+  "values": {
+    "": "0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470",
+    "GPU_H100": "0x015c7b55f404941b79dd1c755f1885475cd50005a6d084ac10f085e81fb9e6a8",
+    "GPU_A100": "0x774fc467c460b36868b1c43bbc49677fe99c2d86137564ded521d9229ea3c504",
+    "GPU_L40S": "0x4e44f74ed88b0ef7c8dc261760fbd140bf6fa73a03262228a025ea3f1f217755",
+    "GPU_RTX_4090": "0xca54777d53ef618f9ff2a54026ae69b0c95467324afbe000b91b6d49c26c337e",
+    "CPU_EPYC": "0xa98abadd9d04671b917c2981c84dba3ad318310b860ace4fcee82e9d8fe23709",
+    "CPU_XEON": "0x927bf4d4035588527adcfc2a57481d893886cd432804be04f02ab9fa1a9df17c",
+    "STORAGE_NVME": "0x13f51e7fc09e348cc0f3db172d4ce8e1cce3b08da7fd57a7d95fa89ed403e9fd",
+    "STORAGE_HDD": "0xc4ca67dd43130e99505922bc87adedcca18449a8d23d6a16786487232ec5cd34",
+    "NETWORK_10G": "0x4c442f9a042479b7c8fa9c75cf3f35b8c80c996fc4bf277bd6c6108ffcd7bdd3",
+    "TEE_SGX": "0xcb53bfe298e443869cf66b3aea87fa6a2d70e3b1019044f3a3fa35f60d136e53",
+    "TEE_NITRO": "0xd2ff4323ee91f10474f81b9f6eb459a013a11b6f61fc2599f1d520ed884d0519"
+  },
+  "source_contract_sha256": "a085ba6d42fc4b2f04628c658c4b655d74ac6ab481b52b837b35904a4fba611b",
+  "cast_binary_sha256": "ccd95a4607ca3ebfcb88bb90e7235cdb7f0564f5f1afa17478d5fccabbb222cb",
+  "authentic_deployment_evidence": false
+}

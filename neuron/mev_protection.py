@@ -19,8 +19,16 @@ import time
 import logging
 import os
 from dataclasses import dataclass, field
-from typing import List, Optional, Dict
+from typing import List, Optional, Dict, Mapping
 from enum import Enum
+
+from neuron.runtime_safety import (
+    ImmutableRuntimeConfiguration,
+    LiveModeSafetyError,
+    RuntimePolicy,
+    load_runtime_policy,
+    resolve_component_mock_mode,
+)
 
 logger = logging.getLogger("VAMS-MEV")
 
@@ -96,7 +104,10 @@ class BatchResult:
 # ENCRYPTED MEMPOOL
 # =============================================================================
 
-class EncryptedMempool:
+MEV_MOCK_VARIABLE = "MEV_MOCK_MODE"
+
+
+class EncryptedMempool(ImmutableRuntimeConfiguration):
     """
     Threshold-encrypted transaction pool.
 
@@ -111,20 +122,36 @@ class EncryptedMempool:
     Current: Mock encryption using SHA-256 commitment scheme.
     """
 
-    def __init__(self, mock_mode: bool = None):
+    _immutable_runtime_fields = frozenset({"_mock_mode", "runtime_policy"})
+
+    def __init__(self, mock_mode: Optional[bool] = None, *, environ: Optional[Mapping[str, str]] = None, policy: Optional[RuntimePolicy] = None):
+        source = os.environ if environ is None else environ
+        self.runtime_policy = policy or load_runtime_policy(source)
+        self._mock_mode = resolve_component_mock_mode(
+            "EncryptedMempool",
+            MEV_MOCK_VARIABLE,
+            mock_mode,
+            policy=self.runtime_policy,
+            environ=source,
+        )
+        if self.runtime_policy.is_live:
+            raise LiveModeSafetyError(
+                "EncryptedMempool live execution is disabled until threshold encryption "
+                "and proposer-builder separation are implemented"
+            )
+        if not self._mock_mode:
+            raise LiveModeSafetyError(
+                "EncryptedMempool has no authoritative non-simulated implementation"
+            )
         self._pool: Dict[str, EncryptedTransaction] = {}
         self._block_counter = 0
-        # AUDIT FIX OFC01: Explicit mock mode flag with env override
-        if mock_mode is None:
-            self._mock_mode = os.environ.get("VAMS_MOCK_MODE", "true").lower() == "true"
-        else:
-            self._mock_mode = mock_mode
         self._stats = {
             "submitted": 0,
             "committed": 0,
             "decrypted": 0,
             "mev_prevented": 0,
         }
+        self._freeze_runtime_configuration()
 
     def submit_transaction(
         self,
@@ -214,7 +241,7 @@ class EncryptedMempool:
 # BATCH AUCTION SETTLER
 # =============================================================================
 
-class BatchAuctionSettler:
+class BatchAuctionSettler(ImmutableRuntimeConfiguration):
     """
     Uniform-price batch settlement for x402 payments.
 
@@ -228,7 +255,16 @@ class BatchAuctionSettler:
         - JIT liquidity manipulation
     """
 
-    def __init__(self, batch_window_ms: int = None):
+    _immutable_runtime_fields = frozenset({"batch_window_ms", "runtime_policy"})
+
+    def __init__(self, batch_window_ms: int = None, *, environ: Optional[Mapping[str, str]] = None, policy: Optional[RuntimePolicy] = None):
+        source = os.environ if environ is None else environ
+        self.runtime_policy = policy or load_runtime_policy(source)
+        if self.runtime_policy.is_live:
+            raise LiveModeSafetyError(
+                "BatchAuctionSettler live execution is disabled until batches are "
+                "broadcast and confirmed by an authoritative settlement contract"
+            )
         self.batch_window_ms = batch_window_ms or MEV_BATCH_WINDOW_MS
         self._current_batch: List[BatchPayment] = []
         self._batch_counter = 0
@@ -238,6 +274,7 @@ class BatchAuctionSettler:
             "total_volume_vams": 0.0,
             "total_mev_savings": 0.0,
         }
+        self._freeze_runtime_configuration()
 
     def add_payment(self, payment: BatchPayment):
         """Add a payment to the current batch window."""
@@ -327,9 +364,19 @@ class MEVProtection:
         | Slashing for MEV       | Economic punishment |
     """
 
-    def __init__(self, batch_window_ms: int = None):
-        self.mempool = EncryptedMempool()
-        self.settler = BatchAuctionSettler(batch_window_ms)
+    def __init__(self, batch_window_ms: int = None, mock_mode: Optional[bool] = None, *, environ: Optional[Mapping[str, str]] = None, policy: Optional[RuntimePolicy] = None):
+        source = os.environ if environ is None else environ
+        runtime_policy = policy or load_runtime_policy(source)
+        self.mempool = EncryptedMempool(
+            mock_mode=mock_mode,
+            environ=source,
+            policy=runtime_policy,
+        )
+        self.settler = BatchAuctionSettler(
+            batch_window_ms,
+            environ=source,
+            policy=runtime_policy,
+        )
         self._slashing_log: List[dict] = []
 
     async def submit_protected_transaction(

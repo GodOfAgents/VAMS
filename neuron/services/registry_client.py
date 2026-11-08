@@ -1,8 +1,8 @@
 """
 VAMS Service Block SDK Client
 ================================
-Python client for interacting with the ServiceBlockRegistry
-smart contract and resolving service blocks into blueprints.
+Local simulated catalogue and declaration-to-blueprint resolution. An
+authenticated on-chain registry reader is not implemented by this module.
 
 Architecture Reference:
     - ICN Gap #6: Service Blocks
@@ -14,9 +14,15 @@ from __future__ import annotations
 import hashlib
 import json
 import logging
+import os
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any, Dict, List, Optional
+
+from neuron.runtime_safety import (
+    ImmutableRuntimeConfiguration, LiveModeSafetyError, RuntimeConfigurationError,
+    RuntimePolicy, load_runtime_policy,
+)
 
 from neuron.composer.models import (
     ComputeSpec,
@@ -283,25 +289,53 @@ _SERVICE_BLOCK_PERMISSION_SCOPES: Dict[str, List[str]] = {
 # Service Block Client
 # ═══════════════════════════════════════════════════════════════
 
-class ServiceBlockClient:
+class ServiceBlockClient(ImmutableRuntimeConfiguration):
     """
-    Python SDK client for the ServiceBlockRegistry.
+    Explicit non-live simulation of a Service Block catalogue.
 
-    Provides methods to query, resolve, and compose service blocks.
+    No authenticated on-chain registry read is implemented by this client.
 
     Usage:
-        client = ServiceBlockClient()
+        client = ServiceBlockClient(simulation=True)  # VAMS_ENV=test/local/demo
         blocks = client.list_blocks(category="AI")
         blueprint = client.resolve_blueprint("llama_inference")
     """
 
-    def __init__(self, contract_client=None):
-        """
-        Args:
-            contract_client: Optional Web3 contract instance.
-                             If None, uses in-memory block definitions.
-        """
+    _immutable_runtime_fields = frozenset({"simulation", "runtime_policy", "_runtime_environ"})
+
+    def __init__(self, contract_client=None, *, simulation: bool = False,
+                 policy: Optional[RuntimePolicy] = None):
+        if type(simulation) is not bool:
+            raise RuntimeConfigurationError("ServiceBlockClient simulation must be a boolean")
+        if policy is not None and type(policy) is not RuntimePolicy:
+            raise RuntimeConfigurationError("ServiceBlockClient requires a RuntimePolicy")
+        self._runtime_environ = os.environ
+        self.runtime_policy = None
+        # Default construction is inert/import-safe. It cannot later be armed.
+        if simulation or policy is not None:
+            observed = load_runtime_policy(self._runtime_environ)
+            if policy is not None and policy != observed:
+                raise RuntimeConfigurationError("Conflicting ServiceBlockClient runtime policy")
+            observed.authorize_component_mock("ServiceBlockClient simulation", simulation)
+            self.runtime_policy = observed
+        self.simulation = simulation
+        # Retained for API compatibility; its presence never qualifies a read.
         self._contract = contract_client
+        self._freeze_runtime_configuration()
+
+    def assert_simulation_available(self) -> None:
+        """Reject before static catalogue access unless current non-live opt-in holds."""
+        if not self.simulation or self.runtime_policy is None:
+            raise LiveModeSafetyError("Authenticated Service Block registry reader unavailable")
+        observed = load_runtime_policy(self._runtime_environ)
+        if observed != self.runtime_policy:
+            raise RuntimeConfigurationError("ServiceBlockClient runtime policy changed")
+        observed.authorize_component_mock("ServiceBlockClient simulation", True)
+
+    def list_macros(self) -> List[Dict[str, Any]]:
+        self.assert_simulation_available()
+        from neuron.services.macro_blocks import list_macros
+        return list_macros()
 
     # ──────────────────────────────────────────────────
     # Query API
@@ -312,12 +346,16 @@ class ServiceBlockClient:
         category: Optional[str] = None,
         verified_only: bool = True,
     ) -> List[Dict[str, Any]]:
-        """List available service blocks."""
+        """List simulated declarations; verified_only is not an on-chain filter."""
+        self.assert_simulation_available()
         result = []
         for name, bp in _SERVICE_BLOCK_BLUEPRINTS.items():
             memory_policy = self.get_memory_policy(name)
             manifest = self.get_skillops_manifest(name)
             block_info = {
+                "simulation": True,
+                "registry_verified": False,
+                "evidence_classification": "non-authoritative",
                 "name": name,
                 "category": self._infer_category(name),
                 "gpu_type": bp.compute.gpu_type.value,
@@ -342,12 +380,16 @@ class ServiceBlockClient:
 
     def get_block(self, block_name: str) -> Optional[Dict[str, Any]]:
         """Get full metadata for a service block."""
+        self.assert_simulation_available()
         bp = _SERVICE_BLOCK_BLUEPRINTS.get(block_name)
         if not bp:
             return None
         memory_policy = self.get_memory_policy(block_name)
         manifest = self.get_skillops_manifest(block_name)
         return {
+            "simulation": True,
+            "registry_verified": False,
+            "evidence_classification": "non-authoritative",
             "name": block_name,
             "category": self._infer_category(block_name),
             "memory_policy": memory_policy.value,
@@ -366,6 +408,7 @@ class ServiceBlockClient:
         Missing or unknown policies fail closed so a live Service Block cannot
         silently become a persistent prompt-memory mutation surface.
         """
+        self.assert_simulation_available()
         if block_name not in _SERVICE_BLOCK_BLUEPRINTS:
             raise KeyError(f"Unknown service block '{block_name}'")
 
@@ -383,6 +426,7 @@ class ServiceBlockClient:
         Missing or unknown permission scopes fail closed so off-chain registry
         mirrors do not silently grant undeclared capabilities.
         """
+        self.assert_simulation_available()
         if block_name not in _SERVICE_BLOCK_BLUEPRINTS:
             raise KeyError(f"Unknown service block '{block_name}'")
 
@@ -400,8 +444,13 @@ class ServiceBlockClient:
         manifest: ServiceBlockManifest,
     ) -> ServiceBlockManifest:
         """Validate SkillOps permission scopes and memory-policy coupling."""
-        if manifest.manifest_version <= 0:
-            raise ValueError("SkillOps manifest version must be positive")
+        self.assert_simulation_available()
+        if (
+            isinstance(manifest.manifest_version, bool)
+            or not isinstance(manifest.manifest_version, int)
+            or manifest.manifest_version <= 0
+        ):
+            raise ValueError("SkillOps manifest version must be a positive integer")
         if not manifest.permission_scopes:
             raise ValueError("SkillOps manifest must declare at least one permission")
 
@@ -436,17 +485,21 @@ class ServiceBlockClient:
             block_name: Name of the service block
 
         Returns:
-            InstanceBlueprint ready for provisioning
+            InstanceBlueprint after local declaration checks
 
         Raises:
-            KeyError: If block not found
+            KeyError: If the block or required metadata is missing
+            ValueError: If local permission or memory declarations are invalid
         """
+        self.assert_simulation_available()
         bp = _SERVICE_BLOCK_BLUEPRINTS.get(block_name)
         if not bp:
             raise KeyError(
                 f"Unknown service block '{block_name}'. "
                 f"Available: {list(_SERVICE_BLOCK_BLUEPRINTS.keys())}"
             )
+        # Resolution callers must pass the same local metadata checks as listings.
+        self.get_skillops_manifest(block_name)
         return bp
 
     def resolve_macro(self, macro_name: str) -> List[InstanceBlueprint]:
@@ -459,6 +512,7 @@ class ServiceBlockClient:
         Returns:
             List of InstanceBlueprints for all constituent blocks
         """
+        self.assert_simulation_available()
         from neuron.services.macro_blocks import get_macro
 
         macro = get_macro(macro_name)

@@ -1,23 +1,12 @@
 #!/bin/bash
+set -euo pipefail
 
-echo "🚀 Starting VAMS L3 (Polygon CDK)..."
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd -- "$SCRIPT_DIR/.." && pwd)"
 
-# 1. Load Configuration
-CONFIG_FILE="./config.json"
-CHAIN_ID=$(jq -r '.chain_id' $CONFIG_FILE)
-echo "   - Chain ID: $CHAIN_ID"
-echo "   - Mode: $DA_MODE"
+python3 "$REPO_ROOT/scripts/security/runtime_mode_preflight.py" \
+  --require-live \
+  --expected-mode testnet
 
-# 2. Check Data Availability Layer
-# In Validium mode, we need to ensure the DAC is reachable
-echo "🔍 Verifying Data Availability Committee (DAC)..."
-# (Mock check)
-echo "   ✅ DAC Members Online: 2/2"
-
-# 3. Launch Docker Containers (ZkEVM Node, Prover, Aggregator)
-echo "🐳 Spinning up ZkEVM Containers..."
-# docker-compose -f docker-compose.yml up -d
-
-echo "✅ VAMS L3 is running at http://localhost:8545"
-echo "   - Explorer: http://localhost:4000"
-echo "   - Bridge: http://localhost:8080"
+echo "Deployment blocked: cdk-deployment/deploy.sh is an incomplete scaffold and cannot produce live evidence." >&2
+exit 1

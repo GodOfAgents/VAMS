@@ -1,0 +1,14 @@
+{
+  "command": "bwrap --unshare-net --ro-bind / / --tmpfs /tmp --dev-bind /dev /dev --proc /proc --chdir /home/GodOfAgents/code/VAMS-testnet /usr/bin/env -i HOME=/tmp TMPDIR=/tmp PATH=/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin:/usr/bin:/bin LANG=C.UTF-8 LC_ALL=C.UTF-8 TZ=UTC PYTHONDONTWRITEBYTECODE=1 PYTHONNOUSERSITE=1 /home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python -B -m pytest -q --tb=short -p no:cacheprovider neuron/tests/test_sequence_wallet.py",
+  "date": "2026-10-04",
+  "git_head": "829ab544571f12efe50ecb5740f129c8acb3e16f",
+  "invocation_note": "Exact command and outcome recorded from the coordinator session; no hosted CI or chain was used.",
+  "network": "disabled by bwrap",
+  "pytest": "9.1.1",
+  "python": "3.12.14",
+  "schema": "m7-inv3-inv4-session-key-run-r1",
+  "source_hashes": {
+    "neuron/sdk/sequence_wallet.py": "eab8fe41dd31b109b2470c6d390700e0ec083c3640a0b15a571e56fa6fefcd2b",
+    "neuron/tests/test_sequence_wallet.py": "8fd8e3f54be411c9377cb6ce8325e2a139cb8d042f3613134a7bfc94a4beea2b"
+  }
+}

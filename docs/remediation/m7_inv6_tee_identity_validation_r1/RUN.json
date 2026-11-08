@@ -1,0 +1,71 @@
+{
+  "schema_version": "m7-inv6-tee-identity-validation-v1",
+  "date": "2026-10-04",
+  "invariant": "INV-6",
+  "source_files": {
+    "neuron/trust_plugins/tee_plugin.py": "c324996897a72fc9fdc0d19a218568a7b055bc905fe44211bb3b20c6be4bc34e",
+    "neuron/sdk/phala_tee.py": "a477288dbac1457dba979b679e629184f1fa82d69b2143b937f6e302aac91a86"
+  },
+  "test_files": {
+    "neuron/tests/test_m1_2a_identity_tee_runtime.py": "6b7ea8427713300659b3f8f9eb9f25823c094fa8eb90d316ad5c5868d8ba2cbd",
+    "neuron/tests/test_trust_plugins.py": "cb8d548627d0bf3a0879e01f093f4e1c3672c54dfc5d345d8cc283ed3cbb22f2"
+  },
+  "toolchain": {
+    "python": "3.12.14",
+    "python_path": "/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python",
+    "python_sha256": "aa01d96348989f33ed998b42c83e98593b41dba83914d9899730b90c36f2e5c9",
+    "pytest": "9.1.1"
+  },
+  "node_ids": [
+    "neuron/tests/test_m1_2a_identity_tee_runtime.py::test_tee_plugin_accepts_live_report_bound_to_root_eoa",
+    "neuron/tests/test_m1_2a_identity_tee_runtime.py::test_tee_plugin_rejects_session_key_substitution",
+    "neuron/tests/test_m1_2a_identity_tee_runtime.py::test_tee_plugin_rejects_wrong_provider_root_binding",
+    "neuron/tests/test_m1_2a_identity_tee_runtime.py::test_non_live_simulated_proof_cannot_cross_live_verification_boundary",
+    "neuron/tests/test_trust_plugins.py::TestTEEPlugin::test_requires_explicit_root_eoa"
+  ],
+  "command": "bwrap --unshare-net --ro-bind / / --tmpfs /tmp --dev-bind /dev /dev --proc /proc --chdir /home/GodOfAgents/code/VAMS-testnet /usr/bin/env -i HOME=/tmp TMPDIR=/tmp VAMS_ENV=test PATH=/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin:/usr/bin:/bin LANG=C.UTF-8 LC_ALL=C.UTF-8 TZ=UTC PYTHONDONTWRITEBYTECODE=1 PYTHONNOUSERSITE=1 /home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python -B -m pytest -q --tb=short -p no:cacheprovider neuron/tests/test_m1_2a_identity_tee_runtime.py::test_tee_plugin_accepts_live_report_bound_to_root_eoa neuron/tests/test_m1_2a_identity_tee_runtime.py::test_tee_plugin_rejects_session_key_substitution neuron/tests/test_m1_2a_identity_tee_runtime.py::test_tee_plugin_rejects_wrong_provider_root_binding neuron/tests/test_m1_2a_identity_tee_runtime.py::test_non_live_simulated_proof_cannot_cross_live_verification_boundary neuron/tests/test_trust_plugins.py::TestTEEPlugin::test_requires_explicit_root_eoa",
+  "isolation": {
+    "network": "disabled",
+    "checkout": "read-only",
+    "writable_paths": [
+      "/tmp tmpfs"
+    ],
+    "bytecode": false,
+    "pytest_cache": false
+  },
+  "executions": [
+    {
+      "role": "primary",
+      "exit_code": 0,
+      "output_summary": "5 passed in 1.35s",
+      "stdout_artifact": "not retained"
+    },
+    {
+      "role": "independent_rerun",
+      "exit_code": 0,
+      "stdout": "..... [100%]\n5 passed in 1.39s"
+    }
+  ],
+  "assertions": [
+    "explicit nonzero 20-byte root EOA required",
+    "service and delivery binding incorporates the root EOA; provider attested_root_eoa and report_data must match it",
+    "root/session-key substitution rejected",
+    "wrong provider root binding rejected",
+    "simulated non-authoritative proof rejected at live verification boundary"
+  ],
+  "classification": "synthetic local behavior only; FakePhalaClient/no live provider call",
+  "limitations": [
+    "no live TEE/provider evidence",
+    "no source change",
+    "no testnet or deployment credit"
+  ],
+  "unrelated_gates": {
+    "f05_negative_cases": "45/55",
+    "f05_mutations": "18/21",
+    "readiness": "NOT READY",
+    "deployment_enabled": false,
+    "deposit_enabled": false,
+    "slash_activation_enabled": false,
+    "execute_intent_enabled": false
+  }
+}

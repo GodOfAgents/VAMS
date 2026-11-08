@@ -1,0 +1,100 @@
+{
+  "schema_version": "f05-r3-public-harness-canaries-r2",
+  "date": "2026-10-03",
+  "status": "independent_review_passed_synthetic_scope",
+  "purpose": "Revalidate the existing R3 snapshot-bound canary mode against the exact current public harness source; no registered case or mutation credit.",
+  "repository": {
+    "head": "829ab544571f12efe50ecb5740f129c8acb3e16f",
+    "branch": "testnet/remediation-20260907"
+  },
+  "toolchain": {
+    "python": "Python 3.12.14",
+    "python_path": "/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python",
+    "aiken": "aiken v1.1.21+42babe5",
+    "aiken_path": "/home/GodOfAgents/vams-evidence/toolchains/aiken-1.1.21/unpacked/aiken-x86_64-unknown-linux-musl/aiken",
+    "aiken_sha256": "07f3f927f1a8c71fc61273fdff850d9b98edb28dde207c8a32585991f2c88e79"
+  },
+  "current_source_sha256": {
+    "scripts/remediation/test_f05_2a_authority_bootstrap_public.py": "f6689e80ab2cbac78a8b05b76917ec0e9eac122e5023f1c37d3dd21afd5d6570",
+    "scripts/remediation/f05_2a_tx_sim_runner_r3.py": "3088ade0a316f6af59c04fe3e1675733100b58be826fa22af3c25e40a086ea5c",
+    "scripts/remediation/f05_2a_tx_sim_registry.py": "c03230249c7e73f6929cc944b7af3e30d98b8168f8abd184fa39332a601a394e"
+  },
+  "frozen_input_sha256": {
+    "docs/remediation/m3_f05_2a/tx_sim_r1/CANARY-MANIFEST.json": "91c7bc46476a391c3ea3e3012b2f9174a1b87f6e0253ce6167b4c7b96e47f95d",
+    "docs/remediation/m3_f05_2a/tx_sim_r1/applied-policy.cbor": "fc8726cff89172d4944e257a2eb2659d35363c8e5a4d423ed8a2112eb5af7e59",
+    "docs/remediation/m3_f05_2a/tx_sim_r1/valid.tx.cbor": "765c717f16b543c746b88742e8b775cd3ecabca4fef6edd16702184683780a28",
+    "docs/remediation/m3_f05_2a/tx_sim_r1/invalid_signature.tx.cbor": "594c1b9297bff3a55c1bd7b600ad8f5d2c049471b70e667bc064212100f3754c",
+    "docs/remediation/m3_f05_2a/tx_sim_r1/raw_inputs.cbor": "4b20e2b2cf4bd58b1f6e385c90ffd098d583df69d95fbc7b1fcc2591da72b9fe",
+    "docs/remediation/m3_f05_2a/tx_sim_r1/raw_outputs.cbor": "9cdf345a785f51763bdb43f1b1ba0c20b5545051f03051e6a7bf726ea128c56a"
+  },
+  "command": [
+    "bwrap",
+    "--unshare-net",
+    "--ro-bind",
+    "/",
+    "/",
+    "--tmpfs",
+    "/tmp",
+    "--dev-bind",
+    "/dev",
+    "/dev",
+    "--proc",
+    "/proc",
+    "--bind",
+    "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m3_f05_2a_r3_harness_current_r2",
+    "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m3_f05_2a_r3_harness_current_r2",
+    "--chdir",
+    "/home/GodOfAgents/code/VAMS-testnet",
+    "/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python",
+    "-B",
+    "scripts/remediation/test_f05_2a_authority_bootstrap_public.py",
+    "--aiken",
+    "/home/GodOfAgents/vams-evidence/toolchains/aiken-1.1.21/unpacked/aiken-x86_64-unknown-linux-musl/aiken",
+    "--tx-sim-r3-canaries",
+    "--output",
+    "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m3_f05_2a_r3_harness_current_r2/RESULT.json"
+  ],
+  "process_result": {
+    "exit_code": 0,
+    "stdout_sha256": "7b413221e74793d66bb95bb2c20faa1b39796f5f1b3a1a107b601891aaad0b7e",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "exit_file_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "result_sha256": "7b413221e74793d66bb95bb2c20faa1b39796f5f1b3a1a107b601891aaad0b7e"
+  },
+  "result": {
+    "status": "pass",
+    "mode": "snapshot_bound_transaction_canaries_only",
+    "evidence_class": "synthetic_local_transaction_simulator",
+    "registry": "not_run",
+    "applied_policy_id": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+    "cases": [
+      {
+        "id": "valid",
+        "wrapper_exit": 0,
+        "simulator_child_exit": 0,
+        "result": "script_accepted",
+        "target_invoked": true,
+        "cleanup": "clean"
+      },
+      {
+        "id": "invalid_signature",
+        "wrapper_exit": 0,
+        "simulator_child_exit": 1,
+        "result": "compiled_evaluation",
+        "target_invoked": true,
+        "cleanup": "clean"
+      }
+    ]
+  },
+  "ledger_counts": {
+    "negative_cases": "45/55",
+    "mutations": "18/21"
+  },
+  "evidence_credit": "No registered F05 negative-case or mutation credit; no ledger admission or live-network evidence.",
+  "independent_review": {
+    "status": "PASS",
+    "scope": "current source, tool, fixture, and captures; two canaries; target invocation; policy binding; classifications; cleanup",
+    "registered_f05_credit": false,
+    "ledger_or_live_evidence": false
+  }
+}

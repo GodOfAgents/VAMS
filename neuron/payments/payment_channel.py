@@ -13,12 +13,19 @@ import time
 import json
 import os
 import logging
-from typing import Dict, Optional, Any, List
+from typing import Dict, Mapping, Optional, Any, List
 from threading import Lock
 from dataclasses import dataclass, asdict
 
-from payments.delivery_proof import ServiceDeliveryProof
-from payments.batch_settlement import Payment
+from .delivery_proof import ServiceDeliveryProof
+from .batch_settlement import Payment
+from neuron.runtime_safety import (
+    ImmutableRuntimeConfiguration,
+    LiveModeSafetyError,
+    RuntimePolicy,
+    load_runtime_policy,
+    resolve_component_mock_mode,
+)
 
 logger = logging.getLogger("VAMS-Channels")
 
@@ -35,17 +42,50 @@ class ChannelState:
     expires_at: float
     signatures: List[str]  # History of payment signatures
 
-class PaymentChannelManager:
+PAYMENT_CHANNEL_MOCK_VARIABLE = "PAYMENT_CHANNEL_MOCK_MODE"
+
+
+class PaymentChannelManager(ImmutableRuntimeConfiguration):
     """
     Manages local state of multiple payment channels.
     Thread-safe. Persists to JSON.
     """
     
-    def __init__(self, persistence_path: str = "channels.json"):
+    _immutable_runtime_fields = frozenset(
+        {"persistence_path", "mock_mode", "runtime_policy"}
+    )
+
+    def __init__(
+        self,
+        persistence_path: str = "channels.json",
+        mock_mode: Optional[bool] = None,
+        *,
+        environ: Optional[Mapping[str, str]] = None,
+        policy: Optional[RuntimePolicy] = None,
+    ):
+        source = os.environ if environ is None else environ
+        self.runtime_policy = policy or load_runtime_policy(source)
+        self.mock_mode = resolve_component_mock_mode(
+            "PaymentChannelManager",
+            PAYMENT_CHANNEL_MOCK_VARIABLE,
+            mock_mode,
+            policy=self.runtime_policy,
+            environ=source,
+        )
+        if self.runtime_policy.is_live:
+            raise LiveModeSafetyError(
+                "PaymentChannelManager live execution is disabled until channel "
+                "funding and signatures use a confirmed on-chain implementation"
+            )
+        if not self.mock_mode:
+            raise LiveModeSafetyError(
+                "PaymentChannelManager has no authoritative non-simulated implementation"
+            )
         self.persistence_path = persistence_path
         self.channels: Dict[str, ChannelState] = {}
         self.lock = Lock()
         self._load_state()
+        self._freeze_runtime_configuration()
 
     def create_channel(self, agent: str, provider: str, deposit: int, duration_hours: int = 24) -> str:
         """Initialize a new channel state locally."""
@@ -106,8 +146,10 @@ class PaymentChannelManager:
             receipt = {
                 "channel_id": channel_id,
                 "payment": payment.to_tuple(),  # (agent, provider, amount, nonce, service)
-                "signature": f"sig_mock_{channel.nonce}", 
-                "timestamp": time.time()
+                "signature": f"simulated:signature:{channel.nonce}",
+                "timestamp": time.time(),
+                "simulated": True,
+                "evidence_classification": "non-authoritative",
             }
             
             channel.signatures.append(receipt["signature"])

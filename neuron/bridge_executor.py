@@ -26,10 +26,16 @@ import time
 import logging
 import os
 from dataclasses import dataclass, field
-from typing import List, Optional, Dict, Tuple
+from typing import List, Optional, Dict, Tuple, Mapping
 from enum import Enum
 
-from neuron.runtime_safety import require_not_live_mock
+from neuron.runtime_safety import (
+    ImmutableRuntimeConfiguration,
+    LiveModeSafetyError,
+    RuntimePolicy,
+    load_runtime_policy,
+    resolve_component_mock_mode,
+)
 
 logger = logging.getLogger("VAMS-Bridge")
 
@@ -116,13 +122,27 @@ class BridgeMessage:
         return self.to_bytes().hex()
 
 
-class ICBClient:
+class ICBClient(ImmutableRuntimeConfiguration):
     """
     Python-side client for the ICB (Inter-Chain Bridge) Aiken contract.
     Mirrors verification logic from cardano/lib/vams/icb.ak.
     """
 
-    def __init__(self):
+    _immutable_runtime_fields = frozenset({"runtime_policy"})
+
+    def __init__(
+        self,
+        *,
+        environ: Optional[Mapping[str, str]] = None,
+        policy: Optional[RuntimePolicy] = None,
+    ):
+        source = os.environ if environ is None else environ
+        self.runtime_policy = policy or load_runtime_policy(source)
+        if self.runtime_policy.is_live:
+            raise LiveModeSafetyError(
+                "ICBClient live verification is disabled until bridge proofs are "
+                "cryptographically verified against their separate payload hashes"
+            )
         self._nonce_tracker: Dict[str, int] = {}  # dest_chain -> last_nonce
         self._stats = {
             "messages_built": 0,
@@ -130,6 +150,7 @@ class ICBClient:
             "nonces_validated": 0,
             "replay_attempts_blocked": 0,
         }
+        self._freeze_runtime_configuration()
 
     def build_bridge_message(
         self,
@@ -241,7 +262,11 @@ class ISMVerification:
     attestation: str = ""
 
 
-class MultiISMVerifier:
+BRIDGE_ISM_MOCK_VARIABLE = "BRIDGE_ISM_MOCK_MODE"
+BRIDGE_MOCK_VARIABLE = "BRIDGE_MOCK_MODE"
+
+
+class MultiISMVerifier(ImmutableRuntimeConfiguration):
     """
     Multi-ISM verification with 2/3 threshold.
 
@@ -259,14 +284,35 @@ class MultiISMVerifier:
 
     THRESHOLD = 2  # 2/3 ISMs must verify
 
-    def __init__(self, mock_mode: bool = True):
-        require_not_live_mock("MultiISMVerifier", mock_mode)
-        self.mock_mode = mock_mode
+    _immutable_runtime_fields = frozenset({"mock_mode", "runtime_policy"})
+
+    def __init__(
+        self,
+        mock_mode: Optional[bool] = None,
+        *,
+        environ: Optional[Mapping[str, str]] = None,
+        policy: Optional[RuntimePolicy] = None,
+    ):
+        source = os.environ if environ is None else environ
+        self.runtime_policy = policy or load_runtime_policy(source)
+        self.mock_mode = resolve_component_mock_mode(
+            "MultiISMVerifier",
+            BRIDGE_ISM_MOCK_VARIABLE,
+            mock_mode,
+            policy=self.runtime_policy,
+            environ=source,
+        )
+        if self.runtime_policy.is_live:
+            raise LiveModeSafetyError(
+                "MultiISMVerifier live execution is disabled until Phala, oracle, "
+                "and multisig attestations are authenticated"
+            )
         self._stats = {
             "verifications": 0,
             "passed": 0,
             "failed": 0,
         }
+        self._freeze_runtime_configuration()
 
     def verify(self, message_hash: str) -> Tuple[bool, List[ISMVerification]]:
         """
@@ -313,7 +359,7 @@ class MultiISMVerifier:
                 attestation=f"phala_att_{message_hash[:8]}",
             )
         # Production: call Phala TEE attestation API
-        self.logger.error("Live Phala ISM not yet integrated")
+        logger.error("Live Phala ISM not yet integrated")
         return ISMVerification(
             ism_type=ISMType.TEE_PHALA,
             verified=False,
@@ -330,7 +376,7 @@ class MultiISMVerifier:
                 latency_ms=120.0,
                 attestation=f"ccip_att_{message_hash[:8]}",
             )
-        self.logger.error("Live Chainlink CCIP ISM not yet integrated")
+        logger.error("Live Chainlink CCIP ISM not yet integrated")
         return ISMVerification(
             ism_type=ISMType.ORACLE_CHAINLINK,
             verified=False,
@@ -347,7 +393,7 @@ class MultiISMVerifier:
                 latency_ms=200.0,
                 attestation=f"dao_att_{message_hash[:8]}",
             )
-        self.logger.error("Live DAO multisig ISM not yet integrated")
+        logger.error("Live DAO multisig ISM not yet integrated")
         return ISMVerification(
             ism_type=ISMType.MULTISIG_DAO,
             verified=False,
@@ -444,6 +490,8 @@ class BridgeResult:
     latency_ms: float
     tx_hash: str = ""
     error: str = ""
+    simulated: bool = False
+    evidence_classification: str = "unverified"
 
 
 try:
@@ -453,8 +501,18 @@ except ImportError:
 
 
 class TrailsTransportHandler:
-    def __init__(self, mock_mode: bool = True):
-        self.client = TrailsClient(mock_mode=mock_mode)
+    def __init__(
+        self,
+        mock_mode: bool,
+        *,
+        environ: Mapping[str, str],
+        policy: RuntimePolicy,
+    ):
+        self.client = TrailsClient(
+            mock_mode=mock_mode,
+            environ=environ,
+            runtime_policy=policy,
+        )
         
     def execute_intent(self, source: str, dest: str, payload: bytes) -> BridgeResult:
         start_time = time.time()
@@ -469,28 +527,63 @@ class TrailsTransportHandler:
             icb_message=None,
             ism_verified=True,  # Handled by Trails natively
             latency_ms=elapsed_ms,
-            tx_hash=status.tx_hash
+            tx_hash=status.tx_hash,
+            simulated=status.simulated,
+            evidence_classification=status.evidence_classification,
         )
 
 
-class BridgeExecutor:
+class BridgeExecutor(ImmutableRuntimeConfiguration):
     """
     Cross-chain bridge executor with ICB integration
     and Multi-ISM verification.
     """
 
-    def __init__(self, mock_mode: bool = True):
-        require_not_live_mock("BridgeExecutor", mock_mode)
-        self.mock_mode = mock_mode
-        self.icb = ICBClient()
-        self.ism_verifier = MultiISMVerifier(mock_mode=mock_mode)
-        self.trails_handler = TrailsTransportHandler(mock_mode=mock_mode)
+    _immutable_runtime_fields = frozenset({"mock_mode", "runtime_policy"})
+
+    def __init__(
+        self,
+        mock_mode: Optional[bool] = None,
+        *,
+        environ: Optional[Mapping[str, str]] = None,
+        policy: Optional[RuntimePolicy] = None,
+    ):
+        source = os.environ if environ is None else environ
+        self.runtime_policy = policy or load_runtime_policy(source)
+        self.mock_mode = resolve_component_mock_mode(
+            "BridgeExecutor",
+            BRIDGE_MOCK_VARIABLE,
+            mock_mode,
+            policy=self.runtime_policy,
+            environ=source,
+        )
+        if self.runtime_policy.is_live:
+            raise LiveModeSafetyError(
+                "BridgeExecutor live execution is disabled until transport submission, "
+                "bridge proofs, confirmation, and recovery are implemented"
+            )
+        if not self.mock_mode:
+            raise LiveModeSafetyError(
+                "BridgeExecutor has no authoritative non-simulated implementation"
+            )
+        self.icb = ICBClient(environ=source, policy=self.runtime_policy)
+        self.ism_verifier = MultiISMVerifier(
+            mock_mode=True,
+            environ=source,
+            policy=self.runtime_policy,
+        )
+        self.trails_handler = TrailsTransportHandler(
+            mock_mode=True,
+            environ=source,
+            policy=self.runtime_policy,
+        )
         self._stats = {
             "executions": 0,
             "successful": 0,
             "failed": 0,
             "fallbacks_used": 0,
         }
+        self._freeze_runtime_configuration()
 
     def execute(
         self,
@@ -536,7 +629,9 @@ class BridgeExecutor:
                     icb_message=None,
                     ism_verified=False,
                     latency_ms=0,
-                    error=f"Trails transport failed: {e}",
+                    error="Trails transport failed",
+                    simulated=True,
+                    evidence_classification="non-authoritative",
                 )
 
         start_time = time.time()
@@ -610,6 +705,8 @@ class BridgeExecutor:
             ism_verified=ism_verified,
             latency_ms=elapsed_ms,
             tx_hash=tx_hash,
+            simulated=True,
+            evidence_classification="non-authoritative",
         )
 
     def get_stats(self) -> dict:

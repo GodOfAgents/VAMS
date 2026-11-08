@@ -1,0 +1,1069 @@
+{
+  "schema": "vams.f04.option-b.acceptance.v1",
+  "design_status": "FROZEN_FOR_INDEPENDENT_REVIEW",
+  "compiled_credit": false,
+  "ledger_credit": false,
+  "live_credit": false,
+  "historical_matrix_sha256": "b9328c7cedb8be75b96885eba7a6f235c5e76e4a4d2597ae5dd94552c77658f9",
+  "source_group_counts": {
+    "anchor_top_level": 26,
+    "anchor_subcases": 7,
+    "genesis_consumer": 39,
+    "preserved_recovery": 31,
+    "integration": 10
+  },
+  "case_count": 113,
+  "cases": [
+    {
+      "id": "A01",
+      "source": "ANCHOR-CASES.json",
+      "assertion": "founder+3 guardians, valid previous bootstrap, one fresh anchor_seed, exact token/output",
+      "expected": "ACCEPT",
+      "layer": "compiled_v3",
+      "entrypoint": "issue_anchor",
+      "execution": "PENDING",
+      "mutation_required": false
+    },
+    {
+      "id": "A02",
+      "source": "ANCHOR-CASES.json",
+      "assertion": "different fresh anchor_seed issues second valid candidate anchor for same bootstrap",
+      "expected": "ACCEPT",
+      "layer": "compiled_v3",
+      "entrypoint": "issue_anchor",
+      "execution": "PENDING",
+      "mutation_required": false
+    },
+    {
+      "id": "A03",
+      "source": "ANCHOR-CASES.json",
+      "assertion": "missing founder signature",
+      "expected": "REJECT",
+      "layer": "compiled_v3",
+      "entrypoint": "issue_anchor",
+      "execution": "PENDING",
+      "mutation_required": true
+    },
+    {
+      "id": "A04",
+      "source": "ANCHOR-CASES.json",
+      "assertion": "only two distinct committed guardians",
+      "expected": "REJECT",
+      "layer": "compiled_v3",
+      "entrypoint": "issue_anchor",
+      "execution": "PENDING",
+      "mutation_required": true
+    },
+    {
+      "id": "A05",
+      "source": "ANCHOR-CASES.json",
+      "assertion": "non-guardian quorum insufficiency, duplicate authorization helper and invalid signer-set contexts are distinct evidence subcases",
+      "expected": "REJECT",
+      "layer": "subcase_specific",
+      "entrypoint": "issue_anchor",
+      "execution": "PENDING",
+      "mutation_required": true
+    },
+    {
+      "id": "A05.1",
+      "source": "ANCHOR-CASES.json",
+      "parent_id": "A05",
+      "assertion": "ledger-valid unique signer set has only two committed guardians plus a non-guardian",
+      "expected": "REJECT",
+      "layer": "compiled_v3",
+      "execution": "PENDING",
+      "compiled_credit_eligible": true
+    },
+    {
+      "id": "A05.2",
+      "source": "ANCHOR-CASES.json",
+      "parent_id": "A05",
+      "assertion": "pure helper duplicate-list probe must count unique committed keys, not repeated entries",
+      "expected": "DISTINCT_COUNT_ONLY",
+      "layer": "pure_helper",
+      "execution": "PENDING",
+      "compiled_credit_eligible": false
+    },
+    {
+      "id": "A05.3",
+      "source": "ANCHOR-CASES.json",
+      "parent_id": "A05",
+      "assertion": "duplicate entries in purported ledger signatory set are invalid-context evidence, not a valid signer-set negative",
+      "expected": "INVALID_CONTEXT",
+      "layer": "invalid_context",
+      "execution": "PENDING",
+      "compiled_credit_eligible": false
+    },
+    {
+      "id": "A06",
+      "source": "ANCHOR-CASES.json",
+      "assertion": "missing seed compiled guard; equal seed consumed/reference overlap and duplicate input invalid-context; spent-seed ledger admission are distinct subcases",
+      "expected": "REJECT",
+      "layer": "subcase_specific",
+      "entrypoint": "issue_anchor",
+      "execution": "PENDING",
+      "mutation_required": true
+    },
+    {
+      "id": "A06.1",
+      "source": "ANCHOR-CASES.json",
+      "parent_id": "A06",
+      "assertion": "anchor_seed absent from otherwise ledger-valid consumed inputs",
+      "expected": "REJECT",
+      "layer": "compiled_v3",
+      "execution": "PENDING",
+      "compiled_credit_eligible": true
+    },
+    {
+      "id": "A06.2",
+      "source": "ANCHOR-CASES.json",
+      "parent_id": "A06",
+      "assertion": "anchor_seed equals bootstrap_ref, requiring the same UTxO to be consumed and referenced; structurally invalid context",
+      "expected": "INVALID_CONTEXT",
+      "layer": "invalid_context",
+      "execution": "PENDING",
+      "compiled_credit_eligible": false
+    },
+    {
+      "id": "A06.3",
+      "source": "ANCHOR-CASES.json",
+      "parent_id": "A06",
+      "assertion": "same consumed input reference duplicated in purported transaction",
+      "expected": "INVALID_CONTEXT",
+      "layer": "invalid_context",
+      "execution": "PENDING",
+      "compiled_credit_eligible": false
+    },
+    {
+      "id": "A06.4",
+      "source": "ANCHOR-CASES.json",
+      "parent_id": "A06",
+      "assertion": "anchor_seed already consumed by admitted prior issuance, replay attempts to spend it again",
+      "expected": "LEDGER_REJECT",
+      "layer": "ledger_admission",
+      "execution": "PENDING",
+      "compiled_credit_eligible": false
+    },
+    {
+      "id": "A07",
+      "source": "ANCHOR-CASES.json",
+      "assertion": "bootstrap consumed rather than referenced; missing/forged/wrong PreGenesisV2",
+      "expected": "REJECT",
+      "layer": "compiled_v3",
+      "entrypoint": "issue_anchor",
+      "execution": "PENDING",
+      "mutation_required": true
+    },
+    {
+      "id": "A08",
+      "source": "ANCHOR-CASES.json",
+      "assertion": "wrong committed DID/founder/controller/operator/guardians/metadata/stake",
+      "expected": "REJECT",
+      "layer": "compiled_v3",
+      "entrypoint": "issue_anchor",
+      "execution": "PENDING",
+      "mutation_required": true
+    },
+    {
+      "id": "A09",
+      "source": "ANCHOR-CASES.json",
+      "assertion": "wrong anchor token name, qty0/2/-1 or multiple mint assets",
+      "expected": "REJECT",
+      "layer": "compiled_v3",
+      "entrypoint": "issue_anchor",
+      "execution": "PENDING",
+      "mutation_required": true
+    },
+    {
+      "id": "A10",
+      "source": "ANCHOR-CASES.json",
+      "assertion": "wrong address/stake credential/datum/reference script/ADA/extra asset",
+      "expected": "REJECT",
+      "layer": "compiled_v3",
+      "entrypoint": "issue_anchor",
+      "execution": "PENDING",
+      "mutation_required": true
+    },
+    {
+      "id": "A11",
+      "source": "ANCHOR-CASES.json",
+      "assertion": "attempt spending/modifying/moving immutable anchor",
+      "expected": "REJECT",
+      "layer": "compiled_v3",
+      "entrypoint": "anchor_spend",
+      "execution": "PENDING",
+      "mutation_required": true
+    },
+    {
+      "id": "A12",
+      "source": "ANCHOR-CASES.json",
+      "assertion": "attempt burn or replacement under shared P0",
+      "expected": "REJECT",
+      "layer": "compiled_v3",
+      "entrypoint": "anchor_burn",
+      "execution": "PENDING",
+      "mutation_required": true
+    },
+    {
+      "id": "A13",
+      "source": "ANCHOR-CASES.json",
+      "assertion": "same valid anchor ref independently checked by N and R; founder/controller/all5 signed",
+      "expected": "ACCEPT",
+      "layer": "compiled_v3",
+      "entrypoint": "paired_register",
+      "execution": "PENDING",
+      "mutation_required": false
+    },
+    {
+      "id": "A14",
+      "source": "ANCHOR-CASES.json",
+      "assertion": "no anchor/wrong P0/wrong S0/alternative unanchored N",
+      "expected": "REJECT",
+      "layer": "compiled_v3",
+      "entrypoint": "paired_register",
+      "execution": "PENDING",
+      "mutation_required": true
+    },
+    {
+      "id": "A15",
+      "source": "ANCHOR-CASES.json",
+      "assertion": "two matching anchor references; transaction-local ambiguous authorization",
+      "expected": "REJECT",
+      "layer": "compiled_v3",
+      "entrypoint": "paired_register",
+      "execution": "PENDING",
+      "mutation_required": true
+    },
+    {
+      "id": "A16",
+      "source": "ANCHOR-CASES.json",
+      "assertion": "wrong N/R/identity name/DID/founder/bootstrap or genesis fields",
+      "expected": "REJECT",
+      "layer": "compiled_v3",
+      "entrypoint": "paired_register",
+      "execution": "PENDING",
+      "mutation_required": true
+    },
+    {
+      "id": "A17",
+      "source": "ANCHOR-CASES.json",
+      "assertion": "missing founder/controller/any one of five guardian PoP",
+      "expected": "REJECT",
+      "layer": "compiled_v3",
+      "entrypoint": "paired_register",
+      "execution": "PENDING",
+      "mutation_required": true
+    },
+    {
+      "id": "A18",
+      "source": "ANCHOR-CASES.json",
+      "assertion": "missing or wrong bootstrap; no exact registry input/output; nonRegisterAgent",
+      "expected": "REJECT",
+      "layer": "compiled_v3",
+      "entrypoint": "paired_register",
+      "execution": "PENDING",
+      "mutation_required": true
+    },
+    {
+      "id": "A19",
+      "source": "ANCHOR-CASES.json",
+      "assertion": "all NEW V2 R mint-purpose actions reject, including V2 MintIdentity and BurnIdentity; no change or qualification of V1 legacy burn behavior is claimed",
+      "expected": "REJECT",
+      "layer": "compiled_v3",
+      "entrypoint": "new_v2_registry_mint",
+      "execution": "PENDING",
+      "mutation_required": true
+    },
+    {
+      "id": "A20",
+      "source": "ANCHOR-CASES.json",
+      "assertion": "reviewed/pinned VAMS R/N route: different candidate anchors cannot admit two registrations consuming same bootstrap",
+      "expected": "AT_MOST_ONE_ADMITTED",
+      "layer": "ledger_admission",
+      "entrypoint": "ledger_conflict",
+      "execution": "PENDING",
+      "mutation_required": false
+    },
+    {
+      "id": "A21",
+      "source": "ANCHOR-CASES.json",
+      "assertion": "same raw DID can register using distinct bootstrap_ref; no global uniqueness",
+      "expected": "ACCEPT",
+      "layer": "compiled_v3",
+      "entrypoint": "paired_register",
+      "execution": "PENDING",
+      "mutation_required": false
+    },
+    {
+      "id": "A22",
+      "source": "ANCHOR-CASES.json",
+      "assertion": "valid recovered current controller/guardians retain founding anchor immutable projection",
+      "expected": "ACCEPT",
+      "layer": "compiled_v3",
+      "entrypoint": "recovery",
+      "execution": "PENDING",
+      "mutation_required": false
+    },
+    {
+      "id": "A23",
+      "source": "ANCHOR-CASES.json",
+      "assertion": "altered immutable tuple, stale epochs or initial-anchor guardian authorization substituted",
+      "expected": "REJECT",
+      "layer": "compiled_v3",
+      "entrypoint": "recovery",
+      "execution": "PENDING",
+      "mutation_required": true
+    },
+    {
+      "id": "A24",
+      "source": "ANCHOR-CASES.json",
+      "assertion": "all DAG parameters/policy IDs independently source-bound and reproducibly derived",
+      "expected": "ACYCLIC",
+      "layer": "build_provenance",
+      "entrypoint": "applied_graph",
+      "execution": "PENDING",
+      "mutation_required": false
+    },
+    {
+      "id": "A25",
+      "source": "ANCHOR-CASES.json",
+      "assertion": "one-unit beyond each DID/u32/u64/quantity/transaction/datum bound",
+      "expected": "REJECT",
+      "layer": "compiled_v3",
+      "entrypoint": "bounds",
+      "execution": "PENDING",
+      "mutation_required": true
+    },
+    {
+      "id": "A26",
+      "source": "ANCHOR-CASES.json",
+      "assertion": "maximal bounded V3 contexts; actual CPU/memory/size evidence pending",
+      "expected": "WITHIN_REVIEWED_BUDGET",
+      "layer": "compiled_v3_budget",
+      "entrypoint": "worst_state",
+      "execution": "PENDING",
+      "mutation_required": false
+    },
+    {
+      "id": "F04B-G01",
+      "source": "GENESIS-CASES.json",
+      "assertion": "V2 paired genesis with founder+controller+all5 guardians; exact seed/anchor/value/epochs",
+      "expected": "ACCEPT",
+      "layer": "compiled_paired",
+      "execution": "PENDING",
+      "mutation_required": false
+    },
+    {
+      "id": "F04B-G02",
+      "source": "GENESIS-CASES.json",
+      "assertion": "registration only founder+3 guardians",
+      "expected": "REJECT",
+      "layer": "compiled_paired",
+      "execution": "PENDING",
+      "mutation_required": true
+    },
+    {
+      "id": "F04B-G03",
+      "source": "GENESIS-CASES.json",
+      "assertion": "anchor founder+3 guardians precedes full5 PoP registration",
+      "expected": "ACCEPT",
+      "layer": "compiled_anchor_then_paired",
+      "execution": "PENDING",
+      "mutation_required": false
+    },
+    {
+      "id": "F04B-G04",
+      "source": "GENESIS-CASES.json",
+      "assertion": "duplicate guardians or guardian overlaps founder/controller/operator",
+      "expected": "REJECT",
+      "layer": "compiled_paired",
+      "execution": "PENDING",
+      "mutation_required": true
+    },
+    {
+      "id": "F04B-G05",
+      "source": "GENESIS-CASES.json",
+      "assertion": "missing destination initial controller signature where distinct from founder",
+      "expected": "REJECT",
+      "layer": "compiled_paired",
+      "execution": "PENDING",
+      "mutation_required": true
+    },
+    {
+      "id": "F04B-G06",
+      "source": "GENESIS-CASES.json",
+      "assertion": "any nonzero genesis nonce/control_epoch/guardian_epoch; frozen or pending",
+      "expected": "REJECT",
+      "layer": "compiled_paired",
+      "execution": "PENDING",
+      "mutation_required": true
+    },
+    {
+      "id": "F04B-G07",
+      "source": "GENESIS-CASES.json",
+      "assertion": "genesis metadata/operator/guardians/controller/stake differ from immutable anchor or seed",
+      "expected": "REJECT",
+      "layer": "compiled_paired",
+      "execution": "PENDING",
+      "mutation_required": true
+    },
+    {
+      "id": "F04B-G08",
+      "source": "GENESIS-CASES.json",
+      "assertion": "same DID under different bootstrap references with otherwise valid anchors",
+      "expected": "ACCEPT_NO_GLOBAL_UNIQUENESS_CREDIT",
+      "layer": "compiled_paired_ledger",
+      "execution": "PENDING",
+      "mutation_required": false
+    },
+    {
+      "id": "F04B-G09",
+      "source": "GENESIS-CASES.json",
+      "assertion": "two candidate anchors distinct anchor seeds same bootstrap; first registers; second attempts spent bootstrap",
+      "expected": "REJECT_SECOND_BY_LEDGER_SINGLE_SPEND",
+      "layer": "ledger_admission",
+      "execution": "PENDING",
+      "mutation_required": true
+    },
+    {
+      "id": "F04B-G10",
+      "source": "GENESIS-CASES.json",
+      "assertion": "anchor reference reused for same identity update/recovery after controller/guardian changes",
+      "expected": "ACCEPT_WITH_CURRENT_STATE_AUTHORIZATION",
+      "layer": "compiled_recovery",
+      "execution": "PENDING",
+      "mutation_required": false
+    },
+    {
+      "id": "F04B-G11",
+      "source": "GENESIS-CASES.json",
+      "assertion": "post-recovery anchor initial controller/guardians unchanged and current state new epochs",
+      "expected": "ACCEPT",
+      "layer": "compiled_recovery",
+      "execution": "PENDING",
+      "mutation_required": false
+    },
+    {
+      "id": "F04B-G12",
+      "source": "GENESIS-CASES.json",
+      "assertion": "V1 or legacy8 field datum passed into V2 seed or V2 state decoder",
+      "expected": "REJECT",
+      "layer": "compiled_decoder",
+      "execution": "PENDING",
+      "mutation_required": true
+    },
+    {
+      "id": "F04B-G13",
+      "source": "GENESIS-CASES.json",
+      "assertion": "missing epochs/default0/coercion from V1 consumer state",
+      "expected": "REJECT",
+      "layer": "consumer",
+      "execution": "PENDING",
+      "mutation_required": true
+    },
+    {
+      "id": "F04B-G14",
+      "source": "GENESIS-CASES.json",
+      "assertion": "V1 legacy UTxO read-only interpretation under old address/schema",
+      "expected": "LEGACY_ONLY_NO_MIGRATION_OR_V2_AUTHORITY",
+      "layer": "consumer",
+      "execution": "PENDING",
+      "mutation_required": false
+    },
+    {
+      "id": "F04B-G15",
+      "source": "GENESIS-CASES.json",
+      "assertion": "invalid/genesis asset value, extra native assets, stake below1e9, conservation drift",
+      "expected": "REJECT",
+      "layer": "compiled_paired",
+      "execution": "PENDING",
+      "mutation_required": true
+    },
+    {
+      "id": "F04B-G16",
+      "source": "GENESIS-CASES.json",
+      "assertion": "controller recovery preserves immutable identity and economics; increments control_epoch/state_nonce exactly",
+      "expected": "ACCEPT_AFTER_7D_LEAVES_FROZEN",
+      "layer": "compiled_recovery",
+      "execution": "PENDING",
+      "mutation_required": false
+    },
+    {
+      "id": "F04B-G17",
+      "source": "GENESIS-CASES.json",
+      "assertion": "routine rotation needs controller+2 guardians+destination PoP full48h",
+      "expected": "ACCEPT_AT_BOUND_REJECT_ONE_MS_EARLY",
+      "layer": "compiled_recovery",
+      "execution": "PENDING",
+      "mutation_required": false
+    },
+    {
+      "id": "F04B-G18",
+      "source": "GENESIS-CASES.json",
+      "assertion": "guardian rotation3 old +5 new PoP full14d exact guardian_epoch increment",
+      "expected": "ACCEPT_AT_BOUND_REJECT_ONE_MS_EARLY",
+      "layer": "compiled_recovery",
+      "execution": "PENDING",
+      "mutation_required": false
+    },
+    {
+      "id": "F04B-G19",
+      "source": "GENESIS-CASES.json",
+      "assertion": "epoch or nonce overflow, stale request ID/base nonce/authority epochs",
+      "expected": "REJECT",
+      "layer": "compiled_recovery",
+      "execution": "PENDING",
+      "mutation_required": true
+    },
+    {
+      "id": "F04B-G20",
+      "source": "GENESIS-CASES.json",
+      "assertion": "old controller TEE/session/OMS/cache credential after recovered epoch",
+      "expected": "REJECT",
+      "layer": "consumer",
+      "execution": "PENDING",
+      "mutation_required": true
+    },
+    {
+      "id": "F04B-G21",
+      "source": "GENESIS-CASES.json",
+      "assertion": "new epochs/root with independent current authenticated association and live provider proof",
+      "expected": "ACCEPT_ONLY_WHEN_INTEGRATION_GATE_PASSED",
+      "layer": "consumer",
+      "execution": "PENDING",
+      "mutation_required": false
+    },
+    {
+      "id": "F04B-G22",
+      "source": "GENESIS-CASES.json",
+      "assertion": "current-state unavailable/stale/ambiguous/unfinalized/reorg",
+      "expected": "REJECT_NO_CACHED_ALLOW",
+      "layer": "consumer",
+      "execution": "PENDING",
+      "mutation_required": true
+    },
+    {
+      "id": "F04B-G23",
+      "source": "GENESIS-CASES.json",
+      "assertion": "28-byte controller substituted/truncated/padded as20-byte root EOA; session address substituted",
+      "expected": "REJECT",
+      "layer": "consumer",
+      "execution": "PENDING",
+      "mutation_required": true
+    },
+    {
+      "id": "F04B-G24",
+      "source": "GENESIS-CASES.json",
+      "assertion": "TEE proof verifies internally rootA but externally current expected rootB",
+      "expected": "REJECT",
+      "layer": "consumer",
+      "execution": "PENDING",
+      "mutation_required": true
+    },
+    {
+      "id": "F04B-G25",
+      "source": "GENESIS-CASES.json",
+      "assertion": "session24h at exact expiry;25h; outside whitelist; excess value",
+      "expected": "REJECT",
+      "layer": "consumer",
+      "execution": "PENDING",
+      "mutation_required": true
+    },
+    {
+      "id": "F04B-G26",
+      "source": "GENESIS-CASES.json",
+      "assertion": "session valid current binding under24h whitelisted allowed value",
+      "expected": "ACCEPT_ONLY_WHEN_INTEGRATION_GATE_PASSED",
+      "layer": "consumer",
+      "execution": "PENDING",
+      "mutation_required": false
+    },
+    {
+      "id": "F04B-G27",
+      "source": "GENESIS-CASES.json",
+      "assertion": "OMS offline/malformed/simulated/provider valid old subject/epoch",
+      "expected": "REJECT_P3",
+      "layer": "consumer",
+      "execution": "PENDING",
+      "mutation_required": true
+    },
+    {
+      "id": "F04B-G28",
+      "source": "GENESIS-CASES.json",
+      "assertion": "guardian epoch rotation or freeze invalidates cached authority/held grant",
+      "expected": "REJECT_UNTIL_FRESH_REAUTHORIZATION",
+      "layer": "consumer",
+      "execution": "PENDING",
+      "mutation_required": true
+    },
+    {
+      "id": "F04B-G29",
+      "source": "GENESIS-CASES.json",
+      "assertion": "cache same DID across distinct policy/bootstrap identities",
+      "expected": "ISOLATE_NO_ALIAS",
+      "layer": "consumer",
+      "execution": "PENDING",
+      "mutation_required": false
+    },
+    {
+      "id": "F04B-G30",
+      "source": "GENESIS-CASES.json",
+      "assertion": "registry-side mint purpose supplied any V1/V2 redeemer",
+      "expected": "REJECT",
+      "layer": "compiled_registry_mint",
+      "execution": "PENDING",
+      "mutation_required": true
+    },
+    {
+      "id": "F04B-G31",
+      "source": "GENESIS-CASES.json",
+      "assertion": "F05 action reference without founding owner/guardian PoP attempts F04 genesis/recovery",
+      "expected": "REJECT",
+      "layer": "compiled_paired_recovery",
+      "execution": "PENDING",
+      "mutation_required": true
+    },
+    {
+      "id": "F04B-G32",
+      "source": "GENESIS-CASES.json",
+      "assertion": "V2 action_epoch initialized0/slashersempty; no F05 reference creates recovery right",
+      "expected": "ACCEPT_GENESIS_SLASH_DISABLED",
+      "layer": "compiled_paired",
+      "execution": "PENDING",
+      "mutation_required": false
+    },
+    {
+      "id": "F04B-G33",
+      "source": "GENESIS-CASES.json",
+      "assertion": "registration time unbounded/exclusive/reversed/>300000ms/outsideu64 or wrong registered_at lower",
+      "expected": "REJECT",
+      "layer": "compiled_paired",
+      "execution": "PENDING",
+      "mutation_required": true
+    },
+    {
+      "id": "F04B-G34",
+      "source": "GENESIS-CASES.json",
+      "assertion": "anchor issuance bootstrap reference forged/wrong script/wrong seed datum/value or consumes bootstrap early",
+      "expected": "REJECT",
+      "layer": "compiled_anchor",
+      "execution": "PENDING",
+      "mutation_required": true
+    },
+    {
+      "id": "F04B-G35",
+      "source": "GENESIS-CASES.json",
+      "assertion": "association lacks either controller or EVM root PoP, wrong identity/epoch/network/verifier/config/binding nonce/expired proof",
+      "expected": "REJECT",
+      "layer": "consumer_association_activation_gate",
+      "execution": "PENDING",
+      "mutation_required": true
+    },
+    {
+      "id": "F04B-G36",
+      "source": "GENESIS-CASES.json",
+      "assertion": "held grant validated before epoch/freeze/reorg change; state changes before effect",
+      "expected": "REJECT_HANDLER_EFFECT_COUNT_ZERO",
+      "layer": "consumer",
+      "execution": "PENDING",
+      "mutation_required": true
+    },
+    {
+      "id": "F04B-G37",
+      "source": "GENESIS-CASES.json",
+      "assertion": "pending wrong constructor/arity/Option/Bool encoding, swapped field order or commitment/actiontag",
+      "expected": "REJECT",
+      "layer": "compiled_wire_recovery",
+      "execution": "PENDING",
+      "mutation_required": true
+    },
+    {
+      "id": "F04B-G38",
+      "source": "GENESIS-CASES.json",
+      "assertion": "guardian or controller no-op rotation, authsigner list >8, status2/unknown",
+      "expected": "REJECT",
+      "layer": "compiled_recovery",
+      "execution": "PENDING",
+      "mutation_required": true
+    },
+    {
+      "id": "F04B-G39",
+      "source": "GENESIS-CASES.json",
+      "assertion": "uncertain/rollback clock or expiry-extension old grant",
+      "expected": "REJECT_NO_EFFECT",
+      "layer": "consumer",
+      "execution": "PENDING",
+      "mutation_required": true
+    },
+    {
+      "id": "F04-R01",
+      "source": "docs/remediation/m7_f04_owner_recovery_design_r1_20261004/TEST-MATRIX.md",
+      "original_case_number": 1,
+      "original_assertion": "Accept exactly one standalone-minted identity NFT only when the designated bootstrap reference is consumed as an input, the registration spend validates the same transaction\u2019s `tx.mint` entry, and exactly one matching registry output/datum carries the token; DID/founding-owner/bootstrap-derived asset name matches the approved formula. Do not require the newly minted token itself as an input.",
+      "original_assertion_sha256": "85a340cb7935c0039951f47950836d505a00da776b851d0ef31105c53fc6f8fd",
+      "layer": "multiple_separately_reported_layers",
+      "execution": "PENDING",
+      "application": "V2 target only; Slash-positive subcase waits on separate F05 gate; source text preserved"
+    },
+    {
+      "id": "F04-R02",
+      "source": "docs/remediation/m7_f04_owner_recovery_design_r1_20261004/TEST-MATRIX.md",
+      "original_case_number": 2,
+      "original_assertion": "Reject absent or reference-only bootstrap input, wrong reference, wrong policy/name, quantity other than +1, multiple token names, duplicate registry identity state, missing founding-owner or initial-controller signature (unless the keys are the same), repeated/ambiguous field encoding, and missing/invalid signer proof from any of five guardians. Assert the 32\u2013256-byte valid-UTF-8 DID boundary and reject malformed UTF-8 and out-of-range lengths.",
+      "original_assertion_sha256": "44d63211690284cafeda3a020b08efb3507c776538fe7daa9b01bd89481df0b5",
+      "layer": "multiple_separately_reported_layers",
+      "execution": "PENDING",
+      "application": "V2 target only; Slash-positive subcase waits on separate F05 gate; source text preserved"
+    },
+    {
+      "id": "F04-R03",
+      "source": "docs/remediation/m7_f04_owner_recovery_design_r1_20261004/TEST-MATRIX.md",
+      "original_case_number": 3,
+      "original_assertion": "Accept only five pairwise-distinct guardian VKHs at fixed 3-of-5 threshold, disjoint from founding owner/controller/operator. Reject duplicate keys, fewer/more keys, any guardian overlap with founding owner/controller/operator, missing guardian PoP, and PoP bound to another DID/policy/token/bootstrap/epoch. Controller and operator may equal one another or founding owner but never a guardian. Include positive fixtures for (a) controller=operator, (b) controller=founding owner with distinct operator, and (c) operator=founding owner with distinct controller; all five guardians remain distinct and disjoint. Count the intersection with the ledger signer set. Exercise duplicate list entries only in pure helper/property tests; reject invalid signer sets at the context-construction layer.",
+      "original_assertion_sha256": "ca3a09bced9ac772b3fce91fc386a03af39ca5503a60cbe2770cd8eec6d53d85",
+      "layer": "multiple_separately_reported_layers",
+      "execution": "PENDING",
+      "application": "V2 target only; Slash-positive subcase waits on separate F05 gate; source text preserved"
+    },
+    {
+      "id": "F04-R04",
+      "source": "docs/remediation/m7_f04_owner_recovery_design_r1_20261004/TEST-MATRIX.md",
+      "original_case_number": 4,
+      "original_assertion": "Reject any registry-side mint. Prove standalone mint remains the only normative identity creation path.",
+      "original_assertion_sha256": "51c23eb2c31558e8bb9c468de75f563d2198384863ba5b784152b45fbfe24561",
+      "layer": "multiple_separately_reported_layers",
+      "execution": "PENDING",
+      "application": "V2 target only; Slash-positive subcase waits on separate F05 gate; source text preserved"
+    },
+    {
+      "id": "F04-R05",
+      "source": "docs/remediation/m7_f04_owner_recovery_design_r1_20261004/TEST-MATRIX.md",
+      "original_case_number": 5,
+      "original_assertion": "Burn only the exact identity NFT as part of the authorized terminal registry transition. Match exactly one registry input datum and its `DeregisterAgent` redeemer, pending request ID, controller, epochs, and interval. The registry validator enforces no continuation and exactly one controller-key payout of all input value except the NFT, with transaction fees funded separately. Reject arbitrary quantity -1 burn, ambiguous/extra matching registry inputs, wrong identity/asset/policy, partial burn, wrong/split payout, or unrelated redeemer.\n\n## Controller rotation and lost-key recovery",
+      "original_assertion_sha256": "941e458d4bd6d2b8fbb556cca139201cc35ec369253c2b9e9d95f0f3e997b8b7",
+      "layer": "multiple_separately_reported_layers",
+      "execution": "PENDING",
+      "application": "V2 target only; Slash-positive subcase waits on separate F05 gate; source text preserved"
+    },
+    {
+      "id": "F04-R06",
+      "source": "docs/remediation/m7_f04_owner_recovery_design_r1_20261004/TEST-MATRIX.md",
+      "original_case_number": 6,
+      "original_assertion": "Routine rotation succeeds only with current-controller signature, two distinct current guardian signatures, and destination-controller PoP. Reject controller alone, one guardian, duplicate guardian counted twice, non-guardian, stale guardian, destination equal to any guardian, and absent/invalid destination PoP. Preserve allowed controller/operator or controller/founding-owner equality when neither is a guardian.",
+      "original_assertion_sha256": "a3946e4863c55b46c648a89d68de52bd096ff587fb91e011b28c04809f08957f",
+      "layer": "multiple_separately_reported_layers",
+      "execution": "PENDING",
+      "application": "V2 target only; Slash-positive subcase waits on separate F05 gate; source text preserved"
+    },
+    {
+      "id": "F04-R07",
+      "source": "docs/remediation/m7_f04_owner_recovery_design_r1_20261004/TEST-MATRIX.md",
+      "original_case_number": 7,
+      "original_assertion": "Recovery succeeds with three distinct current guardian signatures and destination-controller PoP when old controller signature is absent. Reject two-of-five, single administrator, one/two guardian(s), duplicate key counted twice, non-guardian signer, destination controller equal to any guardian, old guardian set after epoch rotation, and identity/request substitution.",
+      "original_assertion_sha256": "e64134a5e04dd168558fff5db76c530f875d23d4b92eb4217ddff7db3c7f78dc",
+      "layer": "multiple_separately_reported_layers",
+      "execution": "PENDING",
+      "application": "V2 target only; Slash-positive subcase waits on separate F05 gate; source text preserved"
+    },
+    {
+      "id": "F04-R08",
+      "source": "docs/remediation/m7_f04_owner_recovery_design_r1_20261004/TEST-MATRIX.md",
+      "original_case_number": 8,
+      "original_assertion": "Verify immediate freeze on recovery scheduling; old controller cannot update, rotate operator, change value, deregister, or veto/cancel recovery while pending. Verify guardian quorum can cancel; controller alone cannot. Reject recovery destination equal to any guardian and assert guardian/key disjointness after every successful controller transition.",
+      "original_assertion_sha256": "796244c1c1134236953acf449f14d32d97a679f75d3ed8a9b3403cbee1e78696",
+      "layer": "multiple_separately_reported_layers",
+      "execution": "PENDING",
+      "application": "V2 target only; Slash-positive subcase waits on separate F05 gate; source text preserved"
+    },
+    {
+      "id": "F04-R09",
+      "source": "docs/remediation/m7_f04_owner_recovery_design_r1_20261004/TEST-MATRIX.md",
+      "original_case_number": 9,
+      "original_assertion": "Recovery while suspended/slashed changes only control fields and does not unsuspend, restore stake/reputation, rewrite slashing evidence, or grant slash authority.\n\n## Freeze, unfreeze, guardian rotation, and exit",
+      "original_assertion_sha256": "c2e22cb0e627ee119681d185524205f72879feeae22b61331a72eff56c0534a8",
+      "layer": "multiple_separately_reported_layers",
+      "execution": "PENDING",
+      "application": "V2 target only; Slash-positive subcase waits on separate F05 gate; source text preserved"
+    },
+    {
+      "id": "F04-R10",
+      "source": "docs/remediation/m7_f04_owner_recovery_design_r1_20261004/TEST-MATRIX.md",
+      "original_case_number": 10,
+      "original_assertion": "Emergency freeze accepts 3-of-5 and applies immediately; reject one or two guardians, controller alone, global admin alone, and any output/value/controller/guardian-set mutation in the freeze transition.",
+      "original_assertion_sha256": "4cee54091357974d644dccbd0903e82843580b44fd791c33787eb1687a16886f",
+      "layer": "multiple_separately_reported_layers",
+      "execution": "PENDING",
+      "application": "V2 target only; Slash-positive subcase waits on separate F05 gate; source text preserved"
+    },
+    {
+      "id": "F04-R11",
+      "source": "docs/remediation/m7_f04_owner_recovery_design_r1_20261004/TEST-MATRIX.md",
+      "original_case_number": 11,
+      "original_assertion": "While frozen reject ordinary update, operator rotation, stake/value transition, deregistration, Deposit, and ExecuteIntent. Accept a valid independently authorized slash only when its activation gate is separately open; assert it preserves pending request bytes, controller, guardian set, epochs, and request ID while advancing state_nonce exactly once. Reject unauthorized slash and any slash mutation of control/recovery fields. Keep deployment/Slash/Deposit/ExecuteIntent activation gates closed until their separate criteria pass.",
+      "original_assertion_sha256": "9ba0c905824adb1caa43f0926681aac71963b183ee7409a4161a9f933df40856",
+      "layer": "multiple_separately_reported_layers",
+      "execution": "PENDING",
+      "application": "V2 target only; Slash-positive subcase waits on separate F05 gate; source text preserved"
+    },
+    {
+      "id": "F04-R12",
+      "source": "docs/remediation/m7_f04_owner_recovery_design_r1_20261004/TEST-MATRIX.md",
+      "original_case_number": 12,
+      "original_assertion": "Unfreeze requires 3-of-5 and exactly 48 hours. With no intervening slash, schedule from N to N+1 and execute/cancel/expire from N+1 to N+2. If an independently authorized slash occurs while pending, assert the request remains byte-identical and completion advances the then-current nonce by one. Reject one millisecond early, controller-only/admin-only unfreeze, changed value/identity, stale guardian epoch, and stale request replay.",
+      "original_assertion_sha256": "7f4105d16bc77ed4a7c99cf803d2be7081d012d93258fcb8771b76fe0a62b5c4",
+      "layer": "multiple_separately_reported_layers",
+      "execution": "PENDING",
+      "application": "V2 target only; Slash-positive subcase waits on separate F05 gate; source text preserved"
+    },
+    {
+      "id": "F04-R13",
+      "source": "docs/remediation/m7_f04_owner_recovery_design_r1_20261004/TEST-MATRIX.md",
+      "original_case_number": 13,
+      "original_assertion": "Operator rotation outside a pending/frozen state rejects any destination equal to a guardian; verify after every accepted operator change that no guardian/controller/operator/founding-owner separation rule is violated. Guardian rotation requires 3-of-5 old distinct guardians and PoP by every proposed new guardian; delay is 14 days and threshold stays 3-of-5. Assert after every guardian/controller/operator mutation that guardians are pairwise distinct and disjoint from founding owner, controller, and operator; controller/operator may coincide with each other or founding owner only when not a guardian. Reject duplicate proposed keys, any proposed guardian equal to founding owner/current or destination controller/operator, missing/invalid PoP, early execution, stale epoch, old-set replay, unapproved threshold change, and mixed controller/guardian mutation.",
+      "original_assertion_sha256": "49f711e44eae9d7b32ea5a164c407c8d2a1ca8a5a30b9572abae80f99bd0e32d",
+      "layer": "multiple_separately_reported_layers",
+      "execution": "PENDING",
+      "application": "V2 target only; Slash-positive subcase waits on separate F05 gate; source text preserved"
+    },
+    {
+      "id": "F04-R14",
+      "source": "docs/remediation/m7_f04_owner_recovery_design_r1_20261004/TEST-MATRIX.md",
+      "original_case_number": 14,
+      "original_assertion": "Voluntary deregistration requires current controller + 3-of-5 guardians and 48-hour delay. A single tagged pending request blocks all ordinary transitions; guardians may cancel it, and anyone may expire it only after the specified strict expiry boundary, with no burn or payout. After delay, payout goes only to current controller, equals all non-identity value from the state input, and transaction fees come from other inputs; the exact identity token burns and no continuing identity output remains. Reject owner-only or administrator burn/payout, early payout, partial burn, split/alternate beneficiary, unrelated redeemer, extra matching registry input, and recovery bypass.\n\n## Time, replay, UTxO concurrency, and exact continuity",
+      "original_assertion_sha256": "819b59970b6fe39226e4d567d1e9d9d71987cd5f3085c8a2fd8f0f14efef1785",
+      "layer": "multiple_separately_reported_layers",
+      "execution": "PENDING",
+      "application": "V2 target only; Slash-positive subcase waits on separate F05 gate; source text preserved"
+    },
+    {
+      "id": "F04-R15",
+      "source": "docs/remediation/m7_f04_owner_recovery_design_r1_20261004/TEST-MATRIX.md",
+      "original_case_number": 15,
+      "original_assertion": "For each delay, accept a finite closed/inclusive execution interval beginning exactly at `execute_after`; reject one POSIX millisecond before, and accept an interval ending exactly at inclusive `expires_at` while rejecting one millisecond after. Pending cleanup requires a finite inclusive lower bound strictly greater than expiry. At scheduling, require finite closed/inclusive lower and upper bounds, nonnegative ordered bounds, and width <=300,000 ms. Anchor `execute_after` to schedule `upper + delay`; simulate schedule inclusion at `upper` and reject execution at `upper + delay - 1 ms`, accepting only at/after `upper + delay`. Reject open/exclusive/reversed/missing ranges, width >300,000 ms, and checked-add overflow.",
+      "original_assertion_sha256": "26ea6c1ceab00bd4af1a9df4a4231d9094e1c3a6e5cc2295445d8c1586bca774",
+      "layer": "multiple_separately_reported_layers",
+      "execution": "PENDING",
+      "application": "V2 target only; Slash-positive subcase waits on separate F05 gate; source text preserved"
+    },
+    {
+      "id": "F04-R16",
+      "source": "docs/remediation/m7_f04_owner_recovery_design_r1_20261004/TEST-MATRIX.md",
+      "original_case_number": 16,
+      "original_assertion": "Reject request-ID mutation, action/destination/context substitution, stale base nonce/control epoch/guardian epoch, approval replay after cancellation/expiry, approval replay after another transition, and two competing spends from the same identity UTxO. An arbitrary executor may submit the exact committed action after delay, but cannot change destination/payout/identity or epochs. Accept exactly one ledger-valid spend and continuation.",
+      "original_assertion_sha256": "f7fd54a9bef75f2cee2591fc593c4a89f590a9c814f66b66892a98061ef29c6b",
+      "layer": "multiple_separately_reported_layers",
+      "execution": "PENDING",
+      "application": "V2 target only; Slash-positive subcase waits on separate F05 gate; source text preserved"
+    },
+    {
+      "id": "F04-R17",
+      "source": "docs/remediation/m7_f04_owner_recovery_design_r1_20261004/TEST-MATRIX.md",
+      "original_case_number": 17,
+      "original_assertion": "Emergency freeze increments the current state nonce exactly once whether or not pending state exists, clears pending, and invalidates that request; if an independent slash advanced nonce while pending, freeze advances from that current value. A pending action is a tagged union and at most one may exist. Reject scheduling a second request; allow 3-of-5 guardian cancellation of any pending kind; controller-only cancellation fails. Permissionless cleanup requires finite inclusive lower bound strictly greater than expiry, clears pending without burn/payout/transfer, and preserves the current frozen bit.",
+      "original_assertion_sha256": "5dc27bf2380465f673db9e20ca0cc6e2d0877f86bab22331893a7acb67ae7966",
+      "layer": "multiple_separately_reported_layers",
+      "execution": "PENDING",
+      "application": "V2 target only; Slash-positive subcase waits on separate F05 gate; source text preserved"
+    },
+    {
+      "id": "F04-R18",
+      "source": "docs/remediation/m7_f04_owner_recovery_design_r1_20261004/TEST-MATRIX.md",
+      "original_case_number": 18,
+      "original_assertion": "Every nonterminal transition advances the current state nonce exactly once. A scheduled request stores base_nonce N and outputs N+1; execute/cancel/expiry requires current nonce >=N+1, exact stored pending fields/request ID, and unchanged control/guardian epochs, then outputs current nonce+1 (terminal deregistration has no continuation). A separately authorized slash while pending preserves the request bytes and advances the nonce once; later request completion advances from that newer nonce. Stale, replayed, or skipped nonce fails. Every recovery/control-only nonterminal transition has exactly one same-script continuing identity output with exactly one same-policy/token NFT and exact value equality. An independently authorized slash follows its separately accepted F05 value-routing rules while preserving the pending control request; other action classes follow their own accepted value rules. DID, founding owner, bootstrap, policy/token, stake, reputation, metadata, slashers, and unrelated fields remain byte-for-byte/semantically unchanged except fields expressly changed by the separate authorized slash. Only authorized controller/guardian/operator/pending/freeze/nonce/epoch and slash fields may change; every post-transition key set must preserve guardian disjointness.",
+      "original_assertion_sha256": "8cdfde2d0359bb359cc6283dcf8d0214f3b3295e8f27aa0af80b4fcf71369d3a",
+      "layer": "multiple_separately_reported_layers",
+      "execution": "PENDING",
+      "application": "V2 target only; Slash-positive subcase waits on separate F05 gate; source text preserved"
+    },
+    {
+      "id": "F04-R19",
+      "source": "docs/remediation/m7_f04_owner_recovery_design_r1_20261004/TEST-MATRIX.md",
+      "original_case_number": 19,
+      "original_assertion": "For recovery/control-only transitions, wrong or missing identity token in continuation, multiple candidate continuations, extra identity token, value loss/gain, duplicate datum, altered immutable field, or silent datum-version migration fails. Slash value movement follows separately accepted F05 routing rules. Terminal deregistration has no continuation and routes every native asset from the state input to one exact current-controller payout; registry-input value cannot fund fees, which must come from other inputs.\n\n## Dependent credentials and test layers",
+      "original_assertion_sha256": "6a5cb43edaae2e2812c7b15ba89f488752ca01ebc7018ea1d9595589c8dfc850",
+      "layer": "multiple_separately_reported_layers",
+      "execution": "PENDING",
+      "application": "V2 target only; Slash-positive subcase waits on separate F05 gate; source text preserved"
+    },
+    {
+      "id": "F04-R20",
+      "source": "docs/remediation/m7_f04_owner_recovery_design_r1_20261004/TEST-MATRIX.md",
+      "original_case_number": 20,
+      "original_assertion": "Consumer-level epoch invalidation: TEE verifier rejects old root/epoch attestation and accepts fresh one; session-key verification rejects prior control epoch immediately but still enforces <=24h and whitelist; OMSIdentityVerifier rejects old controller/epoch and fails closed if registry evidence is unavailable/stale; authorization cache evicts prior-epoch entries and denies until fresh proof. Confirm stable DID/NFT resolves to new controller/epoch. Test each consumer with old and new evidence after recovery.",
+      "original_assertion_sha256": "5444eee0b36b9d4864079e35e648e3747c0711558f33f0e2364da3b7ac282875",
+      "layer": "consumer",
+      "execution": "PENDING",
+      "application": "V2 target only; Slash-positive subcase waits on separate F05 gate; source text preserved"
+    },
+    {
+      "id": "F04-R21",
+      "source": "docs/remediation/m7_f04_owner_recovery_design_r1_20261004/TEST-MATRIX.md",
+      "original_case_number": 21,
+      "original_assertion": "Classify tests by layer: pure helper/property tests may exercise duplicate signatory list entries and encoding ambiguities; Plutus V3 script tests use only ledger-valid signer sets and complete contexts; target evaluator tests cover actual interval and redeemer semantics; ledger-admission and live Pre-Prod evidence remain separate and are not inferred from simulations.\n\n## Mutation sensitivity and evidence",
+      "original_assertion_sha256": "dc3e9a183bfea10c1e3e6e6a3a5a8a4178248e20112f7cb662e30a6d627626a2",
+      "layer": "multiple_separately_reported_layers",
+      "execution": "PENDING",
+      "application": "V2 target only; Slash-positive subcase waits on separate F05 gate; source text preserved"
+    },
+    {
+      "id": "F04-R22",
+      "source": "docs/remediation/m7_f04_owner_recovery_design_r1_20261004/TEST-MATRIX.md",
+      "original_case_number": 22,
+      "original_assertion": "Mutate away each quorum threshold, distinct-signer check, PoP, timelock boundary, bounded validity width, request-domain field, nonce/epoch increment, freeze lock, continuity/value check, exact token continuation, and admin-denial rule. The targeted suite must fail for every mutation.",
+      "original_assertion_sha256": "8d806272ec586c139aa4fc448169dc7e4620f1347d7fcdaec0435fb8dfa7208d",
+      "layer": "multiple_separately_reported_layers",
+      "execution": "PENDING",
+      "application": "V2 target only; Slash-positive subcase waits on separate F05 gate; source text preserved"
+    },
+    {
+      "id": "F04-R23",
+      "source": "docs/remediation/m7_f04_owner_recovery_design_r1_20261004/TEST-MATRIX.md",
+      "original_case_number": 23,
+      "original_assertion": "Run compiled public validators using complete Plutus V3 contexts, realistic signer sets, validity intervals, inputs, outputs, mint/burn, redeemers, datum hashes, and value maps. Validate against the target Cardano evaluator/ledger; a Python design model or local helper passing is not acceptance.",
+      "original_assertion_sha256": "772d6b415f55dce68f2d8a360d0cc59909c5d7a20df928cedc558c74ad2568f3",
+      "layer": "multiple_separately_reported_layers",
+      "execution": "PENDING",
+      "application": "V2 target only; Slash-positive subcase waits on separate F05 gate; source text preserved"
+    },
+    {
+      "id": "F04-R24",
+      "source": "docs/remediation/m7_f04_owner_recovery_design_r1_20261004/TEST-MATRIX.md",
+      "original_case_number": 24,
+      "original_assertion": "Record design simulations separately from Aiken unit/property tests, compiled evaluator tests, ledger admission, and live Pre-Prod evidence. This draft executed none of them.\n\n\n## Independent golden vectors and exact delay constants",
+      "original_assertion_sha256": "f910af5dac42dd655c57ce92c10425f53a9b6ae83f81894b0b7e6c6227b8ee3b",
+      "layer": "multiple_separately_reported_layers",
+      "execution": "PENDING",
+      "application": "V2 target only; Slash-positive subcase waits on separate F05 gate; source text preserved"
+    },
+    {
+      "id": "F04-R25",
+      "source": "docs/remediation/m7_f04_owner_recovery_design_r1_20261004/TEST-MATRIX.md",
+      "original_case_number": 25,
+      "original_assertion": "Golden identity-name vector, calculated directly from the frozen byte formula and checked by an independent implementation: DID UTF-8 `did:vams:fixture:alpha-000000000` (exactly 32 bytes); owner VKH `11` repeated 28 bytes; bootstrap tx ID `22` repeated 32 bytes; output index `7` encoded `00000007`; exact preimage hex is `56414d532f6167656e742f76310000206469643a76616d733a666978747572653a616c7068612d303030303030303030` + `11` repeated 28 bytes + `22` repeated 32 bytes + `00000007`; expected `blake2b_256` asset name is `7404132c5454a7dc815915f00f259c437a4eab0861eb0caa53e9e0354fb36c7c`. Assert exact preimage and digest; do not derive expected output by calling the production helper.",
+      "original_assertion_sha256": "5eb1929fe3dffddfb35a1b1e638cbca9cd954bd52e80c1c61ecfc46b0aeaa22e",
+      "layer": "multiple_separately_reported_layers",
+      "execution": "PENDING",
+      "application": "V2 target only; Slash-positive subcase waits on separate F05 gate; source text preserved"
+    },
+    {
+      "id": "F04-R26",
+      "source": "docs/remediation/m7_f04_owner_recovery_design_r1_20261004/TEST-MATRIX.md",
+      "original_case_number": 26,
+      "original_assertion": "Golden destination-controller commitment vector: VKH `66` repeated 28 bytes; preimage `56414d532f6167656e742d636f6e74726f6c2f64657374696e6174696f6e2d636f6e74726f6c6c65722f763100` + 28 bytes `66`; expected `blake2b_256` commitment `bc7f57370b353f563c1a5fbf612d2e4fdf74d0424bac1c5b3cae60e5c112b7cd`. Also assert the guardian-set commitment for five ascending VKHs `71`, `72`, `73`, `74`, `75` repeated 28 bytes each uses domain `VAMS/agent-control/destination-guardians/v1` + NUL and yields `719227a998697cffaed49b1f91a0cf65e24027f9ef8686bfb3022c1e6e2b3b6c`. Expected bytes/digests must be frozen independently of production helpers.",
+      "original_assertion_sha256": "6df0128d7240ea64c9adf80547bf7e603cc72f5625ff41286f3135422a35fe63",
+      "layer": "multiple_separately_reported_layers",
+      "execution": "PENDING",
+      "application": "V2 target only; Slash-positive subcase waits on separate F05 gate; source text preserved"
+    },
+    {
+      "id": "F04-R27",
+      "source": "docs/remediation/m7_f04_owner_recovery_design_r1_20261004/TEST-MATRIX.md",
+      "original_case_number": 27,
+      "original_assertion": "Golden request-ID vector uses the exact format in DESIGN.md: policy ID `44` repeated 28 bytes; asset name from case 25; bootstrap tx ID `22` repeated 32 bytes and index 7; action `0x01`; controller `55` repeated 28 bytes; destination commitment from case 26; base nonce 9; control epoch 2; guardian epoch 4; schedule upper bound `1,800,000,000,000`; routine delay `172,800,000`; expiry grace `2,592,000,000`; thus execute-after is `1,800,172,800,000` and expiry is `1,802,764,800,000`. Assert this exact preimage: `56414d532f6167656e742d636f6e74726f6c2f726571756573742f763100` + policy bytes + case-25 asset name + bootstrap bytes + `00000007` + `01` + controller bytes + commitment `bc7f57370b353f563c1a5fbf612d2e4fdf74d0424bac1c5b3cae60e5c112b7cd` + `0000000000000009` + `0000000000000002` + `0000000000000004` + `000001a322a90800` + `000001a3bd27d000`; expected request ID is `929e3d0dba071ebc834595828284253d5d8f20f152c84442448478e26981b7fb`. Expected bytes come from a direct serializer independent of production implementation. Assert exact configured delay values for routine rotation, unfreeze, and deregistration (`172,800,000 ms` each), recovery (`604,800,000 ms`), and guardian rotation (`1,209,600,000 ms`), including tests proving each action cannot execute one millisecond early.",
+      "original_assertion_sha256": "2816e6ed850a76bfb581d10af6892f18d0ae6099213ec98fa7ab4ce91523f008",
+      "layer": "multiple_separately_reported_layers",
+      "execution": "PENDING",
+      "application": "V2 target only; Slash-positive subcase waits on separate F05 gate; source text preserved"
+    },
+    {
+      "id": "F04-R28",
+      "source": "docs/remediation/m7_f04_owner_recovery_design_r1_20261004/TEST-MATRIX.md",
+      "original_case_number": 28,
+      "original_assertion": "Counter overflow: for each state transition that increments `state_nonce`, set it to `2^64-1` and assert rejection without wrap or output; set `control_epoch`/`guardian_epoch` to `2^64-1` and assert controller/guardian rotation rejects. Reject pending scheduling when base nonce exceeds `2^64-3`, and reject an independently authorized slash while pending if it would consume the last nonce reserved for request completion. Confirm valid values immediately below each bound increment exactly once.",
+      "original_assertion_sha256": "23bf3951cbc204f68d398538c14b7fd00c1fea7625f6af758451252d3003c0f8",
+      "layer": "multiple_separately_reported_layers",
+      "execution": "PENDING",
+      "application": "V2 target only; Slash-positive subcase waits on separate F05 gate; source text preserved"
+    },
+    {
+      "id": "F04-R29",
+      "source": "docs/remediation/m7_f04_owner_recovery_design_r1_20261004/TEST-MATRIX.md",
+      "original_case_number": 29,
+      "original_assertion": "Atomic standalone registration: the standalone policy rejects minting with no registry-script input, with a wrong registry script hash, or with more than one matching registry input; rejects zero matching registry outputs, duplicate matching outputs, a wrong output datum/identity tuple, or an output lacking the minted token. Accept only the same transaction with exactly one designated bootstrap input, exactly one matching registry-script input, one +1 minted token, and exactly one registry-script output with matching inline datum/token. Confirm the registry spend is executed and rejects any non-`RegisterAgent`/invalid redeemer; a passing mint policy alone is insufficient.",
+      "original_assertion_sha256": "2dc412f4175a469db4c85a82d6d3f4ddf3bbc9cf392feae0c26cddbb64611ca4",
+      "layer": "multiple_separately_reported_layers",
+      "execution": "PENDING",
+      "application": "V2 target only; Slash-positive subcase waits on separate F05 gate; source text preserved"
+    },
+    {
+      "id": "F04-R30",
+      "source": "docs/remediation/m7_f04_owner_recovery_design_r1_20261004/TEST-MATRIX.md",
+      "original_case_number": 30,
+      "original_assertion": "Transaction-signature PoP substitution: reject genesis when the founding owner, initial controller, or any one of five guardians is absent from the ledger-validated signer set (one signature covers founder/controller only when their VKHs are equal); reject routine/recovery rotation without the destination controller signer; reject guardian rotation unless all five proposed guardians sign. Reject signatures for a different request ID, identity token, bootstrap reference, destination controller, guardian set, or guardian epoch. Tests use complete ledger-valid contexts and do not model a detached signature as PoP.",
+      "original_assertion_sha256": "3c341b0409e4c03e4e7e7090e52d4a7f80b150724a757383c09367b175323fa7",
+      "layer": "multiple_separately_reported_layers",
+      "execution": "PENDING",
+      "application": "V2 target only; Slash-positive subcase waits on separate F05 gate; source text preserved"
+    },
+    {
+      "id": "F04-R31",
+      "source": "docs/remediation/m7_f04_owner_recovery_design_r1_20261004/TEST-MATRIX.md",
+      "original_case_number": 31,
+      "original_assertion": "DID bounds: accept well-formed UTF-8 values of exactly 32 and 256 bytes; reject 31-byte and 257-byte values and malformed UTF-8. Count encoded bytes without Unicode normalization and verify the u16 length prefix matches the exact accepted byte sequence.",
+      "original_assertion_sha256": "6334047758b6e7f37f162bd8fad33068e3be46103c95d4b6fa1dbd5c26f85a95",
+      "layer": "multiple_separately_reported_layers",
+      "execution": "PENDING",
+      "application": "V2 target only; Slash-positive subcase waits on separate F05 gate; source text preserved"
+    },
+    {
+      "id": "Q01",
+      "layer": "compiled_paired",
+      "assertion": "N.mint and R.RegisterAgent spend evaluate identical body/purposes/redeemers; one alone earns no paired credit",
+      "execution": "PENDING"
+    },
+    {
+      "id": "Q02",
+      "layer": "provenance",
+      "assertion": "synthetic references do not prove anchor origin; require resolved references and P0 issuance evidence",
+      "execution": "PENDING"
+    },
+    {
+      "id": "Q03",
+      "layer": "mutation",
+      "assertion": "remove each guard separately and bind mutant bytes; targeted suite must detect it",
+      "execution": "PENDING"
+    },
+    {
+      "id": "Q04",
+      "layer": "build_provenance",
+      "assertion": "two independent offline source/toolchain builds produce identical applied program and V3 hashes",
+      "execution": "PENDING"
+    },
+    {
+      "id": "Q05",
+      "layer": "compiled_v3_budget",
+      "assertion": "whole transaction scripts, redeemers, datums, fees and body-bound witnesses measured against approved target parameters and reviewed margin",
+      "execution": "PENDING"
+    },
+    {
+      "id": "Q06",
+      "layer": "always_reject_exception",
+      "assertion": "S0 spend, V2 R mint and P0 burn have no same-purpose positive control; prove correct reject attribution and related valid controls",
+      "execution": "PENDING"
+    },
+    {
+      "id": "Q07",
+      "layer": "consumer",
+      "assertion": "anchor is not current authority; resolver and chain association are separate reviewed gates",
+      "execution": "PENDING"
+    },
+    {
+      "id": "Q08",
+      "layer": "compiled_wire",
+      "assertion": "compiled CBOR vectors for V1/V2/seed/pending tags, Bool, Option and OutputReference",
+      "execution": "PENDING"
+    },
+    {
+      "id": "Q09",
+      "layer": "ledger_admission",
+      "assertion": "distinct anchor seeds per bootstrap permitted; conflicting spends cannot both be admitted",
+      "execution": "PENDING"
+    },
+    {
+      "id": "Q10",
+      "layer": "compiled_v3",
+      "assertion": "same DID under distinct bootstraps permitted; no global uniqueness claim",
+      "execution": "PENDING"
+    }
+  ]
+}

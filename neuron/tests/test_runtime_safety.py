@@ -4,7 +4,7 @@ from neuron.runtime_safety import LiveModeSafetyError, is_live_environment
 
 
 def test_local_environment_allows_explicit_mock(monkeypatch):
-    monkeypatch.delenv("VAMS_ENV", raising=False)
+    monkeypatch.setenv("VAMS_ENV", "local")
     monkeypatch.setenv("OMS_MOCK_MODE", "true")
 
     from neuron.sdk.oms_identity import OMSIdentityVerifier
@@ -45,7 +45,7 @@ def test_live_environment_rejects_default_oms_secret(monkeypatch):
 
 
 def test_local_non_mock_clients_require_explicit_api_keys(monkeypatch):
-    monkeypatch.delenv("VAMS_ENV", raising=False)
+    monkeypatch.setenv("VAMS_ENV", "local")
     monkeypatch.delenv("OMS_API_KEY", raising=False)
     monkeypatch.delenv("TRAILS_API_KEY", raising=False)
     monkeypatch.delenv("COINME_API_KEY", raising=False)

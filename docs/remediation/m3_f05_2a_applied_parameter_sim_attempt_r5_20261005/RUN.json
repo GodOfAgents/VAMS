@@ -1,0 +1,118 @@
+{
+  "attempt": {
+    "aiken_sha256": "07f3f927f1a8c71fc61273fdff850d9b98edb28dde207c8a32585991f2c88e79",
+    "aiken_version": "aiken v1.1.21+42babe5",
+    "argv": [
+      "/home/GodOfAgents/vams-evidence/toolchains/python/bin/python3.12",
+      "/home/GodOfAgents/code/VAMS-testnet/scripts/remediation/f05_2a_tx_sim_runner_r3.py",
+      "--aiken",
+      "/home/GodOfAgents/vams-evidence/toolchains/aiken-1.1.21/aiken",
+      "--tx",
+      "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m3_f05_2a_applied_parameter_family_r5_20261005/applied_keys_duplicate/one-guard-mutant-control.tx.cbor",
+      "--raw-inputs",
+      "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m3_f05_2a_applied_parameter_family_r5_20261005/applied_keys_duplicate/one-guard-mutant-control.raw_inputs.cbor",
+      "--raw-outputs",
+      "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m3_f05_2a_applied_parameter_family_r5_20261005/applied_keys_duplicate/one-guard-mutant-control.raw_outputs.cbor",
+      "--policy-id",
+      "1b8e1c1bbc466063dc2602bf2696ec4a4e6cd2f2e6048c2376e5afd5"
+    ],
+    "cwd": "/home/GodOfAgents/code/VAMS-testnet",
+    "guard_removed": "remove_key_uniqueness_order_guard",
+    "label": "applied_keys_duplicate one-guard mutant control through immutable R3 runner",
+    "policy_id": "1b8e1c1bbc466063dc2602bf2696ec4a4e6cd2f2e6048c2376e5afd5",
+    "runner_result": {
+      "cleanup": {
+        "child_reaped": true,
+        "process_group_empty": true,
+        "snapshot_descriptors_closed": true,
+        "status": "clean"
+      },
+      "schema_version": "f05-2a-tx-sim-run-result-r3",
+      "simulator_child_exit": 0,
+      "simulator_result": {
+        "stage": "script_accepted",
+        "target_script_invoked": true
+      },
+      "submitted_sha256": {
+        "raw_inputs": "4b20e2b2cf4bd58b1f6e385c90ffd098d583df69d95fbc7b1fcc2591da72b9fe",
+        "raw_outputs": "ff6527fab75c8c2e175dbc2a4391de063b841a3f2d52d2773d06359467cecbf7",
+        "transaction": "dc7e2ed5088a7d7d10e03c116f408ca99f0324de2f412c40414ba4fe00d257b9"
+      },
+      "submitted_size_bytes": {
+        "raw_inputs": 73,
+        "raw_outputs": 79,
+        "transaction": 5092
+      },
+      "target_mint_binding": {
+        "compiled_script_hash": "1b8e1c1bbc466063dc2602bf2696ec4a4e6cd2f2e6048c2376e5afd5",
+        "expected_policy_id": "1b8e1c1bbc466063dc2602bf2696ec4a4e6cd2f2e6048c2376e5afd5",
+        "policy_ids": [
+          "1b8e1c1bbc466063dc2602bf2696ec4a4e6cd2f2e6048c2376e5afd5"
+        ]
+      },
+      "wrapper_exit_code": 0
+    },
+    "runner_sha256": "3088ade0a316f6af59c04fe3e1675733100b58be826fa22af3c25e40a086ea5c",
+    "submitted_files": {
+      "raw_inputs": {
+        "bytes": 73,
+        "path": "docs/remediation/m3_f05_2a_applied_parameter_family_r5_20261005/applied_keys_duplicate/one-guard-mutant-control.raw_inputs.cbor",
+        "sha256": "4b20e2b2cf4bd58b1f6e385c90ffd098d583df69d95fbc7b1fcc2591da72b9fe"
+      },
+      "raw_outputs": {
+        "bytes": 79,
+        "path": "docs/remediation/m3_f05_2a_applied_parameter_family_r5_20261005/applied_keys_duplicate/one-guard-mutant-control.raw_outputs.cbor",
+        "sha256": "ff6527fab75c8c2e175dbc2a4391de063b841a3f2d52d2773d06359467cecbf7"
+      },
+      "transaction": {
+        "bytes": 5092,
+        "path": "docs/remediation/m3_f05_2a_applied_parameter_family_r5_20261005/applied_keys_duplicate/one-guard-mutant-control.tx.cbor",
+        "sha256": "dc7e2ed5088a7d7d10e03c116f408ca99f0324de2f412c40414ba4fe00d257b9"
+      }
+    },
+    "wrapper_exit_code": 0
+  },
+  "classification": {
+    "interpretation": "paired attribution control; no mutation ledger credit pending independent review",
+    "stage": "script_accepted",
+    "target_script_invoked": true
+  },
+  "credit": {
+    "accepted_mutant_control": true,
+    "ledger_admission": false,
+    "live_network": false,
+    "mutation": null,
+    "negative_case": null,
+    "original_policy": false
+  },
+  "evidence_scope": "local synthetic one-guard mutant control for duplicate-key attribution; no original-policy, ledger-admission, or live-network evidence",
+  "fixture_package": {
+    "case_manifest_sha256": "7c7d3c779ef452df3fd808d1e0465c9eeef855058dfa5c3f5ce961b4b4536caa",
+    "family_manifest_sha256": "3d43acdc634f700c3bc709bae03a7869f26c35cd59941d4be0d94a89ca5c094e",
+    "path": "docs/remediation/m3_f05_2a_applied_parameter_family_r5_20261005",
+    "root_sha256sums_sha256": "ad27af4dd49aac3e8d0ba570468adf5c4fc32e02b5acc3303b2f40b67e5c71f0"
+  },
+  "ledger_effect": {
+    "case_statuses_modified": false,
+    "classification_overlay_modified": false,
+    "mutation_pass": 18,
+    "mutation_pending": 3,
+    "negative_pass": 45,
+    "negative_pending": 10
+  },
+  "paired_negative_attempt": {
+    "negative_policy_id": "d1f886d981117ada5f4e92370e1921c1c3616ce37b558b3fc42b65b9",
+    "negative_transaction_sha256": "4e538bf83ddef70b48c7d3536a8f3ea1daac7151f2f8534667ff541c9f8a52ac",
+    "path": "docs/remediation/m3_f05_2a_applied_parameter_sim_attempt_r4_20261005/RUN.json",
+    "sha256": "c9f8291509a2bbf24ac4ca18dfb241203c5f8aa1c276fd7eed1bdfb637ca2799",
+    "sha256sums_sha256": "c0b9f6b751a22d91288f2c41d276d7dddc49a1c025d8428528a2c9a45deb582a"
+  },
+  "r5_family_manifest_sha256": "3d43acdc634f700c3bc709bae03a7869f26c35cd59941d4be0d94a89ca5c094e",
+  "schema_version": "f05-2a-applied-parameter-mutant-control-attempt-r5",
+  "security": {
+    "ephemeral_funding_keys_only": true,
+    "private_key_material_persisted": false
+  },
+  "status": "one-guard mutant accepted at Mint[0]; attribution and case/mutation credit pending independent paired review",
+  "stop_rule": "Only the applied_keys_duplicate mutant control ran in this attempt; no other case or control ran."
+}

@@ -1,0 +1,58 @@
+{
+  "checkout": {
+    "dirty_tree": true,
+    "head": "829ab544571f12efe50ecb5740f129c8acb3e16f"
+  },
+  "evidence_id": "m7_pip_audit_local_r1",
+  "execution": {
+    "network": "Enabled only for PyPI vulnerability/package metadata queries. No packages or tools installed; cache path was under temporary /tmp.",
+    "outer_command": "bwrap --ro-bind / / --tmpfs /tmp --dev-bind /dev /dev --proc /proc --bind /home/GodOfAgents/code/VAMS-testnet/docs/remediation/m7_pip_audit_local_r1 /home/GodOfAgents/code/VAMS-testnet/docs/remediation/m7_pip_audit_local_r1 --chdir /home/GodOfAgents/code/VAMS-testnet /home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python -B /home/GodOfAgents/code/VAMS-testnet/docs/remediation/m7_pip_audit_local_r1/run_pip_audit.py",
+    "raw_output_retained": false,
+    "sanitized_result": "RESULT.json",
+    "sanitized_result_sha256": "c5cc50a88a41da145898a0d64cefa32ddb8971aa218aefb9cac8ebcf847a8598",
+    "scanner_commands": [
+      {
+        "command": "pip-audit -r neuron/requirements.txt --format json --progress-spinner off --cache-dir /tmp/vams-pip-audit-cache --timeout 30",
+        "dependency_count": 62,
+        "exit_code": 0,
+        "raw_output_sha256": "aa7106f7c968470df2b562a10bfb69c801480ce0553183b23f7a53833b517043",
+        "report_parse_ok": true,
+        "vulnerability_count": 0
+      },
+      {
+        "command": "pip-audit -r gateway/requirements.txt --format json --progress-spinner off --cache-dir /tmp/vams-pip-audit-cache --timeout 30",
+        "dependency_count": 17,
+        "exit_code": 0,
+        "raw_output_sha256": "7632d6b50e972620091726d4f1d48f367e8060266debfd41ec37e01428fa6696",
+        "report_parse_ok": true,
+        "vulnerability_count": 0
+      }
+    ],
+    "wrapper": "run_pip_audit.py",
+    "wrapper_exit_code": 0,
+    "wrapper_sha256": "d2d1fff87487856bae52a2d144a14218c7ad61f0264b3fd77c6ffc7596a4f9da"
+  },
+  "recorded_at_utc": "2026-10-03T04:34:54Z",
+  "requirements": {
+    "gateway": {
+      "path": "gateway/requirements.txt",
+      "sha256": "c442d01c246812c909fd28f6cf90c14c5e17921597d409c0492fbbf808e0f0b3"
+    },
+    "neuron": {
+      "path": "neuron/requirements.txt",
+      "sha256": "a7563450beb54994461ebc0057ff4da02c9754c2b1dcf7690c533b84cb75734d"
+    }
+  },
+  "tool": {
+    "name": "pip-audit",
+    "path": "/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/pip-audit",
+    "python": "3.12.14",
+    "sha256": "310dabedfa526a73c82ac3e0f80a8af761aa3ebf2ef4026c49d06352e7691b95",
+    "version": "2.10.1"
+  },
+  "workflow": {
+    "configured_requirement_scan": "pip-audit -r neuron/requirements.txt",
+    "path": ".github/workflows/security-gates.yml",
+    "sha256": "baf53503673b70c5185f654f8f694f1feaf98af68ee56e29c83c01ee0cf0593c"
+  }
+}

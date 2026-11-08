@@ -1,0 +1,445 @@
+{
+  "schema_version": "m3.2a-r7-topology-v1",
+  "status": "design-only",
+  "transitions": [
+    {
+      "id": "genesis",
+      "transition": "Genesis",
+      "enforcement": "script_and_deployment_envelope",
+      "inputs": {
+        "governed": 0,
+        "auxiliary_regular": 1,
+        "authority_reference": 0,
+        "allowed_reference_scripts": 0,
+        "collateral": 1
+      },
+      "collateral_return": {
+        "without_change": 0,
+        "with_change": 0
+      },
+      "outputs": {
+        "without_change": 1,
+        "with_change": 2
+      },
+      "minted_assets": [
+        "authority_nft"
+      ],
+      "burned_assets": [],
+      "datums": [
+        "GovernanceConfigV1"
+      ],
+      "redeemers": [
+        "Genesis"
+      ],
+      "signers": {
+        "authority_members": 0,
+        "proposer": 0,
+        "voter": 0,
+        "distinct": 0
+      },
+      "script_witnesses": [
+        "authority_validator",
+        "authority_policy"
+      ],
+      "one_over_limit_mutations": [
+        "inputs",
+        "outputs",
+        "assets",
+        "datum_bytes",
+        "signers"
+      ]
+    },
+    {
+      "id": "create",
+      "transition": "Create",
+      "enforcement": "script_and_deployment_envelope",
+      "inputs": {
+        "governed": 1,
+        "auxiliary_regular": 1,
+        "authority_reference": 0,
+        "allowed_reference_scripts": 0,
+        "collateral": 1
+      },
+      "collateral_return": {
+        "without_change": 0,
+        "with_change": 0
+      },
+      "outputs": {
+        "without_change": 2,
+        "with_change": 3
+      },
+      "minted_assets": [
+        "proposal_nft"
+      ],
+      "burned_assets": [],
+      "datums": [
+        "AuthorityDatumV1",
+        "ProposalDatumV1"
+      ],
+      "redeemers": [
+        "CreateProposal"
+      ],
+      "signers": {
+        "authority_members": 3,
+        "proposer": 1,
+        "voter": 0,
+        "distinct": 3
+      },
+      "script_witnesses": [
+        "authority_validator",
+        "governor_validator",
+        "proposal_policy"
+      ],
+      "one_over_limit_mutations": [
+        "inputs",
+        "outputs",
+        "assets",
+        "datum_bytes",
+        "signers"
+      ]
+    },
+    {
+      "id": "vote",
+      "transition": "Vote",
+      "enforcement": "script_and_deployment_envelope",
+      "inputs": {
+        "governed": 1,
+        "auxiliary_regular": 1,
+        "authority_reference": 1,
+        "allowed_reference_scripts": 0,
+        "collateral": 1
+      },
+      "collateral_return": {
+        "without_change": 0,
+        "with_change": 0
+      },
+      "outputs": {
+        "without_change": 2,
+        "with_change": 3
+      },
+      "minted_assets": [
+        "receipt_nft"
+      ],
+      "burned_assets": [],
+      "datums": [
+        "AuthorityDatumV1",
+        "ProposalDatumV1"
+      ],
+      "redeemers": [
+        "Vote"
+      ],
+      "signers": {
+        "authority_members": 0,
+        "proposer": 0,
+        "voter": 1,
+        "distinct": 1
+      },
+      "script_witnesses": [
+        "governor_validator",
+        "receipt_policy"
+      ],
+      "one_over_limit_mutations": [
+        "inputs",
+        "outputs",
+        "assets",
+        "datum_bytes",
+        "signers"
+      ]
+    },
+    {
+      "id": "finalize-passed",
+      "transition": "Finalize-Passed",
+      "enforcement": "script_and_deployment_envelope",
+      "inputs": {
+        "governed": 1,
+        "auxiliary_regular": 1,
+        "authority_reference": 1,
+        "allowed_reference_scripts": 0,
+        "collateral": 1
+      },
+      "collateral_return": {
+        "without_change": 0,
+        "with_change": 0
+      },
+      "outputs": {
+        "without_change": 1,
+        "with_change": 2
+      },
+      "minted_assets": [],
+      "burned_assets": [],
+      "datums": [
+        "AuthorityDatumV1",
+        "ProposalDatumV1"
+      ],
+      "redeemers": [
+        "FinalizePassed"
+      ],
+      "signers": {
+        "authority_members": 0,
+        "proposer": 0,
+        "voter": 0,
+        "distinct": 0
+      },
+      "script_witnesses": [
+        "governor_validator"
+      ],
+      "one_over_limit_mutations": [
+        "inputs",
+        "outputs",
+        "assets",
+        "datum_bytes",
+        "signers"
+      ]
+    },
+    {
+      "id": "finalize-rejected",
+      "transition": "Finalize-Rejected",
+      "enforcement": "script_and_deployment_envelope",
+      "inputs": {
+        "governed": 1,
+        "auxiliary_regular": 1,
+        "authority_reference": 0,
+        "allowed_reference_scripts": 0,
+        "collateral": 1
+      },
+      "collateral_return": {
+        "without_change": 0,
+        "with_change": 0
+      },
+      "outputs": {
+        "without_change": 9,
+        "with_change": 10
+      },
+      "minted_assets": [],
+      "burned_assets": [
+        "proposal_nft",
+        "all_receipts"
+      ],
+      "datums": [
+        "ProposalDatumV1",
+        "VoteLockRecordV1"
+      ],
+      "redeemers": [
+        "FinalizeRejected"
+      ],
+      "signers": {
+        "authority_members": 0,
+        "proposer": 0,
+        "voter": 0,
+        "distinct": 0
+      },
+      "script_witnesses": [
+        "governor_validator",
+        "proposal_policy",
+        "receipt_policy"
+      ],
+      "one_over_limit_mutations": [
+        "inputs",
+        "outputs",
+        "assets",
+        "datum_bytes",
+        "signers"
+      ]
+    },
+    {
+      "id": "cancel",
+      "transition": "Cancel",
+      "enforcement": "script_and_deployment_envelope",
+      "inputs": {
+        "governed": 1,
+        "auxiliary_regular": 1,
+        "authority_reference": 0,
+        "allowed_reference_scripts": 0,
+        "collateral": 1
+      },
+      "collateral_return": {
+        "without_change": 0,
+        "with_change": 0
+      },
+      "outputs": {
+        "without_change": 9,
+        "with_change": 10
+      },
+      "minted_assets": [],
+      "burned_assets": [
+        "proposal_nft",
+        "all_receipts"
+      ],
+      "datums": [
+        "ProposalDatumV1",
+        "VoteLockRecordV1"
+      ],
+      "redeemers": [
+        "Cancel"
+      ],
+      "signers": {
+        "authority_members": 0,
+        "proposer": 1,
+        "voter": 0,
+        "distinct": 1
+      },
+      "script_witnesses": [
+        "governor_validator",
+        "proposal_policy",
+        "receipt_policy"
+      ],
+      "one_over_limit_mutations": [
+        "inputs",
+        "outputs",
+        "assets",
+        "datum_bytes",
+        "signers"
+      ]
+    },
+    {
+      "id": "queue",
+      "transition": "Queue",
+      "enforcement": "script_and_deployment_envelope",
+      "inputs": {
+        "governed": 2,
+        "auxiliary_regular": 1,
+        "authority_reference": 0,
+        "allowed_reference_scripts": 0,
+        "collateral": 1
+      },
+      "collateral_return": {
+        "without_change": 0,
+        "with_change": 0
+      },
+      "outputs": {
+        "without_change": 10,
+        "with_change": 11
+      },
+      "minted_assets": [
+        "intent_nft"
+      ],
+      "burned_assets": [
+        "proposal_nft",
+        "all_receipts"
+      ],
+      "datums": [
+        "AuthorityDatumV1",
+        "ProposalDatumV1",
+        "IntentDatumV1",
+        "VoteLockRecordV1"
+      ],
+      "redeemers": [
+        "Queue"
+      ],
+      "signers": {
+        "authority_members": 3,
+        "proposer": 0,
+        "voter": 0,
+        "distinct": 3
+      },
+      "script_witnesses": [
+        "authority_validator",
+        "governor_validator",
+        "timelock_validator",
+        "intent_policy",
+        "receipt_policy"
+      ],
+      "one_over_limit_mutations": [
+        "inputs",
+        "outputs",
+        "assets",
+        "datum_bytes",
+        "signers"
+      ]
+    },
+    {
+      "id": "cancelintent",
+      "transition": "CancelIntent",
+      "enforcement": "script_and_deployment_envelope",
+      "inputs": {
+        "governed": 1,
+        "auxiliary_regular": 1,
+        "authority_reference": 0,
+        "allowed_reference_scripts": 0,
+        "collateral": 1
+      },
+      "collateral_return": {
+        "without_change": 0,
+        "with_change": 0
+      },
+      "outputs": {
+        "without_change": 1,
+        "with_change": 2
+      },
+      "minted_assets": [],
+      "burned_assets": [
+        "intent_nft"
+      ],
+      "datums": [
+        "IntentDatumV1"
+      ],
+      "redeemers": [
+        "CancelIntent"
+      ],
+      "signers": {
+        "authority_members": 3,
+        "proposer": 0,
+        "voter": 0,
+        "distinct": 3
+      },
+      "script_witnesses": [
+        "timelock_validator",
+        "intent_policy"
+      ],
+      "one_over_limit_mutations": [
+        "inputs",
+        "outputs",
+        "assets",
+        "datum_bytes",
+        "signers"
+      ]
+    },
+    {
+      "id": "expireintent",
+      "transition": "ExpireIntent",
+      "enforcement": "script_and_deployment_envelope",
+      "inputs": {
+        "governed": 1,
+        "auxiliary_regular": 1,
+        "authority_reference": 0,
+        "allowed_reference_scripts": 0,
+        "collateral": 1
+      },
+      "collateral_return": {
+        "without_change": 0,
+        "with_change": 0
+      },
+      "outputs": {
+        "without_change": 1,
+        "with_change": 2
+      },
+      "minted_assets": [],
+      "burned_assets": [
+        "intent_nft"
+      ],
+      "datums": [
+        "IntentDatumV1"
+      ],
+      "redeemers": [
+        "ExpireIntent"
+      ],
+      "signers": {
+        "authority_members": 0,
+        "proposer": 0,
+        "voter": 0,
+        "distinct": 0
+      },
+      "script_witnesses": [
+        "timelock_validator",
+        "intent_policy"
+      ],
+      "one_over_limit_mutations": [
+        "inputs",
+        "outputs",
+        "assets",
+        "datum_bytes",
+        "signers"
+      ]
+    }
+  ]
+}

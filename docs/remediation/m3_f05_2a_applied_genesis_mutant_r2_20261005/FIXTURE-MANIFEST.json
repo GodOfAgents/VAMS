@@ -1,0 +1,106 @@
+{
+  "artifacts": {
+    "MUTANT-SOURCE.patch": {
+      "bytes": 400,
+      "sha256": "fd6f06b112efebd2b63833d84d77b5611534fd1ef3268886859f3122e2e5ca23"
+    },
+    "R5-exact-negative-redeemer.cbor": {
+      "bytes": 350,
+      "sha256": "10165e48a2b777b856c31d815fdcea91d2d5786740b5157271e74a998fc051d4"
+    },
+    "one-guard-mutant-control.applied-policy.cbor": {
+      "bytes": 3395,
+      "sha256": "bcb691e487db3b30b0d25167d514e2f65f31de08d73b5f4aee0c29dd05da8fec"
+    },
+    "one-guard-mutant-control.raw_inputs.cbor": {
+      "bytes": 73,
+      "sha256": "4b20e2b2cf4bd58b1f6e385c90ffd098d583df69d95fbc7b1fcc2591da72b9fe"
+    },
+    "one-guard-mutant-control.raw_outputs.cbor": {
+      "bytes": 79,
+      "sha256": "7816fe012b4c206ed7cdbace0c8eaded68becf9e035d44906612b14ca39fbf03"
+    },
+    "one-guard-mutant-control.tx.cbor": {
+      "bytes": 5032,
+      "sha256": "7a590ae68203a4cbc0cddf3959c645d5bbd6e56a1c523b2949e05838008f06e0"
+    }
+  },
+  "assertion": {
+    "id": "applied_genesis_parameter",
+    "mutation": "compile_with_different_genesis_ref_keep_transaction"
+  },
+  "case_id": "applied_genesis_parameter",
+  "credit": {
+    "case": false,
+    "ledger_admission": false,
+    "live_network": false,
+    "mutation": false,
+    "original_policy": false
+  },
+  "entrypoint": "f05_authority_policy.f05_authority_policy.mint / Mint[0]",
+  "exact_r5_binding": {
+    "R6_positive_control": {
+      "path": "docs/remediation/m3_f05_2a_applied_parameter_sim_attempt_r6_20261005/RUN.json",
+      "sha256": "457cb0ec423477df1d232501506e713f3ce7800210635b35535abff0b2417c8e",
+      "stage": "script_accepted"
+    },
+    "R7_negative_control": {
+      "path": "docs/remediation/m3_f05_2a_applied_parameter_sim_attempt_r7_20261005/RUN.json",
+      "sha256": "651fc64426b0968828a597564b48ae4a6dbba68b0f5d516d37f28b8bc5924d7e",
+      "stage": "compiled_evaluation"
+    },
+    "case_manifest": "docs/remediation/m3_f05_2a_applied_parameter_family_r5_20261005/applied_genesis_parameter/FIXTURE-MANIFEST.json",
+    "case_manifest_sha256": "594e9fe401253d4fa4cae33f71861ae5b45502d7098635da380c8618a96f23a6",
+    "genesis_ref_file": "docs/remediation/m3_f05_2a_applied_parameter_family_r5_20261005/applied_genesis_parameter/negative.genesis_ref.cbor",
+    "genesis_ref_sha256": "51f08c55f440a2116b42e5283fc76d8be4d707788d3bc765023620199af45c75",
+    "initial_keys_file": "docs/remediation/m3_f05_2a_applied_parameter_family_r5_20261005/applied_genesis_parameter/negative.initial_keys.cbor",
+    "initial_keys_sha256": "9b604d528d46f510b808d00ad985e498522a7d60595823ce016adb647ff9556f",
+    "negative_transaction_sha256": "67a3a40a149c5972720b23c18d37bb65f4ead04f0eaae421c3f3aa6440cb1e6b",
+    "normal_policy_file": "docs/remediation/m3_f05_2a_applied_parameter_family_r5_20261005/applied_genesis_parameter/negative.applied-policy.cbor",
+    "normal_policy_id": "fc305fd82585607dc1998425cbe3bce8f43667e1ac161c448098c058",
+    "normal_policy_sha256": "66d372129d322008e8b095f87b0b7726d3020868954361578a774f4afe8e6c5d"
+  },
+  "mutant": {
+    "PoP_signatures_preserved_from_R5": true,
+    "R5_negative_redeemer_sha256": "10165e48a2b777b856c31d815fdcea91d2d5786740b5157271e74a998fc051d4",
+    "mutation": "remove_seed_guard",
+    "policy_id": "1d20d3c373cd806fbbf9634a4840ce2cfcbeccd1ae9fd89a8ccbee83",
+    "program_sha256": "bcb691e487db3b30b0d25167d514e2f65f31de08d73b5f4aee0c29dd05da8fec",
+    "status": "not executed",
+    "transaction_sha256": "7a590ae68203a4cbc0cddf3959c645d5bbd6e56a1c523b2949e05838008f06e0",
+    "validation": {
+      "ada_conservation": true,
+      "body_hash": "84809b0ba2d21dff0f50b3d37b4be682b285cd7b2640a05ddc7bdd9f2cdc945c",
+      "funding_signatures": 2,
+      "native_asset_conservation": true,
+      "private_keys_persisted": false,
+      "valid_body_bound_ephemeral_signatures": true
+    }
+  },
+  "normal_policy_recompile": {
+    "code_sha256": "66d372129d322008e8b095f87b0b7726d3020868954361578a774f4afe8e6c5d",
+    "exact_R5_code_and_ID_match": true,
+    "policy_id": "fc305fd82585607dc1998425cbe3bce8f43667e1ac161c448098c058"
+  },
+  "original_case_id_preserved": true,
+  "schema_version": "f05-2a-applied-genesis-mutant-candidate-r2",
+  "scope": "synthetic alternate applied policy only; no original-policy, ledger-admission, or live-network credit",
+  "source_mutation": {
+    "changed_lines": [
+      "-  expect count_seed_input(tx.inputs, genesis_ref) == 1",
+      "+  expect True"
+    ],
+    "mutant_source_sha256": "ade9f13f6fa321d9c40df3395f5afe358312151647d7f9ce073ed77f81b2ad86",
+    "name": "remove_seed_guard",
+    "original_source_sha256": "e9d3ac9cbb14b9e7693dc12430234694c82eb52e61d176e1e39992fb9cbeafa8",
+    "patch_sha256": "fd6f06b112efebd2b63833d84d77b5611534fd1ef3268886859f3122e2e5ca23"
+  },
+  "status": "candidate-awaiting-independent-byte-review; tx-sim-not-run; case-and-mutation-PENDING",
+  "toolchain": {
+    "aiken": "aiken v1.1.21+42babe5",
+    "aiken_sha256": "07f3f927f1a8c71fc61273fdff850d9b98edb28dde207c8a32585991f2c88e79",
+    "mutant_recompiled": true,
+    "python": "3.12.14",
+    "simulation": "not run"
+  }
+}

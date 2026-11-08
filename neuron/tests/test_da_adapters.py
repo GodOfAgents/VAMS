@@ -126,7 +126,8 @@ class TestEigenDAAdapter:
         receipt = await eigenda_adapter.submit_blob(sample_data)
         assert isinstance(receipt, DAReceipt)
         assert receipt.protocol == DAProtocol.EIGEN_DA
-        assert receipt.blob_id.startswith("eigenda:")
+        assert receipt.blob_id.startswith("simulated:eigenda:")
+        assert receipt.commitment.startswith("simulated:sha256:")
 
     @pytest.mark.asyncio
     async def test_verify_stub_never_qualifies_as_evidence(self, eigenda_adapter, sample_data):
@@ -147,7 +148,8 @@ class TestAvailAdapter:
         receipt = await avail_adapter.submit_blob(sample_data)
         assert isinstance(receipt, DAReceipt)
         assert receipt.protocol == DAProtocol.AVAIL
-        assert receipt.blob_id.startswith("avail:")
+        assert receipt.blob_id.startswith("simulated:avail:")
+        assert receipt.commitment.startswith("simulated:sha256:")
 
     @pytest.mark.asyncio
     async def test_verify_stub_never_qualifies_as_evidence(self, avail_adapter, sample_data):
@@ -168,7 +170,10 @@ class TestCrossAdapter:
         ]
         for adapter in adapters:
             receipt = await adapter.submit_blob(sample_data)
-            assert receipt.commitment.startswith("0x")
+            if receipt.protocol in {DAProtocol.EIGEN_DA, DAProtocol.AVAIL}:
+                assert receipt.commitment.startswith("simulated:sha256:")
+            else:
+                assert receipt.commitment.startswith("0x")
             assert receipt.height > 0
             assert receipt.blob_id != ""
             assert receipt.verified is False

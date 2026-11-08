@@ -1,167 +1,84 @@
-//// VAMS Governor Validator
-////
-//// On-chain governance with quadratic voting for the VAMS protocol.
-//// Each proposal is a separate UTXO with a ProposalDatum.
-////
-//// Flow:
-////   1. CreateProposal → mints a new proposal UTXO
-////   2. Vote → spends + recreates proposal UTXO with updated tallies
-////   3. Execute → consumes passed proposal, creates timelock intent
-////   4. Cancel → proposer burns proposal before deadline
-////
-//// AUDIT FIXES APPLIED:
-////   AK01 — Vote weight now verified against on-chain VAMS token balance
-////   AK03 — has_valid_continuing_output now inspects tx.outputs
-
 use aiken/collection/list
-use aiken/interval.{Finite}
-use cardano/address.{Address, Script, VerificationKey}
-use cardano/assets.{PolicyId}
-use cardano/transaction.{InlineDatum, Output, OutputReference, Transaction}
-use vams/types.{
-  Active, Cancel, Execute, GovernorRedeemer, Pending, ProposalDatum, Vote,
+use cardano/address.{Script}
+use cardano/assets
+use cardano/transaction.{InlineDatum, Input, OutputReference, Transaction}
+use vams/governance.{
+  bounded_tx, config_valid, finite_after, finite_before, finite_interval, isqrt,
+  max_voters, proposal_immutable,
+  unique_bytes, valid_domain, valid_hash, valid_lock, valid_vkh,
 }
-use vams/utils.{has_deadline_passed, is_signed_by, isqrt}
+use vams/types.{
+  AdvanceIntentNonce, AdvanceProposalNonce, AuthorityDatumV1, AuthorityRedeemer,
+  Cancel, CreateProposal, FinalizePassed, FinalizeRejected, Genesis,
+  GovernorRedeemer, ProposalCancelled, ProposalDatumV1, ProposalPassed,
+  ProposalPending, ProposalRejected, ProposalStatusV1, Queue, Vote,
+  VoteLockRecordV1,
+}
 
-// ═══════════════════ Constants ═══════════════════
-// Constants min_proposal_stake, min_voting_period_ms, and default_quorum 
-// have been parameterized.
-
-// ═══════════════════ Validator ═══════════════════
-
-/// AUDIT FIX: AK01 — Added vams_policy_id and vams_asset_name as
-/// validator parameters so we can look up voter's on-chain VAMS balance.
-/// AK08 — Added timelock_script_hash to verify bridging execution output.
-validator governor(
-  vams_policy_id: PolicyId,
-  vams_asset_name: ByteArray,
-  timelock_script_hash: ByteArray,
-  _min_proposal_stake: Int,
-  _min_voting_period_ms: Int,
-  _default_quorum: Int,
+validator authority_validator(
+  authority_policy_id: ByteArray,
+  authority_asset_name: ByteArray,
 ) {
   spend(
-    datum_opt: Option<ProposalDatum>,
-    redeemer: GovernorRedeemer,
+    datum_opt: Option<AuthorityDatumV1>,
+    redeemer: AuthorityRedeemer,
     own_ref: OutputReference,
     tx: Transaction,
   ) {
-    // Datum must exist for spending
-    expect Some(datum) = datum_opt
-
-    // Resolve our own address from the spent input
-    let own_address = resolve_own_address(tx, own_ref)
-
+    expect Some(before) = datum_opt
+    expect bounded_tx(tx)
+    expect Some(own_input) =
+      list.find(tx.inputs, fn(input) { input.output_reference == own_ref })
+    expect
+      assets.quantity_of(
+        own_input.output.value,
+        authority_policy_id,
+        authority_asset_name,
+      ) == 1
+    expect
+      list.length(
+        list.filter(
+          tx.inputs,
+          fn(input) {
+            assets.quantity_of(
+              input.output.value,
+              authority_policy_id,
+              authority_asset_name,
+            ) == 1
+          },
+        ),
+      ) == 1
     when redeemer is {
-      // ── Vote on existing proposal ──
-      Vote { support, weight } -> {
-        // Proposal must be Pending or Active
-        expect datum.status == Pending || datum.status == Active
-
-        // Extract current time from validity range
-        expect Finite(current_time) = tx.validity_range.lower_bound.bound_type
-
-        // Deadline must not have passed
-        expect !has_deadline_passed(datum.deadline, current_time)
-
-        // Voter must have signed the transaction
-        let voter_bytes = get_first_signatory(tx)
-        expect is_signed_by(tx.extra_signatories, voter_bytes)
-
-        // Voter must not have already voted
-        expect !list.has(datum.voters, voter_bytes)
-
-        // ── AUDIT FIX: AK01 ──
-        // Verify weight against on-chain VAMS token balance.
-        // Sum voter's VAMS tokens from all transaction inputs they own.
-        let voter_balance =
-          get_voter_vams_balance(
-            tx,
-            voter_bytes,
-            vams_policy_id,
-            vams_asset_name,
-          )
-
-        // Weight must equal isqrt(voter_balance) — quadratic voting
-        expect weight == isqrt(voter_balance)
-        expect weight > 0
-
-        // Verify the output recreates the proposal with updated votes
-        let expected_for =
-          if support {
-            datum.for_votes + weight
-          } else {
-            datum.for_votes
-          }
-        let expected_against =
-          if !support {
-            datum.against_votes + weight
-          } else {
-            datum.against_votes
-          }
-
-        // ── AUDIT FIX: AK03 ──
-        // Must produce a continuing output at our own address with updated datum
+      AdvanceProposalNonce -> {
+        expect Some(datum) = authority_continuation(tx, own_input)
+        expect config_valid(before.config)
+        expect config_valid(datum.config)
+        expect datum.config.version == before.config.version
         expect
-          has_valid_continuing_output(
-            tx.outputs,
-            own_address,
-            datum.id,
-            expected_for,
-            expected_against,
-            datum,
-            voter_bytes,
-          )
-
-        True
-      }
-
-      // ── Execute a passed proposal ──
-      Execute -> {
-        expect Finite(current_time) = tx.validity_range.lower_bound.bound_type
-
-        // Deadline must have passed
-        expect has_deadline_passed(datum.deadline, current_time)
-
-        // Must have met quorum
-        let total_votes = datum.for_votes + datum.against_votes
-        expect total_votes >= datum.quorum
-
-        // Must have majority
-        expect datum.for_votes > datum.against_votes
-
-        // Status must be Pending or Active (not already executed)
-        expect datum.status == Pending || datum.status == Active
-
-        // ── AUDIT FIX: AK08 ──
-        // Ensure a Timelock intent UTXO is created.
+          datum.config.authority_policy_id == before.config.authority_policy_id
+        expect datum.config.members == before.config.members
+        expect datum.config.threshold == before.config.threshold
         expect
-          list.any(
-            tx.outputs,
-            fn(out) {
-              when out.address.payment_credential is {
-                Script(hash) -> hash == timelock_script_hash
-                _ -> False
-              }
-            },
-          )
-
+          datum.config.next_proposal_nonce == before.config.next_proposal_nonce + 1
+        expect datum.config.next_intent_nonce == before.config.next_intent_nonce
         True
       }
-
-      // ── Cancel a proposal (proposer only) ──
-      Cancel -> {
-        // Only the proposer can cancel
-        expect is_signed_by(tx.extra_signatories, datum.proposer)
-
-        // Can only cancel if still Pending or Active
-        expect datum.status == Pending || datum.status == Active
-
+      AdvanceIntentNonce -> {
+        expect Some(datum) = authority_continuation(tx, own_input)
+        expect config_valid(before.config)
+        expect config_valid(datum.config)
+        expect datum.config.version == before.config.version
+        expect
+          datum.config.authority_policy_id == before.config.authority_policy_id
+        expect datum.config.members == before.config.members
+        expect datum.config.threshold == before.config.threshold
+        expect
+          datum.config.next_proposal_nonce == before.config.next_proposal_nonce
+        expect
+          datum.config.next_intent_nonce == before.config.next_intent_nonce + 1
         True
       }
-
-      // CreateProposal is handled at the minting policy level
-      _ -> False
+      Genesis -> False
     }
   }
 
@@ -170,86 +87,172 @@ validator governor(
   }
 }
 
-// ═══════════════════ Helper Functions ═══════════════════
-
-/// Get the first signatory from a transaction
-fn get_first_signatory(tx: Transaction) -> ByteArray {
-  expect [first, ..] = tx.extra_signatories
-  first
-}
-
-/// Resolve our own script address from the spent input reference
-fn resolve_own_address(tx: Transaction, own_ref: OutputReference) -> Address {
-  expect Some(own_input) =
-    list.find(tx.inputs, fn(input) { input.output_reference == own_ref })
-  own_input.output.address
-}
-
-/// AUDIT FIX: AK01 — Sum the voter's VAMS token balance from tx inputs.
-/// Finds all inputs signed by the voter that contain VAMS tokens.
-fn get_voter_vams_balance(
-  tx: Transaction,
-  voter_vkh: ByteArray,
-  policy_id: PolicyId,
-  asset_name: ByteArray,
-) -> Int {
-  list.foldl(
-    tx.inputs,
-    0,
-    fn(input, acc) {
-      // Check if this input is owned by the voter (payment credential matches)
-      let is_voter_input =
-        when input.output.address.payment_credential is {
-          VerificationKey(hash) -> hash == voter_vkh
-          _ -> False
-        }
-      if is_voter_input {
-        acc + assets.quantity_of(input.output.value, policy_id, asset_name)
-      } else {
-        acc
+validator governor_validator {
+  spend(
+    datum_opt: Option<ProposalDatumV1>,
+    redeemer: GovernorRedeemer,
+    own_ref: OutputReference,
+    tx: Transaction,
+  ) {
+    expect Some(before) = datum_opt
+    expect bounded_tx(tx)
+    expect finite_interval(tx)
+    expect valid_proposal(before)
+    expect Some(own_input) =
+      list.find(tx.inputs, fn(input) { input.output_reference == own_ref })
+    expect Script(_) = own_input.output.address.payment_credential
+    when redeemer is {
+      CreateProposal -> False
+      Vote { support, locked_vams } -> {
+        expect before.status == ProposalPending
+        expect list.length(before.locks) < max_voters
+        expect
+          !list.any(
+            before.locks,
+            fn(lock) {
+              when tx.extra_signatories is {
+                [signer, ..] -> lock.voter_vkh == signer
+                _ -> False
+              }
+            },
+          )
+        expect [voter, ..] = tx.extra_signatories
+        expect valid_vkh(voter)
+        expect list.has(tx.extra_signatories, voter)
+        expect locked_vams > 0
+        expect locked_vams <= 1_000_000_000
+        expect isqrt(locked_vams) > 0
+        expect finite_before(tx, before.deadline)
+        expect valid_vote_continuation(tx, own_input, before, support, locked_vams, voter)
+        True
       }
-    },
+      FinalizePassed -> {
+        expect before.status == ProposalPending
+        expect finite_after(tx, before.deadline)
+        expect before.yes_weight + before.no_weight >= before.quorum
+        expect before.yes_weight > before.no_weight
+        expect valid_status_continuation(tx, own_input, before, ProposalPassed)
+        True
+      }
+      FinalizeRejected -> {
+        expect before.status == ProposalPending
+        expect finite_after(tx, before.deadline)
+        expect
+          before.yes_weight + before.no_weight < before.quorum || before.yes_weight <= before.no_weight
+        expect valid_status_continuation(tx, own_input, before, ProposalRejected)
+        True
+      }
+      Cancel -> {
+        expect before.status == ProposalPending
+        expect finite_before(tx, before.deadline)
+        expect list.has(tx.extra_signatories, before.proposer_vkh)
+        expect valid_status_continuation(tx, own_input, before, ProposalCancelled)
+        True
+      }
+      Queue -> {
+        expect before.status == ProposalPassed
+        expect finite_interval(tx)
+        expect list.length(tx.extra_signatories) <= 5
+        expect list.length(tx.inputs) >= 2
+        True
+      }
+    }
+  }
+
+  else(_) {
+    fail
+  }
+}
+
+fn valid_proposal(datum: ProposalDatumV1) -> Bool {
+  datum.version == 1 && valid_hash(datum.proposal_asset) && datum.nonce >= 0 && valid_vkh(
+    datum.proposer_vkh,
+  ) && valid_hash(datum.description_hash) && valid_hash(datum.action_hash) && valid_domain(
+    datum.target_domain,
+  ) && datum.policy_epoch >= 0 && datum.quorum > 0 && datum.deadline >= 0 && datum.yes_weight >= 0 && datum.no_weight >= 0 && list.length(
+    datum.locks,
+  ) <= max_voters && unique_locks(datum.locks) && list.all(
+    datum.locks,
+    valid_lock,
   )
 }
 
-/// AUDIT FIX: AK03 — Now actually inspects tx.outputs to verify
-/// the continuing output has the correctly updated datum.
-fn has_valid_continuing_output(
-  outputs: List<Output>,
-  own_address: Address,
-  proposal_id: Int,
-  expected_for: Int,
-  expected_against: Int,
-  original: ProposalDatum,
-  voter_bytes: ByteArray,
+fn unique_locks(locks: List<VoteLockRecordV1>) -> Bool {
+  let voters = list.map(locks, fn(lock) { lock.voter_vkh })
+  unique_bytes(voters)
+}
+
+fn valid_vote_continuation(
+  tx: Transaction,
+  own_input: Input,
+  before: ProposalDatumV1,
+  support: Bool,
+  locked: Int,
+  voter: ByteArray,
 ) -> Bool {
-  // Find the continuing output at our own validator address
-  when list.find(outputs, fn(output) { output.address == own_address }) is {
-    Some(output) -> {
-      // Extract and verify the inline datum
-      expect InlineDatum(raw_datum) = output.datum
-      expect updated_datum: ProposalDatum = raw_datum
-      // Verify state transition correctness
-      updated_datum.id == proposal_id && updated_datum.for_votes == expected_for && updated_datum.against_votes == expected_against && list.has(
-        updated_datum.voters,
-        voter_bytes,
-      ) && list.length(updated_datum.voters) == list.length(original.voters) + 1 && updated_datum.proposer == original.proposer && updated_datum.quorum == original.quorum && updated_datum.deadline == original.deadline && updated_datum.description_hash == original.description_hash && updated_datum.action_hash == original.action_hash
-    }
-    // No continuing output found — invalid
+  when list.find(tx.outputs, fn(output) {
+    output.address == own_input.output.address
+  }) is {
+    Some(output) ->
+      when output.datum is {
+        InlineDatum(raw) -> {
+          expect after: ProposalDatumV1 = raw
+          proposal_immutable(before, after) && after.status == ProposalPending && list.length(
+            after.locks,
+          ) == list.length(before.locks) + 1 && after.yes_weight == before.yes_weight + if support {
+            isqrt(locked)
+          } else {
+            0
+          } && after.no_weight == before.no_weight + if support {
+            0
+          } else {
+            isqrt(locked)
+          } && list.any(
+            after.locks,
+            fn(lock) {
+              lock.voter_vkh == voter && lock.locked_vams == locked && lock.support == support
+            },
+          )
+        }
+        _ -> False
+      }
     None -> False
   }
 }
 
-// ═══════════════════ Tests ═══════════════════
-
-test quadratic_weight_100k() {
-  isqrt(100_000) == 316
+fn valid_status_continuation(
+  tx: Transaction,
+  own_input: Input,
+  before: ProposalDatumV1,
+  status: ProposalStatusV1,
+) -> Bool {
+  when list.find(tx.outputs, fn(output) {
+    output.address == own_input.output.address
+  }) is {
+    Some(output) ->
+      when output.datum is {
+        InlineDatum(raw) -> {
+          expect after: ProposalDatumV1 = raw
+          proposal_immutable(before, after) && after.status == status && after.yes_weight == before.yes_weight && after.no_weight == before.no_weight && after.locks == before.locks
+        }
+        _ -> False
+      }
+    None -> False
+  }
 }
 
-test quadratic_weight_1m() {
-  isqrt(1_000_000) == 1000
-}
-
-test quadratic_weight_10k() {
-  isqrt(10_000) == 100
+fn authority_continuation(tx: Transaction, own_input: Input) -> Option<AuthorityDatumV1> {
+  when list.find(tx.outputs, fn(output) {
+    output.address == own_input.output.address
+  }) is {
+    Some(output) ->
+      when output.datum is {
+        InlineDatum(raw) -> {
+          expect datum: AuthorityDatumV1 = raw
+          Some(datum)
+        }
+        _ -> None
+      }
+    None -> None
+  }
 }

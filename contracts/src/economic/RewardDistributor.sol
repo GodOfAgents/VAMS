@@ -22,8 +22,8 @@ import {IRegionalIncentives} from "./IRegionalIncentives.sol";
  *      Uses lazy-claim pattern: rewards accumulate on-chain, providers
  *      claim at their convenience. Supports epoch-based accounting.
  *
- *      Fee integration: Receives tokens from RegionAwareDEC (emissions)
- *      and directly from ComposedSettlement (fee routing).
+ *      Every credit pulls exact funding from its accumulator. ComposedSettlement
+ *      pays builders directly; those payments must not also be credited here.
  *
  *      Architecture Reference: Phase 4 (Economic Layer), Sprint 11
  */
@@ -133,7 +133,7 @@ contract RewardDistributor is
         address provider,
         uint256 baseReward,
         bytes32 regionId
-    ) external override onlyRole(ACCUMULATOR_ROLE) whenNotPaused {
+    ) external override onlyRole(ACCUMULATOR_ROLE) nonReentrant whenNotPaused {
         if (provider == address(0) || baseReward == 0) revert InvalidRewardData();
 
         // 1. Base reward
@@ -161,7 +161,7 @@ contract RewardDistributor is
         // AUDIT FIX ECON03: Require actual token deposit to back the reward.
         // The caller (settlement contract / emission controller) must have approved
         // this contract and must deposit the exact totalReward amount.
-        vamsToken.safeTransferFrom(msg.sender, address(this), totalReward);
+        _pullExactFunding(totalReward);
 
         // Update provider breakdown
         ProviderReward storage breakdown = _rewardBreakdowns[provider];
@@ -181,8 +181,10 @@ contract RewardDistributor is
     function accumulateBuilderRevenue(
         address builder,
         uint256 amount
-    ) external override onlyRole(ACCUMULATOR_ROLE) whenNotPaused {
+    ) external override onlyRole(ACCUMULATOR_ROLE) nonReentrant whenNotPaused {
         if (builder == address(0) || amount == 0) revert InvalidRewardData();
+
+        _pullExactFunding(amount);
 
         builderRevenue[builder] += amount;
         unclaimedRewards[builder] += amount;
@@ -223,6 +225,7 @@ contract RewardDistributor is
     function claimRewards() external override nonReentrant whenNotPaused {
         uint256 claimable = unclaimedRewards[msg.sender];
         if (claimable == 0) revert NoRewardsToClaim(msg.sender);
+        _requireBacking();
 
         // Reset unclaimed balance
         unclaimedRewards[msg.sender] = 0;
@@ -333,8 +336,13 @@ contract RewardDistributor is
     function emergencyWithdraw(address to, uint256 amount)
         external
         onlyRole(DEFAULT_ADMIN_ROLE)
+        nonReentrant
     {
         require(to != address(0), "Zero address");
+        uint256 balance = vamsToken.balanceOf(address(this));
+        uint256 liabilities = pendingLiabilities();
+        uint256 surplus = balance > liabilities ? balance - liabilities : 0;
+        if (amount > surplus) revert InsufficientSurplus(amount, surplus);
         vamsToken.safeTransfer(to, amount);
     }
 
@@ -345,6 +353,26 @@ contract RewardDistributor is
     function unpause() external onlyRole(PAUSER_ROLE) { _unpause(); }
 
     // ═══════════════════ Internal ═══════════════════
+
+    /// @inheritdoc IRewardDistributor
+    function pendingLiabilities() public view override returns (uint256) {
+        return totalDistributed - totalClaimed;
+    }
+
+    function _requireBacking() internal view {
+        uint256 balance = vamsToken.balanceOf(address(this));
+        uint256 liabilities = pendingLiabilities();
+        if (balance < liabilities) revert InsufficientBacking(balance, liabilities);
+    }
+
+    function _pullExactFunding(uint256 amount) internal {
+        _requireBacking();
+        uint256 beforeBalance = vamsToken.balanceOf(address(this));
+        vamsToken.safeTransferFrom(msg.sender, address(this), amount);
+        uint256 afterBalance = vamsToken.balanceOf(address(this));
+        uint256 received = afterBalance >= beforeBalance ? afterBalance - beforeBalance : 0;
+        if (received != amount) revert FundingMismatch(amount, received);
+    }
 
     function _getStakingBoostBps(address provider) internal view returns (uint256) {
         uint256 staked = _getStakedAmount(provider);

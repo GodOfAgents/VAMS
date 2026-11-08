@@ -1,0 +1,77 @@
+{
+  "schema_version": "f05-uplc-backend-diagnostic-r1",
+  "date": "2026-10-03",
+  "scope": "synthetic-only-no-source-changes",
+  "toolchain": {
+    "aiken_version": "v1.1.21+42babe5",
+    "aiken_path": "/home/GodOfAgents/vams-evidence/toolchains/aiken-1.1.21/unpacked/aiken-x86_64-unknown-linux-musl/aiken",
+    "aiken_sha256": "07f3f927f1a8c71fc61273fdff850d9b98edb28dde207c8a32585991f2c88e79",
+    "python_path": "/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python"
+  },
+  "source_sha256": {
+    "cardano/validators/f05_authority_policy.ak": "e9d3ac9cbb14b9e7693dc12430234694c82eb52e61d176e1e39992fb9cbeafa8",
+    "cardano/validators/f05_authority_policy.test.ak": "a3bc9ccafa26ae4219207a620940ca7da3296608d576725c325a4558b958336d",
+    "scripts/remediation/test_f05_2a_authority_bootstrap_public.py": "2d30427544ba58b41228c2236e306b23e4b8e3593987ed9bd451c6421da7e7dc",
+    "scripts/remediation/f05_2a_tx_sim_registry.py": "c03230249c7e73f6929cc944b7af3e30d98b8168f8abd184fa39332a601a394e",
+    "scripts/remediation/f05_2a_tx_sim_runner_r3.py": "3088ade0a316f6af59c04fe3e1675733100b58be826fa22af3c25e40a086ea5c"
+  },
+  "fixtures": {
+    "valid.tx.cbor": "765c717f16b543c746b88742e8b775cd3ecabca4fef6edd16702184683780a28",
+    "invalid_signature.tx.cbor": "594c1b9297bff3a55c1bd7b600ad8f5d2c049471b70e667bc064212100f3754c",
+    "raw_inputs.cbor": "4b20e2b2cf4bd58b1f6e385c90ffd098d583df69d95fbc7b1fcc2591da72b9fe",
+    "raw_outputs.cbor": "9cdf345a785f51763bdb43f1b1ba0c20b5545051f03051e6a7bf726ea128c56a",
+    "policy_id": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731"
+  },
+  "commands": [
+    {
+      "id": "native",
+      "command": "bwrap --unshare-net --ro-bind / / --bind /tmp/vams-f05-uplc-cardano-check-r1 /tmp/vams-f05-uplc-cardano-check-r1 --ro-bind /home/GodOfAgents/.cache /home/GodOfAgents/.cache --dev-bind /dev /dev --proc /proc --setenv HOME /home/GodOfAgents --chdir /tmp/vams-f05-uplc-cardano-check-r1/cardano /home/GodOfAgents/vams-evidence/toolchains/aiken-1.1.21/unpacked/aiken-x86_64-unknown-linux-musl/aiken check --debug --trace-level silent --match-tests \"f05_authority_policy.{..}\"",
+      "exit": 0,
+      "result": "2 passed, 0 failed",
+      "stdout_sha256": "db5b71335decedd56933388b267837337327994d7577b5c976fed7a24aa904a8",
+      "stderr_sha256": "5076a98bc50ef3773424e7e9baf07981aaa7914f44ff53870e826eb3c6bdde83"
+    },
+    {
+      "id": "valid",
+      "command": "bwrap --unshare-net --ro-bind / / --tmpfs /tmp --dev-bind /dev /dev --proc /proc --chdir /home/GodOfAgents/code/VAMS-testnet /home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python scripts/remediation/f05_2a_tx_sim_runner_r3.py --aiken /home/GodOfAgents/vams-evidence/toolchains/aiken-1.1.21/unpacked/aiken-x86_64-unknown-linux-musl/aiken --tx docs/remediation/m3_f05_2a/tx_sim_r1/valid.tx.cbor --raw-inputs docs/remediation/m3_f05_2a/tx_sim_r1/raw_inputs.cbor --raw-outputs docs/remediation/m3_f05_2a/tx_sim_r1/raw_outputs.cbor --policy-id 9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+      "wrapper_exit": 0,
+      "simulator_child_exit": 0,
+      "result": "script_accepted",
+      "target_invoked": true,
+      "cleanup": "clean",
+      "stdout_sha256": "bda28652420e706b95235f6150c495b6f859a5cd7aea68762b6285f3c24ea91f",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "id": "invalid_signature",
+      "command": "bwrap --unshare-net --ro-bind / / --tmpfs /tmp --dev-bind /dev /dev --proc /proc --chdir /home/GodOfAgents/code/VAMS-testnet /home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python scripts/remediation/f05_2a_tx_sim_runner_r3.py --aiken /home/GodOfAgents/vams-evidence/toolchains/aiken-1.1.21/unpacked/aiken-x86_64-unknown-linux-musl/aiken --tx docs/remediation/m3_f05_2a/tx_sim_r1/invalid_signature.tx.cbor --raw-inputs docs/remediation/m3_f05_2a/tx_sim_r1/raw_inputs.cbor --raw-outputs docs/remediation/m3_f05_2a/tx_sim_r1/raw_outputs.cbor --policy-id 9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+      "wrapper_exit": 0,
+      "simulator_child_exit": 1,
+      "result": "compiled_evaluation_rejection",
+      "target_invoked": true,
+      "cleanup": "clean",
+      "stdout_sha256": "23ad065e139a6042cf5fd1748ad9f316bbc8e7cf658c3413332fe2eeca2f512f",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "raw_uplc_diagnostic": {
+    "evidence_directory": "docs/remediation/m3_f05_2a_unconditional_mutation_r1",
+    "diagnostic_stdout_sha256": "d2f042378bc9d6e4c446c88fa16d3f808fd2842570c4513ad9c62d920d8f764b",
+    "full_suite_stderr_sha256": "b0ac68ebdbbc3965d79d21e4b5256fb792c01ded3e0c985dab028ec9ae9f71ab",
+    "exit": 101,
+    "error": "Default Function not found - verifySignature",
+    "classification": "evaluator_failure_not_validator_rejection"
+  },
+  "ledger_counts": {
+    "negatives": "45/55",
+    "mutations": "18/21",
+    "applied_parameter_decision": "A/B/C pending"
+  },
+  "evidence_credit": "no registered negative case, mutation, ledger admission, or live-network evidence",
+  "integrated_review": {
+    "status": "PASS",
+    "reviewer": "f05_uplc_backend_review",
+    "scope": "current source/tool/fixture/output hashes; independent replay of both R3 cases; classification, exact-policy binding, invocation, teardown",
+    "limitation": "disposable native test copy was unavailable for independent source-byte comparison; native result remains synthetic handler evidence"
+  }
+}

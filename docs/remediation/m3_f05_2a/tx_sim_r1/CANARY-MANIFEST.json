@@ -1,0 +1,68 @@
+{
+  "schema_version": "f05-2a-typed-tx-sim-canaries-r1",
+  "status": "transaction-canaries-only; registry-not-run",
+  "source_evidence": "/home/GodOfAgents/vams-evidence/m3-f05-2a-simulator-input-contract-20261001T0000Z-829ab544571f",
+  "source_manifest": "SHA256SUMS in source evidence package; independently verified",
+  "conway_cddl": {
+    "source": "IntersectMBO/cardano-ledger",
+    "commit": "f9fd3acf64544b96487c3bc0b282e8d3b43a4a90",
+    "sha256": "316ed8ee090ea172983083329e849f24f4360a236d26be0a6f2094c6078f1e1f",
+    "note": "Reviewed external CDDL artifact; intentionally not copied into repository."
+  },
+  "runtimes": {
+    "aiken-1.1.21": {
+      "version": "aiken v1.1.21+42babe5",
+      "sha256": "07f3f927f1a8c71fc61273fdff850d9b98edb28dde207c8a32585991f2c88e79"
+    },
+    "aiken-1.1.23": {
+      "version": "aiken v1.1.23+8949565",
+      "sha256": "748b9d45785fbded901ed87475072b6d20ee259bb4588c72428c12a19e8902d3"
+    }
+  },
+  "target": {
+    "entrypoint": "f05_authority_policy.f05_authority_policy.mint",
+    "plutus_version": 3,
+    "redeemer_pointer": ["mint", 0],
+    "proof_message_bytes": 279,
+    "applied_state_validator_hash": "b4a7b5de32fa88554a4eb44d8e8235e24e738a1c1d1fe1764a0a3e66",
+    "applied_policy_id": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+    "applied_policy_cbor": {
+      "path": "applied-policy.cbor",
+      "sha256": "fc8726cff89172d4944e257a2eb2659d35363c8e5a4d423ed8a2112eb5af7e59",
+      "compiled_program_bytes": 3464,
+      "artifact_file_bytes": 3467
+    }
+  },
+  "shared_vectors": {
+    "raw_inputs.cbor": "4b20e2b2cf4bd58b1f6e385c90ffd098d583df69d95fbc7b1fcc2591da72b9fe",
+    "raw_outputs.cbor": "9cdf345a785f51763bdb43f1b1ba0c20b5545051f03051e6a7bf726ea128c56a"
+  },
+  "canaries": [
+    {
+      "id": "valid",
+      "transaction": "valid.tx.cbor",
+      "sha256": "765c717f16b543c746b88742e8b775cd3ecabca4fef6edd16702184683780a28",
+      "expected_exit": 0,
+      "required_output": ["Parsing script context", "Evaluating Mint[0]"]
+    },
+    {
+      "id": "invalid_signature",
+      "transaction": "invalid_signature.tx.cbor",
+      "sha256": "594c1b9297bff3a55c1bd7b600ad8f5d2c049471b70e667bc064212100f3754c",
+      "expected_exit": 1,
+      "required_output": ["Parsing script context", "Evaluating Mint[0]", "failed script execution"]
+    },
+    {
+      "id": "wrong_credential",
+      "transaction": "wrong_credential.tx.cbor",
+      "sha256": "e468d4c1d6b8560ae01556b178d5689cc22d0fb81e4d9894d8ea8d22b0ca4879",
+      "expected_exit": 1,
+      "required_output": ["Parsing script context", "Evaluating Mint[0]", "failed script execution"]
+    }
+  ],
+  "registry": {
+    "expected_negative_cases": 55,
+    "expected_mutations": 21,
+    "execution": "not run in this canary gate; awaiting independent reachability review"
+  }
+}

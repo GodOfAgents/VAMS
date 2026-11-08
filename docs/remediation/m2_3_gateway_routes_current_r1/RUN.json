@@ -1,0 +1,68 @@
+{
+  "schema_version": "vams-m2-3-gateway-routes-run-v1",
+  "date": "2026-10-03",
+  "status": "independent_review_passed_focused_m2_3_loopback_scope",
+  "repository": {
+    "head": "829ab544571f12efe50ecb5740f129c8acb3e16f",
+    "branch": "testnet/remediation-20260907"
+  },
+  "toolchain": {
+    "python": "Python 3.12.14",
+    "pytest": "pytest 9.1.1",
+    "network": "bwrap --unshare-net",
+    "checkout_mount": "read-only; evidence directory writable"
+  },
+  "command": [
+    "bwrap",
+    "--unshare-net",
+    "--ro-bind",
+    "/",
+    "/",
+    "--tmpfs",
+    "/tmp",
+    "--dev-bind",
+    "/dev",
+    "/dev",
+    "--proc",
+    "/proc",
+    "--bind",
+    "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m2_3_gateway_routes_current_r1",
+    "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m2_3_gateway_routes_current_r1",
+    "--chdir",
+    "/home/GodOfAgents/code/VAMS-testnet",
+    "/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python",
+    "-B",
+    "-m",
+    "pytest",
+    "-q",
+    "--tb=short",
+    "-p",
+    "no:cacheprovider",
+    "--import-mode=importlib",
+    "neuron/tests/test_m2_3_gateway_routes.py"
+  ],
+  "source_sha256": {
+    "gateway/replay_store.py": "0c10719bc399e932e763b9d80635f262f8caea683d4e7b37de4370a0a4ebc9de",
+    "gateway/request_auth.py": "9b47c26f1e640f3bd85f2d88d223fa97f38cfe2d9bd90948389f11ed9474a926",
+    "gateway/route_policy.py": "15166275718db36c9c68692a98a8fccbaee0ec3342fac0102cf9989305116916",
+    "gateway/route_security.py": "c1b56ada6d3640ba9c6bf6e5bafc01ea0eab0494805835e280aadaba47a336b0",
+    "gateway/server.py": "ace02242ab38aa9fa5afa4371be21a1a7d2329d5b9241dec30c7d503ff393c7e",
+    "neuron/runtime_safety.py": "b39c48ec63f20c34573e11e0a515ef622e3340f76964e1688c2dfa23b29d0079",
+    "neuron/tests/m2_gateway_helpers.py": "2f8c695bbb5f3508aba0123668c5957349a4b7967433356747dcca8bb9528ce4",
+    "neuron/tests/test_m2_3_gateway_routes.py": "150d1ed4ffc18cd2c16c5e956c1d611747721889a554d5ef8564fa2774704ba9"
+  },
+  "result": {
+    "exit_code": 0,
+    "passed": 40,
+    "failed": 0,
+    "stdout_sha256": "7775238204a66f3ebe74f0457a6fc0c3fcdcbc96f42f698ad7c5f2a1d18b9962",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "coverage": "Closed route ledger and fail-closed route classification; public versus authenticated/privileged access; invalid, duplicate, and tampered auth rejected before handler or nonce consumption; exact signed method/path/query/body/content type behavior; replay-protected state-changing composition under concurrent requests; loopback HTTP integration with synthetic signer and local SQLite; handler failures and response/log sanitization.",
+  "limits": "Synthetic keys, provider/composer, and temporary local SQLite; test-only loopback server/network namespace. No public ingress/TLS, production identity/key resolver, multi-host replay, real provider effect, or testnet readiness established.",
+  "changes_by_run": [],
+  "independent_review": {
+    "status": "PASS",
+    "scope": "five checksums, eight source/test hashes, captures, route/auth assertions, local loopback and synthetic scope limits"
+  }
+}

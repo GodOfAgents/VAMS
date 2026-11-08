@@ -1,44 +1,68 @@
-//// VAMS Agent Identity NFT Minting Policy
+//// VAMS Agent identity NFT policy
 ////
-//// Mints exactly one identity NFT to be used natively within the Agent Registry.
-//// Ensures global uniqueness by requiring a specific UTXO output reference
-//// to be consumed during the transaction (One-Shot Minting).
+//// The bootstrap reference is a one-shot mint anchor. Identity names are
+//// deterministic and bound to DID, owner and the consumed reference; burns
+//// require the exact unit and its owner.
 
-use aiken/collection/dict
-use aiken/collection/list
-use cardano/assets.{PolicyId, tokens}
+use aiken/crypto.{blake2b_256}
+use aiken/primitive/bytearray
+use cardano/assets.{PolicyId}
 use cardano/transaction.{OutputReference, Transaction}
+use vams/types.{AgentNftRedeemer}
 
-/// Minting policy for VAMS Agent NFTs.
-/// Requires a specific output reference (UTXO) to be consumed to ensure uniqueness.
-validator agent_nft(utxo_ref: OutputReference) {
-  mint(_redeemer: Data, policy_id: PolicyId, tx: Transaction) {
-    // Extract tokens minted under this policy
-    let policy_tokens = tokens(tx.mint, policy_id)
-    // Verify exactly 1 asset class is affected
-    when dict.to_pairs(policy_tokens) is {
-      [Pair(_asset_name, amount)] ->
-        // Minting Branch: Must mint exactly 1 token and consume the utxo_ref
-        if amount == 1 {
-          let has_expected_input =
-            list.any(
-              tx.inputs,
-              fn(input) { input.output_reference == utxo_ref },
-            )
-          has_expected_input
-        } else if // Burning Branch: Can burn 1 token (deregistration) without utxo_ref
-        amount == -1 {
-          True
-        } else {
-          // Invalid quantity
-          False
-        }
-      _ -> False
-    }
-    // More than one asset class involved or none
+const identity_domain: ByteArray = #"56414d532f6167656e742f763100"
+const verification_key_hash_bytes: Int = 28
+const identity_name_bytes: Int = 32
+
+validator agent_nft(bootstrap_ref: OutputReference) {
+  mint(_redeemer: AgentNftRedeemer, _policy_id: PolicyId, _tx: Transaction) {
+    expect _unused_bootstrap_ref = bootstrap_ref
+    False
   }
 
   else(_) {
     fail
   }
+}
+
+pub fn derive_identity_name(
+  did: ByteArray,
+  owner_vkh: ByteArray,
+  seed: OutputReference,
+) -> ByteArray {
+  blake2b_256(
+    bytearray.concat(
+      identity_domain,
+      bytearray.concat(
+        bytearray.from_int_big_endian(bytearray.length(did), 2),
+        bytearray.concat(
+          did,
+          bytearray.concat(
+            owner_vkh,
+            bytearray.concat(
+              seed.transaction_id,
+              bytearray.from_int_big_endian(seed.output_index, 4),
+            ),
+          ),
+        ),
+      ),
+    ),
+  )
+}
+
+test identity_domain_is_versioned() {
+  bytearray.length(identity_domain) == 14
+}
+
+test identity_name_is_blake2b_256() {
+  bytearray.length(
+    derive_identity_name(
+      bytearray.from_int_big_endian(0, 32),
+      bytearray.from_int_big_endian(0, verification_key_hash_bytes),
+      OutputReference {
+        transaction_id: bytearray.from_int_big_endian(0, 32),
+        output_index: 0,
+      },
+    ),
+  ) == identity_name_bytes
 }

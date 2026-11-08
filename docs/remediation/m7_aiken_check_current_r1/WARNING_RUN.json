@@ -1,0 +1,61 @@
+{
+  "schema": "m7-aiken-warning-diagnostic-run-v1",
+  "recorded_at_utc": "2026-10-03T06:46:30Z",
+  "checkout": {
+    "head": "829ab544571f12efe50ecb5740f129c8acb3e16f",
+    "dirty_tree": true
+  },
+  "command": "aiken check --deny --seed 20260711 --max-success 250",
+  "execution": {
+    "runner": "capture_warnings.py",
+    "runner_sha256": "f46775d8d808a99601e5f273ebbd61869e597cff9ad773e46ed3bc38f100c801",
+    "pseudo_terminal": true,
+    "network_disabled": true,
+    "canonical_cardano_tree_read_only": true,
+    "fresh_tmpfs_project_copy": true,
+    "dependencies": "Aiken copied/resolved 2 packages from existing cache into the temporary project. No network dependency fetch occurred; no tools were installed or fetched."
+  },
+  "tool": {
+    "path": "/home/GodOfAgents/vams-evidence/toolchains/aiken-1.1.21/unpacked/aiken-x86_64-unknown-linux-musl/aiken",
+    "version": "v1.1.21+42babe5",
+    "sha256": "07f3f927f1a8c71fc61273fdff850d9b98edb28dde207c8a32585991f2c88e79"
+  },
+  "source": {
+    "file_count_before": 21,
+    "sha256_before": "7c513c0586cec60d7a030f9d2b453d90a0f4f1b2711c0e5e7c094afb9e43b403",
+    "file_count_after": 21,
+    "sha256_after": "7c513c0586cec60d7a030f9d2b453d90a0f4f1b2711c0e5e7c094afb9e43b403",
+    "unchanged": true
+  },
+  "diagnostic_result": {
+    "path": "WARNING_DIAGNOSTIC.json",
+    "sha256": "2f60f619ec44764e0068ab0dbeaa0372667c2b24df2efe6336291166e2deb5cd"
+  },
+  "sanitized_transcript": {
+    "path": "WARNING_DIAGNOSTIC.txt",
+    "sha256": "91803a837d7f4d4b052b1bc1fe660b841fe345b699f58ff2c76c82a41b52d958"
+  },
+  "result": {
+    "exit_code": 1,
+    "summary": {
+      "checks": 1865,
+      "errors": 0,
+      "warnings": 7
+    },
+    "seven_source_warnings": [
+      "unused variable bootstrap_ref (agent_nft.ak:21; CLI suggests _bootstrap_ref)",
+      "unused import tokens (agent_nft.ak:11)",
+      "unused import BurnIdentity (agent_nft.ak:13)",
+      "unused private function valid_did (agent_nft.ak:54)",
+      "unused import MintIdentity (agent_nft.ak:13)",
+      "unused module list (agent_nft.ak:8)",
+      "unused module dict (agent_nft.ak:7)"
+    ],
+    "separate_resolver_notices": [
+      "uncertain local version for aiken-lang/stdlib; version unpinned and network inaccessible",
+      "uncertain local version for aiken-lang/fuzz; version unpinned and network inaccessible"
+    ],
+    "fetched_packages_from_cache": 2
+  },
+  "scope": "Diagnostic only. No source, lock, manifest, vendor, F05 counters, or deployment behavior changed. Review pending."
+}

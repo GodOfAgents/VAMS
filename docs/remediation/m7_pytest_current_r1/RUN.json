@@ -1,0 +1,120 @@
+{
+  "capture_script_sha256": "36d20f777e9eb50a6771c19305dc1fc5df09319ac490e4d35d9f90f1bfbcdfda",
+  "collection": {
+    "collected": 1693,
+    "command": [
+      "/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python",
+      "-B",
+      "-m",
+      "pytest",
+      "--collect-only",
+      "-q",
+      "-p",
+      "no:cacheprovider",
+      "--ignore=docs/remediation/m3_f05_design_r2/test_design.py"
+    ],
+    "exit_code": 0,
+    "raw_output_retained": false,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "8bd1af92735d8184c1d83c0f3ff74ac253364358675fcacad33d280a68e5f7d0",
+    "summary": null
+  },
+  "envoy": {
+    "path": "/home/GodOfAgents/vams-evidence/toolchains/envoy-1.39.1/envoy",
+    "sha256": "002c6e1c69ed0fa0ea381887247cadadfaec9481375fa8d8d2b1731eeabf40b8",
+    "version": "/home/GodOfAgents/vams-evidence/toolchains/envoy-1.39.1/envoy  version: b579d07d3ad7ee11d32b105e91a5a39ad24718d7/1.39.1/Clean/RELEASE/BoringSSL",
+    "version_sha256": "b16afab18a2f675b8efa7d41567691c6e35846f0b44adc0a27ec12cb663180b1"
+  },
+  "evidence_credit": "No deployment, ledger, or live-network credit.",
+  "git_after": {
+    "head": "829ab544571f12efe50ecb5740f129c8acb3e16f",
+    "status_sha256": "71e0ffee46650648e412bcd7e7221d9a39e7ad56bb2cff6278fd318ef44806c9"
+  },
+  "git_before": {
+    "head": "829ab544571f12efe50ecb5740f129c8acb3e16f",
+    "status_sha256": "71e0ffee46650648e412bcd7e7221d9a39e7ad56bb2cff6278fd318ef44806c9"
+  },
+  "inventory_after": "c7fb6aa004d7ef3b09280bc1b359bb01bc39aa12a465766a19df79ef2675d40b",
+  "inventory_before": "c7fb6aa004d7ef3b09280bc1b359bb01bc39aa12a465766a19df79ef2675d40b",
+  "main_suite": {
+    "collected": null,
+    "command": [
+      "/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python",
+      "-B",
+      "-m",
+      "pytest",
+      "-v",
+      "--tb=short",
+      "-p",
+      "no:cacheprovider",
+      "--ignore=docs/remediation/m3_f05_design_r2/test_design.py"
+    ],
+    "exit_code": 1,
+    "raw_output_retained": false,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "564384be60711a66b8d7714b66a74000651aa596826116b39e39df26c268bd81",
+    "summary": {
+      "counts": {
+        "failed": 10,
+        "passed": 1683,
+        "subtests_passed": 444
+      },
+      "duration_seconds": 169.47,
+      "line": "======= 10 failed, 1683 passed, 444 subtests passed in 169.47s (0:02:49) ======="
+    }
+  },
+  "outer_command": [
+    "bwrap",
+    "--unshare-net",
+    "--ro-bind",
+    "/",
+    "/",
+    "--tmpfs",
+    "/tmp",
+    "--dev-bind",
+    "/dev",
+    "/dev",
+    "--proc",
+    "/proc",
+    "--bind",
+    "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m7_pytest_current_r1",
+    "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m7_pytest_current_r1",
+    "--chdir",
+    "/home/GodOfAgents/code/VAMS-testnet",
+    "/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python",
+    "-B",
+    "docs/remediation/m7_pytest_current_r1/run_pytest_snapshot.py"
+  ],
+  "pytest": "pytest 9.1.1",
+  "python": "3.12.14",
+  "result_sha256": "ce5ce3c5c18fe838b124c6910c0adda93c03302110cc3ab575362ff4780d6e98",
+  "schema": "m7-root-pytest-run-r3",
+  "separate_design_suite": {
+    "collected": null,
+    "command": [
+      "/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python",
+      "-B",
+      "-m",
+      "pytest",
+      "-v",
+      "--tb=short",
+      "-p",
+      "no:cacheprovider",
+      "docs/remediation/m3_f05_design_r2/test_design.py"
+    ],
+    "exit_code": 1,
+    "raw_output_retained": false,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "9c8c820e42f5000172fcc95ee41184b61579e523f2c0f0c06f3c2cb5109e41ca",
+    "summary": {
+      "counts": {
+        "failed": 1,
+        "passed": 9
+      },
+      "duration_seconds": 0.15,
+      "line": "========================= 1 failed, 9 passed in 0.15s =========================="
+    }
+  },
+  "workflow_sha256_after": "baf53503673b70c5185f654f8f694f1feaf98af68ee56e29c83c01ee0cf0593c",
+  "workflow_sha256_before": "baf53503673b70c5185f654f8f694f1feaf98af68ee56e29c83c01ee0cf0593c"
+}

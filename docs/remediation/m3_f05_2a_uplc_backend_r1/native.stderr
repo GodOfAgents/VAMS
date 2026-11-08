@@ -1,0 +1,9 @@
+    Compiling GodOfAgents/vams-cardano 0.1.0 (.)
+    Resolving GodOfAgents/vams-cardano
+      Fetched 2 packages in 0.04s from cache
+    Compiling aiken-lang/stdlib v2 (./build/packages/aiken-lang-stdlib)
+    Compiling aiken-lang/fuzz v2 (./build/packages/aiken-lang-fuzz)
+   Collecting all tests scenarios within module(s): *f05_authority_policy*
+   Generating UPLC for ./validators/f05_authority_policy.test.ak.{public_applied_policy_fixture_accepts}
+   Generating UPLC for ./validators/f05_authority_policy.test.ak.{public_seed_missing_regression_rejects}
+      Testing ...

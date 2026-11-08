@@ -1,0 +1,52 @@
+{
+  "record": "m7_f04_policy_anchor_gate_r1_20261004",
+  "head": "829ab544571f12efe50ecb5740f129c8acb3e16f",
+  "branch": "testnet/remediation-20260907",
+  "source_changed": false,
+  "aiken": {
+    "path": "/home/GodOfAgents/vams-evidence/toolchains/aiken-1.1.21/unpacked/aiken-x86_64-unknown-linux-musl/aiken",
+    "version": "aiken v1.1.21+42babe5",
+    "sha256": "07f3f927f1a8c71fc61273fdff850d9b98edb28dde207c8a32585991f2c88e79",
+    "default_path": "not found; invoked by absolute path",
+    "command": "bwrap --unshare-net --ro-bind / / --tmpfs /tmp --dev-bind /dev /dev --proc /proc --bind /dev/shm/vams-f04-aiken-baseline-20261004/cardano /home/GodOfAgents/code/VAMS-testnet/cardano --chdir /home/GodOfAgents/code/VAMS-testnet/cardano --clearenv --setenv HOME /home/GodOfAgents --setenv TMPDIR /tmp --setenv PATH /home/GodOfAgents/vams-evidence/toolchains/aiken-1.1.21/unpacked/aiken-x86_64-unknown-linux-musl:/usr/bin:/bin --setenv LANG C.UTF-8 --setenv LC_ALL C.UTF-8 --setenv TZ UTC aiken check --deny --seed 20260711 --max-success 250",
+    "exit_code": 0,
+    "tests": {
+      "total": 122,
+      "passed": 122,
+      "failed": 0,
+      "unit": 115,
+      "property": 7
+    },
+    "scope": "Aiken baseline only; no paired Plutus V3 evaluator"
+  },
+  "independent_security": {
+    "canonical_policy_anchor": "BLOCKED",
+    "single_global_anchor_candidate": "FAIL: applied policy ID varies with per-identity bootstrap_ref"
+  },
+  "git_diff_check": {
+    "result": "PASS",
+    "exit_code": 0
+  },
+  "validator_sha256": {
+    "cardano/validators/agent_nft.ak": "e28ff520d07f73a622a093b362f66411678d535bbb48cf2aecbcd8011204caba",
+    "cardano/validators/agent_registry.ak": "7655acb5d48cb0abcfe85dadfe9aa9c80046bff3aeeaf0720cb706084adbb5cd"
+  },
+  "ledger_or_live_evidence": false,
+  "option_b_refined_review": {
+    "result": "conditionally suitable for owner approval; not implementation-ready",
+    "shared_anchor_policy": "one fixed applied ID; anchor_seed in redeemer, not params",
+    "seeds": "anchor_seed distinct from bootstrap_ref; bootstrap consumed only at registration",
+    "guardian_auth": "owner+3-of-5 from committed roster for anchor; owner/controller plus all five guardian PoPs at registration",
+    "duplicate_anchor_semantics": "owner decision: allow multiple pre-registration anchors while bootstrap allows one registration, or add stateful uniqueness",
+    "policy_provenance": "quorum authorizes applied policy ID; signers independently verify reproducible source/build/hash",
+    "upgrade": "immutable anchor requires separate migration design"
+  },
+  "anchor_token_name": "domain-separated derivation includes consumed anchor_seed plus identity tuple; exact formula to freeze in approved design",
+  "per_anchor_seed": "stored in immutable datum and consumed at anchor issuance; distinct from registration bootstrap_ref",
+  "token_reissue": "same seed-bound token cannot be reissued; different seed can create another anchor for the same identity tuple unless stateful uniqueness is added",
+  "reference_uniqueness": "exactly one matching reference per transaction, not global per-identity uniqueness",
+  "signatures": {
+    "anchor_issuance": "founding owner plus 3-of-5 from committed guardian set",
+    "registration": "owner/controller plus five transaction-bound guardian signatures from all anchored guardians"
+  }
+}

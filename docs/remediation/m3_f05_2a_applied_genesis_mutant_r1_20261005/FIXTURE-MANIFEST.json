@@ -1,0 +1,211 @@
+{
+  "artifacts": {
+    "MUTANT-SOURCE.patch": {
+      "bytes": 400,
+      "sha256": "fd6f06b112efebd2b63833d84d77b5611534fd1ef3268886859f3122e2e5ca23"
+    },
+    "negative.applied-policy.cbor": {
+      "bytes": 3467,
+      "sha256": "5a5b4ba4cf4d4c7f4f7127d7b4ad270122354497041a2e90e8aeef5d3ebadf9c"
+    },
+    "negative.genesis_ref.cbor": {
+      "bytes": 39,
+      "sha256": "51f08c55f440a2116b42e5283fc76d8be4d707788d3bc765023620199af45c75"
+    },
+    "negative.initial_keys.cbor": {
+      "bytes": 172,
+      "sha256": "e29d73ad4b9ee55ebb5a093e16f97d582e23c34fd2c5ae8e2ca91be8a10a6a14"
+    },
+    "negative.raw_inputs.cbor": {
+      "bytes": 73,
+      "sha256": "4b20e2b2cf4bd58b1f6e385c90ffd098d583df69d95fbc7b1fcc2591da72b9fe"
+    },
+    "negative.raw_outputs.cbor": {
+      "bytes": 79,
+      "sha256": "2d261c6ce8919872336245b31c503896a5062b0aceb95b9e8effd87dc5a6702f"
+    },
+    "negative.tx.cbor": {
+      "bytes": 5104,
+      "sha256": "dd8fd0eaade26a8481896b194eb994dc2f68a0d3d2311b5056f341be974beb2c"
+    },
+    "one-guard-mutant-control.applied-policy.cbor": {
+      "bytes": 3395,
+      "sha256": "afa2deab4d9ce00326e3702326d360abd02850ad4bfd99424c48b7705b038282"
+    },
+    "one-guard-mutant-control.genesis_ref.cbor": {
+      "bytes": 39,
+      "sha256": "51f08c55f440a2116b42e5283fc76d8be4d707788d3bc765023620199af45c75"
+    },
+    "one-guard-mutant-control.initial_keys.cbor": {
+      "bytes": 172,
+      "sha256": "e29d73ad4b9ee55ebb5a093e16f97d582e23c34fd2c5ae8e2ca91be8a10a6a14"
+    },
+    "one-guard-mutant-control.raw_inputs.cbor": {
+      "bytes": 73,
+      "sha256": "4b20e2b2cf4bd58b1f6e385c90ffd098d583df69d95fbc7b1fcc2591da72b9fe"
+    },
+    "one-guard-mutant-control.raw_outputs.cbor": {
+      "bytes": 79,
+      "sha256": "40ef21a205b71f8ec07eba21cd4ac4e9dfe759a4b3210d0ebb401c46196292a7"
+    },
+    "one-guard-mutant-control.tx.cbor": {
+      "bytes": 5032,
+      "sha256": "813f4b91a490f20b4e2a0f8d1614d9dc294fca618a25d41b480bf83664bc7c85"
+    },
+    "positive-control.applied-policy.cbor": {
+      "bytes": 3467,
+      "sha256": "5a5b4ba4cf4d4c7f4f7127d7b4ad270122354497041a2e90e8aeef5d3ebadf9c"
+    },
+    "positive-control.genesis_ref.cbor": {
+      "bytes": 39,
+      "sha256": "51f08c55f440a2116b42e5283fc76d8be4d707788d3bc765023620199af45c75"
+    },
+    "positive-control.initial_keys.cbor": {
+      "bytes": 172,
+      "sha256": "e29d73ad4b9ee55ebb5a093e16f97d582e23c34fd2c5ae8e2ca91be8a10a6a14"
+    },
+    "positive-control.raw_inputs.cbor": {
+      "bytes": 73,
+      "sha256": "5e935c48cc9d4e82e6dbedce94b2fbd3fb427f5e187bbe67ed376671ba5e4fec"
+    },
+    "positive-control.raw_outputs.cbor": {
+      "bytes": 79,
+      "sha256": "1909c7a1f43861d78046bd25748a99a58a576ddb3b6092d4a758ff3619c51846"
+    },
+    "positive-control.tx.cbor": {
+      "bytes": 5104,
+      "sha256": "029d7a370100e15f4c7eeb082e1f0b3eda7738c7e4dc2386b5c2af2e66724720"
+    }
+  },
+  "assertion": {
+    "id": "applied_genesis_parameter",
+    "mutation": "compile_with_different_genesis_ref_keep_transaction"
+  },
+  "case_id": "applied_genesis_parameter",
+  "credit": {
+    "case": false,
+    "ledger_admission": false,
+    "live_network": false,
+    "mutation": false,
+    "original_policy": false
+  },
+  "entrypoint": "f05_authority_policy.f05_authority_policy.mint / Mint[0]",
+  "negative": {
+    "applied_parameter_seed_ref": {
+      "output_index": 7,
+      "tx_hash": "abababababababababababababababababababababababababababababababab"
+    },
+    "seed_omitted_from_inputs": true,
+    "seed_retained_in_applied_parameters": true,
+    "seed_retained_in_datum_and_pop": true,
+    "status": "PENDING",
+    "tx_sha256": "dd8fd0eaade26a8481896b194eb994dc2f68a0d3d2311b5056f341be974beb2c"
+  },
+  "one_guard_mutant_control": {
+    "mutant_policy_id": "3a79876afa3121d9fb65d21ce32bcd0e5daa1e1e8477cea652114125",
+    "mutation": "remove_seed_guard",
+    "status": "not executed",
+    "tx_sha256": "813f4b91a490f20b4e2a0f8d1614d9dc294fca618a25d41b480bf83664bc7c85"
+  },
+  "original_case_id_preserved": true,
+  "policy_applications": {
+    "negative": {
+      "policy_id": "3c74bddc66d6a48cf20bbb1d37a241e29ffebd8c1f2468edafb216ba",
+      "program_sha256": "5a5b4ba4cf4d4c7f4f7127d7b4ad270122354497041a2e90e8aeef5d3ebadf9c",
+      "seed_in_inputs": false,
+      "validation": {
+        "ada_conservation": true,
+        "body_hash": "c62539a6788ef53ee37fdc48c35df18c7416f97844188abf5b35f1f68b48bc70",
+        "funding_signatures": 2,
+        "mint0_redeemer": {
+          "cbor_sha256": "838095f0744c22a68cab3d06a8e15373db0479dcdba0d0921a99b7372fe4a7d6",
+          "constructor_tag": 121,
+          "proof_count": 5,
+          "proof_signatures_hex": [
+            "d62d002647fb9120db89cfedb296f1220e212fd7243be0337ee2da9ddaed09268689b1cc4edca96bc69bf334072cced287e15c5e89bfabb1f37caba2c3e08a06",
+            "1c1392596f4279d9d72d6d56f436156eeaf7383c10aeee6c5626af189448f146a2b1ea588b805d3004f1999aa816e70bfc7509f0a16005640b920b4228220e0a",
+            "1a6b632b9d31522161240f677bd2f33ea218779e0dc04c44ffc658c56b436397612f7c3e5f006db52e0357da7ba8d97efe487fde30d71c5633a9579bd98eb004",
+            "1095375edc64767194a63346ca5451271efa4c34128e98bf0d1e4fce6cd52dee89c06e2e3b8c4c6a09e4733d506ed6a1ac1988dd4953acc82554447809be8509",
+            "7766a8c12c6b7606833abc4ccc70dc5410ffe2fa4704dc4fe99f849dc082ac87cf4d0048865591b9ba764328f4fcb8bfc051e32925a142afdcd38f50e4367904"
+          ]
+        },
+        "native_asset_conservation": true,
+        "private_keys_persisted": false,
+        "valid_body_bound_ephemeral_signatures": true
+      }
+    },
+    "one-guard-mutant-control": {
+      "policy_id": "3a79876afa3121d9fb65d21ce32bcd0e5daa1e1e8477cea652114125",
+      "program_sha256": "afa2deab4d9ce00326e3702326d360abd02850ad4bfd99424c48b7705b038282",
+      "seed_in_inputs": false,
+      "validation": {
+        "ada_conservation": true,
+        "body_hash": "967a4f2cbe816ad20316e06e9bb9797b5def98663181490bbfb6df8e79e3fa07",
+        "funding_signatures": 2,
+        "mint0_redeemer": {
+          "cbor_sha256": "838095f0744c22a68cab3d06a8e15373db0479dcdba0d0921a99b7372fe4a7d6",
+          "constructor_tag": 121,
+          "proof_count": 5,
+          "proof_signatures_hex": [
+            "d62d002647fb9120db89cfedb296f1220e212fd7243be0337ee2da9ddaed09268689b1cc4edca96bc69bf334072cced287e15c5e89bfabb1f37caba2c3e08a06",
+            "1c1392596f4279d9d72d6d56f436156eeaf7383c10aeee6c5626af189448f146a2b1ea588b805d3004f1999aa816e70bfc7509f0a16005640b920b4228220e0a",
+            "1a6b632b9d31522161240f677bd2f33ea218779e0dc04c44ffc658c56b436397612f7c3e5f006db52e0357da7ba8d97efe487fde30d71c5633a9579bd98eb004",
+            "1095375edc64767194a63346ca5451271efa4c34128e98bf0d1e4fce6cd52dee89c06e2e3b8c4c6a09e4733d506ed6a1ac1988dd4953acc82554447809be8509",
+            "7766a8c12c6b7606833abc4ccc70dc5410ffe2fa4704dc4fe99f849dc082ac87cf4d0048865591b9ba764328f4fcb8bfc051e32925a142afdcd38f50e4367904"
+          ]
+        },
+        "native_asset_conservation": true,
+        "private_keys_persisted": false,
+        "valid_body_bound_ephemeral_signatures": true
+      }
+    },
+    "positive-control": {
+      "policy_id": "3c74bddc66d6a48cf20bbb1d37a241e29ffebd8c1f2468edafb216ba",
+      "program_sha256": "5a5b4ba4cf4d4c7f4f7127d7b4ad270122354497041a2e90e8aeef5d3ebadf9c",
+      "seed_in_inputs": true,
+      "validation": {
+        "ada_conservation": true,
+        "body_hash": "c40c7bdfd08a0c5ddef979465e3339456d88c12c2b2c6a7a9279a2cd850ec844",
+        "funding_signatures": 2,
+        "mint0_redeemer": {
+          "cbor_sha256": "838095f0744c22a68cab3d06a8e15373db0479dcdba0d0921a99b7372fe4a7d6",
+          "constructor_tag": 121,
+          "proof_count": 5,
+          "proof_signatures_hex": [
+            "d62d002647fb9120db89cfedb296f1220e212fd7243be0337ee2da9ddaed09268689b1cc4edca96bc69bf334072cced287e15c5e89bfabb1f37caba2c3e08a06",
+            "1c1392596f4279d9d72d6d56f436156eeaf7383c10aeee6c5626af189448f146a2b1ea588b805d3004f1999aa816e70bfc7509f0a16005640b920b4228220e0a",
+            "1a6b632b9d31522161240f677bd2f33ea218779e0dc04c44ffc658c56b436397612f7c3e5f006db52e0357da7ba8d97efe487fde30d71c5633a9579bd98eb004",
+            "1095375edc64767194a63346ca5451271efa4c34128e98bf0d1e4fce6cd52dee89c06e2e3b8c4c6a09e4733d506ed6a1ac1988dd4953acc82554447809be8509",
+            "7766a8c12c6b7606833abc4ccc70dc5410ffe2fa4704dc4fe99f849dc082ac87cf4d0048865591b9ba764328f4fcb8bfc051e32925a142afdcd38f50e4367904"
+          ]
+        },
+        "native_asset_conservation": true,
+        "private_keys_persisted": false,
+        "valid_body_bound_ephemeral_signatures": true
+      }
+    }
+  },
+  "positive_control": {
+    "status": "not executed",
+    "tx_sha256": "029d7a370100e15f4c7eeb082e1f0b3eda7738c7e4dc2386b5c2af2e66724720"
+  },
+  "schema_version": "f05-2a-applied-genesis-mutant-candidate-r1",
+  "scope": "synthetic alternate applied policy only; no original-policy, ledger-admission, or live-network evidence",
+  "source_mutation": {
+    "changed_lines": [
+      "-  expect count_seed_input(tx.inputs, genesis_ref) == 1",
+      "+  expect True"
+    ],
+    "file": "validators/f05_authority_policy.ak",
+    "mutant_source_sha256": "ade9f13f6fa321d9c40df3395f5afe358312151647d7f9ce073ed77f81b2ad86",
+    "name": "remove_seed_guard",
+    "original_source_sha256": "e9d3ac9cbb14b9e7693dc12430234694c82eb52e61d176e1e39992fb9cbeafa8"
+  },
+  "status": "candidate-awaiting-independent-byte-review; tx-sim-not-run; case-and-mutation-PENDING",
+  "toolchain": {
+    "aiken": "aiken v1.1.21+42babe5",
+    "aiken_sha256": "07f3f927f1a8c71fc61273fdff850d9b98edb28dde207c8a32585991f2c88e79",
+    "mutant_recompiled": true,
+    "python": "3.12.14"
+  }
+}

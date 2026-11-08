@@ -1,0 +1,77 @@
+{
+  "date": "2026-10-03",
+  "slice": "Sentinel test-local DA publisher boundary correction",
+  "checkout": "/home/GodOfAgents/code/VAMS-testnet",
+  "head": "829ab544571f12efe50ecb5740f129c8acb3e16f",
+  "changed_files": [
+    {
+      "path": "neuron/tests/test_sentinel.py",
+      "status_before": "tracked clean",
+      "sha256_after": "2c246cd1f4820aff1f82dc2b5dbaa0747a9a8fbe1f20b3a97c45e401c8aa3b1c"
+    }
+  ],
+  "change": "Patch the currently awaited PerformanceAuditLog.publish_sentinel_report method, provide its response protocol field, and assert exactly one await routed to DAProtocol.NEAR_DA.",
+  "environment": {
+    "python": "3.12.14",
+    "pytest": "9.1.1",
+    "VAMS_ENV": "test",
+    "envoy_path": "/home/GodOfAgents/vams-evidence/toolchains/envoy-1.39.1/envoy",
+    "envoy_sha256": "002c6e1c69ed0fa0ea381887247cadadfaec9481375fa8d8d2b1731eeabf40b8"
+  },
+  "diagnostics": [
+    {
+      "command": "env PATH=/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin PYTHONDONTWRITEBYTECODE=1 VAMS_ENV=test /home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/pytest -vv --tb=long neuron/tests/test_sentinel.py::TestSentinelNode::test_audit_node_success",
+      "exit_code": 1,
+      "result": "Before patch correction, the test failed because its obsolete DAPublisher mock did not intercept PerformanceAuditLog; the actual Near DA route was correctly disabled."
+    },
+    {
+      "description": "An earlier isolated run omitted VAMS_ENV=test and failed during runtime-policy initialization. Not a workflow-equivalent result."
+    }
+  ],
+  "verification": [
+    {
+      "command": "env PATH=/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin VAMS_ENV=test PYTHONDONTWRITEBYTECODE=1 /home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/pytest -v --tb=short neuron/tests/test_sentinel.py",
+      "exit_code": 0,
+      "duration_seconds": 3.85,
+      "result": "12 passed; run after final formatting"
+    },
+    {
+      "command": "env PATH=/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin VAMS_ENV=test PYTHONDONTWRITEBYTECODE=1 VAMS_ENVOY_BIN=/home/GodOfAgents/vams-evidence/toolchains/envoy-1.39.1/envoy /home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/pytest -v --tb=short --ignore=docs/remediation/m3_f05_design_r2/test_design.py",
+      "exit_code": 1,
+      "duration_seconds": 210.25,
+      "result": "1572 passed, 3 failed, 441 nested subtests passed; 1575 root pytest items",
+      "note": "Executed after behavior patch and before formatting-only wrapping of the mock response."
+    },
+    {
+      "command": "env PATH=/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin VAMS_ENV=test PYTHONDONTWRITEBYTECODE=1 VAMS_ENVOY_BIN=/home/GodOfAgents/vams-evidence/toolchains/envoy-1.39.1/envoy /home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/pytest -v --tb=short docs/remediation/m3_f05_design_r2/test_design.py",
+      "exit_code": 0,
+      "duration_seconds": 0.29,
+      "result": "10 passed"
+    }
+  ],
+  "remaining_failures": [
+    "scripts/remediation/test_m3_1b_r9_provenance.py::R11BoundaryTests::test_authoritative_mutation_detected",
+    "scripts/remediation/test_m3_1b_r9_provenance.py::R11BoundaryTests::test_cleanup_after_injected_failure_and_network_boundary",
+    "scripts/remediation/test_m3_1b_r9_provenance.py::R11BoundaryTests::test_f04_forward_manifest_rebinds_current_lock_without_false_continuity"
+  ],
+  "aggregate": {
+    "unique_collected_node_ids": 1585,
+    "passed": 1582,
+    "failed": 3,
+    "nested_subtests_not_additional_node_ids": 441
+  },
+  "independent_review": {
+    "result": "PASS",
+    "reviewer": "/root/f05_other_seed_blocker_review",
+    "reran_tests": false,
+    "scope": "current async publisher patch, Near route assertion, mock/live containment"
+  },
+  "git_diff_check": "PASS",
+  "f05_counts": {
+    "negative_cases": "45/55",
+    "mutations": "18/21",
+    "new_credit": "none"
+  },
+  "readiness": "NOT_READY",
+  "deployment_and_gated_activation": "disabled"
+}

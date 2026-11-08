@@ -1,0 +1,3685 @@
+{
+  "artifact": "VAMS privacy field source inventory",
+  "artifact_version": "1.12-draft",
+  "updated_at": "2026-11-01",
+  "review_status": "UNAPPROVED_SOURCE_BACKED_DRAFT",
+  "candidate_binding": {
+    "lane": "/home/GodOfAgents/code/VAMS-fleet-20261020-01/integration-r18",
+    "candidate_tree": "Historical R18 identity retained for provenance only. Current inventory preparation is bound separately to current_source_binding; no candidate commit, release, privacy approval, or operator approval is asserted.",
+    "git_metadata": "unavailable in this lane; no candidate commit is asserted",
+    "historical_head": "not used as the candidate binding",
+    "source_manifest": {
+      "path": "/home/GodOfAgents/code/VAMS-fleet-20261020-01/evidence/integration-r18/inspection-source-manifest.json",
+      "raw_sha256": "f01cf1ce5b9a8fe7352ace9c8dbf05455f655a3a76e3e8da2f52c9df84403ac4",
+      "selected_file_count": 6586,
+      "binding_result": "Historical R18 manifest binding retained as provenance; it is not the current source base. Current pre-patch source base is recorded in current_source_binding. UNAPPROVED; T33 BLOCKED."
+    },
+    "release_commit": null
+  },
+  "scope": {
+    "publisher_inventory": {
+      "path": "docs/audit/privacy-publisher-inventory.json",
+      "sha256": "9647d33860b0fc3e255e156a9d7877fcf78e05ce7b6805c5dd2bda085c5dd040",
+      "schema_path": "docs/audit/schemas/privacy-publisher-inventory.schema.json",
+      "schema_sha256": "d794ea6d68a08f06a7a27c50b4f5ad9adc104984d9198665858aea19adcd9c44",
+      "fixed_scope": [
+        "neuron/da",
+        "neuron/sentinel",
+        "neuron/vdso"
+      ],
+      "route_count": 7,
+      "treatment": "supplement only; neither the existing schema nor its three-path scope is changed"
+    },
+    "included": [
+      "the seven existing publisher records and the source-connected data entering or leaving them",
+      "VamsNeuron heartbeat construction, signing, direct GatewayClient send, and local SQLite tables and sync methods",
+      "main gateway heartbeat, node state and response, authentication/replay state, DA status/history, and other registered main-gateway request/response surfaces",
+      "legacy neuron gateway request/response models, process state, rate limiting, and source-connected client logging",
+      "Sentinel raw report construction, actual audit_node consumers, logs, public DA serialization, and performance-audit history",
+      "VDSO intent and encrypted-sidecar API fields, process-local sidecar state, commitment responses, and the separate DA publisher path",
+      "Object-policy read-call typed calldata construction and witness fields, source-observed as local bytes only; no submission consumer is established.",
+      "Semantic MMU local memory, HIPIF trace folding, interrupt escrow checkpoints, reviewed patches, access log, local diagnostics and L3 persistence failure behavior; deployment copies and owner decisions remain UNKNOWN."
+    ],
+    "limits": [
+      "This is a bounded static source inventory, not a runtime consumer-closure claim; search results only establish source-visible references in the selected tree.",
+      "No application, provider, HTTP, database, or logging backend was executed or queried. No deployed process, database, log sink, filesystem access, backup, recipient identity, or provider retention was observed.",
+      "No repository-wide privacy audit was attempted. Challenge transport internals, unreferenced integrations, infrastructure log collectors, deployment manifests, and external provider contracts remain outside the inspected flow boundary.",
+      "The source records do not decide data-subject identity, disclosure permission, minimization exceptions, retention periods, legal basis, trust roots, or recipient allowlists.",
+      "The artifact is not an approved inventory, privacy review, deployment inventory, retention policy, redaction result, public-content review, named external assurance, or release evidence. T33 remains BLOCKED.",
+      "The SDK source-hash queue records candidate source presence but does not constitute completed field/sink review; all 21 SDK modules beyond the added Semantic MMU flow remain pending detailed review.",
+      "Semantic MMU source repair is bound by exact candidate file hash; atomic replace is not evidence of directory fsync, universal power-loss durability, backup recovery, deployed ACLs or remote persistence."
+    ],
+    "capability_boundary": "No GCA capability is disabled or narrowed here. skill_vector, cognitive_requirements, memory_policy, and verifiable state commitments are inventoried as fields. Hybrid, vector, graph, episodic, semantic, and other verifiable memory implementations remain interchangeable; this artifact selects no memory representation or disclosure policy."
+  },
+  "evidence_labels": {
+    "source_observed": "A field, transformation, code gate, state structure, or response is explicit in the referenced current source.",
+    "inferred_data_flow": "A connection follows from source call sites or configuration, but no runtime transfer was observed.",
+    "unknown_operational_fact": "Source cannot establish the effective runtime, recipient/operator, access, storage, logging, backup, or retention fact."
+  },
+  "classification_legend": {
+    "raw_identifier": "An identifier appears in its input representation; the source does not establish that it identifies a natural person.",
+    "stable_pseudonym_or_hash": "A deterministic pseudonym, state hash, commitment, content hash, or digest can remain linkable across records; hashing alone is not anonymity.",
+    "signature_or_key_envelope": "Cryptographic signature, public key, nonce, encapsulated key, or wrapped key material; field presence does not establish key custody or recipient identity.",
+    "numeric_telemetry": "Measurement, score, step, cost, amount, or timing value; bounded numeric shape does not establish semantic privacy.",
+    "encrypted_ciphertext": "Encrypted bytes plus visible metadata; ciphertext secrecy does not conceal recipient IDs, hashes, timing, or size, and is not a privacy approval.",
+    "operational_metadata": "Provider, region, URL, mode, status, timestamp, count, protocol, or resource profile that may reveal deployment or commercial information.",
+    "trusted_ingress_version_marker": "Operational ingress/version marker matched from a request header; source constants and logging do not establish the deployed proxy identity or trust boundary.",
+    "signed_payload": "Structured content covered by a cryptographic signature; its fields retain their own identifier, telemetry, or operational categories.",
+    "cryptographic_proof_material": "Hashes, salts, and Merkle proof paths used to validate a claim or commitment; these remain linkable evidence and do not reveal plaintext by themselves."
+  },
+  "current_source_revalidation": [
+    {
+      "topic": "history_limit_validation",
+      "status": "source_observed_current_r12",
+      "finding": "GET /da/anchors declares limit >= 1 and PerformanceAuditLog.get_audit_history rejects nonpositive or non-integer values. The prior limit=0 behavior does not describe this candidate. There is still no route upper bound or stored-history cap; a sufficiently large positive limit can return the full current list.",
+      "source_refs": [
+        "main-da-route",
+        "performance-history"
+      ]
+    },
+    {
+      "topic": "Celestia_exception_logging",
+      "status": "source_observed_current_r12",
+      "finding": "Caught Celestia retrieval/submission exceptions use fixed generic adapter log messages; exception text is not interpolated there. An RPC error can still become a raised DAAdapterError handled by the publisher generic submission-failure branch. The publisher caught pre-submit rejection branch now also emits fixed error/log messages and a known canonical protocol label or unknown. No log sink, deployment or complete consumer behavior was observed; other Sentinel/client exception paths remain separate.",
+      "source_refs": [
+        "celestia-submit",
+        "celestia-retrieve",
+        "performance-publish"
+      ]
+    },
+    {
+      "topic": "numeric_overflow_ordering",
+      "status": "source_observed_current_r12",
+      "finding": "Public numeric bounds are checked before converting values to float for finite-number checks, preventing an unbounded integer from reaching that conversion. This does not classify the meaning of an otherwise accepted numeric KPI or score.",
+      "source_refs": [
+        "da-kpi",
+        "da-telemetry"
+      ]
+    },
+    {
+      "topic": "publisher_validation_error_logging",
+      "status": "source_observed_current_r12",
+      "finding": "Caught AuditReport parsing/DA configuration rejection returns the fixed Invalid Sentinel report or DA target error, logs the fixed Sentinel report rejected before DA submission message, and exposes only a canonical known enum/normalized-string protocol or unknown. This caught branch does not interpolate exception text or unknown target values. Sentinel may log the returned bounded error; its other exception logs, actual sinks/access/retention and deployed state remain separately unverified.",
+      "source_refs": [
+        "performance-publish",
+        "sentinel-consumers-logs"
+      ]
+    },
+    {
+      "topic": "GatewayClient_failure_logging",
+      "status": "source_observed_current_r12",
+      "finding": "Five client failure records use fixed messages: non-200 registration does not log/read response.text; registration/deregistration/heartbeat/result catches do not interpolate exception text or attach tracebacks. Heartbeat remains DEBUG, other four ERROR. Successful/already-registered ID logs, legacy server/other logs, effective sinks/access/retention and historical/deployed copies remain separate. Constructor URL emission is covered by a separate pending local repair. Separate constructor runtime validation and ordinary configuration binding now have a scoped local regression; redirect/HTTP/auth and deployed assurance remain outside these logging checks.",
+      "source_refs": [
+        "gateway-client-url",
+        "gateway-client-heartbeat",
+        "gateway-client-other"
+      ]
+    },
+    {
+      "topic": "GatewayClient_runtime_context_URL_binding",
+      "status": "source_observed_current_r12",
+      "finding": "Constructor validates the existing central mode/registered-mock policy before Session creation; supplied policy must match the effective source. Runtime policy/base URL reject ordinary rebinding and URL decisions use the captured policy. Valid HTTPS in all six modes and non-live loopback HTTP remain supported. Parent call forwards selected context, checked by static AST/syntax only; full parent runtime/deployment is unverified. Five canonical requests now explicitly disable automatic redirects; installed-requests local dispatch checks do not establish complete TLS/auth/live-mode/privacy assurance.",
+      "source_refs": [
+        "gateway-client-url",
+        "gateway-client-other",
+        "neuron-gateway-setup",
+        "neuron-live-gate"
+      ]
+    },
+    {
+      "topic": "GatewayClient_automatic_redirect_dispatch",
+      "status": "source_observed_current_r12",
+      "finding": "All five request calls explicitly set allow_redirects=False, so 3xx enters existing non-success handling without an additional automatic dispatch. Actual installed requests2.32.5 in-memory adapters check five methods and301/302/303/307/308 across cross-originHTTPS/cross-originHTTP/same-originHTTPS, with normal-status/loopback controls. No external HTTP/TLS/certificate/auth/operator/privacy/deployed assurance follows. Test-only trust_env=False/auth=None/proxies={} are not production configuration claims; Session/environment/proxy configuration is unchanged.",
+      "source_refs": [
+        "gateway-client-heartbeat",
+        "gateway-client-other"
+      ]
+    },
+    {
+      "topic": "GatewayClient_constructor_log",
+      "status": "source_observed_local_synthetic_pending_independent_review",
+      "finding": "Only the constructor INFO call changed to a fixed diagnostic. Eighteen mocked-Session regressions cover all six runtime modes, private synthetic path/query/fragment/newline markers, local loopback, earlier rejection, immutable effective configuration and request compatibility. No actual HTTP, credentials or deployment observation. Historical/deployed/other logs and data policy remain open.",
+      "source_refs": [
+        "gateway-client-url"
+      ]
+    },
+    {
+      "topic": "main_gateway_heartbeat_current_fields",
+      "status": "source_observed_current_candidate_base",
+      "finding": "Current heartbeat verifies node signature and, in live mode, requires forwarded certificate-verified and fingerprint headers matched against configured fingerprints plus trusted-ingress/loopback middleware. It stores node fields in process memory and returns raw node_id/count; source does not establish deployed proxy identity or endpoint allowlist.",
+      "source_refs": [
+        "main-gateway-heartbeat",
+        "main-gateway-startup",
+        "route-ingress"
+      ]
+    },
+    {
+      "topic": "main_gateway_composer_simulation_boundary",
+      "status": "source_observed_current_candidate_base",
+      "finding": "Compose and service/macro routes are local simulation/static declaration paths. Outputs carry simulation=true and non-authoritative status; static catalogs say registry_verified=false. Current default composer has no registry client/candidate nodes. No provider execution, escrow receipt, settlement or authenticated registry read is established.",
+      "source_refs": [
+        "main-gateway-compose",
+        "gateway-service-instances",
+        "composer-candidate-flow",
+        "service-block-output",
+        "service-manifest-output"
+      ]
+    },
+    {
+      "topic": "sentinel_local_publication_not_chain_anchor",
+      "status": "source_observed_current_candidate_base",
+      "finding": "Sentinel reports remain raw in-process until DA serialization. Local-runtime guards run around awaited probe/publication; strict success is success is True is the only True return. SLA submission helper raises a constant unavailable error before any transaction construction/send; returned audit status is local publication only. Existing identifiers, KPI content and optional anomaly log diagnostic remain owner/reviewer privacy inputs.",
+      "source_refs": [
+        "sentinel-raw-report",
+        "sentinel-consumers-logs",
+        "sentinel-sla-stub"
+      ]
+    },
+    {
+      "topic": "composer_serialization_and_state_current_boundary",
+      "status": "source_observed_current_candidate_base",
+      "finding": "Blueprint/allocation output includes capability profiles, provider/node identifiers and cost/score data; ProvisionedInstance explicitly marks simulation state and non-authoritative evidence. Composer checks its bound runtime policy before actions and after allocation callbacks, but logs blueprint names, instance IDs, costs and exception text; effective sinks/retention remain UNKNOWN.",
+      "source_refs": [
+        "composer-blueprint",
+        "composer-allocation-output",
+        "composer-state",
+        "composer-create-logs",
+        "composer-delete"
+      ]
+    },
+    {
+      "topic": "service_catalog_manifest_current_boundary",
+      "status": "source_observed_current_candidate_base",
+      "finding": "ServiceBlockClient exposes locally defined static service declarations, memory policy, manifest hashes/roots and permissions; outputs set simulation=true, registry_verified=false and evidence_classification=non-authoritative. They are not authenticated remote registry results.",
+      "source_refs": [
+        "service-block-output",
+        "service-manifest-output",
+        "macro-output"
+      ]
+    }
+  ],
+  "source_files": {
+    "docs/audit/privacy-publisher-inventory.json": {
+      "artifact": "docs/audit/privacy-publisher-inventory.json",
+      "algorithm": "sha256",
+      "digest": "9647d33860b0fc3e255e156a9d7877fcf78e05ce7b6805c5dd2bda085c5dd040"
+    },
+    "docs/audit/schemas/privacy-publisher-inventory.schema.json": {
+      "artifact": "docs/audit/schemas/privacy-publisher-inventory.schema.json",
+      "algorithm": "sha256",
+      "digest": "d794ea6d68a08f06a7a27c50b4f5ad9adc104984d9198665858aea19adcd9c44"
+    },
+    "neuron/neuron.py": {
+      "artifact": "neuron/neuron.py",
+      "algorithm": "sha256",
+      "digest": "ce51c861bacdb10be4064858e46bb0abb7eccedce083939e177070473e4bf78f"
+    },
+    "neuron/config.py": {
+      "artifact": "neuron/config.py",
+      "algorithm": "sha256",
+      "digest": "c41e8f3ea8f3cf1fbb84d051de1ae353d8d37d6b9ef59927ea563a05ea57c0df"
+    },
+    "neuron/storage/local.py": {
+      "artifact": "neuron/storage/local.py",
+      "algorithm": "sha256",
+      "digest": "11ddead7b5ca4c3ad25c438446f114d3faff02b4bd8882665f2bf5571fef23a5"
+    },
+    "neuron/gateway/client.py": {
+      "artifact": "neuron/gateway/client.py",
+      "algorithm": "sha256",
+      "digest": "d4dd680869368eadc01ea4b56078115d37a4d72983c7a0168dce37c98eacd6e0"
+    },
+    "neuron/gateway/server.py": {
+      "artifact": "neuron/gateway/server.py",
+      "algorithm": "sha256",
+      "digest": "ea9e4e2388e1bbf2ff2ac62e8afbf66a97f69821da0b1f47c90feb8584704f66"
+    },
+    "neuron/gateway/models.py": {
+      "artifact": "neuron/gateway/models.py",
+      "algorithm": "sha256",
+      "digest": "d0e12c494e4d2c0b32b13f584d08fe53168971d60c3ab5981bbce9072fdc0ed0"
+    },
+    "neuron/gateway/rate_limiter.py": {
+      "artifact": "neuron/gateway/rate_limiter.py",
+      "algorithm": "sha256",
+      "digest": "57b47b460290540f440d05076d8314c20147e32d6fd0886d25c5352ce26e58f1"
+    },
+    "neuron/runtime_safety.py": {
+      "artifact": "neuron/runtime_safety.py",
+      "algorithm": "sha256",
+      "digest": "b39c48ec63f20c34573e11e0a515ef622e3340f76964e1688c2dfa23b29d0079"
+    },
+    "gateway/server.py": {
+      "artifact": "gateway/server.py",
+      "algorithm": "sha256",
+      "digest": "ae9011d5c5e4926c28483406c6527cb69476873a13d5cdafde14c370fa57fa9b"
+    },
+    "gateway/route_policy.py": {
+      "artifact": "gateway/route_policy.py",
+      "algorithm": "sha256",
+      "digest": "15166275718db36c9c68692a98a8fccbaee0ec3342fac0102cf9989305116916"
+    },
+    "gateway/route_security.py": {
+      "artifact": "gateway/route_security.py",
+      "algorithm": "sha256",
+      "digest": "c1b56ada6d3640ba9c6bf6e5bafc01ea0eab0494805835e280aadaba47a336b0"
+    },
+    "gateway/request_auth.py": {
+      "artifact": "gateway/request_auth.py",
+      "algorithm": "sha256",
+      "digest": "9b47c26f1e640f3bd85f2d88d223fa97f38cfe2d9bd90948389f11ed9474a926"
+    },
+    "gateway/replay_store.py": {
+      "artifact": "gateway/replay_store.py",
+      "algorithm": "sha256",
+      "digest": "0c10719bc399e932e763b9d80635f262f8caea683d4e7b37de4370a0a4ebc9de"
+    },
+    "neuron/sentinel/sentinel_node.py": {
+      "artifact": "neuron/sentinel/sentinel_node.py",
+      "algorithm": "sha256",
+      "digest": "7577a07a878d8a48fe536cb993deccf8c5bb4e6a62b58541d633b740ac49f3ec"
+    },
+    "neuron/sentinel/da_publisher.py": {
+      "artifact": "neuron/sentinel/da_publisher.py",
+      "algorithm": "sha256",
+      "digest": "8811cae8eb27e453cf7740860e815d48551c859ec629ff8226ad984c39b7ce53"
+    },
+    "neuron/da/models.py": {
+      "artifact": "neuron/da/models.py",
+      "algorithm": "sha256",
+      "digest": "4fc6b3d96809c72989f3ef7e016e8ec3427b7d380c6175820e39dd40848fbc7f"
+    },
+    "neuron/da/performance_audit.py": {
+      "artifact": "neuron/da/performance_audit.py",
+      "algorithm": "sha256",
+      "digest": "5ffff1b7b2c2e4c2201cd097064dbe23282c0da448cda63cb8385d021b790d5a"
+    },
+    "neuron/da/adapters/base.py": {
+      "artifact": "neuron/da/adapters/base.py",
+      "algorithm": "sha256",
+      "digest": "b9aaabec97eac0cb92bebe26e535b6c7c6404902e5d039776d2d7e5a16e59081"
+    },
+    "neuron/da/adapters/avail_adapter.py": {
+      "artifact": "neuron/da/adapters/avail_adapter.py",
+      "algorithm": "sha256",
+      "digest": "20e471706c4587feddafbb0c93c3e730fc000b0ce9da30af52edcef228c31c02"
+    },
+    "neuron/da/adapters/celestia_adapter.py": {
+      "artifact": "neuron/da/adapters/celestia_adapter.py",
+      "algorithm": "sha256",
+      "digest": "56ddcdb9c8c86026839a73f989d16dcda0def438c60cb67a43244d1175405ac7"
+    },
+    "neuron/da/adapters/eigenda_adapter.py": {
+      "artifact": "neuron/da/adapters/eigenda_adapter.py",
+      "algorithm": "sha256",
+      "digest": "5cc57044bcff0712b0f4a1a9cf43ccaa7c54e317635af590502bc475a3c02050"
+    },
+    "neuron/da/adapters/near_adapter.py": {
+      "artifact": "neuron/da/adapters/near_adapter.py",
+      "algorithm": "sha256",
+      "digest": "6d797515bbce468c3e7e0579e38ef315002798ed766505a7cc7985db97ea338b"
+    },
+    "neuron/vdso/sidecar.py": {
+      "artifact": "neuron/vdso/sidecar.py",
+      "algorithm": "sha256",
+      "digest": "269e2449344e41621d51b3ff155c8c84f9cf2f6ced193425f2697ca6e7b0abb3"
+    },
+    "neuron/vdso/da.py": {
+      "artifact": "neuron/vdso/da.py",
+      "algorithm": "sha256",
+      "digest": "84ada9c4cf724ab12f9542fef3f138929f0a751964849e99ad16b14c785882fb"
+    },
+    "neuron/vdso/service.py": {
+      "artifact": "neuron/vdso/service.py",
+      "algorithm": "sha256",
+      "digest": "4a30a3a01d66172924f87992ce92cfdcef71be968724a0b4a52604586cd51b90"
+    },
+    "neuron/vdso/models.py": {
+      "artifact": "neuron/vdso/models.py",
+      "algorithm": "sha256",
+      "digest": "78a540284827c9a40c759662c565effe40be23c6c5760d8ba15d576530cf1586"
+    },
+    "neuron/vdso/workflow.py": {
+      "artifact": "neuron/vdso/workflow.py",
+      "algorithm": "sha256",
+      "digest": "a34b00d530b6a92ab70c4cfc12ab13d03cdd778cbb82d3ec425461d4ed5b681a"
+    },
+    "gateway/vdso.py": {
+      "artifact": "gateway/vdso.py",
+      "algorithm": "sha256",
+      "digest": "21152bc7f676f82ce39fb854ad35936cef0e5168a292b5ec83ec8003b6a7beb6"
+    },
+    "neuron/composer/models.py": {
+      "artifact": "neuron/composer/models.py",
+      "algorithm": "sha256",
+      "digest": "7fe2a2e0ec198ee3d987a1fe72f5bf62d535e171b5c106a52f524de2aaa42865"
+    },
+    "neuron/composer/composer.py": {
+      "artifact": "neuron/composer/composer.py",
+      "algorithm": "sha256",
+      "digest": "a762a602bb4544a4c9c06f6e71efc825978cea6b57b3149a6c3bdcce0faf7a8a"
+    },
+    "neuron/services/registry_client.py": {
+      "artifact": "neuron/services/registry_client.py",
+      "algorithm": "sha256",
+      "digest": "69fee6e6b6fdc8ba1cf6ed80864fe30ce6f7af863073b5d43f337532826f1115"
+    },
+    "neuron/services/macro_blocks.py": {
+      "artifact": "neuron/services/macro_blocks.py",
+      "algorithm": "sha256",
+      "digest": "1b12d9ba8160dae56735d4dce152e9aa630cda3cb757148a490ec104b383a072"
+    },
+    "neuron/economics/keeper.py": {
+      "artifact": "neuron/economics/keeper.py",
+      "algorithm": "sha256",
+      "digest": "42774c6a41a45968e5415b1c25a776d4489d1c489145a1c552cf59e1fce7bd7f"
+    },
+    "neuron/economics/reward_engine.py": {
+      "artifact": "neuron/economics/reward_engine.py",
+      "algorithm": "sha256",
+      "digest": "32cfafffeeacba295293847f5d819204884c86492c0ee9cde1a57254b9ff358e"
+    },
+    "neuron/action_context.py": {
+      "artifact": "neuron/action_context.py",
+      "algorithm": "sha256",
+      "digest": "6719957bfae1b82eb826744463bbbc09bbd4bb367b8b98b4644ff9a0533679fb"
+    },
+    "neuron/effect_protocol_v3.py": {
+      "artifact": "neuron/effect_protocol_v3.py",
+      "algorithm": "sha256",
+      "digest": "10e8281f02bfeef54cf620bc7fd1f15407e283e8c752c707196985482b491d08"
+    },
+    "neuron/effect_authority_v3.py": {
+      "artifact": "neuron/effect_authority_v3.py",
+      "algorithm": "sha256",
+      "digest": "d35d8ed5b065b99a0daa8060d795b605d270173d7bd8ad897676d6084c7792a7"
+    },
+    "neuron/effect_provider_v3.py": {
+      "artifact": "neuron/effect_provider_v3.py",
+      "algorithm": "sha256",
+      "digest": "28d9e3880cd2ee673cb258643d99c4508619d357a4e06d079ed022767ae8a3a6"
+    },
+    "neuron/object_grant_v1.py": {
+      "artifact": "neuron/object_grant_v1.py",
+      "algorithm": "sha256",
+      "digest": "fb50966d3fb8e25a0e398ec29bf02f1a0b4435b6e0091eaac6ae35e710957f58"
+    },
+    "neuron/signed_receipts.py": {
+      "artifact": "neuron/signed_receipts.py",
+      "algorithm": "sha256",
+      "digest": "cd35ef6cd09d60e433978b6d0ef2b35f08f06286c8112b532a084af97abe57c1"
+    },
+    "contracts/src/trust/RestrictedTestnetPolicyV1.sol": {
+      "artifact": "contracts/src/trust/RestrictedTestnetPolicyV1.sol",
+      "algorithm": "sha256",
+      "digest": "8b7dd049565cea5fe9be3c06313b34b437c4f04d53de4577f000401ad45df62e"
+    },
+    "neuron/object_policy_calls_v1.py": {
+      "artifact": "neuron/object_policy_calls_v1.py",
+      "algorithm": "sha256",
+      "digest": "c01d6ed85bda237df5c245448b685fcf4f0d09e8a0891ed182aa9214d26c3532"
+    },
+    "neuron/sdk/semantic_mmu.py": {
+      "artifact": "neuron/sdk/semantic_mmu.py",
+      "algorithm": "sha256",
+      "digest": "b1072060beeedc985f4cd874b709c1afdeaf78020ceb086e9f8418c12e2c86a1"
+    }
+  },
+  "source_references": {
+    "publisher-scope": {
+      "path": "docs/audit/schemas/privacy-publisher-inventory.schema.json",
+      "lines": [
+        9,
+        11
+      ],
+      "anchor": "const"
+    },
+    "publisher-avail": {
+      "path": "docs/audit/privacy-publisher-inventory.json",
+      "lines": [
+        10,
+        24
+      ],
+      "anchor": "avail-blob-submission"
+    },
+    "publisher-celestia": {
+      "path": "docs/audit/privacy-publisher-inventory.json",
+      "lines": [
+        27,
+        43
+      ],
+      "anchor": "celestia-blob-submission"
+    },
+    "publisher-eigenda": {
+      "path": "docs/audit/privacy-publisher-inventory.json",
+      "lines": [
+        45,
+        60
+      ],
+      "anchor": "eigenda-blob-submission"
+    },
+    "publisher-near": {
+      "path": "docs/audit/privacy-publisher-inventory.json",
+      "lines": [
+        62,
+        77
+      ],
+      "anchor": "near-blob-submission"
+    },
+    "publisher-performance": {
+      "path": "docs/audit/privacy-publisher-inventory.json",
+      "lines": [
+        79,
+        97
+      ],
+      "anchor": "performance-audit-publisher"
+    },
+    "publisher-legacy": {
+      "path": "docs/audit/privacy-publisher-inventory.json",
+      "lines": [
+        99,
+        113
+      ],
+      "anchor": "legacy-sentinel-da-publisher"
+    },
+    "publisher-vdso": {
+      "path": "docs/audit/privacy-publisher-inventory.json",
+      "lines": [
+        115,
+        131
+      ],
+      "anchor": "vdso-encrypted-sidecar-publisher"
+    },
+    "neuron-identity": {
+      "path": "neuron/neuron.py",
+      "lines": [
+        421,
+        428
+      ],
+      "anchor": "public_key_bytes(self.vk).hex()[:16]"
+    },
+    "neuron-logging": {
+      "path": "neuron/neuron.py",
+      "lines": [
+        370,
+        382
+      ],
+      "anchor": "print(f\"{Fore.LIGHTBLACK_EX}"
+    },
+    "neuron-gateway-setup": {
+      "path": "neuron/neuron.py",
+      "lines": [
+        276,
+        293
+      ],
+      "anchor": "self.gateway = GatewayClient("
+    },
+    "neuron-sign": {
+      "path": "neuron/neuron.py",
+      "lines": [
+        437,
+        444
+      ],
+      "anchor": "def sign_telemetry"
+    },
+    "neuron-send": {
+      "path": "neuron/neuron.py",
+      "lines": [
+        446,
+        470
+      ],
+      "anchor": "self.gateway.send_heartbeat(payload, signature)"
+    },
+    "neuron-loop": {
+      "path": "neuron/neuron.py",
+      "lines": [
+        698,
+        708
+      ],
+      "anchor": "self.send_heartbeat(block_info)"
+    },
+    "neuron-live-gate": {
+      "path": "neuron/neuron.py",
+      "lines": [
+        203,
+        217
+      ],
+      "anchor": "VamsNeuron live startup is disabled"
+    },
+    "neuron-config": {
+      "path": "neuron/config.py",
+      "lines": [
+        13,
+        28
+      ],
+      "anchor": "DATABASE_PATH = os.getenv"
+    },
+    "storage-schema": {
+      "path": "neuron/storage/local.py",
+      "lines": [
+        25,
+        63
+      ],
+      "anchor": "CREATE TABLE IF NOT EXISTS heartbeats"
+    },
+    "storage-heartbeat": {
+      "path": "neuron/storage/local.py",
+      "lines": [
+        65,
+        112
+      ],
+      "anchor": "def get_unsynced_heartbeats"
+    },
+    "storage-other-tables": {
+      "path": "neuron/storage/local.py",
+      "lines": [
+        45,
+        61
+      ],
+      "anchor": "CREATE TABLE IF NOT EXISTS metrics"
+    },
+    "storage-other-methods": {
+      "path": "neuron/storage/local.py",
+      "lines": [
+        114,
+        174
+      ],
+      "anchor": "def record_metric"
+    },
+    "gateway-client-url": {
+      "path": "neuron/gateway/client.py",
+      "lines": [
+        18,
+        65
+      ],
+      "anchor": "def _validated_base_url"
+    },
+    "gateway-client-heartbeat": {
+      "path": "neuron/gateway/client.py",
+      "lines": [
+        121,
+        134
+      ],
+      "anchor": "json={\"payload\": payload, \"signature\": signature}"
+    },
+    "gateway-client-other": {
+      "path": "neuron/gateway/client.py",
+      "lines": [
+        67,
+        161
+      ],
+      "anchor": "def register_agent"
+    },
+    "legacy-gateway-mode": {
+      "path": "neuron/gateway/server.py",
+      "lines": [
+        32,
+        55
+      ],
+      "anchor": "if policy.is_live"
+    },
+    "legacy-gateway-routes": {
+      "path": "neuron/gateway/server.py",
+      "lines": [
+        68,
+        153
+      ],
+      "anchor": "@app.post(\"/agents/register\", response_model=GenericResponse)"
+    },
+    "legacy-models": {
+      "path": "neuron/gateway/models.py",
+      "lines": [
+        12,
+        40
+      ],
+      "anchor": "class RegisterRequest"
+    },
+    "legacy-rate-middleware": {
+      "path": "neuron/gateway/server.py",
+      "lines": [
+        59,
+        66
+      ],
+      "anchor": "request.client.host"
+    },
+    "legacy-rate-limiter": {
+      "path": "neuron/gateway/rate_limiter.py",
+      "lines": [
+        7,
+        53
+      ],
+      "anchor": "Rate limit exceeded for {key}"
+    },
+    "runtime-modes": {
+      "path": "neuron/runtime_safety.py",
+      "lines": [
+        15,
+        92
+      ],
+      "anchor": "RUNTIME_MODE_VARIABLE = \"VAMS_ENV\""
+    },
+    "runtime-policy": {
+      "path": "neuron/runtime_safety.py",
+      "lines": [
+        164,
+        224
+      ],
+      "anchor": "if mode in LIVE_MODES and enabled_mock_variables:"
+    },
+    "main-gateway-bind": {
+      "path": "gateway/server.py",
+      "lines": [
+        62,
+        68
+      ],
+      "anchor": "LIVE_BIND_HOST = \"127.0.0.1\""
+    },
+    "main-gateway-startup": {
+      "path": "gateway/server.py",
+      "lines": [
+        138,
+        230
+      ],
+      "anchor": "async def lifespan"
+    },
+    "main-gateway-middleware": {
+      "path": "gateway/server.py",
+      "lines": [
+        251,
+        307
+      ],
+      "anchor": "class RateLimitMiddleware"
+    },
+    "main-gateway-heartbeat": {
+      "path": "gateway/server.py",
+      "lines": [
+        745,
+        846
+      ],
+      "anchor": "@app.post(\"/heartbeat\")"
+    },
+    "main-gateway-compose": {
+      "path": "gateway/server.py",
+      "lines": [
+        874,
+        1028
+      ],
+      "anchor": "class ComposeRequest(BaseModel):"
+    },
+    "main-gateway-economics-da": {
+      "path": "gateway/server.py",
+      "lines": [
+        1035,
+        1125
+      ],
+      "anchor": "@app.get(\"/economics/status\")"
+    },
+    "main-gateway-route-startup": {
+      "path": "gateway/server.py",
+      "lines": [
+        1129,
+        1143
+      ],
+      "anchor": "def main():"
+    },
+    "route-policy": {
+      "path": "gateway/route_policy.py",
+      "lines": [
+        56,
+        91
+      ],
+      "anchor": "_rule(\"/da/anchors\", \"GET\", \"da_anchors\""
+    },
+    "route-security": {
+      "path": "gateway/route_security.py",
+      "lines": [
+        30,
+        120
+      ],
+      "anchor": "class GatewayRouteSecurityMiddleware"
+    },
+    "route-ingress": {
+      "path": "gateway/route_security.py",
+      "lines": [
+        140,
+        181
+      ],
+      "anchor": "def _validate_trusted_ingress"
+    },
+    "auth-headers": {
+      "path": "gateway/request_auth.py",
+      "lines": [
+        40,
+        61
+      ],
+      "anchor": "\"signature\": b\"x-vams-auth-signature\""
+    },
+    "auth-envelope": {
+      "path": "gateway/request_auth.py",
+      "lines": [
+        220,
+        279
+      ],
+      "anchor": "class GatewayAuthEnvelope"
+    },
+    "auth-consumption": {
+      "path": "gateway/request_auth.py",
+      "lines": [
+        298,
+        352
+      ],
+      "anchor": "async def authenticate"
+    },
+    "replay-schema": {
+      "path": "gateway/replay_store.py",
+      "lines": [
+        45,
+        73
+      ],
+      "anchor": "CREATE TABLE replay_reservations"
+    },
+    "replay-retention": {
+      "path": "gateway/replay_store.py",
+      "lines": [
+        289,
+        352
+      ],
+      "anchor": "retain_until = min("
+    },
+    "replay-cleanup": {
+      "path": "gateway/replay_store.py",
+      "lines": [
+        678,
+        694
+      ],
+      "anchor": "def _cleanup_in_transaction"
+    },
+    "replay-store-selection": {
+      "path": "gateway/replay_store.py",
+      "lines": [
+        713,
+        781
+      ],
+      "anchor": "def build_gateway_replay_store"
+    },
+    "sentinel-mode": {
+      "path": "neuron/sentinel/sentinel_node.py",
+      "lines": [
+        54,
+        79
+      ],
+      "anchor": "class VAMSSentinelNode(ImmutableRuntimeConfiguration):"
+    },
+    "sentinel-raw-report": {
+      "path": "neuron/sentinel/sentinel_node.py",
+      "lines": [
+        157,
+        191
+      ],
+      "anchor": "async def execute_challenge("
+    },
+    "sentinel-consumers-logs": {
+      "path": "neuron/sentinel/sentinel_node.py",
+      "lines": [
+        193,
+        249
+      ],
+      "anchor": "async def audit_node("
+    },
+    "sentinel-sla-stub": {
+      "path": "neuron/sentinel/sentinel_node.py",
+      "lines": [
+        250,
+        252
+      ],
+      "anchor": "async def _submit_sla_report("
+    },
+    "sentinel-scheduler": {
+      "path": "neuron/sentinel/sentinel_node.py",
+      "lines": [
+        286,
+        310
+      ],
+      "anchor": "node_id = b\"test_node_01\""
+    },
+    "da-pseudonym": {
+      "path": "neuron/da/models.py",
+      "lines": [
+        43,
+        62
+      ],
+      "anchor": "def pseudonymize_public_identifier"
+    },
+    "da-kpi": {
+      "path": "neuron/da/models.py",
+      "lines": [
+        101,
+        137
+      ],
+      "anchor": "def sanitize_public_kpis"
+    },
+    "da-telemetry": {
+      "path": "neuron/da/models.py",
+      "lines": [
+        140,
+        198
+      ],
+      "anchor": "def sanitize_public_telemetry"
+    },
+    "da-serialized-report": {
+      "path": "neuron/da/models.py",
+      "lines": [
+        240,
+        297
+      ],
+      "anchor": "def serialize(self)"
+    },
+    "da-receipt-model": {
+      "path": "neuron/da/models.py",
+      "lines": [
+        211,
+        236
+      ],
+      "anchor": "raw_response: Optional[Dict[str, Any]]"
+    },
+    "performance-gates": {
+      "path": "neuron/da/performance_audit.py",
+      "lines": [
+        39,
+        168
+      ],
+      "anchor": "LIVE_CAPABLE_PROTOCOLS = {DAProtocol.CELESTIA}"
+    },
+    "performance-publish": {
+      "path": "neuron/da/performance_audit.py",
+      "lines": [
+        200,
+        306
+      ],
+      "anchor": "async def publish_sentinel_report"
+    },
+    "performance-history": {
+      "path": "neuron/da/performance_audit.py",
+      "lines": [
+        324,
+        346
+      ],
+      "anchor": "def get_audit_history"
+    },
+    "adapter-base": {
+      "path": "neuron/da/adapters/base.py",
+      "lines": [
+        17,
+        84
+      ],
+      "anchor": "supports_live_submission"
+    },
+    "avail-adapter": {
+      "path": "neuron/da/adapters/avail_adapter.py",
+      "lines": [
+        31,
+        96
+      ],
+      "anchor": "AvailDAAdapter is a structured stub"
+    },
+    "celestia-submit": {
+      "path": "neuron/da/adapters/celestia_adapter.py",
+      "lines": [
+        26,
+        118
+      ],
+      "anchor": "Celestia live submission failed"
+    },
+    "celestia-retrieve": {
+      "path": "neuron/da/adapters/celestia_adapter.py",
+      "lines": [
+        120,
+        192
+      ],
+      "anchor": "Celestia blob retrieval failed"
+    },
+    "eigenda-adapter": {
+      "path": "neuron/da/adapters/eigenda_adapter.py",
+      "lines": [
+        31,
+        95
+      ],
+      "anchor": "EigenDAAdapter is a structured stub"
+    },
+    "near-adapter": {
+      "path": "neuron/da/adapters/near_adapter.py",
+      "lines": [
+        24,
+        80
+      ],
+      "anchor": "Near live submission is disabled"
+    },
+    "legacy-da-publisher": {
+      "path": "neuron/sentinel/da_publisher.py",
+      "lines": [
+        15,
+        70
+      ],
+      "anchor": "async def publish_report"
+    },
+    "vdso-models": {
+      "path": "neuron/vdso/models.py",
+      "lines": [
+        129,
+        214
+      ],
+      "anchor": "class UnsignedIntent"
+    },
+    "vdso-sidecar-model": {
+      "path": "neuron/vdso/sidecar.py",
+      "lines": [
+        39,
+        140
+      ],
+      "anchor": "class EncryptedWitnessSidecar"
+    },
+    "vdso-encrypt": {
+      "path": "neuron/vdso/sidecar.py",
+      "lines": [
+        143,
+        211
+      ],
+      "anchor": "def encrypt_sidecar"
+    },
+    "vdso-api-intent-model": {
+      "path": "gateway/vdso.py",
+      "lines": [
+        100,
+        185
+      ],
+      "anchor": "class UnsignedIntentRequest"
+    },
+    "vdso-api-envelope-model": {
+      "path": "gateway/vdso.py",
+      "lines": [
+        188,
+        254
+      ],
+      "anchor": "class RecipientEnvelopeRequest"
+    },
+    "vdso-api-auth": {
+      "path": "gateway/vdso.py",
+      "lines": [
+        273,
+        312
+      ],
+      "anchor": "def require_vdso_request_auth"
+    },
+    "vdso-api-handlers": {
+      "path": "gateway/vdso.py",
+      "lines": [
+        296,
+        448
+      ],
+      "anchor": "def _intent_response"
+    },
+    "vdso-service-state": {
+      "path": "neuron/vdso/service.py",
+      "lines": [
+        93,
+        173
+      ],
+      "anchor": "self._ciphertext_sidecars: Dict"
+    },
+    "vdso-service-sidecar": {
+      "path": "neuron/vdso/service.py",
+      "lines": [
+        286,
+        325
+      ],
+      "anchor": "def store_encrypted_sidecar"
+    },
+    "vdso-da-publisher": {
+      "path": "neuron/vdso/da.py",
+      "lines": [
+        91,
+        189
+      ],
+      "anchor": "def serialize_encrypted_sidecar"
+    },
+    "vdso-workflow": {
+      "path": "neuron/vdso/workflow.py",
+      "lines": [
+        55,
+        99
+      ],
+      "anchor": "self.service.require_bound_sidecar(intent)"
+    },
+    "composer-blueprint": {
+      "path": "neuron/composer/models.py",
+      "lines": [
+        184,
+        220
+      ],
+      "anchor": "def to_dict(self) -> Dict[str, Any]:"
+    },
+    "composer-allocation-output": {
+      "path": "neuron/composer/models.py",
+      "lines": [
+        256,
+        315
+      ],
+      "anchor": "def to_dict(self) -> Dict[str, Any]:"
+    },
+    "composer-state": {
+      "path": "neuron/composer/composer.py",
+      "lines": [
+        105,
+        121
+      ],
+      "anchor": "self._instances: Dict[str, ProvisionedInstance] = {}"
+    },
+    "composer-create-logs": {
+      "path": "neuron/composer/composer.py",
+      "lines": [
+        136,
+        206
+      ],
+      "anchor": "self.assert_simulation_available()"
+    },
+    "composer-delete": {
+      "path": "neuron/composer/composer.py",
+      "lines": [
+        245,
+        264
+      ],
+      "anchor": "def deprovision(self, instance_id: str) -> bool:"
+    },
+    "service-block-output": {
+      "path": "neuron/services/registry_client.py",
+      "lines": [
+        350,
+        402
+      ],
+      "anchor": "\"registry_verified\": False,"
+    },
+    "service-manifest-output": {
+      "path": "neuron/services/registry_client.py",
+      "lines": [
+        122,
+        143
+      ],
+      "anchor": "def computed_manifest_hash(self) -> str:"
+    },
+    "macro-output": {
+      "path": "neuron/services/macro_blocks.py",
+      "lines": [
+        109,
+        120
+      ],
+      "anchor": "\"description\": m[\"description\"][:100]"
+    },
+    "economics-state": {
+      "path": "neuron/economics/keeper.py",
+      "lines": [
+        33,
+        57
+      ],
+      "anchor": "self.epoch_history: Dict[int, EpochRewardSummary]"
+    },
+    "economics-log": {
+      "path": "neuron/economics/keeper.py",
+      "lines": [
+        67,
+        96
+      ],
+      "anchor": "f\"Root: {summary.merkle_root}\""
+    },
+    "economics-status": {
+      "path": "neuron/economics/keeper.py",
+      "lines": [
+        152,
+        171
+      ],
+      "anchor": "\"completed_epochs\": len(self.epoch_history)"
+    },
+    "economics-summary-model": {
+      "path": "neuron/economics/reward_engine.py",
+      "lines": [
+        68,
+        100
+      ],
+      "anchor": "class EpochRewardSummary"
+    },
+    "economics-estimate": {
+      "path": "neuron/economics/reward_engine.py",
+      "lines": [
+        250,
+        304
+      ],
+      "anchor": "\"apr\": round(apr, 6)"
+    },
+    "gateway-runtime-log": {
+      "path": "gateway/server.py",
+      "lines": [
+        192,
+        200
+      ],
+      "anchor": "\"gateway runtime mode=%s classification=%s evidence=%s gateway_mock=%s \""
+    },
+    "gateway-service-instances": {
+      "path": "gateway/server.py",
+      "lines": [
+        475,
+        512
+      ],
+      "anchor": "composer = VAMSResourceComposer()"
+    },
+    "composer-candidate-flow": {
+      "path": "neuron/composer/composer.py",
+      "lines": [
+        393,
+        415
+      ],
+      "anchor": "def _fetch_candidate_nodes("
+    },
+    "economics-fetcher-defaults": {
+      "path": "neuron/economics/keeper.py",
+      "lines": [
+        33,
+        47
+      ],
+      "anchor": "self.provider_fetcher = provider_fetcher"
+    },
+    "signed-receipt-order": {
+      "path": "neuron/signed_receipts.py",
+      "lines": [
+        14,
+        16
+      ],
+      "anchor": "ORDER="
+    },
+    "object-effect-v3": {
+      "path": "neuron/effect_protocol_v3.py",
+      "lines": [
+        47,
+        53
+      ],
+      "anchor": "class ObjectEffectV3:"
+    },
+    "restricted-policy-read-methods": {
+      "path": "contracts/src/trust/RestrictedTestnetPolicyV1.sol",
+      "lines": [
+        89,
+        106
+      ],
+      "anchor": "function authorizes(ActionContextV1.Context memory c) external view returns (bool)"
+    },
+    "object-authority-scope-v3": {
+      "path": "neuron/effect_authority_v3.py",
+      "lines": [
+        29,
+        55
+      ],
+      "anchor": "class ObjectAuthorityScopeV3:"
+    },
+    "governed-object-grant-v1": {
+      "path": "neuron/object_grant_v1.py",
+      "lines": [
+        13,
+        60
+      ],
+      "anchor": "class GovernedObjectGrantV1:"
+    },
+    "object-policy-call-domain": {
+      "path": "neuron/object_policy_calls_v1.py",
+      "lines": [
+        81,
+        109
+      ],
+      "anchor": "def _configuration(self):"
+    },
+    "object-policy-call-witness": {
+      "path": "neuron/object_policy_calls_v1.py",
+      "lines": [
+        46,
+        69
+      ],
+      "anchor": "class ObjectGrantWitnessV1:"
+    },
+    "provider-identity-v3": {
+      "path": "neuron/effect_provider_v3.py",
+      "lines": [
+        36,
+        65
+      ],
+      "anchor": "class ObjectProviderIdentityV3:"
+    },
+    "action-context-v1": {
+      "path": "neuron/action_context.py",
+      "lines": [
+        9,
+        41
+      ],
+      "anchor": "HASH_FIELDS ="
+    },
+    "object-policy-call-helper": {
+      "path": "neuron/object_policy_calls_v1.py",
+      "lines": [
+        110,
+        122
+      ],
+      "anchor": "def object_call(self,proposal,witness):"
+    },
+    "semantic-mmu-access-log": {
+      "path": "neuron/sdk/semantic_mmu.py",
+      "lines": [
+        210,
+        224
+      ],
+      "anchor": "def _log_access("
+    },
+    "semantic-mmu-store-fetch": {
+      "path": "neuron/sdk/semantic_mmu.py",
+      "lines": [
+        398,
+        562
+      ],
+      "anchor": "def store("
+    },
+    "semantic-mmu-patch": {
+      "path": "neuron/sdk/semantic_mmu.py",
+      "lines": [
+        343,
+        396
+      ],
+      "anchor": "def apply_memory_patch("
+    },
+    "semantic-mmu-persistence": {
+      "path": "neuron/sdk/semantic_mmu.py",
+      "lines": [
+        226,
+        259
+      ],
+      "anchor": "def _write_to_horma_fs(self, page: MemoryPage):"
+    },
+    "semantic-mmu-hipif": {
+      "path": "neuron/sdk/semantic_mmu.py",
+      "lines": [
+        293,
+        341
+      ],
+      "anchor": "def fold_completed_subtask("
+    },
+    "semantic-mmu-address": {
+      "path": "neuron/sdk/semantic_mmu.py",
+      "lines": [
+        190,
+        208
+      ],
+      "anchor": "def _validate_address(address: str) -> List[str]:"
+    },
+    "semantic-mmu-flush-checkpoint-reset": {
+      "path": "neuron/sdk/semantic_mmu.py",
+      "lines": [
+        580,
+        681
+      ],
+      "anchor": "def checkpoint_interrupt_state("
+    }
+  },
+  "publisher_routes": [
+    {
+      "id": "avail-blob-submission",
+      "path": "neuron/da/adapters/avail_adapter.py",
+      "symbol": "AvailDAAdapter.submit_blob",
+      "fixed_inventory_record": {
+        "channel": "local-simulation",
+        "payload_policy": "local-mock-only",
+        "operational_live_capable": false,
+        "release_evidence_eligible": false
+      },
+      "current_mode_status": "constructor requires mock mode; the adapter computes a digest and simulated receipt and has no live submit path",
+      "source_connected_consumer": "PerformanceAuditLog can instantiate it only in mock routing; no provider request is made by this adapter",
+      "data_fields": [
+        "serialized input bytes supplied by the audit publisher",
+        "SHA-256 digest",
+        "simulated blob_id",
+        "height",
+        "simulated commitment",
+        "runtime/evidence classification"
+      ],
+      "source_refs": [
+        "publisher-avail",
+        "avail-adapter",
+        "performance-gates",
+        "performance-publish"
+      ]
+    },
+    {
+      "id": "celestia-blob-submission",
+      "path": "neuron/da/adapters/celestia_adapter.py",
+      "symbol": "CelestiaDAAdapter.submit_blob",
+      "fixed_inventory_record": {
+        "channel": "public-da",
+        "payload_policy": "transport-only",
+        "operational_live_capable": true,
+        "release_evidence_eligible": false
+      },
+      "current_mode_status": "conditionally live-capable when mock_mode is false; adapter release evidence remains ineligible without an independent observer; actual invocation and destination are unknown",
+      "source_connected_consumer": "PerformanceAuditLog passes AuditReport.serialize() bytes; EncryptedSidecarPublisher rejects the current CelestiaDAAdapter class for VDSO evidence",
+      "data_fields": [
+        "namespace (base64 in the RPC request)",
+        "serialized payload bytes (base64)",
+        "share_version",
+        "gas_price",
+        "RPC height/result",
+        "blob_id",
+        "commitment",
+        "receipt raw_response while the receipt is held"
+      ],
+      "source_refs": [
+        "publisher-celestia",
+        "celestia-submit",
+        "celestia-retrieve",
+        "performance-publish",
+        "vdso-da-publisher"
+      ]
+    },
+    {
+      "id": "eigenda-blob-submission",
+      "path": "neuron/da/adapters/eigenda_adapter.py",
+      "symbol": "EigenDAAdapter.submit_blob",
+      "fixed_inventory_record": {
+        "channel": "local-simulation",
+        "payload_policy": "local-mock-only",
+        "operational_live_capable": false,
+        "release_evidence_eligible": false
+      },
+      "current_mode_status": "constructor rejects non-mock selection; PerformanceAuditLog supplies mock mode for this structured stub",
+      "source_connected_consumer": "PerformanceAuditLog can instantiate it only for mock routing; no provider submission or receipt verification occurs",
+      "data_fields": [
+        "serialized input bytes supplied by the audit publisher",
+        "SHA-256 digest",
+        "simulated blob_id",
+        "height",
+        "simulated commitment",
+        "runtime/evidence classification"
+      ],
+      "source_refs": [
+        "publisher-eigenda",
+        "eigenda-adapter",
+        "performance-gates",
+        "performance-publish"
+      ]
+    },
+    {
+      "id": "near-blob-submission",
+      "path": "neuron/da/adapters/near_adapter.py",
+      "symbol": "NearDAAdapter.submit_blob",
+      "fixed_inventory_record": {
+        "channel": "local-simulation",
+        "payload_policy": "local-mock-only",
+        "operational_live_capable": false,
+        "release_evidence_eligible": false
+      },
+      "current_mode_status": "PerformanceAuditLog excludes Near from non-mock enabled protocols; direct non-mock submit raises DAAdapterError; mock submit returns a local receipt",
+      "source_connected_consumer": "PerformanceAuditLog calls this adapter only when Near is included by mock configuration",
+      "data_fields": [
+        "serialized input bytes supplied by the audit publisher",
+        "SHA-256 commitment",
+        "mock blob_id",
+        "height",
+        "protocol"
+      ],
+      "source_refs": [
+        "publisher-near",
+        "near-adapter",
+        "performance-gates",
+        "performance-publish"
+      ]
+    },
+    {
+      "id": "performance-audit-publisher",
+      "path": "neuron/da/performance_audit.py",
+      "symbol": "PerformanceAuditLog.publish_sentinel_report",
+      "fixed_inventory_record": {
+        "channel": "public-da",
+        "payload_policy": "sanitized-public",
+        "operational_live_capable": true,
+        "release_evidence_eligible": false
+      },
+      "current_mode_status": "non-mock routing defaults to Celestia only; mock routing can select the configured local stubs; live modes reject registered mock flags; release evidence remains ineligible",
+      "source_connected_consumer": "VAMSSentinelNode.audit_node is the production-source call site found; main gateway exposes adapter status and retained audit history",
+      "data_fields": [
+        "raw Sentinel report input",
+        "serialized allowlisted AuditReport fields",
+        "DA receipt and provider identifiers",
+        "reportHash/merkleRoot/merkleProof",
+        "mock/live and evidence classifications",
+        "audit_history node_id/protocol/blob_id/height/report_hash/timestamp"
+      ],
+      "source_refs": [
+        "publisher-performance",
+        "performance-gates",
+        "performance-publish",
+        "performance-history",
+        "sentinel-consumers-logs",
+        "main-gateway-economics-da"
+      ]
+    },
+    {
+      "id": "legacy-sentinel-da-publisher",
+      "path": "neuron/sentinel/da_publisher.py",
+      "symbol": "DAPublisher.publish_report",
+      "fixed_inventory_record": {
+        "channel": "local-simulation",
+        "payload_policy": "local-mock-only",
+        "operational_live_capable": false,
+        "release_evidence_eligible": false
+      },
+      "current_mode_status": "simulated publisher; source search found no production caller; VAMSSentinelNode constructs PerformanceAuditLog instead",
+      "source_connected_consumer": "no production consumer found in selected source; tests/docs are not runtime evidence",
+      "data_fields": [
+        "raw report dictionary serialized as sorted JSON",
+        "full report leaf SHA-256",
+        "simulated DA height",
+        "commitment",
+        "Merkle root",
+        "Merkle proof",
+        "error string on local exception"
+      ],
+      "source_refs": [
+        "publisher-legacy",
+        "legacy-da-publisher",
+        "sentinel-mode"
+      ]
+    },
+    {
+      "id": "vdso-encrypted-sidecar-publisher",
+      "path": "neuron/vdso/da.py",
+      "symbol": "EncryptedSidecarPublisher.publish",
+      "fixed_inventory_record": {
+        "channel": "encrypted-da",
+        "payload_policy": "encrypted-only",
+        "operational_live_capable": false,
+        "release_evidence_eligible": false
+      },
+      "current_mode_status": "publisher method exists but no production call site was found; current standard Near/Celestia adapters are explicitly rejected for VDSO evidence; an independent retrieval-bound observer is required",
+      "source_connected_consumer": "the gateway sidecar route stores sidecars in VDSOCanaryService memory but does not call EncryptedSidecarPublisher",
+      "data_fields": [
+        "ciphertext-only serialized sidecar",
+        "nonce",
+        "plaintext_root",
+        "content_hash",
+        "policy_hash",
+        "recipient_id",
+        "encapsulated_key",
+        "wrapped_key",
+        "DA receipt fields"
+      ],
+      "source_refs": [
+        "publisher-vdso",
+        "vdso-da-publisher",
+        "vdso-api-handlers",
+        "vdso-service-sidecar"
+      ]
+    }
+  ],
+  "flows": [
+    {
+      "id": "neuron-heartbeat-and-local-sqlite",
+      "flow_status": "source_observed construction and local insert; network destination is configuration-dependent and transfer success was not observed",
+      "producer": "VamsNeuron.sign_telemetry builds compact JSON and signs its exact UTF-8 bytes; send_heartbeat inserts the row before attempting GatewayClient.send_heartbeat. The main loop calls send_heartbeat for a block event.",
+      "consumers": [
+        "NeuronStorage SQLite methods",
+        "GatewayClient POST /heartbeat when self.gateway is set",
+        "recipient gateway selected by VAMS_GATEWAY; exact host/operator unknown"
+      ],
+      "field_groups": [
+        {
+          "category": "raw/stable node identifier",
+          "fields": [
+            "node_id"
+          ],
+          "detail": "VamsNeuron derives a stable 16-hex-character prefix from public_key_bytes(self.vk); the same value is in the payload, SQLite row, and identity log.",
+          "source_refs": [
+            "neuron-identity",
+            "neuron-sign",
+            "storage-schema"
+          ],
+          "candidate_data_categories": [
+            "stable_pseudonym_or_hash"
+          ]
+        },
+        {
+          "category": "signed telemetry payload",
+          "fields": [
+            "type",
+            "version",
+            "node_id",
+            "block_height",
+            "provider",
+            "timestamp",
+            "nonce"
+          ],
+          "detail": "JSON payload; timestamp is a floating-point wall-clock value and nonce is 8 random bytes rendered as hex.",
+          "source_refs": [
+            "neuron-sign"
+          ],
+          "candidate_data_categories": [
+            "signed_payload",
+            "stable_pseudonym_or_hash",
+            "numeric_telemetry",
+            "operational_metadata"
+          ]
+        },
+        {
+          "category": "cryptographic signature",
+          "fields": [
+            "signature"
+          ],
+          "detail": "Full secp256k1 signature is hex encoded, stored locally, and placed in the request. Console output prints its first 24 characters.",
+          "source_refs": [
+            "neuron-sign",
+            "neuron-send",
+            "neuron-logging",
+            "storage-heartbeat"
+          ],
+          "candidate_data_categories": [
+            "signature_or_key_envelope"
+          ]
+        },
+        {
+          "category": "SQLite heartbeat row",
+          "fields": [
+            "id",
+            "timestamp",
+            "node_id",
+            "block_height",
+            "network",
+            "payload",
+            "signature",
+            "synced",
+            "synced_at"
+          ],
+          "detail": "id is local autoincrement state; synced defaults to 0; synced_at is set only by mark_synced.",
+          "source_refs": [
+            "storage-schema",
+            "storage-heartbeat"
+          ],
+          "candidate_data_categories": [
+            "signed_payload",
+            "stable_pseudonym_or_hash",
+            "signature_or_key_envelope",
+            "operational_metadata"
+          ]
+        },
+        {
+          "category": "other SQLite tables",
+          "fields": [
+            "metrics.id",
+            "metrics.timestamp",
+            "metrics.metric_name",
+            "metrics.metric_value",
+            "node_info.key",
+            "node_info.value"
+          ],
+          "detail": "record_metric and node-info key/value methods are present; no non-test production call site for record_metric, get_unsynced_heartbeats, or mark_synced was found in the bounded neuron source search.",
+          "source_refs": [
+            "storage-other-tables",
+            "storage-other-methods",
+            "neuron-identity"
+          ]
+        },
+        {
+          "category": "configuration and endpoint metadata",
+          "fields": [
+            "VAMS_DB_PATH",
+            "VAMS_GATEWAY",
+            "VAMS_IDENTITY_PATH"
+          ],
+          "detail": "Database defaults to relative neuron_data.db; gateway defaults to localhost:8000; actual configured values are unknown.",
+          "source_refs": [
+            "neuron-config",
+            "gateway-client-url"
+          ]
+        }
+      ],
+      "transforms": [
+        "Payload JSON is signed over its encoded bytes.",
+        "The heartbeat row is inserted before the HTTP call.",
+        "GatewayClient sends JSON {payload, signature}; it treats HTTP 200 as success and does not parse the response body.",
+        "No call from the direct send path to get_unsynced_heartbeats or mark_synced was found; successful send therefore does not source-observably mark the stored row synced."
+      ],
+      "recipient_channel": [
+        {
+          "role": "configured gateway",
+          "channel": "HTTP POST /heartbeat",
+          "recipient_identity": "UNKNOWN until VAMS_GATEWAY and the deployed service are supplied"
+        }
+      ],
+      "local_storage": "SQLite at VAMS_DB_PATH or relative neuron_data.db. Application code stores payload/signature as text and defines no heartbeat deletion, expiry, or retention method. Filesystem encryption, permissions, WAL/backup handling, readers, and effective retention are UNKNOWN.",
+      "provider_storage": "No DA provider receives this heartbeat through the inspected direct client path. Gateway-side copies are described separately below; gateway and upstream ingress retention are UNKNOWN.",
+      "access_boundary": "VamsNeuron is source-gated out of staging/testnet/production. GatewayClient validates central mode and registered mock flags before Session creation, captures matching supplied context and guards ordinary policy/base-URL rebinding; the parent passes its selected context. Initial URLs support HTTPS in live modes and plaintext loopback only outside live. Five canonical request calls explicitly disable automatic redirects; local installed-requests adapter checks establish dispatch containment only, not end-to-end TLS/auth, deployment absence or complete M1. Sender still adds no M2 auth headers or client certificate in this method; production Session/environment/proxy configuration is unchanged.",
+      "retention_deletion": "SQLite rows remain until an external deletion or file removal; none is implemented in NeuronStorage. mark_synced changes flags only. Actual DB path, OS access, copies, and backups require operator confirmation.",
+      "source_refs": [
+        "neuron-live-gate",
+        "neuron-sign",
+        "neuron-send",
+        "neuron-loop",
+        "storage-schema",
+        "storage-heartbeat",
+        "storage-other-tables",
+        "storage-other-methods",
+        "neuron-config",
+        "gateway-client-heartbeat",
+        "gateway-client-url"
+      ],
+      "unresolved_owner_decisions": [
+        "Identify the running Neuron build and configured VAMS_GATEWAY target.",
+        "Decide whether the full signature and signed payload may persist locally and for how long.",
+        "Name local DB readers, file-permission owner, backups/WAL handling, deletion mechanism, and retention period.",
+        "Decide whether synced rows are to be retained or deleted; the current direct-send path does not mark them synced.",
+        "Confirm intended gateway protocol/authentication because current client request shape is not M2-authenticated and does not include a live mTLS certificate."
+      ]
+    },
+    {
+      "id": "main-gateway-authentication-and-replay",
+      "flow_status": "source_observed request middleware and code-selected stores; effective mode, DB path, host access, and deployed ingress are UNKNOWN",
+      "producer": "Protected main-gateway clients supply the M2 headers and request body; VDSO endpoints also reuse the authenticated signer identity.",
+      "consumers": [
+        "GatewayRouteSecurityMiddleware",
+        "GatewayRequestAuthenticator",
+        "configured admin-DID key resolver",
+        "process-local or SQLite durable replay store"
+      ],
+      "field_groups": [
+        {
+          "category": "signature/authentication envelope",
+          "fields": [
+            "x-vams-auth-version",
+            "x-vams-auth-algorithm",
+            "x-vams-auth-audience",
+            "x-vams-auth-signer",
+            "x-vams-auth-nonce",
+            "x-vams-auth-issued-at",
+            "x-vams-auth-expires-at",
+            "x-vams-auth-signature"
+          ],
+          "detail": "Envelope binds method, raw path/query, body SHA-256, audience, DID signer, nonce and time bounds; signature is a cryptographic signature, signer is a stable public-key identity.",
+          "source_refs": [
+            "auth-headers",
+            "auth-envelope",
+            "auth-consumption"
+          ],
+          "candidate_data_categories": [
+            "signature_or_key_envelope",
+            "stable_pseudonym_or_hash",
+            "operational_metadata"
+          ]
+        },
+        {
+          "category": "transient authenticated request",
+          "fields": [
+            "method",
+            "raw_path",
+            "raw_query",
+            "body_sha256",
+            "raw_body"
+          ],
+          "detail": "Raw body is read and passed downstream in ASGI request scope; no source-observed persistent copy is made by the auth middleware itself.",
+          "source_refs": [
+            "auth-envelope",
+            "auth-consumption",
+            "route-security"
+          ],
+          "candidate_data_categories": [
+            "signed_payload",
+            "operational_metadata"
+          ]
+        },
+        {
+          "category": "process-local replay state",
+          "fields": [
+            "auth_version",
+            "audience",
+            "signer_digest",
+            "nonce",
+            "expires_at"
+          ],
+          "detail": "Non-live default when no GATEWAY_AUTH_REPLAY_DB is configured; bounded to 10000 entries and expired entries are purged on reserve.",
+          "source_refs": [
+            "auth-consumption",
+            "replay-store-selection"
+          ]
+        },
+        {
+          "category": "SQLite replay database",
+          "fields": [
+            "replay_metadata.schema_version",
+            "replay_metadata.backend_identity",
+            "replay_metadata.clock_high_watermark",
+            "replay_reservations.auth_version",
+            "replay_reservations.audience",
+            "replay_reservations.signer_digest",
+            "replay_reservations.nonce",
+            "replay_reservations.expires_at",
+            "replay_reservations.retain_until",
+            "replay_reservations.reserved_at",
+            "signer_revocations.signer_digest",
+            "signer_revocations.effective_at",
+            "signer_revocations.recorded_at"
+          ],
+          "detail": "Persisted signer identity is SHA-256 digested; the signature and full body are not columns in this store.",
+          "source_refs": [
+            "replay-schema",
+            "replay-retention",
+            "replay-cleanup"
+          ],
+          "candidate_data_categories": [
+            "stable_pseudonym_or_hash",
+            "operational_metadata"
+          ]
+        }
+      ],
+      "transforms": [
+        "The body is hashed into the canonical auth envelope; the signature is verified against the configured resolver public key.",
+        "A signer DID is SHA-256 digested for replay namespace storage.",
+        "Durable replay retain_until is derived from expires_at plus configured future-skew and safety-margin values; expired reservations are batch-cleaned during reserve and by an explicit cleanup method.",
+        "Source contains no deletion/expiry method for signer_revocations."
+      ],
+      "recipient_channel": [
+        {
+          "role": "main gateway",
+          "channel": "protected HTTP route; live path expects trusted loopback ingress marker and, for /heartbeat, proxy-verified certificate headers",
+          "recipient_identity": "configured DID and ingress deployment identity UNKNOWN"
+        }
+      ],
+      "local_storage": "In-memory authenticated request state for request duration. If GATEWAY_AUTH_REPLAY_DB is absent outside live mode, process-local replay state is used. If configured, SQLite uses a host-local absolute .sqlite3 path; live mode requires this durable path. No DB was opened.",
+      "provider_storage": "No DA provider is used by request authentication. Upstream proxy/access-log and backup behavior are UNKNOWN.",
+      "access_boundary": "Route policy classifies reads/state changes and middleware authenticates protected routes before handlers. Live requests also require loopback peer plus the exact ingress marker; other routes are public, framework-only, or disabled by the route ledger. Source application auth error bodies are generic; current auth code has no logger calls.",
+      "retention_deletion": "Process-local entries expire when checked by later requests. SQLite reservation rows are eligible for deletion at retain_until; signer-revocation rows and replay metadata have no deletion/expiry implementation identified. DB filesystem access, replicas, backups, and operational log retention are UNKNOWN.",
+      "source_refs": [
+        "main-gateway-startup",
+        "route-policy",
+        "route-security",
+        "route-ingress",
+        "auth-headers",
+        "auth-envelope",
+        "auth-consumption",
+        "replay-schema",
+        "replay-retention",
+        "replay-cleanup",
+        "replay-store-selection"
+      ],
+      "unresolved_owner_decisions": [
+        "Name the DID/key owner, ingress operator, gateway process operator, and authorized readers of the replay DB.",
+        "Confirm exact GATEWAY_AUTH_REPLAY_DB path, effective permissions, same-host deployment boundary, backups, WAL/SHM handling, and disposal.",
+        "Approve retention for signer revocations, replay rows, and upstream request/access logs; source-only expiry arithmetic is not a retention policy.",
+        "Confirm whether body hashes, nonce, signer digest, timestamps, and response/error metadata may be logged or exported by the deployed proxy.",
+        "Confirm deployed ingress proxy identity/version and log access; the hardcoded version marker is source behavior and does not establish the deployment trust root."
+      ]
+    },
+    {
+      "id": "main-gateway-heartbeat-and-node-state",
+      "flow_status": "source_observed handler/state/response; actual client acceptance and deployment are UNKNOWN",
+      "producer": "Client POST /heartbeat with a JSON string payload and signature; live requests also carry proxy-verified client-certificate headers.",
+      "consumers": [
+        "main gateway receive_heartbeat handler",
+        "in-process nodes map",
+        "authenticated dashboard and /nodes response clients"
+      ],
+      "field_groups": [
+        {
+          "category": "request identity and signature",
+          "fields": [
+            "POST /heartbeat.payload",
+            "payload",
+            "signature",
+            "payload.node_id",
+            "payload.public_key"
+          ],
+          "detail": "Handler parses JSON, selects a registered public_key or payload public_key, then verifies the node signature. node_id/public_key remain raw strings at this boundary.",
+          "source_refs": [
+            "main-gateway-heartbeat"
+          ],
+          "candidate_data_categories": [
+            "raw_identifier",
+            "signed_payload",
+            "signature_or_key_envelope"
+          ]
+        },
+        {
+          "category": "request telemetry/profile",
+          "fields": [
+            "payload.block_height",
+            "payload.region",
+            "payload.cost_per_hour",
+            "payload.credit_score",
+            "payload.passports",
+            "payload.skills",
+            "payload.cognitive_profile"
+          ],
+          "detail": "The latter profile fields are optional and have code defaults when a new NodeInfo is created; cognitive_profile and skills are capability/profile data, not a privacy-approved category.",
+          "source_refs": [
+            "main-gateway-heartbeat"
+          ]
+        },
+        {
+          "category": "live ingress identity",
+          "fields": [
+            "X-VAMS-Client-Cert-Verified",
+            "X-VAMS-Client-Cert-Fingerprint",
+            "x-vams-ingress-version",
+            "configured heartbeat certificate fingerprint allowlist"
+          ],
+          "detail": "For live heartbeat requests the handler requires a verified-certificate header, a normalized fingerprint header matching the configured allowlist, and the trusted-ingress/loopback conditions enforced by middleware. The forwarded header assertion is only source-checked; it does not independently establish that deployed proxy identity or certificate chain was authentic. Non-live calls skip the certificate-header check.",
+          "source_refs": [
+            "main-gateway-startup",
+            "route-ingress"
+          ],
+          "candidate_data_categories": [
+            "operational_metadata",
+            "stable_pseudonym_or_hash"
+          ]
+        },
+        {
+          "category": "in-memory NodeInfo and API response",
+          "fields": [
+            "GET / dashboard",
+            "node_id",
+            "public_key",
+            "last_block",
+            "network",
+            "last_seen",
+            "heartbeat_count",
+            "first_seen",
+            "region",
+            "cost_per_hour",
+            "credit_score",
+            "passports",
+            "skills",
+            "cognitive_profile",
+            "is_online",
+            "uptime",
+            "last_seen_formatted",
+            "GET /nodes.total",
+            "GET /nodes.online",
+            "GET /nodes.nodes[]",
+            "GET /.dashboard node_id",
+            "GET /.dashboard last_block",
+            "GET /.dashboard network",
+            "GET /.dashboard heartbeat_count",
+            "GET /.dashboard uptime",
+            "GET /.dashboard last_seen_formatted",
+            "GET /health"
+          ],
+          "detail": "POST response returns status, raw node_id, and heartbeat_count. GET /nodes returns all NodeInfo fields; dashboard renders node_id, block, network, count, uptime and last-seen time. The /nodes wrapper returns total, online and nodes; the dashboard renders the listed summary fields for online and offline nodes. GET /health returns the separately listed sanitized runtime/status fields.",
+          "source_refs": [
+            "main-gateway-heartbeat"
+          ]
+        }
+      ],
+      "transforms": [
+        "Payload JSON is parsed; node identity and block height are read; optional profile fields update NodeInfo.",
+        "Live heartbeat source requires the forwarded mTLS verified marker and fingerprint to match the configured allowlist, in addition to trusted-ingress checks; effective proxy configuration is UNKNOWN.",
+        "network is set by the handler to mocha-4 rather than copied from request.",
+        "Signature input is the exact payload string bytes; server response does not echo payload or signature.",
+        "Application heartbeat log is fixed text; handler errors return fixed text except parse status."
+      ],
+      "recipient_channel": [
+        {
+          "role": "main gateway process",
+          "channel": "POST /heartbeat"
+        },
+        {
+          "role": "authenticated dashboard/API clients",
+          "channel": "GET / and GET /nodes"
+        }
+      ],
+      "local_storage": "nodes is an in-process Python map; no disk persistence for these fields is shown. Main app also keeps rate-limit buckets in memory.",
+      "provider_storage": "No DA provider receives heartbeat fields from this handler. Host/proxy access logs are not established by this source inventory.",
+      "access_boundary": "POST /heartbeat is a privileged state change; GET / and GET /nodes are authenticated reads; GET /health is public. Main gateway binds to loopback in source. In live mode trusted ingress is required and heartbeat additionally checks mTLS headers; deployed proxy and authorization clients remain UNKNOWN.",
+      "retention_deletion": "A background cleanup removes nodes offline for more than one hour; the map is also bounded by MAX_NODES=5000 with old offline-node eviction when needed. Process restart clears map state. No field-level delete endpoint is defined.",
+      "source_refs": [
+        "main-gateway-bind",
+        "main-gateway-startup",
+        "main-gateway-heartbeat",
+        "route-policy",
+        "route-security",
+        "main-gateway-middleware"
+      ],
+      "unresolved_owner_decisions": [
+        "Identify whose node IDs, public keys, regions, economic values, skills and cognitive profiles are represented and who may read them.",
+        "Approve which heartbeat and profile fields may leave a Neuron process or be returned to clients.",
+        "Confirm actual client certificate issuer/subject mapping, proxy header sanitization, API client authorization, access logs, log retention, and node-state retention.",
+        "Reconcile the current GatewayClient request with the M2 middleware and the legacy payload format before claiming an operating integration."
+      ]
+    },
+    {
+      "id": "main-gateway-other-api-surfaces",
+      "flow_status": "source-observed route declarations/serializers and current global service construction; default gateway composer has no HardwareRegistryClient and default keeper has no fetch callbacks, so provider-backed data and allocation responses are conditional on another injection or state source, which is UNKNOWN.",
+      "producer": "External API clients send route parameters and ComposeRequest bodies; main gateway handlers dispatch to local demo simulation, static service declarations, economics getters, and catalog functions. The gateway-global composer is constructed without registry candidates; no provider provisioning or settlement is represented by these routes.",
+      "consumers": [
+        "main gateway handlers",
+        "VAMSResourceComposer and in-process instance state",
+        "ServiceBlockClient in-memory definitions",
+        "EconomicsKeeper in-process epoch state",
+        "API response clients",
+        "optional HardwareRegistryClient only if supplied to another composer construction"
+      ],
+      "field_groups": [
+        {
+          "category": "resource composition request",
+          "fields": [
+            "blueprint_name",
+            "service_block_name",
+            "macro_block_name",
+            "name",
+            "gpu_type",
+            "gpu_count",
+            "vcpu",
+            "ram_gb",
+            "storage_gb",
+            "region",
+            "max_cost_per_hour",
+            "elastic",
+            "min_replicas",
+            "max_replicas",
+            "required_service_blocks"
+          ],
+          "detail": "POST /compose sends these fields to provision_* or creates an InstanceBlueprint. Blueprint serialization additionally exposes compute/memory/storage/networking/TEE requirements, skill_vector and cognitive_requirements.",
+          "source_refs": [
+            "main-gateway-compose",
+            "composer-blueprint"
+          ]
+        },
+        {
+          "category": "allocation and instance response",
+          "fields": [
+            "instance_id",
+            "blueprint_name",
+            "status",
+            "allocation.blueprint_hash",
+            "allocation.total_hourly_cost",
+            "allocation.total_nodes",
+            "allocation.is_multi_provider",
+            "allocation.assignments[].node_id",
+            "allocation.assignments[].provider",
+            "allocation.assignments[].hw_class",
+            "allocation.assignments[].region",
+            "allocation.assignments[].allocated_units",
+            "allocation.assignments[].hourly_cost",
+            "provisioned_at",
+            "expires_at",
+            "escrow_tx_hash",
+            "base_hourly_cost",
+            "premium_rate_bps",
+            "premium_hourly_cost",
+            "total_hourly_cost",
+            "stats.total_provisions",
+            "stats.total_deprovisions",
+            "stats.failed_provisions",
+            "stats.active_instances",
+            "status=simulated",
+            "simulation=true",
+            "evidence_classification=non-authoritative",
+            "escrow_tx_hash (nullable)"
+          ],
+          "detail": "POST /compose returns local simulated instance/allocation records and marks simulation=true and evidence_classification=non-authoritative. The instance structure includes a nullable escrow_tx_hash field, but a local simulation record is not a provider or escrow receipt. Deprovision only removes local simulation state; no provider release or payment occurs.",
+          "source_refs": [
+            "main-gateway-compose",
+            "composer-allocation-output",
+            "composer-create-logs",
+            "composer-delete"
+          ]
+        },
+        {
+          "category": "public service catalogs",
+          "fields": [
+            "blueprints[].name",
+            "blueprint_hash",
+            "compute.gpu_type",
+            "compute.gpu_count",
+            "compute.vcpu",
+            "compute.tflops_min",
+            "memory.ram_gb",
+            "memory.bandwidth_gbps",
+            "storage.type",
+            "storage.capacity_gb",
+            "storage.iops_min",
+            "storage.persistent",
+            "networking.bandwidth_mbps",
+            "networking.region",
+            "networking.max_latency_ms",
+            "tee.tee_type",
+            "tee.attestation_required",
+            "max_cost_per_hour",
+            "elastic",
+            "min_sla_score_bps",
+            "skill_vector",
+            "cognitive_requirements",
+            "required_service_blocks",
+            "blocks[].name",
+            "category",
+            "memory_policy",
+            "memory_policy_requires_review",
+            "skillops_manifest.block_name",
+            "manifest_hash",
+            "capability_root",
+            "manifest_version",
+            "permission_scopes",
+            "permissions_bitmap",
+            "macros[].name",
+            "block_count",
+            "blocks",
+            "description",
+            "catalogue_kind=static-planning-templates",
+            "registry_verified=false",
+            "simulation=true",
+            "evidence_classification=non-authoritative"
+          ],
+          "detail": "Catalog outputs disclose capability/resource and memory-policy declarations. Blueprints are static planning templates; service/macro listings explicitly identify simulation/non-authoritative status and registry_verified=false. Manifest hashes/roots are stable digests; this source does not prove registry authenticity or deployment.",
+          "source_refs": [
+            "main-gateway-compose",
+            "composer-blueprint",
+            "service-block-output",
+            "service-manifest-output",
+            "macro-output"
+          ]
+        },
+        {
+          "category": "economics request and response",
+          "fields": [
+            "epoch_id",
+            "region_id",
+            "capacity_contribution",
+            "staked_amount",
+            "epoch_emission_budget",
+            "total_region_capacity",
+            "apr",
+            "apr_pct",
+            "weekly_reward",
+            "annual_reward",
+            "base_reward",
+            "regional_bonus",
+            "staking_boost",
+            "staking_tier",
+            "boost_pct",
+            "current_epoch_id",
+            "epoch_duration_seconds",
+            "seconds_until_next_epoch",
+            "is_running",
+            "completed_epochs",
+            "total_epochs",
+            "epochs[].epoch_id",
+            "total_distributed",
+            "provider_count",
+            "provider_rewards[].provider",
+            "provider_rewards[].region_id",
+            "base_reward",
+            "regional_bonus",
+            "staking_boost",
+            "builder_revenue",
+            "gas_premium_burn",
+            "symbiosis_decay_factor",
+            "total_reward",
+            "staking_tier",
+            "merkle_root"
+          ],
+          "detail": "Economics endpoints return numeric and provider/region data; /economics/estimate-apr is public while status and epoch reads are authenticated. Keeper state is in process memory. The gateway-global EconomicsKeeper is constructed without provider/emission/revenue fetchers; summary provider fields are schema/source-defined and no live source input is established by this construction.",
+          "source_refs": [
+            "main-gateway-economics-da",
+            "economics-state",
+            "economics-status",
+            "economics-summary-model",
+            "economics-estimate"
+          ]
+        },
+        {
+          "category": "health and runtime response",
+          "fields": [
+            "status",
+            "version",
+            "composer_available",
+            "runtime.mode",
+            "runtime.runtime_classification",
+            "runtime.evidence_classification",
+            "runtime.gateway_mock_enabled"
+          ],
+          "detail": "GET /health returns a sanitized runtime summary; it is public and source-mode values do not prove deployment state.",
+          "source_refs": [
+            "main-gateway-heartbeat",
+            "runtime-policy"
+          ]
+        },
+        {
+          "category": "route parameters and response envelopes",
+          "fields": [
+            "POST /compose",
+            "DELETE /compose/{instance_id}",
+            "GET /compose/instances",
+            "GET /compose/blueprints",
+            "GET /services/blocks?category=",
+            "GET /services/macros",
+            "GET /economics/status",
+            "GET /economics/epochs",
+            "GET /economics/epochs/{epoch_id}",
+            "GET /economics/estimate-apr",
+            "DELETE /compose/{instance_id}.instance_id",
+            "GET /services/blocks.category",
+            "GET /economics/epochs/{epoch_id}.epoch_id",
+            "GET /economics/estimate-apr.region_id",
+            "GET /economics/estimate-apr.capacity_contribution",
+            "GET /economics/estimate-apr.staked_amount",
+            "GET /economics/estimate-apr.epoch_emission_budget",
+            "GET /economics/estimate-apr.total_region_capacity",
+            "POST /compose.status",
+            "POST /compose.instance",
+            "POST /compose.instances[]",
+            "DELETE /compose.status",
+            "DELETE /compose.instance_id",
+            "GET /compose/instances.total",
+            "GET /compose/instances.instances[]",
+            "GET /compose/instances.stats",
+            "GET /economics/epochs.total_epochs",
+            "GET /economics/epochs.epochs[]"
+          ],
+          "detail": "These path/query fields and wrapper keys supplement the request-body and nested instance fields above. HTTP error detail may contain an instance/epoch/blueprint identifier or exception text; exact request logging is not established by these handlers.",
+          "source_refs": [
+            "main-gateway-compose",
+            "main-gateway-economics-da"
+          ]
+        },
+        {
+          "category": "middleware state and response metadata",
+          "fields": [
+            "request.client.host",
+            "rate_limit.buckets[client_ip].tokens",
+            "rate_limit.buckets[client_ip].last_refill",
+            "X-VAMS-Runtime-Mode",
+            "X-VAMS-Runtime-Classification",
+            "X-VAMS-Evidence-Classification"
+          ],
+          "detail": "The client IP is used as an in-memory rate-limit key. Main gateway responses receive runtime/evidence headers. Bucket cleanup is conditional on map size exceeding 1000 and then removes entries idle longer than two 60-second windows; this is source behavior, not a deployed retention guarantee.",
+          "source_refs": [
+            "main-gateway-middleware",
+            "main-gateway-startup"
+          ]
+        },
+        {
+          "category": "application and startup log fields",
+          "fields": [
+            "gateway_runtime.mode",
+            "gateway_runtime.classification",
+            "gateway_runtime.evidence",
+            "gateway_runtime.gateway_mock",
+            "gateway_runtime.live_ingress",
+            "server.version",
+            "server.bind_host",
+            "composer.blueprint_name",
+            "composer.instance_id",
+            "composer.node_count",
+            "composer.hourly_cost",
+            "composer.exception_text",
+            "deprovision.instance_id",
+            "economics.epoch_id",
+            "economics.provider_count",
+            "economics.total_distributed",
+            "economics.merkle_root",
+            "startup.runtime",
+            "startup.evidence",
+            "gateway_runtime.live_ingress_version_marker"
+          ],
+          "detail": "The main gateway logger emits runtime mode/classification/evidence/mock values and, in live mode, the hardcoded trusted-ingress version marker value (envoy-1.39.1-v1); composer logs blueprint names, instance IDs, node counts, hourly costs and exception text; EconomicsKeeper logs epoch IDs, provider count, distributed amount and Merkle root. Server startup prints version, bind host, runtime and evidence. Sink access, Uvicorn access-log configuration and retention are UNKNOWN.",
+          "source_refs": [
+            "gateway-runtime-log",
+            "main-gateway-route-startup",
+            "composer-create-logs",
+            "composer-delete",
+            "economics-log"
+          ]
+        },
+        {
+          "category": "local Composer simulation state and diagnostics",
+          "fields": [
+            "blueprint.name",
+            "instance_id",
+            "plan.total_nodes",
+            "plan.total_hourly_cost",
+            "simulation statistics",
+            "ComposerError/KeyError response detail"
+          ],
+          "detail": "The Composer stores only local simulated ProvisionedInstance records. Current process logs include blueprint name, local instance ID, node count, hourly cost and caught exception detail; the gateway converts selected ComposerError/KeyError text to an HTTP 422 detail. Effective logger/HTTP collection, recipient access and retention are UNKNOWN.",
+          "source_refs": [
+            "composer-create-logs",
+            "composer-delete",
+            "main-gateway-compose"
+          ]
+        }
+      ],
+      "transforms": [
+        "Compose routes require the local simulation boundary and return status=simulated, simulation=true, and evidence_classification=non-authoritative; live/provider execution is unavailable.",
+        "Service and macro listing routes expose local declarations with registry_verified=false; service block data includes memory policy and manifest fields.",
+        "The configured gateway composer has no registry client and default node list is empty; no provider execution/receipt/settlement occurs through this source route.",
+        "Local simulation identifiers, provider candidate fields and cost/profile metrics remain in API outputs and local process state.",
+        "Route errors may return ComposerError/KeyError detail strings; no sink behavior beyond HTTP response is inferred."
+      ],
+      "recipient_channel": [
+        {
+          "role": "API clients",
+          "channel": "authenticated reads/state changes or public catalogs/estimates as defined by route policy"
+        },
+        {
+          "role": "resource candidate/provider records",
+          "channel": "Current gateway-global composer construction has no registry recipient; source code includes an optional HardwareRegistryClient candidate lookup for separately constructed composers, but no provider lookup or provisioning transfer is established in the current gateway instance."
+        }
+      ],
+      "local_storage": "Composer active instances, stats, and EconomicsKeeper epoch_history are process memory. Composer records expires_at but the inspected lifecycle removes entries through explicit deprovision; an automatic expiry cleanup was not found. Service catalogs are source-defined/in-memory. Main rate-limit middleware also stores client-IP token buckets in process memory; idle cleanup runs only when the bucket map exceeds 1000 entries.",
+      "provider_storage": "No provider-side retention, external provisioning transfer, or provider receipt is established in the current gateway-global composer path. Serializer fields for provider assignments are conditional on separately supplied candidate data; provider storage/retention is UNKNOWN if another runtime supplies it.",
+      "access_boundary": "Route policy protects /compose, deprovision, active-instance reads, and economics status/epochs; blueprint/service/macro catalogs, health and APR estimate are public. Actual gateway authorizations and response consumers are UNKNOWN.",
+      "retention_deletion": "Process memory ends on process restart. Explicit deprovision removes an active instance; source records expiry time but no automatic expiry method was found in the reviewed call path. Epoch history has no deletion method in EconomicsKeeper. Logs and backups are UNKNOWN. Rate-limit buckets have no time-based cleanup while the map is at or below 1000 entries; above that threshold, stale buckets older than two windows are removed on a later request.",
+      "source_refs": [
+        "main-gateway-compose",
+        "main-gateway-economics-da",
+        "route-policy",
+        "composer-state",
+        "composer-create-logs",
+        "composer-delete",
+        "service-block-output",
+        "service-manifest-output",
+        "macro-output",
+        "economics-state",
+        "economics-log",
+        "economics-status",
+        "economics-summary-model",
+        "economics-estimate",
+        "gateway-runtime-log",
+        "main-gateway-route-startup",
+        "main-gateway-middleware",
+        "gateway-service-instances",
+        "composer-candidate-flow",
+        "economics-fetcher-defaults"
+      ],
+      "unresolved_owner_decisions": [
+        "Name the resource-composer/provider registry operators and the parties represented by node_id, provider, region, performance and cost values.",
+        "Decide which skill_vector, cognitive_requirements, memory_policy, skill manifest, economic, staking and reward fields are public or restricted while preserving existing GCA interfaces and hybrid/verifiable-memory options.",
+        "Confirm whether expiry timestamps trigger an external cleanup process; source code alone does not show one.",
+        "Identify readers of public catalogs/estimates and protected instance/economic endpoints, including proxy and API logs.",
+        "Confirm whether provider provisioning actually occurs and identify provider storage/retention before treating these responses as deployment evidence.",
+        "Name application, Uvicorn and proxy log sinks/readers/retention; decide whether client IPs, blueprint names, instance IDs, costs, Merkle roots, error strings and runtime markers may be retained or exported.",
+        "Confirm whether the deployed gateway replaces/injects a HardwareRegistryClient or provider/emission fetch callbacks; identify those endpoints, operators, request/response fields and resulting storage before treating provider allocation/economic fields as active flow.",
+        "Confirm the deployed ingress proxy/version and who can read startup logs; the source marker does not prove which operator or proxy handles live traffic."
+      ]
+    },
+    {
+      "id": "main-gateway-da-status-and-history",
+      "flow_status": "source_observed response surfaces and in-memory history; no gateway request was sent",
+      "producer": "PerformanceAuditLog adapter status/history; gateway GET /da/status and GET /da/anchors handlers.",
+      "consumers": [
+        "authenticated main gateway read clients",
+        "DA adapters when status checks are invoked",
+        "Celestia or mock provider path as separately classified"
+      ],
+      "field_groups": [
+        {
+          "category": "adapter status and endpoint metadata",
+          "fields": [
+            "GET /da/status",
+            "GET /da/anchors?protocol=&limit=",
+            "version",
+            "da_layer",
+            "runtime",
+            "adapters[].name",
+            "adapters[].rpc_url",
+            "mock_mode",
+            "healthy",
+            "supports_live_submission",
+            "supports_exact_retrieval",
+            "release_evidence_eligible"
+          ],
+          "detail": "rpc_url is returned as configured. Source does not prove it is free of credentials or that its host is an approved recipient.",
+          "source_refs": [
+            "main-gateway-economics-da",
+            "performance-publish"
+          ]
+        },
+        {
+          "category": "anchor query and response",
+          "fields": [
+            "protocol",
+            "limit",
+            "total",
+            "protocol_filter",
+            "runtime",
+            "anchors[].node_id",
+            "protocol",
+            "blob_id",
+            "height",
+            "report_hash",
+            "timestamp",
+            "audit_history.node_id",
+            "audit_history.protocol",
+            "audit_history.blob_id",
+            "audit_history.height",
+            "audit_history.report_hash",
+            "audit_history.timestamp"
+          ],
+          "detail": "node_id in audit_history is a deterministic pseudonym, not the raw Sentinel ID. The output does not return report payload or signature. These same fields are held in the local audit_history list before the gateway response wrapper is built.",
+          "source_refs": [
+            "main-gateway-economics-da",
+            "performance-history"
+          ]
+        }
+      ],
+      "transforms": [
+        "Protocol query filters the selected in-memory history after slicing.",
+        "Current API rejects limit < 1; no upper bound is declared.",
+        "Runtime response is a sanitized mode/evidence summary."
+      ],
+      "recipient_channel": [
+        {
+          "role": "main gateway clients",
+          "channel": "M2-authenticated /da/status and /da/anchors HTTP responses"
+        }
+      ],
+      "local_storage": "PerformanceAuditLog.audit_history is an in-memory list with no cap or expiry; process restart clears it. The route can slice the response but does not bound stored history.",
+      "provider_storage": "Celestia DA may hold the serialized report from a separate publish flow. Exact provider-side retention, access and deletion are UNKNOWN. Adapter health checks make provider requests if invoked; none were executed here.",
+      "access_boundary": "Both routes are AUTHENTICATED_READ in the closed main-gateway route policy. The response contains stable pseudonyms and report hashes, which remain linkable. No route/runtime authorization was exercised.",
+      "retention_deletion": "Audit history lasts for process lifetime with no deletion/expiry method found. A positive request limit affects only the returned view. Provider retention and gateway/proxy response logs are UNKNOWN.",
+      "source_refs": [
+        "main-gateway-economics-da",
+        "route-policy",
+        "performance-history",
+        "performance-publish",
+        "da-pseudonym"
+      ],
+      "unresolved_owner_decisions": [
+        "Approve visibility and linkability of pseudonymous node IDs, provider blob IDs, hashes, heights and timestamps.",
+        "Set owner-approved cap, retention and deletion for audit_history; no period is inferred here.",
+        "Name who can query these endpoints and who controls the RPC endpoint returned by /da/status.",
+        "Confirm provider data retention, access, deletion, replication and logs for any actual Celestia publication."
+      ]
+    },
+    {
+      "id": "legacy-neuron-gateway",
+      "flow_status": "source_observed local API and process state; client call compatibility is an inference; deployed presence is UNKNOWN",
+      "producer": "GatewayClient methods and external clients can call the legacy routes. In the inspected VamsNeuron path only send_heartbeat is called; register_agent, poll_tasks, submit_result, and deregister_agent had no production call site found in the selected neuron source.",
+      "consumers": [
+        "legacy FastAPI handlers",
+        "AGENTS, TASKS, PENDING_TASKS process dictionaries",
+        "response clients and application logger"
+      ],
+      "field_groups": [
+        {
+          "category": "registration identity and capabilities",
+          "fields": [
+            "node_id",
+            "public_key",
+            "stake_amount",
+            "capabilities",
+            "version"
+          ],
+          "detail": "RegisterRequest accepts these fields; node_id is a raw 32-byte hex identifier and capabilities is an arbitrary dictionary. Success response data.agent_id returns node_id.",
+          "source_refs": [
+            "legacy-models",
+            "legacy-gateway-routes",
+            "gateway-client-other"
+          ]
+        },
+        {
+          "category": "legacy heartbeat",
+          "fields": [
+            "payload",
+            "signature",
+            "timestamp_text",
+            "status",
+            "node_id"
+          ],
+          "detail": "Handler splits payload as timestamp|status|node_id, ignores signature verification, stores last_seen/status, and returns GenericResponse success/message. This differs from the current JSON heartbeat sender.",
+          "source_refs": [
+            "legacy-gateway-routes",
+            "legacy-models",
+            "gateway-client-heartbeat"
+          ]
+        },
+        {
+          "category": "task request/response",
+          "fields": [
+            "node_id",
+            "task_id",
+            "type",
+            "payload",
+            "reward",
+            "created_at",
+            "expires_at",
+            "result",
+            "signature",
+            "timestamp"
+          ],
+          "detail": "Pending task response passes Task objects from TASKS; result handler logs task_id and deletes a task. No task creation route/source was found in this gateway module.",
+          "source_refs": [
+            "legacy-gateway-routes",
+            "legacy-models",
+            "gateway-client-other"
+          ]
+        },
+        {
+          "category": "legacy status and rate-limit state",
+          "fields": [
+            "root.status",
+            "root.system",
+            "root.agents_active",
+            "root.mode",
+            "root.runtime_classification",
+            "root.evidence_classification",
+            "rate_limit.key",
+            "rate_limit.tokens",
+            "rate_limit.last_refill",
+            "rate_limit.default_limit",
+            "rate_limit.window_sec"
+          ],
+          "detail": "The root response exposes system/status/count/mode fields. rate_limit.key is request.client.host; the limiter logs the raw key when a limit is exceeded. Its bucket is process-local; cleanup is defined but no call site was found. The middleware calls through even when the limiter returns false.",
+          "source_refs": [
+            "legacy-gateway-routes",
+            "legacy-rate-middleware",
+            "legacy-rate-limiter"
+          ]
+        },
+        {
+          "category": "response wrappers, client-only requests and logs",
+          "fields": [
+            "GenericResponse.success",
+            "GenericResponse.message",
+            "GenericResponse.data.agent_id",
+            "GET /tasks/pending.tasks[]",
+            "POST /agents/{agent_id}/deregister.signature",
+            "GatewayClient.base_url",
+            "response.status_code",
+            "response.text",
+            "exception_text"
+          ],
+          "detail": "Registration/heartbeat/result handlers return GenericResponse; registration returns raw node ID as data.agent_id. GatewayClient has an unmatched deregistration request with agent_id/signature and no selected production caller. Client constructor now emits one fixed INFO diagnostic without the configured URL; success/already-registered logs still expose agent IDs. Historical/deployed constructor URL logs and endpoint transport disclosure remain separate. Five non-200/caught failure records now use fixed messages without reading response.text or interpolating exceptions; response.status_code/response.text/exception_text remain historical/owner-review field categories, not outputs of those five records. Legacy server/other logs and deployed copies remain separate. submit_result still omits the TaskResult required task_id body field (timestamp defaults); no production call site found. Do not infer method use or deployment.",
+          "source_refs": [
+            "legacy-models",
+            "legacy-gateway-routes",
+            "gateway-client-other",
+            "gateway-client-url"
+          ]
+        },
+        {
+          "category": "legacy gateway route surface",
+          "fields": [
+            "GET /",
+            "POST /agents/register",
+            "POST /heartbeat",
+            "GET /tasks/pending?node_id=",
+            "POST /tasks/{task_id}/result"
+          ],
+          "detail": "These are the route declarations in the legacy gateway module. The separate GatewayClient deregistration request has no matching route in that module.",
+          "source_refs": [
+            "legacy-gateway-routes",
+            "gateway-client-other"
+          ]
+        }
+      ],
+      "transforms": [
+        "Registration writes raw node ID, public key, stake, capabilities and status into AGENTS; response returns the raw agent ID.",
+        "Heartbeat parses a delimited string and updates in-memory last_seen/status; signature is accepted by the model but not verified by the handler.",
+        "Task result is logged and the task entry is deleted; no result persistence is shown.",
+        "GatewayClient constructor emits a fixed INFO message without URL/arguments/traceback; success/already-registered IDs and legacy server registration ID/stake/task logs remain. Historical/deployed URL emissions remain unverified. The five client failure records now use bounded fixed messages without response body/exception interpolation; heartbeat remains DEBUG. Other logs, prior/deployed copies and effective collection/retention are unverified."
+      ],
+      "recipient_channel": [
+        {
+          "role": "legacy gateway",
+          "channel": "HTTP API; CLI start_server defaults to loopback but function accepts host override"
+        },
+        {
+          "role": "legacy API clients",
+          "channel": "JSON responses"
+        }
+      ],
+      "local_storage": "AGENTS, TASKS, PENDING_TASKS, and rate limiter buckets are process memory; no durable DB is used by this gateway module.",
+      "provider_storage": "No DA provider call is part of these handlers. If a Task payload contains provider/user data, its producer and downstream use are UNKNOWN.",
+      "access_boundary": "Legacy gateway rejects startup and CLI launch in live modes until M2 request authentication/replay is implemented. Routes have no route-level auth in this module. This code gate does not prove deployment absence; default listener is loopback unless caller overrides host.",
+      "retention_deletion": "Process restart clears dictionaries. Agent entries have no expiry cleanup in the inspected module; successful result submission deletes that task; rate-limiter cleanup exists but no call site was found. Log collection/retention is UNKNOWN.",
+      "source_refs": [
+        "legacy-gateway-mode",
+        "legacy-gateway-routes",
+        "legacy-models",
+        "legacy-rate-middleware",
+        "legacy-rate-limiter",
+        "gateway-client-other",
+        "gateway-client-heartbeat",
+        "neuron-live-gate",
+        "gateway-client-url"
+      ],
+      "unresolved_owner_decisions": [
+        "Confirm whether any legacy gateway process is deployed or reachable and name its operator/bind boundary.",
+        "Decide whether raw node IDs, public keys, stakes, arbitrary capabilities, task payload/results, signatures and error text may be accepted or returned.",
+        "Identify task producers, payload schemas, recipients, storage and retention outside this handler.",
+        "Name log sinks/readers/retention and review remaining client ID, endpoint transport, legacy server/other logs and historical/deployed body/exception copies for restricted data; the five source-sanitized failure records do not establish deployed cleanup or complete privacy.",
+        "Reconcile the pipe-delimited legacy heartbeat contract with the current JSON/M2 client contract before enabling any profile.",
+        "Confirm whether callers use the unmatched deregistration endpoint or task-result method; identify response/error log access and any historical/deployed raw response.text copies containing identifiers or secrets.",
+        "Review whether VAMS_GATEWAY path/query components contain restricted data in transport or historical/deployed logs. This candidate constructor no longer emits its URL; URL validation and transport policy are unchanged."
+      ]
+    },
+    {
+      "id": "sentinel-raw-report-and-local-logs",
+      "flow_status": "source_observed local probe, raw in-process report, local-publication status and bounded outer failure result; actual challenge endpoint, DA runtime, and logs remain UNKNOWN",
+      "producer": "VAMSSentinelNode.execute_challenge checks its bound non-live runtime before and after the awaited challenge, builds a raw report from node/operator identifiers, benchmark result/KPIs and timings, then optionally adds gain/fidelity telemetry. audit_node rechecks runtime before and after awaiting DA publication, returns true only for explicit success is True, and treats that as local publication status.",
+      "consumers": [
+        "audit_node",
+        "PerformanceAuditLog.publish_sentinel_report",
+        "Sentinel logger",
+        "conditional _submit_sla_report stub"
+      ],
+      "field_groups": [
+        {
+          "category": "raw identifiers and endpoint inputs",
+          "fields": [
+            "node_id input",
+            "endpoint input",
+            "sentinelId",
+            "nodeId",
+            "hw_class input"
+          ],
+          "detail": "Raw report nodeId is full node_id.hex(); sentinelId is operator_address. Logs emit eight-character prefixes of node ID and operator address. endpoint/hw_class are method inputs; endpoint is passed to challenge.run and neither is placed in the raw report dictionary by this method.",
+          "source_refs": [
+            "sentinel-raw-report",
+            "sentinel-consumers-logs",
+            "sentinel-mode"
+          ],
+          "candidate_data_categories": [
+            "raw_identifier",
+            "operational_metadata"
+          ]
+        },
+        {
+          "category": "raw challenge and telemetry",
+          "fields": [
+            "challengeType",
+            "metricsScore",
+            "passed",
+            "kpis",
+            "timestamp",
+            "duration",
+            "continualLearningGain.statefulReward",
+            "continualLearningGain.statelessReward",
+            "continualLearningGain.gain",
+            "continualLearningGain.operationalFailureCandidate",
+            "continualLearningGain.status",
+            "continualLearningGain.rewardImpact",
+            "continualLearningGain.regionalBonusImpact",
+            "worldStateFidelity.agent_state_hash",
+            "worldStateFidelity.verified_external_state_hash",
+            "worldStateFidelity.state_fidelity_score",
+            "worldStateFidelity.staleness_score",
+            "worldStateFidelity.false_progress_score",
+            "worldStateFidelity.first_state_divergence_step",
+            "worldStateFidelity.first_invalid_action_step",
+            "worldStateFidelity.status",
+            "worldStateFidelity.rewardImpact",
+            "worldStateFidelity.regionalBonusImpact"
+          ],
+          "detail": "kpis is copied from challenge result without schema filtering at raw-report construction; world_state_trace may be evaluated into fidelity telemetry. Numeric scores and stable hashes are not classified as harmless by shape.",
+          "source_refs": [
+            "sentinel-raw-report",
+            "da-telemetry"
+          ],
+          "candidate_data_categories": [
+            "numeric_telemetry",
+            "stable_pseudonym_or_hash"
+          ]
+        },
+        {
+          "category": "conditional enrichment and logs",
+          "fields": [
+            "activation_vector input if present",
+            "activation_anomaly_score",
+            "adversarial_flag",
+            "SLA_ENFORCER_ADDRESS",
+            "operator_address prefix",
+            "exception text"
+          ],
+          "detail": "Optional activation-vector-derived score/flag may be added; the selected report path does not itself create activation_vector. The SLA helper always raises a constant LiveModeSafetyError and does not construct or send a transaction; requesting it causes audit_node to return False through a bounded exception-class log. Other Sentinel log calls include short node/operator prefixes and anomaly diagnostic exception text. Actual logger sinks/access/retention are UNKNOWN.",
+          "source_refs": [
+            "sentinel-consumers-logs",
+            "sentinel-sla-stub"
+          ]
+        }
+      ],
+      "transforms": [
+        "Raw identifiers, KPIs and optional telemetry remain in the returned Python dictionary until the public DA serializer filters/transforms the outgoing report.",
+        "execute_challenge revalidates its exact bound non-live policy after the challenge await; audit_node also guards before/after publication.",
+        "audit_node returns True only for da_response[\"success\"] is True; otherwise or on exception it returns False. This boolean is local publication status, not challenge truth or an on-chain result.",
+        "An SLA request when address/private key configuration is present enters a constant unavailable helper; no transaction construction or send occurs.",
+        "run_scheduler uses a fixed synthetic node ID, hardware class and localhost endpoint; code behavior is not evidence of a running scheduler or actual node identity."
+      ],
+      "recipient_channel": [
+        {
+          "role": "challenge endpoint",
+          "channel": "challenge.run(endpoint); request/response fields and endpoint operator were not inspected"
+        },
+        {
+          "role": "DA publisher",
+          "channel": "in-process method call with raw report dictionary"
+        },
+        {
+          "role": "logs",
+          "channel": "Python logger; configured handlers/collectors unknown"
+        }
+      ],
+      "local_storage": "No raw report persistence is implemented in execute_challenge/audit_node. Report and challenge result exist during the call; publication adapter/history has its separate flow. Logger handler/collector copies are UNKNOWN.",
+      "provider_storage": "No provider storage occurs until the separate publisher serializer/adapter flow. Challenge endpoint storage and access are UNKNOWN.",
+      "access_boundary": "VAMSSentinelNode startup rejects live execution until identity, anchoring and publication controls are complete. Local/non-live execution remains possible by code; this is not evidence that a deployment is absent.",
+      "retention_deletion": "No delete or expiry method for report dictionaries or logs is in these functions. Runtime memory ends with process lifetime; logger sink and retention are UNKNOWN.",
+      "source_refs": [
+        "sentinel-mode",
+        "sentinel-raw-report",
+        "sentinel-consumers-logs",
+        "sentinel-sla-stub",
+        "sentinel-scheduler"
+      ],
+      "unresolved_owner_decisions": [
+        "Map nodeId, sentinelId/operator_address, endpoint and KPI fields to data subjects and approved purposes.",
+        "Approve KPI keys and semantic numeric disclosures individually; decide linkability limits for state hashes, IDs, report times and score histories.",
+        "Identify challenge endpoint recipients and their access, logging, storage and deletion practices.",
+        "Name Sentinel logger handlers and collectors, including access, export, backups and retention.",
+        "Confirm whether the conditional SLA route is intended to become an external consumer and what fields it may receive."
+      ]
+    },
+    {
+      "id": "performance-audit-serialization-and-publication",
+      "flow_status": "source_observed serializer, adapter call, receipt, local history and gateway return; external publication is possible by code but was not executed",
+      "producer": "PerformanceAuditLog.publish_sentinel_report converts raw dictionary to AuditReport, selects a DA target, serializes and calls an adapter.",
+      "consumers": [
+        "CelestiaDAAdapter when selected and mock_mode is false",
+        "local mock adapters in mock routing",
+        "PerformanceAuditLog.audit_history",
+        "main gateway /da/anchors response"
+      ],
+      "field_groups": [
+        {
+          "category": "public report identifiers",
+          "fields": [
+            "nodeId",
+            "sentinelId"
+          ],
+          "detail": "Both are normalized to deterministic domain-separated SHA-256 strings with a fixed public prefix; they are stable/linkable and low-entropy values may be guessed. They are pseudonyms, not anonymity claims.",
+          "source_refs": [
+            "da-pseudonym",
+            "da-serialized-report"
+          ],
+          "candidate_data_categories": [
+            "stable_pseudonym_or_hash"
+          ]
+        },
+        {
+          "category": "public challenge fields",
+          "fields": [
+            "challengeType",
+            "metricsScore",
+            "passed",
+            "timestamp",
+            "duration"
+          ],
+          "detail": "challengeType is a bounded machine string; metricsScore is integer 0..10000; timestamp is bounded integer; duration is finite and <= 86400 seconds, rounded to six decimals.",
+          "source_refs": [
+            "da-serialized-report"
+          ],
+          "candidate_data_categories": [
+            "numeric_telemetry",
+            "operational_metadata"
+          ]
+        },
+        {
+          "category": "public numeric KPI values",
+          "fields": [
+            "kpis.* boolean",
+            "kpis.* integer",
+            "kpis.* float"
+          ],
+          "detail": "Up to 64 allowed scalar KPI keys, key length <=64; named sensitive fragments are filtered; booleans and finite numeric values with absolute value <=1e18 can be serialized. Strings/nested objects are omitted. Numeric meaning remains an owner decision.",
+          "source_refs": [
+            "da-kpi"
+          ],
+          "candidate_data_categories": [
+            "numeric_telemetry"
+          ]
+        },
+        {
+          "category": "public stable state hashes and telemetry",
+          "fields": [
+            "worldStateFidelity.agent_state_hash",
+            "worldStateFidelity.verified_external_state_hash",
+            "worldStateFidelity.state_fidelity_score",
+            "worldStateFidelity.staleness_score",
+            "worldStateFidelity.false_progress_score",
+            "worldStateFidelity.first_state_divergence_step",
+            "worldStateFidelity.first_invalid_action_step",
+            "continualLearningGain.statefulReward",
+            "continualLearningGain.statelessReward",
+            "continualLearningGain.gain",
+            "continualLearningGain.operationalFailureCandidate",
+            "activation_anomaly_score",
+            "adversarial_flag"
+          ],
+          "detail": "Allowlisted stable 64-hex hashes, scores, step numbers, telemetry labels, gains and flags can be sent. Hash fields are linkable; accepted numeric fields are not semantically reviewed here.",
+          "source_refs": [
+            "da-telemetry"
+          ],
+          "candidate_data_categories": [
+            "stable_pseudonym_or_hash",
+            "numeric_telemetry"
+          ]
+        },
+        {
+          "category": "provider receipt and local/API result",
+          "fields": [
+            "protocol",
+            "blob_id",
+            "height",
+            "commitment",
+            "timestamp",
+            "verified",
+            "simulated",
+            "runtime_classification",
+            "evidence_classification",
+            "raw_response",
+            "success",
+            "daHeight",
+            "daCommitment",
+            "reportHash",
+            "merkleRoot",
+            "merkleProof",
+            "mock_mode",
+            "release_evidence_eligible"
+          ],
+          "detail": "Celestia blob_id contains height and payload hash; commitment and reportHash/merkleRoot are stable content digests. raw_response exists on DAReceipt but is omitted from DAReceipt.to_dict and the PerformanceAuditLog return object; it can exist transiently in the receipt object.",
+          "source_refs": [
+            "da-receipt-model",
+            "performance-publish"
+          ],
+          "candidate_data_categories": [
+            "stable_pseudonym_or_hash",
+            "operational_metadata"
+          ]
+        },
+        {
+          "category": "publisher and Sentinel log/error fields",
+          "fields": [
+            "protocol",
+            "node_pseudonym_prefix",
+            "height",
+            "report_hash_prefix",
+            "validation_exception_text",
+            "publisher_error",
+            "Sentinel_audit_node_id_prefix"
+          ],
+          "detail": "Successful AuditLog records include protocol, a pseudonym prefix, height and report-hash prefix. Caught pre-submit report/configuration rejection now logs/returns fixed messages and a known canonical protocol label or unknown; Sentinel may log that bounded returned error. Adapter transport/submission failures use generic messages. Other Sentinel exception paths and effective log sinks/access/retention remain unverified.",
+          "source_refs": [
+            "performance-publish",
+            "sentinel-consumers-logs",
+            "celestia-submit"
+          ]
+        }
+      ],
+      "transforms": [
+        "Deterministic report JSON is sorted and compact; da_target is used for routing but is not serialized.",
+        "Identifier hashes are domain-separated with no secret key; KPI keys are fragment-filtered and values are type/range filtered; telemetry is allowlisted.",
+        "Celestia request includes base64 namespace and serialized data. Retrieval uses height/namespace and returns matching bytes by hash; source code does not establish provider retention.",
+        "Successful publication logs protocol, an eight-character node pseudonym prefix, height and report-hash prefix. The caught pre-submit rejection path emits fixed messages without exception/unknown-target interpolation and returns a canonical protocol label or unknown. Generic submission-failure handling is unchanged. Sentinel may log a bounded failed publisher response; other Sentinel/client exception paths are not certified by this change.",
+        "For selected local mock adapters, only digest/receipt metadata is returned; mock output is non-authoritative."
+      ],
+      "recipient_channel": [
+        {
+          "role": "Celestia RPC endpoint",
+          "channel": "JSON-RPC blob.Submit/blob.GetAll; source default is the Mocha RPC URL, configured endpoint/operator unknown"
+        },
+        {
+          "role": "DA response clients",
+          "channel": "in-process audit result and authenticated gateway history"
+        }
+      ],
+      "local_storage": "Audit history is an unbounded process-memory list containing node pseudonym, protocol, provider blob ID, height, report hash and timestamp. Receipt raw_response is transient in memory in the current publisher flow; no durable copy is shown. Application log records may contain prefixes, protocol, height, report hash, and validation/error text; configured log sink/access/retention are UNKNOWN.",
+      "provider_storage": "When non-mock Celestia submit is invoked, the full serialized report bytes are sent to the configured DA endpoint as a public-da transport. Provider-side replicas, public retrieval audience, retention, deletion and operator identity are UNKNOWN. No submit/retrieval was executed.",
+      "access_boundary": "Publisher is an in-process call with no per-method authorization. Main gateway anchor reads require M2 authenticated-read policy. The public DA channel can expose serialized report fields independently of gateway auth.",
+      "retention_deletion": "Local audit_history has no cap, expiry or delete method and lasts for process lifetime. Provider-side retention/deletion is UNKNOWN. Current r2 positive limit validation affects the returned slice only and does not bound storage.",
+      "mode_status": "PerformanceAuditLog rejects mock mode in live profiles. Non-mock default enabled protocol set is Celestia only; Avail/EigenDA/Near are disabled for non-mock routing. Celestia is operationally live-capable but remains release-evidence-ineligible. Actual VAMS_ENV, mock flags, configured protocols, runtime invocation and deployment are UNKNOWN.",
+      "source_refs": [
+        "da-pseudonym",
+        "da-kpi",
+        "da-telemetry",
+        "da-serialized-report",
+        "da-receipt-model",
+        "performance-gates",
+        "performance-publish",
+        "performance-history",
+        "celestia-submit",
+        "celestia-retrieve",
+        "main-gateway-economics-da"
+      ],
+      "unresolved_owner_decisions": [
+        "Approve every outgoing KPI key/value meaning and the exposure of scores, gain metrics, hashes, timestamps and challenge labels.",
+        "Decide whether deterministic pseudonyms meet the required linkability policy; source hashing has no secret and does not prevent guessing or joining.",
+        "Name Celestia endpoint operator/recipient and decide public payload fields, access, retention, deletion, replication and provider-log treatment.",
+        "Set local audit-history limit, retention and deletion policy; no period is inferred.",
+        "Identify which runtime profiles can instantiate PerformanceAuditLog and whether any currently configured protocol differs from source defaults.",
+        "Review bounded publisher rejection outputs and other Sentinel/client failure or exception logging before assigning log access/retention; source sanitization does not establish effective sinks, deployed cleanup or complete PII safety."
+      ]
+    },
+    {
+      "id": "legacy-sentinel-da-simulation",
+      "flow_status": "source_observed simulator implementation; no production call site found in selected source",
+      "producer": "A caller could pass a report dictionary to DAPublisher.publish_report; the selected Sentinel production-source path instead uses PerformanceAuditLog.",
+      "consumers": [
+        "local DAPublisher hash/Merkle helpers",
+        "caller receiving simulated response"
+      ],
+      "field_groups": [
+        {
+          "category": "raw report passthrough",
+          "fields": [
+            "all keys and nested values in report dictionary"
+          ],
+          "detail": "The simulator hashes sorted JSON directly and does not call AuditReport or its public filters; input fields are not individually known from this class.",
+          "source_refs": [
+            "legacy-da-publisher"
+          ]
+        },
+        {
+          "category": "simulated output",
+          "fields": [
+            "success",
+            "daHeight",
+            "daCommitment",
+            "merkleRoot",
+            "merkleProof",
+            "error"
+          ],
+          "detail": "Merkle/commitment is derived from the entire serialized raw report; exception text can be returned to caller.",
+          "source_refs": [
+            "legacy-da-publisher"
+          ]
+        }
+      ],
+      "transforms": [
+        "Sorted JSON report is hashed into a local leaf; a single-item mock root/proof is returned."
+      ],
+      "recipient_channel": [
+        {
+          "role": "local caller",
+          "channel": "in-process simulated result; no provider network call in this class"
+        }
+      ],
+      "local_storage": "Only an in-memory height counter is maintained; no payload persistence is shown.",
+      "provider_storage": "None in the inspected simulator implementation.",
+      "access_boundary": "No publisher authorization layer is shown; class is local simulation and release-ineligible.",
+      "retention_deletion": "Height counter lasts until object/process teardown; report bytes are used transiently for hashing; no retained report list or deletion API is shown.",
+      "mode_status": "Inventory marks route non-live and local-mock-only. No source-connected runtime caller found; this does not establish deployment absence.",
+      "source_refs": [
+        "publisher-legacy",
+        "legacy-da-publisher",
+        "sentinel-mode"
+      ],
+      "unresolved_owner_decisions": [
+        "Confirm whether this legacy publisher is intentionally retired or still used by an uninspected extension.",
+        "If used, decide whether raw dictionary hashing is allowed and identify its caller, log sink, and any external wrapper."
+      ]
+    },
+    {
+      "id": "vdso-intent-sidecar-api-and-memory",
+      "flow_status": "source_observed API schemas, gateway route calls and process-memory dictionaries; route-to-canary workflow wiring is not present in inspected source",
+      "producer": "M2-authenticated clients submit VDSO intent, authorization, ciphertext sidecar, and disclosure verification requests to the main gateway router.",
+      "consumers": [
+        "gateway.vdso request models/handlers",
+        "global VDSOCanaryService",
+        "service intent/sidecar/object maps",
+        "authenticated VDSO API response clients"
+      ],
+      "field_groups": [
+        {
+          "category": "stable intent and state identifiers",
+          "fields": [
+            "actor_root",
+            "state_domain",
+            "object_id",
+            "program_id",
+            "workflow_definition_hash",
+            "input_commitment",
+            "expected_output_commitment",
+            "evidence_root",
+            "sidecar_root",
+            "state_commitment",
+            "intent_id",
+            "workflow_id",
+            "adapter_id",
+            "conformance_root"
+          ],
+          "detail": "Bytes32 identity/commitment values are stable correlators; source does not establish anonymity or low linkability.",
+          "source_refs": [
+            "vdso-models",
+            "vdso-api-intent-model",
+            "vdso-api-handlers"
+          ],
+          "candidate_data_categories": [
+            "stable_pseudonym_or_hash"
+          ]
+        },
+        {
+          "category": "intent policy and numeric fields",
+          "fields": [
+            "schema_version",
+            "host_authority",
+            "authority_epoch",
+            "nonce",
+            "valid_until_height",
+            "accesses[].mode",
+            "accesses[].expected_version",
+            "accesses[].fencing_token",
+            "signature_suite",
+            "execution_tier",
+            "max_execution_units",
+            "max_settlement_cost",
+            "status",
+            "external_writes",
+            "selected_adapter_id",
+            "POST /v1/vdso/intents/simulate.current_height"
+          ],
+          "detail": "Host/domain, object access, execution limits and selected adapter status can reveal workflow/state policy and operational conditions. Simulation request also carries current_height.",
+          "source_refs": [
+            "vdso-models",
+            "vdso-api-intent-model",
+            "vdso-api-handlers"
+          ],
+          "candidate_data_categories": [
+            "numeric_telemetry",
+            "stable_pseudonym_or_hash",
+            "operational_metadata"
+          ]
+        },
+        {
+          "category": "authorization signature material",
+          "fields": [
+            "authorization.suite",
+            "authorization.secp256k1_public_key",
+            "authorization.secp256k1_signature",
+            "authorization.ml_dsa_65_public_key_b64",
+            "authorization.ml_dsa_65_signature_b64",
+            "M2 signer DID",
+            "M2 request signature"
+          ],
+          "detail": "VDSO signature inputs are verified and converted to domain bytes; submitted intent record stores the intent, not the authorization envelope. Signer identity is derived from the authenticated gateway request.",
+          "source_refs": [
+            "vdso-api-envelope-model",
+            "vdso-api-auth",
+            "vdso-service-state",
+            "auth-consumption"
+          ],
+          "candidate_data_categories": [
+            "signature_or_key_envelope",
+            "stable_pseudonym_or_hash"
+          ]
+        },
+        {
+          "category": "encrypted sidecar request and stored record",
+          "fields": [
+            "schema_version",
+            "nonce_b64",
+            "ciphertext_b64",
+            "plaintext_root",
+            "content_hash",
+            "policy_hash",
+            "recipient_envelopes[].recipient_id",
+            "recipient_envelopes[].encapsulated_key_b64",
+            "recipient_envelopes[].wrapped_key_b64"
+          ],
+          "detail": "Base64 fields decode to nonce/ciphertext/key-envelope bytes. recipient_id is a stable recipient identifier; plaintext_root/content_hash/policy_hash are visible commitments; ciphertext is encrypted payload data.",
+          "source_refs": [
+            "vdso-api-envelope-model",
+            "vdso-sidecar-model",
+            "vdso-encrypt"
+          ],
+          "candidate_data_categories": [
+            "encrypted_ciphertext",
+            "stable_pseudonym_or_hash",
+            "signature_or_key_envelope"
+          ]
+        },
+        {
+          "category": "sidecar and object responses",
+          "fields": [
+            "stored",
+            "content_hash",
+            "plaintext_root",
+            "policy_hash",
+            "object.schema_version",
+            "object_id",
+            "binding.state_domain",
+            "binding.host_authority",
+            "binding.authority_epoch",
+            "version",
+            "state_commitment",
+            "adapters[].access_modes",
+            "maximum_tier",
+            "privacy_class",
+            "active",
+            "quarantined",
+            "expires_at"
+          ],
+          "detail": "POST /sidecars returns content_hash/stored only; GET /sidecars returns commitments only, not ciphertext/envelopes. Object and adapter routes return stable state/capability metadata.",
+          "source_refs": [
+            "vdso-api-handlers",
+            "vdso-models"
+          ]
+        },
+        {
+          "category": "disclosure verification",
+          "fields": [
+            "claim_key_hash",
+            "disclosed_value_hash",
+            "salt",
+            "siblings[]",
+            "path_bits[]",
+            "expected_root",
+            "valid"
+          ],
+          "detail": "Request contains hashes and Merkle proof path; response is a validity boolean. Handler does not log these values in inspected code.",
+          "source_refs": [
+            "vdso-api-envelope-model",
+            "vdso-api-handlers"
+          ],
+          "candidate_data_categories": [
+            "stable_pseudonym_or_hash",
+            "cryptographic_proof_material"
+          ]
+        },
+        {
+          "category": "VDSO gateway route surface",
+          "fields": [
+            "POST /v1/vdso/intents/simulate",
+            "POST /v1/vdso/intents",
+            "GET /v1/vdso/intents/{intent_id}",
+            "GET /v1/vdso/objects/{object_id}",
+            "GET /v1/vdso/adapters",
+            "POST /v1/vdso/sidecars",
+            "GET /v1/vdso/sidecars/{content_hash}",
+            "POST /v1/vdso/disclosures/verify"
+          ],
+          "detail": "Simulation consumes intent plus current_height; intent submission consumes signed intent and authorization; sidecar upload consumes ciphertext metadata/envelopes; disclosure verification consumes hashes and proof path. Route responses and stored fields are itemized in the adjacent intent/sidecar field groups.",
+          "source_refs": [
+            "vdso-api-handlers",
+            "route-policy"
+          ]
+        }
+      ],
+      "transforms": [
+        "Strict request models reject extra fields, decode recipient key envelopes from base64, decode sidecar nonce/ciphertext, and validate sidecar integrity.",
+        "VDSO service stores full sidecar keyed by content_hash in _ciphertext_sidecars; intent map stores intent/status/selected adapter metadata.",
+        "The global router constructs VDSOCanaryService with default VDSO_MODE=off unless configured; authoritative mode is rejected; live canary construction requires injected trusted host height, durable nonce store and deployment verifier.",
+        "VDSOCanaryService.submit_shadow records intent and nonce; the gateway submit route calls submit_shadow but does not call require_bound_sidecar. VDSOWorkflow has a canary path that checks sidecar binding, but no source call site constructing/running VDSOOrchestrator was found.",
+        "Gateway sidecar upload handler does not invoke EncryptedSidecarPublisher.",
+        "The VDSO HTTP router contains no application logger calls in the inspected module; web-server/proxy access logging remains UNKNOWN."
+      ],
+      "recipient_channel": [
+        {
+          "role": "main gateway",
+          "channel": "M2-authenticated VDSO API; mutating POST is privileged-state-change and reads are authenticated-read"
+        },
+        {
+          "role": "configured VDSO recipient",
+          "channel": "recipient_id and key envelopes are supplied by client; actual person/service/key owner UNKNOWN"
+        }
+      ],
+      "local_storage": "VDSO objects, intents, nonce store (default InMemoryNonceStore), and ciphertext sidecars are in-process maps/state for the global service; no persistent sidecar disk store is shown. No cleanup/deletion/expiry method for _ciphertext_sidecars or _intents was found.",
+      "provider_storage": "The HTTP sidecar handler only stores in VDSOCanaryService memory and returns a commitment. It does not submit to DA. Separate EncryptedSidecarPublisher may submit serialized ciphertext to a DA provider only with a retrieval-bound live-evidence capability; actual invocation/provider is UNKNOWN.",
+      "access_boundary": "VDSO routes are included in the main gateway closed route policy. M2 authentication is applied globally; intent/sidecar mutation has additional dependency on authenticated request signer for the relevant endpoints. GET commitment exposes hashes, not ciphertext. Deployed caller allowlist and recipient key registry are UNKNOWN.",
+      "retention_deletion": "In-memory records remain until process teardown or replacement; no sidecar delete or TTL is implemented in inspected service. Any later DA copy retention is UNKNOWN. No filesystem, backup, recipient endpoint or key-deletion policy is established.",
+      "mode_status": "Global VDSO mode defaults to off. Live canary requires injected trusted providers not supplied by gateway.vdso module; authoritative mode is blocked. Existing publisher inventory marks VDSO DA live capability and release eligibility false. These source gates do not prove actual deployment absence.",
+      "source_refs": [
+        "vdso-api-intent-model",
+        "vdso-api-envelope-model",
+        "vdso-api-auth",
+        "vdso-api-handlers",
+        "vdso-models",
+        "vdso-sidecar-model",
+        "vdso-encrypt",
+        "vdso-service-state",
+        "vdso-service-sidecar",
+        "vdso-workflow",
+        "vdso-da-publisher",
+        "publisher-vdso",
+        "route-policy"
+      ],
+      "unresolved_owner_decisions": [
+        "Identify each recipient_id, recipient public-key owner, key lifecycle and authorized decryptor; do not infer recipients from envelope fields.",
+        "Approve the meaning/linkability of actor_root, state_domain, object IDs, state commitments, plaintext roots, policy hashes, intent IDs and workflow hashes.",
+        "Set sidecar/intention local storage access, retention, deletion, backup and memory dump handling.",
+        "Confirm whether VDSO_MODE is off/shadow/canary in any target profile and whether a separate orchestrator or external publisher is injected.",
+        "Review the actual encryption/HPKE backend, associated data policy, recipient registry and provider retention before any privacy or release claim.",
+        "Confirm VDSO HTTP access-log fields, readers and retention even though the inspected route handlers have no application logger calls."
+      ]
+    },
+    {
+      "id": "vdso-encrypted-da-publication",
+      "flow_status": "source_observed serialization and gates; no source caller found and no publication or retrieval was executed",
+      "producer": "EncryptedSidecarPublisher.publish accepts an EncryptedWitnessSidecar and expected signed sidecar root.",
+      "consumers": [
+        "selected DAAdapter.submit_blob",
+        "independent RetrievalBoundLiveEvidence receipt verifier and blob retriever",
+        "caller receiving VDSODAReceipt"
+      ],
+      "field_groups": [
+        {
+          "category": "serialized ciphertext sidecar",
+          "fields": [
+            "schema_version",
+            "nonce",
+            "ciphertext",
+            "plaintext_root",
+            "content_hash",
+            "policy_hash",
+            "recipient_envelopes[].recipient_id",
+            "recipient_envelopes[].encapsulated_key",
+            "recipient_envelopes[].wrapped_key"
+          ],
+          "detail": "A length-delimited encoded array contains ciphertext and metadata/envelopes; plaintext is not accepted by serialize_encrypted_sidecar. Ciphertext size and visible metadata remain observable.",
+          "source_refs": [
+            "vdso-sidecar-model",
+            "vdso-encrypt",
+            "vdso-da-publisher"
+          ],
+          "candidate_data_categories": [
+            "encrypted_ciphertext",
+            "stable_pseudonym_or_hash",
+            "signature_or_key_envelope"
+          ]
+        },
+        {
+          "category": "DA receipt and live read-back",
+          "fields": [
+            "protocol",
+            "blob_id",
+            "height",
+            "commitment",
+            "content_hash",
+            "retrieved exact bytes"
+          ],
+          "detail": "Publisher requires adapter protocol match, content hash binding to signed sidecar_root, independent receipt verification and exact retrieved-byte equality.",
+          "source_refs": [
+            "vdso-da-publisher"
+          ],
+          "candidate_data_categories": [
+            "encrypted_ciphertext",
+            "stable_pseudonym_or_hash",
+            "operational_metadata"
+          ]
+        }
+      ],
+      "transforms": [
+        "serialize_encrypted_sidecar validates integrity then encodes ciphertext plus metadata/envelopes.",
+        "Submission namespace is vams-vdso-sidecar-v1.",
+        "VDSO receipt commitment is checked against SHA-256 payload; independent observer retrieves and compares exact bytes.",
+        "Standard current CelestiaDAAdapter and NearDAAdapter instances are explicitly rejected as VDSO live-evidence capable; custom adapter/observer wiring is not found in the production source search."
+      ],
+      "recipient_channel": [
+        {
+          "role": "selected DA provider",
+          "channel": "encrypted-da transport if an allowed adapter and observer are explicitly supplied",
+          "recipient_identity": "provider/operator UNKNOWN"
+        },
+        {
+          "role": "recipient-envelope holders",
+          "channel": "key envelope metadata is in serialized payload",
+          "recipient_identity": "recipient IDs supplied by caller; identity mapping UNKNOWN"
+        }
+      ],
+      "local_storage": "Payload and DA receipt are held in process during publication; no persistent receipt store is shown by this publisher.",
+      "provider_storage": "If wired, provider receives ciphertext plus nonce, hashes and recipient envelopes, not plaintext. Provider-side retention, access, replication, deletion and metadata visibility are UNKNOWN.",
+      "access_boundary": "No publisher method auth is shown; current caller must separately control adapter and injected independent observer callbacks. Main VDSO HTTP route does not invoke this publisher.",
+      "retention_deletion": "No local receipt retention or delete method is shown. Provider copy retention is UNKNOWN and must not be inferred from encryption.",
+      "mode_status": "Fixed inventory marks this route operational_live_capable=false and release_evidence_eligible=false. Current Celestia/Near adapters are blocked for this VDSO path; no runtime invocation/deployment state was observed.",
+      "source_refs": [
+        "publisher-vdso",
+        "vdso-sidecar-model",
+        "vdso-encrypt",
+        "vdso-da-publisher"
+      ],
+      "unresolved_owner_decisions": [
+        "Name and approve the provider/operator and each recipient represented by recipient_id.",
+        "Decide which metadata may be public alongside ciphertext and how ciphertext size/timing is treated.",
+        "Approve provider retention/deletion/backups and recipient key rotation/revocation; none is specified by these source files.",
+        "Confirm whether any non-source-inventoried caller supplies adapters/observer callbacks before marking this route enabled."
+      ]
+    },
+    {
+      "id": "object-policy-read-call-calldata-construction-not-submitted",
+      "flow_status": "source_observed local typed calldata construction only; selected source has no RPC consumer, response, transaction, chain publication, or authenticated policy result",
+      "producer": "ObjectPolicyCallsV1.object_call/scope_call return ObjectPolicyReadCallV1 containing unsigned method selector plus ABI calldata. No production caller or RPC/transaction submission is established in the selected source tree.",
+      "consumers": [
+        "local Python caller receiving ObjectPolicyReadCallV1; production consumer UNKNOWN/not found in selected source"
+      ],
+      "field_groups": [
+        {
+          "category": "configured domain and provider identity",
+          "fields": [
+            "policy_contract",
+            "chain_id",
+            "host_domain",
+            "budget_unit",
+            "provider_id",
+            "runtime_id",
+            "target",
+            "authority/provider issuer IDs"
+          ],
+          "detail": "Typed configured values are validated for equality and encoded in call domain/issuer slots. Stable identifiers/addresses and domain IDs can be linkable; owner classification remains UNKNOWN.",
+          "source_refs": [
+            "object-policy-call-domain",
+            "provider-identity-v3",
+            "object-policy-helper"
+          ]
+        },
+        {
+          "category": "ActionContext proposal or scope template",
+          "fields": [
+            "actor_root",
+            "provider_id",
+            "runtime_id",
+            "model_id",
+            "host_domain",
+            "workflow_id",
+            "intent_id",
+            "action_hash",
+            "input_hash",
+            "policy_root",
+            "target",
+            "nonce",
+            "budget_unit",
+            "root_scheme",
+            "authority_epoch",
+            "policy_version",
+            "capabilities",
+            "budget",
+            "issued_at",
+            "expires_at",
+            "chain_id"
+          ],
+          "detail": "Object calls encode the canonical action context fields, excluding the domain prefix. Identifiers, workload/action/input/policy hashes, nonce, budget and time bounds become visible in the in-memory calldata value; hashes are stable commitments, not anonymity.",
+          "source_refs": [
+            "action-context-v1",
+            "object-effect-v3",
+            "object-authority-scope-v3",
+            "object-policy-helper"
+          ]
+        },
+        {
+          "category": "proposal and authority-scope values",
+          "fields": [
+            "resource_id",
+            "cost_units",
+            "fencing_token",
+            "resources[]",
+            "budget_limit",
+            "max_action_cost",
+            "fencing_token"
+          ],
+          "detail": "Object-effect proposal appends resource/cost/fencing values; scope call adds the resource set and budget/cost/fence limits. These are encoded locally in the returned read-call bytes.",
+          "source_refs": [
+            "object-effect-v3",
+            "object-authority-scope-v3",
+            "object-policy-helper"
+          ]
+        },
+        {
+          "category": "grant witness and signature/proof material",
+          "fields": [
+            "grant.actor_root",
+            "grant.provider_id",
+            "grant.runtime_id",
+            "grant.workflow_id",
+            "grant.intent_id",
+            "grant.target",
+            "grant.authority_issuer",
+            "grant.provider_issuer",
+            "grant.nonce",
+            "grant.budget_limit",
+            "grant.max_action_cost",
+            "grant.max_scope_lifetime",
+            "grant.valid_after",
+            "grant.valid_until",
+            "grant.resources[]",
+            "consent[65 bytes]",
+            "siblings[]",
+            "index"
+          ],
+          "detail": "Helper encodes the complete governed grant, 65-byte consent signature, positioned Merkle siblings and index. It checks signature shape/low-S form and computes membership-root structure but does not verify actor consent or accept that root as current policy. Signatures/witness and identifiers are sensitive/linkable inputs; no disclosure approval is implied.",
+          "source_refs": [
+            "object-policy-call-witness",
+            "governed-object-grant-v1",
+            "signed-receipt-order",
+            "object-policy-helper"
+          ]
+        }
+      ],
+      "transforms": [
+        "Typed values are validated then ABI-encoded with fixed method selectors; `repr=False` hides byte fields from default repr only.",
+        "The helper has no RPC client, response parser, signing key, transaction send, persistence, or external submission behavior.",
+        "No method call result is obtained, and local calldata construction does not prove policy authorization, consent, provider identity, eligibility, custody, or effect execution."
+      ],
+      "recipient_channel": [
+        {
+          "role": "local caller",
+          "channel": "in-process return value of object_call/scope_call; caller identity, subsequent handling and any future endpoint disclosure UNKNOWN"
+        }
+      ],
+      "local_storage": "The helper creates immutable in-memory bytes and does not persist them. Caller-side copies/logging/telemetry are UNKNOWN.",
+      "provider_storage": "None shown by this helper; no RPC/public chain submission observed.",
+      "access_boundary": "Helper enforces typed configuration/shape only; returned calldata is unsigned and not an authenticated policy decision. No per-caller authorization is implemented here.",
+      "retention_deletion": "No helper retention or deletion mechanism. Caller memory/log/capture, RPC-provider retention, and future chain disclosure are not established.",
+      "mode_status": "Source helper only; no production caller/RPC/transaction route established. This is not evidence of absent external callers outside selected source.",
+      "source_refs": [
+        "object-policy-call-helper",
+        "object-policy-call-witness",
+        "object-policy-call-domain",
+        "action-context-v1",
+        "object-effect-v3",
+        "object-authority-scope-v3",
+        "provider-identity-v3",
+        "governed-object-grant-v1",
+        "signed-receipt-order",
+        "restricted-policy-read-methods"
+      ],
+      "unresolved_owner_decisions": [
+        "Classify the fields, stable hashes, consent signature and witness material and decide which are permitted to reach any future RPC or transaction endpoint.",
+        "Identify any external consumer/caller, recipient/operator, access boundary, metadata handling and retention before enabling submission.",
+        "Obtain qualified signer/custody and authenticated current-policy proof; this local codec does not supply them."
+      ]
+    },
+    {
+      "id": "semantic-mmu-local-memory-checkpoint-access-and-log-flow",
+      "flow_status": "source-observed local in-process and filesystem dataflow; atomic same-directory replacement and fail-closed L3 persistence exception are source behavior only, not filesystem power-loss, remote-provider, backup, or deployed-sink qualification",
+      "producer": "SemanticMMU stores caller content at a validated stable relative address; local L1/L2 dictionaries and local HORMA filesystem L3 are implemented. x402_recovery passes interrupt request payload and escrow state to checkpoint_interrupt_state. HIPIF reads a contained raw trace, derives a summary, and persists it under the workflow address.",
+      "consumers": [
+        "SemanticMMU local fetch/restore and caller receiving MemoryPage/HIPIF result",
+        "local .data/memory JSON and patches JSONL files",
+        "configured Python logger handlers/collectors (effective sinks unknown)",
+        "x402 recovery restore caller of checkpoint state"
+      ],
+      "field_groups": [
+        {
+          "category": "stable semantic addresses and page metadata",
+          "fields": [
+            "address/workflow/entity/interrupt IDs",
+            "content",
+            "content_hash",
+            "tier",
+            "provenance",
+            "value_score",
+            "access_count",
+            "last_accessed",
+            "created_at"
+          ],
+          "detail": "Addresses are stable path components under .data/memory. L3 JSON stores the address, content and metadata fields; content may be arbitrary caller data and classifications/subject mapping are UNKNOWN. Content hashes and address-derived values are stable/linkable, not anonymous. JSON and the same-directory temporary page are plaintext; no at-rest encryption is established.",
+          "source_refs": [
+            "semantic-mmu-address",
+            "semantic-mmu-persistence",
+            "semantic-mmu-store-fetch"
+          ]
+        },
+        {
+          "category": "HIPIF raw trace and folded summary",
+          "fields": [
+            "raw_trace_path",
+            "raw trace lines/content",
+            "workflow_id",
+            "selected transaction/error text",
+            "folded_summary",
+            "generic HIPIF error result"
+          ],
+          "detail": "HIPIF accepts only a trace path contained under the memory root, reads the raw trace, builds a summary containing workflow ID, counts, up to three transaction-like lines and up to three error-like lines, then stores at workflows/{workflow_id}/folded_summary. Raw trace is unlinked only after store succeeds. If summary persistence fails, the trace remains; if unlink fails after persistence, the summary may already be stored while the raw trace remains, and the method returns generic failure. Failure log/result contains no exception/path text.",
+          "source_refs": [
+            "semantic-mmu-hipif",
+            "semantic-mmu-persistence",
+            "semantic-mmu-store-fetch"
+          ]
+        },
+        {
+          "category": "x402 interrupt escrow checkpoint and restore",
+          "fields": [
+            "interrupt_id",
+            "nonce",
+            "provider",
+            "escrow_id",
+            "amount_wei",
+            "expires_at",
+            "request_payload (arbitrary mapping)"
+          ],
+          "detail": "checkpoint_interrupt_state stores these values in session-scoped L2 RAM at _irq_checkpoint/{interrupt_id}; restore returns the stored content. It does not perform a remote write or explicitly persist this checkpoint to L3. Actual payload semantics and caller data classification are UNKNOWN.",
+          "source_refs": [
+            "semantic-mmu-flush-checkpoint-reset",
+            "semantic-mmu-store-fetch"
+          ]
+        },
+        {
+          "category": "EvoMem reviewed patch file",
+          "fields": [
+            "address-derived filename",
+            "previous_state",
+            "new_state",
+            "rationale_for_change",
+            "supporting_evidence",
+            "reviewed_by",
+            "reviewed_at",
+            "session_id"
+          ],
+          "detail": "Persistent append requires review_approved, a reviewed_by value and review-authorizer success; the patch payload is caller content plus reviewer/time/session metadata, serialized to .data/memory/patches/*.jsonl. Logs are stage-only. Reviewer identity classification, access, retention and deletion remain UNKNOWN.",
+          "source_refs": [
+            "semantic-mmu-patch",
+            "semantic-mmu-address"
+          ]
+        },
+        {
+          "category": "memory access log and state/reset metadata",
+          "fields": [
+            "address_hash (unsalted SHA-256)",
+            "operation",
+            "tier",
+            "session_id",
+            "timestamp",
+            "old_session_hash",
+            "l1_pages",
+            "l2_pages",
+            "access_events",
+            "l3_pages",
+            "persistent_purged"
+          ],
+          "detail": "The access log is process-local, capped at 10,000 entries, and returned to callers by get_access_log. Its stable unsalted address hash plus session/time fields are linkable pseudonymous metadata. hard_reset_session clears L1/L2/access log and rotates session ID; persistent L3 deletion is optional and reviewer-gated.",
+          "source_refs": [
+            "semantic-mmu-access-log",
+            "semantic-mmu-flush-checkpoint-reset"
+          ]
+        },
+        {
+          "category": "stage-only process diagnostics",
+          "fields": [
+            "operation/stage labels",
+            "generic failure class markers"
+          ],
+          "detail": "Current S-MMU logs are fixed stage-only messages and do not include raw address/workflow/interrupt IDs, resolved paths, content-hash prefixes, or interpolated filesystem/HIPIF/patch exceptions. Temporary-file cleanup failure is also logged as a fixed message. Effective log handlers, collectors, exports, access and retention are UNKNOWN.",
+          "source_refs": [
+            "semantic-mmu-persistence",
+            "semantic-mmu-hipif",
+            "semantic-mmu-patch",
+            "semantic-mmu-store-fetch",
+            "semantic-mmu-flush-checkpoint-reset"
+          ]
+        },
+        {
+          "category": "L3 temporary-file copy and partial-write residue",
+          "fields": [
+            "same-directory .vams-mmu-<random>.tmp plaintext page copy",
+            "target .json page",
+            "temporary-file cleanup result"
+          ],
+          "detail": "The L3 writer creates a same-directory NamedTemporaryFile, serializes the page in plaintext JSON, flushes/fsyncs the file, then os.replace atomically publishes the target. On ordinary failure it attempts to unlink only its owned temporary. A cleanup failure or process crash can leave an orphan temporary plaintext copy; its retention/operator handling is UNKNOWN. NamedTemporaryFile uses private default permissions where supported, but no deployment ACL or at-rest encryption is established.",
+          "source_refs": [
+            "semantic-mmu-persistence"
+          ]
+        }
+      ],
+      "transforms": [
+        "Address input is validated as relative POSIX-style components and resolved beneath MEMORY_ROOT; source does not establish OS-level isolation or effective memory-root deployment configuration.",
+        "L3 pages are serialized as JSON to a same-directory temporary file, flushed/fsynced and atomically replaced; failure cleans the temporary file best-effort and raises a constant MMUPersistenceError with suppressed cause. Parent-directory fsync, universal power-loss durability and remote-provider behavior are not established.",
+        "L3 store updates _l3_store only after successful persistence; failed write propagates and does not report successful store. HIPIF retains its raw trace if summary persistence fails.",
+        "HIPIF failure returns the generic string 'HIPIF folding failed.' and emits a fixed message; successful folding removes the original trace after store succeeds.",
+        "No change to memory fields/schema/layout, V(m), SIRA, reviewer gate, checkpoint payload shape or access-log schema/semantics is claimed.",
+        "On successful write the target is replaced only after file flush/fsync; the temporary file is a second plaintext page copy until replaced/removed. This is not at-rest encryption or power-loss/backup qualification.",
+        "If HIPIF unlink fails after the summary was stored, the caller can receive generic failure despite summary persistence and retained raw trace."
+      ],
+      "recipient_channel": [
+        {
+          "role": "local SemanticMMU callers",
+          "channel": "in-process store/fetch/HIPIF/checkpoint/access-log return values; concrete caller identities beyond source call paths UNKNOWN"
+        },
+        {
+          "role": "local filesystem",
+          "channel": ".data/memory HORMA JSON and patches JSONL; effective host access boundary UNKNOWN"
+        },
+        {
+          "role": "process logs",
+          "channel": "fixed stage-only logger calls; configured handlers/collectors and recipients UNKNOWN"
+        }
+      ],
+      "local_storage": "L1/L2/access events are process memory; L3 pages and reviewed patches are local files. During L3 replacement, a same-directory temporary plaintext JSON copy exists; ordinary failures attempt cleanup, but crash/cleanup failure can leave an orphan copy. Checkpoint data is L2 session memory. No remote L3/DA provider call is implemented here. Backup, WAL, replica, restore, ACL and orphan cleanup behavior are UNKNOWN.",
+      "provider_storage": "No external provider submission is shown by these SemanticMMU methods. Remote/backup copies outside this implementation are UNKNOWN.",
+      "access_boundary": "Persistent EvoMem patches and optional persistent L3 purge require the existing review authorization checks. Ordinary L3 store/fetch/checkpoint are not per-user authenticated by this class. Deployment filesystem ACLs and caller authorization are UNKNOWN.",
+      "retention_deletion": "Raw HIPIF trace is deleted only after successful summary store; an unlink failure can leave both the stored summary and original trace while returning generic failure. L1/L2/access log clear on hard reset; access log is bounded to 10,000 events. L3 data persists unless reviewer-gated purge is used; EvoMem patch files have no deletion API. A crash/cleanup failure can leave temporary plaintext files. Filesystem backups/log copies and actual retention are UNKNOWN.",
+      "mode_status": "Local S-MMU implementation; this flow does not establish deployed mode or external DA/provider operation.",
+      "source_refs": [
+        "semantic-mmu-address",
+        "semantic-mmu-persistence",
+        "semantic-mmu-hipif",
+        "semantic-mmu-patch",
+        "semantic-mmu-store-fetch",
+        "semantic-mmu-flush-checkpoint-reset",
+        "semantic-mmu-access-log"
+      ],
+      "unresolved_owner_decisions": [
+        "Classify workflow/entity/interrupt identifiers, arbitrary content/request payload, transaction/error snippets, escrow fields, hashes and reviewer/session metadata; hashing is not anonymity.",
+        "Name actual filesystem/log/backup/restore operators and callers and decide their access controls, purposes, retention/deletion, exports and replication.",
+        "Approve allowed content and HIPIF summary fields and the use of session/access-history metadata; source behavior does not supply consent or data-owner decisions.",
+        "Verify deployed MEMORY_ROOT, filesystem ACLs, backup/WAL/replica and log collector behavior before D4 acceptance."
+      ]
+    }
+  ],
+  "review_handoff": {
+    "review_required": "Privacy Lead must review actual fields, subject mapping, linkability, recipients, access, retention, deletion and allowed disclosures across the currently identified SDK and effect flows. Gateway and operator owners must identify deployment mode, endpoints, auth key/certificate ownership, DB/log access, filesystem MEMORY_ROOT/ACLs, backups and provider agreements. The 21 SDK modules beyond the bounded Semantic MMU flow remain pending detailed review.",
+    "unknowns_are_actionable": "All UNKNOWN values above require named owner/operator answers; this artifact does not fill them by assumption.",
+    "not_evidence": "Source hashes and static call-site/anchor checks establish source consistency only. The R31 effect packet still has 214 plus 7 UNREVIEWED field slots and unobserved WAL/replica/backup/observer copies. Object-policy bytes are constructed locally only. Semantic MMU repair source does not establish host ACLs, directory fsync, universal power-loss durability, backups, remote-provider behavior or log sinks. No runtime behavior, privacy approval, deployed inventory completeness, retention compliance, redaction, release readiness, or T33 closure is established.",
+    "next_prompt": "Privacy Lead, data owner, and gateway/runtime/storage operators: Review the inventory against current pre-patch source-base manifest SHA-256 6a8d7d1568285ccfe5c344755c063aaa2efeb879b0a43b9c10281494b4168092; after final integration, bind your review to the externally generated final combined candidate manifest (the final hash is intentionally not asserted in this inventory). For each field/group, decide approved, prohibited, or conditionally allowed with purpose and data-subject classification; assess linkability of raw/stable identifiers, hashes, signatures, request and escrow data, checkpoints, access/session metadata, KPIs, cognitive/skill profiles, and object-policy calldata/witness material. Identify actual recipients/operators, access boundaries, effective endpoints/runtime modes, filesystem MEMORY_ROOT and ACLs, log collectors, database/WAL/replica/backup/restore copies, DA/provider copies, and approved retention/deletion/consent handling. Explicitly review the Semantic MMU plaintext temporary-file copy and possible orphan on crash/cleanup failure; HIPIF partial completion where summary persistence may succeed while trace deletion fails; generic persistence/HIPIF error outputs; local-only object-policy call bytes (no selected RPC consumer established); the 21 SDK modules still pending field/sink review; and the R31 effect scope (15 source files/16 historical flows, 214 plus 7 UNREVIEWED slots, with WAL/replica/backup/observer copies unobserved). Preserve UNKNOWN for unanswered facts. This inventory and root-reported unit tests are static/source and local-test evidence only; they do not establish deployed logging, filesystem permissions, actual providers, backups, retention, or operator behavior. No response to this prompt by itself approves release or closes D4.",
+    "T33_status": "BLOCKED",
+    "historical_next_prompt": "Historical R18 prompt; it named the prior manifest and is retained for provenance only: Privacy Lead and gateway/operator owner: For candidate source manifest SHA-256 f01cf1ce5b9a8fe7352ace9c8dbf05455f655a3a76e3e8da2f52c9df84403ac4, review this field inventory and return (1) each field/group approved, prohibited, or conditionally allowed with purpose; (2) whether raw IDs, signatures/payloads, numeric KPIs, stable pseudonyms/state hashes, cognitive/skill profiles, RPC URLs, and VDSO ciphertext metadata are linkable or restricted; (3) named recipients/operators and access boundaries for Neuron DB, main/legacy gateway, logs, replay DB, Celestia/other DA, and VDSO recipients; (4) owner-approved retention/deletion and backup/WAL/log handling for each local/provider copy; and (5) exact effective runtime modes/endpoints and source-to-deployment mapping. Leave any unanswered item UNKNOWN; do not treat this draft as approval or release evidence."
+  },
+  "classification_basis": "Candidate source-based data-type tags are attached to field groups; they describe field shape/linkability for Privacy Lead review and do not assign legal status, approve disclosure, or determine permitted use.",
+  "current_source_binding": {
+    "source_manifest_reference_sha256": "6a8d7d1568285ccfe5c344755c063aaa2efeb879b0a43b9c10281494b4168092",
+    "input_manifest": "VAMS-implementation-20261029/REMAINING-INPUTS-43.json",
+    "source_paths_checked": 6733,
+    "binding_role": "pre-patch source base for this candidate inventory delta; final candidate manifest must be emitted externally after integration to avoid self-reference",
+    "release_or_privacy_approval": false,
+    "current_source_delta": {
+      "path": "neuron/sdk/semantic_mmu.py",
+      "sha256": "b1072060beeedc985f4cd874b709c1afdeaf78020ceb086e9f8418c12e2c86a1",
+      "description": "Root-pinned local Semantic MMU repair; final candidate manifest remains external to avoid self-reference."
+    },
+    "final_candidate_manifest_sha256": null
+  },
+  "source_coverage_reconciliation": {
+    "source_base_manifest_sha256": "6a8d7d1568285ccfe5c344755c063aaa2efeb879b0a43b9c10281494b4168092",
+    "coverage_label": "SOURCE_HASHED_PENDING_FIELD_AND_SINK_REVIEW; hashes are source bindings only, not full module review or privacy acceptance",
+    "sdk_scope": {
+      "total_files": 22,
+      "semantic_mmu": {
+        "path": "neuron/sdk/semantic_mmu.py",
+        "sha256": "b1072060beeedc985f4cd874b709c1afdeaf78020ceb086e9f8418c12e2c86a1",
+        "status": "BOUNDED_FLOW_REVIEWED; source inventory covers path/data/log/checkpoint/access-log flows; broader SDK audit remains incomplete"
+      },
+      "remaining_files": 21,
+      "remaining_source_hashes": {
+        "neuron/sdk/__init__.py": "ecb6ee9fdf6264850779694944acd1008f63d25336e55a9bae9cada665c93f82",
+        "neuron/sdk/akash_orchestrator.py": "ddc34f60df76765a8cbcc3d872c7f3ce3fd8e8f6c21c307ead59e9fb742c8e1f",
+        "neuron/sdk/avail_substrate.py": "5fa34167e9aaee4005b74a6453f3b31b15b2524128723b78d315d6dfecf64e56",
+        "neuron/sdk/bittensor_subnet.py": "dc57bb1649f11d547e74f03f58bec7ba830edada9ac26253458ecfc5ed8673fa",
+        "neuron/sdk/celestia.py": "dbe831eec086c13672c3d3eec1b520f7efe993fbcefed10e9f7f2ea9e6cd9ab2",
+        "neuron/sdk/cognitive_drift.py": "e21cdfaa15b5091a3cbb7abc3aca075a8c7e9400776394e26882bdfb97c936a3",
+        "neuron/sdk/eigenda_kzg.py": "30010351a7f9ea9b98381b9c2085f3ebfb66c8db5a18a5835c2fc90bd54ebfc8",
+        "neuron/sdk/hardware_registry.py": "628f3225f5f646fbbbf445794b07b7f480a980634f641418d7a18bfc904da22d",
+        "neuron/sdk/iagon_storage.py": "ea40df64b1be29e5a56b3567fe421bc043b8f546e70e2331ea0b4b63a241cba6",
+        "neuron/sdk/interrupt_handler.py": "8594a76d60e6c608191a18c9548b73005aa79fcc5a25d4855297045361a91006",
+        "neuron/sdk/nonce_manager.py": "083e7c030564fef2e696cd78bd9b2452c2b229f5bd4d6da1d5870b9fce237133",
+        "neuron/sdk/oms_identity.py": "38471dc06868c42bc0035d63683ba73038eb214005bf65c81aee0fcd626c9a09",
+        "neuron/sdk/parallel_web.py": "711570d5f72497cdaaf4bddbdae6e285ebda71ac7618107f0f79ff4c3047bc1a",
+        "neuron/sdk/phala_tee.py": "a477288dbac1457dba979b679e629184f1fa82d69b2143b937f6e302aac91a86",
+        "neuron/sdk/semantic_checkpoint.py": "1a1f37790c04a48feda32a439e67ffdddc5c18e9961c64f9e190414032d32cca",
+        "neuron/sdk/sequence_wallet.py": "82e45cbcda549ceb923d95075aeb44d7af4e8a6ac5bf543cab6c3907f7aa2bf2",
+        "neuron/sdk/signer.py": "a5d3684efae58524c87e0b0f2e2bd17b6a60aae543c7ac35ea3b2e551c3327be",
+        "neuron/sdk/sira_engine.py": "e906f1f62338bfe87ab1551ea24b939f86b1000f0d3f5d51f21ba92830f99903",
+        "neuron/sdk/trails_client.py": "54ae20533be1be16f3a715d92817007d9891d4f88d07946f07b79ccacf926a64",
+        "neuron/sdk/trust_aggregator.py": "3ffb3f394f5f21a4c720c61ce288edf73d03d0fcaa08a5ab8aea9a23c678dee7",
+        "neuron/sdk/x402_recovery.py": "f2517d4ed788d40438afc6b1e9c6a213b597818eef1585f618777cd13e9f7b5d"
+      },
+      "review_status": "21_OTHER_SDK_FILES_PENDING_FIELD_AND_SINK_REVIEW",
+      "semantic_mmu_base_hash": "f3cda5e8eb55f61fb19c082bdd37759d5a69901320b38086db4754ad57dfa3e2",
+      "semantic_mmu_delta_summary": "Current candidate uses fixed stage-only logs, generic HIPIF failure text, atomic same-directory replacement, constant MMUPersistenceError from None, cache-after-write ordering, and raw-trace preservation on persistence failure. Hash/schema/layout/content/access-log semantics unchanged; no remote-provider or full durability qualification.",
+      "semantic_mmu_status": "BOUNDED_FLOW_REVIEWED: local fields, plaintext temporary copy, partial failures, checkpoint/access log, fixed diagnostics; deployment copies and privacy decisions UNKNOWN",
+      "semantic_mmu_temp_and_partial": "Same-directory NamedTemporaryFile -> file flush/fsync -> os.replace; ordinary cleanup attempted. Crash/cleanup failure can leave orphan plaintext temp. HIPIF unlink failure after successful summary persistence leaves two copies and returns generic failure."
+    },
+    "effect_privacy_packet": {
+      "input_artifact": "VAMS-implementation-20261029/privacy-review31/INPUTS.json",
+      "input_sha256": "8ea39c0791fd801ba645dd2fc7ec76e865ea5a1cc51fb48d25e90b5d7a386cd1",
+      "review_packet": "VAMS-implementation-20261029/privacy-review31/REVIEW-PACKET.txt",
+      "review_packet_sha256": "bf06a0e17ff76c618b157b4cd0dcbaf21bf2be050a3a81ca74f09f87bfcf4dcd",
+      "flow_review": "VAMS-implementation-20261029/privacy-review31/flow-and-acceptance-review.json",
+      "flow_review_sha256": "ca19fcc3f18b6ae44035f2e4d480b5bc4a922144b9dc8d4a767054fc0810b936",
+      "historical_source_manifest_sha256": "6e74f80c2b80a9929fd6aed24bc14966c6d765c28de473a2940c9479c523ba01",
+      "historical_selected_source_count": 15,
+      "historical_flow_count": 16,
+      "unresolved_field_slots": 214,
+      "earned_record_unresolved_field_slots": 7,
+      "current_source_hash_reconciliation": "All 15 input file hashes were compared to both the 6a8 base capture and memory-edit43 candidate; exact hashes match. This check does not refresh field anchors or disposition decisions.",
+      "current_disposition": "UNREVIEWED; retain all 214 plus 7 unknown slots and deployment-only WAL/replica/backup/observer requirements; do not treat historical packet as current privacy approval.",
+      "source_hashes_verified_at_base": {
+        "neuron/action_context.py": "6719957bfae1b82eb826744463bbbc09bbd4bb367b8b98b4644ff9a0533679fb",
+        "neuron/signed_receipts.py": "cd35ef6cd09d60e433978b6d0ef2b35f08f06286c8112b532a084af97abe57c1",
+        "neuron/object_grant_v1.py": "fb50966d3fb8e25a0e398ec29bf02f1a0b4435b6e0091eaac6ae35e710957f58",
+        "neuron/effect_protocol_v3.py": "10e8281f02bfeef54cf620bc7fd1f15407e283e8c752c707196985482b491d08",
+        "neuron/effect_postgres_v3.py": "e50fede41ff10e8c66fd97c7eba8b7c836c7010a9f979b0637406e35631a1976",
+        "neuron/effect_provider_v3.py": "28d9e3880cd2ee673cb258643d99c4508619d357a4e06d079ed022767ae8a3a6",
+        "neuron/effect_authority_v3.py": "d35d8ed5b065b99a0daa8060d795b605d270173d7bd8ad897676d6084c7792a7",
+        "neuron/effect_authority_v4.py": "45a33c9d2a0c98447b504c34c4d87f9a019fe4bcf9a3276ac49f2947590a3092",
+        "neuron/effect_authority_store_v3.py": "2af263dfa17595caac2600c52f5aeca7538e44498ade01146187090aed13e012",
+        "neuron/effect_authority_store_v4.py": "f76b0d2f4af5e7ea923a1008e4f099226d2defcfb4d60401fd62749dc3d9fa63",
+        "neuron/effect_coordinator_v3.py": "db1a72cd0e9c6cc0260d67a272e0c025f3ed8a0837d494b22fd0044db00f8d75",
+        "neuron/effect_coordinator_v4.py": "9f3852f1d3f258e743426ef18fa7e86b234a26321379e8c9881d52bf0c92a42f",
+        "neuron/runtime_safety.py": "b39c48ec63f20c34573e11e0a515ef622e3340f76964e1688c2dfa23b29d0079",
+        "contracts/src/trust/GovernedObjectGrantV1.sol": "2443b2e537672b0fb3dc4ae7afc14b62ef75138e0c42c38a0b5fb0b625d409a9",
+        "contracts/src/trust/RestrictedTestnetPolicyV1.sol": "8b7dd049565cea5fe9be3c06313b34b437c4f04d53de4577f000401ad45df62e"
+      },
+      "flow_anchor_reconciliation": "The 16 historical flow records are referenced but not imported into the current field inventory by this delta. Their file hash bindings match the current base; their fine-grained anchors and per-field dispositions require a fresh reviewer reconciliation before they are claimed as current.",
+      "current_manifest_rebinding": "Not rewritten in the external historical packet. The inventory records the 6a8 base comparison separately; preserve original artifact identity and historical manifest reference."
+    },
+    "object_policy_call_helper": {
+      "path": "neuron/object_policy_calls_v1.py",
+      "sha256": "c01d6ed85bda237df5c245448b685fcf4f0d09e8a0891ed182aa9214d26c3532",
+      "status": "LOCAL_CONSTRUCTION_ONLY_NOT_SUBMITTED",
+      "production_consumer": "not found in selected source; no RPC/transaction submission established"
+    },
+    "decisions": {
+      "data_owner": "UNKNOWN",
+      "independent_privacy_reviewer": "UNKNOWN",
+      "recipients": "UNKNOWN",
+      "retention": "UNKNOWN",
+      "deletion": "UNKNOWN",
+      "consent": "UNKNOWN",
+      "privacy_approval": false
+    }
+  },
+  "source_hash_encoding": "typed-artifact-algorithm-digest-v1"
+}

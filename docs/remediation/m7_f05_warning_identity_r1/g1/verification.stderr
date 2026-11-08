@@ -1,0 +1,11 @@
+    Compiling GodOfAgents/vams-cardano 0.1.0 (.)
+    Resolving GodOfAgents/vams-cardano
+        Using uncertain local version for aiken-lang/stdlib
+        ↳ You're seeing this message because the package version is unpinned and the network is not accessible.
+        Using uncertain local version for aiken-lang/fuzz
+        ↳ You're seeing this message because the package version is unpinned and the network is not accessible.
+      Fetched 2 packages in 10.13s from cache
+    Compiling aiken-lang/stdlib v2 (./build/packages/aiken-lang-stdlib)
+    Compiling aiken-lang/fuzz v2 (./build/packages/aiken-lang-fuzz)
+   Collecting all tests scenarios across all modules
+      Testing ...

@@ -1,0 +1,93 @@
+{
+  "schema_version": "f05-2a-applied-parameter-negative-sim-attempt-r3",
+  "attempt": {
+    "label": "applied_keys_unsorted negative through immutable R3 runner",
+    "argv": [
+      "/home/GodOfAgents/vams-evidence/toolchains/python/bin/python3.12",
+      "/home/GodOfAgents/code/VAMS-testnet/scripts/remediation/f05_2a_tx_sim_runner_r3.py",
+      "--aiken",
+      "/home/GodOfAgents/vams-evidence/toolchains/aiken-1.1.21/aiken",
+      "--tx",
+      "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m3_f05_2a_applied_parameter_family_r5_20261005/applied_keys_unsorted/negative.tx.cbor",
+      "--raw-inputs",
+      "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m3_f05_2a_applied_parameter_family_r5_20261005/applied_keys_unsorted/negative.raw_inputs.cbor",
+      "--raw-outputs",
+      "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m3_f05_2a_applied_parameter_family_r5_20261005/applied_keys_unsorted/negative.raw_outputs.cbor",
+      "--policy-id",
+      "1fb791c31f3e1ca6ca17d0329ace7c345366359fed36096c325a2e93"
+    ],
+    "cwd": "/home/GodOfAgents/code/VAMS-testnet",
+    "python_version": "Python 3.12.14",
+    "aiken_version": "aiken v1.1.21+42babe5",
+    "aiken_sha256": "07f3f927f1a8c71fc61273fdff850d9b98edb28dde207c8a32585991f2c88e79",
+    "runner_sha256": "3088ade0a316f6af59c04fe3e1675733100b58be826fa22af3c25e40a086ea5c",
+    "policy_id": "1fb791c31f3e1ca6ca17d0329ace7c345366359fed36096c325a2e93",
+    "wrapper_exit_code": 0,
+    "runner_result": {
+      "schema_version": "f05-2a-tx-sim-run-result-r3",
+      "simulator_child_exit": 1,
+      "simulator_result": {
+        "stage": "compiled_evaluation",
+        "target_script_invoked": true
+      },
+      "cleanup": {
+        "child_reaped": true,
+        "process_group_empty": true,
+        "snapshot_descriptors_closed": true,
+        "status": "clean"
+      },
+      "submitted_sha256": {
+        "transaction": "e77240962aa9151cb780eed1df30f8305a8958c0d24bf48c7d8dea9bece1de50",
+        "raw_inputs": "4b20e2b2cf4bd58b1f6e385c90ffd098d583df69d95fbc7b1fcc2591da72b9fe",
+        "raw_outputs": "dd662f3915fce3b7aef990ef6944c991dea967c41bbed1ef12914f517577d8a8"
+      },
+      "submitted_size_bytes": {
+        "transaction": 5104,
+        "raw_inputs": 73,
+        "raw_outputs": 79
+      },
+      "target_mint_binding": {
+        "expected_policy_id": "1fb791c31f3e1ca6ca17d0329ace7c345366359fed36096c325a2e93",
+        "compiled_script_hash": "1fb791c31f3e1ca6ca17d0329ace7c345366359fed36096c325a2e93",
+        "policy_ids": [
+          "1fb791c31f3e1ca6ca17d0329ace7c345366359fed36096c325a2e93"
+        ]
+      }
+    },
+    "capture_note": "Exact structured runner result returned by scoped execution and transcribed locally; raw simulator stdout/stderr and external attestation are not retained."
+  },
+  "fixture": {
+    "path": "docs/remediation/m3_f05_2a_applied_parameter_family_r5_20261005/applied_keys_unsorted",
+    "case_id": "applied_keys_unsorted",
+    "assertion": "compile_with_unsorted_keys_and_matching_datum",
+    "decision": "R4.1 applied-parameter C",
+    "family_manifest_sha256": "3d43acdc634f700c3bc709bae03a7869f26c35cd59941d4be0d94a89ca5c094e",
+    "case_manifest_sha256": "bf84b96865bb89860a25f1cbf6a9799419a17b7b71bf6249c21fabe128a27c96",
+    "negative_policy_id": "1fb791c31f3e1ca6ca17d0329ace7c345366359fed36096c325a2e93",
+    "proofs": "five valid 64-byte PoPs bound to the exact unsorted applied parameter",
+    "funding_signatures": 2,
+    "valid_body_bound_ephemeral_signatures": true,
+    "ada_conservation": true,
+    "native_asset_conservation": true,
+    "private_keys_persisted": false,
+    "positive_control_run": "docs/remediation/m3_f05_2a_applied_parameter_sim_attempt_r14_20261005/RUN.json",
+    "positive_control_run_sha256": "9d40df445cca42f37aab07bb221cc54535b95d70d79e6c64a236def6c2ea6aa1",
+    "positive_control_review_sha256": "f08ac5add7f4096054d994ed3a1977663cf4c88096b8a5fdd295e086e09c450e"
+  },
+  "controls": {
+    "accepted_positive_control": true,
+    "negative_rejected_compiled_mint0": true,
+    "target_invoked_at_mint0": true,
+    "clean_cleanup": true,
+    "mutation": false
+  },
+  "credit": {
+    "negative_case": "pending independent attribution review",
+    "mutation": null,
+    "original_policy": false,
+    "ledger_admission": false,
+    "live_network": false
+  },
+  "evidence_scope": "local synthetic alternate-applied-policy positive/negative simulator evidence only; named-condition attribution, mutation, original-policy, full-ledger-admission, Cardano Pre-Prod, and live-network credit not yet established",
+  "case_status": "PENDING until independent attribution review"
+}

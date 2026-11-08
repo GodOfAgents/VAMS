@@ -1,0 +1,7 @@
+# M7 documentation currency audit
+
+The priority triage identified 11 source-supported documentation discrepancies across the 14 manifest-current documents. The current documentation validator passed separately but checks configured patterns and links; it does not prove semantic currency. The manifest last_verified date of 2026-07-12 cannot be advanced across all 14 documents while these discrepancies remain.
+
+The independent read-only reviewer confirmed all 11 findings and 30 original hashes. Two additional cited plan/handoff hashes and a retained local tool probe are now bound in RESULT.json and RUN.json. Final independent read-only review PASS: all 32 cited hashes, three package checksums, tool probes, manifest count, and 11 findings matched. Acceptance is limited to priority triage. Tool availability is not execution evidence: pinned Aiken and Python were verified, while forge was absent from current PATH. Historical Python/Aiken results remain as recorded, and no gate was rerun here.
+
+No application or source documentation was edited. This is documentation triage, not validator acceptance, ledger admission, live-network evidence, or deployment approval. Readiness is NOT READY; deployment, Deposit, Slash activation, and ExecuteIntent stay disabled. The next single slice is a bounded correction of REPO_STATUS_REPORT.md current gate evidence and its historical July schedule, after this package passes final review.

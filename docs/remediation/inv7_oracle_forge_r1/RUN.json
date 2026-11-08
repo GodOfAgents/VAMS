@@ -1,0 +1,66 @@
+{
+  "schema_version": "vams-gate-diagnostic-v1",
+  "date": "2026-10-03",
+  "gate": "INV-7 CommitRevealOracle stale fallback",
+  "status": "not_executed_missing_offline_compiler",
+  "repository": {
+    "head": "829ab544571f12efe50ecb5740f129c8acb3e16f",
+    "branch": "testnet/remediation-20260907"
+  },
+  "source_sha256": {
+    "contracts/src/oracle/CommitRevealOracle.sol": "ef954da24ef00b372491379326ea4528d0d7ea66e78528668e718567c8c6871f",
+    "contracts/test/oracle/CommitRevealOracle.t.sol": "76a53a6890e17cb876a316fc9ab3e78c11da7dbc253fb7e077be516260cfb52a",
+    "contracts/foundry.toml": "6e9b8e142a4fce5d57be189df14403fbca4e2ecf8fecb9b86c9e284877c59f6a"
+  },
+  "toolchain": {
+    "forge_version": "1.7.1",
+    "forge_sha256": "4f77da0810de94325734855d0ad58d70640aa8a5b2a837608ddf8c26da34355c",
+    "solidity_config": "0.8.24",
+    "solc_cached": false
+  },
+  "command": [
+    "bwrap",
+    "--unshare-net",
+    "--ro-bind",
+    "/",
+    "/",
+    "--tmpfs",
+    "/tmp",
+    "--dev-bind",
+    "/dev",
+    "/dev",
+    "--proc",
+    "/proc",
+    "--bind",
+    "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/inv7_oracle_forge_r1",
+    "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/inv7_oracle_forge_r1",
+    "--chdir",
+    "/home/GodOfAgents/code/VAMS-testnet/contracts",
+    "/home/GodOfAgents/vams-evidence/toolchains/foundry-1.7.1/unpacked/forge",
+    "test",
+    "--offline",
+    "--match-path",
+    "test/oracle/CommitRevealOracle.t.sol",
+    "--out",
+    "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/inv7_oracle_forge_r1/out",
+    "--cache-path",
+    "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/inv7_oracle_forge_r1/cache",
+    "-vvv"
+  ],
+  "process": {
+    "exit_code": 1,
+    "combined_output": "Error: can't install missing solc 0.8.24 in offline mode"
+  },
+  "interpretation": {
+    "test_cases_executed": 0,
+    "classified_as": "toolchain_unavailable_in_offline_mode",
+    "source_or_test_failure": false,
+    "installation_or_fetch_attempted": false
+  },
+  "required_tests": [
+    "test_staleRequestResolvesToFixedFallback",
+    "test_staleFallbackCannotBeTriggeredBeforeDeadline",
+    "test_staleFallbackCannotBeReplayed"
+  ],
+  "invariant_scope": "The inspected source fixes fallbackValue at deployment and resolveStaleRequest rejects non-expired or already-resolved requests; runtime test behavior remains unverified."
+}

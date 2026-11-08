@@ -1,0 +1,46 @@
+{
+  "schema": "m7-aiken-warning-cleanup-v1",
+  "date": "2026-10-03",
+  "head": "829ab544571f12efe50ecb5740f129c8acb3e16f",
+  "scope": "Remove seven current-source Aiken warnings in disabled standalone agent_nft only; no normative F04 switch.",
+  "source_hashes": {
+    "cardano/validators/agent_nft.ak": "e28ff520d07f73a622a093b362f66411678d535bbb48cf2aecbcd8011204caba",
+    "cardano/aiken-dependency-manifest.json": "2eeba62fdf6e3748cd9999b70b95f0f42d49a76151d24e282a0c1a5688bd0022",
+    "cardano/plutus.json": "c4230410d0caac45f2c71d36e45a539c78087697128ce1533306d17e96a48008",
+    "cardano/aiken.toml": "0520b42b48f051b1850f8143cdb9d2a7e7532d88ebac3c1b2ae7073332bac23a",
+    "cardano/aiken.lock": "7c69f0a484d3b42862dc0ab0773cf6b3edf72709c921b2ad3648a0753af8cafc",
+    "docs/CHANGELOG.md": "ba7d496bc487253710a4a249cf948961a05f30447f9a93b11257ea1dde25b7c8"
+  },
+  "strict_check": {
+    "command": "aiken check --deny --seed 20260711 --max-success 250",
+    "exit_code": 0,
+    "summary": {
+      "checks": 1865,
+      "errors": 0,
+      "warnings": 0
+    },
+    "source_unchanged": true
+  },
+  "provenance": {
+    "check_exit": 0,
+    "build_exit": 0,
+    "blueprint_sha256": "c4230410d0caac45f2c71d36e45a539c78087697128ce1533306d17e96a48008",
+    "program_count": 26,
+    "all_program_hashes_match_manifest": true,
+    "source_file_count": 15
+  },
+  "focused_unittest": {
+    "tests": 22,
+    "exit_code": 0
+  },
+  "docs": {
+    "validator_exit": 0,
+    "unittest_passed": 2,
+    "unittest_exit": 0
+  },
+  "initial_rejected_variant": "Renaming bootstrap_ref removed warnings but changed blueprint parameter title; retained in PROVENANCE_FAILED_INITIAL.json and not accepted.",
+  "aiken_test_subcommand": "Unavailable in pinned Aiken 1.1.21; aiken check type-checks and runs tests.",
+  "invariants": "INV-1 through INV-10 not touched by dead-source cleanup; F04 identity authority remains unresolved.",
+  "evidence_kind": "offline local build and tests; no ledger admission or live network",
+  "readiness": "NOT READY"
+}

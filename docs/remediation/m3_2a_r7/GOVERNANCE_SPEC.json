@@ -1,0 +1,286 @@
+{
+  "schema_version": "m3.2a-r7-governance-spec-v1",
+  "status": "design-only",
+  "normative_artifacts": [
+    "GOVERNANCE_SPEC.json",
+    "ASSET_VECTORS.json",
+    "DATUM_VECTORS.json",
+    "TRANSITION_TOPOLOGY.json",
+    "ACCEPTANCE_MATRIX.json",
+    "governance_spec.py",
+    "test_governance_spec.py"
+  ],
+  "network": {
+    "field": "network_id",
+    "type": "u8",
+    "source": "immutable GovernanceConfigV1 genesis datum",
+    "alternate_networks": "reject"
+  },
+  "addresses": {
+    "authority_output": {
+      "kind": "enterprise_script",
+      "payment_credential": "compiled authority validator script hash",
+      "stake_credential": "none",
+      "header": "0x70 | network_id"
+    },
+    "proposal_output": {
+      "kind": "enterprise_script",
+      "payment_credential": "compiled governor validator script hash",
+      "stake_credential": "none",
+      "header": "0x70 | network_id"
+    },
+    "intent_output": {
+      "kind": "enterprise_script",
+      "payment_credential": "compiled timelock validator script hash",
+      "stake_credential": "none",
+      "header": "0x70 | network_id"
+    },
+    "voter_refund": {
+      "kind": "enterprise_key",
+      "payment_credential": "voter verification-key hash",
+      "stake_credential": "none",
+      "header": "0x60 | network_id"
+    },
+    "proposer_refund": {
+      "kind": "enterprise_key",
+      "payment_credential": "proposer verification-key hash",
+      "stake_credential": "none",
+      "header": "0x60 | network_id"
+    },
+    "fee_change": {
+      "kind": "exact_auxiliary_input_address",
+      "payment_credential": "byte-for-byte auxiliary funding input address",
+      "stake_credential": "unchanged_by_protocol",
+      "header": "byte-for-byte resolved auxiliary input address"
+    }
+  },
+  "value_parameters": {
+    "authority_state_lovelace": {
+      "type": "u64",
+      "source": "immutable GovernanceConfigV1",
+      "fixture_values": "not admission parameters"
+    },
+    "proposal_base_lovelace": {
+      "type": "u64",
+      "source": "immutable GovernanceConfigV1",
+      "fixture_values": "not admission parameters"
+    },
+    "per_voter_refund_lovelace": {
+      "type": "u64",
+      "source": "immutable GovernanceConfigV1",
+      "fixture_values": "not admission parameters"
+    }
+  },
+  "value_rules": {
+    "governed_state_assets": [
+      "authority_nft",
+      "proposal_nft",
+      "receipt_nft",
+      "intent_nft",
+      "locked_vams"
+    ],
+    "auxiliary_funding": "exactly one ADA-only regular input; its address is the only fee/change address",
+    "fees": "ADA-only and funded exclusively by auxiliary input",
+    "change": "optional single ADA-only output at auxiliary input address; governed ADA/assets forbidden",
+    "min_ada": "authoritative ledger parameter snapshot and ledger-equivalent minimum-UTxO preflight; no admission claim"
+  },
+  "equations": {
+    "authority_state": "authority_nft(1) + authority_state_lovelace",
+    "proposal": "proposal_nft(1) + proposal_base_lovelace",
+    "vote": "preserve proposal value + receipt_nft(1) + locked_vams + per_voter_refund_lovelace",
+    "finalize_passed": "preserve complete proposal value",
+    "finalize_rejected_cancel": "one voter refund per lock (locked_vams + per_voter_refund_lovelace) + proposal_base_lovelace to proposer",
+    "queue": "voter refunds + preserved authority value + intent_nft(1) + proposal_base_lovelace in intent",
+    "cancel_expire_intent": "burn intent_nft + proposal_base_lovelace to bound proposer"
+  },
+  "encoding": {
+    "domains": {
+      "authority": "56414d532f617574686f726974792f763100",
+      "proposal": "56414d532f70726f706f73616c2f763100",
+      "receipt": "56414d532f726563656970742f763100",
+      "intent": "56414d532f696e74656e742f763100"
+    },
+    "domain_ascii": {
+      "authority": "VAMS/authority/v1\\0",
+      "proposal": "VAMS/proposal/v1\\0",
+      "receipt": "VAMS/receipt/v1\\0",
+      "intent": "VAMS/intent/v1\\0"
+    },
+    "hash": "BLAKE2b-256",
+    "output_reference": "tx_id[32] || output_index[u32be]",
+    "integer_widths": {
+      "u8": 1,
+      "u32": 4,
+      "u64": 8
+    },
+    "verification_key_hash_bytes": 28,
+    "policy_id_bytes": 28,
+    "asset_name_bytes": 32,
+    "action_hash_bytes": 32,
+    "target_domain": "u8(length 0..32) || bytes",
+    "truncation": "reject",
+    "output_reference_index_bytes": 4
+  },
+  "bootstrap": [
+    "compile and hash validator/policy artifacts",
+    "consume exact one-shot seed OutputReference",
+    "mint exactly one authority NFT",
+    "commit compiled IDs, network and value parameters in immutable genesis datum",
+    "derive later policies only from committed authority identity",
+    "deployment recomputes artifacts and vectors before genesis"
+  ],
+  "lifecycle": {
+    "quadratic_weight": "floor_sqrt(locked_vams_smallest_unit)",
+    "quorum": "positive and <= 8 * floor_sqrt(max_lock)",
+    "pass": "total_weight >= quorum and yes_weight > no_weight",
+    "tie": "reject",
+    "queue_time": "finite validity lower bound exactly",
+    "execute_after": "queue_time + 86400000ms",
+    "pre_f05_execute": "always reject",
+    "post_f05_execute": "outside M3.2a and not an accepted R7 case"
+  },
+  "limits": {
+    "max_members": 5,
+    "authority_threshold": 3,
+    "max_voters": 8,
+    "max_inputs": 16,
+    "max_outputs": 16,
+    "max_assets": 16,
+    "max_datum_bytes": 896,
+    "max_signers": 5,
+    "max_validity_width_ms": 300000,
+    "max_voting_duration_ms": 2592000000,
+    "normal_delay_ms": 86400000,
+    "max_intent_lifetime_ms": 604800000,
+    "vkh_bytes": 28,
+    "policy_id_bytes": 28,
+    "asset_name_bytes": 32,
+    "tx_id_bytes": 32,
+    "action_hash_bytes": 32,
+    "target_domain_bytes": 32
+  },
+  "topology_file": "TRANSITION_TOPOLOGY.json",
+  "asset_vectors_file": "ASSET_VECTORS.json",
+  "datum_vectors_file": "DATUM_VECTORS.json",
+  "acceptance_file": "ACCEPTANCE_MATRIX.json",
+  "implementation_boundary": "Current governor/timelock/types remain legacy; these artifacts are future M3.2b contract, not implementation evidence.",
+  "config_schema": {
+    "name": "GovernanceConfigV1",
+    "fields": [
+      {
+        "name": "network_id",
+        "type": "u8",
+        "source": "immutable genesis datum"
+      },
+      {
+        "name": "authority_state_lovelace",
+        "type": "u64",
+        "source": "immutable genesis datum"
+      },
+      {
+        "name": "proposal_base_lovelace",
+        "type": "u64",
+        "source": "immutable genesis datum"
+      },
+      {
+        "name": "per_voter_refund_lovelace",
+        "type": "u64",
+        "source": "immutable genesis datum"
+      },
+      {
+        "name": "authority_seed",
+        "type": "OutputReference",
+        "source": "one-shot genesis input"
+      },
+      {
+        "name": "authority_script_hash",
+        "type": "bytes28",
+        "source": "compiled artifact"
+      },
+      {
+        "name": "governor_script_hash",
+        "type": "bytes28",
+        "source": "compiled artifact"
+      },
+      {
+        "name": "timelock_script_hash",
+        "type": "bytes28",
+        "source": "compiled artifact"
+      },
+      {
+        "name": "fixed_authorizers",
+        "type": "array[5] bytes28",
+        "source": "immutable genesis datum"
+      },
+      {
+        "name": "threshold",
+        "type": "u32",
+        "source": "immutable genesis datum"
+      }
+    ],
+    "runtime_overrides": "reject",
+    "fixture_values": "non-admission only"
+  },
+  "address_vectors": [
+    {
+      "id": "key_network_0",
+      "credential_kind": "key",
+      "network_id": 0,
+      "credential_hash": "11111111111111111111111111111111111111111111111111111111",
+      "stake_credential": "none",
+      "header_hex": "60",
+      "address_hex": "6011111111111111111111111111111111111111111111111111111111",
+      "declared_length": 29
+    },
+    {
+      "id": "key_network_1",
+      "credential_kind": "key",
+      "network_id": 1,
+      "credential_hash": "11111111111111111111111111111111111111111111111111111111",
+      "stake_credential": "none",
+      "header_hex": "61",
+      "address_hex": "6111111111111111111111111111111111111111111111111111111111",
+      "declared_length": 29
+    },
+    {
+      "id": "key_network_15",
+      "credential_kind": "key",
+      "network_id": 15,
+      "credential_hash": "11111111111111111111111111111111111111111111111111111111",
+      "stake_credential": "none",
+      "header_hex": "6f",
+      "address_hex": "6f11111111111111111111111111111111111111111111111111111111",
+      "declared_length": 29
+    },
+    {
+      "id": "script_network_0",
+      "credential_kind": "script",
+      "network_id": 0,
+      "credential_hash": "22222222222222222222222222222222222222222222222222222222",
+      "stake_credential": "none",
+      "header_hex": "70",
+      "address_hex": "7022222222222222222222222222222222222222222222222222222222",
+      "declared_length": 29
+    },
+    {
+      "id": "script_network_1",
+      "credential_kind": "script",
+      "network_id": 1,
+      "credential_hash": "22222222222222222222222222222222222222222222222222222222",
+      "stake_credential": "none",
+      "header_hex": "71",
+      "address_hex": "7122222222222222222222222222222222222222222222222222222222",
+      "declared_length": 29
+    },
+    {
+      "id": "script_network_15",
+      "credential_kind": "script",
+      "network_id": 15,
+      "credential_hash": "22222222222222222222222222222222222222222222222222222222",
+      "stake_credential": "none",
+      "header_hex": "7f",
+      "address_hex": "7f22222222222222222222222222222222222222222222222222222222",
+      "declared_length": 29
+    }
+  ]
+}

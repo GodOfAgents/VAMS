@@ -3,7 +3,7 @@ from datetime import datetime, timedelta, timezone
 from neuron.sdk.sequence_wallet import SequenceWalletManager, SessionKeyManager, TrustTier
 
 def test_wallet_creation():
-    manager = SequenceWalletManager()
+    manager = SequenceWalletManager(mock_mode=True)
     owner = "0x1234567890123456789012345678901234567890"
     wallet = manager.create_wallet(owner)
     
@@ -16,13 +16,17 @@ def test_session_key_creation():
     session_mgr = manager.get_session_manager()
     
     allowed = ["0xContract1", "0xContract2"]
+    session_created_before = datetime.now(timezone.utc).timestamp()
     session = session_mgr.create_session_key(TrustTier.SILVER, allowed, validity_hours=24)
     
     assert "private_key" in session
     assert "session_key_address" in session
     assert session["max_value_per_tx"] == 1000
     assert session["allowed_contracts"] == [address.lower() for address in allowed]
-    assert session["expires_at"] > datetime.now(timezone.utc).timestamp()
+    now = datetime.now(timezone.utc).timestamp()
+    assert session["expires_at"] > now
+    assert 0 < session["expires_at"] - now <= 24 * 60 * 60
+    assert session["expires_at"] <= session_created_before + 24 * 60 * 60 + 1
 
 def test_session_scope_verification():
     manager = SequenceWalletManager(config={"core_contracts": ["0xContract1", "0xContract2"]})
@@ -50,6 +54,35 @@ def test_session_expiry():
             TrustTier.BRONZE, ["0xContract"], validity_hours=-1
         )
 
+def test_expired_session_is_rejected():
+    manager = SequenceWalletManager(config={"core_contracts": ["0xCore"]})
+    session_mgr = manager.get_session_manager()
+    session = session_mgr.create_session_key(TrustTier.GOLD, ["0xCore"])
+    session["expires_at"] = datetime.now(timezone.utc).timestamp() - 1
+
+    assert session_mgr.verify_session_scope(
+        session["session_key_address"], "0xCore", 0
+    ) is False
+
+
+
+def test_session_is_rejected_at_exact_expiry(monkeypatch):
+    manager = SequenceWalletManager(config={"core_contracts": ["0xCore"]})
+    session_mgr = manager.get_session_manager()
+    session = session_mgr.create_session_key(TrustTier.GOLD, ["0xCore"])
+    expires_at = session["expires_at"]
+
+    class FrozenDatetime(datetime):
+        @classmethod
+        def now(cls, tz=None):
+            return datetime.fromtimestamp(expires_at, tz=tz or timezone.utc)
+
+    monkeypatch.setattr("neuron.sdk.sequence_wallet.datetime", FrozenDatetime)
+
+    assert session_mgr.verify_session_scope(
+        session["session_key_address"], "0xCore", 0
+    ) is False
+
 def test_trust_tier_mapping():
     contracts = ["0xBronze", "0xSilver", "0xGold", "0xPlatinum"]
     manager = SequenceWalletManager(config={"core_contracts": contracts})
@@ -73,6 +106,14 @@ def test_session_key_rejects_more_than_24_hours():
     with pytest.raises(ValueError, match="between 1 and 24"):
         manager.get_session_manager().create_session_key(
             TrustTier.GOLD, ["0xCore"], validity_hours=25
+        )
+
+
+def test_session_key_rejects_unconfigured_vams_core_whitelist():
+    manager = SequenceWalletManager(config={})
+    with pytest.raises(ValueError, match="not configured"):
+        manager.get_session_manager().create_session_key(
+            TrustTier.GOLD, ["0xCore"]
         )
 
 

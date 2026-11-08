@@ -1,0 +1,148 @@
+{
+  "schema": "vams.governance-v2-spec.v1",
+  "status": "IMPLEMENTATION_CANDIDATE_UNQUALIFIED",
+  "parent_r7_sha256": {
+    "GOVERNANCE_SPEC.json": "973fa224f3ac46017be18c378027c8cf5067d103b8c118a86ae2e0e4ce0d2302",
+    "ASSET_VECTORS.json": "05e14cbfa65ff9d804f5a6483612d5a3925e2f51e54b3a542fce2be53aa45125",
+    "DATUM_VECTORS.json": "ab811013d75c40f89a75d3de16803cea4c3ac93bdfd65d8a8614d1fde3efba04",
+    "TRANSITION_TOPOLOGY.json": "dcd4b8aaacc73df5ef3a7508818ffd96b2a756aff0c599cde0345d11376ef6f0",
+    "ACCEPTANCE_MATRIX.json": "3a5a9d7e1e84f6c625d276ac6ac2e21ca775b665c23a25a73f196c7dbe022fc4"
+  },
+  "normal_delay_ms": 172800000,
+  "intent_lifetime_ms": 604800000,
+  "members": 5,
+  "threshold": 3,
+  "max_voters": 8,
+  "max_inputs": 16,
+  "max_outputs": 16,
+  "max_assets": 16,
+  "max_datum_bytes": 896,
+  "max_validity_width_ms": 300000,
+  "max_voting_duration_ms": 2592000000,
+  "max_lock_vams_smallest_units": 1000000000,
+  "authority_identity": "One combined mint/spend script; its hash is its policy ID and payment script credential.",
+  "bootstrap": "Consume exact seed; configured five unique custodians; three signatures authorize genesis and immutable child identities.",
+  "compilation_order": [
+    "Apply authority bootstrap parameters and hash",
+    "Derive authority asset name and anchor",
+    "Apply anchor to governor, timelock, proposal, receipt, intent programs",
+    "Recompute all applied identities; 3-of-5 approves exact genesis datum/transaction"
+  ],
+  "config_additions": [
+    "proposal_policy_id",
+    "receipt_policy_id",
+    "intent_policy_id",
+    "vams_policy_id",
+    "vams_asset_name"
+  ],
+  "proposal_addition": "payload_hash is immutable and bound at creation, queue and intent identity",
+  "encoding": "Existing v1 types/bytes remain. v2 datums/actions use explicit version2 and distinct domains. Full flat hash preimages in GOLDEN-VECTORS.json. Timing amendment preserves field layout/domains/historical vectors; new queue_time selection has a separate vector.",
+  "transactions": {
+    "genesis": {
+      "governed_inputs": 0,
+      "funding_inputs": 1,
+      "authority_references": 0,
+      "ordered_outputs": [
+        "authority",
+        "optional ADA-only funding change"
+      ]
+    },
+    "create": {
+      "governed_inputs": 1,
+      "funding_inputs": 1,
+      "authority_references": 0,
+      "ordered_outputs": [
+        "authority nonce+1",
+        "proposal",
+        "optional ADA-only funding change"
+      ]
+    },
+    "vote": {
+      "governed_inputs": 1,
+      "funding_inputs": 1,
+      "authority_references": 1,
+      "ordered_outputs": [
+        "exact proposal continuation",
+        "optional voter ADA/VAMS change"
+      ],
+      "funding_exception": "The signed voter funding input contains actual VAMS and ADA; it is not ADA-only."
+    },
+    "finalize_passed": {
+      "governed_inputs": 1,
+      "funding_inputs": 1,
+      "authority_references": 1,
+      "ordered_outputs": [
+        "same complete value, Passed state",
+        "optional funding change"
+      ]
+    },
+    "finalize_rejected_cancel": {
+      "governed_inputs": 1,
+      "funding_inputs": 1,
+      "authority_references": 1,
+      "ordered_outputs": [
+        "voter refunds in exact lock order",
+        "proposer base refund",
+        "optional funding change"
+      ]
+    },
+    "queue": {
+      "governed_inputs": 2,
+      "funding_inputs": 1,
+      "authority_references": 0,
+      "ordered_outputs": [
+        "authority intent nonce+1",
+        "voter refunds in exact lock order",
+        "intent with proposal base",
+        "optional funding change"
+      ]
+    },
+    "cancel_expire_intent": {
+      "governed_inputs": 1,
+      "funding_inputs": 1,
+      "authority_references": 1,
+      "ordered_outputs": [
+        "exact proposer base refund",
+        "optional funding change"
+      ]
+    },
+    "execute_intent": "ALWAYS_REJECT until authentic bridge/finality/replay requirements qualify"
+  },
+  "continuity": "Authority config is immutable except one exact proposal/intent nonce increment bound to its full transaction. Epoch mismatch rejects pending state.",
+  "value_rules": [
+    "Governed reserves/locked stake never pay fees.",
+    "Only the funding input pays fee and new reserve contributions; all remaining value returns to its exact address.",
+    "One proposal/intent transition per transaction; ordered exact outputs prevent double satisfaction.",
+    "Receipt/proposal/intent mint and burn are exact across all policies; no VAMS mint supplies fictitious voting stake."
+  ],
+  "ledger_only_checks": [
+    "Actual network/genesis/magic, collateral, minimum UTxO, minimum fee, script validity and applied budgets require ledger-equivalent preflight.",
+    "Plutus Address has no network nibble; it cannot independently validate a serialized address network."
+  ],
+  "migration": "New compiled identities and explicit source review required. Do not admit legacy unqualified governance or reinterpret v1 datums; no deployment route activated. Timing-amended scripts need new compiled/applied identities and genesis review; no adoption of old lower-anchor states.",
+  "acceptance": "Native check/tests, cross-script transactions, applied budgets, current-source independent review and actual custody manifest all pending.",
+  "redeemer_envelope": {
+    "type": "GovernanceRequestV2",
+    "constructor": 0,
+    "fields": [
+      "version: Int exactly2",
+      "action: GovernanceActionV2"
+    ],
+    "requirement": "Every mint/spend entrypoint validates the outer version before dispatch. Old raw action constructor tags are not reinterpreted."
+  },
+  "timing_revision": "upper-bound-v1",
+  "validity_interval": {
+    "shape": "[lower,upper)",
+    "lower_inclusive": true,
+    "upper_inclusive": false,
+    "finite_unsigned_bits": 64,
+    "nonempty": true,
+    "max_width_ms": 300000,
+    "queue_time": "finite upper bound, after envelope validation",
+    "queue_prerequisite": "lower >= passed proposal deadline",
+    "execute_after": "queue_time +172800000; queue_time +delay +lifetime fits uint64",
+    "before_deadline": "upper <= deadline and lower < deadline",
+    "after_deadline_or_expiry": "lower >= threshold",
+    "minimum_delay_argument": "For every inclusion t in [L,U), U+D-t >=D; conservative by at most validity width."
+  }
+}

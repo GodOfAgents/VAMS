@@ -1,0 +1,54 @@
+{
+  "schema": "m7-aiken-exact-commit-pin-v1",
+  "date": "2026-10-03",
+  "head": "829ab544571f12efe50ecb5740f129c8acb3e16f",
+  "source_hashes": {
+    "cardano/aiken.toml": "0520b42b48f051b1850f8143cdb9d2a7e7532d88ebac3c1b2ae7073332bac23a",
+    "cardano/aiken.lock": "7c69f0a484d3b42862dc0ab0773cf6b3edf72709c921b2ad3648a0753af8cafc",
+    "cardano/build/packages/packages.toml": "9e051ca506a016c3553f334cefcd0e65efa505dcbb73ff20b0b807dc7b5e360e",
+    "cardano/aiken-dependency-manifest.json": "56f8578cd01192091e65c5a91dfa317b26a75a97efb3c944dbfa8ed7f6277ba8",
+    "cardano/plutus.json": "c4230410d0caac45f2c71d36e45a539c78087697128ce1533306d17e96a48008",
+    "scripts/remediation/verify_m3_1b_r9.py": "10cc4605ee5a9b6024956c77f5a8af8044882be3019c30a43e31e22f6416bc89",
+    "scripts/remediation/test_m3_1b_r9_provenance.py": "8c12e0160b4134d8f04e20745a68b4078adcd663d872f1847e007b7c2273f6d4",
+    "docs/CHANGELOG.md": "33c1c422deabe7e59a806d081225cd4401a6c043f228e01447d9e1d032103648"
+  },
+  "accepted_commits": {
+    "aiken-lang/fuzz": "06874926ec70747f3fc4e2b9364ee9e1393441cc",
+    "aiken-lang/stdlib": "33376da0c274e41f52e69e4769a0e7878a24efba"
+  },
+  "blueprint_sha256": "c4230410d0caac45f2c71d36e45a539c78087697128ce1533306d17e96a48008",
+  "offline_rebuild_blueprint_sha256": [
+    "c4230410d0caac45f2c71d36e45a539c78087697128ce1533306d17e96a48008",
+    "c4230410d0caac45f2c71d36e45a539c78087697128ce1533306d17e96a48008"
+  ],
+  "program_hashes_unchanged": 26,
+  "full_python": {
+    "collected": 1607,
+    "exit_code": 0,
+    "summary": {
+      "passed": 1607,
+      "failed": 0,
+      "subtests_passed": 444,
+      "duration_seconds": 208.31
+    },
+    "source_inventory": {
+      "file_count_before": 360,
+      "sha256_before": "538cbd0c63fda5b99a79d8f62e487193f3ff8aca4d72b82da4a16bd652aa827f",
+      "file_count_after": 360,
+      "sha256_after": "538cbd0c63fda5b99a79d8f62e487193f3ff8aca4d72b82da4a16bd652aa827f",
+      "unchanged_during_run": true,
+      "changed_paths": []
+    }
+  },
+  "strict_aiken": {
+    "exit_code": 1,
+    "summary": {
+      "checks": 1865,
+      "errors": 0,
+      "warnings": 7
+    },
+    "source_unchanged": true
+  },
+  "evidence_kind": "offline local build and tests; not ledger admission or live network",
+  "readiness": "NOT READY"
+}

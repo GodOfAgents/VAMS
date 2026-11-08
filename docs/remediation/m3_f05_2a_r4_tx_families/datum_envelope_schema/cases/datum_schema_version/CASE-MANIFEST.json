@@ -1,0 +1,50 @@
+{
+  "conservation": {
+    "fee_lovelace": 1000000,
+    "input_lovelace": 17000000,
+    "lovelace_conserved": true,
+    "minted_output_assets_match": true,
+    "output_lovelace": 16000000
+  },
+  "delta": "change only the AuthorityStateV3 schema_version field from 1 to 2",
+  "expected_result": "reject at compiled target Mint[0]",
+  "family_id": "datum_envelope_schema",
+  "files": {
+    "raw_inputs": {
+      "path": "cases/datum_schema_version/raw_inputs.cbor",
+      "sha256": "4b20e2b2cf4bd58b1f6e385c90ffd098d583df69d95fbc7b1fcc2591da72b9fe",
+      "size_bytes": 73
+    },
+    "raw_outputs": {
+      "path": "cases/datum_schema_version/raw_outputs.cbor",
+      "sha256": "cc2c3f92005a9a61a0e7edc746e417a5a720b8267893bf13d352117cc5d46bac",
+      "size_bytes": 79
+    },
+    "transaction": {
+      "path": "cases/datum_schema_version/transaction.cbor",
+      "sha256": "747781ff47a021ed42f15c54def943c1a44f10551c63cb811cd8a262c064c5a1",
+      "size_bytes": 5099
+    }
+  },
+  "funding_witnesses": {
+    "count": 2,
+    "private_material_persisted": false,
+    "verified_against_serialized_body": true
+  },
+  "id": "datum_schema_version",
+  "original_registry_assertion": {
+    "path": "expected.every_negative_case",
+    "value": "reject"
+  },
+  "registry_assertion": "state.schema_version == authority_schema_version",
+  "schema_version": "f05-2a-r4-family-case-v1",
+  "script_invoked": false,
+  "simulator_result": "not run pending independent family review and coordinator freeze",
+  "status": "PENDING",
+  "target": {
+    "applied_script_hash": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+    "policy_id": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+    "purpose": "Mint[0]"
+  },
+  "transaction_body_hash_blake2b_256": "c93537bcb5f94073dc129e18586186b666f51e3fe7ca64962f7c6eafc4452c20"
+}

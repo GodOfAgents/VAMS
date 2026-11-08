@@ -1,0 +1,38 @@
+{
+  "record": "M7 pip-audit gateway requirements run r1",
+  "date": "2026-10-04",
+  "start_utc": "2026-10-04T15:23:49Z",
+  "end_utc": "2026-10-04T15:24:02Z",
+  "exit_code": 0,
+  "command": "/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/pip-audit -r gateway/requirements.txt",
+  "head": "829ab544571f12efe50ecb5740f129c8acb3e16f",
+  "branch": "testnet/remediation-20260907",
+  "workflow_sha256": "baf53503673b70c5185f654f8f694f1feaf98af68ee56e29c83c01ee0cf0593c",
+  "requirements_sha256": "c442d01c246812c909fd28f6cf90c14c5e17921597d409c0492fbbf808e0f0b3",
+  "tool": {
+    "version": "pip-audit 2.10.1",
+    "sha256": "310dabedfa526a73c82ac3e0f80a8af761aa3ebf2ef4026c49d06352e7691b95"
+  },
+  "interpreter": {
+    "version": "Python 3.12.14",
+    "sha256": "aa01d96348989f33ed998b42c83e98593b41dba83914d9899730b90c36f2e5c9"
+  },
+  "result": {
+    "message": "No known vulnerabilities found",
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr_sha256": "15950a68a7ed99c59779717acefdceb3f69cfd31bde67d2c954f2a3cea4d7955"
+  },
+  "inventory": {
+    "before_sha256": "1cbec2a8b3e2c7b2d62a114f04ac3c79cd2a77a4af42c96f43f3b6d811b2c1a7",
+    "after_sha256": "1cbec2a8b3e2c7b2d62a114f04ac3c79cd2a77a4af42c96f43f3b6d811b2c1a7",
+    "byte_identical": true
+  },
+  "resolver": {
+    "mode": "temporary virtual environment; pip dry-run/report resolution path, with pip/wheel/setuptools setup",
+    "source": "installed pip-audit implementation inspected by verification agent; no source file digest retained",
+    "network": "package-index metadata access may occur; exact URLs/bytes not captured",
+    "persistent_repository_change": false
+  },
+  "capture_directory": "/home/GodOfAgents/vams-evidence/m7-pip-audit-gateway-r1-20261004",
+  "capture_manifest_sha256": "5600b1a665931fc4a59893eb130a056e79c8288d47385441f6dc10c6c546d6ee"
+}

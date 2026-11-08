@@ -1,0 +1,28 @@
+{
+  "schema": "vams-m3-f05-2a-identity-reverify-run-v1",
+  "date": "2026-10-03",
+  "repository": "/home/GodOfAgents/code/VAMS-testnet",
+  "branch": "testnet/remediation-20260907",
+  "head": "829ab544571f12efe50ecb5740f129c8acb3e16f",
+  "dirty_entries_before": 127,
+  "dirty_entries_after": 127,
+  "commands": [
+    {"command": "PYTHONDONTWRITEBYTECODE=1 /home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python /home/GodOfAgents/vams-evidence/m3-f05-2a-identity-gate-20261002-r1/identity_probe.py --evidence /home/GodOfAgents/vams-evidence/m3-f05-2a-identity-reverify-20261003-r1", "exit": 0, "result": "two current-source builds reproduced the exact applied policy identity"},
+    {"command": "sha256sum -c SHA256SUMS in /home/GodOfAgents/vams-evidence/m3-f05-2a-identity-reverify-20261003-r1", "exit": 0, "result": "all manifest entries OK"},
+    {"command": "git diff --check", "exit": 0, "result": "clean"}
+  ],
+  "evidence": {
+    "result": "/home/GodOfAgents/vams-evidence/m3-f05-2a-identity-reverify-20261003-r1/RESULT.json",
+    "result_sha256": "546c9f52bbc5e4eb0debe6b08f9eb81b472c2f211632c68f5482c02bc903abdf",
+    "manifest_sha256": "14a5335a77fe9fd70820b65017b6e01cc01d94a214df4375f4472735dc8bf53c",
+    "independent_review": "PASS for narrow synthetic identity"
+  },
+  "accepted_current_f05_counts": {
+    "negative_cases": "45/55 PASS; 10 pending",
+    "mutations": "18/21 PASS; 3 pending",
+    "overlay": "docs/remediation/m3_f05_2a_evidence_classification_r1/CASE-STATUS.json",
+    "overlay_sha256": "8a571af3c92957ced0dc4d1c17c03776ac6a774d19a8ac20fce10c0fff1e5cc2"
+  },
+  "limitations": ["synthetic identity only", "no ledger, Pre-Prod, live-network or deployment evidence", "no new negative or mutation credit", "process/network isolation unverified", "two dependencies resolved from existing cache"],
+  "invariant_impact": "INV-1 through INV-10 not touched"
+}

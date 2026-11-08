@@ -11,7 +11,12 @@ import sys
 from collections import Counter
 from pathlib import Path
 
-from economic_concentration import PROFILE_PATH, evaluate
+try:
+    from scripts.audit.economic_concentration import PROFILE_PATH, evaluate
+    from scripts.audit.restricted_profile_v1 import validate_testnet_profile
+except ModuleNotFoundError:
+    from economic_concentration import PROFILE_PATH, evaluate
+    from restricted_profile_v1 import validate_testnet_profile
 
 
 ATTACK_EXPECTATIONS = {
@@ -76,6 +81,9 @@ def _inject(snapshot: dict, attack: str) -> None:
 
 
 def run_campaign(epochs: int, seed: int, profile: dict) -> dict:
+    errors = validate_testnet_profile(profile)
+    if errors:
+        raise ValueError("invalid restricted testnet profile: " + "; ".join(errors))
     if epochs < 1:
         raise ValueError("epochs must be positive")
     rng = random.Random(seed)

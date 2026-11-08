@@ -1,0 +1,34 @@
+{
+  "schema": "m3-f05-2a-runner-python-compat-r1",
+  "source_sha256": {
+    "scripts/remediation/f05_2a_tx_sim_runner_r3.py": "3088ade0a316f6af59c04fe3e1675733100b58be826fa22af3c25e40a086ea5c",
+    "scripts/remediation/test_f05_2a_tx_sim_runner_r3.py": "511c8ac4ae9fc03a5cc167287838ed99e7296652fdc9397fe6819d8e5cf566e8"
+  },
+  "runs": {
+    "python312": {
+      "command": [
+        "PYTHONDONTWRITEBYTECODE=1",
+        "/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python",
+        "scripts/remediation/test_f05_2a_tx_sim_runner_r3.py"
+      ],
+      "version": "Python 3.12.14",
+      "exit_code": 0,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "2e59d17c21e93a3076b919dbe7f0722df93b436188e8f299225ca41a44d2bc1c",
+      "summary": "16 tests passed"
+    },
+    "python314": {
+      "command": [
+        "PYTHONDONTWRITEBYTECODE=1",
+        "python3",
+        "scripts/remediation/test_f05_2a_tx_sim_runner_r3.py"
+      ],
+      "version": "Python 3.14.4",
+      "exit_code": 0,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "93bc7186fbf8140c145ed2732ce1343987a041c6807308b30727d1e0bebe7468",
+      "summary": "16 tests passed"
+    }
+  },
+  "classification": "local unit tests for synthetic transaction simulator runner; no F05 case or mutation credit"
+}

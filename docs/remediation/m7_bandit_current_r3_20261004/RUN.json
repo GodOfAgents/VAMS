@@ -1,0 +1,56 @@
+{
+  "capture_script_sha256": "f28e32b79154be10e206f2d3fa264bacb0270729f99ea73e830b4a3aa985bbe7",
+  "error_count": 0,
+  "evidence_credit": "No deployment, ledger, or live-network credit.",
+  "finding_count": 0,
+  "inner_command": [
+    "/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/bandit",
+    "-r",
+    "neuron/",
+    "gateway/",
+    "-ll",
+    "-ii",
+    "-f",
+    "json",
+    "-o",
+    "/tmp/vams-bandit-rmnk_y4g/bandit-report.json"
+  ],
+  "outer_command": [
+    "/usr/bin/bwrap",
+    "--unshare-net",
+    "--ro-bind",
+    "/",
+    "/",
+    "--tmpfs",
+    "/tmp",
+    "--dev-bind",
+    "/dev",
+    "/dev",
+    "--proc",
+    "/proc",
+    "--bind",
+    "/home/GodOfAgents/vams-evidence/m7-bandit-current-r3-20261004",
+    "/home/GodOfAgents/vams-evidence/m7-bandit-current-r3-20261004",
+    "--chdir",
+    "/home/GodOfAgents/code/VAMS-testnet",
+    "/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python",
+    "-B",
+    "/home/GodOfAgents/vams-evidence/m7-bandit-current-r3-20261004/run_capture.py"
+  ],
+  "provenance_note": "Scan-time canonical HEAD and workflow-file hash were not captured; this result is bound to the recorded Python source inventory and scanner/tool hashes only.",
+  "result_sha256": "f385fea4a3c779b7f26ed525d1f02e77eecba917f3cf5de6aa4d1bfbf1da7c48",
+  "scanner_exit_code": 0,
+  "schema_version": "m7-bandit-capture-r1",
+  "source_inventory": {
+    "path_sha256_manifest_sha256": "a84b810486e2939c19b8b7458553a0446721e52051f9431e9d8694fcee540d0d",
+    "python_file_count": 190
+  },
+  "source_inventory_after": {
+    "path_sha256_manifest_sha256": "a84b810486e2939c19b8b7458553a0446721e52051f9431e9d8694fcee540d0d",
+    "python_file_count": 190
+  },
+  "tool": {
+    "sha256": "c14fb89c43dad91a351fb8f5da774f7b9f3b5a5e2a757dabb34fbb0f418b0e37",
+    "version": "bandit 1.9.4"
+  }
+}

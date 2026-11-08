@@ -20,9 +20,18 @@ import math
 import hashlib
 import json
 import logging
+import os
 from dataclasses import dataclass, field
-from typing import Optional, Dict, Any, List, Tuple
+from typing import Optional, Dict, Any, List, Tuple, Mapping
 from enum import Enum
+
+from neuron.runtime_safety import (
+    ImmutableRuntimeConfiguration,
+    LiveModeSafetyError,
+    RuntimePolicy,
+    load_runtime_policy,
+    resolve_component_mock_mode,
+)
 
 logger = logging.getLogger("vams.cognitive_drift")
 
@@ -98,9 +107,14 @@ class CSPResult:
     consensus_time_ms: float = 0.0
     drift_before: float = 0.0
     drift_after: float = 0.0
+    simulated: bool = True
+    evidence_classification: str = "non-authoritative"
 
 
-class CognitiveDriftDetector:
+COGNITIVE_SYNC_MOCK_VARIABLE = "COGNITIVE_SYNC_MOCK_MODE"
+
+
+class CognitiveDriftDetector(ImmutableRuntimeConfiguration):
     """
     Monitors multi-agent Cognitive Drift and triggers Sync Pulses.
     
@@ -121,14 +135,48 @@ class CognitiveDriftDetector:
         reputation_decay: Per-epoch reputation decay rate (default: 5%)
     """
     
+    _immutable_runtime_fields = frozenset(
+        {
+            "runtime_policy",
+            "mock_mode",
+            "theta",
+            "gamma",
+            "max_oracle_influence",
+            "min_oracle_participants",
+            "reputation_decay",
+        }
+    )
+
     def __init__(
         self,
         theta: float = 0.3,
         gamma: float = 1.5,
         max_oracle_influence: float = 0.15,
         min_oracle_participants: int = 3,
-        reputation_decay: float = 0.05
+        reputation_decay: float = 0.05,
+        mock_mode: Optional[bool] = None,
+        *,
+        environ: Optional[Mapping[str, str]] = None,
+        policy: Optional[RuntimePolicy] = None,
     ):
+        source = os.environ if environ is None else environ
+        self.runtime_policy = policy or load_runtime_policy(source)
+        self.mock_mode = resolve_component_mock_mode(
+            "CognitiveDriftDetector",
+            COGNITIVE_SYNC_MOCK_VARIABLE,
+            mock_mode,
+            policy=self.runtime_policy,
+            environ=source,
+        )
+        if self.runtime_policy.is_live:
+            raise LiveModeSafetyError(
+                "CognitiveDriftDetector live synchronization is disabled until "
+                "authenticated quorum, durable anchoring, and reconciliation exist"
+            )
+        if not self.mock_mode:
+            raise LiveModeSafetyError(
+                "CognitiveDriftDetector has no authoritative non-simulated implementation"
+            )
         self.theta = theta
         self.gamma = gamma
         self.max_oracle_influence = max_oracle_influence
@@ -162,6 +210,7 @@ class CognitiveDriftDetector:
         
         # Initialize mock oracle network
         self._init_mock_oracles()
+        self._freeze_runtime_configuration()
     
     def _init_mock_oracles(self):
         """Initialize a mock oracle network for local testing."""

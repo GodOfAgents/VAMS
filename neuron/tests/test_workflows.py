@@ -13,34 +13,20 @@ Test strategy
 - Verify LogicLayerMonitor HTTP health checks (unchanged component).
 
 Run with:
-    cd neuron
-    pip install dbos psycopg2-binary pytest pytest-asyncio
-    python -m pytest tests/test_workflows.py -v
+    python -m pytest neuron/tests/test_workflows.py -v
 """
 
-import sys
-import os
 import time
 import pytest
 import asyncio
-
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from pathlib import Path
 
 
 # ─── DBOS test harness ────────────────────────────────────────────────────────
-import os
 import sqlalchemy as sa
 from dbos import DBOS
 
-# Clean up any leftover database file
-DB_FILE = "dbos_test_workflows.db"
-if os.path.exists(DB_FILE):
-    try:
-        os.remove(DB_FILE)
-    except OSError:
-        pass
-
-from workflows import (
+from neuron.workflows import (
     step_gather_data,
     step_run_inference,
     step_execute_action,
@@ -54,30 +40,34 @@ from workflows import (
 # ─── Fixtures ─────────────────────────────────────────────────────────────────
 
 @pytest.fixture(scope="function")
-def dbos_client():
+def dbos_client(tmp_path):
     """
     Session-scoped DBOS test client.
     Initialises file-based SQLite database with NullPool to run workflow tests.
     """
+    db_file = tmp_path / "dbos_test_workflows.db"
     DBOS.destroy()
-    DBOS(config={
-        "name": "vams-test-app",
-        "system_database_url": f"sqlite:///{DB_FILE}",
-        "db_engine_kwargs": {
-            "poolclass": sa.NullPool
-        }
-    })
-    DBOS.reset_system_database()
-    DBOS.launch()
-    
-    yield None
-    
-    DBOS.destroy()
-    if os.path.exists(DB_FILE):
-        try:
-            os.remove(DB_FILE)
-        except OSError:
-            pass
+    try:
+        DBOS(config={
+            "name": "vams-test-app",
+            "system_database_url": f"sqlite:///{db_file}",
+            "db_engine_kwargs": {
+                "poolclass": sa.NullPool
+            }
+        })
+        DBOS.reset_system_database()
+        DBOS.launch()
+
+        yield None
+    finally:
+        DBOS.destroy()
+        for candidate in (
+            db_file,
+            Path(f"{db_file}-wal"),
+            Path(f"{db_file}-shm"),
+            Path(f"{db_file}-journal"),
+        ):
+            candidate.unlink(missing_ok=True)
 
 
 # ─── Step unit tests ──────────────────────────────────────────────────────────

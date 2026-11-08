@@ -60,8 +60,13 @@ The following cannot be waived:
 ### G1 - Build and security verification
 
 - Forge build/tests, Slither, Aiken, pytest, Bandit, pip-audit, Semgrep,
-  npm audit/build, Caddy validation, secret scans, SBOM, and signing pass on one
+  npm audit/build, checksum-verified Envoy 1.39.1 validation of
+  `gateway/envoy.testnet.yaml`, secret scans, SBOM, and signing pass on one
   commit.
+- CI validates the checked-in Envoy configuration only. Deployment review must
+  verify the selected TLS-terminating proxy configuration and loopback
+  application bind; `gateway/Caddyfile.testnet.example` is historical and is
+  not approved for live ingress.
 - Existing tests and new invariant/property tests have zero failures.
 
 ### G2 - Economic and invariant verification
@@ -131,3 +136,29 @@ canary portion of G6.
   incident drills, and a deployment register without pending fields.
 - Detached evidence signatures are cryptographically verified with Cosign in
   the manual GitHub promotion job before either command can return success.
+
+
+## Cardano governance v2 package
+
+Cardano rehearsal/deployment manifests use schema2.0.0 and the package contract in
+`scripts/audit/cardano_governance_release.py`. Polygon remains version1 pending its
+explicit restricted-profile repair. Do not reuse old Cardano v1 source/artifacts.
+Each Cardano artifact binds exact serialized Plutusv3 bytes; cardano_build binds all
+current source/test/dependency inputs, compiler/runner identities and six retained
+records: build, native tests, applied parameters, ledger, budgets and review.
+The aggregate must bind every direct reference, including binary scripts. All
+actual files and claimed results require authentic qualification and review;
+format/hash agreement is not proof that a compiler, ledger or reviewer ran.
+See `../remediation/repair_20261028/RELEASE-BINDING.md`. Missing values remain
+UNKNOWN; no fixture may be placed in release evidence as an authentic result.
+
+### Selected profile configuration identity
+
+The checked-in `testnet-profile.json` version1.0.0 has an exact typed contract in
+`scripts/audit/restricted_profile_v1.py`. Audit-program validation, concentration
+evaluation and the synthetic campaign reject missing/unknown fields, altered
+selected values or wrong JSON types. This binds configuration identity only;
+actual governance, provider independence, exposure controls and elapsed days need
+their own evidence. General policy caps/minima can allow stricter alternatives,
+but an alternate configuration requires a reviewed version rather than silent
+reinterpretation of this selected profile. Threshold comparison semantics stay.

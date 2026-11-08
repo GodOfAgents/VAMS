@@ -1,0 +1,29 @@
+{
+  "schema": "f05-inline-datum-type-slice-v1",
+  "source_sha256": "ce3726e2b46ca0f0bc936202dd2e6bd35dcff64bac82ce8e8148f9fbb73fd07d",
+  "test_sha256": "267fa7241409b032aa05d6dd87d778aee55a7caf267ebd0744e123d778a8d36e",
+  "focused_tests": {
+    "integrated_passed": 38,
+    "independent_anchor_passed": 7
+  },
+  "full_harness": {
+    "exit_code": 0,
+    "result_created": true,
+    "protected_file_count": 25,
+    "protected_unchanged": true,
+    "result_sha256": "467c3352c171dc155c7bd1f494b6e9214efebbd27775d7a470aebb5544dff4ce",
+    "status": "pass",
+    "cases": 57,
+    "positive_accepted": 1,
+    "negatives_rejected": 56,
+    "mutation_rows": 21,
+    "failures": []
+  },
+  "ledger": "unchanged: 45/55 negatives PASS; 18/21 mutations PASS",
+  "limitations": [
+    "six applied-parameter owner choices",
+    "four proof-domain owner choices",
+    "unconditional_success rebinding and parameter rebuild",
+    "per-mutant child exits, CBOR, and IDs not retained"
+  ]
+}

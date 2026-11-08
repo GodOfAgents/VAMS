@@ -1,0 +1,28 @@
+{
+  "command": [
+    "/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python",
+    "-B",
+    "scripts/security/public_content_policy_scan.py"
+  ],
+  "date": "2026-10-03",
+  "exit_code": 0,
+  "finding_count": 0,
+  "git_head": "829ab544571f12efe50ecb5740f129c8acb3e16f",
+  "path_inventory_after": {
+    "count": 1694,
+    "excludes_evidence_package": "docs/remediation/m7_public_content_policy_current_r1/",
+    "sha256": "51359db032ebb08334c411e03a5aad6fefa5a76959640fb808854e12601c276f"
+  },
+  "path_inventory_before": {
+    "count": 1694,
+    "excludes_evidence_package": "docs/remediation/m7_public_content_policy_current_r1/",
+    "sha256": "51359db032ebb08334c411e03a5aad6fefa5a76959640fb808854e12601c276f"
+  },
+  "path_inventory_unchanged": true,
+  "python": "3.12.14",
+  "raw_output_retained": false,
+  "schema": "m7-public-content-policy-current-v1",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "6c90e740b3829382137f122b10d3ac0809ce5be73da6c3b366159fbaa738c638",
+  "summary": "Public content policy scan passed."
+}

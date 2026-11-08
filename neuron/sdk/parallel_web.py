@@ -1,13 +1,11 @@
 """
 VAMS Neuron - Parallel Web Systems Integration
 ==============================================
-Client for the Parallel Web Systems API ("Web for Machines").
-Used by VAMS Agents to perform verifiable research and generate provenance logs.
+Mock-only Parallel Web Systems fixture.
+This module makes no provider request and does not verify provenance or proofs.
 
-Features:
-- Search the web via Parallel API
-- Verify content provenance
-- Generate 'Proof of Research' for VAMS Trust Aggregator
+It is available in non-live modes for local examples. Its output is always
+simulated and non-authoritative.
 """
 
 import time
@@ -15,6 +13,7 @@ import hashlib
 import json
 from dataclasses import dataclass
 from typing import List, Optional, Dict
+from neuron.runtime_safety import load_runtime_policy
 
 @dataclass
 class ParallelResult:
@@ -24,11 +23,15 @@ class ParallelResult:
     provenance_hash: str
     confidence_score: float
     timestamp: float
+    simulated: bool = True
+    evidence_classification: str = "non-authoritative"
+    confidence_classification: str = "fixture-only"
 
 class ParallelWebClient:
     """
-    Client for Parallel Web Systems.
-    "The Eyes and Ears of VAMS Agents."
+    Local fixture for the future Parallel Web Systems client.
+
+    This class returns synthetic data and cannot provide authoritative research.
     """
     
     def __init__(self, api_key: Optional[str] = None):
@@ -38,54 +41,64 @@ class ParallelWebClient:
         
     def search(self, query: str) -> List[ParallelResult]:
         """
-        Perform a verifiable web search.
+        Return one synthetic result in a non-live runtime.
         
         Args:
             query: The search term (e.g. "latest VAMS token price")
             
         Returns:
-            List of verified results
+            List of simulated, non-authoritative results
         """
-        # In production, this would request the Parallel API
-        # For MVP, we return strict mocked data to demonstrate the flow
-        
-        print(f"[Parallel] Searching for: '{query}'...")
+        load_runtime_policy().authorize_component_mock(
+            "ParallelWebClient fixture", True
+        )
+
+        print("[Parallel] Producing a local research fixture...")
         
         # Simulate network delay
         time.sleep(0.5)
         
-        # Mock Result
+        # This is a deterministic query-derived fixture, not provider provenance.
         mock_hash = hashlib.sha256(f"{query}:result".encode()).hexdigest()
         
         return [
             ParallelResult(
-                title=f"Result for {query}",
-                url="https://source.news/article/123",
-                content_snippet=f"Verified information regarding {query}...",
+                title=f"Fixture result for {query}",
+                url="https://example.invalid/parallel-fixture",
+                content_snippet=f"Simulated fixture content for {query}.",
                 provenance_hash=mock_hash,
-                confidence_score=0.98,
-                timestamp=time.time()
+                confidence_score=0.98,  # Fixture constant, not an evidence estimate.
+                timestamp=time.time(),
+                simulated=True,
+                evidence_classification="non-authoritative",
+                confidence_classification="fixture-only",
             )
         ]
     
     def generate_proof_of_research(self, results: List[ParallelResult]) -> bytes:
         """
-        Bundles search results into a 'Proof of Research' byte array.
-        This proof is submitted to VAMSTrustAggregator.
+        Serialize a tagged local fixture record; this is not a proof or receipt.
         """
+        load_runtime_policy().authorize_component_mock(
+            "ParallelWebClient fixture", True
+        )
+
         proof_payload = {
-            "query_count": len(results),
-            "root_hash": self._compute_root_hash(results),
-            "provider": "parallel_systems",
-            "timestamp": time.time()
+            "schema": "vams.parallel-research-simulation.v1",
+            "simulated": True,
+            "evidence_classification": "non-authoritative",
+            "confidence_classification": "fixture-only",
+            "result_count": len(results),
+            "fixture_digest": self._compute_root_hash(results),
+            "provider": "local_parallel_fixture",
+            "created_at": time.time(),
         }
-        
-        # In reality, this would be signed by Parallel's oracle key
+
         proof_bytes = json.dumps(proof_payload).encode()
         return proof_bytes
         
     def _compute_root_hash(self, results: List[ParallelResult]) -> str:
-        """Merkle root of results."""
+        """Deterministic fixture digest; this is not a Merkle tree root."""
         hasher = hashlib.sha256()
         for res in results:
             hasher.update(res.provenance_hash.encode())

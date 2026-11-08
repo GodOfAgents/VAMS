@@ -1,0 +1,113 @@
+{
+  "schema_version": "f05-2a-applied-parameter-positive-sim-attempt-r3",
+  "attempt": {
+    "label": "applied_keys_parameter positive control through immutable R3 runner",
+    "argv": [
+      "/home/GodOfAgents/vams-evidence/toolchains/python/bin/python3.12",
+      "/home/GodOfAgents/code/VAMS-testnet/scripts/remediation/f05_2a_tx_sim_runner_r3.py",
+      "--aiken",
+      "/home/GodOfAgents/vams-evidence/toolchains/aiken-1.1.21/aiken",
+      "--tx",
+      "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m3_f05_2a_applied_parameter_family_r5_20261005/applied_keys_parameter/positive-control.tx.cbor",
+      "--raw-inputs",
+      "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m3_f05_2a_applied_parameter_family_r5_20261005/applied_keys_parameter/positive-control.raw_inputs.cbor",
+      "--raw-outputs",
+      "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m3_f05_2a_applied_parameter_family_r5_20261005/applied_keys_parameter/positive-control.raw_outputs.cbor",
+      "--policy-id",
+      "efec0d79e496e2df81f8e3e27734c9718655dc577070c7519645fa29"
+    ],
+    "cwd": "/home/GodOfAgents/code/VAMS-testnet",
+    "python_version": "Python 3.12.14",
+    "aiken_version": "aiken v1.1.21+42babe5",
+    "aiken_sha256": "07f3f927f1a8c71fc61273fdff850d9b98edb28dde207c8a32585991f2c88e79",
+    "runner_sha256": "3088ade0a316f6af59c04fe3e1675733100b58be826fa22af3c25e40a086ea5c",
+    "policy_id": "efec0d79e496e2df81f8e3e27734c9718655dc577070c7519645fa29",
+    "wrapper_exit_code": 0,
+    "runner_result": {
+      "schema_version": "f05-2a-tx-sim-run-result-r3",
+      "simulator_child_exit": 0,
+      "simulator_result": {
+        "stage": "script_accepted",
+        "target_script_invoked": true
+      },
+      "cleanup": {
+        "child_reaped": true,
+        "process_group_empty": true,
+        "snapshot_descriptors_closed": true,
+        "status": "clean"
+      },
+      "submitted_sha256": {
+        "transaction": "97f584e0f071b774883d15237042cefddff6e7b471d58329fcb5f24a08775c7d",
+        "raw_inputs": "4b20e2b2cf4bd58b1f6e385c90ffd098d583df69d95fbc7b1fcc2591da72b9fe",
+        "raw_outputs": "37d1a506522392074de0f58ed0bf093eb181a612c9c9118d1060eae95f911ed3"
+      },
+      "submitted_size_bytes": {
+        "transaction": 5104,
+        "raw_inputs": 73,
+        "raw_outputs": 79
+      },
+      "target_mint_binding": {
+        "expected_policy_id": "efec0d79e496e2df81f8e3e27734c9718655dc577070c7519645fa29",
+        "compiled_script_hash": "efec0d79e496e2df81f8e3e27734c9718655dc577070c7519645fa29",
+        "policy_ids": [
+          "efec0d79e496e2df81f8e3e27734c9718655dc577070c7519645fa29"
+        ]
+      }
+    },
+    "capture_note": "Exact structured runner output returned by scoped execution and transcribed locally; raw simulator stdout/stderr and external attestation are not retained."
+  },
+  "fixture_package": {
+    "path": "docs/remediation/m3_f05_2a_applied_parameter_family_r5_20261005",
+    "family_manifest_sha256": "3d43acdc634f700c3bc709bae03a7869f26c35cd59941d4be0d94a89ca5c094e",
+    "family_sha256sums_sha256": "ad27af4dd49aac3e8d0ba570468adf5c4fc32e02b5acc3303b2f40b67e5c71f0",
+    "case_id": "applied_keys_parameter",
+    "decision": "R4.1 applied-parameter C",
+    "entrypoint": "f05_authority_policy.f05_authority_policy.mint / Mint[0]",
+    "alternate_applied_policy_id": "efec0d79e496e2df81f8e3e27734c9718655dc577070c7519645fa29",
+    "submitted_files": {
+      "transaction": {
+        "path": "applied_keys_parameter/positive-control.tx.cbor",
+        "bytes": 5104,
+        "sha256": "97f584e0f071b774883d15237042cefddff6e7b471d58329fcb5f24a08775c7d"
+      },
+      "raw_inputs": {
+        "path": "applied_keys_parameter/positive-control.raw_inputs.cbor",
+        "bytes": 73,
+        "sha256": "4b20e2b2cf4bd58b1f6e385c90ffd098d583df69d95fbc7b1fcc2591da72b9fe"
+      },
+      "raw_outputs": {
+        "path": "applied_keys_parameter/positive-control.raw_outputs.cbor",
+        "bytes": 79,
+        "sha256": "37d1a506522392074de0f58ed0bf093eb181a612c9c9118d1060eae95f911ed3"
+      }
+    },
+    "pre_execution_validation": {
+      "valid_pop_count": 5,
+      "funding_signatures": 2,
+      "valid_body_bound_ephemeral_signatures": true,
+      "ada_conservation": true,
+      "native_asset_conservation": true,
+      "private_keys_persisted": false
+    }
+  },
+  "controls": {
+    "accepted_positive_control": true,
+    "target_invoked_at_mint0": true,
+    "script_accepted": true,
+    "clean_cleanup": true,
+    "negative_case": false,
+    "mutation": false
+  },
+  "credit": {
+    "positive_control": "pending independent run-record review",
+    "negative_case": null,
+    "mutation": null,
+    "original_policy": false,
+    "ledger_admission": false,
+    "live_network": false
+  },
+  "evidence_scope": "one local synthetic alternate-applied-policy positive-control execution only; no original-policy, negative-case, mutation, full-ledger-admission, Cardano Pre-Prod, or live-network credit",
+  "case_status": "PENDING; no negative or mutation credit",
+  "status": "positive control accepted at compiled Mint[0]; independent run-record review pending",
+  "stop_rule": "Do not execute negative or mutant case fixtures before independent review of this exact control."
+}

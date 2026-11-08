@@ -1,0 +1,84 @@
+{
+  "schema_version": "m7-f05-unconditional-status-reconciliation-v1",
+  "date": "2026-10-04",
+  "audit_method": "read-only SHA-256 inspection of pre-update status/handoff and cited evidence records; no execution",
+  "pre_update_records": {
+    "docs/remediation/STATUS.md": "930e2b58c407abb741393ee99aaff27a9267abd67380af1f69cc6e9c0e8c6435",
+    "docs/remediation/SESSION_HANDOFF.md": "efd94f25a51d1b3e99435ca505f84101173dbe01fd331bb9953239e0c059d1c2"
+  },
+  "historical_earlier_run_records": [
+    {
+      "path": "docs/remediation/m3_f05_2a_harness_diagnostic_fix_r1",
+      "sha256": {
+        "ASSESSMENT.md": "64b93ac6994be5e306d11d98ea27690eaae410aeeb961eb58ebd8bb4edf301b2",
+        "RUN.json": "ebfeb97269640610e048159a0cc6731577cf7ebc9ddf67f4053f21567ad02114",
+        "REVIEW.md": "e34f86beb44eb55e45c9b90e80bd7e76fdf02fdee254df86d479a86fb1c0e9a8"
+      },
+      "scope": "earlier direct-UPLC evaluation stopped before accept/reject on unsupported verifySignature; superseded as current evidence status by later reviewed synthetic runs"
+    },
+    {
+      "path": "docs/remediation/m3_f05_2a_r3_harness_current_r2",
+      "sha256": {
+        "ASSESSMENT.md": "81e7e8e09140b28995a3644d3ee6992e6d9fc9d2dd273f16480168ece6cee308",
+        "RUN.json": "7a82d529ec34c19fab437e94753be4060ee127093b1e438da8e721903a4c31b1",
+        "REVIEW.md": "b19cdd4da42e931b2f1f61ca5eab68e3666f6af3c7b8f42bf605b88e1426d834"
+      },
+      "scope": "earlier two-canary / positive-control-only diagnostic; no registered case credit"
+    }
+  ],
+  "later_accepted_synthetic_evidence": [
+    {
+      "path": "docs/remediation/m7_f05_unconditional_contexts_r1",
+      "sha256": {
+        "SHA256SUMS": "14cbf76278d7ce616ac0037c4af52cc6d30e65ab2f5eb42ccabb5766560a898e",
+        "ASSESSMENT.md": "ddf50e7de0852dd4641cc7a94f4df6e08ca1d61c417ea12fece8991d9f978075",
+        "REVIEW.md": "206ea1fbf710eb563caa01d74ca35626ab955c4d1d44d2014a82fd0bb56575d6",
+        "HARNESS_RESULT.json": "c9d6eed4d607f49ed4ac0a4fe448e2833f7a0064f8ea5981b34b78536f5e87a8"
+      },
+      "manifest_verified": true,
+      "claim": "55/55 synthetic direct-UPLC unconditional-success subcases accepted; no ledger/live credit"
+    },
+    {
+      "path": "docs/remediation/m7_f05_mutation_provenance_r1",
+      "sha256": {
+        "SHA256SUMS": "4e506b59c1387d31a58bc332d5aa9537269f93d51d2cb20461e216a424ea380f",
+        "ASSESSMENT.md": "26a51ad1b3f24d34341a7991c3933d65102177be5d30ec29ae869ea58db430f4",
+        "REVIEW.md": "8ec3c8f07f1872cb22e2f0eacadf3bc326ce5584c01e0ed669ae1aeef5091428",
+        "RESULT.json": "7e28e825908592a47a57bed677c0e7d8db5d18cc6fb393d7ed0d25b2e54b12b2",
+        "rerun1/CAPTURE.json": "12a6302a1ccaa0269ea22774d0b2e447b3a2acbc9f7360b9c1c5bed7dc470df2",
+        "rerun1/COMMANDS.json": "fd094c2159d0180ef07b21c56827c3c854d6c6e4f9745e5759f904b09d97594e"
+      },
+      "manifest_verified": true,
+      "claim": "bounded synthetic compiled-UPLC provenance; ephemeral committee keys and new base policy distinct from frozen original; no original-policy transaction or ledger/live proof"
+    },
+    {
+      "path": "docs/remediation/m3_f05_2a_unconditional_r4_mutation_r1",
+      "sha256": {
+        "ASSESSMENT.md": "3555d1bfa3680593d97ffc8388872771e19d62ad11d8cccbd7f57d2793ffe2a8",
+        "REVIEW.md": "c2f018bb5b953974b0e04ffc5f7db898dcf949e9d0c7568daabe85b0a88bc30a",
+        "RUN.json": "5ac31d232b69dfc3e10710b09e586c97e58fd1ee1ba8bb325d4473a69f328b70",
+        "RUN.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+      },
+      "manifest_verified": false,
+      "manifest_note": "this package has no SHA256SUMS; the listed record hashes were computed read-only",
+      "claim": "only mutant positive control plus paired seed_missing diagnostic and unchanged baseline seed_missing rejection; no registered mutation credit"
+    }
+  ],
+  "ledger": {
+    "negative_cases": "45/55",
+    "mutations": "18/21"
+  },
+  "open_owner_choices": [
+    "six applied-parameter evidence classifications A/B/C",
+    "four proof-domain evidence classifications A/B/C",
+    "separate F04 normative identity-entrypoint decision"
+  ],
+  "readiness": {
+    "status": "NOT READY",
+    "deployment_enabled": false,
+    "deposit_enabled": false,
+    "slash_activation_enabled": false,
+    "execute_intent_enabled": false
+  },
+  "no_new_execution": true
+}

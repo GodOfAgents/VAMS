@@ -1,0 +1,24 @@
+{
+  "delta": {
+    "changed_from": "PENDING",
+    "changed_mutation_id": "remove_key_order_guard",
+    "changed_to": "PASS",
+    "counts": {
+      "mutation_pass": 21,
+      "mutation_pending": 0,
+      "negative_pass": 53,
+      "negative_pending": 2,
+      "transaction_simulator_pass": 49,
+      "transaction_simulator_pending": 2
+    },
+    "from": "R11",
+    "negative_cases_structurally_unchanged": true,
+    "other_mutation_rows_structurally_unchanged": true
+  },
+  "schema_version": "f05-2a-evidence-classification-comparison-r12",
+  "source": "docs/remediation/m3_f05_2a_evidence_classification_r11_20261005/CASE-STATUS.json",
+  "source_negative_cases_sha256": "b783d0af16d3deb7834a9afab152a0d63cab22c5f3fcc34d528ff611076ef9ca",
+  "source_sha256": "65dd7accc853988cfbfe3540461c475f857553ee500f52b9e4a015b841e0dc5f",
+  "target": "docs/remediation/m3_f05_2a_evidence_classification_r12_20261005/CASE-STATUS.json",
+  "target_negative_cases_sha256": "b783d0af16d3deb7834a9afab152a0d63cab22c5f3fcc34d528ff611076ef9ca"
+}

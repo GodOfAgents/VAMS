@@ -17,8 +17,9 @@ __all__ = [
 
 def discover_plugins():
     """Return all available proof plugin instances."""
+    # ZKMLProofPlugin is an unqualified placeholder and must not enter
+    # automatically collected trust evidence.
     return [
         TEEProofPlugin(),
-        ZKMLProofPlugin(),
         OutputHashProofPlugin(),
     ]

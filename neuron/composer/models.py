@@ -48,6 +48,8 @@ class TEEType(str, Enum):
 
 
 class AllocationStatus(str, Enum):
+    SIMULATED = "simulated"
+    SIMULATION_REMOVED = "simulation_removed"
     """Status of a provisioned instance."""
     PENDING = "pending"
     ACTIVE = "active"
@@ -317,8 +319,7 @@ class AllocationPlan:
 @dataclass
 class ProvisionedInstance:
     """
-    A successfully provisioned resource allocation.
-    Returned to the agent after a blueprint is composed and locked.
+    Local allocation record; this structure is not a provider or escrow receipt.
     """
     instance_id: str
     blueprint: InstanceBlueprint
@@ -333,6 +334,8 @@ class ProvisionedInstance:
             "instance_id": self.instance_id,
             "blueprint_name": self.blueprint.name,
             "status": self.status.value,
+            "simulation": self.status in (AllocationStatus.SIMULATED, AllocationStatus.SIMULATION_REMOVED),
+            "evidence_classification": "non-authoritative",
             "allocation": self.allocation.to_dict(),
             "provisioned_at": self.provisioned_at,
             "expires_at": self.expires_at,

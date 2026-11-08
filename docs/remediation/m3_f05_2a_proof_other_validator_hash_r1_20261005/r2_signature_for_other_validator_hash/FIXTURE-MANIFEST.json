@@ -1,0 +1,344 @@
+{
+  "applied_parameters": {
+    "alternate_signed_state_validator_hash": "cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd",
+    "committee_public_keys_hex": [
+      "55e34fef0c27f3f76cc45b29f6cfcdf4eed966f4787d1d24de0ea97c14b50e0c",
+      "7ecf5d03bc1e6a7c1ede0d35b0f398c1f26cc6815ecb2b76bb8edd6b49470a32",
+      "948381ab7d405566957e64c44ad02ef1c3baefbb9cf6581b3d79364c843d95b2",
+      "9f6509c37b9083a8d70fb46bfa030f2239912c15467f58f38255e6067726516b",
+      "ffbb71f5268f8f4fd7bc60be9c6e8206b1203ae23d3da63003bc4349fd82bb18"
+    ],
+    "derived_applied_state_validator_hash": "b4a7b5de32fa88554a4eb44d8e8235e24e738a1c1d1fe1764a0a3e66",
+    "parameter_cbor_sha256": "db7afeb09c148a7200410532165c8f7a56088cd13cecd8a67cc07b51c293219c",
+    "private_key_material_persisted": false,
+    "seed_ref": {
+      "output_index": 7,
+      "tx_hash": "abababababababababababababababababababababababababababababababab"
+    }
+  },
+  "applied_policy": {
+    "compiled_script_sha256": "8002a87a2f9b285197518bd865c7da7afae26b5362a0683d7a1c723716424dbd",
+    "policy_id": "409712d7175aa2f7d372364919d50f55a048b83c7770a646826a1df4",
+    "state_validator_hash": "b4a7b5de32fa88554a4eb44d8e8235e24e738a1c1d1fe1764a0a3e66"
+  },
+  "artifacts": {
+    "negative.applied-policy.cbor": {
+      "bytes": 3467,
+      "sha256": "8002a87a2f9b285197518bd865c7da7afae26b5362a0683d7a1c723716424dbd"
+    },
+    "negative.genesis_ref.cbor": {
+      "bytes": 39,
+      "sha256": "51f08c55f440a2116b42e5283fc76d8be4d707788d3bc765023620199af45c75"
+    },
+    "negative.initial_keys.cbor": {
+      "bytes": 172,
+      "sha256": "a7cd5c35689dece281de4dfb4f2e0a0d29bb5129b63d7bf3971f1663bf04391c"
+    },
+    "negative.proof-message.bin": {
+      "bytes": 279,
+      "sha256": "608b46934b1a315c3c905c96f250e3d23d75eadb483cd5b893bc6e386c47a22e"
+    },
+    "negative.raw_inputs.cbor": {
+      "bytes": 73,
+      "sha256": "5e935c48cc9d4e82e6dbedce94b2fbd3fb427f5e187bbe67ed376671ba5e4fec"
+    },
+    "negative.raw_outputs.cbor": {
+      "bytes": 79,
+      "sha256": "fccf32f91dd3541e33bdb9a92f61ab002bdf93ba7275a270101c70309fa044b9"
+    },
+    "negative.tx.cbor": {
+      "bytes": 5104,
+      "sha256": "b1113e0ee4172a49d7ce4a3e30a31d03b017c54cadb5546b72b60ec5c054dd2d"
+    },
+    "negative.validation": {
+      "ada_conservation": true,
+      "body_hash": "f29811ae30b910fa386cb2fa78e40b7dbc17b9abad9ac92e280795b0afb804b1",
+      "funding_signatures": 2,
+      "mint0_redeemer": {
+        "cbor_sha256": "5648b34b15f3bf1c38ff86fb092be2def7d72431b90363218a5a7efd21a92ebc",
+        "constructor_tag": 121,
+        "proof_count": 5,
+        "proof_signatures_hex": [
+          "4ded021c82fb6617a9970a2132a12f5c93af3521ad9a7230782beb237b0b93264855e82b521fad9d0906b6a5867853d0616b98cfa84fceeff514e0467bcf9106",
+          "6dcc18748c4a2401367644ab125df8b6a671ff7564fc20e263ef00430308f56f6a3690fabc3d284c99c8dffaa8fb5cd2b0cd79b1b025658b0bbb33dd3da6320e",
+          "64a125d025808131f0ba68132bf19ecb82f8a61d93c1426ca6714bddf7e4d02d7792e28d87cea146c4aa3f400daa1e3ebb74e6d406c0bef4490732be4972620a",
+          "19e3da3a657a746b728d457352d9a78763360b0c3d80113c01f95a68b2770a15a9edde66083c008ab329de6531ab0cce985b2141f89fe794b1a045ae7e3e7404",
+          "62027f2cf946f3376756d95a2c5c0e55d2650f6186b8b104f51e637d8a4d5802fca552c31499bb34758023c9dba933b2776b1ba1be8208cdc3f4da09877e9402"
+        ]
+      },
+      "native_asset_conservation": true,
+      "private_keys_persisted": false,
+      "valid_body_bound_ephemeral_signatures": true
+    },
+    "positive-control.applied-policy.cbor": {
+      "bytes": 3467,
+      "sha256": "8002a87a2f9b285197518bd865c7da7afae26b5362a0683d7a1c723716424dbd"
+    },
+    "positive-control.genesis_ref.cbor": {
+      "bytes": 39,
+      "sha256": "51f08c55f440a2116b42e5283fc76d8be4d707788d3bc765023620199af45c75"
+    },
+    "positive-control.initial_keys.cbor": {
+      "bytes": 172,
+      "sha256": "a7cd5c35689dece281de4dfb4f2e0a0d29bb5129b63d7bf3971f1663bf04391c"
+    },
+    "positive-control.proof-message.bin": {
+      "bytes": 279,
+      "sha256": "4b1e030c5639db1e22d6dac2e10a7ee63313319b0121bb4c8fcc844fc9797e74"
+    },
+    "positive-control.raw_inputs.cbor": {
+      "bytes": 73,
+      "sha256": "5e935c48cc9d4e82e6dbedce94b2fbd3fb427f5e187bbe67ed376671ba5e4fec"
+    },
+    "positive-control.raw_outputs.cbor": {
+      "bytes": 79,
+      "sha256": "fccf32f91dd3541e33bdb9a92f61ab002bdf93ba7275a270101c70309fa044b9"
+    },
+    "positive-control.tx.cbor": {
+      "bytes": 5104,
+      "sha256": "8eb0a4f8b11c30231d1788ab3399823a542c7ae86e75bc1902aa452f527f0f4b"
+    },
+    "positive-control.validation": {
+      "ada_conservation": true,
+      "body_hash": "f29811ae30b910fa386cb2fa78e40b7dbc17b9abad9ac92e280795b0afb804b1",
+      "funding_signatures": 2,
+      "mint0_redeemer": {
+        "cbor_sha256": "2beb26e6e9665bf44743c994f7c333ddd0f18f60ce5401a8915420fe3e1fb331",
+        "constructor_tag": 121,
+        "proof_count": 5,
+        "proof_signatures_hex": [
+          "31d85353713275a2935dbb584f030a1ce08b6431c395317b64e9b09b67db1b7e33b397d36bb581fc9b1d7321512a82a7d331f645f2ce6380b985d6ea56a23303",
+          "88cd27c0f70f2251900f0b91b0eba669bbd9d7c1dab6efca3e0e93719a5018f82aa3475594f027b95358534e3f749ef875ff33dc0c3f46842cc84ad3c6cfc101",
+          "ee053bf076f8e8a387d5f0776432a8b69847761c3beb49016bb12fa0ae0743d0ebccb9990a077bec8a79775225a4687d973ec35a0a0a958565012d6d5372e809",
+          "536705fdaa3b89bedae9c3c41dbccae6cd3e0488f517b497db664b93b0c1739e4a7ff81cf37043aba3488438d1b720106a7251ecceb4e0656662d0ee2f700e02",
+          "f5580997bd2c2fc7772580484d765448e1a53b4991e74be4617c23940a1fa608fb77f5148d693023f209e3408783027c67505219aa68f0f045639206b96b9a07"
+        ]
+      },
+      "native_asset_conservation": true,
+      "private_keys_persisted": false,
+      "valid_body_bound_ephemeral_signatures": true
+    }
+  },
+  "case_id": "r2_signature_for_other_validator_hash",
+  "contract_row": {
+    "amended_contract": {
+      "applied_policy_id": null,
+      "applied_script_hash": null,
+      "attribution": "condition-isolated compiled mutant or equivalent reviewer-verified entrypoint evidence must accept same negative when only named guard is removed; otherwise PENDING",
+      "changed_condition": "ephemeral committee signs validator hash cd repeated 28 bytes; test policy uses derived hash",
+      "compiled_program_bytes_sha256": null,
+      "condition_attribution_control": "Require either reviewer-verifiable first-failure attribution from the unmodified compiled target at Mint[0], tied to exact program bytes and input, or a same-negative one-guard mutant whose separately derived policy ID, mint, and V3 witness are rebound and which accepts. If neither establishes the named assertion, remain PENDING.",
+      "conservation": "all input values equal outputs plus fee; conserve every native asset; account for collateral and change separately",
+      "control_and_mutant_identity_rule": "For every executed positive, negative, and mutant-control transaction, independently verify that transaction mint policy ID equals that fixture's own compiled applied policy ID and its own V3 witness script hash.",
+      "credit": {
+        "ledger_admission": false,
+        "live_network": false,
+        "negative_case": null,
+        "original_policy": false
+      },
+      "decision": "B",
+      "evidence_category": "synthetic_parameter_bound_tx_sim",
+      "expected_compiled_entrypoint": "cardano/validators/f05_authority_policy.ak#f05_authority_policy.mint / Mint[0]",
+      "expected_result": "reject for named condition",
+      "expected_target_invoked": true,
+      "fixture_family": "proof_domain",
+      "funding": "valid final-body-bound funding signatures made with ephemeral test keys only",
+      "independent_byte_review": "required before execution for params, compiled bytes/hash, policy ID, transaction/vectors, signatures, bindings, one-condition delta, and conservation",
+      "parameter_cbor_sha256": null,
+      "positive_control": "Accepted positive control: same test-only applied policy parameters and transaction semantics, with ephemeral proofs over the exact applied validator-hash-domain message.",
+      "positive_control_binding": "Every positive-control transaction independently satisfies mint policy ID == its own compiled applied policy ID == its own Plutus V3 witness script hash; record all three values and independently review its bytes.",
+      "preserved_verifier_property": "valid_bootstrap_proofs(initial_keys, proofs, bootstrap_message)",
+      "raw_inputs_sha256": null,
+      "raw_outputs_sha256": null,
+      "status": "PENDING",
+      "transaction_cbor_sha256": null,
+      "witness_binding": "mint policy ID == applied policy ID == Plutus V3 witness script hash"
+    },
+    "id": "r2_signature_for_other_validator_hash",
+    "original_r2_case_contract": {
+      "category": "ledger_tx_sim",
+      "compiled_target_policy_id": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+      "compiled_target_policy_id_status": "confirmed base policy id",
+      "evidence_ref": "docs/remediation/m3_f05_2a/authority_bootstrap_public_fixtures.json#negative_cases/r2_signature_for_other_validator_hash",
+      "executor": "pinned Aiken tx simulate --cbor",
+      "expected_base_policy_id": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+      "expected_result": "reject at compiled target Mint[0]",
+      "historical_evidence_ref": null,
+      "id": "r2_signature_for_other_validator_hash",
+      "mutation": "sign_tuple_with_another_state_validator_hash",
+      "original_assertion": {
+        "path": "expected.every_negative_case",
+        "value": "reject"
+      },
+      "preservation_delta": null,
+      "status": "PENDING",
+      "status_reason": "not yet executed and independently reviewed",
+      "target_policy_hash": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+      "target_policy_hash_note": "accepted applied-policy hash",
+      "target_ref": "cardano/validators/f05_authority_policy.ak#f05_authority_policy.mint",
+      "verifier_property": "valid_bootstrap_proofs(initial_keys, proofs, bootstrap_message)"
+    },
+    "preserved_security_assertion": {
+      "expected_result": "reject at compiled target Mint[0]",
+      "original_assertion": {
+        "path": "expected.every_negative_case",
+        "value": "reject"
+      },
+      "target_ref": "cardano/validators/f05_authority_policy.ak#f05_authority_policy.mint",
+      "verifier_property": "valid_bootstrap_proofs(initial_keys, proofs, bootstrap_message)"
+    }
+  },
+  "credit": {
+    "ledger_admission": false,
+    "live_network": false,
+    "negative_case": null,
+    "original_policy": false
+  },
+  "decision": "R4.1 proof-domain B",
+  "entrypoint": "f05_authority_policy.f05_authority_policy.mint / Plutus V3 / Mint[0]",
+  "execution": "NOT RUN; candidate fixtures await independent exact-byte review",
+  "funding_and_conservation": {
+    "authority_output_lovelace": 10000000,
+    "change_output_lovelace": 6000000,
+    "collateral": {
+      "lovelace": 0,
+      "present": false
+    },
+    "fee_lovelace": 1000000,
+    "inputs_lovelace": 17000000,
+    "native_asset_equation": "exactly one authority NFT under this applied policy is minted and preserved in authority output",
+    "value_equation": "17000000 = 10000000 + 6000000 + 1000000"
+  },
+  "negative": {
+    "applied_policy_id": "409712d7175aa2f7d372364919d50f55a048b83c7770a646826a1df4",
+    "applied_validator_hash_retained": "b4a7b5de32fa88554a4eb44d8e8235e24e738a1c1d1fe1764a0a3e66",
+    "changed_condition": "committee signs the same tuple with alternate state-validator hash cd repeated 28 bytes",
+    "compiled_script_sha256": "8002a87a2f9b285197518bd865c7da7afae26b5362a0683d7a1c723716424dbd",
+    "mint_applied_v3_witness_identity_verified": true,
+    "named_condition_attribution": "pending; no simulator or first-failure evidence inferred",
+    "proof_message_sha256": "608b46934b1a315c3c905c96f250e3d23d75eadb483cd5b893bc6e386c47a22e",
+    "raw_inputs_sha256": "5e935c48cc9d4e82e6dbedce94b2fbd3fb427f5e187bbe67ed376671ba5e4fec",
+    "raw_outputs_sha256": "fccf32f91dd3541e33bdb9a92f61ab002bdf93ba7275a270101c70309fa044b9",
+    "signed_validator_hash": "cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd",
+    "status": "PENDING",
+    "transaction_sha256": "b1113e0ee4172a49d7ce4a3e30a31d03b017c54cadb5546b72b60ec5c054dd2d",
+    "validation": {
+      "ada_conservation": true,
+      "body_hash": "f29811ae30b910fa386cb2fa78e40b7dbc17b9abad9ac92e280795b0afb804b1",
+      "funding_signatures": 2,
+      "mint0_redeemer": {
+        "cbor_sha256": "5648b34b15f3bf1c38ff86fb092be2def7d72431b90363218a5a7efd21a92ebc",
+        "constructor_tag": 121,
+        "proof_count": 5,
+        "proof_signatures_hex": [
+          "4ded021c82fb6617a9970a2132a12f5c93af3521ad9a7230782beb237b0b93264855e82b521fad9d0906b6a5867853d0616b98cfa84fceeff514e0467bcf9106",
+          "6dcc18748c4a2401367644ab125df8b6a671ff7564fc20e263ef00430308f56f6a3690fabc3d284c99c8dffaa8fb5cd2b0cd79b1b025658b0bbb33dd3da6320e",
+          "64a125d025808131f0ba68132bf19ecb82f8a61d93c1426ca6714bddf7e4d02d7792e28d87cea146c4aa3f400daa1e3ebb74e6d406c0bef4490732be4972620a",
+          "19e3da3a657a746b728d457352d9a78763360b0c3d80113c01f95a68b2770a15a9edde66083c008ab329de6531ab0cce985b2141f89fe794b1a045ae7e3e7404",
+          "62027f2cf946f3376756d95a2c5c0e55d2650f6186b8b104f51e637d8a4d5802fca552c31499bb34758023c9dba933b2776b1ba1be8208cdc3f4da09877e9402"
+        ]
+      },
+      "native_asset_conservation": true,
+      "private_keys_persisted": false,
+      "valid_body_bound_ephemeral_signatures": true
+    }
+  },
+  "original_assertion": {
+    "id": "r2_signature_for_other_validator_hash",
+    "mutation": "sign_tuple_with_another_state_validator_hash"
+  },
+  "original_case_id_preserved": true,
+  "positive_control": {
+    "applied_policy_id": "409712d7175aa2f7d372364919d50f55a048b83c7770a646826a1df4",
+    "compiled_script_sha256": "8002a87a2f9b285197518bd865c7da7afae26b5362a0683d7a1c723716424dbd",
+    "mint_applied_v3_witness_identity_verified": true,
+    "proof_message_sha256": "4b1e030c5639db1e22d6dac2e10a7ee63313319b0121bb4c8fcc844fc9797e74",
+    "raw_inputs_sha256": "5e935c48cc9d4e82e6dbedce94b2fbd3fb427f5e187bbe67ed376671ba5e4fec",
+    "raw_outputs_sha256": "fccf32f91dd3541e33bdb9a92f61ab002bdf93ba7275a270101c70309fa044b9",
+    "signed_validator_hash": "b4a7b5de32fa88554a4eb44d8e8235e24e738a1c1d1fe1764a0a3e66",
+    "status": "PENDING",
+    "transaction_sha256": "8eb0a4f8b11c30231d1788ab3399823a542c7ae86e75bc1902aa452f527f0f4b",
+    "validation": {
+      "ada_conservation": true,
+      "body_hash": "f29811ae30b910fa386cb2fa78e40b7dbc17b9abad9ac92e280795b0afb804b1",
+      "funding_signatures": 2,
+      "mint0_redeemer": {
+        "cbor_sha256": "2beb26e6e9665bf44743c994f7c333ddd0f18f60ce5401a8915420fe3e1fb331",
+        "constructor_tag": 121,
+        "proof_count": 5,
+        "proof_signatures_hex": [
+          "31d85353713275a2935dbb584f030a1ce08b6431c395317b64e9b09b67db1b7e33b397d36bb581fc9b1d7321512a82a7d331f645f2ce6380b985d6ea56a23303",
+          "88cd27c0f70f2251900f0b91b0eba669bbd9d7c1dab6efca3e0e93719a5018f82aa3475594f027b95358534e3f749ef875ff33dc0c3f46842cc84ad3c6cfc101",
+          "ee053bf076f8e8a387d5f0776432a8b69847761c3beb49016bb12fa0ae0743d0ebccb9990a077bec8a79775225a4687d973ec35a0a0a958565012d6d5372e809",
+          "536705fdaa3b89bedae9c3c41dbccae6cd3e0488f517b497db664b93b0c1739e4a7ff81cf37043aba3488438d1b720106a7251ecceb4e0656662d0ee2f700e02",
+          "f5580997bd2c2fc7772580484d765448e1a53b4991e74be4617c23940a1fa608fb77f5148d693023f209e3408783027c67505219aa68f0f045639206b96b9a07"
+        ]
+      },
+      "native_asset_conservation": true,
+      "private_keys_persisted": false,
+      "valid_body_bound_ephemeral_signatures": true
+    }
+  },
+  "preserved_security_assertion": {
+    "expected_result": "reject at compiled target Mint[0]",
+    "original_assertion": {
+      "path": "expected.every_negative_case",
+      "value": "reject"
+    },
+    "target_ref": "cardano/validators/f05_authority_policy.ak#f05_authority_policy.mint",
+    "verifier_property": "valid_bootstrap_proofs(initial_keys, proofs, bootstrap_message)"
+  },
+  "proof_message_relation": {
+    "all_other_bytes_identical": true,
+    "bytes": 279,
+    "differing_offsets": [
+      82,
+      83,
+      84,
+      85,
+      86,
+      87,
+      88,
+      89,
+      90,
+      91,
+      92,
+      93,
+      94,
+      95,
+      96,
+      97,
+      98,
+      99,
+      100,
+      101,
+      102,
+      103,
+      104,
+      105,
+      106,
+      107,
+      108,
+      109
+    ],
+    "field_width": 28,
+    "negative_value_hex": "cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd",
+    "positive_value_hex": "b4a7b5de32fa88554a4eb44d8e8235e24e738a1c1d1fe1764a0a3e66",
+    "state_validator_hash_offset": 82
+  },
+  "schema_version": "f05-2a-proof-domain-validator-hash-r1",
+  "scope": "synthetic test-only alternate applied policy; no original-policy, full-ledger-admission, Pre-Prod, or live-network credit",
+  "shared_transaction_context": {
+    "body_identical": true,
+    "funding_witnesses_byte_identical": true,
+    "only_witness_change": "Mint[0] proof list",
+    "raw_inputs_identical": true,
+    "raw_outputs_identical": true
+  },
+  "status": "candidate-awaiting-independent-byte-review; tx-sim-not-run; no credit",
+  "toolchain": {
+    "aiken_binary_sha256": "07f3f927f1a8c71fc61273fdff850d9b98edb28dde207c8a32585991f2c88e79",
+    "aiken_version": "aiken v1.1.21+42babe5",
+    "python_version": "Python 3.12.14"
+  }
+}

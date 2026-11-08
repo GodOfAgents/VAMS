@@ -1,0 +1,9 @@
+# Independent integrated review
+
+Verdict: PASS for the narrow unconditional-success context repair and executed synthetic subcases; no new F05 ledger credit. Reviewer checked exact harness SHA-256 1db507fe0559216a28d3768deaf12e1d56ecb76f51ef8cad1c5cec1f4449550b and separate test SHA-256 a8b5ae20ed7cdb49900c23ada6fb6c79a484f8e8cb782d6cbf6d35b063e46662 against capture, independently ran offline focused tests (75/75 PASS), and checked `git diff --check` on both files (exit 0).
+
+Full harness exit 0, 26 protected inputs unchanged. The 57 case rows contain one positive accept and 56 negative rejects. Its 21 mutation rows include 55 unconditional-success subcases in exact fixture order, each child exit 0 and accepted, with seven distinct applied policy IDs/script hashes (base plus six parameter variants). For 49 ordinary cases, mint/output/purpose rebind to the base mutant; six applied cases compile matching-parameter mutants and rebuild keys/proofs. Altered proof-domain cases retain their altered signatures. Result bytes match captured stdout; no key material is retained.
+
+Remaining limits: individual compiled mutant CBOR/policy derivation and complete per-child invocation provenance were not retained. This is direct synthetic UPLC execution, not transaction ledger admission or live-network evidence. The F05 overlay remains 45/55 negative cases and 18/21 mutations pending case-level admission and owner decisions. INV-1 through INV-10 enforcement and mock/live boundaries were not changed.
+
+The protected-file inventory omits the authority bootstrap public fixture JSON, amendment/contract records and frozen transaction-simulator inputs. The reviewer measured fixture SHA-256 98a05d24d476b1aee2754768322dc4b794e5afb5fabec28ade17a2888285467d. Input provenance must be expanded before ledger admission.

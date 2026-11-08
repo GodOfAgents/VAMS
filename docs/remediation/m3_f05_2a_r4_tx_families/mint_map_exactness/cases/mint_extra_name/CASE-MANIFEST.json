@@ -1,0 +1,58 @@
+{
+  "conservation": {
+    "fee_lovelace": 1000000,
+    "input_lovelace": 17000000,
+    "lovelace_conserved": true,
+    "minted_assets": {
+      "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731.56414d532d4630352d415554482d5633": 1,
+      "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731.56414d532d4630352d4558545241": 1
+    },
+    "minted_output_assets_match": true,
+    "output_assets": {
+      "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731.56414d532d4630352d415554482d5633": 1,
+      "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731.56414d532d4630352d4558545241": 1
+    },
+    "output_lovelace": 16000000
+  },
+  "delta": "add one extra policy asset name to both mint and authority output; singleton amount and every other field remain unchanged",
+  "expected_result": "reject at compiled target Mint[0]",
+  "family_id": "mint_map_exactness",
+  "files": {
+    "raw_inputs": {
+      "path": "cases/mint_extra_name/raw_inputs.cbor",
+      "sha256": "4b20e2b2cf4bd58b1f6e385c90ffd098d583df69d95fbc7b1fcc2591da72b9fe",
+      "size_bytes": 73
+    },
+    "raw_outputs": {
+      "path": "cases/mint_extra_name/raw_outputs.cbor",
+      "sha256": "693ebb7904f54518425cc0e394b002594ebf80671711f2d3ef54953cddfa5cde",
+      "size_bytes": 79
+    },
+    "transaction": {
+      "path": "cases/mint_extra_name/transaction.cbor",
+      "sha256": "8b9ac39b039007aed1421aecd9bcb9cab617b13921a66a1ec8133c5a47a59e2f",
+      "size_bytes": 5131
+    }
+  },
+  "funding_witnesses": {
+    "count": 2,
+    "private_material_persisted": false,
+    "verified_against_serialized_body": true
+  },
+  "id": "mint_extra_name",
+  "original_registry_assertion": {
+    "path": "expected.every_negative_case",
+    "value": "reject"
+  },
+  "registry_assertion": "dict.to_pairs(assets.tokens(tx.mint, policy_id)) == [Pair(authority_asset_name, 1)]",
+  "schema_version": "f05-2a-r4-family-case-v1",
+  "script_invoked": false,
+  "simulator_result": "not run pending independent family review and coordinator freeze",
+  "status": "PENDING",
+  "target": {
+    "applied_script_hash": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+    "policy_id": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+    "purpose": "Mint[0]"
+  },
+  "transaction_body_hash_blake2b_256": "4e5b9427df052c1ae270ebc8815b66220007f4cb63934648c9cc64f65b892466"
+}

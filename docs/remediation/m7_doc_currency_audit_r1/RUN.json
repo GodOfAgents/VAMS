@@ -1,0 +1,56 @@
+{
+  "audit_result": "RESULT.json",
+  "audit_result_sha256": "a748fe1a1e1651a82c272e46f619a1dfd6e62248792a0e147e4ce91adb0732ac",
+  "checkout": {
+    "dirty_tree": true,
+    "head": "829ab544571f12efe50ecb5740f129c8acb3e16f"
+  },
+  "date": "2026-10-03",
+  "evidence_hash_count": 32,
+  "finding_count": 11,
+  "independent_review": {
+    "caveat": "STATUS and SESSION_HANDOFF evidence hashes bind pre-acceptance snapshots.",
+    "scope": "Final integrated read-only review: all 32 cited hashes, all 3 package checksums, retained pinned tool probes, 14-document manifest, and 11 findings; priority triage only.",
+    "status": "PASS"
+  },
+  "manifest_current_document_count": 14,
+  "readiness": "NOT READY",
+  "schema": "m7-document-currency-audit-run-v1",
+  "tool_probe": {
+    "aiken": {
+      "argv": [
+        "/home/GodOfAgents/vams-evidence/toolchains/aiken-1.1.21/unpacked/aiken-x86_64-unknown-linux-musl/aiken",
+        "--version"
+      ],
+      "exists": true,
+      "exit_code": 0,
+      "output": "aiken v1.1.21+42babe5",
+      "path": "/home/GodOfAgents/vams-evidence/toolchains/aiken-1.1.21/unpacked/aiken-x86_64-unknown-linux-musl/aiken",
+      "sha256": "07f3f927f1a8c71fc61273fdff850d9b98edb28dde207c8a32585991f2c88e79"
+    },
+    "forge": {
+      "argv": [
+        "command",
+        "-v",
+        "forge"
+      ],
+      "available_on_current_PATH": false,
+      "path": null
+    },
+    "python": {
+      "argv": [
+        "/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python",
+        "--version"
+      ],
+      "exists": true,
+      "exit_code": 0,
+      "output": "Python 3.12.14",
+      "path": "/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python",
+      "sha256": "aa01d96348989f33ed998b42c83e98593b41dba83914d9899730b90c36f2e5c9"
+    }
+  },
+  "verification": {
+    "all_evidence_hashes_match": true,
+    "git_diff_check_exit_code": 0
+  }
+}

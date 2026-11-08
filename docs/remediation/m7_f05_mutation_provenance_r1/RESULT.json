@@ -1,0 +1,29 @@
+{
+  "schema": "f05-mutation-provenance-record-v1",
+  "accepted_run": "rerun1",
+  "diagnostic_run": "package root; not accepted because capture script changed before rerun1",
+  "command": "cd /home/GodOfAgents/code/VAMS-testnet && bwrap --unshare-net --ro-bind / / --tmpfs /tmp --dev-bind /dev /dev --proc /proc --bind /home/GodOfAgents/code/VAMS-testnet/docs/remediation/m7_f05_mutation_provenance_r1 /home/GodOfAgents/code/VAMS-testnet/docs/remediation/m7_f05_mutation_provenance_r1 --chdir /home/GodOfAgents/code/VAMS-testnet /home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python -B docs/remediation/m7_f05_mutation_provenance_r1/capture.py --evidence /home/GodOfAgents/code/VAMS-testnet/docs/remediation/m7_f05_mutation_provenance_r1/rerun1 --aiken /home/GodOfAgents/vams-evidence/toolchains/aiken-1.1.21/unpacked/aiken-x86_64-unknown-linux-musl/aiken",
+  "outer_exit_code": 0,
+  "capture_status": "suite_returned",
+  "suite_status": "pass",
+  "protected_file_count": 46,
+  "protected_unchanged": true,
+  "coverage_assertions_pass": true,
+  "aiken_executable_sha256": "07f3f927f1a8c71fc61273fdff850d9b98edb28dde207c8a32585991f2c88e79",
+  "capture_script_sha256": "59f1554eca67f9b3d70bd2f091bd8f34447c6ae5eecc58e495d893abb8f0ce61",
+  "commands": 542,
+  "compiles": 35,
+  "evaluations": 134,
+  "cleanup": {
+    "all_signing_memfds_closed": true,
+    "signing_key_count": 5,
+    "workroots": [
+      {
+        "path": "/tmp/f05-2a-public-v3-a9ob_e_q",
+        "removed": true
+      }
+    ]
+  },
+  "evidence_class": "synthetic compiled UPLC; no ledger transaction or live-network proof",
+  "f05_accepted_ledger": "unchanged: 45/55 negatives PASS, 18/21 mutations PASS"
+}

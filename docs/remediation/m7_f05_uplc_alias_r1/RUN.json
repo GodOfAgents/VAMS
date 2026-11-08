@@ -1,0 +1,85 @@
+{
+  "schema": "m7-f05-uplc-text-alias-run-v1",
+  "commands": [
+    {
+      "command": [
+        "bwrap",
+        "--unshare-net",
+        "--ro-bind",
+        "/",
+        "/",
+        "--tmpfs",
+        "/tmp",
+        "--proc",
+        "/proc",
+        "--dev-bind",
+        "/dev",
+        "/dev",
+        "--chdir",
+        "/home/GodOfAgents/code/VAMS-testnet",
+        "--",
+        "/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python",
+        "-B",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "scripts/remediation/test_f05_2a_uplc_alias.py",
+        "scripts/remediation/test_f05_2a_harness_diagnostics.py"
+      ],
+      "exit_code": 0,
+      "passed": 24
+    },
+    {
+      "command": [
+        "/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python",
+        "-B",
+        "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m7_f05_uplc_alias_r1/capture_harness.py"
+      ],
+      "exit_code": 0,
+      "inner_harness_exit": 1,
+      "result": "HARNESS2_CAPTURE.json"
+    },
+    {
+      "command": [
+        "/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python",
+        "-B",
+        "scripts/docs/validate_docs.py"
+      ],
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python",
+        "-B",
+        "-m",
+        "unittest",
+        "scripts.docs.test_validate_docs",
+        "-v"
+      ],
+      "exit_code": 0,
+      "passed": 2
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exit_code": 0
+    }
+  ],
+  "review": {
+    "outcome": "PASS",
+    "scope": "bounded alias adapter and positive-control diagnostic only",
+    "independent_checks": [
+      "12/12 package checksums",
+      "24/24 focused offline tests",
+      "exact builtin token and byte-equality gate",
+      "source-bound harness positive exit 1 after five aliases"
+    ],
+    "limits": "No F05 case or mutation credit, validator attribution, ledger or live evidence."
+  },
+  "limitation": "Positive control reached evaluator but was rejected/crashed; no case or mutation executed; no validator-defect attribution without separate context diagnosis."
+}

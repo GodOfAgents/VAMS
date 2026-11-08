@@ -1,0 +1,445 @@
+    Compiling GodOfAgents/vams-cardano 0.1.0 (.)
+    Resolving GodOfAgents/vams-cardano
+      Fetched 2 packages in 0.09s from cache
+    Compiling aiken-lang/stdlib v2 (./build/packages/aiken-lang-stdlib)
+    Compiling aiken-lang/fuzz v2 (./build/packages/aiken-lang-fuzz)
+
+  ⚠ I came across an unused variable: output
+     ╭─[./lib/vams/governance.ak:299:30]
+ 298 │ pub fn proposal_output(outputs: List<Output>) -> Option<ProposalDatumV1> {
+ 299 │   when list.find(outputs, fn(output) { True }) is {
+     ·                              ───┬──
+     ·                                 ╰── unused identifier
+ 300 │     Some(output) ->
+     ╰────
+  help: No big deal, but you might want to remove it or use a discard _output
+        to get rid of that warning.
+        
+        You should also know that, unlike in typical imperative languages,
+        unused let-bindings are fully_ignored in Aiken.
+        They will not produce any side-effect (such as error calls). Programs
+        with or without unused variables are semantically equivalent.
+        
+        If you do want to enforce some side-effects, use expect with a discard
+        _output instead of let.
+        
+
+
+  ⚠ I discovered an unused imported value: ProposalPassed
+    ╭─[./lib/vams/governance.ak:13:20]
+ 12 │   AuthorityDatumV1, GovernanceConfigV1, IntentDatumV1, ProposalCancelled,
+ 13 │   ProposalDatumV1, ProposalPassed, ProposalPending, ProposalRejected,
+    ·                    ───────┬──────
+    ·                           ╰── unused import
+ 14 │   ProposalStatusV1, VoteLockRecordV1,
+    ╰────
+  help: No big deal, but you might want to remove it to get rid of that
+        warning.
+
+
+  ⚠ I discovered an unused imported value: VerificationKey
+   ╭─[./lib/vams/governance.ak:6:30]
+ 5 │ use aiken/primitive/bytearray
+ 6 │ use cardano/address.{Script, VerificationKey}
+   ·                              ───────┬───────
+   ·                                     ╰── unused import
+ 7 │ use cardano/assets
+   ╰────
+  help: No big deal, but you might want to remove it to get rid of that
+        warning.
+
+
+  ⚠ I discovered an unused imported value: ProposalRejected
+    ╭─[./lib/vams/governance.ak:13:53]
+ 12 │   AuthorityDatumV1, GovernanceConfigV1, IntentDatumV1, ProposalCancelled,
+ 13 │   ProposalDatumV1, ProposalPassed, ProposalPending, ProposalRejected,
+    ·                                                     ────────┬───────
+    ·                                                             ╰── unused import
+ 14 │   ProposalStatusV1, VoteLockRecordV1,
+    ╰────
+  help: No big deal, but you might want to remove it to get rid of that
+        warning.
+
+
+  ⚠ I discovered an unused imported value: ProposalCancelled
+    ╭─[./lib/vams/governance.ak:12:56]
+ 11 │ use vams/types.{
+ 12 │   AuthorityDatumV1, GovernanceConfigV1, IntentDatumV1, ProposalCancelled,
+    ·                                                        ────────┬────────
+    ·                                                                ╰── unused import
+ 13 │   ProposalDatumV1, ProposalPassed, ProposalPending, ProposalRejected,
+    ╰────
+  help: No big deal, but you might want to remove it to get rid of that
+        warning.
+
+
+  ⚠ I discovered an unused imported value: ProposalStatusV1
+    ╭─[./lib/vams/governance.ak:14:3]
+ 13 │   ProposalDatumV1, ProposalPassed, ProposalPending, ProposalRejected,
+ 14 │   ProposalStatusV1, VoteLockRecordV1,
+    ·   ────────┬───────
+    ·           ╰── unused import
+ 15 │ }
+    ╰────
+  help: No big deal, but you might want to remove it to get rid of that
+        warning.
+
+
+  ⚠ I discovered an unused imported value: AuthorityDatumV1
+    ╭─[./lib/vams/governance.ak:12:3]
+ 11 │ use vams/types.{
+ 12 │   AuthorityDatumV1, GovernanceConfigV1, IntentDatumV1, ProposalCancelled,
+    ·   ────────┬───────
+    ·           ╰── unused import
+ 13 │   ProposalDatumV1, ProposalPassed, ProposalPending, ProposalRejected,
+    ╰────
+  help: No big deal, but you might want to remove it to get rid of that
+        warning.
+
+
+  ⚠ I discovered an unused imported value: ProposalPending
+    ╭─[./lib/vams/governance.ak:13:36]
+ 12 │   AuthorityDatumV1, GovernanceConfigV1, IntentDatumV1, ProposalCancelled,
+ 13 │   ProposalDatumV1, ProposalPassed, ProposalPending, ProposalRejected,
+    ·                                    ───────┬───────
+    ·                                           ╰── unused import
+ 14 │   ProposalStatusV1, VoteLockRecordV1,
+    ╰────
+  help: No big deal, but you might want to remove it to get rid of that
+        warning.
+
+
+  ⚠ I discovered an unused imported module: dict
+   ╭─[./lib/vams/governance.ak:1:1]
+ 1 │ use aiken/collection/dict
+   · ────────────┬────────────
+   ·             ╰── unused module
+ 2 │ use aiken/collection/list
+   ╰────
+  help: No big deal, but you might want to remove it to get rid of that
+        warning.
+
+
+  ⚠ I discovered an unused imported value: VerificationKey
+   ╭─[./validators/governor.ak:3:30]
+ 2 │ use aiken/interval.{Finite}
+ 3 │ use cardano/address.{Script, VerificationKey}
+   ·                              ───────┬───────
+   ·                                     ╰── unused import
+ 4 │ use cardano/assets
+   ╰────
+  help: No big deal, but you might want to remove it to get rid of that
+        warning.
+
+
+  ⚠ I discovered an unused imported value: Finite
+   ╭─[./validators/governor.ak:2:21]
+ 1 │ use aiken/collection/list
+ 2 │ use aiken/interval.{Finite}
+   ·                     ───┬──
+   ·                        ╰── unused import
+ 3 │ use cardano/address.{Script, VerificationKey}
+   ╰────
+  help: No big deal, but you might want to remove it to get rid of that
+        warning.
+
+
+  ⚠ I discovered an unused imported value: max_voting_duration_ms
+   ╭─[./validators/governor.ak:8:15]
+ 7 │   bounded_tx, config_valid, finite_after, finite_before, finite_interval, isqrt,
+ 8 │   max_voters, max_voting_duration_ms, proposal_immutable, signer_threshold,
+   ·               ───────────┬──────────
+   ·                          ╰── unused import
+ 9 │   unique_bytes, valid_domain, valid_hash, valid_lock, valid_vkh,
+   ╰────
+  help: No big deal, but you might want to remove it to get rid of that
+        warning.
+
+
+  ⚠ I discovered an unused imported value: signer_threshold
+   ╭─[./validators/governor.ak:8:59]
+ 7 │   bounded_tx, config_valid, finite_after, finite_before, finite_interval, isqrt,
+ 8 │   max_voters, max_voting_duration_ms, proposal_immutable, signer_threshold,
+   ·                                                           ────────┬───────
+   ·                                                                   ╰── unused import
+ 9 │   unique_bytes, valid_domain, valid_hash, valid_lock, valid_vkh,
+   ╰────
+  help: No big deal, but you might want to remove it to get rid of that
+        warning.
+
+
+  ⚠ I found a when expression with a single clause.
+    ╭─[./validators/f05_authority_policy.ak:32:7]
+ 31 │     when redeemer is {
+ 32 │       BootstrapAuthority { proofs } -> validate_bootstrap(
+    ·       ──────────────┬──────────────
+    ·                     ╰── use let
+ 33 │         genesis_ref,
+    ╰────
+  help: Prefer using a let binding like so...
+        
+        ╰─▶ let BootstrapAuthority { proofs } = redeemer
+
+
+  ⚠ I found a when expression with a single clause.
+    ╭─[./validators/insurance_fund.ak:71:7]
+ 70 │     when redeemer is {
+ 71 │       InitializeFund ->
+    ·       ───────┬──────
+    ·              ╰── use let
+ 72 │         validate_genesis(
+    ╰────
+  help: Prefer using a let binding like so...
+        
+        ╰─▶ let InitializeFund = redeemer
+
+
+  ⚠ I came across an unused variable: after
+     ╭─[./validators/insurance_fund.ak:895:3]
+ 894 │   before: FundDatumV2,
+ 895 │   after: FundDatumV2,
+     ·   ─────────┬────────
+     ·            ╰── unused identifier
+ 896 │   redeemer: InsuranceFundRedeemer,
+     ╰────
+  help: No big deal, but you might want to remove it or use a discard _after
+        to get rid of that warning.
+        
+        You should also know that, unlike in typical imperative languages,
+        unused let-bindings are fully_ignored in Aiken.
+        They will not produce any side-effect (such as error calls). Programs
+        with or without unused variables are semantically equivalent.
+        
+        If you do want to enforce some side-effects, use expect with a discard
+        _after instead of let.
+        
+
+
+  ⚠ I came across an unused variable: input
+    ╭─[./validators/timelock.ak:66:32]
+ 65 │ fn find_authority_config(tx: Transaction) -> Option<GovernanceConfigV1> {
+ 66 │   when list.find(tx.inputs, fn(input) { True }) is {
+    ·                                ──┬──
+    ·                                  ╰── unused identifier
+ 67 │     Some(input) ->
+    ╰────
+  help: No big deal, but you might want to remove it or use a discard _input
+        to get rid of that warning.
+        
+        You should also know that, unlike in typical imperative languages,
+        unused let-bindings are fully_ignored in Aiken.
+        They will not produce any side-effect (such as error calls). Programs
+        with or without unused variables are semantically equivalent.
+        
+        If you do want to enforce some side-effects, use expect with a discard
+        _input instead of let.
+        
+
+
+  ⚠ I discovered an unused imported value: Finite
+   ╭─[./validators/timelock.ak:2:21]
+ 1 │ use aiken/collection/list
+ 2 │ use aiken/interval.{Finite}
+   ·                     ───┬──
+   ·                        ╰── unused import
+ 3 │ use cardano/transaction.{InlineDatum, OutputReference, Transaction}
+   ╰────
+  help: No big deal, but you might want to remove it to get rid of that
+        warning.
+
+
+  ⚠ I discovered an unused imported value: intent_immutable
+   ╭─[./validators/timelock.ak:5:46]
+ 4 │ use vams/governance.{
+ 5 │   bounded_tx, finite_after, finite_interval, intent_immutable,
+   ·                                              ────────┬───────
+   ·                                                      ╰── unused import
+ 6 │   max_intent_lifetime_ms, normal_delay_ms, signer_threshold, valid_domain,
+   ╰────
+  help: No big deal, but you might want to remove it to get rid of that
+        warning.
+
+
+  ⚠ I came across an unused variable: output
+     ╭─[./validators/governance_policies.ak:246:33]
+ 245 │ fn find_proposal(tx: Transaction) -> Option<ProposalDatumV1> {
+ 246 │   when list.find(tx.outputs, fn(output) { True }) is {
+     ·                                 ───┬──
+     ·                                    ╰── unused identifier
+ 247 │     Some(output) ->
+     ╰────
+  help: No big deal, but you might want to remove it or use a discard _output
+        to get rid of that warning.
+        
+        You should also know that, unlike in typical imperative languages,
+        unused let-bindings are fully_ignored in Aiken.
+        They will not produce any side-effect (such as error calls). Programs
+        with or without unused variables are semantically equivalent.
+        
+        If you do want to enforce some side-effects, use expect with a discard
+        _output instead of let.
+        
+
+
+  ⚠ I came across an unused variable: output
+     ╭─[./validators/governance_policies.ak:260:33]
+ 259 │ fn find_intent(tx: Transaction) -> Option<IntentDatumV1> {
+ 260 │   when list.find(tx.outputs, fn(output) { True }) is {
+     ·                                 ───┬──
+     ·                                    ╰── unused identifier
+ 261 │     Some(output) ->
+     ╰────
+  help: No big deal, but you might want to remove it or use a discard _output
+        to get rid of that warning.
+        
+        You should also know that, unlike in typical imperative languages,
+        unused let-bindings are fully_ignored in Aiken.
+        They will not produce any side-effect (such as error calls). Programs
+        with or without unused variables are semantically equivalent.
+        
+        If you do want to enforce some side-effects, use expect with a discard
+        _output instead of let.
+        
+
+
+  ⚠ I discovered an unused imported value: TimelockRedeemer
+    ╭─[./validators/governance_policies.ak:15:27]
+ 14 │   Genesis, GovernanceConfigV1, GovernorRedeemer, IntentDatumV1, ProposalDatumV1,
+ 15 │   ProposalPending, Queue, TimelockRedeemer, Vote, VoteLockRecordV1,
+    ·                           ────────┬───────
+    ·                                   ╰── unused import
+ 16 │ }
+    ╰────
+  help: No big deal, but you might want to remove it to get rid of that
+        warning.
+
+
+  ⚠ I discovered an unused imported value: unique_bytes
+    ╭─[./validators/governance_policies.ak:9:63]
+  8 │   authority_asset_name, bounded_tx, config_valid, finite_interval,
+  9 │   intent_asset_name, proposal_asset_name, receipt_asset_name, unique_bytes,
+    ·                                                               ──────┬─────
+    ·                                                                     ╰── unused import
+ 10 │   valid_domain, valid_hash, valid_lock, valid_vkh,
+    ╰────
+  help: No big deal, but you might want to remove it to get rid of that
+        warning.
+
+
+  ⚠ I discovered an unused imported value: valid_lock
+    ╭─[./validators/governance_policies.ak:10:29]
+  9 │   intent_asset_name, proposal_asset_name, receipt_asset_name, unique_bytes,
+ 10 │   valid_domain, valid_hash, valid_lock, valid_vkh,
+    ·                             ─────┬────
+    ·                                  ╰── unused import
+ 11 │ }
+    ╰────
+  help: No big deal, but you might want to remove it to get rid of that
+        warning.
+
+
+  ⚠ I found an unused private function: find_intent_or_false
+     ╭─[./validators/governance_policies.ak:281:1]
+ 280 │ 
+ 281 │ fn find_intent_or_false(tx: Transaction) -> Bool {
+     · ────────────────────────┬───────────────────────
+     ·                         ╰── unused (private) function
+ 282 │   find_intent(tx) != None
+     ╰────
+  help: Perhaps your forgot to make it public using the pub keyword?
+        Otherwise, you might want to get rid of it altogether.
+
+
+  ⚠ I came across an unused variable: bootstrap_ref
+    ╭─[./validators/agent_nft.ak:21:21]
+ 20 │ 
+ 21 │ validator agent_nft(bootstrap_ref: OutputReference) {
+    ·                     ───────────────┬──────────────
+    ·                                    ╰── unused identifier
+ 22 │   mint(_redeemer: AgentNftRedeemer, _policy_id: PolicyId, _tx: Transaction) { False }
+    ╰────
+  help: No big deal, but you might want to remove it or use a discard
+        _bootstrap_ref to get rid of that warning.
+        
+        You should also know that, unlike in typical imperative languages,
+        unused let-bindings are fully_ignored in Aiken.
+        They will not produce any side-effect (such as error calls). Programs
+        with or without unused variables are semantically equivalent.
+        
+        If you do want to enforce some side-effects, use expect with a discard
+        _bootstrap_ref instead of let.
+        
+
+
+  ⚠ I discovered an unused imported value: BurnIdentity
+    ╭─[./validators/agent_nft.ak:13:35]
+ 12 │ use cardano/transaction.{OutputReference, Transaction}
+ 13 │ use vams/types.{AgentNftRedeemer, BurnIdentity, MintIdentity}
+    ·                                   ──────┬─────
+    ·                                         ╰── unused import
+ 14 │ 
+    ╰────
+  help: No big deal, but you might want to remove it to get rid of that
+        warning.
+
+
+  ⚠ I discovered an unused imported value: MintIdentity
+    ╭─[./validators/agent_nft.ak:13:49]
+ 12 │ use cardano/transaction.{OutputReference, Transaction}
+ 13 │ use vams/types.{AgentNftRedeemer, BurnIdentity, MintIdentity}
+    ·                                                 ──────┬─────
+    ·                                                       ╰── unused import
+ 14 │ 
+    ╰────
+  help: No big deal, but you might want to remove it to get rid of that
+        warning.
+
+
+  ⚠ I discovered an unused imported value: tokens
+    ╭─[./validators/agent_nft.ak:11:31]
+ 10 │ use aiken/primitive/bytearray
+ 11 │ use cardano/assets.{PolicyId, tokens}
+    ·                               ───┬──
+    ·                                  ╰── unused import
+ 12 │ use cardano/transaction.{OutputReference, Transaction}
+    ╰────
+  help: No big deal, but you might want to remove it to get rid of that
+        warning.
+
+
+  ⚠ I found an unused private function: valid_did
+    ╭─[./validators/agent_nft.ak:54:1]
+ 53 │ 
+ 54 │ fn valid_did(did: ByteArray) -> Bool {
+    · ──────────────────┬─────────────────
+    ·                   ╰── unused (private) function
+ 55 │   bytearray.length(did) >= min_did_length && bytearray.length(did) <= max_did_length
+    ╰────
+  help: Perhaps your forgot to make it public using the pub keyword?
+        Otherwise, you might want to get rid of it altogether.
+
+
+  ⚠ I discovered an unused imported module: dict
+   ╭─[./validators/agent_nft.ak:7:1]
+ 6 │ 
+ 7 │ use aiken/collection/dict
+   · ────────────┬────────────
+   ·             ╰── unused module
+ 8 │ use aiken/collection/list
+   ╰────
+  help: No big deal, but you might want to remove it to get rid of that
+        warning.
+
+
+  ⚠ I discovered an unused imported module: list
+   ╭─[./validators/agent_nft.ak:8:1]
+ 7 │ use aiken/collection/dict
+ 8 │ use aiken/collection/list
+   · ────────────┬────────────
+   ·             ╰── unused module
+ 9 │ use aiken/crypto.{blake2b_256}
+   ╰────
+  help: No big deal, but you might want to remove it to get rid of that
+        warning.
+
+      Summary 0 errors, 32 warnings

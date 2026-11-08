@@ -4,12 +4,23 @@ import json
 import shutil
 import subprocess
 import tempfile
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, Mapping
+
+from neuron.runtime_safety import (
+    ImmutableRuntimeConfiguration,
+    LiveModeSafetyError,
+    RuntimePolicy,
+    load_runtime_policy,
+    resolve_component_mock_mode,
+)
 
 class AkashOrchestratorError(Exception):
     pass
 
-class AkashOrchestratorSDK:
+AKASH_MOCK_VARIABLE = "AKASH_MOCK_MODE"
+
+
+class AkashOrchestratorSDK(ImmutableRuntimeConfiguration):
     """
     VAMS SDK Client for Akash Network (Supercloud Compute).
 
@@ -19,16 +30,34 @@ class AkashOrchestratorSDK:
     and establishes the cryptographic lease for the Docker container natively.
     """
 
-    def __init__(self, key_name: str = "vams-controller", rpc_node: str = None, timeout: int = 30):
-        self.rpc_node = rpc_node or os.getenv("AKASH_NODE", "tcp://rpc.akashnet.net:26657")
+    _immutable_runtime_fields = frozenset(
+        {"rpc_node", "key_name", "timeout", "mock_mode", "runtime_policy", "_cli_path"}
+    )
+
+    def __init__(self, key_name: str = "vams-controller", rpc_node: str = None, timeout: int = 30, mock_mode: Optional[bool] = None, *, environ: Optional[Mapping[str, str]] = None, policy: Optional[RuntimePolicy] = None):
+        source = os.environ if environ is None else environ
+        self.runtime_policy = policy or load_runtime_policy(source)
+        self.mock_mode = resolve_component_mock_mode(
+            "AkashOrchestratorSDK",
+            AKASH_MOCK_VARIABLE,
+            mock_mode,
+            policy=self.runtime_policy,
+            environ=source,
+        )
+        if self.runtime_policy.is_live:
+            raise LiveModeSafetyError(
+                "AkashOrchestratorSDK live execution is disabled until deployment "
+                "broadcast, lease selection, confirmation, and recovery are implemented"
+            )
+        self.rpc_node = rpc_node or source.get("AKASH_NODE", "tcp://rpc.akashnet.net:26657")
         self.key_name = key_name
         self.timeout = timeout
-        self.mock_mode = os.getenv("AKASH_MOCK_MODE", "true").lower() == "true"
         self._cli_path: Optional[str] = None
         
         # We ensure the akash binary / provider-services is available unless mocked
         if not self.mock_mode:
             self._verify_cli()
+        self._freeze_runtime_configuration()
 
     def _verify_cli(self):
         """Resolve and verify the Akash CLI using an absolute executable path."""
@@ -99,11 +128,13 @@ deployment:
             time.sleep(1.2)
             mock_dseq = str(int(time.time()))
             return {
-                "status": "leased",
-                "dseq": mock_dseq,
-                "provider": "akash1mockprovideraddresshx8",
+                "status": "simulated",
+                "dseq": f"simulated:{mock_dseq}",
+                "provider": "simulated:akash-provider",
                 "price": "50 uakt/block",
-                "logs": "Mock container started natively deployed via Python Orchestrator."
+                "logs": "Simulated container result.",
+                "simulated": True,
+                "evidence_classification": "non-authoritative",
             }
 
         sdl_content = self._generate_sdl(docker_image, cpu, memory_mb, storage_mb)
@@ -151,7 +182,9 @@ deployment:
                 os.remove(sdl_path)
 
 if __name__ == "__main__":
-    os.environ["AKASH_MOCK_MODE"] = "true"
-    sdk = AkashOrchestratorSDK()
+    policy = load_runtime_policy()
+    if not policy.is_demo:
+        raise LiveModeSafetyError("Akash demo requires explicit VAMS_ENV=demo")
+    sdk = AkashOrchestratorSDK(mock_mode=True, policy=policy)
     res = sdk.deploy_container("vams/neuron-node:latest", cpu=1.0, memory_mb=1024, storage_mb=2048)
     print(f"Akash Deployment Result: {json.dumps(res, indent=2)}")

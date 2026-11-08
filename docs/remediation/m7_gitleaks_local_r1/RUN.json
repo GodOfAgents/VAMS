@@ -1,0 +1,82 @@
+{
+  "evidence_id": "m7_gitleaks_local_r1",
+  "executions": [
+    {
+      "command": "GITLEAKS_BIN=/home/GodOfAgents/vams-evidence/toolchains/gitleaks-8.30.1/gitleaks /home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python -B scripts/security/gitleaks_allowlist_regression.py",
+      "exit_code": 0,
+      "name": "allowlist regression",
+      "output": "Gitleaks allowlist regression passed: public expressions allowed; four secret categories rejected."
+    },
+    {
+      "artifact_note": "CURRENT-TREE.json is not emitted on this failure path.",
+      "command": "/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python -B scripts/security/m0_4_vendor_baseline_gate.py --repo /home/GodOfAgents/code/VAMS-testnet --gitleaks /home/GodOfAgents/vams-evidence/toolchains/gitleaks-8.30.1/gitleaks --output docs/remediation/m7_gitleaks_local_r1/CURRENT-TREE.json",
+      "exit_code": 1,
+      "name": "current-tree vendor-baseline gate",
+      "output": "m0.4_gate=fail reason=first-party finding detected"
+    },
+    {
+      "command": "bwrap --unshare-net --ro-bind / / --tmpfs /tmp --dev-bind /dev /dev --proc /proc --bind /home/GodOfAgents/code/VAMS-testnet/docs/remediation/m7_gitleaks_local_r1 /home/GodOfAgents/code/VAMS-testnet/docs/remediation/m7_gitleaks_local_r1 --chdir /home/GodOfAgents/code/VAMS-testnet /home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python -B /home/GodOfAgents/code/VAMS-testnet/docs/remediation/m7_gitleaks_local_r1/diagnose.py",
+      "exit_code": 0,
+      "name": "sanitized current-tree diagnostic",
+      "result": "CURRENT-TREE-SANITIZED.json",
+      "result_fields": {
+        "distinct_first_party_files": 13,
+        "first_party_generic_api_key_findings": 88,
+        "gate_preflight": "passed",
+        "pinned_scanner": "8.30.1",
+        "raw_report_retained": false,
+        "redaction": 100,
+        "report_entries": 567,
+        "report_sha256": "6970e654612674f6da2bc194bd422155a4afe190118edd4d448d0d04a58cf7b2",
+        "scanner_exit_code": 1,
+        "unknown_ownership": 0,
+        "vendor_identities": 479
+      },
+      "result_sha256": "9834cf8e16c8f39e66b0f4aae967a9d4d1109ab0d9ecf41a526ea280df0166d7",
+      "script": "diagnose.py",
+      "script_sha256": "d9060142b0e76b0576b22f009ef79b0a14afd5162b9e9d6f861eaece2074ab17"
+    },
+    {
+      "command": "bwrap --unshare-net --ro-bind / / --tmpfs /tmp --dev-bind /dev /dev --proc /proc --bind /home/GodOfAgents/code/VAMS-testnet/docs/remediation/m7_gitleaks_local_r1 /home/GodOfAgents/code/VAMS-testnet/docs/remediation/m7_gitleaks_local_r1 --chdir /home/GodOfAgents/code/VAMS-testnet /home/GodOfAgents/vams-evidence/toolchains/gitleaks-8.30.1/gitleaks git --log-opts=\"--all -m\" . --config .gitleaks.toml --redact=100 --report-format json --report-path docs/remediation/m7_gitleaks_local_r1/history-report.json --exit-code 1 --no-banner",
+      "exit_code": 0,
+      "name": "complete local Git history",
+      "report": "history-report.json",
+      "report_entries": 0,
+      "stderr": "HISTORY.stderr",
+      "stderr_sha256": "f04ab0a53c10aeb6489c88a2ee4a07e9957c6702e450a0497064f636859c606c",
+      "stderr_summary": "76 commits scanned; approximately 25,035,910 bytes; no leaks found."
+    }
+  ],
+  "final_recheck": {
+    "command": "/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python -B scripts/security/m0_4_vendor_baseline_gate.py --repo /home/GodOfAgents/code/VAMS-testnet --gitleaks /home/GodOfAgents/vams-evidence/toolchains/gitleaks-8.30.1/gitleaks --output docs/remediation/m7_gitleaks_local_r1/CURRENT-TREE.json",
+    "exit_code": 1,
+    "output": "m0.4_gate=fail reason=first-party finding detected"
+  },
+  "inputs": {
+    "allowlist_regression": {
+      "path": "scripts/security/gitleaks_allowlist_regression.py",
+      "sha256": "57b44f38cd95e097f9d16572beb02fccd1bf83b9685dd8f9b1d95771b11547ae"
+    },
+    "config": {
+      "path": ".gitleaks.toml",
+      "sha256": "40ddce18233e73c94668ddd47a5abe2a6afa0e9bc4602657dc34ec2b78606ecd"
+    },
+    "expected_baseline_sha256": "3a4526acf33ab4adeff87da1553cb5e4493799c3696664c2d60a126a9aa086f4",
+    "vendor_baseline": {
+      "path": "scripts/security/m0_4_vendor_baseline_gate.py",
+      "sha256": "6c4978b9abfec8635abd1897f5e8d873e313c022af4e939a22ec592998e03623"
+    },
+    "workflow": {
+      "path": ".github/workflows/security-gates.yml",
+      "sha256": "baf53503673b70c5185f654f8f694f1feaf98af68ee56e29c83c01ee0cf0593c"
+    }
+  },
+  "interpretation": "The local-history scan passed for available refs. Current-tree gate fails due first-party findings classified as generic-api-key. No findings were adjudicated or remediated, so this security gate remains open.",
+  "pinned_tool": {
+    "path": "/home/GodOfAgents/vams-evidence/toolchains/gitleaks-8.30.1/gitleaks",
+    "sha256": "88f91962aa2f93ac6ab281d553b9e125f5197bbbce38f9f2437f7299c32e5509",
+    "version": "8.30.1"
+  },
+  "recorded_at_utc": "2026-10-03T04:15:21Z",
+  "scope": "Read-only local GitLeaks execution and fully redacted current-tree diagnostic. No fetch or external network."
+}

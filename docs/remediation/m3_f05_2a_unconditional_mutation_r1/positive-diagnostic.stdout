@@ -1,0 +1,12 @@
+{
+  "aiken_version": "aiken v1.1.21+42babe5",
+  "compiled_policy_id": "d8c46cdf5fcc1cf354455fcdfd79c1a9f958600d0128809d73ff50d5",
+  "positive": {
+    "accepted": false,
+    "exit": 101,
+    "cpu": null,
+    "mem": null,
+    "context_cbor_bytes": 1755,
+    "diagnostic": "    |    Operating System: linux |    Architecture:     x86_64 |    Version:          v1.1.21+42babe5 |     |    \u001b[35mcrates/uplc/src/parser.rs:110:57 |     |        \u001b[39mcalled `Result::unwrap()` on an `Err` value: \"Default Function not found - verifySignature\""
+  }
+}

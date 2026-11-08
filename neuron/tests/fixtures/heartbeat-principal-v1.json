@@ -1,0 +1,27 @@
+{
+  "schema": "vams.gateway.heartbeat-principal.data-vector.v1",
+  "description": "Synthetic unsigned serialization vector only; hashes may be guessable/linkable and keys are public test bytes; nothing confers authority or anonymity.",
+  "domain_ascii": "VAMS:GATEWAY:HEARTBEAT-PRINCIPAL:v1",
+  "node_id": "fixture-node-A",
+  "field_count": 18,
+  "fields": [
+    {"name": "principal_id", "id": 1, "encoding": "hex", "value": "5d3ece6d8181af33a7e09b213d73e8fce828f1fc2ea2a4291b89a1699a02e918"},
+    {"name": "node_id_commitment", "id": 2, "encoding": "hex", "value": "79121d7d912632aaf935e2b08d31942fa6c2242e3d17dd751612188321f6d26d"},
+    {"name": "m2_signer_did", "id": 3, "encoding": "did_key", "byte": "11", "public_key_bytes": 64},
+    {"name": "m2_signer_public_key", "id": 4, "encoding": "repeat_byte", "byte": "11", "length": 64},
+    {"name": "certificate_fingerprint", "id": 5, "encoding": "repeat_byte", "byte": "03", "length": 32},
+    {"name": "body_public_key", "id": 6, "encoding": "repeat_byte", "byte": "04", "length": 64},
+    {"name": "host_domain", "id": 7, "encoding": "repeat_byte", "byte": "05", "length": 32},
+    {"name": "service_domain", "id": 8, "encoding": "repeat_byte", "byte": "06", "length": 32},
+    {"name": "audience", "id": 9, "encoding": "ascii", "value": "gateway.testnet"},
+    {"name": "method", "id": 10, "encoding": "ascii", "value": "POST"},
+    {"name": "path", "id": 11, "encoding": "ascii", "value": "/heartbeat"},
+    {"name": "query", "id": 12, "encoding": "hex", "value": ""},
+    {"name": "policy_root", "id": 13, "encoding": "repeat_byte", "byte": "07", "length": 32},
+    {"name": "policy_version", "id": 14, "encoding": "uint64", "value": 3},
+    {"name": "authority_epoch", "id": 15, "encoding": "uint64", "value": 11},
+    {"name": "principal_generation", "id": 16, "encoding": "uint64", "value": 2},
+    {"name": "not_before", "id": 17, "encoding": "uint64", "value": 1700000000},
+    {"name": "expires_at", "id": 18, "encoding": "uint64", "value": 1700000300}
+  ]
+}

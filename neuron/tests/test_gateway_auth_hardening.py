@@ -1,6 +1,5 @@
 import os
 import sys
-import time
 from unittest.mock import patch
 
 import pytest
@@ -11,63 +10,55 @@ root_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__fil
 sys.path.insert(0, root_dir)
 
 os.environ.setdefault("GATEWAY_ADMIN_PASSWORD", "SecureTestPassword123!")
+os.environ["VAMS_ENV"] = "test"
 
 from gateway import server
-from neuron.secp256k1 import generate_private_key, public_key_bytes, sign_message
-
-
-def _signed_admin_headers(method: str, path: str):
-    signing_key = generate_private_key()
-    did = "did:key:" + public_key_bytes(signing_key).hex()
-    timestamp = str(time.time())
-    message = f"VAMS_ADMIN_AUTH:{method}:{path}:{timestamp}"
-    return {
-        "X-VAMS-DID": did,
-        "X-VAMS-Signature": sign_message(signing_key, message.encode()).hex(),
-        "X-VAMS-Timestamp": timestamp,
-    }, did
+from neuron.tests.m2_gateway_helpers import (
+    AUDIENCE,
+    SIGNER,
+    compact_json,
+    signed_headers,
+)
 
 
 def test_did_signature_is_single_use(monkeypatch):
-    monkeypatch.delenv("VAMS_ENV", raising=False)
-    server.used_did_signatures.clear()
-    headers, did = _signed_admin_headers("POST", "/compose")
-    monkeypatch.setenv("GATEWAY_ADMIN_DID", did)
+    monkeypatch.setenv("VAMS_ENV", "test")
+    monkeypatch.setenv("GATEWAY_ADMIN_DID", SIGNER)
+    monkeypatch.setenv("GATEWAY_AUTH_AUDIENCE", AUDIENCE)
+    headers = signed_headers("GET", "/nodes")
 
-    assert server.verify_did_signature(
-        headers["X-VAMS-DID"],
-        headers["X-VAMS-Signature"],
-        headers["X-VAMS-Timestamp"],
-        "POST",
-        "/compose",
-    ) is True
-    assert server.verify_did_signature(
-        headers["X-VAMS-DID"],
-        headers["X-VAMS-Signature"],
-        headers["X-VAMS-Timestamp"],
-        "POST",
-        "/compose",
-    ) is False
+    with TestClient(server.app) as client:
+        assert client.get("/nodes", headers=headers).status_code == 200
+        replay = client.get("/nodes", headers=headers)
+
+    assert replay.status_code == 401
+    assert replay.json()["detail"] == "gateway_request_denied:duplicate_nonce"
 
 
-def test_live_gateway_rejects_basic_auth(monkeypatch):
+def test_live_gateway_rejects_basic_auth(monkeypatch, tmp_path):
     monkeypatch.setenv("VAMS_ENV", "testnet")
-    monkeypatch.setenv("GATEWAY_ADMIN_DID", "did:key:" + "00" * 64)
-    monkeypatch.setenv("GATEWAY_HEARTBEAT_CERT_FINGERPRINTS", "aa")
-    client = TestClient(server.app)
-
-    response = client.post(
-        "/compose",
-        json={"blueprint_name": "ServiceBlock_OMS_v1"},
-        auth=("admin", "SecureTestPassword123!"),
+    monkeypatch.setenv("GATEWAY_ADMIN_DID", SIGNER)
+    monkeypatch.setenv("GATEWAY_AUTH_AUDIENCE", AUDIENCE)
+    monkeypatch.setenv(
+        "GATEWAY_AUTH_REPLAY_DB", str(tmp_path / "basic-auth.sqlite3")
     )
+    monkeypatch.setenv("GATEWAY_ALLOWED_ORIGINS", "https://gateway.example")
+    monkeypatch.setenv("GATEWAY_HEARTBEAT_CERT_FINGERPRINTS", "aa")
+    with TestClient(server.app, client=("127.0.0.1", 50000)) as client:
+        response = client.post(
+            "/compose",
+            json={"blueprint_name": "ServiceBlock_OMS_v1"},
+            headers={"X-VAMS-Ingress-Version": "envoy-1.39.1-v1"},
+            auth=("admin", "SecureTestPassword123!"),
+        )
 
     assert response.status_code == 401
-    assert "DID authentication is required" in response.json()["detail"]
+    assert response.json()["detail"] == "gateway_request_denied:missing_version"
 
 
 def test_live_gateway_startup_requires_admin_did(monkeypatch):
     monkeypatch.setenv("VAMS_ENV", "testnet")
+    monkeypatch.setenv("GATEWAY_ALLOWED_ORIGINS", "https://gateway.example")
     monkeypatch.delenv("GATEWAY_ADMIN_DID", raising=False)
     monkeypatch.setenv("GATEWAY_HEARTBEAT_CERT_FINGERPRINTS", "aa")
 
@@ -78,6 +69,7 @@ def test_live_gateway_startup_requires_admin_did(monkeypatch):
 
 def test_live_gateway_startup_requires_heartbeat_cert_allowlist(monkeypatch):
     monkeypatch.setenv("VAMS_ENV", "testnet")
+    monkeypatch.setenv("GATEWAY_ALLOWED_ORIGINS", "https://gateway.example")
     monkeypatch.setenv("GATEWAY_ADMIN_DID", "did:key:" + "00" * 64)
     monkeypatch.delenv("GATEWAY_HEARTBEAT_CERT_FINGERPRINTS", raising=False)
 
@@ -155,13 +147,25 @@ def test_live_gateway_main_binds_loopback(monkeypatch):
     assert run.call_args.kwargs["host"] == "127.0.0.1"
 
 
-def test_live_heartbeat_requires_verified_client_cert(monkeypatch):
+def test_live_heartbeat_requires_verified_client_cert(monkeypatch, tmp_path):
     monkeypatch.setenv("VAMS_ENV", "testnet")
-    monkeypatch.setenv("GATEWAY_ADMIN_DID", "did:key:" + "00" * 64)
+    monkeypatch.setenv("GATEWAY_ADMIN_DID", SIGNER)
+    monkeypatch.setenv("GATEWAY_AUTH_AUDIENCE", AUDIENCE)
+    monkeypatch.setenv(
+        "GATEWAY_AUTH_REPLAY_DB", str(tmp_path / "heartbeat.sqlite3")
+    )
+    monkeypatch.setenv("GATEWAY_ALLOWED_ORIGINS", "https://gateway.example")
     monkeypatch.setenv("GATEWAY_HEARTBEAT_CERT_FINGERPRINTS", "aa")
-    client = TestClient(server.app)
+    body = compact_json({"payload": "{}", "signature": "00"})
 
-    response = client.post("/heartbeat", json={"payload": "{}", "signature": "00"})
+    with TestClient(server.app, client=("127.0.0.1", 50000)) as client:
+        headers = signed_headers("POST", "/heartbeat", body=body)
+        headers["X-VAMS-Ingress-Version"] = "envoy-1.39.1-v1"
+        response = client.post(
+            "/heartbeat",
+            content=body,
+            headers=headers,
+        )
 
     assert response.status_code == 401
     assert "mTLS client certificate verification is required" in response.json()["detail"]

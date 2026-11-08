@@ -1,0 +1,28 @@
+{
+  "exit_code": 0,
+  "summary": {
+    "checks": 1865,
+    "errors": 0,
+    "warnings": 0
+  },
+  "warning_line_count": 1,
+  "warning_lines": [
+    "Summary 1865 checks, 0 errors, 0 warnings"
+  ],
+  "warning_context": [
+    "",
+    "",
+    "      Summary 1865 checks, 0 errors, 0 warnings"
+  ],
+  "diagnostic_lines": [
+    "Summary 1865 checks, 0 errors, 0 warnings"
+  ],
+  "capture_note": null,
+  "source": {
+    "file_count_before": 21,
+    "sha256_before": "437ac6eef5acb1807d8f6a68b47fdff2e9b3fbe7ed7ca3e39715a767edf59f86",
+    "file_count_after": 21,
+    "sha256_after": "437ac6eef5acb1807d8f6a68b47fdff2e9b3fbe7ed7ca3e39715a767edf59f86",
+    "unchanged": true
+  }
+}

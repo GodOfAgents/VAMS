@@ -1,0 +1,17 @@
+{
+  "schema": "m7-inv5-oms-route-run-r1",
+  "date": "2026-10-04",
+  "git_head": "829ab544571f12efe50ecb5740f129c8acb3e16f",
+  "python": "3.12.14",
+  "pytest": "9.1.1",
+  "network": "disabled by bwrap --unshare-net",
+  "environment": "VAMS_ENV=test; no external credentials; fake provider transport only",
+  "command": "bwrap --unshare-net --ro-bind / / --tmpfs /tmp --dev-bind /dev /dev --proc /proc --chdir /home/GodOfAgents/code/VAMS-testnet /usr/bin/env -i HOME=/tmp TMPDIR=/tmp VAMS_ENV=test PATH=/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin:/usr/bin:/bin LANG=C.UTF-8 LC_ALL=C.UTF-8 TZ=UTC PYTHONDONTWRITEBYTECODE=1 PYTHONNOUSERSITE=1 /home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python -B -m pytest -q --tb=short -p no:cacheprovider neuron/tests/test_m1_2a_identity_tee_runtime.py neuron/tests/test_clr_v3.py neuron/tests/test_oms_integration.py neuron/tests/test_oms_hybrid.py",
+  "command_note": "The first isolated attempt omitted VAMS_ENV and failed at runtime-policy setup (20 failed, 64 passed); it is an invalid gate invocation. The recorded command above corrects this with the required test mode.",
+  "invocation_note": "Command and terminal result recorded from coordinator session; raw pytest output was not retained in the evidence package. No hosted CI, external OMS provider, chain, or live route was used.",
+  "source_hashes": {
+    "neuron/clr_router.py": "ea56a16330521bcb0250eb8ead939ca6388129590afb2ae71d574d8c47e35ace",
+    "neuron/sdk/oms_identity.py": "38471dc06868c42bc0035d63683ba73038eb214005bf65c81aee0fcd626c9a09",
+    "neuron/tests/test_m1_2a_identity_tee_runtime.py": "6b7ea8427713300659b3f8f9eb9f25823c094fa8eb90d316ad5c5868d8ba2cbd"
+  }
+}

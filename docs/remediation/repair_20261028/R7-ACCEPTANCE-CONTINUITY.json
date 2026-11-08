@@ -1,0 +1,1600 @@
+{
+  "schema": "vams.governance-acceptance-continuity.v1",
+  "parent_sha256": "3a5a9d7e1e84f6c625d276ac6ac2e21ca775b665c23a25a73f196c7dbe022fc4",
+  "status": "NO_PARENT_REQUIREMENT_DROPPED_NO_NATIVE_CREDIT",
+  "rows": [
+    {
+      "parent_id": "genesis_valid",
+      "parent_transition": "Genesis",
+      "parent_expectation": "accept",
+      "parent_mutation_id": "none",
+      "planned_representative_tests": [
+        "valid_singleton_genesis_requires_configured_custody_and_seed"
+      ],
+      "native_evidence": "NOT_RUN",
+      "acceptance_credit": false,
+      "remaining": "Complete exact parent mutation and cross-caller coverage under v2; representative test names are not full coverage."
+    },
+    {
+      "parent_id": "genesis_rebind",
+      "parent_transition": "Genesis",
+      "parent_expectation": "reject",
+      "parent_mutation_id": "wrong_seed",
+      "planned_representative_tests": [
+        "genesis_wrong_seed_rejects"
+      ],
+      "native_evidence": "NOT_RUN",
+      "acceptance_credit": false,
+      "remaining": "Complete exact parent mutation and cross-caller coverage under v2; representative test names are not full coverage."
+    },
+    {
+      "parent_id": "counter_cross_mutation",
+      "parent_transition": "Create/Queue",
+      "parent_expectation": "reject",
+      "parent_mutation_id": "counter_cross_mutation",
+      "planned_representative_tests": [
+        "create_cannot_change_intent_counter",
+        "queue_cannot_change_proposal_counter"
+      ],
+      "native_evidence": "NOT_RUN",
+      "acceptance_credit": false,
+      "remaining": "Complete exact parent mutation and cross-caller coverage under v2; representative test names are not full coverage."
+    },
+    {
+      "parent_id": "immutable_authority_field",
+      "parent_transition": "Create/Queue",
+      "parent_expectation": "reject",
+      "parent_mutation_id": "immutable_authority_field",
+      "planned_representative_tests": [
+        "changed_authority_terms_reject_on_nonce_advance"
+      ],
+      "native_evidence": "NOT_RUN",
+      "acceptance_credit": false,
+      "remaining": "Complete exact parent mutation and cross-caller coverage under v2; representative test names are not full coverage."
+    },
+    {
+      "parent_id": "duplicate_signer",
+      "parent_transition": "Create/CancelIntent",
+      "parent_expectation": "reject",
+      "parent_mutation_id": "duplicate_signer",
+      "planned_representative_tests": [
+        "duplicate_members_cannot_cancel_intent",
+        "create_duplicate_signer_cannot_supply_threshold"
+      ],
+      "native_evidence": "NOT_RUN",
+      "acceptance_credit": false,
+      "remaining": "Complete exact parent mutation and cross-caller coverage under v2; representative test names are not full coverage."
+    },
+    {
+      "parent_id": "non_member_signer",
+      "parent_transition": "Create/CancelIntent",
+      "parent_expectation": "reject",
+      "parent_mutation_id": "non_member_signer",
+      "planned_representative_tests": [
+        "create_nonmember_cannot_supply_third_signature",
+        "intent_cancel_nonmember_cannot_supply_third_signature"
+      ],
+      "native_evidence": "NOT_RUN",
+      "acceptance_credit": false,
+      "remaining": "Complete exact parent mutation and cross-caller coverage under v2; representative test names are not full coverage."
+    },
+    {
+      "parent_id": "authority_asset_preimage",
+      "parent_transition": "Genesis",
+      "parent_expectation": "reject",
+      "parent_mutation_id": "authority_asset_preimage",
+      "planned_representative_tests": [
+        "genesis_authority_asset_preimage_substitution_rejects"
+      ],
+      "native_evidence": "NOT_RUN",
+      "acceptance_credit": false,
+      "remaining": "Complete exact parent mutation and cross-caller coverage under v2; representative test names are not full coverage."
+    },
+    {
+      "parent_id": "receipt_substitution",
+      "parent_transition": "Vote",
+      "parent_expectation": "reject",
+      "parent_mutation_id": "receipt_substitution",
+      "planned_representative_tests": [
+        "vote_receipt_name_substitution_rejects"
+      ],
+      "native_evidence": "NOT_RUN",
+      "acceptance_credit": false,
+      "remaining": "Complete exact parent mutation and cross-caller coverage under v2; representative test names are not full coverage."
+    },
+    {
+      "parent_id": "redirected_refund",
+      "parent_transition": "Cancel/Finalize/Queue",
+      "parent_expectation": "reject",
+      "parent_mutation_id": "redirected_refund",
+      "planned_representative_tests": [
+        "wrong_terminal_refund_recipient_rejects",
+        "queue_redirected_voter_refund_rejects",
+        "rejected_proposal_redirected_voter_refund_rejects"
+      ],
+      "native_evidence": "NOT_RUN",
+      "acceptance_credit": false,
+      "remaining": "Complete exact parent mutation and cross-caller coverage under v2; representative test names are not full coverage."
+    },
+    {
+      "parent_id": "governed_asset_change",
+      "parent_transition": "Queue",
+      "parent_expectation": "reject",
+      "parent_mutation_id": "governed_asset_change",
+      "planned_representative_tests": [
+        "queue_locked_vams_cannot_become_funder_change"
+      ],
+      "native_evidence": "NOT_RUN",
+      "acceptance_credit": false,
+      "remaining": "Complete exact parent mutation and cross-caller coverage under v2; representative test names are not full coverage."
+    },
+    {
+      "parent_id": "fee_governed_ada",
+      "parent_transition": "Vote",
+      "parent_expectation": "reject",
+      "parent_mutation_id": "fee_governed_ada",
+      "planned_representative_tests": [
+        "vote_governed_ada_cannot_pay_fee"
+      ],
+      "native_evidence": "NOT_RUN",
+      "acceptance_credit": false,
+      "remaining": "Complete exact parent mutation and cross-caller coverage under v2; representative test names are not full coverage."
+    },
+    {
+      "parent_id": "ninth_voter",
+      "parent_transition": "Vote",
+      "parent_expectation": "reject",
+      "parent_mutation_id": "ninth_voter",
+      "planned_representative_tests": [
+        "ninth_voter_rejects"
+      ],
+      "native_evidence": "NOT_RUN",
+      "acceptance_credit": false,
+      "remaining": "Complete exact parent mutation and cross-caller coverage under v2; representative test names are not full coverage."
+    },
+    {
+      "parent_id": "maximum_width_datum",
+      "parent_transition": "Vote",
+      "parent_expectation": "reject",
+      "parent_mutation_id": "maximum_width_datum",
+      "planned_representative_tests": [
+        "remainder26_maximum_width_datum_eighth_vote_maximum_width_transition_rejects",
+        "remainder26_maximum_width_datum_eighth_vote_maximum_width_governor_spend_rejects",
+        "remainder26_maximum_width_datum_eighth_vote_maximum_width_receipt_policy_rejects",
+        "remainder26_maximum_width_datum_eighth_vote_maximum_width_construction"
+      ],
+      "native_evidence": "NOT_RUN",
+      "acceptance_credit": false,
+      "remaining": "Proposed definitions and source cases only; exact parent/caller review, native/applied/ledger/budget acceptance remain pending.",
+      "proposed_definition_record": "repair_20261031/REMAINDER-CAMPAIGN.json#maximum_width_datum"
+    },
+    {
+      "parent_id": "quorum_tie",
+      "parent_transition": "Finalize-Passed",
+      "parent_expectation": "reject",
+      "parent_mutation_id": "quorum_tie",
+      "planned_representative_tests": [
+        "equal_backed_tallies_cannot_finalize_passed"
+      ],
+      "native_evidence": "NOT_RUN",
+      "acceptance_credit": false,
+      "remaining": "Complete exact parent mutation and cross-caller coverage under v2; representative test names are not full coverage."
+    },
+    {
+      "parent_id": "tally_overflow",
+      "parent_transition": "Vote",
+      "parent_expectation": "reject",
+      "parent_mutation_id": "tally_overflow",
+      "planned_representative_tests": [
+        "forged_input_tally_above_u64_rejects"
+      ],
+      "native_evidence": "NOT_RUN",
+      "acceptance_credit": false,
+      "remaining": "Complete exact parent mutation and cross-caller coverage under v2; representative test names are not full coverage."
+    },
+    {
+      "parent_id": "time_before",
+      "parent_transition": "Vote/Cancel/Finalize",
+      "parent_expectation": "reject",
+      "parent_mutation_id": "time_before",
+      "planned_representative_tests": [
+        "remainder26_time_before_vote_negative_window_transition_rejects",
+        "remainder26_time_before_vote_negative_window_governor_spend_rejects",
+        "remainder26_time_before_vote_negative_window_receipt_policy_rejects",
+        "remainder26_time_before_vote_negative_window_construction",
+        "remainder26_time_before_cancel_negative_window_transition_rejects",
+        "remainder26_time_before_cancel_negative_window_governor_spend_rejects",
+        "remainder26_time_before_cancel_negative_window_proposal_policy_rejects",
+        "remainder26_time_before_cancel_negative_window_receipt_policy_rejects",
+        "remainder26_time_before_cancel_negative_window_construction",
+        "remainder26_time_before_finalize_passed_before_deadline_transition_rejects",
+        "remainder26_time_before_finalize_passed_before_deadline_governor_spend_rejects",
+        "remainder26_time_before_finalize_passed_before_deadline_construction",
+        "remainder26_time_before_finalize_rejected_before_deadline_transition_rejects",
+        "remainder26_time_before_finalize_rejected_before_deadline_governor_spend_rejects",
+        "remainder26_time_before_finalize_rejected_before_deadline_proposal_policy_rejects",
+        "remainder26_time_before_finalize_rejected_before_deadline_receipt_policy_rejects",
+        "remainder26_time_before_finalize_rejected_before_deadline_construction"
+      ],
+      "native_evidence": "NOT_RUN",
+      "acceptance_credit": false,
+      "remaining": "Proposed definitions and source cases only; exact parent/caller review, native/applied/ledger/budget acceptance remain pending.",
+      "proposed_definition_record": "repair_20261031/REMAINDER-CAMPAIGN.json#time_before"
+    },
+    {
+      "parent_id": "time_at",
+      "parent_transition": "Finalize/Expire",
+      "parent_expectation": "accept",
+      "parent_mutation_id": "time_at",
+      "planned_representative_tests": [
+        "expired_intent_is_burned_and_refunded_without_member_threshold"
+      ],
+      "native_evidence": "NOT_RUN",
+      "acceptance_credit": false,
+      "remaining": "Complete exact parent mutation and cross-caller coverage under v2; representative test names are not full coverage."
+    },
+    {
+      "parent_id": "time_after",
+      "parent_transition": "Vote/Cancel",
+      "parent_expectation": "reject",
+      "parent_mutation_id": "time_after",
+      "planned_representative_tests": [
+        "remainder26_time_after_vote_after_deadline_transition_rejects",
+        "remainder26_time_after_vote_after_deadline_governor_spend_rejects",
+        "remainder26_time_after_vote_after_deadline_receipt_policy_rejects",
+        "remainder26_time_after_vote_after_deadline_construction",
+        "remainder26_time_after_cancel_after_deadline_transition_rejects",
+        "remainder26_time_after_cancel_after_deadline_governor_spend_rejects",
+        "remainder26_time_after_cancel_after_deadline_proposal_policy_rejects",
+        "remainder26_time_after_cancel_after_deadline_receipt_policy_rejects",
+        "remainder26_time_after_cancel_after_deadline_construction"
+      ],
+      "native_evidence": "NOT_RUN",
+      "acceptance_credit": false,
+      "remaining": "Proposed definitions and source cases only; exact parent/caller review, native/applied/ledger/budget acceptance remain pending.",
+      "proposed_definition_record": "repair_20261031/REMAINDER-CAMPAIGN.json#time_after"
+    },
+    {
+      "parent_id": "execute_pre_f05",
+      "parent_transition": "ExecuteIntent",
+      "parent_expectation": "reject",
+      "parent_mutation_id": "execute_pre_f05",
+      "planned_representative_tests": [
+        "execute_intent_remains_disabled"
+      ],
+      "native_evidence": "NOT_RUN",
+      "acceptance_credit": false,
+      "remaining": "Complete exact parent mutation and cross-caller coverage under v2; representative test names are not full coverage."
+    },
+    {
+      "parent_id": "output_ref_width",
+      "parent_transition": "all",
+      "parent_expectation": "reject",
+      "parent_mutation_id": "output_ref_width",
+      "planned_representative_tests": [
+        "width_regular_txid31_transition_rejects",
+        "width_regular_txid31_governor_rejects",
+        "width_regular_txid31_receipt_policy_rejects",
+        "width_regular_txid33_transition_rejects",
+        "width_regular_txid33_governor_rejects",
+        "width_regular_txid33_receipt_policy_rejects",
+        "width_regular_index_negative_transition_rejects",
+        "width_regular_index_negative_governor_rejects",
+        "width_regular_index_negative_receipt_policy_rejects",
+        "width_regular_index_overflow_transition_rejects",
+        "width_regular_index_overflow_governor_rejects",
+        "width_regular_index_overflow_receipt_policy_rejects",
+        "width_reference_txid31_transition_rejects",
+        "width_reference_txid31_governor_rejects",
+        "width_reference_txid31_receipt_policy_rejects",
+        "width_reference_txid33_transition_rejects",
+        "width_reference_txid33_governor_rejects",
+        "width_reference_txid33_receipt_policy_rejects",
+        "width_reference_index_negative_transition_rejects",
+        "width_reference_index_negative_governor_rejects",
+        "width_reference_index_negative_receipt_policy_rejects",
+        "width_reference_index_overflow_transition_rejects",
+        "width_reference_index_overflow_governor_rejects",
+        "width_reference_index_overflow_receipt_policy_rejects",
+        "width_u32max_unique_references_transition_accepts",
+        "width_u32max_unique_references_governor_accepts",
+        "width_u32max_unique_references_receipt_policy_accepts"
+      ],
+      "native_evidence": "NOT_RUN",
+      "acceptance_credit": false,
+      "remaining": "Only Vote transition/governor/receipt callers are prepared; all other lifecycle/caller, native wrapper, ledger and budget acceptance remain. No native credit."
+    },
+    {
+      "parent_id": "create_destination",
+      "parent_transition": "Create",
+      "parent_expectation": "reject",
+      "parent_mutation_id": "destination_create",
+      "planned_representative_tests": [
+        "create_wrong_proposal_destination_rejects"
+      ],
+      "native_evidence": "NOT_RUN",
+      "acceptance_credit": false,
+      "remaining": "Complete exact parent mutation and cross-caller coverage under v2; representative test names are not full coverage."
+    },
+    {
+      "parent_id": "create_topology_one_over",
+      "parent_transition": "Create",
+      "parent_expectation": "reject",
+      "parent_mutation_id": "topology_create",
+      "planned_representative_tests": [
+        "remainder26_create_topology_one_over_create_inputs_exact_transition_rejects",
+        "remainder26_create_topology_one_over_create_inputs_exact_authority_spend_rejects",
+        "remainder26_create_topology_one_over_create_inputs_exact_proposal_policy_rejects",
+        "remainder26_create_topology_one_over_create_inputs_exact_construction",
+        "remainder26_create_topology_one_over_create_inputs_global_transition_rejects",
+        "remainder26_create_topology_one_over_create_inputs_global_authority_spend_rejects",
+        "remainder26_create_topology_one_over_create_inputs_global_proposal_policy_rejects",
+        "remainder26_create_topology_one_over_create_inputs_global_construction",
+        "remainder26_create_topology_one_over_create_inputs_global_resource_at_limit",
+        "remainder26_create_topology_one_over_create_outputs_exact_transition_rejects",
+        "remainder26_create_topology_one_over_create_outputs_exact_authority_spend_rejects",
+        "remainder26_create_topology_one_over_create_outputs_exact_proposal_policy_rejects",
+        "remainder26_create_topology_one_over_create_outputs_exact_construction",
+        "remainder26_create_topology_one_over_create_outputs_global_transition_rejects",
+        "remainder26_create_topology_one_over_create_outputs_global_authority_spend_rejects",
+        "remainder26_create_topology_one_over_create_outputs_global_proposal_policy_rejects",
+        "remainder26_create_topology_one_over_create_outputs_global_construction",
+        "remainder26_create_topology_one_over_create_outputs_global_resource_at_limit",
+        "remainder26_create_topology_one_over_create_assets_transition_rejects",
+        "remainder26_create_topology_one_over_create_assets_authority_spend_rejects",
+        "remainder26_create_topology_one_over_create_assets_proposal_policy_rejects",
+        "remainder26_create_topology_one_over_create_assets_construction",
+        "remainder26_create_topology_one_over_create_assets_resource_at_limit",
+        "remainder26_create_topology_one_over_create_datum_bytes_transition_rejects",
+        "remainder26_create_topology_one_over_create_datum_bytes_authority_spend_rejects",
+        "remainder26_create_topology_one_over_create_datum_bytes_proposal_policy_rejects",
+        "remainder26_create_topology_one_over_create_datum_bytes_construction",
+        "remainder26_create_topology_one_over_create_datum_bytes_resource_at_limit",
+        "remainder26_create_topology_one_over_create_signers_transition_rejects",
+        "remainder26_create_topology_one_over_create_signers_authority_spend_rejects",
+        "remainder26_create_topology_one_over_create_signers_proposal_policy_rejects",
+        "remainder26_create_topology_one_over_create_signers_construction",
+        "remainder26_create_topology_one_over_create_signers_resource_at_limit"
+      ],
+      "native_evidence": "NOT_RUN",
+      "acceptance_credit": false,
+      "remaining": "Proposed definitions and source cases only; exact parent/caller review, native/applied/ledger/budget acceptance remain pending.",
+      "proposed_definition_record": "repair_20261031/REMAINDER-CAMPAIGN.json#create_topology_one_over"
+    },
+    {
+      "parent_id": "create_datum_mutation",
+      "parent_transition": "Create",
+      "parent_expectation": "reject",
+      "parent_mutation_id": "datum_create",
+      "planned_representative_tests": [
+        "remainder26_create_datum_mutation_create_datum_version_transition_rejects",
+        "remainder26_create_datum_mutation_create_datum_version_authority_spend_rejects",
+        "remainder26_create_datum_mutation_create_datum_version_proposal_policy_rejects",
+        "remainder26_create_datum_mutation_create_datum_version_construction"
+      ],
+      "native_evidence": "NOT_RUN",
+      "acceptance_credit": false,
+      "remaining": "Proposed definitions and source cases only; exact parent/caller review, native/applied/ledger/budget acceptance remain pending.",
+      "proposed_definition_record": "repair_20261031/REMAINDER-CAMPAIGN.json#create_datum_mutation"
+    },
+    {
+      "parent_id": "create_timing_boundary",
+      "parent_transition": "Create",
+      "parent_expectation": "reject",
+      "parent_mutation_id": "timing_create",
+      "planned_representative_tests": [
+        "remainder26_create_timing_boundary_create_create_at_deadline_transition_rejects",
+        "remainder26_create_timing_boundary_create_create_at_deadline_authority_spend_rejects",
+        "remainder26_create_timing_boundary_create_create_at_deadline_proposal_policy_rejects",
+        "remainder26_create_timing_boundary_create_create_at_deadline_construction"
+      ],
+      "native_evidence": "NOT_RUN",
+      "acceptance_credit": false,
+      "remaining": "Proposed definitions and source cases only; exact parent/caller review, native/applied/ledger/budget acceptance remain pending.",
+      "proposed_definition_record": "repair_20261031/REMAINDER-CAMPAIGN.json#create_timing_boundary"
+    },
+    {
+      "parent_id": "vote_destination",
+      "parent_transition": "Vote",
+      "parent_expectation": "reject",
+      "parent_mutation_id": "destination_vote",
+      "planned_representative_tests": [
+        "vote_wrong_continuing_destination_rejects"
+      ],
+      "native_evidence": "NOT_RUN",
+      "acceptance_credit": false,
+      "remaining": "Complete exact parent mutation and cross-caller coverage under v2; representative test names are not full coverage."
+    },
+    {
+      "parent_id": "vote_topology_one_over",
+      "parent_transition": "Vote",
+      "parent_expectation": "reject",
+      "parent_mutation_id": "topology_vote",
+      "planned_representative_tests": [
+        "remainder26_vote_topology_one_over_vote_inputs_exact_transition_rejects",
+        "remainder26_vote_topology_one_over_vote_inputs_exact_governor_spend_rejects",
+        "remainder26_vote_topology_one_over_vote_inputs_exact_receipt_policy_rejects",
+        "remainder26_vote_topology_one_over_vote_inputs_exact_construction",
+        "remainder26_vote_topology_one_over_vote_inputs_global_transition_rejects",
+        "remainder26_vote_topology_one_over_vote_inputs_global_governor_spend_rejects",
+        "remainder26_vote_topology_one_over_vote_inputs_global_receipt_policy_rejects",
+        "remainder26_vote_topology_one_over_vote_inputs_global_construction",
+        "remainder26_vote_topology_one_over_vote_inputs_global_resource_at_limit",
+        "remainder26_vote_topology_one_over_vote_outputs_exact_transition_rejects",
+        "remainder26_vote_topology_one_over_vote_outputs_exact_governor_spend_rejects",
+        "remainder26_vote_topology_one_over_vote_outputs_exact_receipt_policy_rejects",
+        "remainder26_vote_topology_one_over_vote_outputs_exact_construction",
+        "remainder26_vote_topology_one_over_vote_outputs_global_transition_rejects",
+        "remainder26_vote_topology_one_over_vote_outputs_global_governor_spend_rejects",
+        "remainder26_vote_topology_one_over_vote_outputs_global_receipt_policy_rejects",
+        "remainder26_vote_topology_one_over_vote_outputs_global_construction",
+        "remainder26_vote_topology_one_over_vote_outputs_global_resource_at_limit",
+        "remainder26_vote_topology_one_over_vote_assets_transition_rejects",
+        "remainder26_vote_topology_one_over_vote_assets_governor_spend_rejects",
+        "remainder26_vote_topology_one_over_vote_assets_receipt_policy_rejects",
+        "remainder26_vote_topology_one_over_vote_assets_construction",
+        "remainder26_vote_topology_one_over_vote_assets_resource_at_limit",
+        "remainder26_vote_topology_one_over_vote_datum_bytes_transition_rejects",
+        "remainder26_vote_topology_one_over_vote_datum_bytes_governor_spend_rejects",
+        "remainder26_vote_topology_one_over_vote_datum_bytes_receipt_policy_rejects",
+        "remainder26_vote_topology_one_over_vote_datum_bytes_construction",
+        "remainder26_vote_topology_one_over_vote_datum_bytes_resource_at_limit",
+        "remainder26_vote_topology_one_over_vote_signers_transition_rejects",
+        "remainder26_vote_topology_one_over_vote_signers_governor_spend_rejects",
+        "remainder26_vote_topology_one_over_vote_signers_receipt_policy_rejects",
+        "remainder26_vote_topology_one_over_vote_signers_construction",
+        "remainder26_vote_topology_one_over_vote_signers_resource_at_limit"
+      ],
+      "native_evidence": "NOT_RUN",
+      "acceptance_credit": false,
+      "remaining": "Proposed definitions and source cases only; exact parent/caller review, native/applied/ledger/budget acceptance remain pending.",
+      "proposed_definition_record": "repair_20261031/REMAINDER-CAMPAIGN.json#vote_topology_one_over"
+    },
+    {
+      "parent_id": "vote_datum_mutation",
+      "parent_transition": "Vote",
+      "parent_expectation": "reject",
+      "parent_mutation_id": "datum_vote",
+      "planned_representative_tests": [
+        "remainder26_vote_datum_mutation_vote_datum_version_transition_rejects",
+        "remainder26_vote_datum_mutation_vote_datum_version_governor_spend_rejects",
+        "remainder26_vote_datum_mutation_vote_datum_version_receipt_policy_rejects",
+        "remainder26_vote_datum_mutation_vote_datum_version_construction"
+      ],
+      "native_evidence": "NOT_RUN",
+      "acceptance_credit": false,
+      "remaining": "Proposed definitions and source cases only; exact parent/caller review, native/applied/ledger/budget acceptance remain pending.",
+      "proposed_definition_record": "repair_20261031/REMAINDER-CAMPAIGN.json#vote_datum_mutation"
+    },
+    {
+      "parent_id": "vote_timing_boundary",
+      "parent_transition": "Vote",
+      "parent_expectation": "reject",
+      "parent_mutation_id": "timing_vote",
+      "planned_representative_tests": [
+        "vote_at_deadline_rejects"
+      ],
+      "native_evidence": "NOT_RUN",
+      "acceptance_credit": false,
+      "remaining": "Complete exact parent mutation and cross-caller coverage under v2; representative test names are not full coverage."
+    },
+    {
+      "parent_id": "finalize-passed_destination",
+      "parent_transition": "Finalize-Passed",
+      "parent_expectation": "reject",
+      "parent_mutation_id": "destination_finalize-passed",
+      "planned_representative_tests": [
+        "remainder26_finalize_passed_destination_finalize_passed_destination_transition_rejects",
+        "remainder26_finalize_passed_destination_finalize_passed_destination_governor_spend_rejects",
+        "remainder26_finalize_passed_destination_finalize_passed_destination_construction"
+      ],
+      "native_evidence": "NOT_RUN",
+      "acceptance_credit": false,
+      "remaining": "Proposed definitions and source cases only; exact parent/caller review, native/applied/ledger/budget acceptance remain pending.",
+      "proposed_definition_record": "repair_20261031/REMAINDER-CAMPAIGN.json#finalize-passed_destination"
+    },
+    {
+      "parent_id": "finalize-passed_topology_one_over",
+      "parent_transition": "Finalize-Passed",
+      "parent_expectation": "reject",
+      "parent_mutation_id": "topology_finalize-passed",
+      "planned_representative_tests": [
+        "remainder26_finalize_passed_topology_one_over_finalize_passed_inputs_exact_transition_rejects",
+        "remainder26_finalize_passed_topology_one_over_finalize_passed_inputs_exact_governor_spend_rejects",
+        "remainder26_finalize_passed_topology_one_over_finalize_passed_inputs_exact_construction",
+        "remainder26_finalize_passed_topology_one_over_finalize_passed_inputs_global_transition_rejects",
+        "remainder26_finalize_passed_topology_one_over_finalize_passed_inputs_global_governor_spend_rejects",
+        "remainder26_finalize_passed_topology_one_over_finalize_passed_inputs_global_construction",
+        "remainder26_finalize_passed_topology_one_over_finalize_passed_inputs_global_resource_at_limit",
+        "remainder26_finalize_passed_topology_one_over_finalize_passed_outputs_exact_transition_rejects",
+        "remainder26_finalize_passed_topology_one_over_finalize_passed_outputs_exact_governor_spend_rejects",
+        "remainder26_finalize_passed_topology_one_over_finalize_passed_outputs_exact_construction",
+        "remainder26_finalize_passed_topology_one_over_finalize_passed_outputs_global_transition_rejects",
+        "remainder26_finalize_passed_topology_one_over_finalize_passed_outputs_global_governor_spend_rejects",
+        "remainder26_finalize_passed_topology_one_over_finalize_passed_outputs_global_construction",
+        "remainder26_finalize_passed_topology_one_over_finalize_passed_outputs_global_resource_at_limit",
+        "remainder26_finalize_passed_topology_one_over_finalize_passed_assets_transition_rejects",
+        "remainder26_finalize_passed_topology_one_over_finalize_passed_assets_governor_spend_rejects",
+        "remainder26_finalize_passed_topology_one_over_finalize_passed_assets_construction",
+        "remainder26_finalize_passed_topology_one_over_finalize_passed_assets_resource_at_limit",
+        "remainder26_finalize_passed_topology_one_over_finalize_passed_datum_bytes_transition_rejects",
+        "remainder26_finalize_passed_topology_one_over_finalize_passed_datum_bytes_governor_spend_rejects",
+        "remainder26_finalize_passed_topology_one_over_finalize_passed_datum_bytes_construction",
+        "remainder26_finalize_passed_topology_one_over_finalize_passed_datum_bytes_resource_at_limit",
+        "remainder26_finalize_passed_topology_one_over_finalize_passed_signers_transition_rejects",
+        "remainder26_finalize_passed_topology_one_over_finalize_passed_signers_governor_spend_rejects",
+        "remainder26_finalize_passed_topology_one_over_finalize_passed_signers_construction",
+        "remainder26_finalize_passed_topology_one_over_finalize_passed_signers_resource_at_limit"
+      ],
+      "native_evidence": "NOT_RUN",
+      "acceptance_credit": false,
+      "remaining": "Proposed definitions and source cases only; exact parent/caller review, native/applied/ledger/budget acceptance remain pending.",
+      "proposed_definition_record": "repair_20261031/REMAINDER-CAMPAIGN.json#finalize-passed_topology_one_over"
+    },
+    {
+      "parent_id": "finalize-passed_datum_mutation",
+      "parent_transition": "Finalize-Passed",
+      "parent_expectation": "reject",
+      "parent_mutation_id": "datum_finalize-passed",
+      "planned_representative_tests": [
+        "remainder26_finalize_passed_datum_mutation_finalize_passed_datum_version_transition_rejects",
+        "remainder26_finalize_passed_datum_mutation_finalize_passed_datum_version_governor_spend_rejects",
+        "remainder26_finalize_passed_datum_mutation_finalize_passed_datum_version_construction"
+      ],
+      "native_evidence": "NOT_RUN",
+      "acceptance_credit": false,
+      "remaining": "Proposed definitions and source cases only; exact parent/caller review, native/applied/ledger/budget acceptance remain pending.",
+      "proposed_definition_record": "repair_20261031/REMAINDER-CAMPAIGN.json#finalize-passed_datum_mutation"
+    },
+    {
+      "parent_id": "finalize-passed_timing_boundary",
+      "parent_transition": "Finalize-Passed",
+      "parent_expectation": "reject",
+      "parent_mutation_id": "timing_finalize-passed",
+      "planned_representative_tests": [
+        "premature_finalize_rejects"
+      ],
+      "native_evidence": "NOT_RUN",
+      "acceptance_credit": false,
+      "remaining": "Complete exact parent mutation and cross-caller coverage under v2; representative test names are not full coverage."
+    },
+    {
+      "parent_id": "finalize-rejected_destination",
+      "parent_transition": "Finalize-Rejected",
+      "parent_expectation": "reject",
+      "parent_mutation_id": "destination_finalize-rejected",
+      "planned_representative_tests": [
+        "rejected_proposal_redirected_voter_refund_rejects"
+      ],
+      "native_evidence": "NOT_RUN",
+      "acceptance_credit": false,
+      "remaining": "Complete exact parent mutation and cross-caller coverage under v2; representative test names are not full coverage."
+    },
+    {
+      "parent_id": "finalize-rejected_topology_one_over",
+      "parent_transition": "Finalize-Rejected",
+      "parent_expectation": "reject",
+      "parent_mutation_id": "topology_finalize-rejected",
+      "planned_representative_tests": [
+        "remainder26_finalize_rejected_topology_one_over_finalize_rejected_inputs_exact_transition_rejects",
+        "remainder26_finalize_rejected_topology_one_over_finalize_rejected_inputs_exact_governor_spend_rejects",
+        "remainder26_finalize_rejected_topology_one_over_finalize_rejected_inputs_exact_proposal_policy_rejects",
+        "remainder26_finalize_rejected_topology_one_over_finalize_rejected_inputs_exact_receipt_policy_rejects",
+        "remainder26_finalize_rejected_topology_one_over_finalize_rejected_inputs_exact_construction",
+        "remainder26_finalize_rejected_topology_one_over_finalize_rejected_inputs_global_transition_rejects",
+        "remainder26_finalize_rejected_topology_one_over_finalize_rejected_inputs_global_governor_spend_rejects",
+        "remainder26_finalize_rejected_topology_one_over_finalize_rejected_inputs_global_proposal_policy_rejects",
+        "remainder26_finalize_rejected_topology_one_over_finalize_rejected_inputs_global_receipt_policy_rejects",
+        "remainder26_finalize_rejected_topology_one_over_finalize_rejected_inputs_global_construction",
+        "remainder26_finalize_rejected_topology_one_over_finalize_rejected_inputs_global_resource_at_limit",
+        "remainder26_finalize_rejected_topology_one_over_finalize_rejected_outputs_exact_transition_rejects",
+        "remainder26_finalize_rejected_topology_one_over_finalize_rejected_outputs_exact_governor_spend_rejects",
+        "remainder26_finalize_rejected_topology_one_over_finalize_rejected_outputs_exact_proposal_policy_rejects",
+        "remainder26_finalize_rejected_topology_one_over_finalize_rejected_outputs_exact_receipt_policy_rejects",
+        "remainder26_finalize_rejected_topology_one_over_finalize_rejected_outputs_exact_construction",
+        "remainder26_finalize_rejected_topology_one_over_finalize_rejected_outputs_global_transition_rejects",
+        "remainder26_finalize_rejected_topology_one_over_finalize_rejected_outputs_global_governor_spend_rejects",
+        "remainder26_finalize_rejected_topology_one_over_finalize_rejected_outputs_global_proposal_policy_rejects",
+        "remainder26_finalize_rejected_topology_one_over_finalize_rejected_outputs_global_receipt_policy_rejects",
+        "remainder26_finalize_rejected_topology_one_over_finalize_rejected_outputs_global_construction",
+        "remainder26_finalize_rejected_topology_one_over_finalize_rejected_outputs_global_resource_at_limit",
+        "remainder26_finalize_rejected_topology_one_over_finalize_rejected_assets_transition_rejects",
+        "remainder26_finalize_rejected_topology_one_over_finalize_rejected_assets_governor_spend_rejects",
+        "remainder26_finalize_rejected_topology_one_over_finalize_rejected_assets_proposal_policy_rejects",
+        "remainder26_finalize_rejected_topology_one_over_finalize_rejected_assets_receipt_policy_rejects",
+        "remainder26_finalize_rejected_topology_one_over_finalize_rejected_assets_construction",
+        "remainder26_finalize_rejected_topology_one_over_finalize_rejected_assets_resource_at_limit",
+        "remainder26_finalize_rejected_topology_one_over_finalize_rejected_datum_bytes_transition_rejects",
+        "remainder26_finalize_rejected_topology_one_over_finalize_rejected_datum_bytes_governor_spend_rejects",
+        "remainder26_finalize_rejected_topology_one_over_finalize_rejected_datum_bytes_proposal_policy_rejects",
+        "remainder26_finalize_rejected_topology_one_over_finalize_rejected_datum_bytes_receipt_policy_rejects",
+        "remainder26_finalize_rejected_topology_one_over_finalize_rejected_datum_bytes_construction",
+        "remainder26_finalize_rejected_topology_one_over_finalize_rejected_datum_bytes_resource_at_limit",
+        "remainder26_finalize_rejected_topology_one_over_finalize_rejected_signers_transition_rejects",
+        "remainder26_finalize_rejected_topology_one_over_finalize_rejected_signers_governor_spend_rejects",
+        "remainder26_finalize_rejected_topology_one_over_finalize_rejected_signers_proposal_policy_rejects",
+        "remainder26_finalize_rejected_topology_one_over_finalize_rejected_signers_receipt_policy_rejects",
+        "remainder26_finalize_rejected_topology_one_over_finalize_rejected_signers_construction",
+        "remainder26_finalize_rejected_topology_one_over_finalize_rejected_signers_resource_at_limit"
+      ],
+      "native_evidence": "NOT_RUN",
+      "acceptance_credit": false,
+      "remaining": "Proposed definitions and source cases only; exact parent/caller review, native/applied/ledger/budget acceptance remain pending.",
+      "proposed_definition_record": "repair_20261031/REMAINDER-CAMPAIGN.json#finalize-rejected_topology_one_over"
+    },
+    {
+      "parent_id": "finalize-rejected_datum_mutation",
+      "parent_transition": "Finalize-Rejected",
+      "parent_expectation": "reject",
+      "parent_mutation_id": "datum_finalize-rejected",
+      "planned_representative_tests": [
+        "remainder26_finalize_rejected_datum_mutation_finalize_rejected_datum_version_transition_rejects",
+        "remainder26_finalize_rejected_datum_mutation_finalize_rejected_datum_version_governor_spend_rejects",
+        "remainder26_finalize_rejected_datum_mutation_finalize_rejected_datum_version_proposal_policy_rejects",
+        "remainder26_finalize_rejected_datum_mutation_finalize_rejected_datum_version_receipt_policy_rejects",
+        "remainder26_finalize_rejected_datum_mutation_finalize_rejected_datum_version_construction"
+      ],
+      "native_evidence": "NOT_RUN",
+      "acceptance_credit": false,
+      "remaining": "Proposed definitions and source cases only; exact parent/caller review, native/applied/ledger/budget acceptance remain pending.",
+      "proposed_definition_record": "repair_20261031/REMAINDER-CAMPAIGN.json#finalize-rejected_datum_mutation"
+    },
+    {
+      "parent_id": "finalize-rejected_timing_boundary",
+      "parent_transition": "Finalize-Rejected",
+      "parent_expectation": "reject",
+      "parent_mutation_id": "timing_finalize-rejected",
+      "planned_representative_tests": [
+        "remainder26_finalize_rejected_timing_boundary_finalize_rejected_before_deadline_transition_rejects",
+        "remainder26_finalize_rejected_timing_boundary_finalize_rejected_before_deadline_governor_spend_rejects",
+        "remainder26_finalize_rejected_timing_boundary_finalize_rejected_before_deadline_proposal_policy_rejects",
+        "remainder26_finalize_rejected_timing_boundary_finalize_rejected_before_deadline_receipt_policy_rejects",
+        "remainder26_finalize_rejected_timing_boundary_finalize_rejected_before_deadline_construction"
+      ],
+      "native_evidence": "NOT_RUN",
+      "acceptance_credit": false,
+      "remaining": "Proposed definitions and source cases only; exact parent/caller review, native/applied/ledger/budget acceptance remain pending.",
+      "proposed_definition_record": "repair_20261031/REMAINDER-CAMPAIGN.json#finalize-rejected_timing_boundary"
+    },
+    {
+      "parent_id": "cancel_destination",
+      "parent_transition": "Cancel",
+      "parent_expectation": "reject",
+      "parent_mutation_id": "destination_cancel",
+      "planned_representative_tests": [
+        "wrong_terminal_refund_recipient_rejects"
+      ],
+      "native_evidence": "NOT_RUN",
+      "acceptance_credit": false,
+      "remaining": "Complete exact parent mutation and cross-caller coverage under v2; representative test names are not full coverage."
+    },
+    {
+      "parent_id": "cancel_topology_one_over",
+      "parent_transition": "Cancel",
+      "parent_expectation": "reject",
+      "parent_mutation_id": "topology_cancel",
+      "planned_representative_tests": [
+        "remainder26_cancel_topology_one_over_cancel_inputs_exact_transition_rejects",
+        "remainder26_cancel_topology_one_over_cancel_inputs_exact_governor_spend_rejects",
+        "remainder26_cancel_topology_one_over_cancel_inputs_exact_proposal_policy_rejects",
+        "remainder26_cancel_topology_one_over_cancel_inputs_exact_receipt_policy_rejects",
+        "remainder26_cancel_topology_one_over_cancel_inputs_exact_construction",
+        "remainder26_cancel_topology_one_over_cancel_inputs_global_transition_rejects",
+        "remainder26_cancel_topology_one_over_cancel_inputs_global_governor_spend_rejects",
+        "remainder26_cancel_topology_one_over_cancel_inputs_global_proposal_policy_rejects",
+        "remainder26_cancel_topology_one_over_cancel_inputs_global_receipt_policy_rejects",
+        "remainder26_cancel_topology_one_over_cancel_inputs_global_construction",
+        "remainder26_cancel_topology_one_over_cancel_inputs_global_resource_at_limit",
+        "remainder26_cancel_topology_one_over_cancel_outputs_exact_transition_rejects",
+        "remainder26_cancel_topology_one_over_cancel_outputs_exact_governor_spend_rejects",
+        "remainder26_cancel_topology_one_over_cancel_outputs_exact_proposal_policy_rejects",
+        "remainder26_cancel_topology_one_over_cancel_outputs_exact_receipt_policy_rejects",
+        "remainder26_cancel_topology_one_over_cancel_outputs_exact_construction",
+        "remainder26_cancel_topology_one_over_cancel_outputs_global_transition_rejects",
+        "remainder26_cancel_topology_one_over_cancel_outputs_global_governor_spend_rejects",
+        "remainder26_cancel_topology_one_over_cancel_outputs_global_proposal_policy_rejects",
+        "remainder26_cancel_topology_one_over_cancel_outputs_global_receipt_policy_rejects",
+        "remainder26_cancel_topology_one_over_cancel_outputs_global_construction",
+        "remainder26_cancel_topology_one_over_cancel_outputs_global_resource_at_limit",
+        "remainder26_cancel_topology_one_over_cancel_assets_transition_rejects",
+        "remainder26_cancel_topology_one_over_cancel_assets_governor_spend_rejects",
+        "remainder26_cancel_topology_one_over_cancel_assets_proposal_policy_rejects",
+        "remainder26_cancel_topology_one_over_cancel_assets_receipt_policy_rejects",
+        "remainder26_cancel_topology_one_over_cancel_assets_construction",
+        "remainder26_cancel_topology_one_over_cancel_assets_resource_at_limit",
+        "remainder26_cancel_topology_one_over_cancel_datum_bytes_transition_rejects",
+        "remainder26_cancel_topology_one_over_cancel_datum_bytes_governor_spend_rejects",
+        "remainder26_cancel_topology_one_over_cancel_datum_bytes_proposal_policy_rejects",
+        "remainder26_cancel_topology_one_over_cancel_datum_bytes_receipt_policy_rejects",
+        "remainder26_cancel_topology_one_over_cancel_datum_bytes_construction",
+        "remainder26_cancel_topology_one_over_cancel_datum_bytes_resource_at_limit",
+        "remainder26_cancel_topology_one_over_cancel_signers_transition_rejects",
+        "remainder26_cancel_topology_one_over_cancel_signers_governor_spend_rejects",
+        "remainder26_cancel_topology_one_over_cancel_signers_proposal_policy_rejects",
+        "remainder26_cancel_topology_one_over_cancel_signers_receipt_policy_rejects",
+        "remainder26_cancel_topology_one_over_cancel_signers_construction",
+        "remainder26_cancel_topology_one_over_cancel_signers_resource_at_limit"
+      ],
+      "native_evidence": "NOT_RUN",
+      "acceptance_credit": false,
+      "remaining": "Proposed definitions and source cases only; exact parent/caller review, native/applied/ledger/budget acceptance remain pending.",
+      "proposed_definition_record": "repair_20261031/REMAINDER-CAMPAIGN.json#cancel_topology_one_over"
+    },
+    {
+      "parent_id": "cancel_datum_mutation",
+      "parent_transition": "Cancel",
+      "parent_expectation": "reject",
+      "parent_mutation_id": "datum_cancel",
+      "planned_representative_tests": [
+        "remainder26_cancel_datum_mutation_cancel_datum_version_transition_rejects",
+        "remainder26_cancel_datum_mutation_cancel_datum_version_governor_spend_rejects",
+        "remainder26_cancel_datum_mutation_cancel_datum_version_proposal_policy_rejects",
+        "remainder26_cancel_datum_mutation_cancel_datum_version_receipt_policy_rejects",
+        "remainder26_cancel_datum_mutation_cancel_datum_version_construction"
+      ],
+      "native_evidence": "NOT_RUN",
+      "acceptance_credit": false,
+      "remaining": "Proposed definitions and source cases only; exact parent/caller review, native/applied/ledger/budget acceptance remain pending.",
+      "proposed_definition_record": "repair_20261031/REMAINDER-CAMPAIGN.json#cancel_datum_mutation"
+    },
+    {
+      "parent_id": "cancel_timing_boundary",
+      "parent_transition": "Cancel",
+      "parent_expectation": "reject",
+      "parent_mutation_id": "timing_cancel",
+      "planned_representative_tests": [
+        "proposal_cancel_at_deadline_rejects"
+      ],
+      "native_evidence": "NOT_RUN",
+      "acceptance_credit": false,
+      "remaining": "Complete exact parent mutation and cross-caller coverage under v2; representative test names are not full coverage."
+    },
+    {
+      "parent_id": "queue_destination",
+      "parent_transition": "Queue",
+      "parent_expectation": "reject",
+      "parent_mutation_id": "destination_queue",
+      "planned_representative_tests": [
+        "queue_wrong_intent_destination_rejects"
+      ],
+      "native_evidence": "NOT_RUN",
+      "acceptance_credit": false,
+      "remaining": "Complete exact parent mutation and cross-caller coverage under v2; representative test names are not full coverage."
+    },
+    {
+      "parent_id": "queue_topology_one_over",
+      "parent_transition": "Queue",
+      "parent_expectation": "reject",
+      "parent_mutation_id": "topology_queue",
+      "planned_representative_tests": [
+        "remainder26_queue_topology_one_over_queue_inputs_exact_transition_rejects",
+        "remainder26_queue_topology_one_over_queue_inputs_exact_authority_spend_rejects",
+        "remainder26_queue_topology_one_over_queue_inputs_exact_governor_spend_rejects",
+        "remainder26_queue_topology_one_over_queue_inputs_exact_proposal_policy_rejects",
+        "remainder26_queue_topology_one_over_queue_inputs_exact_receipt_policy_rejects",
+        "remainder26_queue_topology_one_over_queue_inputs_exact_intent_policy_rejects",
+        "remainder26_queue_topology_one_over_queue_inputs_exact_construction",
+        "remainder26_queue_topology_one_over_queue_inputs_global_transition_rejects",
+        "remainder26_queue_topology_one_over_queue_inputs_global_authority_spend_rejects",
+        "remainder26_queue_topology_one_over_queue_inputs_global_governor_spend_rejects",
+        "remainder26_queue_topology_one_over_queue_inputs_global_proposal_policy_rejects",
+        "remainder26_queue_topology_one_over_queue_inputs_global_receipt_policy_rejects",
+        "remainder26_queue_topology_one_over_queue_inputs_global_intent_policy_rejects",
+        "remainder26_queue_topology_one_over_queue_inputs_global_construction",
+        "remainder26_queue_topology_one_over_queue_inputs_global_resource_at_limit",
+        "remainder26_queue_topology_one_over_queue_outputs_exact_transition_rejects",
+        "remainder26_queue_topology_one_over_queue_outputs_exact_authority_spend_rejects",
+        "remainder26_queue_topology_one_over_queue_outputs_exact_governor_spend_rejects",
+        "remainder26_queue_topology_one_over_queue_outputs_exact_proposal_policy_rejects",
+        "remainder26_queue_topology_one_over_queue_outputs_exact_receipt_policy_rejects",
+        "remainder26_queue_topology_one_over_queue_outputs_exact_intent_policy_rejects",
+        "remainder26_queue_topology_one_over_queue_outputs_exact_construction",
+        "remainder26_queue_topology_one_over_queue_outputs_global_transition_rejects",
+        "remainder26_queue_topology_one_over_queue_outputs_global_authority_spend_rejects",
+        "remainder26_queue_topology_one_over_queue_outputs_global_governor_spend_rejects",
+        "remainder26_queue_topology_one_over_queue_outputs_global_proposal_policy_rejects",
+        "remainder26_queue_topology_one_over_queue_outputs_global_receipt_policy_rejects",
+        "remainder26_queue_topology_one_over_queue_outputs_global_intent_policy_rejects",
+        "remainder26_queue_topology_one_over_queue_outputs_global_construction",
+        "remainder26_queue_topology_one_over_queue_outputs_global_resource_at_limit",
+        "remainder26_queue_topology_one_over_queue_assets_transition_rejects",
+        "remainder26_queue_topology_one_over_queue_assets_authority_spend_rejects",
+        "remainder26_queue_topology_one_over_queue_assets_governor_spend_rejects",
+        "remainder26_queue_topology_one_over_queue_assets_proposal_policy_rejects",
+        "remainder26_queue_topology_one_over_queue_assets_receipt_policy_rejects",
+        "remainder26_queue_topology_one_over_queue_assets_intent_policy_rejects",
+        "remainder26_queue_topology_one_over_queue_assets_construction",
+        "remainder26_queue_topology_one_over_queue_assets_resource_at_limit",
+        "remainder26_queue_topology_one_over_queue_datum_bytes_transition_rejects",
+        "remainder26_queue_topology_one_over_queue_datum_bytes_authority_spend_rejects",
+        "remainder26_queue_topology_one_over_queue_datum_bytes_governor_spend_rejects",
+        "remainder26_queue_topology_one_over_queue_datum_bytes_proposal_policy_rejects",
+        "remainder26_queue_topology_one_over_queue_datum_bytes_receipt_policy_rejects",
+        "remainder26_queue_topology_one_over_queue_datum_bytes_intent_policy_rejects",
+        "remainder26_queue_topology_one_over_queue_datum_bytes_construction",
+        "remainder26_queue_topology_one_over_queue_datum_bytes_resource_at_limit",
+        "remainder26_queue_topology_one_over_queue_signers_transition_rejects",
+        "remainder26_queue_topology_one_over_queue_signers_authority_spend_rejects",
+        "remainder26_queue_topology_one_over_queue_signers_governor_spend_rejects",
+        "remainder26_queue_topology_one_over_queue_signers_proposal_policy_rejects",
+        "remainder26_queue_topology_one_over_queue_signers_receipt_policy_rejects",
+        "remainder26_queue_topology_one_over_queue_signers_intent_policy_rejects",
+        "remainder26_queue_topology_one_over_queue_signers_construction",
+        "remainder26_queue_topology_one_over_queue_signers_resource_at_limit"
+      ],
+      "native_evidence": "NOT_RUN",
+      "acceptance_credit": false,
+      "remaining": "Proposed definitions and source cases only; exact parent/caller review, native/applied/ledger/budget acceptance remain pending.",
+      "proposed_definition_record": "repair_20261031/REMAINDER-CAMPAIGN.json#queue_topology_one_over"
+    },
+    {
+      "parent_id": "queue_datum_mutation",
+      "parent_transition": "Queue",
+      "parent_expectation": "reject",
+      "parent_mutation_id": "datum_queue",
+      "planned_representative_tests": [
+        "wrong_queue_payload_rejects"
+      ],
+      "native_evidence": "NOT_RUN",
+      "acceptance_credit": false,
+      "remaining": "Complete exact parent mutation and cross-caller coverage under v2; representative test names are not full coverage."
+    },
+    {
+      "parent_id": "queue_timing_boundary",
+      "parent_transition": "Queue",
+      "parent_expectation": "reject",
+      "parent_mutation_id": "timing_queue",
+      "planned_representative_tests": [
+        "timing_upper_anchor_transition_accepts",
+        "timing_backdated_lower_anchor_transition_rejects",
+        "timing_queue_overflow_transition_rejects",
+        "timing_upper_anchor_authority_accepts",
+        "timing_backdated_lower_anchor_authority_rejects",
+        "timing_queue_overflow_authority_rejects",
+        "timing_upper_anchor_governor_accepts",
+        "timing_backdated_lower_anchor_governor_rejects",
+        "timing_queue_overflow_governor_rejects",
+        "timing_upper_anchor_proposal_policy_accepts",
+        "timing_backdated_lower_anchor_proposal_policy_rejects",
+        "timing_queue_overflow_proposal_policy_rejects",
+        "timing_upper_anchor_receipt_policy_accepts",
+        "timing_backdated_lower_anchor_receipt_policy_rejects",
+        "timing_queue_overflow_receipt_policy_rejects",
+        "timing_upper_anchor_intent_policy_accepts",
+        "timing_backdated_lower_anchor_intent_policy_rejects",
+        "timing_queue_overflow_intent_policy_rejects",
+        "timing_queue_one_ms_accepts",
+        "timing_queue_max_width_accepts",
+        "timing_queue_last_safe_u64_accepts"
+      ],
+      "native_evidence": "NOT_RUN",
+      "acceptance_credit": false,
+      "remaining": "Complete exact parent mutation and cross-caller coverage under v2; representative test names are not full coverage."
+    },
+    {
+      "parent_id": "cancelintent_destination",
+      "parent_transition": "CancelIntent",
+      "parent_expectation": "reject",
+      "parent_mutation_id": "destination_cancelintent",
+      "planned_representative_tests": [
+        "intent_cancel_redirected_proposer_refund_rejects"
+      ],
+      "native_evidence": "NOT_RUN",
+      "acceptance_credit": false,
+      "remaining": "Complete exact parent mutation and cross-caller coverage under v2; representative test names are not full coverage."
+    },
+    {
+      "parent_id": "cancelintent_topology_one_over",
+      "parent_transition": "CancelIntent",
+      "parent_expectation": "reject",
+      "parent_mutation_id": "topology_cancelintent",
+      "planned_representative_tests": [
+        "remainder26_cancelintent_topology_one_over_cancelintent_inputs_exact_transition_rejects",
+        "remainder26_cancelintent_topology_one_over_cancelintent_inputs_exact_timelock_spend_rejects",
+        "remainder26_cancelintent_topology_one_over_cancelintent_inputs_exact_intent_policy_rejects",
+        "remainder26_cancelintent_topology_one_over_cancelintent_inputs_exact_construction",
+        "remainder26_cancelintent_topology_one_over_cancelintent_inputs_global_transition_rejects",
+        "remainder26_cancelintent_topology_one_over_cancelintent_inputs_global_timelock_spend_rejects",
+        "remainder26_cancelintent_topology_one_over_cancelintent_inputs_global_intent_policy_rejects",
+        "remainder26_cancelintent_topology_one_over_cancelintent_inputs_global_construction",
+        "remainder26_cancelintent_topology_one_over_cancelintent_inputs_global_resource_at_limit",
+        "remainder26_cancelintent_topology_one_over_cancelintent_outputs_exact_transition_rejects",
+        "remainder26_cancelintent_topology_one_over_cancelintent_outputs_exact_timelock_spend_rejects",
+        "remainder26_cancelintent_topology_one_over_cancelintent_outputs_exact_intent_policy_rejects",
+        "remainder26_cancelintent_topology_one_over_cancelintent_outputs_exact_construction",
+        "remainder26_cancelintent_topology_one_over_cancelintent_outputs_global_transition_rejects",
+        "remainder26_cancelintent_topology_one_over_cancelintent_outputs_global_timelock_spend_rejects",
+        "remainder26_cancelintent_topology_one_over_cancelintent_outputs_global_intent_policy_rejects",
+        "remainder26_cancelintent_topology_one_over_cancelintent_outputs_global_construction",
+        "remainder26_cancelintent_topology_one_over_cancelintent_outputs_global_resource_at_limit",
+        "remainder26_cancelintent_topology_one_over_cancelintent_assets_transition_rejects",
+        "remainder26_cancelintent_topology_one_over_cancelintent_assets_timelock_spend_rejects",
+        "remainder26_cancelintent_topology_one_over_cancelintent_assets_intent_policy_rejects",
+        "remainder26_cancelintent_topology_one_over_cancelintent_assets_construction",
+        "remainder26_cancelintent_topology_one_over_cancelintent_assets_resource_at_limit",
+        "remainder26_cancelintent_topology_one_over_cancelintent_datum_bytes_transition_rejects",
+        "remainder26_cancelintent_topology_one_over_cancelintent_datum_bytes_timelock_spend_rejects",
+        "remainder26_cancelintent_topology_one_over_cancelintent_datum_bytes_intent_policy_rejects",
+        "remainder26_cancelintent_topology_one_over_cancelintent_datum_bytes_construction",
+        "remainder26_cancelintent_topology_one_over_cancelintent_datum_bytes_resource_at_limit",
+        "remainder26_cancelintent_topology_one_over_cancelintent_signers_transition_rejects",
+        "remainder26_cancelintent_topology_one_over_cancelintent_signers_timelock_spend_rejects",
+        "remainder26_cancelintent_topology_one_over_cancelintent_signers_intent_policy_rejects",
+        "remainder26_cancelintent_topology_one_over_cancelintent_signers_construction",
+        "remainder26_cancelintent_topology_one_over_cancelintent_signers_resource_at_limit"
+      ],
+      "native_evidence": "NOT_RUN",
+      "acceptance_credit": false,
+      "remaining": "Proposed definitions and source cases only; exact parent/caller review, native/applied/ledger/budget acceptance remain pending.",
+      "proposed_definition_record": "repair_20261031/REMAINDER-CAMPAIGN.json#cancelintent_topology_one_over"
+    },
+    {
+      "parent_id": "cancelintent_datum_mutation",
+      "parent_transition": "CancelIntent",
+      "parent_expectation": "reject",
+      "parent_mutation_id": "datum_cancelintent",
+      "planned_representative_tests": [
+        "remainder26_cancelintent_datum_mutation_cancelintent_datum_version_transition_rejects",
+        "remainder26_cancelintent_datum_mutation_cancelintent_datum_version_timelock_spend_rejects",
+        "remainder26_cancelintent_datum_mutation_cancelintent_datum_version_intent_policy_rejects",
+        "remainder26_cancelintent_datum_mutation_cancelintent_datum_version_construction"
+      ],
+      "native_evidence": "NOT_RUN",
+      "acceptance_credit": false,
+      "remaining": "Proposed definitions and source cases only; exact parent/caller review, native/applied/ledger/budget acceptance remain pending.",
+      "proposed_definition_record": "repair_20261031/REMAINDER-CAMPAIGN.json#cancelintent_datum_mutation"
+    },
+    {
+      "parent_id": "cancelintent_timing_boundary",
+      "parent_transition": "CancelIntent",
+      "parent_expectation": "reject",
+      "parent_mutation_id": "timing_cancelintent",
+      "planned_representative_tests": [
+        "remainder26_cancelintent_timing_boundary_cancelintent_empty_window_transition_rejects",
+        "remainder26_cancelintent_timing_boundary_cancelintent_empty_window_timelock_spend_rejects",
+        "remainder26_cancelintent_timing_boundary_cancelintent_empty_window_intent_policy_rejects",
+        "remainder26_cancelintent_timing_boundary_cancelintent_empty_window_construction"
+      ],
+      "native_evidence": "NOT_RUN",
+      "acceptance_credit": false,
+      "remaining": "Proposed definitions and source cases only; exact parent/caller review, native/applied/ledger/budget acceptance remain pending.",
+      "proposed_definition_record": "repair_20261031/REMAINDER-CAMPAIGN.json#cancelintent_timing_boundary"
+    },
+    {
+      "parent_id": "expireintent_destination",
+      "parent_transition": "ExpireIntent",
+      "parent_expectation": "reject",
+      "parent_mutation_id": "destination_expireintent",
+      "planned_representative_tests": [
+        "intent_expiry_redirected_proposer_refund_rejects"
+      ],
+      "native_evidence": "NOT_RUN",
+      "acceptance_credit": false,
+      "remaining": "Complete exact parent mutation and cross-caller coverage under v2; representative test names are not full coverage."
+    },
+    {
+      "parent_id": "expireintent_topology_one_over",
+      "parent_transition": "ExpireIntent",
+      "parent_expectation": "reject",
+      "parent_mutation_id": "topology_expireintent",
+      "planned_representative_tests": [
+        "remainder26_expireintent_topology_one_over_expireintent_inputs_exact_transition_rejects",
+        "remainder26_expireintent_topology_one_over_expireintent_inputs_exact_timelock_spend_rejects",
+        "remainder26_expireintent_topology_one_over_expireintent_inputs_exact_intent_policy_rejects",
+        "remainder26_expireintent_topology_one_over_expireintent_inputs_exact_construction",
+        "remainder26_expireintent_topology_one_over_expireintent_inputs_global_transition_rejects",
+        "remainder26_expireintent_topology_one_over_expireintent_inputs_global_timelock_spend_rejects",
+        "remainder26_expireintent_topology_one_over_expireintent_inputs_global_intent_policy_rejects",
+        "remainder26_expireintent_topology_one_over_expireintent_inputs_global_construction",
+        "remainder26_expireintent_topology_one_over_expireintent_inputs_global_resource_at_limit",
+        "remainder26_expireintent_topology_one_over_expireintent_outputs_exact_transition_rejects",
+        "remainder26_expireintent_topology_one_over_expireintent_outputs_exact_timelock_spend_rejects",
+        "remainder26_expireintent_topology_one_over_expireintent_outputs_exact_intent_policy_rejects",
+        "remainder26_expireintent_topology_one_over_expireintent_outputs_exact_construction",
+        "remainder26_expireintent_topology_one_over_expireintent_outputs_global_transition_rejects",
+        "remainder26_expireintent_topology_one_over_expireintent_outputs_global_timelock_spend_rejects",
+        "remainder26_expireintent_topology_one_over_expireintent_outputs_global_intent_policy_rejects",
+        "remainder26_expireintent_topology_one_over_expireintent_outputs_global_construction",
+        "remainder26_expireintent_topology_one_over_expireintent_outputs_global_resource_at_limit",
+        "remainder26_expireintent_topology_one_over_expireintent_assets_transition_rejects",
+        "remainder26_expireintent_topology_one_over_expireintent_assets_timelock_spend_rejects",
+        "remainder26_expireintent_topology_one_over_expireintent_assets_intent_policy_rejects",
+        "remainder26_expireintent_topology_one_over_expireintent_assets_construction",
+        "remainder26_expireintent_topology_one_over_expireintent_assets_resource_at_limit",
+        "remainder26_expireintent_topology_one_over_expireintent_datum_bytes_transition_rejects",
+        "remainder26_expireintent_topology_one_over_expireintent_datum_bytes_timelock_spend_rejects",
+        "remainder26_expireintent_topology_one_over_expireintent_datum_bytes_intent_policy_rejects",
+        "remainder26_expireintent_topology_one_over_expireintent_datum_bytes_construction",
+        "remainder26_expireintent_topology_one_over_expireintent_datum_bytes_resource_at_limit",
+        "remainder26_expireintent_topology_one_over_expireintent_signers_transition_rejects",
+        "remainder26_expireintent_topology_one_over_expireintent_signers_timelock_spend_rejects",
+        "remainder26_expireintent_topology_one_over_expireintent_signers_intent_policy_rejects",
+        "remainder26_expireintent_topology_one_over_expireintent_signers_construction",
+        "remainder26_expireintent_topology_one_over_expireintent_signers_resource_at_limit"
+      ],
+      "native_evidence": "NOT_RUN",
+      "acceptance_credit": false,
+      "remaining": "Proposed definitions and source cases only; exact parent/caller review, native/applied/ledger/budget acceptance remain pending.",
+      "proposed_definition_record": "repair_20261031/REMAINDER-CAMPAIGN.json#expireintent_topology_one_over"
+    },
+    {
+      "parent_id": "expireintent_datum_mutation",
+      "parent_transition": "ExpireIntent",
+      "parent_expectation": "reject",
+      "parent_mutation_id": "datum_expireintent",
+      "planned_representative_tests": [
+        "remainder26_expireintent_datum_mutation_expireintent_datum_version_transition_rejects",
+        "remainder26_expireintent_datum_mutation_expireintent_datum_version_timelock_spend_rejects",
+        "remainder26_expireintent_datum_mutation_expireintent_datum_version_intent_policy_rejects",
+        "remainder26_expireintent_datum_mutation_expireintent_datum_version_construction"
+      ],
+      "native_evidence": "NOT_RUN",
+      "acceptance_credit": false,
+      "remaining": "Proposed definitions and source cases only; exact parent/caller review, native/applied/ledger/budget acceptance remain pending.",
+      "proposed_definition_record": "repair_20261031/REMAINDER-CAMPAIGN.json#expireintent_datum_mutation"
+    },
+    {
+      "parent_id": "expireintent_timing_boundary",
+      "parent_transition": "ExpireIntent",
+      "parent_expectation": "reject",
+      "parent_mutation_id": "timing_expireintent",
+      "planned_representative_tests": [
+        "premature_intent_expiry_rejects"
+      ],
+      "native_evidence": "NOT_RUN",
+      "acceptance_credit": false,
+      "remaining": "Complete exact parent mutation and cross-caller coverage under v2; representative test names are not full coverage."
+    },
+    {
+      "parent_id": "executeintent_destination",
+      "parent_transition": "ExecuteIntent",
+      "parent_expectation": "reject",
+      "parent_mutation_id": "destination_executeintent",
+      "planned_representative_tests": [
+        "remainder26_executeintent_destination_executeintent_destination_timelock_spend_rejects",
+        "remainder26_executeintent_destination_executeintent_destination_intent_policy_rejects",
+        "remainder26_executeintent_destination_executeintent_destination_construction"
+      ],
+      "native_evidence": "NOT_RUN",
+      "acceptance_credit": false,
+      "remaining": "Proposed definitions and source cases only; exact parent/caller review, native/applied/ledger/budget acceptance remain pending.",
+      "proposed_definition_record": "repair_20261031/REMAINDER-CAMPAIGN.json#executeintent_destination"
+    },
+    {
+      "parent_id": "executeintent_topology_one_over",
+      "parent_transition": "ExecuteIntent",
+      "parent_expectation": "reject",
+      "parent_mutation_id": "topology_executeintent",
+      "planned_representative_tests": [
+        "remainder26_executeintent_topology_one_over_executeintent_inputs_exact_timelock_spend_rejects",
+        "remainder26_executeintent_topology_one_over_executeintent_inputs_exact_intent_policy_rejects",
+        "remainder26_executeintent_topology_one_over_executeintent_inputs_exact_construction",
+        "remainder26_executeintent_topology_one_over_executeintent_inputs_global_timelock_spend_rejects",
+        "remainder26_executeintent_topology_one_over_executeintent_inputs_global_intent_policy_rejects",
+        "remainder26_executeintent_topology_one_over_executeintent_inputs_global_construction",
+        "remainder26_executeintent_topology_one_over_executeintent_inputs_global_resource_at_limit",
+        "remainder26_executeintent_topology_one_over_executeintent_outputs_exact_timelock_spend_rejects",
+        "remainder26_executeintent_topology_one_over_executeintent_outputs_exact_intent_policy_rejects",
+        "remainder26_executeintent_topology_one_over_executeintent_outputs_exact_construction",
+        "remainder26_executeintent_topology_one_over_executeintent_outputs_global_timelock_spend_rejects",
+        "remainder26_executeintent_topology_one_over_executeintent_outputs_global_intent_policy_rejects",
+        "remainder26_executeintent_topology_one_over_executeintent_outputs_global_construction",
+        "remainder26_executeintent_topology_one_over_executeintent_outputs_global_resource_at_limit",
+        "remainder26_executeintent_topology_one_over_executeintent_assets_timelock_spend_rejects",
+        "remainder26_executeintent_topology_one_over_executeintent_assets_intent_policy_rejects",
+        "remainder26_executeintent_topology_one_over_executeintent_assets_construction",
+        "remainder26_executeintent_topology_one_over_executeintent_assets_resource_at_limit",
+        "remainder26_executeintent_topology_one_over_executeintent_datum_bytes_timelock_spend_rejects",
+        "remainder26_executeintent_topology_one_over_executeintent_datum_bytes_intent_policy_rejects",
+        "remainder26_executeintent_topology_one_over_executeintent_datum_bytes_construction",
+        "remainder26_executeintent_topology_one_over_executeintent_datum_bytes_resource_at_limit",
+        "remainder26_executeintent_topology_one_over_executeintent_signers_timelock_spend_rejects",
+        "remainder26_executeintent_topology_one_over_executeintent_signers_intent_policy_rejects",
+        "remainder26_executeintent_topology_one_over_executeintent_signers_construction",
+        "remainder26_executeintent_topology_one_over_executeintent_signers_resource_at_limit"
+      ],
+      "native_evidence": "NOT_RUN",
+      "acceptance_credit": false,
+      "remaining": "Proposed definitions and source cases only; exact parent/caller review, native/applied/ledger/budget acceptance remain pending.",
+      "proposed_definition_record": "repair_20261031/REMAINDER-CAMPAIGN.json#executeintent_topology_one_over"
+    },
+    {
+      "parent_id": "executeintent_datum_mutation",
+      "parent_transition": "ExecuteIntent",
+      "parent_expectation": "reject",
+      "parent_mutation_id": "datum_executeintent",
+      "planned_representative_tests": [
+        "remainder26_executeintent_datum_mutation_executeintent_datum_version_timelock_spend_rejects",
+        "remainder26_executeintent_datum_mutation_executeintent_datum_version_intent_policy_rejects",
+        "remainder26_executeintent_datum_mutation_executeintent_datum_version_construction"
+      ],
+      "native_evidence": "NOT_RUN",
+      "acceptance_credit": false,
+      "remaining": "Proposed definitions and source cases only; exact parent/caller review, native/applied/ledger/budget acceptance remain pending.",
+      "proposed_definition_record": "repair_20261031/REMAINDER-CAMPAIGN.json#executeintent_datum_mutation"
+    },
+    {
+      "parent_id": "executeintent_timing_boundary",
+      "parent_transition": "ExecuteIntent",
+      "parent_expectation": "reject",
+      "parent_mutation_id": "timing_executeintent",
+      "planned_representative_tests": [
+        "remainder26_executeintent_timing_boundary_executeintent_before_execute_timelock_spend_rejects",
+        "remainder26_executeintent_timing_boundary_executeintent_before_execute_intent_policy_rejects",
+        "remainder26_executeintent_timing_boundary_executeintent_before_execute_construction"
+      ],
+      "native_evidence": "NOT_RUN",
+      "acceptance_credit": false,
+      "remaining": "Proposed definitions and source cases only; exact parent/caller review, native/applied/ledger/budget acceptance remain pending.",
+      "proposed_definition_record": "repair_20261031/REMAINDER-CAMPAIGN.json#executeintent_timing_boundary"
+    },
+    {
+      "parent_id": "asset_boundary_00",
+      "parent_transition": "Queue",
+      "parent_expectation": "reject",
+      "parent_mutation_id": "asset_boundary_0",
+      "planned_representative_tests": [
+        "asset_boundary_00_queue_transition_rejects",
+        "asset_boundary_00_queue_authority_spend_rejects",
+        "asset_boundary_00_queue_governor_spend_rejects",
+        "asset_boundary_00_queue_proposal_policy_rejects",
+        "asset_boundary_00_queue_receipt_policy_rejects",
+        "asset_boundary_00_queue_intent_policy_rejects",
+        "asset_boundary_00_fixture_conserves"
+      ],
+      "native_evidence": "NOT_RUN",
+      "acceptance_credit": false,
+      "remaining": "Proposed v2 refinement only: native/caller/ledger/applied budget and independent review all pending.",
+      "proposed_v2_definition": "intent_legacy_domain",
+      "proposed_definition_record": "repair_20261031/ASSET-BOUNDARY-CAMPAIGN.json#asset_boundary_00"
+    },
+    {
+      "parent_id": "asset_boundary_01",
+      "parent_transition": "Vote",
+      "parent_expectation": "reject",
+      "parent_mutation_id": "asset_boundary_1",
+      "planned_representative_tests": [
+        "asset_boundary_01_vote_transition_rejects",
+        "asset_boundary_01_vote_governor_spend_rejects",
+        "asset_boundary_01_vote_receipt_policy_rejects",
+        "asset_boundary_01_fixture_conserves"
+      ],
+      "native_evidence": "NOT_RUN",
+      "acceptance_credit": false,
+      "remaining": "Proposed v2 refinement only: native/caller/ledger/applied budget and independent review all pending.",
+      "proposed_v2_definition": "proposal_legacy_domain",
+      "proposed_definition_record": "repair_20261031/ASSET-BOUNDARY-CAMPAIGN.json#asset_boundary_01"
+    },
+    {
+      "parent_id": "asset_boundary_02",
+      "parent_transition": "Queue",
+      "parent_expectation": "reject",
+      "parent_mutation_id": "asset_boundary_2",
+      "planned_representative_tests": [
+        "asset_boundary_02_queue_transition_rejects",
+        "asset_boundary_02_queue_authority_spend_rejects",
+        "asset_boundary_02_queue_governor_spend_rejects",
+        "asset_boundary_02_queue_proposal_policy_rejects",
+        "asset_boundary_02_queue_receipt_policy_rejects",
+        "asset_boundary_02_queue_intent_policy_rejects",
+        "asset_boundary_02_fixture_conserves"
+      ],
+      "native_evidence": "NOT_RUN",
+      "acceptance_credit": false,
+      "remaining": "Proposed v2 refinement only: native/caller/ledger/applied budget and independent review all pending.",
+      "proposed_v2_definition": "proposal_domain_without_nul",
+      "proposed_definition_record": "repair_20261031/ASSET-BOUNDARY-CAMPAIGN.json#asset_boundary_02"
+    },
+    {
+      "parent_id": "asset_boundary_03",
+      "parent_transition": "Vote",
+      "parent_expectation": "reject",
+      "parent_mutation_id": "asset_boundary_3",
+      "planned_representative_tests": [
+        "asset_boundary_03_vote_transition_rejects",
+        "asset_boundary_03_vote_governor_spend_rejects",
+        "asset_boundary_03_vote_receipt_policy_rejects",
+        "asset_boundary_03_fixture_conserves"
+      ],
+      "native_evidence": "NOT_RUN",
+      "acceptance_credit": false,
+      "remaining": "Proposed v2 refinement only: native/caller/ledger/applied budget and independent review all pending.",
+      "proposed_v2_definition": "proposal_authority_policy_substitution",
+      "proposed_definition_record": "repair_20261031/ASSET-BOUNDARY-CAMPAIGN.json#asset_boundary_03"
+    },
+    {
+      "parent_id": "asset_boundary_04",
+      "parent_transition": "Queue",
+      "parent_expectation": "reject",
+      "parent_mutation_id": "asset_boundary_4",
+      "planned_representative_tests": [
+        "asset_boundary_04_queue_transition_rejects",
+        "asset_boundary_04_queue_authority_spend_rejects",
+        "asset_boundary_04_queue_governor_spend_rejects",
+        "asset_boundary_04_queue_proposal_policy_rejects",
+        "asset_boundary_04_queue_receipt_policy_rejects",
+        "asset_boundary_04_queue_intent_policy_rejects",
+        "asset_boundary_04_fixture_conserves"
+      ],
+      "native_evidence": "NOT_RUN",
+      "acceptance_credit": false,
+      "remaining": "Proposed v2 refinement only: native/caller/ledger/applied budget and independent review all pending.",
+      "proposed_v2_definition": "proposal_authority_asset_substitution",
+      "proposed_definition_record": "repair_20261031/ASSET-BOUNDARY-CAMPAIGN.json#asset_boundary_04"
+    },
+    {
+      "parent_id": "asset_boundary_05",
+      "parent_transition": "Vote",
+      "parent_expectation": "reject",
+      "parent_mutation_id": "asset_boundary_5",
+      "planned_representative_tests": [
+        "asset_boundary_05_vote_transition_rejects",
+        "asset_boundary_05_vote_governor_spend_rejects",
+        "asset_boundary_05_vote_receipt_policy_rejects",
+        "asset_boundary_05_fixture_conserves"
+      ],
+      "native_evidence": "NOT_RUN",
+      "acceptance_credit": false,
+      "remaining": "Proposed v2 refinement only: native/caller/ledger/applied budget and independent review all pending.",
+      "proposed_v2_definition": "proposal_policy_substitution",
+      "proposed_definition_record": "repair_20261031/ASSET-BOUNDARY-CAMPAIGN.json#asset_boundary_05"
+    },
+    {
+      "parent_id": "asset_boundary_06",
+      "parent_transition": "Queue",
+      "parent_expectation": "reject",
+      "parent_mutation_id": "asset_boundary_6",
+      "planned_representative_tests": [
+        "asset_boundary_06_queue_transition_rejects",
+        "asset_boundary_06_queue_authority_spend_rejects",
+        "asset_boundary_06_queue_governor_spend_rejects",
+        "asset_boundary_06_queue_proposal_policy_rejects",
+        "asset_boundary_06_queue_receipt_policy_rejects",
+        "asset_boundary_06_queue_intent_policy_rejects",
+        "asset_boundary_06_fixture_conserves"
+      ],
+      "native_evidence": "NOT_RUN",
+      "acceptance_credit": false,
+      "remaining": "Proposed v2 refinement only: native/caller/ledger/applied budget and independent review all pending.",
+      "proposed_v2_definition": "proposal_epoch_little_endian",
+      "proposed_definition_record": "repair_20261031/ASSET-BOUNDARY-CAMPAIGN.json#asset_boundary_06"
+    },
+    {
+      "parent_id": "asset_boundary_07",
+      "parent_transition": "Vote",
+      "parent_expectation": "reject",
+      "parent_mutation_id": "asset_boundary_7",
+      "planned_representative_tests": [
+        "asset_boundary_07_vote_transition_rejects",
+        "asset_boundary_07_vote_governor_spend_rejects",
+        "asset_boundary_07_vote_receipt_policy_rejects",
+        "asset_boundary_07_fixture_conserves"
+      ],
+      "native_evidence": "NOT_RUN",
+      "acceptance_credit": false,
+      "remaining": "Proposed v2 refinement only: native/caller/ledger/applied budget and independent review all pending.",
+      "proposed_v2_definition": "proposal_epoch_width8",
+      "proposed_definition_record": "repair_20261031/ASSET-BOUNDARY-CAMPAIGN.json#asset_boundary_07"
+    },
+    {
+      "parent_id": "asset_boundary_08",
+      "parent_transition": "Queue",
+      "parent_expectation": "reject",
+      "parent_mutation_id": "asset_boundary_8",
+      "planned_representative_tests": [
+        "asset_boundary_08_queue_transition_rejects",
+        "asset_boundary_08_queue_authority_spend_rejects",
+        "asset_boundary_08_queue_governor_spend_rejects",
+        "asset_boundary_08_queue_proposal_policy_rejects",
+        "asset_boundary_08_queue_receipt_policy_rejects",
+        "asset_boundary_08_queue_intent_policy_rejects",
+        "asset_boundary_08_fixture_conserves"
+      ],
+      "native_evidence": "NOT_RUN",
+      "acceptance_credit": false,
+      "remaining": "Proposed v2 refinement only: native/caller/ledger/applied budget and independent review all pending.",
+      "proposed_v2_definition": "proposal_nonce_width4",
+      "proposed_definition_record": "repair_20261031/ASSET-BOUNDARY-CAMPAIGN.json#asset_boundary_08"
+    },
+    {
+      "parent_id": "asset_boundary_09",
+      "parent_transition": "Vote",
+      "parent_expectation": "reject",
+      "parent_mutation_id": "asset_boundary_9",
+      "planned_representative_tests": [
+        "asset_boundary_09_vote_transition_rejects",
+        "asset_boundary_09_vote_governor_spend_rejects",
+        "asset_boundary_09_vote_receipt_policy_rejects",
+        "asset_boundary_09_fixture_conserves"
+      ],
+      "native_evidence": "NOT_RUN",
+      "acceptance_credit": false,
+      "remaining": "Proposed v2 refinement only: native/caller/ledger/applied budget and independent review all pending.",
+      "proposed_v2_definition": "proposal_nonce_substitution",
+      "proposed_definition_record": "repair_20261031/ASSET-BOUNDARY-CAMPAIGN.json#asset_boundary_09"
+    },
+    {
+      "parent_id": "asset_boundary_10",
+      "parent_transition": "Queue",
+      "parent_expectation": "reject",
+      "parent_mutation_id": "asset_boundary_10",
+      "planned_representative_tests": [
+        "asset_boundary_10_queue_transition_rejects",
+        "asset_boundary_10_queue_authority_spend_rejects",
+        "asset_boundary_10_queue_governor_spend_rejects",
+        "asset_boundary_10_queue_proposal_policy_rejects",
+        "asset_boundary_10_queue_receipt_policy_rejects",
+        "asset_boundary_10_queue_intent_policy_rejects",
+        "asset_boundary_10_fixture_conserves"
+      ],
+      "native_evidence": "NOT_RUN",
+      "acceptance_credit": false,
+      "remaining": "Proposed v2 refinement only: native/caller/ledger/applied budget and independent review all pending.",
+      "proposed_v2_definition": "proposal_proposer_substitution",
+      "proposed_definition_record": "repair_20261031/ASSET-BOUNDARY-CAMPAIGN.json#asset_boundary_10"
+    },
+    {
+      "parent_id": "asset_boundary_11",
+      "parent_transition": "Vote",
+      "parent_expectation": "reject",
+      "parent_mutation_id": "asset_boundary_11",
+      "planned_representative_tests": [
+        "asset_boundary_11_vote_transition_rejects",
+        "asset_boundary_11_vote_governor_spend_rejects",
+        "asset_boundary_11_vote_receipt_policy_rejects",
+        "asset_boundary_11_fixture_conserves"
+      ],
+      "native_evidence": "NOT_RUN",
+      "acceptance_credit": false,
+      "remaining": "Proposed v2 refinement only: native/caller/ledger/applied budget and independent review all pending.",
+      "proposed_v2_definition": "proposal_description_substitution",
+      "proposed_definition_record": "repair_20261031/ASSET-BOUNDARY-CAMPAIGN.json#asset_boundary_11"
+    },
+    {
+      "parent_id": "asset_boundary_12",
+      "parent_transition": "Queue",
+      "parent_expectation": "reject",
+      "parent_mutation_id": "asset_boundary_12",
+      "planned_representative_tests": [
+        "asset_boundary_12_queue_transition_rejects",
+        "asset_boundary_12_queue_authority_spend_rejects",
+        "asset_boundary_12_queue_governor_spend_rejects",
+        "asset_boundary_12_queue_proposal_policy_rejects",
+        "asset_boundary_12_queue_receipt_policy_rejects",
+        "asset_boundary_12_queue_intent_policy_rejects",
+        "asset_boundary_12_fixture_conserves"
+      ],
+      "native_evidence": "NOT_RUN",
+      "acceptance_credit": false,
+      "remaining": "Proposed v2 refinement only: native/caller/ledger/applied budget and independent review all pending.",
+      "proposed_v2_definition": "proposal_action_substitution",
+      "proposed_definition_record": "repair_20261031/ASSET-BOUNDARY-CAMPAIGN.json#asset_boundary_12"
+    },
+    {
+      "parent_id": "asset_boundary_13",
+      "parent_transition": "Vote",
+      "parent_expectation": "reject",
+      "parent_mutation_id": "asset_boundary_13",
+      "planned_representative_tests": [
+        "asset_boundary_13_vote_transition_rejects",
+        "asset_boundary_13_vote_governor_spend_rejects",
+        "asset_boundary_13_vote_receipt_policy_rejects",
+        "asset_boundary_13_fixture_conserves"
+      ],
+      "native_evidence": "NOT_RUN",
+      "acceptance_credit": false,
+      "remaining": "Proposed v2 refinement only: native/caller/ledger/applied budget and independent review all pending.",
+      "proposed_v2_definition": "proposal_payload_substitution",
+      "proposed_definition_record": "repair_20261031/ASSET-BOUNDARY-CAMPAIGN.json#asset_boundary_13"
+    },
+    {
+      "parent_id": "asset_boundary_14",
+      "parent_transition": "Queue",
+      "parent_expectation": "reject",
+      "parent_mutation_id": "asset_boundary_14",
+      "planned_representative_tests": [
+        "asset_boundary_14_queue_transition_rejects",
+        "asset_boundary_14_queue_authority_spend_rejects",
+        "asset_boundary_14_queue_governor_spend_rejects",
+        "asset_boundary_14_queue_proposal_policy_rejects",
+        "asset_boundary_14_queue_receipt_policy_rejects",
+        "asset_boundary_14_queue_intent_policy_rejects",
+        "asset_boundary_14_fixture_conserves"
+      ],
+      "native_evidence": "NOT_RUN",
+      "acceptance_credit": false,
+      "remaining": "Proposed v2 refinement only: native/caller/ledger/applied budget and independent review all pending.",
+      "proposed_v2_definition": "proposal_target_substitution",
+      "proposed_definition_record": "repair_20261031/ASSET-BOUNDARY-CAMPAIGN.json#asset_boundary_14"
+    },
+    {
+      "parent_id": "asset_boundary_15",
+      "parent_transition": "Vote",
+      "parent_expectation": "reject",
+      "parent_mutation_id": "asset_boundary_15",
+      "planned_representative_tests": [
+        "asset_boundary_15_vote_transition_rejects",
+        "asset_boundary_15_vote_governor_spend_rejects",
+        "asset_boundary_15_vote_receipt_policy_rejects",
+        "asset_boundary_15_fixture_conserves"
+      ],
+      "native_evidence": "NOT_RUN",
+      "acceptance_credit": false,
+      "remaining": "Proposed v2 refinement only: native/caller/ledger/applied budget and independent review all pending.",
+      "proposed_v2_definition": "proposal_target_without_length",
+      "proposed_definition_record": "repair_20261031/ASSET-BOUNDARY-CAMPAIGN.json#asset_boundary_15"
+    },
+    {
+      "parent_id": "asset_boundary_16",
+      "parent_transition": "Queue",
+      "parent_expectation": "reject",
+      "parent_mutation_id": "asset_boundary_16",
+      "planned_representative_tests": [
+        "asset_boundary_16_queue_transition_rejects",
+        "asset_boundary_16_queue_authority_spend_rejects",
+        "asset_boundary_16_queue_governor_spend_rejects",
+        "asset_boundary_16_queue_proposal_policy_rejects",
+        "asset_boundary_16_queue_receipt_policy_rejects",
+        "asset_boundary_16_queue_intent_policy_rejects",
+        "asset_boundary_16_fixture_conserves"
+      ],
+      "native_evidence": "NOT_RUN",
+      "acceptance_credit": false,
+      "remaining": "Proposed v2 refinement only: native/caller/ledger/applied budget and independent review all pending.",
+      "proposed_v2_definition": "proposal_target_wrong_length",
+      "proposed_definition_record": "repair_20261031/ASSET-BOUNDARY-CAMPAIGN.json#asset_boundary_16"
+    },
+    {
+      "parent_id": "asset_boundary_17",
+      "parent_transition": "Vote",
+      "parent_expectation": "reject",
+      "parent_mutation_id": "asset_boundary_17",
+      "planned_representative_tests": [
+        "asset_boundary_17_vote_transition_rejects",
+        "asset_boundary_17_vote_governor_spend_rejects",
+        "asset_boundary_17_vote_receipt_policy_rejects",
+        "asset_boundary_17_fixture_conserves"
+      ],
+      "native_evidence": "NOT_RUN",
+      "acceptance_credit": false,
+      "remaining": "Proposed v2 refinement only: native/caller/ledger/applied budget and independent review all pending.",
+      "proposed_v2_definition": "proposal_quorum_width4",
+      "proposed_definition_record": "repair_20261031/ASSET-BOUNDARY-CAMPAIGN.json#asset_boundary_17"
+    },
+    {
+      "parent_id": "asset_boundary_18",
+      "parent_transition": "Queue",
+      "parent_expectation": "reject",
+      "parent_mutation_id": "asset_boundary_18",
+      "planned_representative_tests": [
+        "asset_boundary_18_queue_transition_rejects",
+        "asset_boundary_18_queue_authority_spend_rejects",
+        "asset_boundary_18_queue_governor_spend_rejects",
+        "asset_boundary_18_queue_proposal_policy_rejects",
+        "asset_boundary_18_queue_receipt_policy_rejects",
+        "asset_boundary_18_queue_intent_policy_rejects",
+        "asset_boundary_18_fixture_conserves"
+      ],
+      "native_evidence": "NOT_RUN",
+      "acceptance_credit": false,
+      "remaining": "Proposed v2 refinement only: native/caller/ledger/applied budget and independent review all pending.",
+      "proposed_v2_definition": "proposal_quorum_little_endian",
+      "proposed_definition_record": "repair_20261031/ASSET-BOUNDARY-CAMPAIGN.json#asset_boundary_18"
+    },
+    {
+      "parent_id": "asset_boundary_19",
+      "parent_transition": "Vote",
+      "parent_expectation": "reject",
+      "parent_mutation_id": "asset_boundary_19",
+      "planned_representative_tests": [
+        "asset_boundary_19_vote_transition_rejects",
+        "asset_boundary_19_vote_governor_spend_rejects",
+        "asset_boundary_19_vote_receipt_policy_rejects",
+        "asset_boundary_19_fixture_conserves"
+      ],
+      "native_evidence": "NOT_RUN",
+      "acceptance_credit": false,
+      "remaining": "Proposed v2 refinement only: native/caller/ledger/applied budget and independent review all pending.",
+      "proposed_v2_definition": "proposal_deadline_little_endian",
+      "proposed_definition_record": "repair_20261031/ASSET-BOUNDARY-CAMPAIGN.json#asset_boundary_19"
+    },
+    {
+      "parent_id": "asset_boundary_20",
+      "parent_transition": "Queue",
+      "parent_expectation": "reject",
+      "parent_mutation_id": "asset_boundary_20",
+      "planned_representative_tests": [
+        "asset_boundary_20_queue_transition_rejects",
+        "asset_boundary_20_queue_authority_spend_rejects",
+        "asset_boundary_20_queue_governor_spend_rejects",
+        "asset_boundary_20_queue_proposal_policy_rejects",
+        "asset_boundary_20_queue_receipt_policy_rejects",
+        "asset_boundary_20_queue_intent_policy_rejects",
+        "asset_boundary_20_fixture_conserves"
+      ],
+      "native_evidence": "NOT_RUN",
+      "acceptance_credit": false,
+      "remaining": "Proposed v2 refinement only: native/caller/ledger/applied budget and independent review all pending.",
+      "proposed_v2_definition": "proposal_deadline_width4",
+      "proposed_definition_record": "repair_20261031/ASSET-BOUNDARY-CAMPAIGN.json#asset_boundary_20"
+    },
+    {
+      "parent_id": "asset_boundary_21",
+      "parent_transition": "Vote",
+      "parent_expectation": "reject",
+      "parent_mutation_id": "asset_boundary_21",
+      "planned_representative_tests": [
+        "asset_boundary_21_vote_transition_rejects",
+        "asset_boundary_21_vote_governor_spend_rejects",
+        "asset_boundary_21_vote_receipt_policy_rejects",
+        "asset_boundary_21_fixture_conserves"
+      ],
+      "native_evidence": "NOT_RUN",
+      "acceptance_credit": false,
+      "remaining": "Proposed v2 refinement only: native/caller/ledger/applied budget and independent review all pending.",
+      "proposed_v2_definition": "proposal_action_payload_swapped",
+      "proposed_definition_record": "repair_20261031/ASSET-BOUNDARY-CAMPAIGN.json#asset_boundary_21"
+    },
+    {
+      "parent_id": "asset_boundary_22",
+      "parent_transition": "Queue",
+      "parent_expectation": "reject",
+      "parent_mutation_id": "asset_boundary_22",
+      "planned_representative_tests": [
+        "asset_boundary_22_queue_transition_rejects",
+        "asset_boundary_22_queue_authority_spend_rejects",
+        "asset_boundary_22_queue_governor_spend_rejects",
+        "asset_boundary_22_queue_proposal_policy_rejects",
+        "asset_boundary_22_queue_receipt_policy_rejects",
+        "asset_boundary_22_queue_intent_policy_rejects",
+        "asset_boundary_22_fixture_conserves"
+      ],
+      "native_evidence": "NOT_RUN",
+      "acceptance_credit": false,
+      "remaining": "Proposed v2 refinement only: native/caller/ledger/applied budget and independent review all pending.",
+      "proposed_v2_definition": "proposal_authority_asset_omitted",
+      "proposed_definition_record": "repair_20261031/ASSET-BOUNDARY-CAMPAIGN.json#asset_boundary_22"
+    },
+    {
+      "parent_id": "asset_boundary_23",
+      "parent_transition": "Vote",
+      "parent_expectation": "reject",
+      "parent_mutation_id": "asset_boundary_23",
+      "planned_representative_tests": [
+        "asset_boundary_23_vote_transition_rejects",
+        "asset_boundary_23_vote_governor_spend_rejects",
+        "asset_boundary_23_vote_receipt_policy_rejects",
+        "asset_boundary_23_fixture_conserves"
+      ],
+      "native_evidence": "NOT_RUN",
+      "acceptance_credit": false,
+      "remaining": "Proposed v2 refinement only: native/caller/ledger/applied budget and independent review all pending.",
+      "proposed_v2_definition": "proposal_epoch_omitted",
+      "proposed_definition_record": "repair_20261031/ASSET-BOUNDARY-CAMPAIGN.json#asset_boundary_23"
+    },
+    {
+      "parent_id": "asset_boundary_24",
+      "parent_transition": "Queue",
+      "parent_expectation": "reject",
+      "parent_mutation_id": "asset_boundary_24",
+      "planned_representative_tests": [
+        "asset_boundary_24_queue_transition_rejects",
+        "asset_boundary_24_queue_authority_spend_rejects",
+        "asset_boundary_24_queue_governor_spend_rejects",
+        "asset_boundary_24_queue_proposal_policy_rejects",
+        "asset_boundary_24_queue_receipt_policy_rejects",
+        "asset_boundary_24_queue_intent_policy_rejects",
+        "asset_boundary_24_fixture_conserves"
+      ],
+      "native_evidence": "NOT_RUN",
+      "acceptance_credit": false,
+      "remaining": "Proposed v2 refinement only: native/caller/ledger/applied budget and independent review all pending.",
+      "proposed_v2_definition": "proposal_digest_truncated31",
+      "proposed_definition_record": "repair_20261031/ASSET-BOUNDARY-CAMPAIGN.json#asset_boundary_24"
+    }
+  ],
+  "limits": [
+    "The724 prepared native cases do not replace or close the81 historical obligations; names are not coverage or acceptance.",
+    "Reviewed v2 amendments for48 hours, explicit identities, outer version and backed voter funding must be applied to exact acceptance cases."
+  ]
+}

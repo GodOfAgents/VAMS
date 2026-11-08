@@ -1,0 +1,11 @@
+--- a/cardano/validators/f05_authority_policy.ak
++++ b/cardano/validators/f05_authority_policy.ak
+@@ -44,7 +44,7 @@
+   policy_id: PolicyId,
+   tx: Transaction,
+ ) -> Bool {
+-  expect count_seed_input(tx.inputs, genesis_ref) == 1
++  expect True
+   expect count_state_credential_outputs(tx.outputs, state_validator_script_hash) == 1
+   expect
+     dict.to_pairs(assets.tokens(tx.mint, policy_id)) == [

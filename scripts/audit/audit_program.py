@@ -11,8 +11,39 @@ import re
 import subprocess
 import sys
 from collections import Counter
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
+
+try:
+    from scripts.audit.restricted_profile_v1 import validate_testnet_profile
+except ModuleNotFoundError:
+    from restricted_profile_v1 import validate_testnet_profile
+
+try:
+    from scripts.audit.polygon_restricted_release import (
+        ARTIFACT_SOURCES as RESTRICTED_EVM_ARTIFACT_SOURCES,
+        referenced_paths as polygon_referenced_paths,
+        validate_package as validate_polygon_package,
+    )
+except ModuleNotFoundError:
+    from polygon_restricted_release import (  # type: ignore[no-redef]
+        ARTIFACT_SOURCES as RESTRICTED_EVM_ARTIFACT_SOURCES,
+        referenced_paths as polygon_referenced_paths,
+        validate_package as validate_polygon_package,
+    )
+
+try:
+    from scripts.audit.cardano_governance_release import (
+        ARTIFACT_SOURCES as CARDANO_V2_ARTIFACT_SOURCES,
+        referenced_paths as cardano_referenced_paths,
+        validate_package as validate_cardano_package,
+    )
+except ModuleNotFoundError:
+    from cardano_governance_release import (  # type: ignore[no-redef]
+        ARTIFACT_SOURCES as CARDANO_V2_ARTIFACT_SOURCES,
+        referenced_paths as cardano_referenced_paths,
+        validate_package as validate_cardano_package,
+    )
 
 try:
     from scripts.audit.runtime_privacy_evidence import (
@@ -123,22 +154,15 @@ REQUIRED_EVIDENCE_RESULTS = {
         "npm audit --omit=dev --audit-level=high && npm run lint && npm run build"
     ),
     "gateway-config": (
-        "caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile && "
-        "caddy adapt --config /etc/caddy/Caddyfile --adapter caddyfile --pretty"
+        "python scripts/security/validate_envoy_gateway.py && "
+        '"$RUNNER_TEMP/envoy" --mode validate -c "$RUNNER_TEMP/envoy-ci/envoy.yaml"'
     ),
     "sbom": (
         "anchore/sbom-action format=cyclonedx-json output-file=sbom.json && "
         "cosign sign-blob --bundle sbom.sigstore.json sbom.json"
     ),
 }
-CANARY_EVM_ARTIFACTS = {
-    "VAMSToken",
-    "VAMSStaking",
-    "VAMSVesting",
-    "VAMSGovernor",
-    "VAMSTimelockController",
-    "VAMSSentinel",
-}
+CANARY_EVM_ARTIFACTS = set(RESTRICTED_EVM_ARTIFACT_SOURCES)
 PUBLIC_EVM_ARTIFACTS = CANARY_EVM_ARTIFACTS | {
     "GovernorExecutor",
     "ComposedSettlement",
@@ -159,8 +183,9 @@ PUBLIC_EVM_ARTIFACTS = CANARY_EVM_ARTIFACTS | {
     "VAMSEmergencyPausable",
     "InsuranceFundProxy",
 }
-CARDANO_ARTIFACTS = {"governor.ak", "timelock.ak", "insurance_fund.ak", "agent_registry.ak"}
+CARDANO_ARTIFACTS = set(CARDANO_V2_ARTIFACT_SOURCES)
 DEPLOYMENT_ARTIFACT_SOURCES = {
+    **RESTRICTED_EVM_ARTIFACT_SOURCES,
     "VAMSToken": "contracts/src/token/VAMSToken.sol",
     "VAMSStaking": "contracts/src/staking/VAMSStaking.sol",
     "VAMSVesting": "contracts/src/vesting/VAMSVesting.sol",
@@ -189,6 +214,7 @@ DEPLOYMENT_ARTIFACT_SOURCES = {
     "timelock.ak": "cardano/validators/timelock.ak",
     "insurance_fund.ak": "cardano/validators/insurance_fund.ak",
     "agent_registry.ak": "cardano/validators/agent_registry.ak",
+    **CARDANO_V2_ARTIFACT_SOURCES,
 }
 NON_DEPLOYABLE_EVM_ARTIFACTS = {"VAMSUpgradeableBase", "VAMSEmergencyPausable"}
 EVM_ZERO_ADDRESS = "0x" + "0" * 40
@@ -244,30 +270,7 @@ def validate_program() -> list[str]:
             if not isinstance(track.get(field), list) or not track[field]:
                 errors.append(f"{track.get('id', index)} {field} must be non-empty")
 
-    profile = _load_json(PROFILE_PATH)
-    if not isinstance(profile, dict):
-        errors.append("testnet-profile.json must be an object")
-    else:
-        governance = profile.get("governance", {})
-        concentration = profile.get("concentration_stop_conditions", {})
-        exposure = profile.get("exposure_limits", {})
-        vdso = profile.get("vdso", {})
-        if profile.get("staking_rewards_enabled") is not False:
-            errors.append("testnet staking rewards must remain disabled")
-        if governance.get("timelock_seconds", 0) < 172800:
-            errors.append("testnet timelock must be at least 48 hours")
-        if governance.get("safe_threshold", 0) < 3:
-            errors.append("testnet Safe threshold must be at least 3")
-        if concentration.get("regional_reward_share_bps", 10001) > 3000:
-            errors.append("regional reward stop condition must not exceed 30%")
-        if exposure.get("single_operation_insurance_reserve_bps", 10001) > 100:
-            errors.append("single-operation canary exposure must not exceed 1%")
-        if vdso.get("mode") != "off":
-            errors.append("the public-testnet profile must keep VDSO mode off")
-        if vdso.get("authoritative_enabled") is not False:
-            errors.append("the public-testnet profile must block authoritative VDSO")
-        if vdso.get("value_bearing_domains_enabled") is not False:
-            errors.append("the public-testnet profile must block value-bearing VDSO domains")
+    errors.extend(validate_testnet_profile(_load_json(PROFILE_PATH)))
 
     for schema_path in sorted(SCHEMA_DIR.glob("*.json")):
         schema = _load_json(schema_path)
@@ -641,12 +644,10 @@ def _validate_timelock_identity(
             errors.append(f"{network} timelock runtime code hash does not match its artifact")
 
         governance_address = authorities.get("governance", {}).get("address")
-        governor_address = artifacts.get("VAMSGovernor", {}).get("address")
         deployer = manifest.get("deployer")
         expected_roles = {
             ("DEFAULT_ADMIN_ROLE", str(address).lower(), True),
             ("PROPOSER_ROLE", str(governance_address).lower(), True),
-            ("PROPOSER_ROLE", str(governor_address).lower(), True),
             ("CANCELLER_ROLE", str(governance_address).lower(), True),
             ("EXECUTOR_ROLE", EVM_ZERO_ADDRESS, True),
             ("DEFAULT_ADMIN_ROLE", str(deployer).lower(), False),
@@ -695,8 +696,8 @@ def _validate_timelock_identity(
             errors.append(f"{network} timelock actual and expected script CBOR hashes differ")
         if not _is_cardano_hash(identity.get("governor_script_hash")):
             errors.append(f"{network} timelock governor script binding is invalid")
-        if identity.get("cancel_threshold") != 2:
-            errors.append(f"{network} timelock cancel threshold must equal 2")
+        if type(identity.get("cancel_threshold")) is not int or identity["cancel_threshold"] != 3:
+            errors.append(f"{network} timelock cancel threshold must equal 3")
         if not isinstance(identity.get("observed_at_slot"), int) or identity["observed_at_slot"] < 0:
             errors.append(f"{network} timelock observation slot is invalid")
         if not _is_sha256(identity.get("control_evidence_sha256")):
@@ -706,11 +707,11 @@ def _validate_timelock_identity(
                 identity.get("source"),
                 identity.get("source_sha256"),
                 f"{network} timelock identity",
-                expected_source=DEPLOYMENT_ARTIFACT_SOURCES["timelock.ak"],
+                expected_source=DEPLOYMENT_ARTIFACT_SOURCES["timelock_v2"],
             )
         )
-        timelock_artifact = artifacts.get("timelock.ak", {})
-        governor_artifact = artifacts.get("governor.ak", {})
+        timelock_artifact = artifacts.get("timelock_v2", {})
+        governor_artifact = artifacts.get("governor_v2", {})
         if timelock_artifact.get("address") != identity.get("script_address"):
             errors.append(f"{network} timelock identity address does not match its artifact")
         if timelock_artifact.get("script_hash") != identity.get("script_hash"):
@@ -885,8 +886,9 @@ def _validate_deployment_manifests(
         else:
             seen_networks.add(network)
         expected_status = "rehearsed" if stage == "canary" else "deployed"
-        if manifest.get("schema_version") != "1.0.0":
-            errors.append(f"{network} deployment schema_version must equal 1.0.0")
+        expected_schema = "2.0.0"
+        if manifest.get("schema_version") != expected_schema:
+            errors.append(f"{network} deployment schema_version must equal {expected_schema}")
         if manifest.get("deployment_status") != expected_status:
             errors.append(f"{network} must have deployment_status={expected_status}")
         if manifest.get("commit_sha") != commit_sha:
@@ -921,6 +923,10 @@ def _validate_deployment_manifests(
         errors.extend(_validate_timelock_identity(manifest, network, artifacts, authorities))
         errors.extend(_validate_role_transfers(manifest, network, stage, artifacts, authorities))
         errors.extend(_validate_deployer_privilege_checks(manifest, network, required_artifacts))
+        if network == "cardano-preprod":
+            errors.extend(validate_cardano_package(manifest, ROOT, artifacts))
+        else:
+            errors.extend(validate_polygon_package(manifest, ROOT, artifacts, authorities))
     missing = DEPLOYMENT_NETWORKS - seen_networks
     if missing:
         errors.append("deployment manifests missing networks: " + ", ".join(sorted(missing)))
@@ -1021,16 +1027,70 @@ def _validate_canary_report(path: Path, commit_sha: str) -> list[str]:
     if not isinstance(report, dict):
         return ["closed-canary report must be an object"]
     errors: list[str] = []
+    required = {"schema_version", "commit_sha", "started_at", "ended_at",
+                "consecutive_days", "stop_conditions_triggered", "drills"}
+    if set(report) != required:
+        errors.append("closed-canary report fields must match schema 1.0.0")
+    if report.get("schema_version") != "1.0.0":
+        errors.append("closed-canary report schema_version must be 1.0.0")
     if report.get("commit_sha") != commit_sha:
         errors.append("closed-canary report commit does not match the current commit")
-    if report.get("consecutive_days", 0) < 7:
+    days = report.get("consecutive_days")
+    if type(days) is not int or days < 7:
         errors.append("closed canary must complete at least 7 consecutive days")
+
+    def timestamp(field: str) -> tuple[datetime, str] | None:
+        value = report.get(field)
+        # Require a timezone-bearing RFC3339 form; fromisoformat alone also
+        # accepts date-only, week-date and arbitrary separator representations.
+        pattern = (r"(?P<base>[0-9]{4}-[0-9]{2}-[0-9]{2}[Tt][0-9]{2}:[0-9]{2}:[0-9]{2})"
+                   r"(?:\.(?P<fraction>[0-9]+))?(?P<zone>[Zz]|[+-][0-9]{2}:[0-9]{2})")
+        match = re.fullmatch(pattern, value) if isinstance(value, str) else None
+        if match is None:
+            errors.append(f"closed-canary {field} must be a timezone-aware RFC3339 timestamp")
+            return None
+        try:
+            zone = match["zone"]
+            if zone not in "Zz" and (int(zone[1:3]) > 23 or int(zone[4:6]) > 59):
+                raise ValueError("RFC3339 offset components out of range")
+            parsed = datetime.fromisoformat(match["base"] + ("+00:00" if zone in "Zz" else zone))
+            # Preserve all fractional digits separately: datetime truncates
+            # precision beyond microseconds and could round a short interval up.
+            return parsed.astimezone(timezone.utc), (match["fraction"] or "").rstrip("0")
+        except (ValueError, OverflowError):
+            errors.append(f"closed-canary {field} is not a valid timestamp")
+            return None
+
+    started = timestamp("started_at")
+    ended = timestamp("ended_at")
+
+    def fraction_compare(left: str, right: str) -> int:
+        width = max(len(left), len(right))
+        a, b = left.ljust(width, "0"), right.ljust(width, "0")
+        return (a > b) - (a < b)
+
+    if ended is not None:
+        now = datetime.now(timezone.utc)
+        whole = now.replace(microsecond=0)
+        fraction = f"{now.microsecond:06d}".rstrip("0")
+        if ended[0] > whole or (ended[0] == whole and fraction_compare(ended[1], fraction) > 0):
+            errors.append("closed-canary observation cannot end in the future")
+    if started is not None and ended is not None:
+        elapsed = ended[0] - started[0]
+        fractions = fraction_compare(ended[1], started[1])
+        if elapsed < timedelta(days=7) or (elapsed == timedelta(days=7) and fractions < 0):
+            errors.append("closed canary must span at least 7 elapsed days")
+        whole_days = elapsed.days - int(elapsed.seconds == 0 and fractions < 0)
+        if type(days) is int and days > whole_days:
+            errors.append("closed-canary consecutive_days exceeds elapsed whole days")
     if report.get("stop_conditions_triggered") is not False:
         errors.append("closed canary recorded a stop condition")
     drills = report.get("drills")
     if not isinstance(drills, dict):
         errors.append("closed-canary report must contain drill results")
     else:
+        if any(type(passed) is not bool for passed in drills.values()):
+            errors.append("closed-canary drill results must be booleans")
         missing = REQUIRED_DRILLS - {
             name for name, passed in drills.items() if passed is True
         }
@@ -1159,6 +1219,12 @@ def validate_readiness(
         runtime_report,
         privacy_review,
     ]
+    for deployment_path in deployment_manifests:
+        if deployment_path.is_file():
+            deployment = _load_json(deployment_path)
+            if isinstance(deployment, dict):
+                supporting_artifacts.extend(cardano_referenced_paths(deployment, ROOT))
+                supporting_artifacts.extend(polygon_referenced_paths(deployment, ROOT))
     if stage == "public":
         canary_report = canary_report or EVIDENCE_DIR / "closed-canary-report.json"
         canary_signature_bundle = (
@@ -1224,9 +1290,19 @@ def generate_manifest(output: Path, raw_results: list[str]) -> None:
 
     evidence_artifacts = []
     if EVIDENCE_DIR.is_dir():
-        for artifact in sorted(EVIDENCE_DIR.glob("*.json")):
+        candidates = set(EVIDENCE_DIR.glob("*.json"))
+        for artifact in list(candidates):
             if artifact.resolve() == output.resolve():
                 continue
+            value = _load_json(artifact)
+            if isinstance(value, dict):
+                candidates.update(cardano_referenced_paths(value, ROOT))
+                candidates.update(polygon_referenced_paths(value, ROOT))
+        for artifact in sorted(candidates):
+            if artifact.resolve() == output.resolve():
+                continue
+            if not artifact.is_file():
+                continue  # Readiness separately rejects missing package references.
             evidence_artifacts.append(
                 {
                     "path": artifact.relative_to(ROOT).as_posix(),

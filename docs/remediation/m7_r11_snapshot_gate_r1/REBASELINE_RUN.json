@@ -1,0 +1,87 @@
+{
+  "date": "2026-10-03",
+  "slice": "M7 R11 current forward provenance rebaseline",
+  "checkout": "/home/GodOfAgents/code/VAMS-testnet",
+  "head": "829ab544571f12efe50ecb5740f129c8acb3e16f",
+  "status": "INDEPENDENTLY_REVIEWED_PASS_FOR_SCOPED_PROVENANCE_REBASELINE",
+  "manifest": {
+    "version": 7,
+    "schema": "m7-f05-current-forward-v1",
+    "baseline": "m3-f04-option-b-r1",
+    "historical_r1_raw_lock_sha256": "8fc8bf1ccf3cf0c91acc94232646ebabb23469eb7c2d4acb1f4f0b0b67f8213b",
+    "raw_lock_continuity": "historically unresolved; R1 bytes unavailable",
+    "source_file_count": 15,
+    "program_count": 26,
+    "lock_sha256": "acffff4aee9569e1ee1de468839077af467b5e403fd96450290cd367b339c651",
+    "blueprint_sha256": "c4230410d0caac45f2c71d36e45a539c78087697128ce1533306d17e96a48008",
+    "source_manifest_sha256": "3bf4beadd08258988f149ff71bda72c63df5d1378e1536261b9643be9d5c93be"
+  },
+  "toolchain": {
+    "python": "3.12.14",
+    "aiken": "v1.1.21+42babe5",
+    "aiken_binary_sha256": "07f3f927f1a8c71fc61273fdff850d9b98edb28dde207c8a32585991f2c88e79",
+    "envoy": "1.39.1"
+  },
+  "verification": [
+    {
+      "command": "env PATH=/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin VAMS_ENV=test PYTHONDONTWRITEBYTECODE=1 VAMS_ENVOY_BIN=/home/GodOfAgents/vams-evidence/toolchains/envoy-1.39.1/envoy /home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/pytest -v --tb=short --ignore=docs/remediation/m3_f05_design_r2/test_design.py",
+      "exit_code": 0,
+      "result": "1575 passed, 441 subtests passed in 253.89s"
+    },
+    {
+      "command": "env PATH=/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin VAMS_ENV=test PYTHONDONTWRITEBYTECODE=1 VAMS_ENVOY_BIN=/home/GodOfAgents/vams-evidence/toolchains/envoy-1.39.1/envoy /home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/pytest -v --tb=short docs/remediation/m3_f05_design_r2/test_design.py",
+      "exit_code": 0,
+      "result": "10 passed in 0.10s"
+    },
+    {
+      "command": "VAMS_ENV=test PYTHONDONTWRITEBYTECODE=1 /home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python scripts/remediation/verify_m3_1b_r9.py --aiken /home/GodOfAgents/vams-evidence/toolchains/aiken-1.1.21/aiken --output docs/remediation/m7_r11_snapshot_gate_r1/current-verifier-run.json",
+      "exit_code": 0,
+      "result": "ok=true; check_exit=0; build_exit=0; see current-verifier-run.json"
+    },
+    {
+      "command": "VAMS_ENV=test PYTHONDONTWRITEBYTECODE=1 /home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python scripts/remediation/verify_m3_1b_r9.py --aiken /home/GodOfAgents/vams-evidence/toolchains/aiken-1.1.21/aiken --output docs/remediation/m7_r11_snapshot_gate_r1/current-verifier-run-b.json",
+      "exit_code": 0,
+      "result": "ok=true; check_exit=0; build_exit=0; see current-verifier-run-b.json"
+    },
+    {
+      "command": "/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python -m py_compile scripts/remediation/verify_m3_1b_r9.py scripts/remediation/test_m3_1b_r9_provenance.py && /home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python -m unittest -v scripts.remediation.test_m3_1b_r9_provenance",
+      "exit_code": 0,
+      "result": "21 tests passed"
+    },
+    {
+      "command": "git diff --check",
+      "exit_code": 0,
+      "result": "passed"
+    },
+    {
+      "command": "aiken check --deny --seed 20260711 --max-success 250",
+      "exit_code": 1,
+      "result": "Latest existing diagnostic remains failed: 122/122 scenarios passed but --deny exits 1 with seven warnings; see m7_aiken_g1_current_test_r1."
+    }
+  ],
+  "two_build_reproducibility": {
+    "structured_results_identical": true,
+    "reviewer_record_sha256": "43bef1e061acc0bf4135098b9bbf11c5f850e6e83f6bbd8ff24a94e930bc89f7",
+    "independent_review": "PASS; second fresh isolated invocation closes two-build caveat; no edits"
+  },
+  "independent_review": {
+    "reviewer": "/root/datum_integrated_review",
+    "result": "PASS for scoped v7 schema, F04 historical attribution, current lock/source/blueprint/program bindings, focused tests, and two isolated builds; no edits"
+  },
+  "f05_counts": {
+    "negative_cases": "45/55",
+    "mutations": "18/21",
+    "new_credit": "none"
+  },
+  "evidence_classification": "offline isolated compiler/build and local tests only; no ledger admission, testnet rehearsal, or live-network evidence",
+  "remaining_blockers": [
+    "F04 normative identity-entrypoint choice (standalone agent_nft vs accepted agent_registry path)",
+    "G1 --deny exit 1 with seven warnings",
+    "F05 signature-domain and applied-parameter owner decisions",
+    "INV-1 through INV-10 full revalidation",
+    "security/dependency, mock containment, governance/privileged-role controls, both chain prerequisites, T06/history, required M7 artifacts"
+  ],
+  "readiness": "NOT_READY",
+  "deployment_and_gated_activation": "disabled",
+  "next_slice": "Record owner choice for F04 identity path; then reconcile only the normative F04 records and review before any validator behavior change"
+}

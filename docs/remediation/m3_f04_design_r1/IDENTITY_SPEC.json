@@ -1,0 +1,260 @@
+{
+  "schema_version": "m3-f04-r1-identity-v1",
+  "status": "design-frozen-not-implemented",
+  "identity": {
+    "policy": "hash(compiled agent_nft applied to consumed bootstrap OutputReference)",
+    "bootstrap": "one exact regular input; duplicate/reference substitution rejects",
+    "domain_hex": "56414d532f6167656e742f763100",
+    "formula": "blake2b_256(domain || u16be(len(did)) || did || owner_vkh[28] || seed_tx_id[32] || seed_index_u32be)",
+    "token_name_bytes": 32,
+    "policy_id_bytes": 28,
+    "mint_quantity": 1,
+    "retain_quantity": 1,
+    "burn_quantity": -1,
+    "did_rules": {
+      "representation": "lowercase-hex",
+      "encoding": "utf-8",
+      "canonical_utf8": true,
+      "min_bytes": 32,
+      "max_bytes": 256,
+      "boundary_lengths": [
+        31,
+        32,
+        256,
+        257
+      ],
+      "invalid_utf8_rejected": true
+    },
+    "hex_rules": {
+      "alphabet": "0123456789abcdef",
+      "lowercase": true,
+      "even_length": true,
+      "prefix": "forbidden"
+    },
+    "json_rules": {
+      "closed_objects": true,
+      "duplicate_keys": "reject",
+      "unknown_keys": "reject",
+      "missing_keys": "reject",
+      "non_finite_numbers": "reject"
+    },
+    "integer_rule": "type(value) is int and not bool"
+  },
+  "datum": {
+    "name": "AgentDatumV1",
+    "constructor": 0,
+    "closed": true,
+    "fields": [
+      [
+        "schema_version",
+        "u16",
+        1
+      ],
+      [
+        "identity_policy_id",
+        "bytes28",
+        "immutable"
+      ],
+      [
+        "identity_asset_name",
+        "bytes32",
+        "immutable"
+      ],
+      [
+        "nonce",
+        "u64",
+        "plus_one"
+      ],
+      [
+        "did",
+        "bytes[32..256]",
+        "immutable"
+      ],
+      [
+        "owner",
+        "bytes28",
+        "immutable"
+      ],
+      [
+        "operator",
+        "bytes28",
+        "mutable_by_owner"
+      ],
+      [
+        "stake_lovelace",
+        "u64>=1000000000",
+        "value_bound"
+      ],
+      [
+        "reputation_bps",
+        "u16[0..10000]",
+        "bounded"
+      ],
+      [
+        "metadata_hash",
+        "bytes32",
+        "mutable_by_owner"
+      ],
+      [
+        "status",
+        "enum(active=0,suspended=1)",
+        "bounded"
+      ],
+      [
+        "action_epoch",
+        "u64",
+        "authority_bound"
+      ],
+      [
+        "registered_at_ms",
+        "u64",
+        "immutable"
+      ],
+      [
+        "authorized_slashers",
+        "array(bytes28)<=5",
+        "bounded"
+      ]
+    ]
+  },
+  "authority": {
+    "name": "RegistryAuthorityV1",
+    "closed": true,
+    "fields": [
+      "schema_version:u16=1",
+      "identity_policy_id:bytes28",
+      "bootstrap_ref:OutputReference",
+      "action_epoch:u64",
+      "slash_enabled:bool=false_pre_f05",
+      "authority_script_hash:bytes28",
+      "authority_policy_id:bytes28",
+      "authority_asset_name:bytes32",
+      "authority_quantity:u64=1",
+      "authority_state_lovelace:u64",
+      "reserve_credential:bytes28",
+      "authority_address:script_hash",
+      "datum_hash:bytes32"
+    ]
+  },
+  "redeemers": {
+    "RegisterAgent": [
+      0,
+      "did:bytes[32..256]",
+      "metadata_hash:bytes32",
+      "operator:bytes28"
+    ],
+    "UpdateAgent": [
+      1,
+      "new_metadata_hash:bytes32",
+      "new_operator:bytes28",
+      "expected_nonce:u64",
+      "expected_action_epoch:u64"
+    ],
+    "DeregisterAgent": [
+      2,
+      "expected_nonce:u64",
+      "expected_action_epoch:u64"
+    ],
+    "SlashAgent": [
+      3,
+      "evidence_hash:bytes32",
+      "slash_amount:u64",
+      "expected_nonce:u64",
+      "expected_action_epoch:u64"
+    ]
+  },
+  "limits": {
+    "min_stake_lovelace": 1000000000,
+    "max_slash_bps": 1000,
+    "initial_reputation_bps": 5000,
+    "max_reputation_bps": 10000,
+    "max_authorized_slashers": 5,
+    "max_inputs": 16,
+    "max_outputs": 16,
+    "max_assets_per_value": 16,
+    "max_datum_bytes": 896
+  },
+  "lifecycle": {
+    "slash_pre_f05": "reject_unconditionally",
+    "register": "enabled_with_bootstrap_and_mint",
+    "update": "owner_exact_continuation",
+    "deregister": "owner_exact_burn"
+  },
+  "r5_contract": {
+    "authority_reference": {
+      "count": 1,
+      "kind": "reference_input",
+      "datum": "RegistryAuthorityV1",
+      "credential": "authority_script_hash",
+      "address": "exact script address from authority_script_hash",
+      "policy_id": "authority_policy_id exact",
+      "token_name": "authority_asset_name exact",
+      "quantity": 1,
+      "value": "exactly authority_state_lovelace plus one authority_policy_id.authority_asset_name",
+      "datum_hash": "hash of the exact RegistryAuthorityV1 datum",
+      "match": [
+        "identity_policy_id",
+        "bootstrap_ref",
+        "action_epoch",
+        "authority_script_hash",
+        "authority_policy_id",
+        "authority_asset_name",
+        "reserve_credential"
+      ],
+      "registry_stake_excluded": true,
+      "missing_duplicate_stale": "reject"
+    },
+    "replay": {
+      "identity": "identity_policy_id || identity_asset_name || nonce || action_epoch",
+      "expected_nonce": "redeemer.expected_nonce == input_datum.nonce",
+      "output_nonce": "output_datum.nonce == input_datum.nonce + 1",
+      "same_nonce": "reject across concurrent or restarted evaluation",
+      "duplicate_signer": "reject"
+    },
+    "f05_interface": {
+      "authority_gate": "reference.authority.slash_enabled == true",
+      "evidence_type": "EvidenceAttestationV1",
+      "evidence_fields": [
+        "schema_version",
+        "identity_policy_id",
+        "identity_asset_name",
+        "action_epoch",
+        "nonce",
+        "evidence_hash",
+        "authorized_slasher",
+        "valid_until",
+        "status",
+        "verifier_id"
+      ],
+      "status": "verified",
+      "expiry": "tx_upper_bound <= valid_until",
+      "binding": "identity_policy_id, identity_asset_name, action_epoch, nonce, slasher and evidence_hash exact",
+      "pre_f05": "reject_unconditionally"
+    },
+    "inv10": {
+      "bridge_proof": "opaque proof input; never payload_hash",
+      "payload_hash": "separate bytes32 action-payload digest",
+      "alias_or_substitution": "reject",
+      "registry_effect": "no slash effect until F05 evidence verifier is enabled"
+    },
+    "action_authorization": {
+      "input_count": 1,
+      "input_kind": "regular_input",
+      "datum": "RegistryActionV1",
+      "policy_id": "action_policy_id exact",
+      "token_name": "action_asset_name exact",
+      "quantity": 1,
+      "burn_quantity": -1,
+      "consumed_once": true,
+      "success_rule": "one unique action token is burned on success",
+      "authority_substitution": "reject",
+      "registry_stake_substitution": "reject"
+    }
+  },
+  "entrypoints": {
+    "registry_spend": "agent_registry.agent_registry.spend",
+    "registry_else": "agent_registry.agent_registry.else",
+    "identity_mint": "agent_nft.agent_nft.mint",
+    "context": "fully_applied_plutus_v3"
+  }
+}

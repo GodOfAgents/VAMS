@@ -1,0 +1,376 @@
+{
+  "selected_inputs": [
+    {
+      "path": "aiken-dependency-manifest.json",
+      "size": 21339,
+      "sha256": "0edce714d52d21ea201db1b251f0d2c72f6b273f5ec3b7e4b6045fa1211ddddf"
+    },
+    {
+      "path": "aiken.lock",
+      "size": 744,
+      "sha256": "acffff4aee9569e1ee1de468839077af467b5e403fd96450290cd367b339c651"
+    },
+    {
+      "path": "aiken.toml",
+      "size": 421,
+      "sha256": "55984b24927897c47dbf45933911b804047d0200bdf9a47942efded8b6ed4683"
+    },
+    {
+      "path": "build/packages/aiken-lang-fuzz/.editorconfig",
+      "size": 150,
+      "sha256": "8289b755c9b4804f8fd04a0de683cb31faa55cded3a3d0be541495342e506e59"
+    },
+    {
+      "path": "build/packages/aiken-lang-fuzz/.envrc",
+      "size": 294,
+      "sha256": "25d7f00b0521cf6e6fba75579bdea0913df8e8606aef9ab68e61de1c90de04fa"
+    },
+    {
+      "path": "build/packages/aiken-lang-fuzz/.gitattributes",
+      "size": 132,
+      "sha256": "bbaac0aab1eebdabcfdfbc5c66642646f384b83566bbc38e614497ccbdca5c9d"
+    },
+    {
+      "path": "build/packages/aiken-lang-fuzz/.github/workflows/continuous-integration.yml",
+      "size": 994,
+      "sha256": "799568675d52b89be2c51c413b3116bd1724a1c8396a4e0b99f6005ca5a1592c"
+    },
+    {
+      "path": "build/packages/aiken-lang-fuzz/.gitignore",
+      "size": 184,
+      "sha256": "a270422eb28f97afad6da1561fb02788dfac76169dc5703e760883782b59aa12"
+    },
+    {
+      "path": "build/packages/aiken-lang-fuzz/CHANGELOG.md",
+      "size": 3363,
+      "sha256": "3e0f7bd316e1c0b3fced18db865cec5a1294d532271ecdecc197aceca9027304"
+    },
+    {
+      "path": "build/packages/aiken-lang-fuzz/LICENSE",
+      "size": 11340,
+      "sha256": "b83ebfd79be23a0d476f64522eb1c79ff19a4c6fb74e982bfb6eae92669dd7c2"
+    },
+    {
+      "path": "build/packages/aiken-lang-fuzz/README.md",
+      "size": 2834,
+      "sha256": "9c545d3f50e43fcbbc502681e62a858dc1aa37a344b6ae79cb7d3db9b2155478"
+    },
+    {
+      "path": "build/packages/aiken-lang-fuzz/aiken.toml",
+      "size": 318,
+      "sha256": "5dea3a11799daab11f9f339994a7f899c2012148c63466407bcf5217519a70c2"
+    },
+    {
+      "path": "build/packages/aiken-lang-fuzz/flake.lock",
+      "size": 7379,
+      "sha256": "e2f3d218dbb652c9933a7ff4a67f3d2ce2eb18d1e526c2217fa31149119130ce"
+    },
+    {
+      "path": "build/packages/aiken-lang-fuzz/flake.nix",
+      "size": 1412,
+      "sha256": "588878fbbfbc9d4f767243ffd4de28ddb8d1f22ca4309706a57e3b0a62afad9d"
+    },
+    {
+      "path": "build/packages/aiken-lang-fuzz/lib/aiken/fuzz/scenario.ak",
+      "size": 23472,
+      "sha256": "56148af35370b2f6734121fbfea604ea31b484d104528364e8b663d41668ce5a"
+    },
+    {
+      "path": "build/packages/aiken-lang-fuzz/lib/aiken/fuzz.ak",
+      "size": 39526,
+      "sha256": "82c035286d03fb2824b200d5b20f367df3cf3d734f7c6e335c3aff857d54e3ad"
+    },
+    {
+      "path": "build/packages/aiken-lang-fuzz/lib/aiken/fuzz.test.ak",
+      "size": 13657,
+      "sha256": "5d26a6f03cf4f210c82227ea47023d58243a798dab562f6d0a5fa9a38dfc56cb"
+    },
+    {
+      "path": "build/packages/aiken-lang-fuzz/lib/cardano/fuzz.ak",
+      "size": 22698,
+      "sha256": "ae8f60e7483b165477abca217342614f9a0da7940a6f539977a888d691f80b0c"
+    },
+    {
+      "path": "build/packages/aiken-lang-fuzz/lib/cardano/fuzz.test.ak",
+      "size": 4200,
+      "sha256": "3c620206c53a49e1f3798fc8825a4128af18af7094e2f8c8bb6fbcf13018df0d"
+    },
+    {
+      "path": "build/packages/aiken-lang-stdlib/.editorconfig",
+      "size": 150,
+      "sha256": "04e175656a58d484b7d02d1e852fb26753ac83e27a5092fb08faf5a181129050"
+    },
+    {
+      "path": "build/packages/aiken-lang-stdlib/.gitattributes",
+      "size": 83,
+      "sha256": "654303d974c0e7f6bcf3b76f61d7a3740f08bdd89d3c473376c71004f2934aff"
+    },
+    {
+      "path": "build/packages/aiken-lang-stdlib/.github/workflows/continuous-integration.yml",
+      "size": 1287,
+      "sha256": "2c08481b55ee4ab498a2600d6e143535d24c3c523b664f2003123909ab21eca8"
+    },
+    {
+      "path": "build/packages/aiken-lang-stdlib/.gitignore",
+      "size": 22,
+      "sha256": "e7c7291b158d8dd199f677ff61996301a0628d4d9a3ce02fcb6283f1fbbe0fb6"
+    },
+    {
+      "path": "build/packages/aiken-lang-stdlib/CHANGELOG.md",
+      "size": 52555,
+      "sha256": "8d42cc7564ba2c9822e772940831b3aa87d1071ae5350f9cbbb7e5c8b175576e"
+    },
+    {
+      "path": "build/packages/aiken-lang-stdlib/LICENSE",
+      "size": 11340,
+      "sha256": "59416b183f899a371f368f356dbe6539e87972f4f5b0c28ab868f51c9424ad0d"
+    },
+    {
+      "path": "build/packages/aiken-lang-stdlib/README.md",
+      "size": 2517,
+      "sha256": "330d235632f07b07e9a2aa29699e3a27e86bccad198ea4ffb3ae4051cc5bb3ce"
+    },
+    {
+      "path": "build/packages/aiken-lang-stdlib/aiken.lock",
+      "size": 414,
+      "sha256": "f7083ef8a14d03ff9292586d91c3c54d0d2954e5ffd44d5c7c4222de60a5f61a"
+    },
+    {
+      "path": "build/packages/aiken-lang-stdlib/aiken.toml",
+      "size": 271,
+      "sha256": "1dfe88e390b703fbad6ce1c41cf9770d6be0841b82a700a010d058e410b1bc5c"
+    },
+    {
+      "path": "build/packages/aiken-lang-stdlib/lib/aiken/cbor.ak",
+      "size": 8432,
+      "sha256": "797f22813156330d728c0ebacebd356a2c43f63e56862cff10be465054422df6"
+    },
+    {
+      "path": "build/packages/aiken-lang-stdlib/lib/aiken/cbor.test.ak",
+      "size": 8233,
+      "sha256": "9aa8309cbcf9a7c1553cd53420149a99cca482f0d9ae1f3756640182f495a037"
+    },
+    {
+      "path": "build/packages/aiken-lang-stdlib/lib/aiken/collection/dict.ak",
+      "size": 26104,
+      "sha256": "0add468ecf7421ef1ea625de5f73489b32706926be1471248e149622c87d719c"
+    },
+    {
+      "path": "build/packages/aiken-lang-stdlib/lib/aiken/collection/list.ak",
+      "size": 28412,
+      "sha256": "b6c858dc9e5d85ac17aaaef018269128b79317520e14a12db2a53b4399d8b07a"
+    },
+    {
+      "path": "build/packages/aiken-lang-stdlib/lib/aiken/collection/pairs.ak",
+      "size": 21161,
+      "sha256": "36f996a26de54b5755f38b8b4843a1e9918349f51a8ad9069b64846a11c34b23"
+    },
+    {
+      "path": "build/packages/aiken-lang-stdlib/lib/aiken/collection.ak",
+      "size": 116,
+      "sha256": "6b86e4876d0806610406b68268352c9012bfee069b1c72d9f2a7497f879e4dc8"
+    },
+    {
+      "path": "build/packages/aiken-lang-stdlib/lib/aiken/crypto/bls12_381/g1.ak",
+      "size": 5907,
+      "sha256": "76f2d81538ef1bb1699f7193465183d6bf297156a71844ce2550c24d22fe5403"
+    },
+    {
+      "path": "build/packages/aiken-lang-stdlib/lib/aiken/crypto/bls12_381/g2.ak",
+      "size": 7186,
+      "sha256": "c4fe7d17f4d8389f8beb7f8a00bf706da56ca49c9d27b2a58743796557d802e7"
+    },
+    {
+      "path": "build/packages/aiken-lang-stdlib/lib/aiken/crypto/bls12_381/scalar.ak",
+      "size": 7704,
+      "sha256": "b711bc1fc9ebec7b5951ee0b79287a4f1c349cd1eecc90839101b71ae940d3ec"
+    },
+    {
+      "path": "build/packages/aiken-lang-stdlib/lib/aiken/crypto.ak",
+      "size": 3546,
+      "sha256": "fe7fc92b6fd5a66e7bd71c23224b1d0c1b4a63bc693806549db6396ba382b70d"
+    },
+    {
+      "path": "build/packages/aiken-lang-stdlib/lib/aiken/interval.ak",
+      "size": 17334,
+      "sha256": "d0801ebeee248b26388fbc6c239ed0180aa8779b89d1a1968ee94b05355d9383"
+    },
+    {
+      "path": "build/packages/aiken-lang-stdlib/lib/aiken/math/rational.ak",
+      "size": 21175,
+      "sha256": "3083f6a84daf47f16db5e4e3d0672041812e9fb03a2fce069835c748a493562b"
+    },
+    {
+      "path": "build/packages/aiken-lang-stdlib/lib/aiken/math/rational.tests.ak",
+      "size": 1815,
+      "sha256": "228b59bf5d737e985a704a6f8171b81198ee558ff26fbd7161e4fc171d78bd11"
+    },
+    {
+      "path": "build/packages/aiken-lang-stdlib/lib/aiken/math.ak",
+      "size": 7453,
+      "sha256": "f5dea1f33ef57902029f9e6038ebb8c7db68995d2bdb428b4018507efa96bb20"
+    },
+    {
+      "path": "build/packages/aiken-lang-stdlib/lib/aiken/option.ak",
+      "size": 6295,
+      "sha256": "189199322e4b6ab64043bc551ab847aa6a7f61755fd0a5218553cd9030432a72"
+    },
+    {
+      "path": "build/packages/aiken-lang-stdlib/lib/aiken/primitive/bytearray.ak",
+      "size": 15571,
+      "sha256": "04d6a4979713b3abe26cf22dc3f18ca391b309471813c23f3c434844e88b75e5"
+    },
+    {
+      "path": "build/packages/aiken-lang-stdlib/lib/aiken/primitive/int.ak",
+      "size": 3463,
+      "sha256": "0b50c8492392b1d0d736744edf0e773f6c0559ada3b47a772bc43ad0382e7346"
+    },
+    {
+      "path": "build/packages/aiken-lang-stdlib/lib/aiken/primitive/string.ak",
+      "size": 2794,
+      "sha256": "aa313ee5ba0ca6889eea774002590dd93bf8661ab1c858ba031e7dc5dc284b15"
+    },
+    {
+      "path": "build/packages/aiken-lang-stdlib/lib/cardano/address/credential.ak",
+      "size": 977,
+      "sha256": "015e01e5af770674bd79cec8ccc73533164078cbef5c77fea5206b2d653c48a6"
+    },
+    {
+      "path": "build/packages/aiken-lang-stdlib/lib/cardano/address.ak",
+      "size": 3559,
+      "sha256": "500f08ea61aa91a8852a978e55b5ceb6b64ef039a1791586f40128f59925a3c8"
+    },
+    {
+      "path": "build/packages/aiken-lang-stdlib/lib/cardano/assets.ak",
+      "size": 21696,
+      "sha256": "fdd056338a1727d82d3786ced110ba062c9821dc3b04ea91f7a53aa2dfb66d75"
+    },
+    {
+      "path": "build/packages/aiken-lang-stdlib/lib/cardano/certificate.ak",
+      "size": 3808,
+      "sha256": "ac5a29844e30203b434f506b735ac9ef429b535de2de25a9a9d204a37740f357"
+    },
+    {
+      "path": "build/packages/aiken-lang-stdlib/lib/cardano/governance/protocol_parameters.ak",
+      "size": 12483,
+      "sha256": "d8fa47c6f270703f7a94889768c996bbee552c61e95ed263809f9d210e313c1f"
+    },
+    {
+      "path": "build/packages/aiken-lang-stdlib/lib/cardano/governance/voter.ak",
+      "size": 1879,
+      "sha256": "1760b278251ce76a9b7b55a45d858fbaf173585305c98629a8d2aca97ce4d079"
+    },
+    {
+      "path": "build/packages/aiken-lang-stdlib/lib/cardano/governance.ak",
+      "size": 3670,
+      "sha256": "75ca34a4a12bf2988003e84f07124fbcd05d734e9b288b25eccfcb05d42c60e8"
+    },
+    {
+      "path": "build/packages/aiken-lang-stdlib/lib/cardano/script_context.ak",
+      "size": 2718,
+      "sha256": "51a6913a3062f2c93dfeb061ec49556fba5e21b49ed4e931124328eafa038c69"
+    },
+    {
+      "path": "build/packages/aiken-lang-stdlib/lib/cardano/transaction/output_reference.ak",
+      "size": 997,
+      "sha256": "7318476ce804b26f9eb08c03a3918c2883667bae1f9d03b12a9317333af21f66"
+    },
+    {
+      "path": "build/packages/aiken-lang-stdlib/lib/cardano/transaction/script_purpose.ak",
+      "size": 4115,
+      "sha256": "a28a72cf15669701ad8df64c2f72125c2012969750b0833d8cc6b35ccfbc80a2"
+    },
+    {
+      "path": "build/packages/aiken-lang-stdlib/lib/cardano/transaction.ak",
+      "size": 7796,
+      "sha256": "3d579be63806c418b1f2442dee21caf0975b320bbf99cda56173fe436540e4db"
+    },
+    {
+      "path": "build/packages/packages.toml",
+      "size": 145,
+      "sha256": "6343ba3b788a2e43f6ac7043aa53c427dcd7190088ea83c14054f2a5dd0417af"
+    },
+    {
+      "path": "lib/vams/f05_authority.ak",
+      "size": 10612,
+      "sha256": "657f30dfc0ecb40f50b2c0442b78f4818de1644f540fb68d76cfb2de72cccdd3"
+    },
+    {
+      "path": "lib/vams/governance.ak",
+      "size": 9132,
+      "sha256": "b288f800f70d5aae566a745a5853067a173dd5cc8ad3225e7ea8d4bb89d29e55"
+    },
+    {
+      "path": "lib/vams/icb.ak",
+      "size": 3674,
+      "sha256": "6df86d4549e9289734b80d2193cc77fffedcb856b46fe41e29d3d8134a8b7917"
+    },
+    {
+      "path": "lib/vams/types.ak",
+      "size": 7489,
+      "sha256": "c420d7481f6104b16c69ec6cddde2a81b19e91ec13d97968ae072d17ace8853e"
+    },
+    {
+      "path": "lib/vams/utils.ak",
+      "size": 3819,
+      "sha256": "67ed2476a33225453942221b2dc621a2687ffd9112f7bbbbe52b43f004f2a939"
+    },
+    {
+      "path": "lib/vams/vdso.ak",
+      "size": 8353,
+      "sha256": "4ba68b11378d968df6e37f4a787c040aba1dbe05dc88368ca01ee5e0ecefcea3"
+    },
+    {
+      "path": "plutus.json",
+      "size": 232958,
+      "sha256": "c4230410d0caac45f2c71d36e45a539c78087697128ce1533306d17e96a48008"
+    },
+    {
+      "path": "validators/agent_nft.ak",
+      "size": 1997,
+      "sha256": "7653cd2a9db99a69424f79164c123ce35d274db75f25f74e0a9f4c4c9b9d36bd"
+    },
+    {
+      "path": "validators/agent_registry.ak",
+      "size": 27368,
+      "sha256": "7655acb5d48cb0abcfe85dadfe9aa9c80046bff3aeeaf0720cb706084adbb5cd"
+    },
+    {
+      "path": "validators/f05_authority_policy.ak",
+      "size": 3487,
+      "sha256": "e9d3ac9cbb14b9e7693dc12430234694c82eb52e61d176e1e39992fb9cbeafa8"
+    },
+    {
+      "path": "validators/f05_authority_policy.test.ak",
+      "size": 4922,
+      "sha256": "a3bc9ccafa26ae4219207a620940ca7da3296608d576725c325a4558b958336d"
+    },
+    {
+      "path": "validators/f05_authority_state.ak",
+      "size": 545,
+      "sha256": "ad15a7416d2069127138d8817b41a920223bbd3d875fdb7b0c9fc3bb60944774"
+    },
+    {
+      "path": "validators/governance_policies.ak",
+      "size": 7771,
+      "sha256": "da0df0fc78e55182dea92921970bb8f127e71b83eaf171b1e18a8a5022bbf73c"
+    },
+    {
+      "path": "validators/governor.ak",
+      "size": 8242,
+      "sha256": "f9383fce703a59a38bece4c78b107e636554e6c427671a83ac0aa6b4b96ace6e"
+    },
+    {
+      "path": "validators/insurance_fund.ak",
+      "size": 58382,
+      "sha256": "184d5c19c65037ee37999af0988166dca2d28a2e2772e268e1c1738a382ecf5f"
+    },
+    {
+      "path": "validators/timelock.ak",
+      "size": 2222,
+      "sha256": "7a2a07f6ef576901fd7fceea059ccfe7cbafde424249a9c5a7d19bba60d4dae3"
+    }
+  ],
+  "input_sha256": "c8268922fa17145571e997bbd8523e75897317eee97b9f3b04e06d95c6b039cb",
+  "pre_post_identical": true
+}

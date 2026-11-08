@@ -1,0 +1,52 @@
+{
+  "commands": [
+    {
+      "argv": [
+        "/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python",
+        "-B",
+        "scripts/docs/validate_docs.py"
+      ],
+      "exit_code": 0,
+      "name": "validate_docs",
+      "raw_output_retained": false,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "a577c20ffd716a727eff6829bca7a41e2cbfc01a44de0198134499fdbac40f0a",
+      "summary_lines": [
+        "Documentation validation passed."
+      ]
+    },
+    {
+      "argv": [
+        "/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python",
+        "-B",
+        "-m",
+        "unittest",
+        "scripts/docs/test_validate_docs.py"
+      ],
+      "exit_code": 0,
+      "name": "focused_unittest",
+      "raw_output_retained": false,
+      "stderr_sha256": "6f283ee6225d2cef4c0127d95456a6f954c45141c92b97dd89016cb1c630e8f4",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "summary_lines": [
+        "Ran 2 tests in 0.002s",
+        "OK"
+      ]
+    }
+  ],
+  "date": "2026-10-03",
+  "git_head": "829ab544571f12efe50ecb5740f129c8acb3e16f",
+  "inventory_after": {
+    "count": 1696,
+    "excludes_evidence_package": "docs/remediation/m7_docs_reality_current_r1/",
+    "sha256": "b4bfc7031d665473c5081a9130972999340483efc2d2e7241bb8c1a24a34a458"
+  },
+  "inventory_before": {
+    "count": 1696,
+    "excludes_evidence_package": "docs/remediation/m7_docs_reality_current_r1/",
+    "sha256": "b4bfc7031d665473c5081a9130972999340483efc2d2e7241bb8c1a24a34a458"
+  },
+  "inventory_unchanged": true,
+  "python": "3.12.14",
+  "schema": "m7-docs-reality-current-v1"
+}

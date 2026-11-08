@@ -1,13 +1,17 @@
 import logging
 from typing import Any
 
+from neuron.runtime_safety import LiveModeSafetyError
+
 logger = logging.getLogger(__name__)
 
 class YieldManager:
     """
-    Manages Insurance Fund yield vault allocations.
-    Interfaces with OMS earning primitives (sPOL, yield vaults).
-    Enforces max allocation cap, instant withdrawal requirements.
+    Read-only fund query wrapper; yield transaction submission is unavailable.
+
+    Restricted testnet keeps real yield disabled. The former write methods built
+    and signed transactions but returned fabricated hashes without broadcasting
+    or confirming anything. No authenticated write/recovery backend exists here.
     """
 
     def __init__(self, insurance_fund_contract: Any, signer: Any):
@@ -17,36 +21,18 @@ class YieldManager:
 
     def deploy_capital(self, vault_address: str, amount: int) -> str:
         """
-        Deploy capital to a yield vault (up to 30% allowed by contract).
+        Reject unsupported yield writes before accessing the fund or signer.
         """
-        logger.info(f"Deploying {amount} to vault {vault_address}")
-        # Build transaction
-        tx = self.fund.functions.deployToYield(vault_address, amount).build_transaction({
-            'from': self.signer.get_address(),
-            # nonce, gas, gasPrice would be added here
-        })
-        # Sign and send
-        signed_tx = self.signer.sign_transaction(tx)
-        # return tx_hash
-        return "0x_mock_tx_hash_deploy"
+        raise LiveModeSafetyError("Yield deployment is disabled; transaction submission is unavailable")
 
     def withdraw_capital(self, vault_address: str, amount: int) -> str:
         """
-        Withdraw capital from a yield vault.
+        Reject the incomplete write path; this does not implement recovery.
         """
-        logger.info(f"Withdrawing {amount} from vault {vault_address}")
-        # Build transaction
-        tx = self.fund.functions.withdrawFromYield(vault_address, amount).build_transaction({
-            'from': self.signer.get_address(),
-            # nonce, gas, gasPrice would be added here
-        })
-        # Sign and send
-        signed_tx = self.signer.sign_transaction(tx)
-        # return tx_hash
-        return "0x_mock_tx_hash_withdraw"
+        raise LiveModeSafetyError("Yield withdrawal submission is unavailable; no recovery backend is qualified")
 
     def get_deployed_balance(self) -> int:
         """
-        Get total capital currently deployed to yield vaults.
+        Pass through the supplied contract's read; not authenticated custody evidence.
         """
         return self.fund.functions.totalDeployedBalance().call()

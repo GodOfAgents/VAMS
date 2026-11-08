@@ -53,7 +53,11 @@ class TestOMSIdentityVerifier(unittest.TestCase):
         mock_response.json.return_value = {"is_verified": False}
         mock_get.return_value = mock_response
 
-        verifier = OMSIdentityVerifier(mock_mode=False, api_key="test-key")
+        verifier = OMSIdentityVerifier(
+            mock_mode=False,
+            api_url="https://api.test/identity",
+            api_key="test-key",
+        )
         self.assertFalse(verifier.is_verified("0x112233"))
 
     @patch("requests.get")
@@ -63,7 +67,11 @@ class TestOMSIdentityVerifier(unittest.TestCase):
         mock_response.status_code = 500
         mock_get.return_value = mock_response
 
-        verifier = OMSIdentityVerifier(mock_mode=False, api_key="test-key")
+        verifier = OMSIdentityVerifier(
+            mock_mode=False,
+            api_url="https://api.test/identity",
+            api_key="test-key",
+        )
         self.assertFalse(verifier.is_verified("0x112233"))
 
         # Check fail closed on connection exception
@@ -77,8 +85,10 @@ class TestCoinmeClient(unittest.TestCase):
         # Checkout session
         checkout = client.create_checkout(100.0, "USD", "0x1234")
         self.assertEqual(checkout["amount_fiat"], 100.0)
-        self.assertEqual(checkout["status"], "pending")
-        self.assertTrue(checkout["checkout_url"].startswith("https://checkout.coinme.com"))
+        self.assertEqual(checkout["status"], "simulated")
+        self.assertTrue(checkout["checkout_url"].startswith("simulated:"))
+        self.assertTrue(checkout["simulated"])
+        self.assertEqual(checkout["evidence_classification"], "non-authoritative")
 
         # Rate
         rate = client.get_conversion_rate("USD", "VAMS")
@@ -146,7 +156,9 @@ class TestTrailsClient(unittest.TestCase):
         status = client.get_status(receipt.intent_id)
         self.assertTrue(isinstance(status, TrailsStatus))
         self.assertEqual(status.status, "settled")
-        self.assertTrue(status.tx_hash.startswith("0x"))
+        self.assertTrue(status.tx_hash.startswith("simulated:sha256:"))
+        self.assertTrue(status.simulated)
+        self.assertEqual(status.evidence_classification, "non-authoritative")
 
     @patch("requests.post")
     def test_live_submit_intent(self, mock_post):
@@ -185,7 +197,7 @@ class TestTrailsClient(unittest.TestCase):
         client = TrailsClient(
             mock_mode=False,
             api_url="https://api.trails.test",
-            api_key="test-key",
+            api_key="provider-key",
         )
         status = client.get_status("int_999")
         self.assertEqual(status.status, "completed")

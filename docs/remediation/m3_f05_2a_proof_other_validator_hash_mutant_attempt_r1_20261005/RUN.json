@@ -1,0 +1,85 @@
+{
+  "schema_version": "f05-2a-proof-domain-mutant-sim-attempt-r1",
+  "case_id": "r2_signature_for_other_validator_hash",
+  "decision": "R4.1 proof-domain B",
+  "attempt": {
+    "label": "one-expression PoP-preimage mutant applied to same negative proof through immutable R3 runner",
+    "argv": [
+      "/home/GodOfAgents/vams-evidence/toolchains/python/bin/python3.12",
+      "/home/GodOfAgents/code/VAMS-testnet/scripts/remediation/f05_2a_tx_sim_runner_r3.py",
+      "--aiken",
+      "/home/GodOfAgents/vams-evidence/toolchains/aiken-1.1.21/aiken",
+      "--tx",
+      "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m3_f05_2a_proof_other_validator_hash_mutant_r1_20261005/r2_signature_for_other_validator_hash/mutant.tx.cbor",
+      "--raw-inputs",
+      "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m3_f05_2a_proof_other_validator_hash_mutant_r1_20261005/r2_signature_for_other_validator_hash/mutant.raw_inputs.cbor",
+      "--raw-outputs",
+      "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m3_f05_2a_proof_other_validator_hash_mutant_r1_20261005/r2_signature_for_other_validator_hash/mutant.raw_outputs.cbor",
+      "--policy-id",
+      "f69665acd72650e6789b38151419ac429ae83782cfffe45d91496f7b"
+    ],
+    "cwd": "/home/GodOfAgents/code/VAMS-testnet",
+    "python_version": "Python 3.12.14",
+    "aiken_version": "aiken v1.1.21+42babe5",
+    "aiken_sha256": "07f3f927f1a8c71fc61273fdff850d9b98edb28dde207c8a32585991f2c88e79",
+    "runner_sha256": "3088ade0a316f6af59c04fe3e1675733100b58be826fa22af3c25e40a086ea5c",
+    "wrapper_exit_code": 0,
+    "runner_result": {
+      "cleanup": {
+        "child_reaped": true,
+        "process_group_empty": true,
+        "snapshot_descriptors_closed": true,
+        "status": "clean"
+      },
+      "schema_version": "f05-2a-tx-sim-run-result-r3",
+      "simulator_child_exit": 0,
+      "simulator_result": {
+        "stage": "script_accepted",
+        "target_script_invoked": true
+      },
+      "submitted_sha256": {
+        "raw_inputs": "5e935c48cc9d4e82e6dbedce94b2fbd3fb427f5e187bbe67ed376671ba5e4fec",
+        "raw_outputs": "a3993e8db5134ee6ae9329a366ae66d6706a08ac3174720317359d85faa4cefd",
+        "transaction": "d4950fb424627e5492589643e078f2239cd2661f4133b7d6276a978b097b7821"
+      },
+      "submitted_size_bytes": {
+        "raw_inputs": 73,
+        "raw_outputs": 79,
+        "transaction": 5104
+      },
+      "target_mint_binding": {
+        "compiled_script_hash": "f69665acd72650e6789b38151419ac429ae83782cfffe45d91496f7b",
+        "expected_policy_id": "f69665acd72650e6789b38151419ac429ae83782cfffe45d91496f7b",
+        "policy_ids": [
+          "f69665acd72650e6789b38151419ac429ae83782cfffe45d91496f7b"
+        ]
+      },
+      "wrapper_exit_code": 0
+    },
+    "capture_note": "Exact structured runner result captured by scoped execution; raw simulator stdout/stderr and external attestation are not retained."
+  },
+  "fixture": {
+    "path": "docs/remediation/m3_f05_2a_proof_other_validator_hash_mutant_r1_20261005/r2_signature_for_other_validator_hash",
+    "original_case_id_preserved": true,
+    "original_assertion": "sign_tuple_with_another_state_validator_hash",
+    "mutant_policy_id": "f69665acd72650e6789b38151419ac429ae83782cfffe45d91496f7b",
+    "mutant_transaction_sha256": "d4950fb424627e5492589643e078f2239cd2661f4133b7d6276a978b097b7821",
+    "mutant_preexecution_review_sha256": "6880c4be08b833e41796c0a4dba4203f4ee9615e525883d31db315712ab0d890",
+    "normal_policy_negative_run_sha256": "5e89f1f022fcb11e3e6311cb13c0bb3bdb7821b8e44d97863d991f5673ce86c0",
+    "same_negative_pop_message_and_signatures": true,
+    "funding_signatures_body_bound": true,
+    "value_and_nft_conserved": true,
+    "private_keys_persisted": false
+  },
+  "credit": {
+    "positive_control_original_policy": "accepted synthetic control",
+    "negative_attribution": null,
+    "mutant_acceptance": "candidate pending independent post-run review",
+    "mutation_suite": false,
+    "original_policy": false,
+    "ledger_admission": false,
+    "live_network": false
+  },
+  "scope": "synthetic test-only alternate-policy one-expression PoP-preimage attribution attempt; no case credit until independent post-run acceptance review; no original-policy, full-ledger-admission, Pre-Prod, or live-network credit",
+  "case_status": "PENDING awaiting independent mutant-attribution review"
+}

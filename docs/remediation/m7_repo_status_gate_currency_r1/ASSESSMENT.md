@@ -1,0 +1,5 @@
+# M7 repository status gate currency
+
+REPO_STATUS_REPORT.md now distinguishes current bounded gate evidence from July historical totals: root Python 1,604 passed/1 failed/441 subtests, strict Aiken 1,865 checks/7 warnings/exit 1, unavailable local forge, current redacted Gitleaks findings, and bounded post-fix security/frontend results. The July launch schedule is marked historical and unachieved. Testnet remains NO-GO and deployment, Deposit, Slash activation, and ExecuteIntent remain disabled.
+
+The documentation validator exited 0 and its focused unittest suite passed 2/2; git diff --check exited 0. Independent read-only review PASS on the exact report diff and cited evidence. Other unchanged narrative sections still need separate source review; Last verified remains a historical metadata date and has not been advanced. No source code, dependencies, credentials, or deployment state changed. The next single slice is correction of Near live-capability claims in README.md and docs/L3_CHAIN_AND_DA.md.

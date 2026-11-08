@@ -1,0 +1,49 @@
+{
+  "branch": "testnet/remediation-20260907",
+  "cache_dir": "/tmp/vams-rw061-evidence-run-20261006-82kj211f/cache",
+  "captured_output_sha256": "c44aeff43b76df239215ed0ea5d88237aa43d503deb0f8f17094f965aae2c90d",
+  "command": [
+    "/home/GodOfAgents/vams-evidence/toolchains/foundry-1.7.1/unpacked/forge",
+    "test",
+    "--offline",
+    "--use",
+    "/home/GodOfAgents/vams-evidence/toolchains/solc-0.8.24/solc-linux-amd64-v0.8.24+commit.e11b9ed9",
+    "--out",
+    "/tmp/vams-rw061-evidence-run-20261006-82kj211f/out",
+    "--cache-path",
+    "/tmp/vams-rw061-evidence-run-20261006-82kj211f/cache",
+    "--match-path",
+    "test/ZKMLProofContainment.t.sol",
+    "-vvv"
+  ],
+  "forge_exit_code": 0,
+  "forge_version": "1.7.1+4072e48705af9d93e3c0f6e29e93b5e9a40caed8",
+  "independent_review_log_sha256": "c88a63cbb6b613ada856b192525aad761442bd549d137a13444d7e9c0d815b69",
+  "official_index_sha256_observed": "ee1a2b4811bd1225c220cd2342e2b49a58cbe18f5687f230f456c443b29497d6",
+  "official_index_url": "https://binaries.soliditylang.org/linux-amd64/list.json",
+  "offline": true,
+  "out_dir": "/tmp/vams-rw061-evidence-run-20261006-82kj211f/out",
+  "recorded_at_utc": "2026-10-05T18:47:05.370765+00:00",
+  "repository_head": "829ab544571f12efe50ecb5740f129c8acb3e16f",
+  "result": {
+    "failed": 0,
+    "passed": 1,
+    "skipped": 0
+  },
+  "solc_path": "/home/GodOfAgents/vams-evidence/toolchains/solc-0.8.24/solc-linux-amd64-v0.8.24+commit.e11b9ed9",
+  "solc_sha256_expected": "fb03a29a517452b9f12bcf459ef37d0a543765bb3bbc911e70a87d6a37c30d5f",
+  "solc_sha256_observed": "fb03a29a517452b9f12bcf459ef37d0a543765bb3bbc911e70a87d6a37c30d5f",
+  "solc_version_output": "solc, the solidity compiler commandline interface\nVersion: 0.8.24+commit.e11b9ed9.Linux.g++\n",
+  "source_sha256": {
+    "contracts/foundry.toml": "6e9b8e142a4fce5d57be189df14403fbca4e2ecf8fecb9b86c9e284877c59f6a",
+    "contracts/lib/openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol": "14db075db83fa7a70d733302ead4688e20efa42a1dccc56499e37f48438ddbd7",
+    "contracts/script/DeployPlugins.s.sol": "839b1f21d5df339d1fb133603e9b35cec29dc98fe985e50c4725ae24e03d4799",
+    "contracts/src/base/VAMSUpgradeableBase.sol": "4f37cd5f23a4a9928d31647864de6d3adcbff84ef92995254b6fe04514a92b7b",
+    "contracts/src/interfaces/IVAMSProofPlugin.sol": "cf35062cc8e7461ce9d95f99335b576106f4a58074f8476beaf910d1f4259be5",
+    "contracts/src/interfaces/IVAMSTrustAggregator.sol": "0d2a8a8bc56b91543b62085cbc32710add781e333664b40d3df9284839f616f8",
+    "contracts/src/trust/VAMSTrustAggregator.sol": "20380eb07a34be12d33ac505f6a19ea1a8dab4aad994002c66f2816b5348612b",
+    "contracts/src/trust/plugins/ZKMLProofPlugin.sol": "0fc39180db4b2222011ebd8497f35deab9e49809e351f85f0b9ae238b9e16e9c",
+    "contracts/test/ZKMLProofContainment.t.sol": "5c27931b426b198852a9218970daa63f4f8217a89d3ac9598197f61dbc6862eb"
+  },
+  "working_directory": "/home/GodOfAgents/code/VAMS-testnet/contracts"
+}

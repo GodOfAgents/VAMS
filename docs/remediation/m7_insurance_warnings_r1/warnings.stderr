@@ -1,0 +1,5 @@
+    Compiling GodOfAgents/vams-cardano 0.1.0 (.)
+    Resolving GodOfAgents/vams-cardano
+      Fetched 2 packages in 0.03s from cache
+    Compiling aiken-lang/stdlib v2 (./build/packages/aiken-lang-stdlib)
+    Compiling aiken-lang/fuzz v2 (./build/packages/aiken-lang-fuzz)

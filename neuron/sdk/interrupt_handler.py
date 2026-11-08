@@ -18,17 +18,22 @@ Reference: AGENTOS_INTEGRATION.md §2.4
 import time
 import hashlib
 import logging
+import os
 from dataclasses import dataclass, field
-from typing import Optional, Dict, Any, Callable, List
+from typing import Optional, Dict, Any, Callable, List, Mapping
 from enum import Enum
 
 from neuron.runtime_safety import (
+    ImmutableRuntimeConfiguration,
     LiveModeSafetyError,
-    is_live_environment,
-    require_not_live_mock,
+    RuntimePolicy,
+    load_runtime_policy,
+    resolve_component_mock_mode,
 )
 
 logger = logging.getLogger("vams.interrupt_handler")
+
+_SAFE_HANDLER_ERROR = "interrupt_handler_failed"
 
 
 class InterruptSignal(Enum):
@@ -110,7 +115,10 @@ DEFAULT_COST_TABLE = {
 }
 
 
-class InterruptVectorTable:
+IVT_MOCK_VARIABLE = "VAMS_IVT_MOCK"
+
+
+class InterruptVectorTable(ImmutableRuntimeConfiguration):
     """
     VAMS implementation of the AgentOS Interrupt Vector Table.
     
@@ -133,23 +141,37 @@ class InterruptVectorTable:
         max_retries: Number of provider failover attempts
     """
     
+    _immutable_runtime_fields = frozenset(
+        {"mock_mode", "runtime_policy", "timeout_ms", "max_retries"}
+    )
+
     def __init__(
         self,
         agent_id: str = "local_agent",
-        mock_mode: bool = True,
+        mock_mode: Optional[bool] = None,
         timeout_ms: int = 30_000,
         max_retries: int = 2,
-        x402_handler: Optional[Any] = None
+        x402_handler: Optional[Any] = None,
+        *,
+        environ: Optional[Mapping[str, str]] = None,
+        policy: Optional[RuntimePolicy] = None,
     ):
-        require_not_live_mock("InterruptVectorTable", mock_mode)
-        if is_live_environment() and not mock_mode:
+        source = os.environ if environ is None else environ
+        self.runtime_policy = policy or load_runtime_policy(source)
+        self.mock_mode = resolve_component_mock_mode(
+            "InterruptVectorTable",
+            IVT_MOCK_VARIABLE,
+            mock_mode,
+            policy=self.runtime_policy,
+            environ=source,
+        )
+        if self.runtime_policy.is_live:
             raise LiveModeSafetyError(
-                "InterruptVectorTable live execution is disabled until every "
-                "economic interrupt has an audited real handler"
+                "InterruptVectorTable live execution is disabled until every economic "
+                "interrupt and recovery path has an audited real handler"
             )
 
         self.agent_id = agent_id
-        self.mock_mode = mock_mode
         self.timeout_ms = timeout_ms
         self.max_retries = max_retries
         self._x402_handler = x402_handler
@@ -182,6 +204,7 @@ class InterruptVectorTable:
         # Wire custom x402 handler if provided and not mock_mode
         if not self.mock_mode and self._x402_handler is not None:
             self.register_x402_handler(self._x402_handler)
+        self._freeze_runtime_configuration()
 
     
     def _register_default_handlers(self):
@@ -294,16 +317,16 @@ class InterruptVectorTable:
                 self._stats["avg_latency_ms"] * (n - 1) + result.latency_ms
             ) / n
             
-        except Exception as e:
+        except Exception:
             result = InterruptResult(
                 interrupt_id=request.interrupt_id,
                 signal=signal,
                 status=InterruptStatus.FAILED,
-                error=str(e),
+                error=_SAFE_HANDLER_ERROR,
                 latency_ms=(time.time() - start_time) * 1000
             )
             self._stats["failed"] += 1
-            logger.error(f"IRQ failed: {request.interrupt_id} — {e}")
+            logger.error("IRQ failed: %s; handler exception detail suppressed", request.interrupt_id)
         
         self._history.append(result)
         self._active_interrupt = None

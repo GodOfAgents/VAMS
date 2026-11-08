@@ -1,0 +1,274 @@
+{
+  "schema_version": "f05-2a-authority-output-missing-r1-case-status-v1",
+  "source_registry": {
+    "path": "docs/remediation/m3_f05_2a/authority_bootstrap_public_fixtures.json",
+    "sha256": "98a05d24d476b1aee2754768322dc4b794e5afb5fabec28ade17a2888285467d",
+    "assertions_changed": false
+  },
+  "negative_cases": {
+    "total": 55,
+    "pass": [
+      {
+        "id": "seed_missing",
+        "evidence": "seed_reference_and_datum_binding"
+      },
+      {
+        "id": "seed_duplicate",
+        "evidence": "/home/GodOfAgents/vams-evidence/m3-f05-2a-seed-duplicate-independent-review-20261002-r1/REVIEW.json"
+      },
+      {
+        "id": "seed_datum_hash",
+        "evidence": "seed_reference_and_datum_binding"
+      },
+      {
+        "id": "seed_datum_index",
+        "evidence": "seed_reference_and_datum_binding"
+      },
+      {
+        "id": "mint_wrong_name",
+        "evidence": "mint_map_exactness"
+      },
+      {
+        "id": "mint_quantity_two",
+        "evidence": "mint_map_exactness"
+      },
+      {
+        "id": "mint_extra_name",
+        "evidence": "mint_map_exactness"
+      },
+      {
+        "id": "output_stake_credential",
+        "evidence": "/home/GodOfAgents/vams-evidence/m3-f05-2a-stake-admission-independent-review-20261002-r1/REVIEW.json"
+      },
+      {
+        "id": "datum_missing",
+        "evidence": "datum_envelope_schema"
+      },
+      {
+        "id": "datum_hash_only",
+        "evidence": "datum_envelope_schema"
+      },
+      {
+        "id": "datum_unknown_constructor",
+        "evidence": "datum_envelope_schema"
+      },
+      {
+        "id": "datum_schema_version",
+        "evidence": "datum_envelope_schema"
+      },
+      {
+        "id": "datum_seed_hash",
+        "evidence": "/home/GodOfAgents/vams-evidence/m3-f05-2a-datum-integrated-independent-review-20261002-r1/INTEGRATED-REVIEW.json"
+      },
+      {
+        "id": "datum_seed_index",
+        "evidence": "/home/GodOfAgents/vams-evidence/m3-f05-2a-datum-integrated-independent-review-20261002-r1/INTEGRATED-REVIEW.json"
+      },
+      {
+        "id": "datum_epoch",
+        "evidence": "/home/GodOfAgents/vams-evidence/m3-f05-2a-datum-integrated-independent-review-20261002-r1/INTEGRATED-REVIEW.json"
+      },
+      {
+        "id": "datum_key_count",
+        "evidence": "/home/GodOfAgents/vams-evidence/m3-f05-2a-datum-integrated-independent-review-20261002-r1/INTEGRATED-REVIEW.json"
+      },
+      {
+        "id": "datum_key_length",
+        "evidence": "/home/GodOfAgents/vams-evidence/m3-f05-2a-datum-integrated-independent-review-20261002-r1/INTEGRATED-REVIEW.json"
+      },
+      {
+        "id": "datum_duplicate_key",
+        "evidence": "/home/GodOfAgents/vams-evidence/m3-f05-2a-datum-integrated-independent-review-20261002-r1/INTEGRATED-REVIEW.json"
+      },
+      {
+        "id": "datum_key_binding",
+        "evidence": "/home/GodOfAgents/vams-evidence/m3-f05-2a-datum-integrated-independent-review-20261002-r1/INTEGRATED-REVIEW.json"
+      },
+      {
+        "id": "datum_threshold",
+        "evidence": "/home/GodOfAgents/vams-evidence/m3-f05-2a-datum-integrated-independent-review-20261002-r1/INTEGRATED-REVIEW.json"
+      },
+      {
+        "id": "datum_status",
+        "evidence": "/home/GodOfAgents/vams-evidence/m3-f05-2a-datum-integrated-independent-review-20261002-r1/INTEGRATED-REVIEW.json"
+      },
+      {
+        "id": "datum_pending_kind",
+        "evidence": "/home/GodOfAgents/vams-evidence/m3-f05-2a-datum-integrated-independent-review-20261002-r1/INTEGRATED-REVIEW.json"
+      },
+      {
+        "id": "datum_pending_noncanonical",
+        "evidence": "/home/GodOfAgents/vams-evidence/m3-f05-2a-datum-integrated-independent-review-20261002-r1/INTEGRATED-REVIEW.json"
+      },
+      {
+        "id": "authority_value_minus_one",
+        "evidence": "accepted R3.1 #33 package"
+      },
+      {
+        "id": "authority_value_plus_one",
+        "evidence": "authority_lovelace"
+      },
+      {
+        "id": "fee_diversion",
+        "evidence": "authority_lovelace"
+      },
+      {
+        "id": "authority_extra_native_asset",
+        "evidence": "/home/GodOfAgents/vams-evidence/m3-f05-2a-extra-asset-independent-integrated-review-20261002-r1/INTEGRATED-REVIEW.json"
+      },
+      {
+        "id": "r2_proof_missing",
+        "evidence": "/home/GodOfAgents/vams-evidence/m3-f05-2a-proof-missing-independent-review-20261002-r1/REVIEW.json"
+      },
+      {
+        "id": "r2_proof_extra",
+        "evidence": "/home/GodOfAgents/vams-evidence/m3-f05-2a-proof-extra-independent-review-20261002-r1/REVIEW.json"
+      },
+      {
+        "id": "r2_invalid_proof_0",
+        "evidence": "/home/GodOfAgents/vams-evidence/m3-f05-2a-proof-pop-independent-integrated-review-20261002-r1/INDEPENDENT-REVIEW.json"
+      },
+      {
+        "id": "r2_invalid_proof_1",
+        "evidence": "/home/GodOfAgents/vams-evidence/m3-f05-2a-invalid-proof-1-independent-review-20261002-r1/REVIEW.json"
+      },
+      {
+        "id": "r2_invalid_proof_2",
+        "evidence": "/home/GodOfAgents/vams-evidence/m3-f05-2a-invalid-proof-2-independent-review-20261002-r1/REVIEW.json"
+      },
+      {
+        "id": "r2_invalid_proof_3",
+        "evidence": "/home/GodOfAgents/vams-evidence/m3-f05-2a-invalid-proof-3-independent-review-20261002-r1/REVIEW.json"
+      },
+      {
+        "id": "r2_invalid_proof_4",
+        "evidence": "/home/GodOfAgents/vams-evidence/m3-f05-2a-invalid-proof-4-independent-review-20261002-r1/REVIEW.json"
+      },
+      {
+        "id": "r2_wrong_key_pairing",
+        "evidence": "/home/GodOfAgents/vams-evidence/m3-f05-2a-wrong-key-pairing-independent-review-20261002-r1/REVIEW.json"
+      },
+      {
+        "id": "r2_swapped_datum_keys",
+        "evidence": "/home/GodOfAgents/vams-evidence/m3-f05-2a-r2-swapped-datum-keys-independent-review-20261002-r1/REVIEW.json"
+      },
+      {
+        "id": "datum_key_order",
+        "evidence": "/home/GodOfAgents/vams-evidence/m3-f05-2a-datum-key-order-corrected-independent-review-20261002-r1/REVIEW.json"
+      },
+      {
+        "id": "r2_duplicate_datum_key",
+        "evidence": "/home/GodOfAgents/vams-evidence/m3-f05-2a-r2-duplicate-datum-key-independent-review-20261002-r1/REVIEW.json"
+      },
+      {
+        "id": "r2_wrong_state_address",
+        "evidence": "/home/GodOfAgents/vams-evidence/m3-f05-2a-r2-wrong-state-address-independent-review-20261002-r1/REVIEW.json"
+      },
+      {
+        "id": "output_wrong_payment_credential",
+        "evidence": "/home/GodOfAgents/vams-evidence/m3-f05-2a-r2-wrong-state-address-independent-review-20261002-r1/REVIEW.json"
+      },
+      {
+        "id": "authority_output_extra_target",
+        "evidence": "/home/GodOfAgents/vams-evidence/m3-f05-2a-authority-output-extra-target-independent-review-20261002-r1/REVIEW.json"
+      },
+      {
+        "id": "authority_output_missing",
+        "evidence": "/home/GodOfAgents/vams-evidence/m3-f05-2a-authority-output-missing-independent-review-20261002-r1/REVIEW.json"
+      }
+    ],
+    "pending": [
+      "applied_genesis_parameter",
+      "applied_keys_parameter",
+      "applied_keys_bad_count",
+      "applied_keys_bad_length",
+      "applied_keys_duplicate",
+      "applied_keys_unsorted",
+      "mint_wrong_policy",
+      "authority_output_duplicate_nft",
+      "authority_output_quantity_two",
+      "r2_signature_for_other_seed",
+      "r2_signature_for_other_network",
+      "r2_signature_for_other_validator_hash",
+      "r2_signature_for_other_epoch"
+    ],
+    "failed": [],
+    "classification": {
+      "transaction_simulator": {
+        "total": 51,
+        "pass": 42,
+        "pending": 9,
+        "failed": 0
+      },
+      "context_only": {
+        "total": 3,
+        "pending": 3
+      },
+      "routing_only": {
+        "total": 1,
+        "pending": 1
+      }
+    },
+    "summary": {
+      "pass": 42,
+      "pending": 13,
+      "failed": 0
+    }
+  },
+  "mutations": {
+    "total": 21,
+    "ids_pending": [
+      "unconditional_success",
+      "remove_seed_guard",
+      "remove_exact_mint_guard",
+      "remove_target_output_cardinality_guard",
+      "remove_state_validator_credential_binding",
+      "remove_singleton_quantity_guard",
+      "remove_inline_datum_guard",
+      "remove_schema_version_guard",
+      "remove_seed_hash_guard",
+      "remove_seed_index_guard",
+      "remove_epoch_guard",
+      "remove_key_uniqueness_order_guard",
+      "remove_key_order_guard",
+      "remove_key_binding_guard",
+      "remove_threshold_guard",
+      "remove_status_guard",
+      "remove_pending_canonicality_guard"
+    ],
+    "categories": {
+      "canonical_policy": 17,
+      "alternate_parameter": 2,
+      "context_only": 1,
+      "composite": 1
+    },
+    "executed": 4,
+    "passed": 4,
+    "failed": 0,
+    "pending": 17,
+    "triad_evidence": "two independently reviewed synthetic compiled triads for exact-lovelace and no-extra-asset guard; each has source/program binding, routing and false-positive admission controls; one independently reviewed synthetic compiled triad for no-stake-credential guard with exact source/program binding, routing and false-positive admission controls; one independently reviewed synthetic compiled triad for the bootstrap PoP verifier removal with exact source/program binding, routing and false-positive admission controls",
+    "pass": [
+      {
+        "id": "remove_exact_lovelace_guard",
+        "evidence": "/home/GodOfAgents/vams-evidence/m3-f05-2a-lovelace-combined-independent-acceptance-20261002-r1/ACCEPTANCE.json"
+      },
+      {
+        "id": "remove_no_extra_asset_guard",
+        "evidence": "/home/GodOfAgents/vams-evidence/m3-f05-2a-extra-asset-independent-integrated-review-20261002-r1/INTEGRATED-REVIEW.json"
+      },
+      {
+        "id": "remove_no_stake_credential_guard",
+        "evidence": "/home/GodOfAgents/vams-evidence/m3-f05-2a-stake-admission-independent-review-20261002-r1/REVIEW.json"
+      },
+      {
+        "id": "remove_bootstrap_proof_of_possession_verification",
+        "evidence": "/home/GodOfAgents/vams-evidence/m3-f05-2a-proof-pop-independent-integrated-review-20261002-r1/INDEPENDENT-REVIEW.json"
+      }
+    ]
+  },
+  "limits": [
+    "No registry identifiers or assertions were changed.",
+    "No case is PASS from inventory alone; PASS entries require the cited simulator evidence.",
+    "Simulator outcomes do not establish full ledger admission."
+  ]
+}

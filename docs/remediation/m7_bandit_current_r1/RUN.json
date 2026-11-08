@@ -1,0 +1,55 @@
+{
+  "capture_script_sha256": "3444d11cdbc7d95f16cadc0ca722e55b42a928e5466064754712f6c728688aea",
+  "error_count": 0,
+  "evidence_credit": "No deployment, ledger, or live-network credit.",
+  "finding_count": 0,
+  "inner_command": [
+    "/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/bandit",
+    "-r",
+    "neuron/",
+    "gateway/",
+    "-ll",
+    "-ii",
+    "-f",
+    "json",
+    "-o",
+    "/tmp/vams-bandit-fl0kh_91/bandit-report.json"
+  ],
+  "outer_command": [
+    "bwrap",
+    "--unshare-net",
+    "--ro-bind",
+    "/",
+    "/",
+    "--tmpfs",
+    "/tmp",
+    "--dev-bind",
+    "/dev",
+    "/dev",
+    "--proc",
+    "/proc",
+    "--bind",
+    "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m7_bandit_current_r1",
+    "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m7_bandit_current_r1",
+    "--chdir",
+    "/home/GodOfAgents/code/VAMS-testnet",
+    "/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python",
+    "-B",
+    "docs/remediation/m7_bandit_current_r1/run_capture.py"
+  ],
+  "result_sha256": "676adf3f378684a904ab09050fa6adf1fe0fa0603975c54316999f710813dae4",
+  "scanner_exit_code": 0,
+  "schema_version": "m7-bandit-capture-r1",
+  "source_inventory": {
+    "path_sha256_manifest_sha256": "442953e5b903c7b7c5f298231b3c605909b1b1a4937f5d0dbed8099937b75ea6",
+    "python_file_count": 190
+  },
+  "source_inventory_after": {
+    "path_sha256_manifest_sha256": "442953e5b903c7b7c5f298231b3c605909b1b1a4937f5d0dbed8099937b75ea6",
+    "python_file_count": 190
+  },
+  "tool": {
+    "sha256": "c14fb89c43dad91a351fb8f5da774f7b9f3b5a5e2a757dabb34fbb0f418b0e37",
+    "version": "bandit 1.9.4"
+  }
+}

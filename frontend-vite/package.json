@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "test": "node --test src/nodeTelemetry.test.js",
+    "scan:bundle": "node scripts/scan-production-bundle.mjs",
     "lint": "eslint .",
     "preview": "vite preview"
   },
@@ -32,7 +34,10 @@
     "vite": "^7.2.4"
   },
   "overrides": {
-    "brace-expansion": "1.1.18",
-    "js-yaml": "4.3.1"
+    "brace-expansion": "1.1.21",
+    "js-yaml": "4.3.2",
+    "@humanfs/node": "0.16.8",
+    "baseline-browser-mapping": "2.11.0",
+    "browserslist": "4.28.7"
   }
 }

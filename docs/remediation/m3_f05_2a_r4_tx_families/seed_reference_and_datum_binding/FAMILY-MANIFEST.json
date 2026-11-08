@@ -1,0 +1,212 @@
+{
+  "accepted_registry": {
+    "path": "docs/remediation/m3_f05_2a/authority_bootstrap_public_fixtures.json",
+    "sha256": "98a05d24d476b1aee2754768322dc4b794e5afb5fabec28ade17a2888285467d"
+  },
+  "all_cases_pending": true,
+  "base_positive_hashes": {
+    "raw_inputs": "4b20e2b2cf4bd58b1f6e385c90ffd098d583df69d95fbc7b1fcc2591da72b9fe",
+    "raw_outputs": "9cdf345a785f51763bdb43f1b1ba0c20b5545051f03051e6a7bf726ea128c56a",
+    "transaction": "765c717f16b543c746b88742e8b775cd3ecabca4fef6edd16702184683780a28"
+  },
+  "cases": [
+    {
+      "conservation": {
+        "fee_lovelace": 1000000,
+        "input_lovelace": 17000000,
+        "lovelace_conserved": true,
+        "minted_output_assets_match": true,
+        "output_lovelace": 16000000
+      },
+      "delta": "replace the unique applied genesis input reference aa\u2026aa#7 by dd\u2026dd#8 in both transaction inputs and ordered raw-input vector; retain resolved UTxO values, mint, outputs and fee",
+      "expected_result": "reject at compiled target Mint[0]",
+      "family_id": "seed_reference_and_datum_binding",
+      "files": {
+        "raw_inputs": {
+          "path": "cases/seed_missing/raw_inputs.cbor",
+          "sha256": "1f4c86aa7a6d64cc0ebac3bf8633e98b5c91fa7ded58bdb70427fdd9ffa0e778",
+          "size_bytes": 73
+        },
+        "raw_outputs": {
+          "path": "cases/seed_missing/raw_outputs.cbor",
+          "sha256": "5a02a590dd2df85f220c273837e014bc5a6c75f6b1dfa8cd9d6770322e89c232",
+          "size_bytes": 79
+        },
+        "transaction": {
+          "path": "cases/seed_missing/transaction.cbor",
+          "sha256": "216c52f1803f8ea2de78e3f4c14ff7905ecaaab5dff10a83af2aca9e3c9c80ab",
+          "size_bytes": 5099
+        }
+      },
+      "funding_witnesses": {
+        "count": 2,
+        "private_material_persisted": false,
+        "verified_against_serialized_body": true
+      },
+      "id": "seed_missing",
+      "original_registry_assertion": {
+        "path": "expected.every_negative_case",
+        "value": "reject"
+      },
+      "registry_assertion": "count_seed_input(tx.inputs, genesis_ref) == 1",
+      "schema_version": "f05-2a-r4-family-case-v1",
+      "script_invoked": false,
+      "simulator_result": "not run pending coordinator freeze and independent review",
+      "status": "PENDING",
+      "target": {
+        "applied_script_hash": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+        "policy_id": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+        "purpose": "Mint[0]"
+      },
+      "transaction_body_hash_blake2b_256": "e0127f544b238b586a4b947642d05cd7469dd5e495e40d52e21643a398bcf149"
+    },
+    {
+      "conservation": {
+        "fee_lovelace": 1000000,
+        "input_lovelace": 17000000,
+        "lovelace_conserved": true,
+        "minted_output_assets_match": true,
+        "output_lovelace": 16000000
+      },
+      "delta": "change only AuthorityStateV3.bootstrap_tx_hash from aa\u2026aa to bb\u2026bb; retain applied seed, proof message, keys, value, mint and outputs",
+      "expected_result": "reject at compiled target Mint[0]",
+      "family_id": "seed_reference_and_datum_binding",
+      "files": {
+        "raw_inputs": {
+          "path": "cases/seed_datum_hash/raw_inputs.cbor",
+          "sha256": "4b20e2b2cf4bd58b1f6e385c90ffd098d583df69d95fbc7b1fcc2591da72b9fe",
+          "size_bytes": 73
+        },
+        "raw_outputs": {
+          "path": "cases/seed_datum_hash/raw_outputs.cbor",
+          "sha256": "6b0a4e1175feea6778d2c9c782a2843317f97905ee2efba20824939d2e1a2d5a",
+          "size_bytes": 79
+        },
+        "transaction": {
+          "path": "cases/seed_datum_hash/transaction.cbor",
+          "sha256": "72cb5d0bd2db739be30485a489e31d758db23ee553e26232575fb66720e0bad3",
+          "size_bytes": 5099
+        }
+      },
+      "funding_witnesses": {
+        "count": 2,
+        "private_material_persisted": false,
+        "verified_against_serialized_body": true
+      },
+      "id": "seed_datum_hash",
+      "original_registry_assertion": {
+        "path": "expected.every_negative_case",
+        "value": "reject"
+      },
+      "registry_assertion": "state.bootstrap_tx_hash == genesis_ref.transaction_id",
+      "schema_version": "f05-2a-r4-family-case-v1",
+      "script_invoked": false,
+      "simulator_result": "not run pending coordinator freeze and independent review",
+      "status": "PENDING",
+      "target": {
+        "applied_script_hash": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+        "policy_id": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+        "purpose": "Mint[0]"
+      },
+      "transaction_body_hash_blake2b_256": "306ce077dcae7dbd48a65ec5d7fb6e424a4546be0ae9e7f2a24f9c577bcd553f"
+    },
+    {
+      "conservation": {
+        "fee_lovelace": 1000000,
+        "input_lovelace": 17000000,
+        "lovelace_conserved": true,
+        "minted_output_assets_match": true,
+        "output_lovelace": 16000000
+      },
+      "delta": "change only AuthorityStateV3.bootstrap_output_index from 7 to 8; retain applied seed, proof message, keys, value, mint and outputs",
+      "expected_result": "reject at compiled target Mint[0]",
+      "family_id": "seed_reference_and_datum_binding",
+      "files": {
+        "raw_inputs": {
+          "path": "cases/seed_datum_index/raw_inputs.cbor",
+          "sha256": "4b20e2b2cf4bd58b1f6e385c90ffd098d583df69d95fbc7b1fcc2591da72b9fe",
+          "size_bytes": 73
+        },
+        "raw_outputs": {
+          "path": "cases/seed_datum_index/raw_outputs.cbor",
+          "sha256": "0cb03db687d95740f58d1e47ffcb7b273a4be864ec45a7995d1d9a45ae6e395c",
+          "size_bytes": 79
+        },
+        "transaction": {
+          "path": "cases/seed_datum_index/transaction.cbor",
+          "sha256": "78a81a65568686d545adf424e70e2933f6beeb5201e7f5ae83ab4730293c3f65",
+          "size_bytes": 5099
+        }
+      },
+      "funding_witnesses": {
+        "count": 2,
+        "private_material_persisted": false,
+        "verified_against_serialized_body": true
+      },
+      "id": "seed_datum_index",
+      "original_registry_assertion": {
+        "path": "expected.every_negative_case",
+        "value": "reject"
+      },
+      "registry_assertion": "state.bootstrap_output_index == genesis_ref.output_index",
+      "schema_version": "f05-2a-r4-family-case-v1",
+      "script_invoked": false,
+      "simulator_result": "not run pending coordinator freeze and independent review",
+      "status": "PENDING",
+      "target": {
+        "applied_script_hash": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+        "policy_id": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+        "purpose": "Mint[0]"
+      },
+      "transaction_body_hash_blake2b_256": "d45ccdcb5b2ca38824e0e6271401ca6ef61924e9248e687e9c0ed5416f5520fa"
+    }
+  ],
+  "conservation_rule": "sum resolved input lovelace equals output lovelace plus fee; minted singleton asset equals the output singleton asset",
+  "executions": 0,
+  "family_fixture_count": 3,
+  "family_id": "seed_reference_and_datum_binding",
+  "freeze_gate": "coordinator freezes exact family hashes and Agent C independently approves before any Aiken simulator invocation",
+  "funding_signature_method": "canonical transaction body Blake2b-256; deterministic per-case synthetic Ed25519 signers derived in memory for repeatable fixtures; ordered raw-output payment credentials rebound; every serialized witness independently verified; no private bytes or seeds written",
+  "positive_control": {
+    "expected_result": "accept control",
+    "family_id": "seed_reference_and_datum_binding",
+    "files": {
+      "raw_inputs": {
+        "path": "positive_control/raw_inputs.cbor",
+        "sha256": "4b20e2b2cf4bd58b1f6e385c90ffd098d583df69d95fbc7b1fcc2591da72b9fe",
+        "size_bytes": 73
+      },
+      "raw_outputs": {
+        "path": "positive_control/raw_outputs.cbor",
+        "sha256": "9cdf345a785f51763bdb43f1b1ba0c20b5545051f03051e6a7bf726ea128c56a",
+        "size_bytes": 79
+      },
+      "transaction": {
+        "path": "positive_control/transaction.cbor",
+        "sha256": "765c717f16b543c746b88742e8b775cd3ecabca4fef6edd16702184683780a28",
+        "size_bytes": 5099
+      }
+    },
+    "funding_witnesses": "previously accepted base-witness set; byte-identical copy",
+    "id": "valid_positive_control",
+    "schema_version": "f05-2a-r4-family-positive-control-v1",
+    "source": "accepted typed positive control, copied byte-for-byte",
+    "status": "control-only; no new simulator execution",
+    "target": {
+      "applied_script_hash": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+      "policy_id": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+      "purpose": "Mint[0]"
+    }
+  },
+  "r2_contract": {
+    "path": "docs/remediation/m3_f05_2a/tx_sim_evidence_contract_r2.json",
+    "sha256": "3510e127d369e9eab24a7ebe5a5dea10daaf55fd9589a297d78776bda940f6e9"
+  },
+  "schema_version": "f05-2a-r4-transaction-family-manifest-v1",
+  "status": "fixtures prepared; pending independent family review; no simulator execution",
+  "target": {
+    "applied_script_hash": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+    "policy_id": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+    "purpose": "Mint[0]"
+  }
+}

@@ -244,9 +244,14 @@ contract VAMSStaking is IVAMSStaking, AccessControl, Pausable, ReentrancyGuard {
 
         // Create unbonding request (dynamic period based on crisis mode)
         uint256 unbondingPeriod = crisisMode ? UNBONDING_PERIOD_CRISIS : UNBONDING_PERIOD_NORMAL;
+        uint256 unbondingEnd = block.timestamp + unbondingPeriod;
+        // Adding a normal-mode request cannot shorten an existing crisis lock.
+        if (_unbonding[msg.sender].unbondingEnd > unbondingEnd) {
+            unbondingEnd = _unbonding[msg.sender].unbondingEnd;
+        }
         _unbonding[msg.sender] = UnbondingRequest({
             amount: _unbonding[msg.sender].amount + amount,
-            unbondingEnd: block.timestamp + unbondingPeriod
+            unbondingEnd: unbondingEnd
         });
 
         StakingTier newTier = _getTier(info.amount);
@@ -254,53 +259,32 @@ contract VAMSStaking is IVAMSStaking, AccessControl, Pausable, ReentrancyGuard {
             emit TierChanged(msg.sender, oldTier, newTier);
         }
 
-        emit Unstaked(msg.sender, amount, block.timestamp + unbondingPeriod);
+        emit Unstaked(msg.sender, amount, unbondingEnd);
     }
 
     /// @inheritdoc IVAMSStaking
     function withdraw() external override nonReentrant returns (uint256 amount) {
-        UnbondingRequest storage request = _unbonding[msg.sender];
+        return _withdrawMaturedPrincipal(msg.sender);
+    }
+
+    function _withdrawMaturedPrincipal(address account) internal returns (uint256 amount) {
+        UnbondingRequest storage request = _unbonding[account];
         if (request.amount == 0) revert NoUnbondingRequest();
         if (block.timestamp < request.unbondingEnd) revert UnbondingNotComplete(request.unbondingEnd);
 
         amount = request.amount;
-        delete _unbonding[msg.sender];
+        delete _unbonding[account];
 
-        stakingToken.safeTransfer(msg.sender, amount);
+        stakingToken.safeTransfer(account, amount);
 
-        emit Withdrawn(msg.sender, amount);
+        emit Withdrawn(account, amount);
     }
 
     /// @inheritdoc IVAMSStaking
     function emergencyWithdraw() external override nonReentrant {
-        StakeInfo storage info = _stakes[msg.sender];
-        UnbondingRequest storage request = _unbonding[msg.sender];
-
-        uint256 stakedAmount = info.amount;
-        uint256 unbondingAmount = request.amount;
-        uint256 amount = stakedAmount + unbondingAmount;
-        if (amount == 0) revert NoStake();
-
-        // AUDIT FIX ECON08: Enforce lock period — cannot emergency withdraw
-        // before the lock expires. This prevents bypassing the time-lock
-        // that was agreed to when staking.
-        require(block.timestamp >= info.lockedUntil, "Lock period not expired");
-
-        // AUDIT FIX H03: Deduct BOTH totalStaked AND totalUnbonding
-        // to maintain solvency invariants. Previously only totalStaked
-        // was decremented, leaving totalUnbonding inflated.
-        totalStaked -= stakedAmount;
-        if (unbondingAmount > 0) {
-            // totalUnbonding tracking (if the contract tracks it separately, deduct)
-        }
-        
-        // Clear state (forfeit rewards)
-        delete _stakes[msg.sender];
-        delete _unbonding[msg.sender];
-
-        stakingToken.safeTransfer(msg.sender, amount);
-
-        emit Withdrawn(msg.sender, amount);
+        // Recovery remains available while paused, but cannot create an early
+        // principal exit. Active positions must first enter normal unbonding.
+        _withdrawMaturedPrincipal(msg.sender);
     }
 
     // ============ Reward Functions ============
@@ -448,7 +432,7 @@ contract VAMSStaking is IVAMSStaking, AccessControl, Pausable, ReentrancyGuard {
     uint256 public constant ANNUAL_MINT_CAP = 25_000_000 ether;
 
     /// @inheritdoc IVAMSStaking
-    function updateEmissionRate(uint256 newRate) external override onlyRole(EMISSION_ADMIN_ROLE) {
+    function updateEmissionRate(uint256 newRate) external virtual override onlyRole(EMISSION_ADMIN_ROLE) {
         if (newRate > MAX_EMISSION_RATE) revert RateExceedsMaximum(newRate, MAX_EMISSION_RATE);
         _updatePool();
         emit EmissionRateUpdated(rewardPerSecond, newRate);
@@ -456,7 +440,7 @@ contract VAMSStaking is IVAMSStaking, AccessControl, Pausable, ReentrancyGuard {
     }
 
     /// @inheritdoc IVAMSStaking
-    function updateEmissionBudget(uint256 newBudget) external override onlyRole(EMISSION_ADMIN_ROLE) {
+    function updateEmissionBudget(uint256 newBudget) external virtual override onlyRole(EMISSION_ADMIN_ROLE) {
         require(newBudget <= ANNUAL_MINT_CAP, "Exceeds token mint cap");
         emit EmissionBudgetUpdated(annualEmissionBudget, newBudget);
         annualEmissionBudget = newBudget;

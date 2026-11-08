@@ -1,17 +1,20 @@
 import hashlib
 import json
 import os
+import sqlite3
+import tempfile
 import time
 import unittest
 from base64 import b64encode
-from concurrent.futures import ThreadPoolExecutor
 from unittest.mock import patch
 
 from fastapi.testclient import TestClient
 
 os.environ.setdefault("GATEWAY_ADMIN_PASSWORD", "SecureVDSOTestPassword123!")
+os.environ["VAMS_ENV"] = "test"
 
 from gateway import vdso as vdso_gateway
+from gateway.request_auth import AUTH_ALGORITHM, AUTH_VERSION, GatewayAuthEnvelope
 from gateway.server import app
 from neuron.secp256k1 import (
     generate_private_key,
@@ -28,26 +31,37 @@ def hex32(value: bytes) -> str:
     return "0x" + value.hex()
 
 
-class _SharedReplayStore(vdso_gateway.InMemoryReplayStore):
-    """Atomic test double for an externally shared replay implementation."""
-
-    shared = True
-
-
 class VDSOGatewayTests(unittest.TestCase):
     def setUp(self):
-        self.environment = patch.dict(os.environ, {"VAMS_ENV": "local"}, clear=False)
+        self.temporary_directory = tempfile.TemporaryDirectory()
+        self.addCleanup(self.temporary_directory.cleanup)
+        self.signing_key = generate_private_key()
+        self.public_key = public_key_bytes(self.signing_key)
+        self.audience = "vams.gateway.vdso-test"
+        self.replay_path = os.path.join(
+            self.temporary_directory.name, "replay.sqlite3"
+        )
+        self.environment = patch.dict(
+            os.environ,
+            {
+                "VAMS_ENV": "local",
+                "GATEWAY_ADMIN_PASSWORD": "SecureVDSOTestPassword123!",
+                "GATEWAY_ADMIN_DID": "did:key:" + self.public_key.hex(),
+                "GATEWAY_AUTH_AUDIENCE": self.audience,
+                "GATEWAY_AUTH_REPLAY_DB": self.replay_path,
+            },
+            clear=False,
+        )
         self.environment.start()
         self.addCleanup(self.environment.stop)
         vdso_gateway.service = VDSOCanaryService(
             mode=VDSOMode.SHADOW,
             height_provider=lambda _binding: 1_000,
         )
-        vdso_gateway.replay_store = None
-        vdso_gateway._local_replay_store.clear()
         self.client = TestClient(app)
-        self.signing_key = generate_private_key()
-        self.public_key = public_key_bytes(self.signing_key)
+        self.client.__enter__()
+        self.addCleanup(self.client.__exit__, None, None, None)
+        self._nonce = 0
 
     def _intent_body(
         self,
@@ -99,20 +113,49 @@ class VDSOGatewayTests(unittest.TestCase):
     def _encoded(body):
         return json.dumps(body, separators=(",", ":")).encode()
 
-    def _headers(self, path, body_bytes, *, timestamp=None):
-        timestamp_value = timestamp if timestamp is not None else str(int(time.time()))
-        digest = hashlib.sha256(body_bytes).hexdigest()
-        message = (
-            f"VAMS_VDSO_AUTH:POST:{path}:{timestamp_value}:{digest}"
-        ).encode()
-        signature = sign_message(self.signing_key, message).hex()
-        return {
+    def _headers(
+        self,
+        path,
+        body_bytes=b"",
+        *,
+        timestamp=None,
+        method="POST",
+        nonce=None,
+    ):
+        now = int(time.time())
+        self._nonce += 1
+        nonce_value = nonce if nonce is not None else self._nonce
+        envelope = GatewayAuthEnvelope(
+            AUTH_VERSION,
+            AUTH_ALGORITHM,
+            method.encode(),
+            path.encode(),
+            b"",
+            hashlib.sha256(body_bytes).digest(),
+            self.audience,
+            "did:key:" + self.public_key.hex(),
+            nonce_value.to_bytes(16, "big"),
+            now,
+            now + 120,
+        )
+        headers = {
             "Content-Type": "application/json",
-            "X-VAMS-DID": "did:key:" + self.public_key.hex(),
-            "X-VAMS-Signature": signature,
-            "X-VAMS-Timestamp": timestamp_value,
-            "X-VAMS-Content-SHA256": digest,
+            "X-VAMS-Auth-Version": AUTH_VERSION,
+            "X-VAMS-Auth-Algorithm": AUTH_ALGORITHM,
+            "X-VAMS-Auth-Audience": self.audience,
+            "X-VAMS-Auth-Signer": envelope.signer,
+            "X-VAMS-Auth-Nonce": envelope.nonce.hex(),
+            "X-VAMS-Auth-Issued-At": str(envelope.issued_at),
+            "X-VAMS-Auth-Expires-At": str(envelope.expires_at),
+            "X-VAMS-Auth-Signature": sign_message(
+                self.signing_key, envelope.canonical_bytes()
+            ).hex(),
         }
+        if method == "GET":
+            headers.pop("Content-Type")
+        if timestamp is not None:
+            headers["X-VAMS-Auth-Issued-At"] = timestamp
+        return headers
 
     def _signed_intent_payload(self, intent_payload):
         intent = vdso_gateway.UnsignedIntentRequest.model_validate(
@@ -179,10 +222,9 @@ class VDSOGatewayTests(unittest.TestCase):
         path = "/v1/vdso/intents/simulate"
         body = self._encoded(self._simulation_body())
         headers = self._headers(path, body)
-        headers["X-VAMS-Content-SHA256"] = "00" * 32
-        response = self.client.post(path, content=body, headers=headers)
+        response = self.client.post(path, content=body + b" ", headers=headers)
         self.assertEqual(response.status_code, 401)
-        self.assertEqual(response.json()["detail"], "request body digest mismatch")
+        self.assertIn("invalid_signature", response.json()["detail"])
 
     def test_timestamp_must_be_canonical_integer_epoch_seconds(self):
         path = "/v1/vdso/intents/simulate"
@@ -195,53 +237,53 @@ class VDSOGatewayTests(unittest.TestCase):
                     headers=self._headers(path, body, timestamp=value),
                 )
                 self.assertEqual(response.status_code, 401, response.text)
-                self.assertIn("canonical integer", response.json()["detail"])
+                self.assertIn("malformed_issued_at", response.json()["detail"])
 
     def test_signature_alias_cannot_bypass_atomic_replay_claim(self):
         path = "/v1/vdso/intents/simulate"
         body = self._encoded(self._simulation_body())
-        timestamp = str(int(time.time()))
-        first_headers = self._headers(path, body, timestamp=timestamp)
-        second_headers = self._headers(path, body, timestamp=timestamp)
+        first_headers = self._headers(path, body, nonce=99)
+        second_headers = self._headers(path, body, nonce=99)
         self.assertNotEqual(
-            first_headers["X-VAMS-Signature"], second_headers["X-VAMS-Signature"]
+            first_headers["X-VAMS-Auth-Signature"],
+            second_headers["X-VAMS-Auth-Signature"],
         )
         first = self.client.post(path, content=body, headers=first_headers)
         second = self.client.post(path, content=body, headers=second_headers)
         self.assertEqual(first.status_code, 200, first.text)
         self.assertEqual(second.status_code, 401, second.text)
-        self.assertEqual(second.json()["detail"], "replayed VDSO request")
+        self.assertIn("duplicate_nonce", second.json()["detail"])
 
-    def test_local_replay_claim_is_atomic_under_race(self):
-        store = vdso_gateway.InMemoryReplayStore()
-        with ThreadPoolExecutor(max_workers=8) as pool:
-            results = tuple(
-                pool.map(
-                    lambda _index: store.check_and_record("same-key", 1_000, 2_000),
-                    range(16),
-                )
-            )
-        self.assertEqual(sum(results), 1)
-
-    def test_live_auth_fails_closed_without_shared_replay_store(self):
+    def test_legacy_vdso_auth_scheme_cannot_bypass_m2(self):
         path = "/v1/vdso/intents/simulate"
         body = self._encoded(self._simulation_body())
-        with patch.dict(os.environ, {"VAMS_ENV": "testnet"}, clear=False):
-            response = self.client.post(
-                path, content=body, headers=self._headers(path, body)
-            )
-        self.assertEqual(response.status_code, 503, response.text)
-        self.assertIn("shared atomic replay", response.json()["detail"])
+        response = self.client.post(
+            path,
+            content=body,
+            headers={
+                "Content-Type": "application/json",
+                "X-VAMS-DID": "did:key:" + self.public_key.hex(),
+                "X-VAMS-Signature": "00" * 64,
+                "X-VAMS-Timestamp": str(int(time.time())),
+            },
+        )
+        self.assertEqual(response.status_code, 401, response.text)
+        self.assertIn("conflicting_legacy_auth_header", response.json()["detail"])
 
-    def test_live_auth_uses_injected_shared_atomic_replay_store(self):
+    def test_vdso_uses_root_durable_m2_replay_store(self):
         path = "/v1/vdso/intents/simulate"
         body = self._encoded(self._simulation_body())
-        vdso_gateway.replay_store = _SharedReplayStore()
-        with patch.dict(os.environ, {"VAMS_ENV": "testnet"}, clear=False):
-            response = self.client.post(
-                path, content=body, headers=self._headers(path, body)
-            )
+        response = self.client.post(
+            path, content=body, headers=self._headers(path, body)
+        )
         self.assertEqual(response.status_code, 200, response.text)
+        with sqlite3.connect(self.replay_path) as connection:
+            self.assertEqual(
+                connection.execute(
+                    "SELECT COUNT(*) FROM replay_reservations"
+                ).fetchone()[0],
+                1,
+            )
 
     def test_valid_until_height_uses_trusted_chain_height_not_wall_clock(self):
         path = "/v1/vdso/intents/simulate"
@@ -346,7 +388,11 @@ class VDSOGatewayTests(unittest.TestCase):
         body = self._encoded(payload)
         response = self.client.post(path, content=body, headers=self._headers(path, body))
         self.assertEqual(response.status_code, 200, response.text)
-        read = self.client.get(f"{path}/{payload['content_hash']}")
+        read_path = f"{path}/{payload['content_hash']}"
+        read = self.client.get(
+            read_path,
+            headers=self._headers(read_path, method="GET"),
+        )
         self.assertEqual(read.status_code, 200, read.text)
         self.assertEqual(read.json()["content_hash"], payload["content_hash"])
         self.assertEqual(

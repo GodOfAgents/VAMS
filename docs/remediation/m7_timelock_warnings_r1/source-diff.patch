@@ -1,0 +1,21 @@
+--- /home/GodOfAgents/code/VAMS-testnet/docs/remediation/m7_timelock_warnings_r1/baseline/timelock.ak	2026-10-02 20:57:20.205404451 +0000
++++ /home/GodOfAgents/code/VAMS-testnet/docs/remediation/m7_timelock_warnings_r1/candidate/timelock.ak	2026-10-02 20:57:20.209210110 +0000
+@@ -1,8 +1,7 @@
+ use aiken/collection/list
+-use aiken/interval.{Finite}
+ use cardano/transaction.{InlineDatum, OutputReference, Transaction}
+ use vams/governance.{
+-  bounded_tx, finite_after, finite_interval, intent_immutable,
++  bounded_tx, finite_after, finite_interval,
+   max_intent_lifetime_ms, normal_delay_ms, signer_threshold, valid_domain,
+   valid_hash, valid_vkh,
+ }
+@@ -63,7 +62,7 @@
+ }
+ 
+ fn find_authority_config(tx: Transaction) -> Option<GovernanceConfigV1> {
+-  when list.find(tx.inputs, fn(input) { True }) is {
++  when list.find(tx.inputs, fn(_input) { True }) is {
+     Some(input) ->
+       when input.output.datum is {
+         InlineDatum(raw) -> {

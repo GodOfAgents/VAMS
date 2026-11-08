@@ -5,6 +5,7 @@ import {Test, console} from "forge-std/Test.sol";
 import {VAMSTrustAggregator} from "../src/trust/VAMSTrustAggregator.sol";
 import {IVAMSTrustAggregator} from "../src/interfaces/IVAMSTrustAggregator.sol";
 import {IVAMSProofPlugin} from "../src/interfaces/IVAMSProofPlugin.sol";
+import {IComposedSettlement} from "../src/economic/IComposedSettlement.sol";
 import {TEEProofPlugin} from "../src/trust/plugins/TEEProofPlugin.sol";
 import {OutputHashProofPlugin} from "../src/trust/plugins/OutputHashProofPlugin.sol";
 import {ERC8004IdentityPlugin} from "../src/trust/plugins/ERC8004IdentityPlugin.sol";
@@ -21,9 +22,33 @@ contract MockLegacyPlugin is IVAMSProofPlugin {
     function name() external pure override returns (string memory) { return "Mock Legacy"; }
 }
 
+// Test-only fixture for aggregator arithmetic, with no attestation claim.
+contract MockScoringPlugin is IVAMSProofPlugin {
+    function proofType() external pure returns (bytes32) { return keccak256("TEST_ONLY_SCORING"); }
+    function verify(bytes32, bytes32, bytes calldata proof) external pure returns (bool) { return proof.length >= 64; }
+    function trustWeight() external pure returns (uint256) { return 2500; }
+    function name() external pure returns (string memory) { return "Test-only scoring"; }
+    function allowEnclave(bytes32) external pure {} // No hardware semantics.
+}
+
+// Trusted-source boundary fixture only; not authentic service or ledger evidence.
+contract SettledEvidenceFixture {
+    address public root;
+    bool public claimed = true;
+    constructor(address provider) { root = provider; }
+    function unsettle() external { claimed = false; }
+    function getProviderAlloc(bytes32, uint256) external view returns (IComposedSettlement.ProviderAlloc memory) {
+        return IComposedSettlement.ProviderAlloc(root, 100, claimed, 1);
+    }
+    function verifiedProviderProofs(bytes32, uint256) external pure returns (bool) { return true; }
+    function deliveredOutputHash(bytes32, uint256) external pure returns (bytes32) { return keccak256("output"); }
+    function getDeliveryContext(bytes32, uint256) external pure returns (bytes32) { return keccak256("context"); }
+}
+
 contract VAMSTrustAggregatorTest is Test {
     VAMSTrustAggregator public aggregator;
     TEEProofPlugin public teePlugin;
+    MockScoringPlugin public scoringPlugin;
     OutputHashProofPlugin public outputHashPlugin;
     ERC8004IdentityPlugin public identityPlugin;
     
@@ -46,6 +71,7 @@ contract VAMSTrustAggregatorTest is Test {
 
         // Deploy plugins
         teePlugin = new TEEProofPlugin(owner);
+        scoringPlugin = new MockScoringPlugin();
         outputHashPlugin = new OutputHashProofPlugin(owner);
         identityPlugin = new ERC8004IdentityPlugin(address(0x789));
 
@@ -157,14 +183,14 @@ contract VAMSTrustAggregatorTest is Test {
 
     function test_SubmitPluginProof_UpdatesScore() public {
         // Register plugin & allow enclave
-        aggregator.registerProofPlugin(teePlugin);
+        aggregator.registerProofPlugin(scoringPlugin);
         bytes32 testEnclave = keccak256("test-enclave");
-        teePlugin.allowEnclave(testEnclave);
+        scoringPlugin.allowEnclave(testEnclave);
 
         bytes32 serviceHash = keccak256("service");
         bytes32 deliveryHash = keccak256("delivery");
 
-        // Create valid attestation proof data
+        // Synthetic payload for scoring arithmetic only
         bytes memory sgxQuote = abi.encodePacked(serviceHash, deliveryHash);
         bytes memory proofData = abi.encode(
             sgxQuote,
@@ -174,7 +200,7 @@ contract VAMSTrustAggregatorTest is Test {
         );
 
         // Cache proofType before prank to avoid prank being consumed by proofType() call
-        bytes32 pType = teePlugin.proofType();
+        bytes32 pType = scoringPlugin.proofType();
         vm.prank(agent);
         aggregator.submitPluginProof(
             pType,
@@ -183,15 +209,15 @@ contract VAMSTrustAggregatorTest is Test {
             proofData
         );
 
-        // TEE weight = 2500 bps -> 25 score points
+        // Test fixture weight = 2500 bps -> 25 score points
         uint256 score = aggregator.getAgentScore(agent);
         assertEq(score, 25);
     }
 
     function test_SubmitPluginProof_DuplicateNoScoreIncrease() public {
-        aggregator.registerProofPlugin(teePlugin);
+        aggregator.registerProofPlugin(scoringPlugin);
         bytes32 testEnclave = keccak256("test-enclave");
-        teePlugin.allowEnclave(testEnclave);
+        scoringPlugin.allowEnclave(testEnclave);
 
         bytes32 serviceHash = keccak256("service");
         bytes32 deliveryHash = keccak256("delivery");
@@ -204,10 +230,10 @@ contract VAMSTrustAggregatorTest is Test {
         );
 
         vm.startPrank(agent);
-        aggregator.submitPluginProof(teePlugin.proofType(), serviceHash, deliveryHash, proofData);
+        aggregator.submitPluginProof(scoringPlugin.proofType(), serviceHash, deliveryHash, proofData);
         uint256 score1 = aggregator.getAgentScore(agent);
         
-        aggregator.submitPluginProof(teePlugin.proofType(), serviceHash, deliveryHash, proofData);
+        aggregator.submitPluginProof(scoringPlugin.proofType(), serviceHash, deliveryHash, proofData);
         uint256 score2 = aggregator.getAgentScore(agent);
         
         assertEq(score1, score2, "Score should not increase on duplicate");
@@ -228,18 +254,18 @@ contract VAMSTrustAggregatorTest is Test {
 
     function test_PluginWeightContributesToTier() public {
         // Register multiple plugins
-        aggregator.registerProofPlugin(teePlugin);
+        aggregator.registerProofPlugin(scoringPlugin);
         aggregator.registerProofPlugin(outputHashPlugin);
 
         // Allow enclave and register provider
         bytes32 testEnclave = keccak256("test-enclave");
-        teePlugin.allowEnclave(testEnclave);
+        scoringPlugin.allowEnclave(testEnclave);
         outputHashPlugin.registerProvider(agent);
 
         bytes32 serviceHash = keccak256("service");
         bytes32 deliveryHash = keccak256("delivery");
 
-        // Submit TEE proof (25 points)
+        // Submit test-only scoring fixture (25 points)
         bytes memory teeProofData = abi.encode(
             abi.encodePacked(serviceHash, deliveryHash),
             testEnclave,
@@ -248,7 +274,7 @@ contract VAMSTrustAggregatorTest is Test {
         );
 
         vm.startPrank(agent);
-        aggregator.submitPluginProof(teePlugin.proofType(), serviceHash, deliveryHash, teeProofData);
+        aggregator.submitPluginProof(scoringPlugin.proofType(), serviceHash, deliveryHash, teeProofData);
 
         // Agent should be Bronze (25 > 0)
         assertEq(uint(aggregator.getAgentTier(agent)), uint(IVAMSTrustAggregator.TrustTier.BRONZE));
@@ -261,9 +287,9 @@ contract VAMSTrustAggregatorTest is Test {
     // ============================================================
 
     function test_VerifyServiceDelivery_ReturnsWeightAndValidity() public {
-        aggregator.registerProofPlugin(teePlugin);
+        aggregator.registerProofPlugin(scoringPlugin);
         bytes32 testEnclave = keccak256("test-enclave");
-        teePlugin.allowEnclave(testEnclave);
+        scoringPlugin.allowEnclave(testEnclave);
 
         bytes32 serviceHash = keccak256("service");
         bytes32 deliveryHash = keccak256("delivery");
@@ -276,7 +302,7 @@ contract VAMSTrustAggregatorTest is Test {
         );
 
         (bool valid, uint256 weight) = aggregator.verifyServiceDelivery(
-            serviceHash, deliveryHash, teePlugin.proofType(), proofData
+            serviceHash, deliveryHash, scoringPlugin.proofType(), proofData
         );
 
         assertTrue(valid);
@@ -288,9 +314,9 @@ contract VAMSTrustAggregatorTest is Test {
     // ============================================================
 
     function test_LegacyAndPluginProofsAccumulate() public {
-        aggregator.registerProofPlugin(teePlugin);
+        aggregator.registerProofPlugin(scoringPlugin);
         bytes32 testEnclave = keccak256("test-enclave");
-        teePlugin.allowEnclave(testEnclave);
+        scoringPlugin.allowEnclave(testEnclave);
 
         vm.startPrank(agent);
 
@@ -299,7 +325,7 @@ contract VAMSTrustAggregatorTest is Test {
         uint256 score1 = aggregator.getAgentScore(agent);
         assertEq(score1, 10);
 
-        // Submit plugin proof (TEE = 25 points)
+        // Submit test-only scoring fixture (25 points)
         bytes memory proofData = abi.encode(
             abi.encodePacked(keccak256("svc"), keccak256("dlv")),
             testEnclave,
@@ -307,7 +333,7 @@ contract VAMSTrustAggregatorTest is Test {
             agent
         );
         aggregator.submitPluginProof(
-            teePlugin.proofType(),
+            scoringPlugin.proofType(),
             keccak256("svc"),
             keccak256("dlv"),
             proofData
@@ -339,11 +365,11 @@ contract VAMSTrustAggregatorTest is Test {
     }
 
     function test_HasPluginProof() public {
-        aggregator.registerProofPlugin(teePlugin);
+        aggregator.registerProofPlugin(scoringPlugin);
         bytes32 testEnclave = keccak256("test-enclave");
-        teePlugin.allowEnclave(testEnclave);
+        scoringPlugin.allowEnclave(testEnclave);
 
-        bytes32 pType = teePlugin.proofType();
+        bytes32 pType = scoringPlugin.proofType();
         assertFalse(aggregator.hasPluginProof(agent, pType));
 
         bytes memory proofData = abi.encode(abi.encodePacked(keccak256("s"), keccak256("d")), testEnclave, bytes32(0), agent);
@@ -352,4 +378,104 @@ contract VAMSTrustAggregatorTest is Test {
 
         assertTrue(aggregator.hasPluginProof(agent, pType));
     }
+    function test_RetiredTEERejectsConcatenationForgeryForRootAndRelay() public {
+        aggregator.registerProofPlugin(teePlugin);
+        bytes32 enclave=keccak256("test-enclave");
+        teePlugin.allowEnclave(enclave);
+        bytes32 service=keccak256("service"); bytes32 output=keccak256("output");
+        bytes memory forgery=abi.encode(abi.encodePacked(service,output),enclave,bytes32(0),agent);
+        bytes32 kind=teePlugin.proofType();
+        vm.prank(agent);
+        vm.expectRevert("Plugin proof verification failed");
+        aggregator.submitPluginProof(kind,service,output,forgery);
+        vm.prank(nonOwner);
+        vm.expectRevert("Plugin proof verification failed");
+        aggregator.submitPluginProof(kind,service,output,forgery);
+        assertEq(aggregator.getAgentScore(agent),0);
+        assertEq(aggregator.getAgentScore(nonOwner),0);
+        assertEq(teePlugin.trustWeight(),0);
+    }
+
+    function test_RelayCannotAttributeSettledEvidenceToItself() public {
+        SettledEvidenceFixture source = new SettledEvidenceFixture(agent);
+        aggregator.setSettlementEvidenceSource(address(source),address(source).codehash);
+        vm.prank(nonOwner);
+        bytes32 key=aggregator.submitSettledDeliveryProof(address(source),keccak256("allocation"),0);
+        assertEq(aggregator.settledDeliveryRoots(key),agent);
+        assertEq(aggregator.getAgentScore(nonOwner),0);
+        assertEq(aggregator.getAgentScore(agent),0); // Evidence records do not invent trust weights.
+        vm.expectRevert("Delivery evidence already recorded");
+        aggregator.submitSettledDeliveryProof(address(source),keccak256("allocation"),0);
+    }
+
+    function test_UnapprovedOrUnsettledEvidenceCannotBeAttributed() public {
+        SettledEvidenceFixture source = new SettledEvidenceFixture(agent);
+        vm.expectRevert("Unapproved evidence source");
+        aggregator.submitSettledDeliveryProof(address(source),keccak256("allocation"),0);
+        aggregator.setSettlementEvidenceSource(address(source),address(source).codehash);
+        source.unsettle();
+        vm.expectRevert("Unsettled delivery");
+        aggregator.submitSettledDeliveryProof(address(source),keccak256("allocation"),0);
+    }
+
+    function test_NewEvidenceSourcesRequireGovernanceAndExactCode() public {
+        SettledEvidenceFixture source = new SettledEvidenceFixture(agent);
+        vm.prank(nonOwner);
+        vm.expectRevert();
+        aggregator.setSettlementEvidenceSource(address(source),address(source).codehash);
+        vm.expectRevert("Evidence source identity mismatch");
+        aggregator.setSettlementEvidenceSource(address(source),bytes32(uint256(1)));
+    }
+
+    function test_ImplementationAndProxyCannotBeReinitialized() public {
+        VAMSTrustAggregator implementation = new VAMSTrustAggregator();
+        bytes4 invalidInitialization = bytes4(keccak256("InvalidInitialization()"));
+        vm.expectRevert(invalidInitialization);
+        implementation.initialize();
+        vm.expectRevert(invalidInitialization);
+        aggregator.initialize();
+        assertTrue(aggregator.hasRole(aggregator.DEFAULT_ADMIN_ROLE(), owner));
+    }
+
+    function test_UnauthorizedProxyUpgradeRejects() public {
+        VAMSTrustAggregator replacement = new VAMSTrustAggregator();
+        bytes32 upgrader = aggregator.UPGRADER_ROLE();
+        vm.prank(nonOwner);
+        vm.expectRevert(abi.encodeWithSignature(
+            "AccessControlUnauthorizedAccount(address,bytes32)", nonOwner, upgrader
+        ));
+        aggregator.upgradeToAndCall(address(replacement), bytes(""));
+        assertTrue(aggregator.hasRole(upgrader, owner));
+        assertFalse(aggregator.hasRole(upgrader, nonOwner));
+    }
+
+    /// @dev Current implementation -> current implementation only. The separate
+    /// compiled layout comparison covers the preserved pre-change storage shape;
+    /// neither check qualifies an unknown deployed implementation or live custody.
+    function test_AuthorizedProxyUpgradePreservesProfileAndSettledEvidence() public {
+        // Explicit synthetic scoring collaborator, not an authentic identity proof.
+        vm.prank(agent);
+        aggregator.submitProof(IVAMSTrustAggregator.ProofType.ERC8004_IDENTITY, new bytes(64));
+        uint256 score = aggregator.getAgentScore(agent);
+        IVAMSTrustAggregator.TrustTier tier = aggregator.getAgentTier(agent);
+        SettledEvidenceFixture source = new SettledEvidenceFixture(agent);
+        bytes32 sourceCodeHash = address(source).codehash;
+        aggregator.setSettlementEvidenceSource(address(source), sourceCodeHash);
+        bytes32 allocation = keccak256("LOCAL-UPGRADE-STATE-FIXTURE");
+        bytes32 evidenceKey = aggregator.submitSettledDeliveryProof(address(source), allocation, 0);
+
+        VAMSTrustAggregator replacement = new VAMSTrustAggregator();
+        aggregator.upgradeToAndCall(address(replacement), bytes(""));
+
+        assertEq(aggregator.getAgentScore(agent), score);
+        assertEq(uint256(aggregator.getAgentTier(agent)), uint256(tier));
+        assertEq(aggregator.governancePhase(), 1);
+        assertTrue(aggregator.hasRole(aggregator.DEFAULT_ADMIN_ROLE(), owner));
+        assertTrue(aggregator.hasRole(aggregator.UPGRADER_ROLE(), owner));
+        assertEq(aggregator.settlementEvidenceSources(address(source)), sourceCodeHash);
+        assertEq(aggregator.settledDeliveryRoots(evidenceKey), agent);
+        vm.expectRevert("Delivery evidence already recorded");
+        aggregator.submitSettledDeliveryProof(address(source), allocation, 0);
+    }
+
 }

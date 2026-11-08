@@ -31,11 +31,11 @@ def _write_source(root: Path, relative_path: str) -> str:
     return audit_program.hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def _deployment_manifest(root: Path, network: str, commit: str) -> dict:
+def _legacy_deployment_manifest(root: Path, network: str, commit: str) -> dict:
     required = (
-        audit_program.CANARY_EVM_ARTIFACTS
+        {"VAMSToken", "VAMSStaking", "VAMSVesting", "VAMSGovernor", "VAMSTimelockController", "VAMSSentinel"}
         if network == "polygon-amoy"
-        else audit_program.CARDANO_ARTIFACTS
+        else {"governor.ak", "timelock.ak", "insurance_fund.ak", "agent_registry.ak"}
     )
     artifacts: list[dict] = []
     for index, name in enumerate(sorted(required), start=1):
@@ -239,6 +239,143 @@ def _deployment_manifest(root: Path, network: str, commit: str) -> dict:
         "rollback_plan": f"rollback {network} using the signed runbook",
     }
 
+
+def _restricted_polygon_manifest(root: Path, manifest: dict) -> dict:
+    """Opaque synthetic metadata only; no deployment, readback or genuine proof."""
+    from scripts.audit import polygon_restricted_release as package
+    artifacts = []
+    for index, (name, source) in enumerate(sorted(package.ARTIFACT_SOURCES.items()), 1):
+        artifacts.append({'name': name, 'source': source, 'source_sha256': _write_source(root, source),
+            'artifact_sha256': _hex(1000 + index, 64), 'verification': 'simulation-passed',
+            'address': _evm_address(1000 + index), 'runtime_code_hash': '0x' + _hex(2000 + index, 64)})
+    by_name = {item['name']: item for item in artifacts}
+    address = lambda name: by_name[name]['address']
+    code = lambda name: by_name[name]['runtime_code_hash']
+    timelock = address('VAMSTimelockController')
+    parameters = {'host_domain': '0x' + '1' * 64, 'budget_unit': '0x' + '2' * 64,
+        'insurance_recipient': _evm_address(3001), 'insurance_recipient_code_hash': '0x' + '3' * 64,
+        'sgx': {'backend': _evm_address(3002), 'backend_code_hash': '0x' + '4' * 64,
+            'collateral_router': _evm_address(3003), 'collateral_router_code_hash': '0x' + '5' * 64,
+            'enclave_measurement': '0x' + '6' * 64, 'signer_measurement': '0x' + '7' * 64,
+            'runtime_id': '0x' + '8' * 64, 'minimum_svn': 1, 'tcb_evaluation': 1},
+        'ezkl': {'backend': _evm_address(3004), 'backend_code_hash': '0x' + '9' * 64,
+            'model_hash': '0x' + 'a' * 64, 'circuit_manifest_hash': '0x' + 'b' * 64}}
+    bindings = {
+        'VAMSRestrictedStaking': {'token': address('VAMSToken'), 'governance': timelock},
+        'ServiceBlockRegistry': {'token': address('VAMSToken'), 'admin': timelock},
+        'ProviderBondRegistry': {'token': address('VAMSToken'), 'admin': timelock,
+                                 'insurance_recipient': parameters['insurance_recipient']},
+        'ComposedSettlement': {'token': address('VAMSToken'), 'admin': timelock,
+            'bond_registry': address('ProviderBondRegistry'),
+            'treasury': manifest['authorities']['treasury']['address'],
+            'service_registry': address('ServiceBlockRegistry'), 'delivery_verifier': address('ActionDeliveryVerifierV1')},
+        'RestrictedTestnetPolicyV1': {'governance': timelock,
+            'host_domain': parameters['host_domain'], 'budget_unit': parameters['budget_unit']},
+        'ActionDeliveryVerifierV1': {'policy': address('RestrictedTestnetPolicyV1'),
+            'policy_code_hash': code('RestrictedTestnetPolicyV1'), 'sgx': address('AutomataSgxActionVerifierV1'),
+            'sgx_code_hash': code('AutomataSgxActionVerifierV1'), 'ezkl': address('EzklActionVerifierV1'),
+            'ezkl_code_hash': code('EzklActionVerifierV1')},
+        'AutomataSgxActionVerifierV1': dict(parameters['sgx']), 'EzklActionVerifierV1': dict(parameters['ezkl'])}
+    roles = {
+        'VAMSToken': {'DEFAULT_ADMIN_ROLE': [timelock], 'PAUSER_ROLE': [timelock], 'MINTER_ROLE': []},
+        'ServiceBlockRegistry': {'DEFAULT_ADMIN_ROLE': [timelock], 'VERIFIER_ROLE': [timelock]},
+        'ProviderBondRegistry': {'DEFAULT_ADMIN_ROLE': [timelock], 'ADMIN_ROLE': [timelock],
+            'PAUSER_ROLE': [timelock], 'ESCROW_ROLE': [address('ComposedSettlement')],
+            'SLASHER_ROLE': [], 'HARDWARE_COMMITMENT_ROLE': [], 'SENTINEL_ROLE': []},
+        'ComposedSettlement': {'DEFAULT_ADMIN_ROLE': [timelock], 'ADMIN_ROLE': [timelock], 'PAUSER_ROLE': [timelock]}}
+    activation = {'reward_per_second': 0, 'annual_emission_budget': 0, 'staking_rewards_enabled': False,
+        'staking_minter_enabled': False, 'vesting_enabled': False, 'buyback_enabled': False,
+        'delegation_enabled': False, 'ordinary_token_governor_enabled': False, 'deposits_enabled': False,
+        'slash_activation_enabled': False, 'execute_intent_enabled': False, 'real_fiat_enabled': False,
+        'real_yield_enabled': False}
+    records = {}
+    for name in ('build', 'state_readback', 'activation_tests', 'dcap_qualification', 'ezkl_qualification', 'insurance_custody'):
+        path = root / package.PREFIX / (name + '.json')
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps({'scope': 'SYNTHETIC_METADATA_FIXTURE_NOT_QUALIFICATION', 'purpose': name}), encoding='utf-8')
+        records[name] = {'path': path.relative_to(root).as_posix(),
+                         'sha256': audit_program.hashlib.sha256(path.read_bytes()).hexdigest()}
+    identity = manifest['timelock_identity']
+    identity.update(address=timelock, actual_runtime_code_hash=code('VAMSTimelockController'),
+                    expected_runtime_code_hash=code('VAMSTimelockController'))
+    identity['roles'] = [item for item in identity['roles'] if not (item['role'] == 'PROPOSER_ROLE'
+                         and item['account'] != manifest['authorities']['governance']['address'])]
+    for item in identity['roles']:
+        if item['role'] == 'DEFAULT_ADMIN_ROLE' and item['granted']:
+            item['account'] = timelock
+    for item in manifest['role_transfers']:
+        item['target'] = timelock
+        if item['action'] == 'grant':
+            item['account'] = timelock
+    template = manifest['deployer_privilege_checks'][0]
+    manifest.update(schema_version='2.0.0', chain_identifier='80002', release_profile='restricted-testnet-v1', artifacts=artifacts,
+        deployer_privilege_checks=[dict(template, artifact=name) for name in sorted(by_name)],
+        restricted_evm={'schema': 'vams.restricted-evm-release.v1', 'parameters': parameters,
+                        'bindings': bindings, 'role_memberships': roles, 'activation': activation, 'records': records})
+    return manifest
+
+
+def _deployment_manifest(root: Path, network: str, commit: str) -> dict:
+    """Synthetic package fixture; none of these bytes are compiled validators."""
+    manifest = _legacy_deployment_manifest(root, network, commit)
+    if network == 'polygon-amoy':
+        return _restricted_polygon_manifest(root, manifest)
+    from scripts.audit import cardano_governance_release as package
+    artifacts = []
+    for index, name in enumerate(sorted(package.ARTIFACT_SOURCES), 1):
+        source = package.ARTIFACT_SOURCES[name]
+        path = root / package.PREFIX / f'{name}.cbor'
+        path.parent.mkdir(parents=True, exist_ok=True)
+        data = b'SYNTHETIC-METADATA-FIXTURE-NOT-UPLC:' + name.encode()
+        path.write_bytes(data)
+        digest = audit_program.hashlib.sha256(data).hexdigest()
+        artifacts.append({
+            'name': name, 'source': source, 'source_sha256': _write_source(root, source),
+            'artifact_sha256': digest, 'verification': 'simulation-passed',
+            'address': package.enterprise_testnet_address(
+                audit_program.hashlib.blake2b(b'\x03' + data, digest_size=28).hexdigest()),
+            'script_hash': audit_program.hashlib.blake2b(b'\x03' + data, digest_size=28).hexdigest(),
+            'script_cbor_sha256': digest,
+            'compiled_script': {'path': path.relative_to(root).as_posix(), 'sha256': digest},
+        })
+    for name in ('aiken.toml', 'aiken.lock', 'aiken-dependency-manifest.json'):
+        _write_source(root, f'cardano/{name}')
+    for name in ('governance_v2', 'governance_v2_types', 'governance_v2_transitions', 'governance_v2_vectors'):
+        _write_source(root, f'cardano/lib/vams/{name}.ak')
+    build = {
+        'schema': 'vams.cardano-governance-build.v2', 'compiler_name': 'aiken',
+        'compiler_version': '1.1.21', 'compiler_binary_sha256': 'b' * 64,
+        'runner_id': 'synthetic-fixture-not-approved-runner', 'language': 'plutus-v3',
+        'source_files': package.source_inputs(root), 'governance_version': 2,
+        'normal_delay_seconds': 172800, 'cancel_threshold': 3, 'execute_intent_enabled': False,
+    }
+    for field in package.BUILD_REFERENCES:
+        path = root / package.PREFIX / f'{field}.json'
+        path.write_text('{"scope":"SYNTHETIC_METADATA_FIXTURE_NO_QUALIFICATION"}', encoding='utf-8')
+        build[field] = {'path': path.relative_to(root).as_posix(),
+                        'sha256': audit_program.hashlib.sha256(path.read_bytes()).hexdigest()}
+    by_name = {item['name']: item for item in artifacts}
+    authority = by_name['governance_authority_v2']
+    manifest['authorities']['governance'].update({
+        'address': authority['address'], 'script_hash': authority['script_hash'],
+        'script_cbor_sha256': authority['script_cbor_sha256'],
+        'script_source': authority['source'], 'script_source_sha256': authority['source_sha256'],
+    })
+    timelock = by_name['timelock_v2']
+    governor = by_name['governor_v2']
+    manifest['timelock_identity'].update({
+        'script_address': timelock['address'], 'script_hash': timelock['script_hash'],
+        'source': timelock['source'], 'source_sha256': timelock['source_sha256'],
+        'actual_script_cbor_sha256': timelock['script_cbor_sha256'],
+        'expected_script_cbor_sha256': timelock['script_cbor_sha256'],
+        'governor_script_hash': governor['script_hash'], 'cancel_threshold': 3,
+    })
+    manifest['role_transfers'][0]['to_script_hash'] = governor['script_hash']
+    manifest['role_transfers'][1]['to_script_hash'] = timelock['script_hash']
+    template = manifest['deployer_privilege_checks'][0]
+    manifest['deployer_privilege_checks'] = [dict(template, artifact=name) for name in sorted(by_name)]
+    manifest.update(schema_version='2.0.0', artifacts=artifacts, cardano_build=build)
+    return manifest
 
 class AuditProgramTests(unittest.TestCase):
     def test_audit_program_has_all_36_tracks(self) -> None:
@@ -550,6 +687,9 @@ class AuditProgramTests(unittest.TestCase):
                 json.dumps(
                     {
                         "commit_sha": commit,
+                        "schema_version": "1.0.0",
+                        "started_at": "2020-01-01T00:00:00Z",
+                        "ended_at": "2020-01-08T00:00:00Z",
                         "consecutive_days": 7,
                         "stop_conditions_triggered": False,
                         "drills": {
@@ -678,6 +818,168 @@ class AuditProgramTests(unittest.TestCase):
             self.assertEqual(
                 audit_program._validate_independent_reviews(path, commit), []
             )
+
+
+class LegacyGovernanceRetirementRegressionTests(unittest.TestCase):
+    # These use the preserved v1 fixture, never an invented deployment record.
+    def legacy_errors(self):
+        commit = 'a' * 40
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            paths = []
+            for network in sorted(audit_program.DEPLOYMENT_NETWORKS):
+                manifest = _legacy_deployment_manifest(root, network, commit)
+                path = root / f'{network}.json'
+                path.write_text(json.dumps(manifest), encoding='utf-8')
+                paths.append(path)
+            with mock.patch.object(audit_program, 'ROOT', root):
+                return audit_program._validate_deployment_manifests(paths, 'canary', commit)
+
+    def test_legacy_cardano_governance_cannot_be_admitted(self):
+        self.assertTrue(any('legacy governance is retired' in error for error in self.legacy_errors()))
+
+    def test_two_signatures_cannot_satisfy_governance_cancellation(self):
+        self.assertTrue(any('cancel threshold must equal 3' in error for error in self.legacy_errors()))
+
+
+class CardanoPackageConsistencyTests(unittest.TestCase):
+    """Opaque byte fixtures test binding only, never compilation or ledger validity."""
+    def setUp(self):
+        from scripts.audit import cardano_governance_release
+        self.package = cardano_governance_release
+        directory = tempfile.TemporaryDirectory()
+        self.addCleanup(directory.cleanup)
+        self.root = Path(directory.name)
+        self.manifest = _deployment_manifest(self.root, 'cardano-preprod', 'a' * 40)
+        self.artifacts = {item['name']: item for item in self.manifest['artifacts']}
+
+    def errors(self):
+        return self.package.validate_package(self.manifest, self.root, self.artifacts)
+
+    def test_consistent_synthetic_package_checks_bytes_only(self):
+        self.assertEqual(self.errors(), [])
+
+    def test_published_cip19_enterprise_script_address_vector(self):
+        self.assertEqual(self.package.enterprise_testnet_address(
+            'c37b1b5dc0669f1d3c61a6fddb2e8fde96be87b881c60bce8e8d542f'),
+            'addr_test1wrphkx6acpnf78fuvxn0mkew3l0fd058hzquvz7w36x4gtcl6szpr')
+
+    def test_wrong_governance_script_address_rejects(self):
+        self.artifacts['governor_v2']['address'] = self.artifacts['timelock_v2']['address']
+        self.assertTrue(any('address does not match its canonical script identity' in item for item in self.errors()))
+
+    def test_wrong_address_checksum_rejects(self):
+        artifact = self.artifacts['governor_v2']
+        final = artifact['address'][-1]
+        artifact['address'] = artifact['address'][:-1] + ('q' if final != 'q' else 'p')
+        self.assertTrue(any('address does not match its canonical script identity' in item for item in self.errors()))
+
+    def test_mainnet_governance_address_rejects(self):
+        self.artifacts['governor_v2']['address'] = 'addr1w8phkx6acpnf78fuvxn0mkew3l0fd058hzquvz7w36x4gtcyjy7wx'
+        self.assertTrue(any('address does not match its canonical script identity' in item for item in self.errors()))
+
+    def test_missing_build_package_rejects(self):
+        del self.manifest['cardano_build']
+        self.assertTrue(any('build package is missing' in item for item in self.errors()))
+
+    def test_source_edit_invalidates_package(self):
+        path = self.root / 'cardano/lib/vams/governance_v2_transitions.ak'
+        path.write_text('changed source', encoding='utf-8')
+        self.assertTrue(any('source files must exactly match' in item for item in self.errors()))
+
+    def test_omitted_source_input_rejects(self):
+        self.manifest['cardano_build']['source_files'].pop('cardano/aiken.lock')
+        self.assertTrue(any('source files must exactly match' in item for item in self.errors()))
+
+    def test_new_native_source_requires_new_build_evidence(self):
+        (self.root / 'cardano/validators/extra.test.ak').write_text('new test', encoding='utf-8')
+        self.assertTrue(any('source files must exactly match' in item for item in self.errors()))
+
+    def test_missing_required_native_source_rejects(self):
+        (self.root / 'cardano/lib/vams/governance_v2_types.ak').unlink()
+        self.assertTrue(any('source input error' in item for item in self.errors()))
+
+    def test_legacy_source_label_cannot_replace_governor_v2(self):
+        self.artifacts['governor_v2']['source'] = 'cardano/validators/governor.ak'
+        self.assertTrue(any('must bind current source' in item for item in self.errors()))
+
+    def test_compiled_script_mutation_rejects(self):
+        artifact = self.artifacts['governor_v2']
+        (self.root / artifact['compiled_script']['path']).write_bytes(b'changed opaque bytes')
+        self.assertTrue(any('artifact hash mismatch' in item for item in self.errors()))
+
+    def test_rehashed_script_substitution_cannot_keep_old_script_identity(self):
+        artifact = self.artifacts['governor_v2']
+        data = b'different opaque metadata fixture'
+        (self.root / artifact['compiled_script']['path']).write_bytes(data)
+        digest = audit_program.hashlib.sha256(data).hexdigest()
+        artifact['compiled_script']['sha256'] = digest
+        artifact['artifact_sha256'] = artifact['script_cbor_sha256'] = digest
+        self.assertTrue(any('Plutus-v3 script hash does not match' in item for item in self.errors()))
+
+    def test_wrong_language_hash_domain_rejects(self):
+        artifact = self.artifacts['governor_v2']
+        data = (self.root / artifact['compiled_script']['path']).read_bytes()
+        artifact['script_hash'] = audit_program.hashlib.blake2b(b'\x02' + data, digest_size=28).hexdigest()
+        self.assertTrue(any('Plutus-v3 script hash does not match' in item for item in self.errors()))
+
+    def test_historical_blueprint_is_not_an_applied_script_reference(self):
+        artifact = self.artifacts['governor_v2']
+        artifact['compiled_script']['path'] = 'cardano/plutus.json'
+        self.assertTrue(any('artifact must stay inside' in item for item in self.errors()))
+
+    def test_symlink_escape_rejects_without_reading_external_bytes(self):
+        with tempfile.TemporaryDirectory() as other:
+            outside = Path(other) / 'outside.cbor'
+            outside.write_bytes(b'unrelated fixture')
+            artifact = self.artifacts['governor_v2']
+            link = self.root / self.package.PREFIX / 'escape.cbor'
+            link.symlink_to(outside)
+            artifact['compiled_script']['path'] = link.relative_to(self.root).as_posix()
+            self.assertTrue(any('artifact must stay inside' in item for item in self.errors()))
+
+    def test_unknown_runner_cannot_complete_identity_field(self):
+        self.manifest['cardano_build']['runner_id'] = 'UNKNOWN'
+        self.assertTrue(any('runner identity is missing' in item for item in self.errors()))
+
+    def test_24_hour_build_configuration_rejects(self):
+        self.manifest['cardano_build']['normal_delay_seconds'] = 86400
+        self.assertTrue(any('normal_delay_seconds must equal 172800' in item for item in self.errors()))
+
+    def test_execute_intent_activation_rejects(self):
+        self.manifest['cardano_build']['execute_intent_enabled'] = True
+        self.assertTrue(any('preserve ExecuteIntent rejection' in item for item in self.errors()))
+
+    def test_governance_authority_cannot_be_substituted(self):
+        self.manifest['authorities']['governance']['script_hash'] = 'f' * 56
+        self.assertTrue(any('governance authority script_hash does not match' in item for item in self.errors()))
+
+    def test_missing_native_record_rejects(self):
+        del self.manifest['cardano_build']['native_test_evidence']
+        self.assertTrue(any('native_test_evidence: exact path/sha256' in item for item in self.errors()))
+
+    def test_malformed_authority_is_a_rejection_not_an_exception(self):
+        self.manifest['authorities'] = []
+        self.assertTrue(any('governance authority is missing' in item for item in self.errors()))
+
+    def test_aggregate_includes_all_direct_build_and_script_references(self):
+        directory = self.root / 'docs/audit/evidence'
+        deployment = directory / 'cardano-preprod-rehearsal.json'
+        deployment.write_text(json.dumps(self.manifest), encoding='utf-8')
+        output = directory / 'audit-evidence.json'
+        with mock.patch.object(audit_program, 'ROOT', self.root), \
+                mock.patch.object(audit_program, 'EVIDENCE_DIR', directory), \
+                mock.patch.object(audit_program, '_git', side_effect=lambda *args: 'a' * 40 if args[0] == 'rev-parse' else ''):
+            audit_program.generate_manifest(output, [f'{name}=success' for name in audit_program.REQUIRED_EVIDENCE_RESULTS])
+            references = self.package.referenced_paths(self.manifest, self.root)
+            self.assertEqual(len(references), 14)
+            self.assertEqual(audit_program._validate_manifest_artifact_binding(output, references), [])
+            aggregate = json.loads(output.read_text(encoding='utf-8'))
+            omitted = references[0].relative_to(self.root).as_posix()
+            aggregate['evidence_artifacts'] = [item for item in aggregate['evidence_artifacts'] if item['path'] != omitted]
+            output.write_text(json.dumps(aggregate), encoding='utf-8')
+            self.assertTrue(any('does not bind artifact' in item
+                                for item in audit_program._validate_manifest_artifact_binding(output, references)))
 
 
 if __name__ == "__main__":

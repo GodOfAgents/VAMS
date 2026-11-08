@@ -1,0 +1,127 @@
+ M .github/workflows/security-gates.yml
+ M .gitignore
+ M AGENTS.md
+ M cardano/aiken.lock
+ M cardano/lib/vams/types.ak
+ M cardano/plutus.json
+ M cardano/validators/agent_nft.ak
+ M cardano/validators/agent_registry.ak
+ M cardano/validators/governor.ak
+ M cardano/validators/insurance_fund.ak
+ M cardano/validators/timelock.ak
+ M cdk-deployment/deploy.sh
+ M docs/API_REFERENCE.md
+ M docs/CHANGELOG.md
+ M docs/GATEWAY_HARDENING_BLUEPRINTS.md
+ M docs/audit/AUDIT_PROGRAM.md
+ M docs/audit/GITLEAKS_ADJUDICATION.md
+ M docs/audit/invariant-controls.json
+ M frontend-vite/README.md
+ M frontend-vite/package.json
+ M frontend-vite/src/App.jsx
+ M gateway/Caddyfile.testnet.example
+ M gateway/server.py
+ M gateway/vdso.py
+ M neuron/anchoring.py
+ M neuron/bridge_executor.py
+ M neuron/clr_router.py
+ M neuron/config.py
+ M neuron/da/adapters/avail_adapter.py
+ M neuron/da/adapters/eigenda_adapter.py
+ M neuron/da/models.py
+ M neuron/da/performance_audit.py
+ M neuron/da_router.py
+ M neuron/demo_cli.py
+ M neuron/economics/keeper.py
+ M neuron/gateway/server.py
+ M neuron/mev_protection.py
+ M neuron/neuron.py
+ M neuron/payments/coinme_client.py
+ M neuron/payments/payment_channel.py
+ M neuron/payments/x402.py
+ M neuron/runtime_safety.py
+ M neuron/sdk/akash_orchestrator.py
+ M neuron/sdk/avail_substrate.py
+ M neuron/sdk/cognitive_drift.py
+ M neuron/sdk/eigenda_kzg.py
+ M neuron/sdk/iagon_storage.py
+ M neuron/sdk/interrupt_handler.py
+ M neuron/sdk/oms_identity.py
+ M neuron/sdk/phala_tee.py
+ M neuron/sdk/signer.py
+ M neuron/sdk/trails_client.py
+ M neuron/sdk/trust_aggregator.py
+ M neuron/sdk/x402_recovery.py
+ M neuron/sentinel/sentinel_node.py
+ M neuron/tests/test_agentos_runtime.py
+ M neuron/tests/test_clr_v3.py
+ M neuron/tests/test_da_adapters.py
+ M neuron/tests/test_fiat_yield.py
+ M neuron/tests/test_gateway_auth_hardening.py
+ M neuron/tests/test_gateway_current.py
+ M neuron/tests/test_gateway_root.py
+ M neuron/tests/test_oms_hybrid.py
+ M neuron/tests/test_oms_integration.py
+ M neuron/tests/test_runtime_safety.py
+ M neuron/tests/test_sdk.py
+ M neuron/tests/test_trails_client.py
+ M neuron/tests/test_trust_plugins.py
+ M neuron/tests/test_vdso_gateway.py
+ M neuron/tests/test_workflows.py
+ M neuron/tests/test_x402_recovery.py
+ M neuron/trust_plugins/tee_plugin.py
+ M neuron/verifiers/celestia_light_client.py
+ M scripts/audit/deployment_readiness.py
+ M scripts/audit/test_deployment_readiness.py
+ M scripts/audit/test_traceability.py
+ M scripts/audit/test_workflow_security.py
+ M scripts/audit/validate_traceability.py
+ M scripts/audit/validate_workflow_security.py
+ M scripts/security/mock_mode_promotion_scan.py
+?? " "
+?? .codex/
+?? cardano/aiken-dependency-manifest.json
+?? cardano/lib/vams/f05_authority.ak
+?? cardano/lib/vams/governance.ak
+?? cardano/typescript
+?? cardano/validators/f05_authority_policy.ak
+?? cardano/validators/f05_authority_policy.test.ak
+?? cardano/validators/f05_authority_state.ak
+?? cardano/validators/governance_policies.ak
+?? conftest.py
+?? docs/remediation/
+?? frontend-vite/scripts/
+?? frontend-vite/src/nodeTelemetry.js
+?? frontend-vite/src/nodeTelemetry.test.js
+?? gateway/envoy.testnet.yaml
+?? gateway/replay_store.py
+?? gateway/request_auth.py
+?? gateway/route_policy.py
+?? gateway/route_security.py
+?? neuron/tests/m2_gateway_helpers.py
+?? neuron/tests/test_gateway_runtime_mode.py
+?? neuron/tests/test_gateway_shutdown.py
+?? neuron/tests/test_m1_2a_identity_tee_runtime.py
+?? neuron/tests/test_m1_2b_da_trails_runtime.py
+?? neuron/tests/test_m1_2c_payment_bridge_recovery_runtime.py
+?? neuron/tests/test_m1_3_entrypoint_containment.py
+?? neuron/tests/test_m2_1_gateway_request_auth.py
+?? neuron/tests/test_m2_2_durable_replay.py
+?? neuron/tests/test_m2_3_gateway_routes.py
+?? neuron/tests/test_m2_4a_replay_schema_integrity.py
+?? neuron/tests/test_m2_4b_envoy_ingress.py
+?? neuron/tests/test_runtime_mode_contract.py
+?? neuron/tests/test_workflows_isolation.py
+?? scripts/remediation/
+?? scripts/security/gitleaks_working_tree_inventory.py
+?? scripts/security/m0_3a_adjudicator.py
+?? scripts/security/m0_4_vendor_baseline.json
+?? scripts/security/m0_4_vendor_baseline_gate.py
+?? scripts/security/runtime_mode_preflight.py
+?? scripts/security/test_gitleaks_working_tree_inventory.py
+?? scripts/security/test_m0_3a_adjudicator.py
+?? scripts/security/test_m0_4_vendor_baseline_gate.py
+?? scripts/security/test_m0_legacy_collection_boundary.py
+?? scripts/security/test_runtime_mode_preflight.py
+?? scripts/security/test_validate_envoy_gateway.py
+?? scripts/security/validate_envoy_gateway.py

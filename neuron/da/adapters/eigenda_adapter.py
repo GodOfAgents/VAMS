@@ -12,16 +12,23 @@ Uses: DA_PROVIDERS["eigenda"]["rpc"] from config.py
 
 import hashlib
 import logging
-from typing import Optional
+from typing import Mapping, Optional
 
 from neuron.da.adapters.base import DAAdapter
 from neuron.da.models import DAProtocol, DAReceipt
-from neuron.runtime_safety import require_not_live_mock
+from neuron.runtime_safety import (
+    ImmutableRuntimeConfiguration,
+    LiveModeSafetyError,
+    RuntimePolicy,
+    load_runtime_policy,
+    resolve_component_mock_mode,
+)
 
 logger = logging.getLogger("VAMS-DA-EigenDA")
+EIGENDA_ADAPTER_MOCK_VARIABLE = "EIGENDA_ADAPTER_MOCK_MODE"
 
 
-class EigenDAAdapter(DAAdapter):
+class EigenDAAdapter(ImmutableRuntimeConfiguration, DAAdapter):
     """
     Stub adapter for EigenDA.
 
@@ -31,18 +38,42 @@ class EigenDAAdapter(DAAdapter):
 
     protocol = DAProtocol.EIGEN_DA
     name = "EigenDA (High-Security)"
+    _immutable_runtime_fields = frozenset(
+        {"rpc_url", "namespace", "mock_mode", "runtime_policy"}
+    )
 
-    def __init__(self, rpc_url: str = "https://holesky.drpc.org", mock_mode: bool = True):
-        require_not_live_mock("EigenDAAdapter", True)
-        super().__init__(rpc_url, namespace=b"vams-perf-v1", mock_mode=True)  # Always mock for now
+    def __init__(
+        self,
+        rpc_url: str = "https://holesky.drpc.org",
+        mock_mode: Optional[bool] = None,
+        *,
+        runtime_policy: Optional[RuntimePolicy] = None,
+        environ: Optional[Mapping[str, str]] = None,
+    ):
+        policy = runtime_policy or load_runtime_policy(environ)
+        resolved_mock = resolve_component_mock_mode(
+            "EigenDAAdapter",
+            EIGENDA_ADAPTER_MOCK_VARIABLE,
+            mock_mode,
+            policy=policy,
+            environ=environ,
+        )
+        if not resolved_mock:
+            raise LiveModeSafetyError(
+                "EigenDAAdapter is a structured stub and cannot be selected for live submission"
+            )
+        super().__init__(rpc_url, namespace=b"vams-perf-v1", mock_mode=True)
+        self.runtime_policy = policy
         self._mock_height = 100
+        self._freeze_runtime_configuration()
 
     async def submit_blob(self, data: bytes, namespace: Optional[bytes] = None) -> DAReceipt:
         self._mock_height += 1
-        commitment = "0x" + hashlib.sha256(data).hexdigest()
-        blob_id = f"eigenda:{self._mock_height}:{hashlib.sha256(data).hexdigest()[:16]}"
+        digest = hashlib.sha256(data).hexdigest()
+        commitment = f"simulated:sha256:{digest}"
+        blob_id = f"simulated:eigenda:{self._mock_height}:{digest[:16]}"
 
-        logger.info(f"[STUB] EigenDA blob dispersed at batch {self._mock_height}")
+        logger.info("EigenDAAdapter simulated submission completed (non-authoritative)")
 
         return DAReceipt(
             protocol=DAProtocol.EIGEN_DA,
@@ -50,12 +81,15 @@ class EigenDAAdapter(DAAdapter):
             height=self._mock_height,
             commitment=commitment,
             verified=False,
+            simulated=True,
+            runtime_classification=self.runtime_policy.runtime_classification,
+            evidence_classification="non-authoritative",
         )
 
     async def verify_blob(self, receipt: DAReceipt) -> bool:
-        logger.info(f"[STUB] EigenDA verification for {receipt.blob_id}")
+        logger.info("EigenDAAdapter simulated receipts are never verified")
         return False
 
     async def get_blob(self, blob_id: str) -> Optional[bytes]:
-        logger.info(f"[STUB] EigenDA blob retrieval not implemented for {blob_id}")
+        logger.info("EigenDAAdapter simulated retrieval is unavailable")
         return None

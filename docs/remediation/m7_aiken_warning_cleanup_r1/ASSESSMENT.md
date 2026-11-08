@@ -1,0 +1,5 @@
+# Strict Aiken warning cleanup
+
+Removed unused imports, constants and helper from the disabled standalone agent_nft validator, and consumed bootstrap_ref with an expect-discard binding that retains the parameter schema. Strict Aiken check passed 1,865 checks with zero errors and zero warnings. Offline provenance check/build passed; the blueprint SHA-256 c4230410d0caac45f2c71d36e45a539c78087697128ce1533306d17e96a48008 and all 26 program hashes are unchanged. The focused provenance unittest passed 22/22. Documentation validation and its two tests passed.
+
+The first attempted parameter rename changed a blueprint schema title and was rejected; the retained PROVENANCE_FAILED_INITIAL.json records that failed gate. The pinned Aiken 1.1.21 CLI has no separate test subcommand; its check command runs tests. Independent read-only review PASS on 11 package hashes, a fresh strict check, a fresh offline provenance build, 22 focused tests, and patch hygiene. F04 normative identity, controller recovery, ledger admission, and other mandatory gates remain open. This is local offline evidence only; deployment, Deposit, Slash activation, and ExecuteIntent stay disabled.

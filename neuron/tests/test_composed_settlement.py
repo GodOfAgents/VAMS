@@ -162,55 +162,48 @@ class TestPaymentSplits:
 class TestEscrowParams:
     def test_get_escrow_params_structure(self, composer, two_provider_plan, blueprint):
         """Escrow params should have all required fields."""
-        params = composer.get_escrow_params(two_provider_plan, blueprint)
+        params = composer.get_payment_quote(two_provider_plan, blueprint)
 
         assert "providers" in params
-        assert "amounts" in params
-        assert "validForSeconds" in params
-        assert "blueprintHash" in params
-        assert "builderRevShareBps" in params
-        assert "builderAddress" in params
+        assert "quotedAmounts" in params
+        assert "durationSeconds" in params
+        assert params["blueprintName"] == blueprint.name
+        assert params["authoritative"] is False
+        assert params["transactionReady"] is False
         assert "splits" in params
 
         assert len(params["providers"]) == 2
-        assert len(params["amounts"]) == 2
-        assert params["validForSeconds"] == 3600
+        assert len(params["quotedAmounts"]) == 2
+        assert params["durationSeconds"] == 3600
 
-    def test_escrow_params_with_builder(self, composer, two_provider_plan, blueprint):
-        """Builder share and address should be included."""
-        params = composer.get_escrow_params(
-            two_provider_plan,
-            blueprint,
-            builder_rev_share_bps=500,
-            builder_address="0xBUILDER",
-        )
-
-        assert params["builderRevShareBps"] == 500
-        assert params["builderAddress"] == "0xBUILDER"
+    def test_unbound_transaction_api_rejects_builder_overrides(self, composer, two_provider_plan, blueprint):
+        with pytest.raises(ComposerError, match="Unbound escrow parameters retired"):
+            composer.get_escrow_params(two_provider_plan, blueprint,
+                builder_rev_share_bps=500, builder_address="0xBUILDER")
 
     def test_escrow_params_custom_duration(self, composer, two_provider_plan, blueprint):
         """Custom duration should be reflected."""
-        params = composer.get_escrow_params(
+        params = composer.get_payment_quote(
             two_provider_plan,
             blueprint,
             duration_seconds=7200,
         )
-        assert params["validForSeconds"] == 7200
+        assert params["durationSeconds"] == 7200
 
     def test_escrow_params_blueprint_hash(self, composer, two_provider_plan, blueprint):
         """Blueprint hash should be deterministic."""
-        params1 = composer.get_escrow_params(two_provider_plan, blueprint)
-        params2 = composer.get_escrow_params(two_provider_plan, blueprint)
+        params1 = composer.get_payment_quote(two_provider_plan, blueprint)
+        params2 = composer.get_payment_quote(two_provider_plan, blueprint)
 
-        assert params1["blueprintHash"] == params2["blueprintHash"]
-        assert params1["blueprintHash"].startswith("0x")
+        assert params1["blueprintName"] == params2["blueprintName"]
+        assert "serviceBlockId" not in params1
 
     def test_escrow_params_empty_plan_raises(self, composer, blueprint):
         """Empty plan should raise ComposerError."""
         empty_plan = MockAllocationPlan(nodes=[], total_nodes=0, total_hourly_cost=0)
 
         with pytest.raises(ComposerError, match="No payment splits"):
-            composer.get_escrow_params(empty_plan, blueprint)
+            composer.get_payment_quote(empty_plan, blueprint)
 
     def test_escrow_params_with_premium(self, composer, two_provider_plan):
         """Escrow params should include gas premium fields when service block is present."""
@@ -226,7 +219,7 @@ class TestEscrowParams:
             required_service_blocks = ["ServiceBlock_OMS_v1"]
 
         bp = MockBlueprintWithBlock()
-        params = composer.get_escrow_params(two_provider_plan, bp)
+        params = composer.get_payment_quote(two_provider_plan, bp)
 
         # Base premium (2%) + OMS premium (5%) = 7% premium rate = 700 BPS
         assert params["gasPremiumBps"] == 700

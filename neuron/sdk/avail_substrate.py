@@ -1,89 +1,92 @@
-import os
-import time
-import json
-import base64
-import requests
-from typing import Optional, Dict, Any
+"""Explicitly simulated Avail SDK boundary.
 
-from neuron.runtime_safety import require_not_live_mock
+The direct signed Substrate submission path is not implemented or audited, so
+this client is a structured stub and can only be selected explicitly in a
+non-live runtime mode.
+"""
+
+from __future__ import annotations
+
+import hashlib
+import os
+from typing import Any, Dict, Mapping, Optional
+
+from neuron.runtime_safety import (
+    ImmutableRuntimeConfiguration,
+    LiveModeSafetyError,
+    RuntimePolicy,
+    load_runtime_policy,
+    resolve_component_mock_mode,
+)
+
+
+AVAIL_MOCK_VARIABLE = "AVAIL_MOCK_MODE"
+
 
 class AvailDAError(Exception):
     pass
 
-class AvailDASDK:
-    """
-    VAMS SDK Client for Avail (Substrate) Validium DA.
 
-    This SDK fulfills Pillar 1 (Durable Execution) by submitting arbitrary 
-    byte arrays (blobs) to the Avail data availability network using 
-    Substrate JSON-RPC methods, returning the block hash and extrinsic index.
-    """
+class AvailDASDK(ImmutableRuntimeConfiguration):
+    """Structured Avail stub with explicitly non-authoritative output."""
 
-    def __init__(self, rpc_url: str = None, seed_phrase: str = None, timeout: int = 15):
-        self.rpc_url = rpc_url or os.getenv("AVAIL_RPC_URL", "https://avail-turing.api.onfinality.io/public")
-        self.seed_phrase = seed_phrase or os.getenv("AVAIL_SEED_PHRASE", "")
+    _immutable_runtime_fields = frozenset(
+        {"rpc_url", "timeout", "mock_mode", "runtime_policy"}
+    )
+
+    def __init__(
+        self,
+        rpc_url: Optional[str] = None,
+        seed_phrase: Optional[str] = None,
+        timeout: int = 15,
+        mock_mode: Optional[bool] = None,
+        *,
+        runtime_policy: Optional[RuntimePolicy] = None,
+        environ: Optional[Mapping[str, str]] = None,
+    ):
+        source = os.environ if environ is None else environ
+        policy = runtime_policy or load_runtime_policy(source)
+        resolved_mock = resolve_component_mock_mode(
+            "AvailDASDK",
+            AVAIL_MOCK_VARIABLE,
+            mock_mode,
+            policy=policy,
+            environ=source,
+        )
+        if not resolved_mock:
+            raise LiveModeSafetyError(
+                "AvailDASDK is a structured stub without an audited signed submission path"
+            )
+        self.rpc_url = rpc_url or source.get("AVAIL_RPC_URL", "")
         self.timeout = timeout
-        self.mock_mode = os.getenv("AVAIL_MOCK_MODE", "true").lower() == "true"
-        require_not_live_mock("AvailDASDK", self.mock_mode)
-        
-        if not self.seed_phrase and not self.mock_mode:
-            raise AvailDAError("AVAIL_SEED_PHRASE must be provided or mock mode enabled")
+        self.mock_mode = True
+        self.runtime_policy = policy
+        self._submission_counter = 0
+        self._freeze_runtime_configuration()
 
     def submit_data(self, payload: bytes) -> Dict[str, Any]:
-        """
-        Submit arbitrary byte payload to Avail.
-        """
-        if self.mock_mode:
-            time.sleep(0.5)
-            mock_hash = base64.b64encode(os.urandom(24)).decode('utf-8').replace('=', '')
-            return {
-                "block_hash": f"0x{mock_hash}",
-                "extrinsic_index": 1,
-                "network": "turing-mock"
-            }
-
-        # Substrate requires scale-encoded signed transactions logic.
-        # This requires the substrate-interface library and compiling the types.json metadata.
-        raise NotImplementedError("Direct REST Substrate transaction signing requires substrate-interface package.")
+        """Return a deterministic, visibly simulated result."""
+        if not isinstance(payload, bytes):
+            raise AvailDAError("AvailDASDK payload must be bytes")
+        self._submission_counter += 1
+        digest = hashlib.sha256(
+            b"vams-avail-simulation-v1\x00"
+            + self._submission_counter.to_bytes(8, "big")
+            + payload
+        ).hexdigest()
+        return {
+            "status": "simulated",
+            "block_hash": f"simulated:{digest}",
+            "extrinsic_index": self._submission_counter,
+            "network": "avail-simulation",
+            "verified": False,
+            "simulated": True,
+            "runtime_classification": self.runtime_policy.runtime_classification,
+            "evidence_classification": "non-authoritative",
+        }
 
     def retrieve_data(self, block_hash: str, extrinsic_index: int) -> bytes:
-        """
-        Retrieve data from an Avail block using the block hash and transaction index.
-        """
-        if self.mock_mode:
-            return b'{"mock": "data_retrieved"}'
-
-        payload = {
-            "jsonrpc": "2.0",
-            "id": 1,
-            "method": "chain_getBlock",
-            "params": [block_hash]
-        }
-        
-        try:
-            response = requests.post(
-                self.rpc_url,
-                json=payload,
-                headers={"Content-Type": "application/json"},
-                timeout=self.timeout
-            )
-            response.raise_for_status()
-            data = response.json()
-            
-            # The extrinsics array contains the actual signed payload data
-            # Requires stripping the Substrate extrinsic framing bytes
-            extrinsics = data.get("result", {}).get("block", {}).get("extrinsics", [])
-            if len(extrinsics) > extrinsic_index:
-                raw_hex = extrinsics[extrinsic_index]
-                # Returning the raw hex string representing the payload
-                return bytes.fromhex(raw_hex[2:]) 
-            raise AvailDAError("Extrinsic not found in block")
-            
-        except requests.exceptions.RequestException as e:
-            raise AvailDAError(f"Failed to query Avail RPC: {str(e)}")
-
-if __name__ == "__main__":
-    os.environ["AVAIL_MOCK_MODE"] = "true"
-    sdk = AvailDASDK()
-    res = sdk.submit_data(b"VAMS_CHECKPOINT_001")
-    print(f"Avail DA Result: {res}")
+        """Structured stubs cannot provide authoritative retrieval proof."""
+        raise AvailDAError(
+            "AvailDASDK simulated receipts do not support authoritative retrieval"
+        )

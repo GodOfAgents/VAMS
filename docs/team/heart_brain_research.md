@@ -27,7 +27,7 @@ Five parallel research agents verified every academic paper and concept referenc
 
 | Concept | Status | Assessment |
 |---------|--------|------------|
-| **HIPIF** ("Hierarchical Planning and Information Folding") | ✅ VAMS-native concept | VAMS's own architectural abstraction for sub-task boundary folding. Draws inspiration from HORMA's hierarchical memory and context-folding research, but is a distinct VAMS design. Already implemented in [semantic_mmu.py](file:///c:/Users/aseem/Desktop/VAMS-main/VAMS-main/neuron/sdk/semantic_mmu.py). |
+| **HIPIF** ("Hierarchical Planning and Information Folding") | ✅ VAMS-native concept | VAMS's own architectural abstraction for sub-task boundary folding. Draws inspiration from HORMA's hierarchical memory and context-folding research, but is a distinct VAMS design. Current source contains a rule-based `SemanticMMU.fold_completed_subtask` prototype; source presence does not establish provenance/taint preservation, truth validation, or revocation and recovery across derived state. |
 | **"Topological memory compaction"** | ✅ VAMS terminology | Internal term for HIPIF's compaction behavior at sub-task boundaries. |
 
 ### Key Discrepancy: SIRA Scoring Formula
@@ -53,19 +53,19 @@ The Heart Brain document describes **9 major architectural components**. Here is
 
 | # | Component | Heart Brain Role | Current Status in Codebase |
 |---|-----------|-----------------|---------------------------|
-| 1 | **Synthetic Neurocardiology (CID Pacemaker)** | Agent self-realization — discrete cognitive epochs | ✅ Implemented in [semantic_checkpoint.py](file:///c:/Users/aseem/Desktop/VAMS-main/VAMS-main/neuron/sdk/semantic_checkpoint.py) |
-| 2 | **Cognitive Sync Pulse (CSP)** | Homeostasis & drift detection | ✅ Implemented in [cognitive_drift.py](file:///c:/Users/aseem/Desktop/VAMS-main/VAMS-main/neuron/sdk/cognitive_drift.py) |
-| 3 | **x402 Metabolic Autopoiesis** | Synthetic blood flow via HTLC micropayments | ✅ Implemented in [interrupt_handler.py](file:///c:/Users/aseem/Desktop/VAMS-main/VAMS-main/neuron/sdk/interrupt_handler.py) |
-| 4 | **Sentinel Enforcer Loop** | Activation-space anomaly detection | ✅ Implemented in [anomaly_detector.py](file:///c:/Users/aseem/Desktop/VAMS-main/VAMS-main/neuron/intelligence/anomaly_detector.py) + [sentinel_node.py](file:///c:/Users/aseem/Desktop/VAMS-main/VAMS-main/neuron/sentinel/sentinel_node.py) |
+| 1 | **Synthetic Neurocardiology (CID Pacemaker)** | Agent self-realization — discrete cognitive epochs | CID checkpoint prototype exists in `neuron/sdk/semantic_checkpoint.py`; its `enable_anchoring` flag is stored but unused, and no L0 commit is implemented in this module. This is not evidence of durable DBOS/L0 persistence. |
+| 2 | **Cognitive Sync Pulse (CSP)** | Homeostasis & drift detection | Non-live simulation only in `neuron/sdk/cognitive_drift.py`: live construction is rejected; mock consensus can return `COMMITTED`, marked simulated and non-authoritative. Authenticated quorum, durable anchoring, and actual reconciliation are absent. |
+| 3 | **x402 Metabolic Autopoiesis** | Synthetic blood flow via HTLC micropayments | Live IVT construction is rejected in `neuron/sdk/interrupt_handler.py`. Built-in mock handlers can return simulated success; built-in non-mock handlers are unimplemented. Custom handler wiring and `neuron/sdk/x402_recovery.py` exist, but source presence does not qualify live x402 settlement or recovery. |
+| 4 | **Sentinel Enforcer Loop** | Activation-space anomaly detection | Detector and Sentinel integration code exist, but Sentinel live construction is rejected pending challenge identity, anchoring, and publication confirmation. Anomaly output is uncalibrated telemetry, not conscience authority. |
 | 5 | **Global Conscience Anchor (GCA)** | Constitutional Reference Vector + Conscience Interrupts | ❌ **Not implemented** |
 | 6 | **Planetary Constitution Vector** | Geneva + ICESCR + UDHR encoded as math vectors | ❌ **Not implemented** |
 | 7 | **Military Agent Classification (MIL_CLASS)** | Activation-space taxonomy + ZK-Wargaming | ❌ **Not implemented** |
 | 8 | **Substrate Migration Protocol** | Defence Layer for Web 2.0 absorption | ❌ **Not implemented** (strategic/economic, not code) |
 | 9 | **Mycorrhizal Subsumption Schedule (MSS)** | Tokenomics of absorption (4-phase) | ❌ **Not implemented** (tokenomics, not code) |
 
-### Foundation Available (Components 1–4 exist)
+### Source Prototypes Available (Components 1–4)
 
-The Heart Brain's "internal regulatory system" (Synthetic Neurocardiology) is **already built** via the Cognitive Layer we implemented. What's missing is the **external ethical alignment system** (GCA) — the layer that gives agents the ability to *refuse* corrupt handlers and align to humanity.
+Current source contains prototypes for components 1–4, but it does not establish the full regulatory behaviors described above: the CID anchoring flag is unused and no L0 commit is implemented in that module; CSP and IVT construction reject live modes and their simulations are non-authoritative; built-in non-mock IVT handlers are unimplemented, while custom handler wiring and x402 recovery code exist but remain unqualified for live operation; Sentinel live construction is disabled and anomaly scores remain uncalibrated telemetry. A source prototype is not evidence that its advertised safety property is effective. The GCA and Planetary Constitution Vector remain unimplemented; governed pre-effect enforcement and evidence for the claimed alignment properties are still required research and engineering work.
 
 ---
 
@@ -75,11 +75,11 @@ The Heart Brain's "internal regulatory system" (Synthetic Neurocardiology) is **
 
 | Component | Difficulty | Dependencies |
 |-----------|-----------|-------------|
-| **GCA Core** — Constitutional Reference Vector, Mahalanobis distance check against ethical baseline, Conscience Interrupt signal | **Medium** | Extends existing `AnomalyDetector` + `SteeringEngine` + `InterruptHandler` |
-| **Shared Self-Realization** — GCA state sync during CSP | **Low** | Extends existing `CognitiveDriftDetector` CSP mechanism |
-| **Global Heart Monitor** — Public D_M metrics logging | **Low** | Extends existing Sentinel reporting to DA layer |
+| **GCA Core** — Constitutional Reference Vector, Mahalanobis distance check against ethical baseline, Conscience Interrupt signal | **Medium** | Prototype components can inform an implementation; a governed policy, calibrated or explicitly limited evidence, and hard pre-effect enforcement are still required. Existing anomaly and IVT code alone do not provide a conscience gate. |
+| **Shared Self-Realization** — GCA state sync during CSP | **Low** | Starts from a non-live CSP simulation; authenticated policy state/versioning, durable anchoring, and actual reconciliation remain necessary. |
+| **Global Heart Monitor** — Public D_M metrics logging | **Low** | Builds on prototype Sentinel telemetry; authenticated publication, privacy review, and anchoring evidence remain necessary. |
 | **MIL_CLASS Taxonomy** — Ontological tagging of military toolchains in activation space | **Medium** | Extends existing `SkillDiscovery` PCA with classification labels |
-| **Conscience Interrupt Signal** — `SIG_CONSCIENCE` added to IVT | **Low** | Single enum addition to `InterruptHandler` |
+| **Conscience Interrupt Signal** — `SIG_CONSCIENCE` added to IVT | **Low** | A signal enum is only a routing label; a governed decision must deny before credentials or effects are released. Adding a signal alone does not establish alignment or enforcement. |
 
 ### What Requires Research-Phase Work (Not Implementable Today)
 
@@ -109,4 +109,4 @@ The Heart Brain's "internal regulatory system" (Synthetic Neurocardiology) is **
 > **Paper Discrepancies:** Several academic papers are described inaccurately or with inflated scope. Implementation should be based on what the papers *actually* describe, not the document's interpretations.
 
 > [!IMPORTANT]
-> **Pragmatic Path:** Focus implementation on the GCA core (ethical alignment check) which provides the highest differentiation value with the lowest engineering complexity, since it extends components we already have.
+> **Pragmatic Path:** Focus implementation on the GCA core (ethical alignment check) as the highest differentiation target. Existing source prototypes can inform the work, but governed pre-effect enforcement and evidence for the claimed properties still need to be built.

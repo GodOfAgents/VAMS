@@ -1,0 +1,174 @@
+{
+  "accepted_registry": {
+    "path": "docs/remediation/m3_f05_2a/authority_bootstrap_public_fixtures.json",
+    "sha256": "98a05d24d476b1aee2754768322dc4b794e5afb5fabec28ade17a2888285467d"
+  },
+  "all_cases_pending": true,
+  "base_positive_hashes": {
+    "raw_inputs": "4b20e2b2cf4bd58b1f6e385c90ffd098d583df69d95fbc7b1fcc2591da72b9fe",
+    "raw_outputs": "9cdf345a785f51763bdb43f1b1ba0c20b5545051f03051e6a7bf726ea128c56a",
+    "transaction": "765c717f16b543c746b88742e8b775cd3ecabca4fef6edd16702184683780a28"
+  },
+  "cases": [
+    {
+      "conservation": {
+        "fee_lovelace": 1000000,
+        "input_lovelace": 17000000,
+        "lovelace_conserved": true,
+        "minted_assets": {
+          "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731.56414d532d4630352d415554482d5633": 1
+        },
+        "minted_output_assets_match": true,
+        "output_assets": {
+          "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731.56414d532d4630352d415554482d5633": 1
+        },
+        "output_lovelace": 16000000
+      },
+      "delta": "authority output lovelace +1; sponsor/change output lovelace -1; fee, assets, inputs, datum, mint unchanged",
+      "expected_result": "reject at compiled target Mint[0]",
+      "family_id": "authority_lovelace",
+      "files": {
+        "raw_inputs": {
+          "path": "cases/authority_value_plus_one/raw_inputs.cbor",
+          "sha256": "4b20e2b2cf4bd58b1f6e385c90ffd098d583df69d95fbc7b1fcc2591da72b9fe",
+          "size_bytes": 73
+        },
+        "raw_outputs": {
+          "path": "cases/authority_value_plus_one/raw_outputs.cbor",
+          "sha256": "bdde6122177c785a4ddc85537aa7dd78e8185cad23d71eb278724cd20a13a059",
+          "size_bytes": 79
+        },
+        "transaction": {
+          "path": "cases/authority_value_plus_one/transaction.cbor",
+          "sha256": "dfda1fcda2283336816e59be78b5b831be371bd4dc187bd78513d4a7bb65a1e2",
+          "size_bytes": 5099
+        }
+      },
+      "funding_witnesses": {
+        "count": 2,
+        "private_material_persisted": false,
+        "verified_against_serialized_body": true
+      },
+      "id": "authority_value_plus_one",
+      "original_registry_assertion": {
+        "path": "expected.every_negative_case",
+        "value": "reject"
+      },
+      "registry_assertion": "assets.lovelace_of(authority_output.value) == authority_initial_lovelace",
+      "schema_version": "f05-2a-r4-family-case-v1",
+      "script_invoked": false,
+      "simulator_result": "not run pending independent family review and coordinator freeze",
+      "status": "PENDING",
+      "target": {
+        "applied_script_hash": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+        "policy_id": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+        "purpose": "Mint[0]"
+      },
+      "transaction_body_hash_blake2b_256": "c85d62f9c8b5845aac6b3c006620f9aed553ed422d95f7da4574191edf365df2"
+    },
+    {
+      "conservation": {
+        "fee_lovelace": 1000001,
+        "input_lovelace": 17000000,
+        "lovelace_conserved": true,
+        "minted_assets": {
+          "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731.56414d532d4630352d415554482d5633": 1
+        },
+        "minted_output_assets_match": true,
+        "output_assets": {
+          "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731.56414d532d4630352d415554482d5633": 1
+        },
+        "output_lovelace": 15999999
+      },
+      "delta": "authority output lovelace -1; fee +1; sponsor/change output, assets, inputs, datum, mint unchanged",
+      "expected_result": "reject at compiled target Mint[0]",
+      "family_id": "authority_lovelace",
+      "files": {
+        "raw_inputs": {
+          "path": "cases/fee_diversion/raw_inputs.cbor",
+          "sha256": "4b20e2b2cf4bd58b1f6e385c90ffd098d583df69d95fbc7b1fcc2591da72b9fe",
+          "size_bytes": 73
+        },
+        "raw_outputs": {
+          "path": "cases/fee_diversion/raw_outputs.cbor",
+          "sha256": "a0de9f558d6b5c6ade9ba8c5cd44bb7f0f0c752dc252e31648d7ccafa5224608",
+          "size_bytes": 79
+        },
+        "transaction": {
+          "path": "cases/fee_diversion/transaction.cbor",
+          "sha256": "bca34837bf358ae95c3682f0fc9e63aeff5a27f514dfdfba5fb13df71fcd1596",
+          "size_bytes": 5099
+        }
+      },
+      "funding_witnesses": {
+        "count": 2,
+        "private_material_persisted": false,
+        "verified_against_serialized_body": true
+      },
+      "id": "fee_diversion",
+      "original_registry_assertion": {
+        "path": "expected.every_negative_case",
+        "value": "reject"
+      },
+      "registry_assertion": "assets.lovelace_of(authority_output.value) == authority_initial_lovelace",
+      "schema_version": "f05-2a-r4-family-case-v1",
+      "script_invoked": false,
+      "simulator_result": "not run pending independent family review and coordinator freeze",
+      "status": "PENDING",
+      "target": {
+        "applied_script_hash": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+        "policy_id": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+        "purpose": "Mint[0]"
+      },
+      "transaction_body_hash_blake2b_256": "32ba724fe40b52fee750bae5068e0633ad9023af5189d070d958e66926143eca"
+    }
+  ],
+  "conservation_rule": "resolved inputs equal outputs plus fee and aggregate output assets equal every minted policy/name/quantity",
+  "executions": 0,
+  "family_fixture_count": 2,
+  "family_id": "authority_lovelace",
+  "freeze_gate": "coordinator freezes exact hashes and Agent C independently approves before simulator invocation",
+  "funding_signature_method": "Blake2b-256 of exact serialized body; deterministic synthetic test-only Ed25519 signers derived in memory per case; resolved payment credentials rebound; witnesses independently verified; no private material persisted",
+  "positive_control": {
+    "expected_result": "accept control",
+    "family_id": "authority_lovelace",
+    "files": {
+      "raw_inputs": {
+        "path": "positive_control/raw_inputs.cbor",
+        "sha256": "4b20e2b2cf4bd58b1f6e385c90ffd098d583df69d95fbc7b1fcc2591da72b9fe",
+        "size_bytes": 73
+      },
+      "raw_outputs": {
+        "path": "positive_control/raw_outputs.cbor",
+        "sha256": "9cdf345a785f51763bdb43f1b1ba0c20b5545051f03051e6a7bf726ea128c56a",
+        "size_bytes": 79
+      },
+      "transaction": {
+        "path": "positive_control/transaction.cbor",
+        "sha256": "765c717f16b543c746b88742e8b775cd3ecabca4fef6edd16702184683780a28",
+        "size_bytes": 5099
+      }
+    },
+    "funding_witnesses": "accepted base witnesses; byte-identical copy",
+    "id": "valid_positive_control",
+    "schema_version": "f05-2a-r4-family-positive-control-v1",
+    "source": "accepted typed positive control copied byte-for-byte",
+    "status": "control-only; no new simulator execution",
+    "target": {
+      "applied_script_hash": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+      "policy_id": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+      "purpose": "Mint[0]"
+    }
+  },
+  "r2_contract": {
+    "path": "docs/remediation/m3_f05_2a/tx_sim_evidence_contract_r2.json",
+    "sha256": "3510e127d369e9eab24a7ebe5a5dea10daaf55fd9589a297d78776bda940f6e9"
+  },
+  "schema_version": "f05-2a-r4-transaction-family-manifest-v1",
+  "status": "fixtures prepared; pending independent review; no simulator execution",
+  "target": {
+    "applied_script_hash": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+    "policy_id": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+    "purpose": "Mint[0]"
+  }
+}

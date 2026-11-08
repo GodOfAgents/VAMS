@@ -1,0 +1,55 @@
+{
+  "schema": "m7-f05-identity-postpin-v1",
+  "date": "2026-10-03",
+  "head": "829ab544571f12efe50ecb5740f129c8acb3e16f",
+  "scope": "Post-pin/current-source reproduction of original F05.2a applied-policy identity; synthetic fixture identity only.",
+  "source_hashes": {
+    "cardano/aiken.lock": "7c69f0a484d3b42862dc0ab0773cf6b3edf72709c921b2ad3648a0753af8cafc",
+    "cardano/aiken.toml": "0520b42b48f051b1850f8143cdb9d2a7e7532d88ebac3c1b2ae7073332bac23a",
+    "cardano/plutus.json": "c4230410d0caac45f2c71d36e45a539c78087697128ce1533306d17e96a48008",
+    "cardano/validators/f05_authority_policy.ak": "e9d3ac9cbb14b9e7693dc12430234694c82eb52e61d176e1e39992fb9cbeafa8",
+    "cardano/validators/agent_nft.ak": "e28ff520d07f73a622a093b362f66411678d535bbb48cf2aecbcd8011204caba",
+    "docs/remediation/m3_f05_2a/tx_sim_r1/applied-policy.cbor": "fc8726cff89172d4944e257a2eb2659d35363c8e5a4d423ed8a2112eb5af7e59",
+    "docs/remediation/m3_f05_2a/tx_sim_typed_r1/valid.tx.cbor": "765c717f16b543c746b88742e8b775cd3ecabca4fef6edd16702184683780a28",
+    "docs/remediation/m3_f05_2a_evidence_classification_r1/CASE-STATUS.json": "8a571af3c92957ced0dc4d1c17c03776ac6a774d19a8ac20fce10c0fff1e5cc2"
+  },
+  "probe_sha256": "168e42f9b26ff549690bbba8c8b8ddd28a3d4effe6db650f3360ed0fe87d4bdb",
+  "run_result_sha256": {
+    "run1": "b7bd161c1659a88e85d4bc799c1ba4a7c0433d2d27fd553e2efe70334d6c71f8",
+    "run2": "68394226995f79a0972bc37b59d031a9f5b6fb5fc56a08411225172c8dfef40a"
+  },
+  "outer_exits": [
+    0,
+    0
+  ],
+  "inner_aiken_exits": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "protected_cardano_inputs": 21,
+  "protected_inputs_unchanged": true,
+  "build_count": 4,
+  "compiled_code_bytes": 3467,
+  "compiled_code_sha256": "fc8726cff89172d4944e257a2eb2659d35363c8e5a4d423ed8a2112eb5af7e59",
+  "applied_policy_id": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+  "matches_frozen_artifact_and_tx_witness": true,
+  "blueprint_sha256": "c4230410d0caac45f2c71d36e45a539c78087697128ce1533306d17e96a48008",
+  "raw_lock_sha256": "7c69f0a484d3b42862dc0ab0773cf6b3edf72709c921b2ad3648a0753af8cafc",
+  "f05_ledger": "45/55 negatives PASS, 18/21 mutations PASS; no count change",
+  "evidence_kind": "synthetic applied-policy identity, not compiled verdict, ledger admission or network evidence",
+  "readiness": "NOT READY"
+}

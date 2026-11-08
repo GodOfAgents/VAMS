@@ -1,0 +1,50 @@
+{
+  "conservation": {
+    "fee_lovelace": 1000000,
+    "input_lovelace": 17000000,
+    "lovelace_conserved": true,
+    "minted_output_assets_match": true,
+    "output_lovelace": 16000000
+  },
+  "delta": "replace only AuthorityStateV3 constructor alternative 0 with Plutus Data constructor alternative 2",
+  "expected_result": "reject at compiled target Mint[0]",
+  "family_id": "datum_envelope_schema",
+  "files": {
+    "raw_inputs": {
+      "path": "cases/datum_unknown_constructor/raw_inputs.cbor",
+      "sha256": "4b20e2b2cf4bd58b1f6e385c90ffd098d583df69d95fbc7b1fcc2591da72b9fe",
+      "size_bytes": 73
+    },
+    "raw_outputs": {
+      "path": "cases/datum_unknown_constructor/raw_outputs.cbor",
+      "sha256": "efada6cb234340a9d4d34dd4a2664b9987daf5becd49785a2a7e9cf6c38be5c6",
+      "size_bytes": 79
+    },
+    "transaction": {
+      "path": "cases/datum_unknown_constructor/transaction.cbor",
+      "sha256": "a23672e8c5c849d11d214bce08ebc92868daee0f4402df2a1ac21c65c4e70c7d",
+      "size_bytes": 5099
+    }
+  },
+  "funding_witnesses": {
+    "count": 2,
+    "private_material_persisted": false,
+    "verified_against_serialized_body": true
+  },
+  "id": "datum_unknown_constructor",
+  "original_registry_assertion": {
+    "path": "expected.every_negative_case",
+    "value": "reject"
+  },
+  "registry_assertion": "expect state: AuthorityStateV3 = raw_datum",
+  "schema_version": "f05-2a-r4-family-case-v1",
+  "script_invoked": false,
+  "simulator_result": "not run pending independent family review and coordinator freeze",
+  "status": "PENDING",
+  "target": {
+    "applied_script_hash": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+    "policy_id": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+    "purpose": "Mint[0]"
+  },
+  "transaction_body_hash_blake2b_256": "9b88876f4e79efd17ff85dba4c614e96a0c478c7273d2f19bf458b2bcf18ae47"
+}

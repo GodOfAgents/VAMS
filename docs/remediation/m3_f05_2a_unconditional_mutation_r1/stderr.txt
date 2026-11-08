@@ -1,0 +1,9 @@
+Traceback (most recent call last):
+  File "/home/GodOfAgents/code/VAMS-testnet/scripts/remediation/test_f05_2a_authority_bootstrap_public.py", line 959, in <module>
+    raise SystemExit(main())
+                     ~~~~^^
+  File "/home/GodOfAgents/code/VAMS-testnet/scripts/remediation/test_f05_2a_authority_bootstrap_public.py", line 950, in main
+    result = _run_suite(args.aiken.resolve())
+  File "/home/GodOfAgents/code/VAMS-testnet/scripts/remediation/test_f05_2a_authority_bootstrap_public.py", line 808, in _run_suite
+    raise AssertionError("canonical F05.2a bootstrap fixture rejected by compiled Plutus V3")
+AssertionError: canonical F05.2a bootstrap fixture rejected by compiled Plutus V3

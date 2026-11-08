@@ -1,0 +1,525 @@
+{
+  "schema_version": "f05-2a-evidence-classification-r7-case-status-v1",
+  "source_registry": {
+    "path": "docs/remediation/m3_f05_2a/authority_bootstrap_public_fixtures.json",
+    "sha256": "98a05d24d476b1aee2754768322dc4b794e5afb5fabec28ade17a2888285467d",
+    "assertions_changed": false
+  },
+  "negative_cases": {
+    "total": 55,
+    "pass": [
+      {
+        "id": "seed_missing",
+        "evidence": "seed_reference_and_datum_binding"
+      },
+      {
+        "id": "seed_duplicate",
+        "evidence": "/home/GodOfAgents/vams-evidence/m3-f05-2a-seed-duplicate-independent-review-20261002-r1/REVIEW.json"
+      },
+      {
+        "id": "seed_datum_hash",
+        "evidence": "seed_reference_and_datum_binding"
+      },
+      {
+        "id": "seed_datum_index",
+        "evidence": "seed_reference_and_datum_binding"
+      },
+      {
+        "id": "mint_wrong_name",
+        "evidence": "mint_map_exactness"
+      },
+      {
+        "id": "mint_quantity_two",
+        "evidence": "mint_map_exactness"
+      },
+      {
+        "id": "mint_extra_name",
+        "evidence": "mint_map_exactness"
+      },
+      {
+        "id": "output_stake_credential",
+        "evidence": "/home/GodOfAgents/vams-evidence/m3-f05-2a-stake-admission-independent-review-20261002-r1/REVIEW.json"
+      },
+      {
+        "id": "datum_missing",
+        "evidence": "datum_envelope_schema"
+      },
+      {
+        "id": "datum_hash_only",
+        "evidence": "datum_envelope_schema"
+      },
+      {
+        "id": "datum_unknown_constructor",
+        "evidence": "datum_envelope_schema"
+      },
+      {
+        "id": "datum_schema_version",
+        "evidence": "datum_envelope_schema"
+      },
+      {
+        "id": "datum_seed_hash",
+        "evidence": "/home/GodOfAgents/vams-evidence/m3-f05-2a-datum-integrated-independent-review-20261002-r1/INTEGRATED-REVIEW.json"
+      },
+      {
+        "id": "datum_seed_index",
+        "evidence": "/home/GodOfAgents/vams-evidence/m3-f05-2a-datum-integrated-independent-review-20261002-r1/INTEGRATED-REVIEW.json"
+      },
+      {
+        "id": "datum_epoch",
+        "evidence": "/home/GodOfAgents/vams-evidence/m3-f05-2a-datum-integrated-independent-review-20261002-r1/INTEGRATED-REVIEW.json"
+      },
+      {
+        "id": "datum_key_count",
+        "evidence": "/home/GodOfAgents/vams-evidence/m3-f05-2a-datum-integrated-independent-review-20261002-r1/INTEGRATED-REVIEW.json"
+      },
+      {
+        "id": "datum_key_length",
+        "evidence": "/home/GodOfAgents/vams-evidence/m3-f05-2a-datum-integrated-independent-review-20261002-r1/INTEGRATED-REVIEW.json"
+      },
+      {
+        "id": "datum_duplicate_key",
+        "evidence": "/home/GodOfAgents/vams-evidence/m3-f05-2a-datum-integrated-independent-review-20261002-r1/INTEGRATED-REVIEW.json"
+      },
+      {
+        "id": "datum_key_binding",
+        "evidence": "/home/GodOfAgents/vams-evidence/m3-f05-2a-datum-integrated-independent-review-20261002-r1/INTEGRATED-REVIEW.json"
+      },
+      {
+        "id": "datum_threshold",
+        "evidence": "/home/GodOfAgents/vams-evidence/m3-f05-2a-datum-integrated-independent-review-20261002-r1/INTEGRATED-REVIEW.json"
+      },
+      {
+        "id": "datum_status",
+        "evidence": "/home/GodOfAgents/vams-evidence/m3-f05-2a-status-independent-review-20261002-r1/REVIEW.json"
+      },
+      {
+        "id": "datum_pending_kind",
+        "evidence": "/home/GodOfAgents/vams-evidence/m3-f05-2a-datum-integrated-independent-review-20261002-r1/INTEGRATED-REVIEW.json"
+      },
+      {
+        "id": "datum_pending_noncanonical",
+        "evidence": "/home/GodOfAgents/vams-evidence/m3-f05-2a-datum-integrated-independent-review-20261002-r1/INTEGRATED-REVIEW.json"
+      },
+      {
+        "id": "authority_value_minus_one",
+        "evidence": "accepted R3.1 #33 package"
+      },
+      {
+        "id": "authority_value_plus_one",
+        "evidence": "authority_lovelace"
+      },
+      {
+        "id": "fee_diversion",
+        "evidence": "authority_lovelace"
+      },
+      {
+        "id": "authority_extra_native_asset",
+        "evidence": "/home/GodOfAgents/vams-evidence/m3-f05-2a-extra-asset-independent-integrated-review-20261002-r1/INTEGRATED-REVIEW.json"
+      },
+      {
+        "id": "r2_proof_missing",
+        "evidence": "/home/GodOfAgents/vams-evidence/m3-f05-2a-proof-missing-independent-review-20261002-r1/REVIEW.json"
+      },
+      {
+        "id": "r2_proof_extra",
+        "evidence": "/home/GodOfAgents/vams-evidence/m3-f05-2a-proof-extra-independent-review-20261002-r1/REVIEW.json"
+      },
+      {
+        "id": "r2_invalid_proof_0",
+        "evidence": "/home/GodOfAgents/vams-evidence/m3-f05-2a-proof-pop-independent-integrated-review-20261002-r1/INDEPENDENT-REVIEW.json"
+      },
+      {
+        "id": "r2_invalid_proof_1",
+        "evidence": "/home/GodOfAgents/vams-evidence/m3-f05-2a-invalid-proof-1-independent-review-20261002-r1/REVIEW.json"
+      },
+      {
+        "id": "r2_invalid_proof_2",
+        "evidence": "/home/GodOfAgents/vams-evidence/m3-f05-2a-invalid-proof-2-independent-review-20261002-r1/REVIEW.json"
+      },
+      {
+        "id": "r2_invalid_proof_3",
+        "evidence": "/home/GodOfAgents/vams-evidence/m3-f05-2a-invalid-proof-3-independent-review-20261002-r1/REVIEW.json"
+      },
+      {
+        "id": "r2_invalid_proof_4",
+        "evidence": "/home/GodOfAgents/vams-evidence/m3-f05-2a-invalid-proof-4-independent-review-20261002-r1/REVIEW.json"
+      },
+      {
+        "id": "r2_wrong_key_pairing",
+        "evidence": "/home/GodOfAgents/vams-evidence/m3-f05-2a-wrong-key-pairing-independent-review-20261002-r1/REVIEW.json"
+      },
+      {
+        "id": "r2_swapped_datum_keys",
+        "evidence": "/home/GodOfAgents/vams-evidence/m3-f05-2a-r2-swapped-datum-keys-independent-review-20261002-r1/REVIEW.json"
+      },
+      {
+        "id": "datum_key_order",
+        "evidence": "/home/GodOfAgents/vams-evidence/m3-f05-2a-datum-key-order-corrected-independent-review-20261002-r1/REVIEW.json"
+      },
+      {
+        "id": "r2_duplicate_datum_key",
+        "evidence": "/home/GodOfAgents/vams-evidence/m3-f05-2a-r2-duplicate-datum-key-independent-review-20261002-r1/REVIEW.json"
+      },
+      {
+        "id": "r2_wrong_state_address",
+        "evidence": "/home/GodOfAgents/vams-evidence/m3-f05-2a-r2-wrong-state-address-independent-review-20261002-r1/REVIEW.json"
+      },
+      {
+        "id": "output_wrong_payment_credential",
+        "evidence": "/home/GodOfAgents/vams-evidence/m3-f05-2a-r2-wrong-state-address-independent-review-20261002-r1/REVIEW.json"
+      },
+      {
+        "id": "authority_output_extra_target",
+        "evidence": "/home/GodOfAgents/vams-evidence/m3-f05-2a-authority-output-extra-target-independent-review-20261002-r1/REVIEW.json"
+      },
+      {
+        "id": "authority_output_missing",
+        "evidence": "/home/GodOfAgents/vams-evidence/m3-f05-2a-authority-output-missing-independent-review-20261002-r1/REVIEW.json"
+      },
+      {
+        "id": "mint_wrong_policy",
+        "evidence": "/home/GodOfAgents/vams-evidence/m3-f05-2a-wrong-policy-routing-20261002-r1/RESULT.json",
+        "classification": "routing_only_noninvocation",
+        "observed": "target not invoked"
+      },
+      {
+        "id": "authority_output_quantity_two",
+        "evidence": "/home/GodOfAgents/vams-evidence/m3-f05-2a-output-quantity-two-context-20261002-r1/RESULT.json",
+        "classification": "context_only",
+        "observed": "compiled context rejection; target invoked"
+      },
+      {
+        "id": "authority_output_duplicate_nft",
+        "evidence": "/home/GodOfAgents/vams-evidence/m3-f05-2a-duplicate-nft-context-20261002-r2/RESULT.json",
+        "classification": "context_only",
+        "observed": "compiled context rejection; target invoked"
+      },
+      {
+        "id": "applied_keys_duplicate",
+        "evidence": "docs/remediation/m3_f05_2a_applied_keys_duplicate_review_r1_20261005/INDEPENDENT-REVIEW.md",
+        "classification": "transaction_simulator",
+        "observed": "synthetic alternate-policy positive accepted and negative rejected at Mint[0]; one-guard mutant accepted; original-policy, ledger-admission, and live-network credit false"
+      },
+      {
+        "id": "applied_genesis_parameter",
+        "evidence": "docs/remediation/m3_f05_2a_applied_genesis_paired_review_r2_20261005/INDEPENDENT-REVIEW.md",
+        "classification": "transaction_simulator",
+        "observed": "exact-R5 synthetic alternate-policy positive accepted and negative rejected at compiled Mint[0]; one-guard remove_seed_guard mutant accepted at compiled Mint[0]; no original-policy, ledger-admission, or live-network credit"
+      },
+      {
+        "id": "applied_keys_parameter",
+        "evidence": "docs/remediation/m3_f05_2a_applied_keys_parameter_triad_review_r1_20261005/INDEPENDENT-REVIEW.md",
+        "evidence_sha256": "893a0474e9a3e039834501c139cb546f563d6f708d3428ec0024cbc577492958",
+        "supporting_evidence": [
+          {
+            "path": "docs/remediation/m3_f05_2a_applied_parameter_sim_attempt_r10_20261005/RUN.json",
+            "sha256": "fdd13ca0572ba92c302d0e5537ee2670520570dcf25977feb39ebebaa6a3a2c9",
+            "role": "accepted positive control"
+          },
+          {
+            "path": "docs/remediation/m3_f05_2a_applied_parameter_sim_attempt_r11_20261005/RUN.json",
+            "sha256": "ca0e17acffdffe5877ee6f1b6ffc2facefbbb70a89ab29c78f488b9c5da92cad",
+            "role": "normal-policy negative attempt"
+          },
+          {
+            "path": "docs/remediation/m3_f05_2a_applied_parameter_sim_attempt_r12_20261005/RUN.json",
+            "sha256": "bcd3e120ecd05b07e35f128f267da0f62f8e6c133042d854166326dfca53b19d",
+            "role": "one-guard mutant positive control"
+          },
+          {
+            "path": "docs/remediation/m3_f05_2a_applied_keys_parameter_triad_review_r1_20261005/INDEPENDENT-REVIEW.md",
+            "sha256": "893a0474e9a3e039834501c139cb546f563d6f708d3428ec0024cbc577492958",
+            "role": "independent paired triad review"
+          }
+        ],
+        "classification": "transaction_simulator",
+        "observed": "synthetic alternate-applied-policy positive accepted, named-condition negative rejected, and exact one-guard mutant accepted at compiled Mint[0]; no mutation-suite, original-policy, full-ledger-admission, Cardano Pre-Prod, or live-network credit"
+      },
+      {
+        "id": "applied_keys_unsorted",
+        "evidence": "docs/remediation/m3_f05_2a_applied_keys_unsorted_r16_review_r1_20261005/INDEPENDENT-REVIEW.md",
+        "evidence_sha256": "9f3b58dc98ee5144705db7f4101181904a93166d7d6b3e5730688e922216e54b",
+        "supporting_evidence": [
+          {
+            "path": "docs/remediation/m3_f05_2a_applied_parameter_sim_attempt_r14_20261005/RUN.json",
+            "sha256": "9d40df445cca42f37aab07bb221cc54535b95d70d79e6c64a236def6c2ea6aa1",
+            "role": "accepted positive control"
+          },
+          {
+            "path": "docs/remediation/m3_f05_2a_applied_keys_unsorted_r14_review_r1_20261005/INDEPENDENT-REVIEW.md",
+            "sha256": "f08ac5add7f4096054d994ed3a1977663cf4c88096b8a5fdd295e086e09c450e",
+            "role": "independent positive-control review"
+          },
+          {
+            "path": "docs/remediation/m3_f05_2a_applied_parameter_sim_attempt_r15_20261005/RUN.json",
+            "sha256": "2943e4d762012bb8e617255d7c54102596456fa6da3b25b841896a05554790c3",
+            "role": "normal-policy negative attempt"
+          },
+          {
+            "path": "docs/remediation/m3_f05_2a_applied_keys_unsorted_r15_mutant_byte_review_r1_20261005/INDEPENDENT-REVIEW.md",
+            "sha256": "c17eecfb046a1f744b9193e2305fc9383a6fd8f077720eeb4e629509fd965aa1",
+            "role": "independent one-guard mutant-byte review"
+          },
+          {
+            "path": "docs/remediation/m3_f05_2a_applied_parameter_sim_attempt_r16_20261005/RUN.json",
+            "sha256": "11ff6ab03cac0dc488af7cc486bb994bf79fd1d0fb49ee4dff8ae619ff37fd24",
+            "role": "one-guard mutant positive control"
+          },
+          {
+            "path": "docs/remediation/m3_f05_2a_applied_keys_unsorted_r16_review_r1_20261005/INDEPENDENT-REVIEW.md",
+            "sha256": "9f3b58dc98ee5144705db7f4101181904a93166d7d6b3e5730688e922216e54b",
+            "role": "independent paired triad attribution review"
+          }
+        ],
+        "classification": "transaction_simulator",
+        "observed": "synthetic alternate-applied-policy positive accepted, unsorted-key negative rejected, and exact one-guard order mutant accepted at compiled Mint[0]; no mutation-suite, original-policy, full-ledger-admission, Cardano Pre-Prod, or live-network credit"
+      },
+      {
+        "id": "r2_signature_for_other_seed",
+        "evidence": "docs/remediation/m3_f05_2a_proof_other_seed_triad_review_r1_20261005/INDEPENDENT-REVIEW.md",
+        "evidence_sha256": "997d6658265add2675332e2759a578b59eee0b0dbdfa96f6233ea510217566ee",
+        "supporting_evidence": [
+          {
+            "path": "docs/remediation/m3_f05_2a_proof_other_seed_positive_attempt_r1_20261005/RUN.json",
+            "sha256": "f9a86dca6d7fed12a92fb2afb59ac77836c6b963b178403f0ef77b8c9494992f",
+            "role": "accepted applied-seed positive control R17"
+          },
+          {
+            "path": "docs/remediation/m3_f05_2a_proof_other_seed_negative_attempt_r1_20261005/RUN.json",
+            "sha256": "2f3d042cd4350d821b0ce91dafa4cddfdb36dc23258eefb6115b947fd764b0be",
+            "role": "alternate-seed negative attempt R18 under unmodified applied policy"
+          },
+          {
+            "path": "docs/remediation/m3_f05_2a_proof_other_seed_mutant_attempt_r1_20261005/RUN.json",
+            "sha256": "ecd352f4acfb379b36a05ab623f8a25a6d5e6a8be4f9181de92cba37f3c973ba",
+            "role": "same-negative one-guard seed-domain mutant acceptance R19"
+          },
+          {
+            "path": "docs/remediation/m3_f05_2a_proof_other_seed_triad_review_r1_20261005/INDEPENDENT-REVIEW.md",
+            "sha256": "997d6658265add2675332e2759a578b59eee0b0dbdfa96f6233ea510217566ee",
+            "role": "independent integrated triad attribution review"
+          }
+        ],
+        "classification": "transaction_simulator",
+        "observed": "synthetic alternate-applied-policy positive accepted, alternate-seed negative rejected, and same-negative one-guard seed-domain mutant accepted at compiled Mint[0]; no mutation-suite, original-policy, full-ledger-admission, Cardano Pre-Prod, or live-network credit"
+      },
+      {
+        "id": "r2_signature_for_other_network",
+        "evidence": "docs/remediation/m3_f05_2a_proof_other_network_triad_review_r1_20261005/INDEPENDENT-REVIEW.md",
+        "evidence_sha256": "df63119b2896ee637d2c7bfff8fe99c0204763643f4170bbf0e7f8ef4b478895",
+        "supporting_evidence": [
+          {
+            "path": "docs/remediation/m3_f05_2a_proof_other_network_positive_attempt_r1_20261005/RUN.json",
+            "sha256": "f83f9efb074e5b7396d395a61154adc8d716b57a3a4193119b46e03d3e531e8a",
+            "role": "accepted positive control R20"
+          },
+          {
+            "path": "docs/remediation/m3_f05_2a_proof_other_network_positive_review_r1_20261005/INDEPENDENT-REVIEW.md",
+            "sha256": "a86e5fe5594048f9bff65f92a4dcf6f124dfe25063578d1aeeaf21a933f6c6ff",
+            "role": "independent positive review"
+          },
+          {
+            "path": "docs/remediation/m3_f05_2a_proof_other_network_negative_attempt_r1_20261005/RUN.json",
+            "sha256": "e31385db7d8c0e0b7ebc4610298813ed66373a59a736109d354db4addc9ec179",
+            "role": "normal-policy negative R21"
+          },
+          {
+            "path": "docs/remediation/m3_f05_2a_proof_other_network_negative_review_r1_20261005/INDEPENDENT-REVIEW.md",
+            "sha256": "ffa6066975cb41f950a0d6d601e2fe18384c37055ba212ba179243717d97d0fe",
+            "role": "independent negative-attempt integrity review"
+          },
+          {
+            "path": "docs/remediation/m3_f05_2a_proof_other_network_mutant_attempt_r1_20261005/RUN.json",
+            "sha256": "364d859090a4d80549a63bb57b04b0f36d1d89b967cc5707e3dc784c79315eaa",
+            "role": "same-negative one-guard mutant R22"
+          },
+          {
+            "path": "docs/remediation/m3_f05_2a_proof_other_network_mutant_preexecution_review_r1_20261005/INDEPENDENT-REVIEW.md",
+            "sha256": "1d92f77fcd16b90c19ebb1330f46aa7175eea84b74e635f89120b7a0cf07b6f7",
+            "role": "independent exact-byte review before mutant execution"
+          },
+          {
+            "path": "docs/remediation/m3_f05_2a_proof_other_network_triad_review_r1_20261005/INDEPENDENT-REVIEW.md",
+            "sha256": "df63119b2896ee637d2c7bfff8fe99c0204763643f4170bbf0e7f8ef4b478895",
+            "role": "independent integrated R20/R21/R22 triad review"
+          }
+        ],
+        "classification": "transaction_simulator",
+        "observed": "synthetic alternate-applied-policy positive accepted, network-magic-0 negative rejected under the unmodified policy, and same-negative one-guard network-domain mutant accepted at compiled Mint[0]; no mutation-suite, original-policy, full-ledger-admission, Cardano Pre-Prod, or live-network credit"
+      }
+    ],
+    "pending": [
+      "applied_keys_bad_count",
+      "applied_keys_bad_length",
+      "r2_signature_for_other_validator_hash",
+      "r2_signature_for_other_epoch"
+    ],
+    "failed": [],
+    "classification": {
+      "transaction_simulator": {
+        "total": 51,
+        "pass": 47,
+        "pending": 4,
+        "failed": 0
+      },
+      "context_only": {
+        "total": 3,
+        "pass": 3,
+        "pending": 0,
+        "failed": 0
+      },
+      "routing_only": {
+        "total": 1,
+        "pass": 1,
+        "pending": 0,
+        "failed": 0
+      }
+    },
+    "summary": {
+      "pass": 51,
+      "pending": 4,
+      "failed": 0
+    }
+  },
+  "mutations": {
+    "total": 21,
+    "ids_pending": [
+      "unconditional_success",
+      "remove_key_uniqueness_order_guard",
+      "remove_key_order_guard"
+    ],
+    "categories": {
+      "canonical_policy": 17,
+      "alternate_parameter": 2,
+      "context_only": 1,
+      "composite": 1
+    },
+    "executed": 18,
+    "passed": 18,
+    "failed": 0,
+    "pending": 3,
+    "triad_evidence": "two independently reviewed synthetic compiled triads for exact-lovelace and no-extra-asset guard; each has source/program binding, routing and false-positive admission controls; one independently reviewed synthetic compiled triad for no-stake-credential guard with exact source/program binding, routing and false-positive admission controls; one independently reviewed synthetic compiled triad for the bootstrap PoP verifier removal with exact source/program binding, routing and false-positive admission controls; one independently reviewed dual-runtime seed_missing mutation triad with mutant positive and routing controls; one independently reviewed dual-runtime datum_schema_version mutation triad with mutant positive and routing controls; one independently reviewed dual-runtime seed_datum_hash mutation triad with mutant positive and routing controls; one independently replayed dual-runtime seed_datum_index mutation triad with mutant positive and routing controls; one independently replayed dual-runtime datum_epoch mutation triad with mutant positive and routing controls; one independently replayed dual-runtime datum_key_binding mutation triad with mutant positive and routing controls; one independently replayed dual-runtime datum_threshold mutation triad with mutant positive and routing controls; one independently reviewed dual-runtime datum_status mutation triad with mutant positive and routing controls; one independently reviewed dual-runtime datum_pending_noncanonical mutation triad with mutant positive and routing controls; one independently reviewed dual-runtime authority_output_extra_target mutation triad with signer-bound resolved inputs, mutant positive and routing controls; one independently reviewed dual-runtime r2_wrong_state_address mutation triad with signer-bound resolved inputs, mutant positive and routing controls; one independently reviewed dual-runtime mint_extra_name mutation triad with conserved sponsor token, singleton authority output, signer-bound resolved inputs, mutant positive and routing controls; one independently reviewed dual-runtime datum_missing mutation triad with explicit sponsor donor Datum, corrected disposable-mutator import scaffold, signer-bound resolved inputs, mutant positive and routing controls; one independently reviewed dual-runtime singleton-quantity mutation triad paired with authority_output_quantity_two, preserving mint-one/output-two conservation-invalid context and signer-bound inputs",
+    "pass": [
+      {
+        "id": "remove_exact_lovelace_guard",
+        "evidence": "/home/GodOfAgents/vams-evidence/m3-f05-2a-lovelace-combined-independent-acceptance-20261002-r1/ACCEPTANCE.json"
+      },
+      {
+        "id": "remove_no_extra_asset_guard",
+        "evidence": "/home/GodOfAgents/vams-evidence/m3-f05-2a-extra-asset-independent-integrated-review-20261002-r1/INTEGRATED-REVIEW.json"
+      },
+      {
+        "id": "remove_no_stake_credential_guard",
+        "evidence": "/home/GodOfAgents/vams-evidence/m3-f05-2a-stake-admission-independent-review-20261002-r1/REVIEW.json"
+      },
+      {
+        "id": "remove_bootstrap_proof_of_possession_verification",
+        "evidence": "/home/GodOfAgents/vams-evidence/m3-f05-2a-proof-pop-independent-integrated-review-20261002-r1/INDEPENDENT-REVIEW.json"
+      },
+      {
+        "id": "remove_seed_guard",
+        "evidence": "/home/GodOfAgents/vams-evidence/m3-f05-2a-seed-guard-independent-review-20261002-r1/REVIEW.json"
+      },
+      {
+        "id": "remove_schema_version_guard",
+        "evidence": "/home/GodOfAgents/vams-evidence/m3-f05-2a-schema-guard-independent-review-20261002-r1/REVIEW.json"
+      },
+      {
+        "id": "remove_seed_hash_guard",
+        "evidence": "/home/GodOfAgents/vams-evidence/m3-f05-2a-seed-hash-independent-review-20261002-r1/REVIEW.json"
+      },
+      {
+        "id": "remove_seed_index_guard",
+        "evidence": "/home/GodOfAgents/vams-evidence/m3-f05-2a-seed-index-independent-review-20261002-r1/ADDENDUM-r2.json"
+      },
+      {
+        "id": "remove_epoch_guard",
+        "evidence": "/home/GodOfAgents/vams-evidence/m3-f05-2a-epoch-independent-review-20261002-r1/REVIEW.json"
+      },
+      {
+        "id": "remove_key_binding_guard",
+        "evidence": "/home/GodOfAgents/vams-evidence/m3-f05-2a-key-binding-independent-review-20261002-r1/REVIEW.json"
+      },
+      {
+        "id": "remove_threshold_guard",
+        "evidence": "/home/GodOfAgents/vams-evidence/m3-f05-2a-threshold-independent-review-20261002-r1/REVIEW.json"
+      },
+      {
+        "id": "remove_status_guard",
+        "evidence": "/home/GodOfAgents/vams-evidence/m3-f05-2a-status-independent-review-20261002-r1/REVIEW.json"
+      },
+      {
+        "id": "remove_pending_canonicality_guard",
+        "evidence": "/home/GodOfAgents/vams-evidence/m3-f05-2a-pending-canonicality-independent-review-20261002-r1/REVIEW.json"
+      },
+      {
+        "id": "remove_target_output_cardinality_guard",
+        "evidence": "/home/GodOfAgents/vams-evidence/m3-f05-2a-target-cardinality-independent-review-20261002-r2/REVIEW.json"
+      },
+      {
+        "id": "remove_state_validator_credential_binding",
+        "evidence": "/home/GodOfAgents/vams-evidence/m3-f05-2a-credential-binding-independent-review-20261002-r2/REVIEW.json"
+      },
+      {
+        "id": "remove_exact_mint_guard",
+        "evidence": "/home/GodOfAgents/vams-evidence/m3-f05-2a-exact-mint-independent-review-20261002-r2/REVIEW.json"
+      },
+      {
+        "id": "remove_inline_datum_guard",
+        "evidence": "/home/GodOfAgents/vams-evidence/m3-f05-2a-inline-datum-independent-review-20261002-r2/REVIEW.json"
+      },
+      {
+        "id": "remove_singleton_quantity_guard",
+        "evidence": "/home/GodOfAgents/vams-evidence/m3-f05-2a-singleton-quantity-mutation-20261002-r2/RESULT.json",
+        "classification": "context_only_mutation"
+      }
+    ]
+  },
+  "limits": [
+    "No registry identifiers or assertions were changed.",
+    "No case is PASS from inventory alone; each PASS must satisfy its declared evidence category and cite reviewed evidence. Simulator evidence is required only for transaction-simulator categories; context-only and routing-only PASS claims retain their explicit non-ledger scope.",
+    "Simulator outcomes do not establish full ledger admission.",
+    "The separate schema-version compiled-context control had a UPLC parser failure and is explicitly excluded from mutation credit.",
+    "Independent review verified original PoP redeemer bytes unchanged but did not independently rederive every PoP signature message."
+  ],
+  "routing_only_acceptance": {
+    "case_id": "mint_wrong_policy",
+    "classification": "routing_noninvoking",
+    "accepted_result": "not invoked",
+    "target_policy_rejection_credit": false,
+    "ledger_or_live_credit": false,
+    "category_reconciliation_note": "seed_duplicate is context_only and already PASS; corrected from the prior ledger's stale category subtotal."
+  },
+  "context_only_acceptance": {
+    "case_id": "authority_output_duplicate_nft",
+    "target_policy_invoked": true,
+    "native_token_conservation_valid": false,
+    "ledger_admission_credit": false,
+    "transaction_simulator_rejection_credit": false,
+    "live_network_credit": false
+  },
+  "mutation_acceptance": {
+    "id": "remove_singleton_quantity_guard",
+    "paired_case": "authority_output_quantity_two",
+    "classification": "context_only_mutation",
+    "negative_case_credit": false,
+    "transaction_simulator_credit": false,
+    "ledger_admission_credit": false,
+    "live_network_credit": false
+  },
+  "evidence_category_clarification": {
+    "change_type": "wording-only record correction",
+    "negative_counts_unchanged": {
+      "registered_pass": 45,
+      "registered_pending": 10,
+      "transaction_simulator_pass": 41,
+      "context_only_pass": 3,
+      "routing_only_pass": 1
+    },
+    "mutation_counts_unchanged": {
+      "pass": 18,
+      "pending": 3
+    },
+    "frozen_contract_or_registry_changed": false
+  }
+}

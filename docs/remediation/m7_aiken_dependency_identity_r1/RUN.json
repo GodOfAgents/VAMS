@@ -1,0 +1,19 @@
+{
+  "head": "829ab544571f12efe50ecb5740f129c8acb3e16f",
+  "independent_review": {
+    "outcome": "PASS",
+    "scope": "exact byte-to-commit mapping only; pin/rebuild not yet accepted"
+  },
+  "readiness": "NOT READY",
+  "schema": "m7-aiken-dependency-identity-run-v1",
+  "verification": {
+    "archive_and_installed_bytes_match_manifest": true,
+    "archive_file_counts": {
+      "fuzz": 16,
+      "stdlib": 38
+    },
+    "git_archive_comment_probe": "git archive --format=zip HEAD README.md | Python ZipFile comment equals full HEAD",
+    "source_count": 4,
+    "source_hashes_match": true
+  }
+}

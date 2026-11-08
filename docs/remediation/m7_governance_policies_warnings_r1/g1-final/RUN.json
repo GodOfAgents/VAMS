@@ -1,0 +1,32 @@
+{
+  "schema": "m7-aiken-g1-run-v1",
+  "command": [
+    "aiken",
+    "check",
+    "--deny",
+    "--seed",
+    "20260711",
+    "--max-success",
+    "250"
+  ],
+  "aiken_version": "aiken v1.1.21+42babe5",
+  "aiken_sha256": "07f3f927f1a8c71fc61273fdff850d9b98edb28dde207c8a32585991f2c88e79",
+  "workflow_sha256": "7ddeb89794f498393e9c3bb460ca1aaa74dde7b9637c590d76cdae3bbc3ec83a",
+  "governance_policies_source_sha256": "da0df0fc78e55182dea92921970bb8f127e71b83eaf171b1e18a8a5022bbf73c",
+  "exit_code": 1,
+  "network": "disabled with bubblewrap --unshare-net",
+  "input_count": 73,
+  "preflight_equal": true,
+  "snapshot_unchanged": true,
+  "canonical_unchanged": true,
+  "summary": {
+    "passed_tests": 122,
+    "failed_tests": 0,
+    "checks": 1865,
+    "errors": 0,
+    "warnings": 7
+  },
+  "tty_sha256": "6300c66d1c7de4d2f72625c6c42f5648d522f71496d4a54f39a72a43de2689ad",
+  "stdout_sha256": "aa6a4fcac9d7886d49703afe31eff0971c15d7035a1a7a43bb3190f9deddc5d6",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

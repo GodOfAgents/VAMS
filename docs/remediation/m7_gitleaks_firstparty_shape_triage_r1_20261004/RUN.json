@@ -1,0 +1,76 @@
+{
+  "command": "bwrap --unshare-net --ro-bind / / --tmpfs /tmp --dev-bind /dev /dev --proc /proc --bind /home/GodOfAgents/vams-evidence/m7_gitleaks_shape_triage_r1_20261004 /home/GodOfAgents/vams-evidence/m7_gitleaks_shape_triage_r1_20261004 --chdir /home/GodOfAgents/code/VAMS-testnet --clearenv --setenv PATH /usr/bin:/bin /home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python -B /home/GodOfAgents/vams-evidence/m7_gitleaks_shape_triage_r1_20261004/triage.py",
+  "exit_code": 0,
+  "input_result_sha256": "634f4afe6a42b5cb23711b7980a2caade5a5b05ca4a9c6893bbf3d396b6b6736",
+  "input_source_manifest_sha256": "dd9689d36655161dd3611f388cd82d7a9bf13f5019002a3f1ea66de5e37e9e69",
+  "network": "disabled by bwrap",
+  "output_path": "/home/GodOfAgents/vams-evidence/m7_gitleaks_shape_triage_r1_20261004/TRIAGE.json",
+  "post_run_review": "PASS",
+  "pre_run_review": "PASS for exact runner SHA-256 df91054da231d07fc96b9714839bc82939c224b1daf24550cc638be4fd5ba36c",
+  "python": "3.12.14",
+  "repo_access": "read-only",
+  "result_sha256": "386c6436b1e67dbd1dfa2c9129019184e0cc5d239d7fae7adb7e02f4504c8980",
+  "runner_sha256": "df91054da231d07fc96b9714839bc82939c224b1daf24550cc638be4fd5ba36c",
+  "schema": "m7-gitleaks-value-free-shape-triage-run-r1",
+  "summary": {
+    "candidate_shape_counts": [
+      {
+        "entropy_bucket": "medium",
+        "is_hex": "False",
+        "length_bucket": "1-16",
+        "occurrences": 1,
+        "value_type": "python_string"
+      },
+      {
+        "entropy_bucket": "not_assessed_short",
+        "is_hex": "False",
+        "length_bucket": "1-16",
+        "occurrences": 1,
+        "value_type": "python_string"
+      },
+      {
+        "entropy_bucket": "medium",
+        "is_hex": "False",
+        "length_bucket": "17-31",
+        "occurrences": 6,
+        "value_type": "python_string"
+      },
+      {
+        "entropy_bucket": "medium",
+        "is_hex": "True",
+        "length_bucket": "64",
+        "occurrences": 1,
+        "value_type": "python_string"
+      },
+      {
+        "entropy_bucket": "medium",
+        "is_hex": "True",
+        "length_bucket": "128+",
+        "occurrences": 101,
+        "value_type": "string"
+      },
+      {
+        "entropy_bucket": "medium",
+        "is_hex": "True",
+        "length_bucket": "32-63",
+        "occurrences": 143,
+        "value_type": "string"
+      },
+      {
+        "entropy_bucket": "medium",
+        "is_hex": "True",
+        "length_bucket": "64",
+        "occurrences": 138,
+        "value_type": "string"
+      }
+    ],
+    "input_finding_count": 385,
+    "json_line_parse_status_counts": {
+      "full_json_line_spans": 382
+    },
+    "source_changed_or_missing_findings": 0,
+    "source_files_changed_or_missing": 0,
+    "source_files_unchanged": 31,
+    "source_identity_match_findings": 385
+  }
+}

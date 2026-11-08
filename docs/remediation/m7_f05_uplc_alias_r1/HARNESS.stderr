@@ -1,0 +1,16 @@
+Traceback (most recent call last):
+  File "/home/GodOfAgents/code/VAMS-testnet/scripts/remediation/test_f05_2a_authority_bootstrap_public.py", line 1094, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/home/GodOfAgents/code/VAMS-testnet/scripts/remediation/test_f05_2a_authority_bootstrap_public.py", line 1085, in main
+    result = _run_suite(args.aiken.resolve())
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/GodOfAgents/code/VAMS-testnet/scripts/remediation/test_f05_2a_authority_bootstrap_public.py", line 932, in _run_suite
+    observed = _evaluate(aiken, base["code"], valid, workroot, "valid-bootstrap")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/GodOfAgents/code/VAMS-testnet/scripts/remediation/test_f05_2a_authority_bootstrap_public.py", line 867, in _evaluate
+    normalized, alias_count = _normalize_verify_signature_builtin(decoded, label)
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/GodOfAgents/code/VAMS-testnet/scripts/remediation/test_f05_2a_authority_bootstrap_public.py", line 856, in _normalize_verify_signature_builtin
+    raise ValueError(f"unexpected Ed25519 builtin alias count: {count}")
+ValueError: unexpected Ed25519 builtin alias count: 0

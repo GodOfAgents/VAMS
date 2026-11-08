@@ -1,0 +1,44 @@
+{
+  "independent_review": {
+    "caveat": "Code-path presence does not establish live-network execution, ledger or release acceptance.",
+    "outcome": "PASS",
+    "scope": "exact architecture diff against Celestia, Near, audit routing and VDSO observer source"
+  },
+  "schema": "m7-celestia-docs-reality-run-v1",
+  "verification": [
+    {
+      "argv": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python",
+        "-B",
+        "scripts/docs/validate_docs.py"
+      ],
+      "exit_code": 0,
+      "output": "Documentation validation passed."
+    },
+    {
+      "argv": [
+        "/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python",
+        "-B",
+        "-m",
+        "unittest",
+        "scripts/docs/test_validate_docs.py"
+      ],
+      "exit_code": 0,
+      "output": "OK",
+      "tests_run": 2
+    },
+    {
+      "exit_code": 0,
+      "method": "read-only source assertions",
+      "output": "Celestia claim/source assertions passed"
+    }
+  ]
+}

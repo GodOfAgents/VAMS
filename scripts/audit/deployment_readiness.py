@@ -49,6 +49,19 @@ def validate_source() -> list[str]:
         "contracts/script/DeployVAMS.s.sol": (
             "VAMS_ALLOW_UNSAFE_LEGACY_DEPLOYMENT",
         ),
+        "cdk-deployment/deploy.sh": (
+            "set -euo pipefail",
+            "scripts/security/runtime_mode_preflight.py",
+            "--require-live",
+            "--expected-mode testnet",
+            "Deployment blocked:",
+            "exit 1",
+        ),
+        "scripts/security/runtime_mode_preflight.py": (
+            "policy = load_runtime_policy",
+            "if require_live and not policy.is_live:",
+            "policy.sanitized_summary()",
+        ),
     }
 
     errors: list[str] = []

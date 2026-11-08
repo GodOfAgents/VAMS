@@ -1,0 +1,59 @@
+{
+  "date": "2026-10-03",
+  "slice": "M3.2b R6 dynamic test-loader correction",
+  "checkout": "/home/GodOfAgents/code/VAMS-testnet",
+  "head": "829ab544571f12efe50ecb5740f129c8acb3e16f",
+  "changed_file": {
+    "path": "docs/remediation/m3_2b_r6/test_binding_guard.py",
+    "status_before": "untracked",
+    "sha256_before": "7eb49307b538618b0b4068e08c9ce1c1a3fe524aef71ca2327544ba49e99408b",
+    "sha256_after": "3f9c487a5962b5e38bf314f34ea82df6af583e0f46fb325bd8c6dbfc07849195"
+  },
+  "change": "Register the spec-created module in sys.modules before exec_module.",
+  "focused_test": {
+    "command": "env PATH=/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin PYTHONDONTWRITEBYTECODE=1 /home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/pytest -v --tb=short docs/remediation/m3_2b_r6/test_binding_guard.py",
+    "exit_code": 0,
+    "duration_seconds": 23.72,
+    "result": "2 passed"
+  },
+  "full_root_gate": {
+    "command": "env PATH=/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin PYTHONDONTWRITEBYTECODE=1 VAMS_ENVOY_BIN=/home/GodOfAgents/vams-evidence/toolchains/envoy-1.39.1/envoy /home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/pytest -v --tb=short --ignore=docs/remediation/m3_f05_design_r2/test_design.py",
+    "exit_code": 1,
+    "duration_seconds": 200.47,
+    "result": "1571 passed, 4 failed, 441 nested subtests passed; 1575 root pytest items",
+    "failures": [
+      "neuron/tests/test_sentinel.py::TestSentinelNode::test_audit_node_success",
+      "scripts/remediation/test_m3_1b_r9_provenance.py::R11BoundaryTests::test_authoritative_mutation_detected",
+      "scripts/remediation/test_m3_1b_r9_provenance.py::R11BoundaryTests::test_cleanup_after_injected_failure_and_network_boundary",
+      "scripts/remediation/test_m3_1b_r9_provenance.py::R11BoundaryTests::test_f04_forward_manifest_rebinds_current_lock_without_false_continuity"
+    ]
+  },
+  "separate_f05_design_file_last_verified": {
+    "command": "env PATH=/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin PYTHONDONTWRITEBYTECODE=1 VAMS_ENVOY_BIN=/home/GodOfAgents/vams-evidence/toolchains/envoy-1.39.1/envoy /home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/pytest -v --tb=short docs/remediation/m3_f05_design_r2/test_design.py",
+    "exit_code": 0,
+    "duration_seconds": 0.25,
+    "result": "10 passed",
+    "note": "No change to this file after the recorded execution."
+  },
+  "aggregate": {
+    "collected_node_ids": 1585,
+    "passed": 1581,
+    "failed": 4,
+    "nested_subtests_not_additional_node_ids": 441
+  },
+  "independent_review": {
+    "result": "PASS",
+    "reviewer": "/root/epoch_guard_independent_review",
+    "reran_tests": false,
+    "noted_untracked_baseline_limitation": true
+  },
+  "git_diff_check": "PASS",
+  "dirty_entries": 127,
+  "f05_counts": {
+    "negative_cases": "45/55",
+    "mutations": "18/21",
+    "new_credit": "none"
+  },
+  "readiness": "NOT_READY",
+  "deployment_and_gated_activations": "disabled"
+}

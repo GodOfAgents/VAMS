@@ -1,0 +1,58 @@
+{
+  "schema_version": "m7-trufflehog-gate-unit-r1",
+  "date": "2026-10-03",
+  "status": "PASS",
+  "repository": {
+    "head": "829ab544571f12efe50ecb5740f129c8acb3e16f"
+  },
+  "toolchain": {
+    "python": "Python 3.12.14",
+    "network": "bwrap --unshare-net",
+    "checkout": "read-only; evidence package writable",
+    "environment": "cleared; PATH=/usr/bin:/bin"
+  },
+  "source_sha256": {
+    "scripts/security/trufflehog_gate.py": "ecc2e74da0cf3f17593e7c9c9977efbd5dbc5ec7d8b72c711c1f11f77b3fa11c",
+    "scripts/security/test_trufflehog_gate.py": "3b7a2666b31429f855b00af1df2237ed715e258234bc30a297867a7761b63d81"
+  },
+  "command": {
+    "argv": [
+      "bwrap",
+      "--unshare-net",
+      "--ro-bind",
+      "/",
+      "/",
+      "--tmpfs",
+      "/tmp",
+      "--dev-bind",
+      "/dev",
+      "/dev",
+      "--bind",
+      "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m7_trufflehog_gate_unit_r1",
+      "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m7_trufflehog_gate_unit_r1",
+      "--chdir",
+      "/home/GodOfAgents/code/VAMS-testnet",
+      "--clearenv",
+      "--setenv",
+      "PATH",
+      "/usr/bin:/bin",
+      "/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python",
+      "-B",
+      "-m",
+      "pytest",
+      "-q",
+      "--tb=short",
+      "-p",
+      "no:cacheprovider",
+      "--import-mode=importlib",
+      "scripts/security/test_trufflehog_gate.py"
+    ],
+    "exit_code": 0
+  },
+  "scope": "Mocked wrapper and sanitization unit tests only. No TruffleHog binary was invoked; no credential scan or history scan was performed.",
+  "independent_review": {
+    "status": "PASS",
+    "reviewer": "f05_identity_current_review",
+    "outcome": "Verified all five package checksum entries, two current source/test hashes, captured command/output/exit, and scope. Subprocess execution is mocked; no TruffleHog binary or credential/history scan ran."
+  }
+}

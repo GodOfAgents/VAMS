@@ -1,0 +1,13 @@
+{
+  "credit_scope": "direct-UPLC synthetic context only; no transaction/ledger/live credit",
+  "delta": "PENDING -> PASS (direct_uplc_context_only)",
+  "mutation_counts": {
+    "failed": 0,
+    "pass": 19,
+    "pending": 2
+  },
+  "negative_rows_unchanged": true,
+  "result": "PASS",
+  "target": "unconditional_success",
+  "transaction_simulator_rows_unchanged": true
+}

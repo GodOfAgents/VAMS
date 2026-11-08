@@ -53,7 +53,7 @@ def nonce_manager(tmp_path) -> NonceManager:
 
 @pytest.fixture
 def mock_escrow_client() -> EscrowStateClient:
-    return EscrowStateClient()
+    return EscrowStateClient(mock_mode=True, environ={"VAMS_ENV": "test"})
 
 
 @pytest.fixture
@@ -69,7 +69,9 @@ def recovery_handler(nonce_manager, mock_escrow_client, mock_mmu) -> X402Interru
         payment_client=None,
         mmu=mock_mmu,
         nonce_manager=nonce_manager,
-        max_retries=2
+        max_retries=2,
+        mock_mode=True,
+        environ={"VAMS_ENV": "test"},
     )
 
 
@@ -508,11 +510,21 @@ class TestX402RecoveryCrashScenarios:
         assert "HTLC preimage mismatch" in res.error
         assert record.state == EscrowState.DISPUTED
 
-    def test_configurable_grace_period(self, recovery_handler):
+    def test_configurable_grace_period(self, nonce_manager, mock_escrow_client, mock_mmu):
         from neuron.sdk.interrupt_handler import InterruptRequest, InterruptSignal, InterruptStatus
         from neuron.sdk.x402_recovery import EscrowRecord, EscrowState
-        
-        recovery_handler.grace_period_seconds = 10.0
+
+        recovery_handler = X402InterruptHandler(
+            agent_id="test_agent",
+            escrow_client=mock_escrow_client,
+            payment_client=None,
+            mmu=mock_mmu,
+            nonce_manager=nonce_manager,
+            max_retries=2,
+            grace_period_seconds=10.0,
+            mock_mode=True,
+            environ={"VAMS_ENV": "test"},
+        )
         
         escrow = EscrowRecord(
             escrow_id=b"id_grace",
@@ -566,15 +578,24 @@ class TestX402ProviderFailover:
         assert res.status == InterruptStatus.VERIFIED
         assert res.provider in ["io.net", "bittensor"]
 
-    def test_max_retries_exhausted_returns_failed(self, recovery_handler):
+    def test_max_retries_exhausted_returns_failed(self, nonce_manager, mock_escrow_client, mock_mmu):
         from neuron.sdk.interrupt_handler import InterruptRequest, InterruptSignal, InterruptStatus
-        
+
+        recovery_handler = X402InterruptHandler(
+            agent_id="test_agent",
+            escrow_client=mock_escrow_client,
+            payment_client=None,
+            mmu=mock_mmu,
+            nonce_manager=nonce_manager,
+            max_retries=2,
+            mock_mode=True,
+            environ={"VAMS_ENV": "test"},
+        )
         def mock_await_delivery(escrow, req):
             raise Exception("Provider offline")
             
         recovery_handler._await_delivery = mock_await_delivery
-        recovery_handler.max_retries = 2
-        
+
         req = InterruptRequest(
             interrupt_id="irq_failover_2",
             signal=InterruptSignal.SIG_TOOL_INVOKE,

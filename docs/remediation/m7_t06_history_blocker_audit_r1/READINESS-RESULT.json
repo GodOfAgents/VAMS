@@ -1,0 +1,14 @@
+{
+  "schema": "m7-t06-readiness-diagnostic-v1",
+  "command": [
+    "python3",
+    "scripts/audit/audit_program.py",
+    "readiness",
+    "--stage",
+    "canary"
+  ],
+  "exit_code": 1,
+  "stdout": "Audit program validation failed:\n  - canary readiness requires all applicable tracks verified; unresolved: T01=implemented, T02=implemented, T03=implemented, T04=partial, T05=partial, T06=partial, T07=partial, T08=partial, T09=partial, T10=partial, T11=partial, T12=partial, T13=partial, T14=partial, T15=partial, T16=blocked, T17=partial, T18=partial, T19=partial, T20=partial, T21=blocked, T22=partial, T23=partial, T24=partial, T25=partial, T26=partial, T27=partial, T28=partial, T29=partial, T30=blocked, T31=partial, T32=partial, T33=blocked, T34=partial, T35=partial\n  - readiness requires a clean working tree, including untracked files\n  - evidence manifest is missing or empty: /home/GodOfAgents/code/VAMS-testnet/docs/audit/evidence/audit-evidence.json\n  - evidence signature bundle is missing or empty: /home/GodOfAgents/code/VAMS-testnet/docs/audit/evidence/audit-evidence.sigstore.json\n  - assurance index is missing: /home/GodOfAgents/code/VAMS-testnet/docs/audit/evidence/assurance-index.json\n  - deployment manifest is missing: /home/GodOfAgents/code/VAMS-testnet/docs/audit/evidence/polygon-amoy-rehearsal.json\n  - deployment manifest is missing: /home/GodOfAgents/code/VAMS-testnet/docs/audit/evidence/cardano-preprod-rehearsal.json\n  - deployment manifests missing networks: cardano-preprod, polygon-amoy\n  - runtime integration report is missing: /home/GodOfAgents/code/VAMS-testnet/docs/audit/evidence/runtime-integration.json\n  - privacy review is missing: /home/GodOfAgents/code/VAMS-testnet/docs/audit/evidence/privacy-review.json\n",
+  "stderr": "",
+  "classification": "local readiness diagnostic; not deployment evidence"
+}

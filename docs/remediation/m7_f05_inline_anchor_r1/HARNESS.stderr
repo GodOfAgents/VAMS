@@ -1,0 +1,15 @@
+Traceback (most recent call last):
+  File "/home/GodOfAgents/code/VAMS-testnet/scripts/remediation/test_f05_2a_authority_bootstrap_public.py", line 1103, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/home/GodOfAgents/code/VAMS-testnet/scripts/remediation/test_f05_2a_authority_bootstrap_public.py", line 1094, in main
+    result = _run_suite(args.aiken.resolve())
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/GodOfAgents/code/VAMS-testnet/scripts/remediation/test_f05_2a_authority_bootstrap_public.py", line 1019, in _run_suite
+    mutant = _compile(CARDANO, aiken, workroot / f"mutant-{index}", mutant_parameters, mutation)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/GodOfAgents/code/VAMS-testnet/scripts/remediation/test_f05_2a_authority_bootstrap_public.py", line 811, in _compile
+    _run([str(aiken), "build"], cardano)
+  File "/home/GodOfAgents/code/VAMS-testnet/scripts/remediation/test_f05_2a_authority_bootstrap_public.py", line 694, in _run
+    raise RuntimeError(f"command failed ({result.returncode}): {' '.join(command[:4])}: {' | '.join(tail)}")
+RuntimeError: command failed (1): /home/GodOfAgents/vams-evidence/toolchains/aiken-1.1.21/unpacked/aiken-x86_64-unknown-linux-musl/aiken build: Compiling GodOfAgents/vams-cardano 0.1.0 (.) |     Compiling aiken-lang/stdlib 33376da0c274e41f52e69e4769a0e7878a24efba (./build/packages/aiken-lang-stdlib) |     Compiling aiken-lang/fuzz 06874926ec70747f3fc4e2b9364ee9e1393441cc (./build/packages/aiken-lang-fuzz)

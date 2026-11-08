@@ -17,6 +17,7 @@ Usage:
 """
 
 import sys
+import os
 import time
 import argparse
 import hashlib
@@ -49,6 +50,11 @@ except ImportError:
     sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
     from anchoring import L1StateAnchor, AnchorReceipt, get_anchor
 
+try:
+    from neuron.runtime_safety import LiveModeSafetyError, RuntimePolicy, load_runtime_policy
+except ModuleNotFoundError:
+    from runtime_safety import LiveModeSafetyError, RuntimePolicy, load_runtime_policy
+
 
 # ============================================================================
 # CONFIGURATION
@@ -56,7 +62,7 @@ except ImportError:
 
 VERSION = "1.0.0"
 DEMO_AGENT_NAME = "TradingBot"
-DEMO_AGENT_ID = "0x7a3f89c2e4b1d6a8f0c2e4b1d6a8f0c27a3f89c2e4b1d6a8f0c2e4b1d6a8f0c2"
+DEMO_AGENT_ID = "simulated:agent:trading-bot"
 
 # Colors for different states (ANSI codes for fallback)
 COLORS = {
@@ -128,12 +134,19 @@ class ImmortalAgentDemo:
         self, 
         workflow_id: Optional[str] = None,
         crash_at_step: int = 3,
-        enable_crash: bool = True
+        enable_crash: bool = True,
+        *,
+        policy: Optional[RuntimePolicy] = None,
     ):
+        self.runtime_policy = policy or load_runtime_policy()
+        if not self.runtime_policy.is_demo:
+            raise LiveModeSafetyError(
+                "ImmortalAgentDemo requires explicit VAMS_ENV=demo"
+            )
         self.workflow_id = workflow_id or f"wf_{int(time.time() * 1000)}"
         self.crash_at_step = crash_at_step
         self.enable_crash = enable_crash
-        self.anchor = get_anchor()
+        self.anchor = get_anchor(mock_mode=True, policy=self.runtime_policy)
         
         # Checkpoint storage (in-memory for demo, production uses SQLite)
         self.checkpoints: List[StepResult] = []
@@ -197,8 +210,8 @@ class ImmortalAgentDemo:
         ).hexdigest()
         return {
             "status": "executed",
-            "tx_hash": f"0x{tx_hash}",
-            "chain": "Polygon CDK",
+            "tx_hash": f"simulated:sha256:{tx_hash}",
+            "chain": "Polygon CDK (simulated)",
             "gas_used": 142_857,
             "gas_price_gwei": 25,
             "position_size": "0.5 BTC"
@@ -217,7 +230,7 @@ class ImmortalAgentDemo:
             "merkle_root": merkle_root,
             "tx_hash": receipt.tx_hash,
             "block_number": receipt.block_number,
-            "chain": "Polygon CDK",
+            "chain": "Polygon CDK (simulated)",
             "checkpoints_anchored": len(self.checkpoints)
         }
     
@@ -234,8 +247,10 @@ class ImmortalAgentDemo:
         iri = None
         try:
             from sdk.iagon_storage import IagonStorageSDK
-            os.environ["IAGON_MOCK_MODE"] = "true"
-            iagon_sdk = IagonStorageSDK()
+            iagon_sdk = IagonStorageSDK(
+                mock_mode=True,
+                policy=self.runtime_policy,
+            )
             iri = iagon_sdk.store_checkpoint(checkpoint_hash, data)
         except Exception:
             pass # Fails gracefully if no SDK 
@@ -353,20 +368,25 @@ class ImmortalAgentDemo:
                 console.print()
                 if self._recovered:
                     console.print(
-                        f"  🎉 [bold green][COMPLETE][/bold green] Agent survived crash!"
-                        f" Immortality proven in {total_duration:.0f}ms"
+                        f"  🎉 [bold green][SIMULATION COMPLETE][/bold green] "
+                        "Crash/recovery exercise finished;"
+                        f" simulated recovery completed in {total_duration:.0f}ms"
                     )
                 else:
                     console.print(
-                        f"  🎉 [bold green][COMPLETE][/bold green] Workflow finished in {total_duration:.0f}ms"
+                        f"  🎉 [bold green][SIMULATION COMPLETE][/bold green] "
+                        f"Workflow exercise finished in {total_duration:.0f}ms"
                     )
             else:
                 if self._recovered:
                     log_fn(
-                        f"\n  🎉 [COMPLETE] Agent survived crash! Immortality proven in {total_duration:.0f}ms"
+                        f"\n  🎉 [SIMULATION COMPLETE] Recovery exercise completed in {total_duration:.0f}ms"
                     )
                 else:
-                    log_fn(f"\n  🎉 [COMPLETE] Workflow finished in {total_duration:.0f}ms")
+                    log_fn(
+                        f"\n  🎉 [SIMULATION COMPLETE] Workflow exercise finished "
+                        f"in {total_duration:.0f}ms"
+                    )
             
             return DemoResult(
                 success=True,
@@ -428,8 +448,8 @@ def print_pillar_box():
         pillars.add_column("Description", style="white")
         pillars.add_column("Demo Status", style="green")
         
-        pillars.add_row("1. Durable Execution", "DBOS checkpointing at each step", "✓ Active")
-        pillars.add_row("2. L1 State Anchoring", "Merkle root on Polygon CDK", "✓ Active")
+        pillars.add_row("1. Durable Execution", "In-memory checkpoint exercise", "○ Simulated")
+        pillars.add_row("2. L1 State Anchoring", "Synthetic receipt only", "○ Simulated")
         pillars.add_row("3. Transparent Failover", "SDK auto-reroutes on failure", "○ Simulated")
         pillars.add_row("4. Request Guarantee", "Queue with retry semantics", "○ Simulated")
         pillars.add_row("5. Permanent Memory", "Arweave for agent memories", "○ Future")
@@ -438,18 +458,27 @@ def print_pillar_box():
         console.print()
     else:
         print("\n┌─── The Five Pillars of Immortal Agents ───────────────────────────┐")
-        print("│ 1. Durable Execution    - DBOS checkpointing        ✓ Active     │")
-        print("│ 2. L1 State Anchoring   - Merkle root on L1         ✓ Active     │")
+        print("│ 1. Durable Execution    - Checkpoint exercise       ○ Simulated  │")
+        print("│ 2. L1 State Anchoring   - Synthetic receipt         ○ Simulated  │")
         print("│ 3. Transparent Failover - SDK auto-reroutes         ○ Simulated  │")
         print("│ 4. Request Guarantee    - Queue with retry          ○ Simulated  │")
         print("│ 5. Permanent Memory     - Arweave storage           ○ Future     │")
         print("└───────────────────────────────────────────────────────────────────┘\n")
 
 
-def run_full_demo(crash_at_step: int = 3, enable_crash: bool = True):
+def run_full_demo(
+    crash_at_step: int = 3,
+    enable_crash: bool = True,
+    *,
+    policy: Optional[RuntimePolicy] = None,
+):
     """Run the complete demo with crash simulation and recovery."""
+    effective_policy = policy or load_runtime_policy()
+    if not effective_policy.is_demo:
+        raise LiveModeSafetyError("Demo CLI requires explicit VAMS_ENV=demo")
     
     print_banner()
+    print("Runtime: demo | non-live | evidence: non-authoritative")
     print_pillar_box()
     
     workflow_id = f"demo_{int(time.time())}"
@@ -474,7 +503,8 @@ def run_full_demo(crash_at_step: int = 3, enable_crash: bool = True):
     wf1 = ImmortalAgentDemo(
         workflow_id=workflow_id,
         crash_at_step=crash_at_step,
-        enable_crash=enable_crash
+        enable_crash=enable_crash,
+        policy=effective_policy,
     )
     result1 = wf1.run()
     
@@ -500,7 +530,8 @@ def run_full_demo(crash_at_step: int = 3, enable_crash: bool = True):
         wf2 = ImmortalAgentDemo(
             workflow_id=workflow_id,
             crash_at_step=crash_at_step,
-            enable_crash=False  # Don't crash again
+            enable_crash=False,  # Don't crash again
+            policy=effective_policy,
         )
         
         # Transfer checkpoints and mark as recovered
@@ -523,7 +554,10 @@ def run_full_demo(crash_at_step: int = 3, enable_crash: bool = True):
                 receipt_table.add_row("Tx Hash", f"{anchor.tx_hash[:24]}...")
                 receipt_table.add_row("Block", f"#{anchor.block_number:,}")
                 receipt_table.add_row("Chain", "Polygon CDK (simulated)")
-                receipt_table.add_row("Checkpoints", f"{anchor.checkpoints_included} states anchored")
+                receipt_table.add_row(
+                    "Checkpoints",
+                    f"{anchor.checkpoints_included} simulated states included",
+                )
                 
                 console.print(receipt_table)
             else:
@@ -533,7 +567,9 @@ def run_full_demo(crash_at_step: int = 3, enable_crash: bool = True):
                 print(f"│ Tx Hash:     {anchor.tx_hash[:24]}...                │")
                 print(f"│ Block:       #{anchor.block_number:,}                              │")
                 print(f"│ Chain:       Polygon CDK (simulated)                      │")
-                print(f"│ Checkpoints: {anchor.checkpoints_included} states anchored                       │")
+                print(
+                    f"│ Checkpoints: {anchor.checkpoints_included} simulated states included             │"
+                )
                 print("└────────────────────────────────────────────────────────────┘")
         
         return result2
@@ -571,11 +607,15 @@ Examples:
     )
     
     args = parser.parse_args()
+    policy = load_runtime_policy()
+    if not policy.is_demo:
+        raise LiveModeSafetyError("Demo CLI requires explicit VAMS_ENV=demo")
     
     # Run the demo
     result = run_full_demo(
         crash_at_step=args.step,
-        enable_crash=not args.no_crash
+        enable_crash=not args.no_crash,
+        policy=policy,
     )
     
     # Final summary
@@ -583,27 +623,27 @@ Examples:
     if result.success:
         if RICH_AVAILABLE:
             console.print(Panel(
-                "[bold green]✅ DEMONSTRATION COMPLETE[/bold green]\n\n"
-                "The Immortal Agent successfully:\n"
-                "• Checkpointed state at each step\n"
+                "[bold green]✅ NON-AUTHORITATIVE SIMULATION COMPLETE[/bold green]\n\n"
+                "The demo process:\n"
+                "• Exercised in-memory checkpoints\n"
                 "• Survived a simulated infrastructure crash\n"
-                "• Recovered from the exact checkpoint state\n"
-                "• Anchored final state to L1 (Polygon CDK)\n\n"
-                "[dim]This proves the core thesis: Agents on VAMS cannot die.[/dim]",
+                "• Exercised simulated checkpoint recovery\n"
+                "• Produced a synthetic, non-authoritative anchor receipt\n\n"
+                "[dim]This is not deployment, durability, recovery, or L1 proof.[/dim]",
                 title="Demo Result",
                 border_style="green"
             ))
         else:
             print("═══════════════════════════════════════════════════════")
-            print("  ✅ DEMONSTRATION COMPLETE")
+            print("  ✅ NON-AUTHORITATIVE SIMULATION COMPLETE")
             print("═══════════════════════════════════════════════════════")
-            print("  The Immortal Agent successfully:")
-            print("  • Checkpointed state at each step")
+            print("  The demo process:")
+            print("  • Exercised in-memory checkpoints")
             print("  • Survived a simulated infrastructure crash")
-            print("  • Recovered from the exact checkpoint state")
-            print("  • Anchored final state to L1 (Polygon CDK)")
+            print("  • Exercised simulated checkpoint recovery")
+            print("  • Produced a synthetic, non-authoritative anchor receipt")
             print()
-            print("  This proves the core thesis: Agents on VAMS cannot die.")
+            print("  This is not deployment, durability, recovery, or L1 proof.")
             print("═══════════════════════════════════════════════════════")
     else:
         print("❌ Demo failed - check error above")

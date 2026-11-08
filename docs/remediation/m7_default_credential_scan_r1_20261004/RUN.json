@@ -1,0 +1,65 @@
+{
+  "date": "2026-10-04",
+  "canonical_head": "829ab544571f12efe50ecb5740f129c8acb3e16f",
+  "canonical_branch": "testnet/remediation-20260907",
+  "python_version": "Python 3.12.14",
+  "python_sha256": "aa01d96348989f33ed998b42c83e98593b41dba83914d9899730b90c36f2e5c9",
+  "workflow_sha256": "baf53503673b70c5185f654f8f694f1feaf98af68ee56e29c83c01ee0cf0593c",
+  "bwrap_sha256": "0abea81db798ebf6b4742ac0664802d97521547a353c2a0dbdc21d76cbbfd2c0",
+  "scans": [
+    {
+      "argv": ["python", "scripts/security/default_credential_scan.py"],
+      "start_utc": "captured in raw evidence",
+      "exit": 0,
+      "findings": 0,
+      "stdout_bytes": 32,
+      "stdout_sha256": "1cd823234465f459251d5a50cebfa9690b11acf1379d4bd9f991f92575767a66",
+      "stderr_bytes": 0,
+      "environment": {
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "PYTHON_BIN": "/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python",
+        "PATH": "/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin:/usr/bin:/bin",
+        "TMPDIR": "/tmp/vams-default-scan",
+        "RUN_EVIDENCE_DIR": "/home/GodOfAgents/vams-evidence/m7-default-credential-scan-r1-20261004"
+      },
+      "child_netns": "4026532231"
+    },
+    {
+      "argv": ["python", "scripts/security/secret_history_prevention_scan.py"],
+      "start_utc": "captured in raw evidence",
+      "exit": 0,
+      "findings": 0,
+      "stdout_bytes": 39,
+      "stdout_sha256": "0bb6bc2f24db1ff8a7b98b6ecb99cfcd57154a91665ad015eb4c0f90b8631e06",
+      "stderr_bytes": 0,
+      "environment": {
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "PYTHON_BIN": "/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python",
+        "PATH": "/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin:/usr/bin:/bin",
+        "TMPDIR": "/tmp/vams-default-scan",
+        "RUN_EVIDENCE_DIR": "/home/GodOfAgents/vams-evidence/m7-default-credential-scan-r1-20261004"
+      },
+      "child_netns": "4026532293"
+    }
+  ],
+  "host_netns": "4026531833",
+  "canonical_source_inventory_before_sha256": "6aabfcecb467848a0e693d59eef074820076697459fcbb3315a7ddaa1ac76d78",
+  "canonical_source_inventory_after_sha256": "6aabfcecb467848a0e693d59eef074820076697459fcbb3315a7ddaa1ac76d78",
+  "canonical_status_before_sha256": "f47b9f971a82c3cdfa35a21fc169d4a271a5fe724b01a6257a69bce5405b73d0",
+  "canonical_status_after_sha256": "f47b9f971a82c3cdfa35a21fc169d4a271a5fe724b01a6257a69bce5405b73d0",
+  "snapshot_inventory_rows": 6871,
+  "network_isolation": "bwrap --unshare-net",
+  "wrapper_capture": "incomplete: [capture-netns] placeholder in retained wrapper text; inner argv/explicit environment reconstructed from execution call; inherited ambient environment not enumerated",
+  "raw_evidence": "/home/GodOfAgents/vams-evidence/m7-default-credential-scan-r1-20261004/",
+  "raw_checksums_file_sha256": "1e82b916fba2d684e00a9846a39d5f43a979f1e5a65559a8803d2ea83ca3942e",
+  "pre_execution_setup_attempt": {
+    "exit": 127,
+    "scripts_ran": false,
+    "reason": "PATH pointed one directory too high"
+  },
+  "readiness": "NOT READY",
+  "deployment_enabled": false,
+  "deposit_enabled": false,
+  "slash_activation_enabled": false,
+  "execute_intent_enabled": false
+}

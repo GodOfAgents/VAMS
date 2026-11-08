@@ -1,0 +1,44 @@
+--- /home/GodOfAgents/code/VAMS-testnet/docs/remediation/m7_governance_policies_warnings_r1/baseline/governance_policies.ak	2026-10-02 21:11:36.907958593 +0000
++++ /home/GodOfAgents/code/VAMS-testnet/docs/remediation/m7_governance_policies_warnings_r1/candidate/governance_policies.ak	2026-10-02 21:11:36.908313407 +0000
+@@ -6,13 +6,13 @@
+ use cardano/transaction.{InlineDatum, OutputReference, Transaction}
+ use vams/governance.{
+   authority_asset_name, bounded_tx, config_valid, finite_interval,
+-  intent_asset_name, proposal_asset_name, receipt_asset_name, unique_bytes,
+-  valid_domain, valid_hash, valid_lock, valid_vkh,
++  intent_asset_name, proposal_asset_name, receipt_asset_name,
++  valid_domain, valid_hash, valid_vkh,
+ }
+ use vams/types.{
+   AuthorityDatumV1, AuthorityRedeemer, Cancel, CreateProposal, FinalizeRejected,
+   Genesis, GovernanceConfigV1, GovernorRedeemer, IntentDatumV1, ProposalDatumV1,
+-  ProposalPending, Queue, TimelockRedeemer, Vote, VoteLockRecordV1,
++  ProposalPending, Queue, Vote, VoteLockRecordV1,
+ }
+ 
+ validator authority_policy(seed_ref: OutputReference) {
+@@ -243,7 +243,7 @@
+ }
+ 
+ fn find_proposal(tx: Transaction) -> Option<ProposalDatumV1> {
+-  when list.find(tx.outputs, fn(output) { True }) is {
++  when list.find(tx.outputs, fn(_output) { True }) is {
+     Some(output) ->
+       when output.datum is {
+         InlineDatum(raw) -> {
+@@ -257,7 +257,7 @@
+ }
+ 
+ fn find_intent(tx: Transaction) -> Option<IntentDatumV1> {
+-  when list.find(tx.outputs, fn(output) { True }) is {
++  when list.find(tx.outputs, fn(_output) { True }) is {
+     Some(output) ->
+       when output.datum is {
+         InlineDatum(raw) -> {
+@@ -278,6 +278,3 @@
+   ) && datum.quorum > 0 && datum.deadline >= 0 && datum.yes_weight == 0 && datum.no_weight == 0 && datum.locks == []
+ }
+ 
+-fn find_intent_or_false(tx: Transaction) -> Bool {
+-  find_intent(tx) != None
+-}

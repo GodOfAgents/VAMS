@@ -1,0 +1,18 @@
+{
+  "date": "2026-10-03",
+  "slice": "fresh current-source isolated G1 diagnostic",
+  "checkout": "/home/GodOfAgents/code/VAMS-testnet",
+  "head": "829ab544571f12efe50ecb5740f129c8acb3e16f",
+  "command": "aiken check --deny --seed 20260711 --max-success 250",
+  "isolation": "bwrap --unshare-net; copied Cardano tree; AIKEN_NO_NETWORK=1",
+  "tool": "/home/GodOfAgents/vams-evidence/toolchains/aiken-1.1.21/unpacked/aiken-x86_64-unknown-linux-musl/aiken",
+  "version": "aiken v1.1.21+42babe5",
+  "input_count": 74,
+  "inputs_sha256": "c8268922fa17145571e997bbd8523e75897317eee97b9f3b04e06d95c6b039cb",
+  "input_pre_post_equal": true,
+  "process_exit": 1,
+  "summary": null,
+  "stdout_sha256": "33b4f396b899731c82dbedcd03d0d77a93e533470796c6ce3ffc9961db590084",
+  "stderr_sha256": "ffe2d5433e32342f39ff0ca66240add539e43198d24e0419e031ca5ddb8b35ac",
+  "result": "diagnostic only; test scenarios and warning gate must be interpreted separately"
+}

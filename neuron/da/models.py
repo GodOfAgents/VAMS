@@ -83,8 +83,8 @@ def _bounded_public_duration(value: Any) -> float:
     if (
         isinstance(value, bool)
         or not isinstance(value, (int, float))
+        or not 0.0 <= value <= MAX_PUBLIC_DURATION_SECONDS
         or not math.isfinite(float(value))
-        or not 0.0 <= float(value) <= MAX_PUBLIC_DURATION_SECONDS
     ):
         raise ValueError(
             "duration must be finite and between 0 and 86400 seconds"
@@ -132,7 +132,7 @@ def sanitize_public_kpis(kpis: Any) -> Dict[str, Any]:
 def _finite_number(value: Any, minimum: float, maximum: float) -> Optional[Any]:
     if isinstance(value, bool) or not isinstance(value, (int, float)):
         return None
-    if not math.isfinite(float(value)) or not minimum <= float(value) <= maximum:
+    if not minimum <= value <= maximum or not math.isfinite(float(value)):
         return None
     return value
 
@@ -218,6 +218,9 @@ class DAReceipt:
     timestamp: float = field(default_factory=time.time)
     verified: bool = False
     raw_response: Optional[Dict[str, Any]] = None
+    simulated: bool = False
+    runtime_classification: str = "unknown"
+    evidence_classification: str = "unclassified"
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -227,6 +230,9 @@ class DAReceipt:
             "commitment": self.commitment,
             "timestamp": self.timestamp,
             "verified": self.verified,
+            "simulated": self.simulated,
+            "runtime_classification": self.runtime_classification,
+            "evidence_classification": self.evidence_classification,
         }
 
 

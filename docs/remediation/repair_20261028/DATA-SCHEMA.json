@@ -1,0 +1,188 @@
+{
+  "schema": "vams.governance-v2-data-schema.v1",
+  "status": "SOURCE_CONTRACT_NOT_NATIVE_SERIALIZATION_PROOF",
+  "source_sha256": "a90a2356c65dd3998738e7ad8bdae91a29765b8aa7670154965ba9233340e7cf",
+  "records": {
+    "GovernanceBootstrapV2": {
+      "constructor": 0,
+      "ordered_fields": [
+        "seed",
+        "network_id",
+        "policy_epoch",
+        "members"
+      ]
+    },
+    "GovernanceAnchorV2": {
+      "constructor": 0,
+      "ordered_fields": [
+        "policy_id",
+        "asset_name"
+      ]
+    },
+    "GovernanceConfigV2": {
+      "constructor": 0,
+      "ordered_fields": [
+        "version",
+        "network_id",
+        "policy_epoch",
+        "seed",
+        "authority_policy_id",
+        "governor_script_hash",
+        "timelock_script_hash",
+        "proposal_policy_id",
+        "receipt_policy_id",
+        "intent_policy_id",
+        "vams_policy_id",
+        "vams_asset_name",
+        "members",
+        "threshold",
+        "normal_delay_ms",
+        "emergency_disabled",
+        "authority_state_lovelace",
+        "proposal_base_lovelace",
+        "per_voter_refund_lovelace",
+        "next_proposal_nonce",
+        "next_intent_nonce",
+        "max_lock_vams",
+        "target_domains"
+      ]
+    },
+    "AuthorityDatumV2": {
+      "constructor": 0,
+      "ordered_fields": [
+        "config"
+      ]
+    },
+    "VoteLockV2": {
+      "constructor": 0,
+      "ordered_fields": [
+        "voter_vkh",
+        "locked_vams",
+        "support",
+        "weight",
+        "receipt_name"
+      ]
+    },
+    "ProposalDatumV2": {
+      "constructor": 0,
+      "ordered_fields": [
+        "version",
+        "state",
+        "proposal_asset",
+        "nonce",
+        "proposer_vkh",
+        "description_hash",
+        "action_hash",
+        "payload_hash",
+        "target_domain",
+        "policy_epoch",
+        "quorum",
+        "deadline",
+        "yes_weight",
+        "no_weight",
+        "locks"
+      ]
+    },
+    "IntentDatumV2": {
+      "constructor": 0,
+      "ordered_fields": [
+        "version",
+        "proposal_id",
+        "proposal_asset",
+        "action_hash",
+        "payload_hash",
+        "target_domain",
+        "policy_epoch",
+        "nonce",
+        "queue_time",
+        "execute_after",
+        "lifetime",
+        "proposer_vkh",
+        "consumed"
+      ]
+    },
+    "GovernanceRequestV2": {
+      "constructor": 0,
+      "ordered_fields": [
+        "version",
+        "action"
+      ]
+    }
+  },
+  "nested_output_reference": {
+    "constructor": 0,
+    "ordered_fields": [
+      "transaction_id: bytes32",
+      "output_index: u32"
+    ]
+  },
+  "proposal_states": [
+    {
+      "constructor": 0,
+      "name": "PendingV2"
+    },
+    {
+      "constructor": 1,
+      "name": "PassedV2"
+    }
+  ],
+  "actions": [
+    {
+      "constructor": 0,
+      "name": "InitializeV2",
+      "fields": []
+    },
+    {
+      "constructor": 1,
+      "name": "CreateV2",
+      "fields": []
+    },
+    {
+      "constructor": 2,
+      "name": "VoteV2",
+      "fields": [
+        "voter_vkh",
+        "support",
+        "locked_vams"
+      ]
+    },
+    {
+      "constructor": 3,
+      "name": "FinalizePassedV2",
+      "fields": []
+    },
+    {
+      "constructor": 4,
+      "name": "FinalizeRejectedV2",
+      "fields": []
+    },
+    {
+      "constructor": 5,
+      "name": "CancelProposalV2",
+      "fields": []
+    },
+    {
+      "constructor": 6,
+      "name": "QueueV2",
+      "fields": []
+    },
+    {
+      "constructor": 7,
+      "name": "CancelIntentV2",
+      "fields": []
+    },
+    {
+      "constructor": 8,
+      "name": "ExpireIntentV2",
+      "fields": []
+    },
+    {
+      "constructor": 9,
+      "name": "ExecuteIntentV2",
+      "fields": []
+    }
+  ],
+  "wire_hash_preimages": "GOLDEN-VECTORS.json",
+  "native_cbor_and_budget_status": "NOT_RUN",
+  "compatibility": "Do not flatten nested references or reuse v1 datums/actions. Legacy encodings remain historical and unmodified."
+}

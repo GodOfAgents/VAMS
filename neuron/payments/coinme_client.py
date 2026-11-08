@@ -2,53 +2,86 @@ import json
 import logging
 import os
 import requests
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Mapping, Optional
 
 from neuron.runtime_safety import (
+    ImmutableRuntimeConfiguration,
     LiveModeSafetyError,
-    require_live_secret,
-    require_not_live_mock,
+    RuntimePolicy,
+    load_runtime_policy,
+    resolve_component_mock_mode,
 )
 
 logger = logging.getLogger("VAMS-Coinme")
 
-class CoinmeClient:
+COINME_MOCK_VARIABLE = "COINME_MOCK_MODE"
+
+
+class CoinmeClient(ImmutableRuntimeConfiguration):
     """
     Wrapper for Coinme API (Fiat-to-crypto on-ramp).
     Provides universal top-up capabilities and KYC passthrough.
     """
     
-    def __init__(self, api_key: Optional[str] = None, base_url: str = None, mock_mode: Optional[bool] = None):
-        self.api_key = api_key or os.getenv("COINME_API_KEY", "")
-        self.base_url = base_url or os.getenv("COINME_API_URL", "https://api.coinme.com/v1")
-        
-        # Determine mock mode
-        if mock_mode is not None:
-            self.mock_mode = mock_mode
-        else:
-            self.mock_mode = os.getenv("COINME_MOCK_MODE", "true").lower() == "true"
+    _immutable_runtime_fields = frozenset(
+        {"api_key", "base_url", "mock_mode", "runtime_policy", "_transport"}
+    )
 
-        require_not_live_mock("CoinmeClient", self.mock_mode)
-        require_live_secret("CoinmeClient", self.api_key)
+    def __init__(
+        self,
+        api_key: Optional[str] = None,
+        base_url: Optional[str] = None,
+        mock_mode: Optional[bool] = None,
+        *,
+        environ: Optional[Mapping[str, str]] = None,
+        policy: Optional[RuntimePolicy] = None,
+        transport: Any = requests,
+    ):
+        source = os.environ if environ is None else environ
+        self.runtime_policy = policy or load_runtime_policy(source)
+        self.mock_mode = resolve_component_mock_mode(
+            "CoinmeClient",
+            COINME_MOCK_VARIABLE,
+            mock_mode,
+            policy=self.runtime_policy,
+            environ=source,
+        )
+        self.api_key = api_key if api_key is not None else source.get("COINME_API_KEY", "")
+        self.base_url = base_url if base_url is not None else source.get("COINME_API_URL", "")
+        self._transport = transport
+
+        if self.runtime_policy.is_live:
+            raise LiveModeSafetyError(
+                "CoinmeClient live execution is disabled until checkout, rate, KYC, "
+                "and webhook authenticity are independently verified"
+            )
         if not self.mock_mode and not self.api_key:
             raise LiveModeSafetyError("CoinmeClient requires COINME_API_KEY outside mock mode")
-            
-        logger.info(f"Initialized CoinmeClient (mock_mode={self.mock_mode}, url={self.base_url})")
+        if not self.mock_mode and not self.base_url:
+            raise LiveModeSafetyError("CoinmeClient requires COINME_API_URL outside mock mode")
+
+        self._freeze_runtime_configuration()
+        logger.info(
+            "Initialized CoinmeClient (mode=%s, classification=%s, simulated=%s)",
+            self.runtime_policy.mode.value,
+            self.runtime_policy.runtime_classification,
+            self.mock_mode,
+        )
 
     def create_checkout(self, amount_fiat: float, currency: str, dest_address: str) -> Dict[str, Any]:
         """
         Creates a checkout session for a fiat to crypto conversion.
         """
-        logger.info(f"Creating checkout for {amount_fiat} {currency} to {dest_address}")
-        
         if self.mock_mode:
             return {
-                "session_id": "sess_" + dest_address[:8] + str(int(amount_fiat)),
-                "checkout_url": f"https://checkout.coinme.com/pay/{dest_address[:8]}",
+                "session_id": "simulated:checkout",
+                "checkout_url": "simulated://coinme/checkout",
                 "amount_fiat": amount_fiat,
                 "currency": currency,
                 "dest_address": dest_address,
-                "status": "pending"
+                "status": "simulated",
+                "simulated": True,
+                "evidence_classification": "non-authoritative",
             }
             
         try:
@@ -61,15 +94,13 @@ class CoinmeClient:
                 "currency": currency,
                 "destination_address": dest_address
             }
-            resp = requests.post(f"{self.base_url}/checkouts", json=payload, headers=headers, timeout=10)
+            resp = self._transport.post(f"{self.base_url}/checkouts", json=payload, headers=headers, timeout=10)
             if resp.status_code in (200, 201):
                 return resp.json()
             else:
-                logger.error(f"Coinme checkout API failed: Status {resp.status_code}, Response: {resp.text}")
                 raise requests.HTTPError(f"Coinme checkout API returned status {resp.status_code}", response=resp)
-        except Exception as e:
-            logger.error(f"Error creating Coinme checkout: {e}")
-            raise
+        except Exception as exc:
+            raise LiveModeSafetyError("CoinmeClient checkout provider request failed") from exc
 
     def get_conversion_rate(self, from_currency: str, to_token: str) -> float:
         """
@@ -83,18 +114,20 @@ class CoinmeClient:
         try:
             headers = {"Authorization": f"Bearer {self.api_key}"}
             params = {"from": from_currency, "to": to_token}
-            resp = requests.get(f"{self.base_url}/rates", params=params, headers=headers, timeout=5)
+            resp = self._transport.get(f"{self.base_url}/rates", params=params, headers=headers, timeout=5)
             if resp.status_code == 200:
-                return float(resp.json().get("rate", 1.0))
-            else:
-                logger.warning(f"Coinme rates API failed: Status {resp.status_code}. Using fallback rate.")
-        except Exception as e:
-            logger.error(f"Error fetching Coinme conversion rate: {e}")
-            
-        # Fallback rate
-        if from_currency == "USD" and to_token == "VAMS":
-            return 10.0
-        return 1.0
+                payload = resp.json()
+                if not isinstance(payload, dict) or "rate" not in payload:
+                    raise ValueError("missing rate")
+                rate = float(payload["rate"])
+                if rate <= 0:
+                    raise ValueError("invalid rate")
+                return rate
+            raise requests.HTTPError(
+                f"Coinme rates API returned status {resp.status_code}", response=resp
+            )
+        except Exception as exc:
+            raise LiveModeSafetyError("CoinmeClient rate provider request failed") from exc
 
     def get_kyc_status(self, user_id: str) -> Dict[str, Any]:
         """
@@ -109,29 +142,25 @@ class CoinmeClient:
             
         try:
             headers = {"Authorization": f"Bearer {self.api_key}"}
-            resp = requests.get(f"{self.base_url}/kyc/{user_id}", headers=headers, timeout=5)
+            resp = self._transport.get(f"{self.base_url}/kyc/{user_id}", headers=headers, timeout=5)
             if resp.status_code == 200:
                 return resp.json()
             else:
-                logger.error(f"Coinme KYC check failed: Status {resp.status_code}")
                 raise requests.HTTPError(f"Coinme KYC check returned status {resp.status_code}", response=resp)
-        except Exception as e:
-            logger.error(f"Error checking Coinme KYC: {e}")
-            raise
+        except Exception as exc:
+            raise LiveModeSafetyError("CoinmeClient KYC provider request failed") from exc
 
     def handle_webhook(self, payload: str, signature: str) -> bool:
         """
         Handle payment confirmation webhooks.
         """
+        if not self.mock_mode:
+            raise LiveModeSafetyError(
+                "CoinmeClient webhook handling is disabled until cryptographic "
+                "signature verification is implemented"
+            )
         try:
-            # Simple signature verification placeholder / validation
-            # In production, this would do cryptographic verification (HMAC-SHA256) of signature
-            if not signature and not self.mock_mode:
-                logger.warning("Missing Coinme webhook signature")
-                return False
-                
             data = json.loads(payload)
-            logger.info(f"Handled webhook for session {data.get('session_id')}")
-            return True
+            return isinstance(data, dict) and bool(signature)
         except json.JSONDecodeError:
             return False

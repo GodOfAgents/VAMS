@@ -31,6 +31,8 @@ from dataclasses import dataclass
 from typing import Optional, List, Dict, Any
 from enum import Enum
 
+from neuron.runtime_safety import LiveModeSafetyError, RuntimeConfigurationError, load_runtime_policy
+
 # Try to import bittensor, will fail gracefully if not installed
 BITTENSOR_AVAILABLE = False
 try:
@@ -57,6 +59,8 @@ class SubnetInfo:
     miners: int
     registration_cost: float
     updated_at: float
+    simulated: bool = False
+    evidence_classification: str = "provider-observation"
     
     def to_dict(self) -> dict:
         return {
@@ -66,7 +70,9 @@ class SubnetInfo:
             "validators": self.validators,
             "miners": self.miners,
             "registration_cost": self.registration_cost,
-            "updated_at": self.updated_at
+            "updated_at": self.updated_at,
+            "simulated": self.simulated,
+            "evidence_classification": self.evidence_classification,
         }
 
 
@@ -82,6 +88,8 @@ class MinerInfo:
     incentive: float
     emission: float
     active: bool
+    simulated: bool = False
+    evidence_classification: str = "provider-observation"
     
     def to_dict(self) -> dict:
         return {
@@ -92,7 +100,9 @@ class MinerInfo:
             "consensus": self.consensus,
             "incentive": self.incentive,
             "emission": self.emission,
-            "active": self.active
+            "active": self.active,
+            "simulated": self.simulated,
+            "evidence_classification": self.evidence_classification,
         }
 
 
@@ -104,6 +114,8 @@ class InferenceResult:
     miner_uid: int
     latency_ms: float
     error: Optional[str] = None
+    simulated: bool = False
+    evidence_classification: str = "provider-observation"
 
 
 # Known subnet names
@@ -163,6 +175,9 @@ class BittensorSubnet:
         self.network = network
         self.wallet_name = wallet_name
         self.wallet_hotkey = wallet_hotkey
+        self._wallet_selection = (
+            (wallet_name, wallet_hotkey) if wallet_name else None
+        )
         
         self._subtensor = None
         self._wallet = None
@@ -172,17 +187,56 @@ class BittensorSubnet:
             self._init_subtensor()
     
     def _init_subtensor(self):
-        """Initialize subtensor connection."""
+        """Initialize subtensor connection and an explicitly selected local wallet."""
+        selection = self._wallet_selection
+        policy = None
+
+        class _WalletBindingChanged(RuntimeConfigurationError):
+            pass
+
+        if selection is not None:
+            policy = load_runtime_policy()
+            if policy.is_live:
+                raise LiveModeSafetyError(
+                    "Bittensor wallet construction is unavailable in live modes"
+                )
+
+        def require_wallet_binding() -> None:
+            if selection is None:
+                return
+            if (self.wallet_name, self.wallet_hotkey) != selection:
+                raise _WalletBindingChanged(
+                    "Bittensor wallet selection or runtime configuration changed"
+                )
+            try:
+                current_policy = load_runtime_policy()
+            except RuntimeConfigurationError:
+                raise _WalletBindingChanged(
+                    "Bittensor wallet selection or runtime configuration changed"
+                ) from None
+            if current_policy != policy:
+                raise _WalletBindingChanged(
+                    "Bittensor wallet selection or runtime configuration changed"
+                )
+
+        if selection is not None:
+            require_wallet_binding()
+
         try:
             self._subtensor = bt.subtensor(network=self.network)
-            
-            if self.wallet_name:
-                self._wallet = bt.wallet(
-                    name=self.wallet_name,
-                    hotkey=self.wallet_hotkey or "default"
+
+            if selection is not None:
+                require_wallet_binding()
+                wallet = bt.wallet(
+                    name=selection[0],
+                    hotkey=selection[1] or "default"
                 )
-        except Exception as e:
-            print(f"[WARN] Could not initialize subtensor: {e}")
+                require_wallet_binding()
+                self._wallet = wallet
+        except _WalletBindingChanged:
+            raise
+        except Exception:
+            print("[WARN] Could not initialize subtensor")
             self._subtensor = None
     
     @property
@@ -227,12 +281,13 @@ class BittensorSubnet:
                 registration_cost=float(self._subtensor.burn(netuid).tao),
                 updated_at=time.time()
             )
-        except Exception as e:
-            print(f"[WARN] Could not get subnet {netuid} info: {e}")
+        except Exception:
+            print("[WARN] Could not get subnet information")
             return self._mock_subnet_info(netuid)
     
     def _mock_subnet_info(self, netuid: int) -> SubnetInfo:
         """Return mock subnet info for demo/testing."""
+        load_runtime_policy().authorize_component_mock("BittensorSubnet", True)
         return SubnetInfo(
             netuid=netuid,
             name=SUBNET_NAMES.get(netuid, f"Subnet {netuid}"),
@@ -240,7 +295,9 @@ class BittensorSubnet:
             validators=100,
             miners=500,
             registration_cost=0.1,
-            updated_at=time.time()
+            updated_at=time.time(),
+            simulated=True,
+            evidence_classification="non-authoritative",
         )
     
     def get_metagraph(self, netuid: int, refresh: bool = False) -> Optional[Any]:
@@ -298,14 +355,15 @@ class BittensorSubnet:
                         emission=float(metagraph.E[uid].item()),
                         active=bool(metagraph.active[uid].item())
                     ))
-        except Exception as e:
-            print(f"[WARN] Error getting miners: {e}")
+        except Exception:
+            print("[WARN] Could not read miner metadata")
             return self._mock_miners(netuid)
         
         return miners
     
     def _mock_miners(self, netuid: int) -> List[MinerInfo]:
         """Return mock miner data for demo/testing."""
+        load_runtime_policy().authorize_component_mock("BittensorSubnet", True)
         return [
             MinerInfo(
                 uid=i,
@@ -316,7 +374,9 @@ class BittensorSubnet:
                 consensus=0.75,
                 incentive=0.01,
                 emission=0.001,
-                active=True
+                active=True,
+                simulated=True,
+                evidence_classification="non-authoritative",
             )
             for i in range(5)
         ]
@@ -345,8 +405,8 @@ class BittensorSubnet:
                 return 0.0
             
             return float(balance.tao) if hasattr(balance, 'tao') else float(balance)
-        except Exception as e:
-            print(f"[WARN] Could not get balance: {e}")
+        except Exception:
+            print("[WARN] Could not read balance")
             return 0.0
     
     def query_miner(
@@ -368,6 +428,28 @@ class BittensorSubnet:
         Returns:
             InferenceResult with response or error
         """
+        policy = load_runtime_policy()
+        if policy.is_live:
+            raise LiveModeSafetyError(
+                "Bittensor inference requires authenticated action-bound admission "
+                "and a qualified inference backend"
+            )
+
+        class _InferencePolicyChanged(RuntimeConfigurationError):
+            pass
+
+        def require_current_policy() -> None:
+            try:
+                current_policy = load_runtime_policy()
+            except RuntimeConfigurationError:
+                raise _InferencePolicyChanged(
+                    "Bittensor inference runtime configuration changed before dispatch"
+                ) from None
+            if current_policy != policy:
+                raise _InferencePolicyChanged(
+                    "Bittensor inference runtime configuration changed before dispatch"
+                )
+
         start = time.time()
         
         if not self._subtensor or not self._wallet:
@@ -386,15 +468,18 @@ class BittensorSubnet:
             
             # Get miner's axon info
             axon = metagraph.axons[uid]
-            
-            # Create dendrite for querying
+
+            # Revalidate after provider-backed model lookup and before building
+            # the inference transport or releasing the prompt.
+            require_current_policy()
             dendrite = bt.dendrite(wallet=self._wallet)
-            
-            # This is simplified - real implementation depends on subnet protocol
-            # Each subnet has its own synapse type
+
+            require_current_policy()
+            synapse = bt.Synapse(prompt=prompt)
+            require_current_policy()
             response = dendrite.query(
                 axon,
-                bt.Synapse(prompt=prompt),
+                synapse,
                 timeout=timeout
             )
             
@@ -407,13 +492,15 @@ class BittensorSubnet:
                 latency_ms=latency
             )
             
-        except Exception as e:
+        except _InferencePolicyChanged:
+            raise
+        except Exception:
             return InferenceResult(
                 success=False,
                 response=None,
                 miner_uid=uid,
                 latency_ms=(time.time() - start) * 1000,
-                error=str(e)
+                error="Inference request failed"
             )
     
     def check_health(self) -> dict:
@@ -442,7 +529,9 @@ class BittensorSubnet:
             }
         
         try:
-            block = self.get_block_number()
+            # Do not use get_block_number() here: its compatibility contract
+            # returns zero on failure, which must not be reported as healthy.
+            block = self._subtensor.block
             latency = (time.time() - start) * 1000
             
             return {
@@ -450,14 +539,18 @@ class BittensorSubnet:
                 "latency_ms": latency,
                 "block": block,
                 "network": self.network,
-                "wallet": self.wallet_name or "none"
+                "wallet": (
+                    self._wallet_selection[0]
+                    if self._wallet is not None and self._wallet_selection is not None
+                    else "none"
+                )
             }
             
-        except Exception as e:
+        except Exception:
             return {
                 "status": "degraded",
                 "latency_ms": (time.time() - start) * 1000,
-                "error": str(e)[:100],
+                "error": "Provider health check failed",
                 "network": self.network
             }
     

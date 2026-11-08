@@ -1,0 +1,50 @@
+{
+  "date": "2026-10-03",
+  "git_head": "829ab544571f12efe50ecb5740f129c8acb3e16f",
+  "python": "3.12.14",
+  "raw_scanner_output_retained": false,
+  "repository_inventory_excluding_evidence_package_after": {
+    "count": 1686,
+    "excludes_evidence_package": "docs/remediation/m7_credential_scans_current_r1/",
+    "sha256": "034a9e0ca83f05774a8bc4f08be3794436f991af926133d70b2a76a276864eec"
+  },
+  "repository_inventory_excluding_evidence_package_before": {
+    "count": 1686,
+    "excludes_evidence_package": "docs/remediation/m7_credential_scans_current_r1/",
+    "sha256": "034a9e0ca83f05774a8bc4f08be3794436f991af926133d70b2a76a276864eec"
+  },
+  "runner_enforces_sandbox": false,
+  "sandbox": "outer bwrap invocation enforces --unshare-net, root read-only, /tmp tmpfs, cleared environment, and only the evidence package writable",
+  "scans": [
+    {
+      "argv": [
+        "/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python",
+        "-B",
+        "scripts/security/default_credential_scan.py"
+      ],
+      "exit_code": 0,
+      "finding_count": 0,
+      "name": "default_credential_scan",
+      "raw_output_retained": false,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "1cd823234465f459251d5a50cebfa9690b11acf1379d4bd9f991f92575767a66",
+      "summary": "Default credential scan passed."
+    },
+    {
+      "argv": [
+        "/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python",
+        "-B",
+        "scripts/security/secret_history_prevention_scan.py"
+      ],
+      "exit_code": 0,
+      "finding_count": 0,
+      "name": "secret_history_prevention_scan",
+      "raw_output_retained": false,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "0bb6bc2f24db1ff8a7b98b6ecb99cfcd57154a91665ad015eb4c0f90b8631e06",
+      "summary": "Secret-history prevention scan passed."
+    }
+  ],
+  "schema": "m7-current-credential-scans-v1",
+  "source_inventory_unchanged": true
+}

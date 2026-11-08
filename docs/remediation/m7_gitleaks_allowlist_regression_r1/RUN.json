@@ -1,0 +1,83 @@
+{
+  "schema_version": "m7-gitleaks-allowlist-regression-r1",
+  "date": "2026-10-03",
+  "status": "PASS",
+  "repository": {
+    "head": "829ab544571f12efe50ecb5740f129c8acb3e16f"
+  },
+  "toolchain": {
+    "python": "Python 3.12.14",
+    "network": "bwrap --unshare-net",
+    "checkout": "read-only; evidence package writable"
+  },
+  "source_sha256": {
+    ".gitleaks.toml": "40ddce18233e73c94668ddd47a5abe2a6afa0e9bc4602657dc34ec2b78606ecd",
+    "scripts/security/gitleaks_allowlist_regression.py": "57b44f38cd95e097f9d16572beb02fccd1bf83b9685dd8f9b1d95771b11547ae",
+    "gitleaks_binary": "88f91962aa2f93ac6ab281d553b9e125f5197bbbce38f9f2437f7299c32e5509"
+  },
+  "results": [
+    {
+      "name": "gitleaks_version",
+      "argv": [
+        "bwrap",
+        "--unshare-net",
+        "--ro-bind",
+        "/",
+        "/",
+        "--tmpfs",
+        "/tmp",
+        "--dev-bind",
+        "/dev",
+        "/dev",
+        "--proc",
+        "/proc",
+        "--chdir",
+        "/home/GodOfAgents/code/VAMS-testnet",
+        "--clearenv",
+        "--setenv",
+        "PATH",
+        "/usr/bin:/bin",
+        "/home/GodOfAgents/vams-evidence/toolchains/gitleaks-8.30.1/gitleaks",
+        "version"
+      ],
+      "exit_code": 0
+    },
+    {
+      "name": "allowlist_regression",
+      "argv": [
+        "bwrap",
+        "--unshare-net",
+        "--ro-bind",
+        "/",
+        "/",
+        "--tmpfs",
+        "/tmp",
+        "--dev-bind",
+        "/dev",
+        "/dev",
+        "--bind",
+        "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m7_gitleaks_allowlist_regression_r1",
+        "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m7_gitleaks_allowlist_regression_r1",
+        "--chdir",
+        "/home/GodOfAgents/code/VAMS-testnet",
+        "--clearenv",
+        "--setenv",
+        "PATH",
+        "/usr/bin:/bin",
+        "--setenv",
+        "GITLEAKS_BIN",
+        "/home/GodOfAgents/vams-evidence/toolchains/gitleaks-8.30.1/gitleaks",
+        "/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python",
+        "-B",
+        "scripts/security/gitleaks_allowlist_regression.py"
+      ],
+      "exit_code": 0
+    }
+  ],
+  "scope": "Workflow narrow allowlist regression only; generated temporary decoys; no repository history scan or finding adjudication.",
+  "independent_review": {
+    "status": "PASS",
+    "reviewer": "f05_identity_current_review",
+    "outcome": "Verified all eight package checksum entries, current GitLeaks config/script/binary hashes, captured version and regression outputs/exits, and generated-temporary-fixture-only scope. No repository/history scan or finding adjudication."
+  }
+}

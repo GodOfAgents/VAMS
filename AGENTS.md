@@ -114,8 +114,15 @@ state the impact explicitly in PRs and reviews.
 
 ## 5. Cognitive Layer Requirements
 
-The cognitive layer is research-backed but must still be treated as
-implementation-dependent. Verify current code before claims.
+The cognitive layer is research-backed but remains implementation-dependent.
+The named memory tiers, algorithms, layouts, and values below describe selected
+implementations, not a mandatory protocol representation. When one is selected,
+retain its stated parameters, thresholds, and corresponding tests. Other memory
+Service Blocks may use vector, graph, hybrid, episodic, semantic, or other
+internals when they satisfy the verifiable memory/state boundary and
+capability-preservation criteria in `docs/remediation/GCA_ACCEPTANCE.md`.
+Substitution does not replace mandatory protocol safety state. Verify current
+code before claims.
 
 S-MMU memory tiers:
 
@@ -444,3 +451,19 @@ Before finalizing any meaningful task, answer these internally:
 6. Did I leave unrelated user changes untouched?
 
 If any answer is no, do not present the work as complete.
+
+## Internal-testnet remediation operating contract
+
+Read docs/remediation/MISSION.md, PLAN.md, FINDINGS.json, STATUS.md and SESSION_HANDOFF.md at the start of each repair session. Inspect applicable nested AGENTS.md/AGENTS.override.md files before touching their directories. This section supplements existing safety invariants; surface conflicts rather than silently overriding them.
+
+Target: a restricted faucet-only Polygon Amoy plus Cardano Pre-Prod testnet. Preserve VAMS's modular Agentic Economy architecture and Heart-Brain/GCA-compatible enforcement boundaries. Public launch, mainnet, TGE and real capital are out of scope. Architecture-research prose and old audit labels are requirements/hypotheses, not verification evidence.
+
+Reproduce the defect against current source; write the regression; implement the smallest coherent repair; rerun focused and affected full gates. Track F01-F16 and any newly discovered findings. An unreproduced assertion may be challenged with explicit counterevidence, never silently deleted. Changes to proof/governance trust models require an ADR and owner review.
+
+Do not suppress findings, weaken test assertions, convert security tests to xfail/skip, remove applicable controls, forge artifacts, replace live verification with structural checks, or mark a track verified solely from a declaration. Retire obsolete tests only with a reviewed replacement preserving their security property.
+
+Do not broadcast, fund contracts, activate proof adapters, change live roles, rotate secrets, rewrite history, force-push, push to main, or request private keys. Use isolated synthetic fixtures and fresh local-only test keys. Never reuse Anvil keys on public chains. A network approval or Git permission is not deployment approval.
+
+Record exact commits/toolchains/commands/exits, new test IDs and artifact digests. Keep raw evidence outside the checkout and do not mark generated logs as release-certified. Keep tests operating on current repository source, not frozen snapshot modules from the audit ZIP.
+
+Maintain docs/remediation/STATUS.md and SESSION_HANDOFF.md before ending. Distinguish implemented, locally tested, independently reviewed, deployed, observed and release-approved. Continue independent local tasks when one item is externally blocked; ask only at real permission or design boundaries.

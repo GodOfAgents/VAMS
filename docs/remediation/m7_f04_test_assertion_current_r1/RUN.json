@@ -1,0 +1,21 @@
+{
+  "commands": [
+    "bwrap --unshare-net --ro-bind / / --tmpfs /tmp --dev-bind /dev /dev --proc /proc --chdir /home/GodOfAgents/code/VAMS-testnet /usr/bin/env -i HOME=/tmp TMPDIR=/tmp PATH=/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin:/usr/bin:/bin LANG=C.UTF-8 LC_ALL=C.UTF-8 TZ=UTC PYTHONDONTWRITEBYTECODE=1 PYTHONNOUSERSITE=1 /home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python -B -m pytest -q --tb=short -p no:cacheprovider docs/remediation/m3_f04_impl_r2/test_interface_migration.py::F04InterfaceMigrationTests::test_blueprint_uses_migrated_public_schemas",
+    "bwrap --unshare-net --ro-bind / / --tmpfs /tmp --dev-bind /dev /dev --proc /proc --chdir /home/GodOfAgents/code/VAMS-testnet /home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python -B scripts/docs/validate_docs.py",
+    "bwrap --unshare-net --ro-bind / / --tmpfs /tmp --dev-bind /dev /dev --proc /proc --chdir /home/GodOfAgents/code/VAMS-testnet /home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python -B -m unittest scripts/docs/test_validate_docs.py",
+    "/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python -B -c \"import ast,pathlib; ast.parse(pathlib.Path('docs/remediation/m3_f04_impl_r2/test_interface_migration.py').read_text()); print('AST parse PASS')\"",
+    "git diff --check"
+  ],
+  "date": "2026-10-04",
+  "git_head": "829ab544571f12efe50ecb5740f129c8acb3e16f",
+  "invocation_note": "Commands and outputs were recorded from the operator session; no hosted CI was invoked.",
+  "network": "disabled by bwrap for Python commands",
+  "pytest": "9.1.1",
+  "python": "3.12.14",
+  "schema": "m7-f04-test-assertion-run-r1",
+  "source_hashes": {
+    "cardano/validators/agent_nft.ak": "e28ff520d07f73a622a093b362f66411678d535bbb48cf2aecbcd8011204caba",
+    "docs/remediation/m3_f04_design_r1/IDENTITY_SPEC.json": "eaabb61ef8a4f454ab7bb2f138ea67a767f3effdff917fc95520be7de9c90c80",
+    "docs/remediation/m3_f04_impl_r2/test_interface_migration.py": "15ba0998446d23ed28fdb438e0fde1d033341f1c3bd6a8383314b894dea70297"
+  }
+}

@@ -1,0 +1,42 @@
+--- /home/GodOfAgents/code/VAMS-testnet/docs/remediation/m7_insurance_warnings_r1/baseline/insurance_fund.ak	2026-10-02 20:43:43.070523287 +0000
++++ /home/GodOfAgents/code/VAMS-testnet/docs/remediation/m7_insurance_warnings_r1/candidate/insurance_fund.ak	2026-10-02 20:43:43.070759776 +0000
+@@ -67,19 +67,17 @@
+   configured_max_payout_bps: Int,
+ ) {
+   mint(redeemer: InsuranceStateRedeemer, policy_id: PolicyId, tx: Transaction) {
+-    when redeemer is {
+-      InitializeFund ->
+-        validate_genesis(
+-          genesis_ref,
+-          state_asset_name,
+-          configured_guardians,
+-          configured_threshold,
+-          configured_policy_epoch,
+-          configured_max_payout_bps,
+-          policy_id,
+-          tx,
+-        )
+-    }
++    let InitializeFund = redeemer
++    validate_genesis(
++      genesis_ref,
++      state_asset_name,
++      configured_guardians,
++      configured_threshold,
++      configured_policy_epoch,
++      configured_max_payout_bps,
++      policy_id,
++      tx,
++    )
+   }
+ 
+   spend(
+@@ -892,7 +890,7 @@
+ 
+ fn run_test_spend(
+   before: FundDatumV2,
+-  after: FundDatumV2,
++  _after: FundDatumV2,
+   redeemer: InsuranceFundRedeemer,
+   tx: Transaction,
+ ) -> Bool {

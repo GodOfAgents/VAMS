@@ -6,7 +6,6 @@ Covers: SemanticCheckpointManager, SemanticMMU, InterruptVectorTable,
 """
 
 import sys
-import os
 import io
 import math
 import time
@@ -20,9 +19,6 @@ import logging
 # Suppress debug logging during tests (avoid console encoding issues)
 logging.basicConfig(level=logging.WARNING)
 
-# Ensure neuron directory is on path
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
-
 
 # ─────────────────────────────────────────────────────────────────────
 # 1. Semantic Checkpoint Manager
@@ -30,7 +26,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."
 
 def test_cid_computation():
     """Test CID computation from attention weights."""
-    from sdk.semantic_checkpoint import SemanticCheckpointManager
+    from neuron.sdk.semantic_checkpoint import SemanticCheckpointManager
     
     mgr = SemanticCheckpointManager(epsilon=0.15)
     
@@ -49,7 +45,7 @@ def test_cid_computation():
 
 def test_boundary_detection():
     """Test semantic boundary detection via CID derivatives."""
-    from sdk.semantic_checkpoint import SemanticCheckpointManager
+    from neuron.sdk.semantic_checkpoint import SemanticCheckpointManager
     
     mgr = SemanticCheckpointManager(epsilon=0.15, min_interval=1, max_interval=100)
     
@@ -67,7 +63,7 @@ def test_boundary_detection():
 
 def test_semantic_page_creation():
     """Test semantic page creation and verification."""
-    from sdk.semantic_checkpoint import SemanticCheckpointManager, CheckpointTrigger
+    from neuron.sdk.semantic_checkpoint import SemanticCheckpointManager, CheckpointTrigger
     
     mgr = SemanticCheckpointManager()
     state = {"agent_id": "test", "step": 3, "data": [1, 2, 3]}
@@ -82,7 +78,7 @@ def test_semantic_page_creation():
 
 def test_cid_from_logits():
     """Test CID approximation from logits (fallback mode)."""
-    from sdk.semantic_checkpoint import SemanticCheckpointManager
+    from neuron.sdk.semantic_checkpoint import SemanticCheckpointManager
     
     mgr = SemanticCheckpointManager()
     
@@ -105,7 +101,7 @@ def test_cid_from_logits():
 
 def test_mmu_store_and_fetch():
     """Test basic store/fetch in L1 cache."""
-    from sdk.semantic_mmu import SemanticMMU, MemoryTier
+    from neuron.sdk.semantic_mmu import SemanticMMU, MemoryTier
     
     mmu = SemanticMMU(l1_capacity=4)
     
@@ -121,7 +117,7 @@ def test_mmu_store_and_fetch():
 
 def test_mmu_lru_eviction():
     """Test LRU eviction when L1 is full."""
-    from sdk.semantic_mmu import SemanticMMU, MemoryTier
+    from neuron.sdk.semantic_mmu import SemanticMMU, MemoryTier
     
     mmu = SemanticMMU(l1_capacity=3)
     
@@ -144,7 +140,7 @@ def test_mmu_lru_eviction():
 
 def test_mmu_page_fault():
     """Test page fault for non-existent address."""
-    from sdk.semantic_mmu import SemanticMMU
+    from neuron.sdk.semantic_mmu import SemanticMMU
     
     mmu = SemanticMMU()
     page = mmu.fetch("nonexistent")
@@ -162,7 +158,7 @@ def test_mmu_page_fault():
 
 def test_ivt_tool_invoke():
     """Test SIG_TOOL_INVOKE interrupt (mock mode)."""
-    from sdk.interrupt_handler import InterruptVectorTable, InterruptSignal, InterruptStatus
+    from neuron.sdk.interrupt_handler import InterruptVectorTable, InterruptSignal, InterruptStatus
     
     ivt = InterruptVectorTable(agent_id="test_agent", mock_mode=True)
     
@@ -184,7 +180,7 @@ def test_ivt_tool_invoke():
 
 def test_ivt_all_signals():
     """Test all interrupt signal types."""
-    from sdk.interrupt_handler import InterruptVectorTable, InterruptSignal, InterruptStatus
+    from neuron.sdk.interrupt_handler import InterruptVectorTable, InterruptSignal, InterruptStatus
     
     ivt = InterruptVectorTable(agent_id="test_agent", mock_mode=True)
     
@@ -213,9 +209,11 @@ def test_ivt_all_signals():
 
 def test_drift_aligned():
     """Test drift measurement when agent is aligned."""
-    from sdk.cognitive_drift import CognitiveDriftDetector, DriftStatus
+    from neuron.sdk.cognitive_drift import CognitiveDriftDetector, DriftStatus
     
-    detector = CognitiveDriftDetector(theta=0.3)
+    detector = CognitiveDriftDetector(
+        theta=0.3, mock_mode=True, environ={"VAMS_ENV": "test"}
+    )
     
     # Set global state
     detector.set_global_state({"goal": "trade BTC", "mode": "active"})
@@ -231,9 +229,11 @@ def test_drift_aligned():
 
 def test_drift_diverged():
     """Test drift detection with divergent state."""
-    from sdk.cognitive_drift import CognitiveDriftDetector, DriftStatus
+    from neuron.sdk.cognitive_drift import CognitiveDriftDetector, DriftStatus
     
-    detector = CognitiveDriftDetector(theta=0.01)  # Very low threshold
+    detector = CognitiveDriftDetector(
+        theta=0.01, mock_mode=True, environ={"VAMS_ENV": "test"}
+    )  # Very low threshold
     
     detector.set_global_state({"goal": "trade BTC"})
     
@@ -248,9 +248,14 @@ def test_drift_diverged():
 
 def test_csp_reconciliation():
     """Test Cognitive Sync Pulse reconciliation."""
-    from sdk.cognitive_drift import CognitiveDriftDetector, CSPStatus
+    from neuron.sdk.cognitive_drift import CognitiveDriftDetector, CSPStatus
     
-    detector = CognitiveDriftDetector(theta=0.01, min_oracle_participants=3)
+    detector = CognitiveDriftDetector(
+        theta=0.01,
+        min_oracle_participants=3,
+        mock_mode=True,
+        environ={"VAMS_ENV": "test"},
+    )
     
     detector.set_global_state({"epoch": 1})
     detector.measure_drift("agent_1", {"epoch": 1, "data": "different"})

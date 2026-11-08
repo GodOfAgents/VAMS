@@ -1,0 +1,15 @@
+M3.2a-R19 verification record
+=============================
+R18 prerequisite: SHA256SUMS eb4b4b6f67c76283be986327aa6a6df223f1da8cc90190012164d5402f903366; all files OK.
+Pre-fix isolated FIFO timeout: timeout 3s, exit 124.
+R19 focused suite: 9 tests, OK, exit 0.
+R17 focused suite: 6 tests, OK, exit 0.
+Oracle suite: 10 tests, OK, exit 0.
+Governance suite: 12 tests, OK, exit 0.
+Provenance suite: 20 tests in 71.387s, OK, exit 0.
+Aiken 1.1.21 offline verifier: run 1 and run 2 both ok=true/check=0/build=0.
+Python compilation: exit 0.
+JSON/documentation validation: exit 0.
+git diff --check: exit 0.
+Final dirty paths: 114.
+No full F01 transition/budget suites were run.

@@ -126,8 +126,8 @@ class CelestiaDAAdapter(DAAdapter):
             return False
         try:
             retrieved = await self.get_blob(receipt.blob_id)
-        except Exception as exc:
-            logger.warning("Celestia exact retrieval failed: %s", exc)
+        except Exception:
+            logger.warning("Celestia exact retrieval failed")
             return False
         if not isinstance(retrieved, bytes):
             return False
@@ -187,8 +187,8 @@ class CelestiaDAAdapter(DAAdapter):
                             return data
                     return None
 
-        except Exception as e:
-            logger.warning(f"Celestia blob retrieval failed: {e}")
+        except Exception:
+            logger.warning("Celestia blob retrieval failed")
             return None
 
     def _mock_submit(self, data: bytes, commitment: str) -> DAReceipt:

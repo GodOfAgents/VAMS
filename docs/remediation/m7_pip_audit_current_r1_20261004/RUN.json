@@ -1,0 +1,35 @@
+{
+  "record": "M7 pip-audit local environment run r1",
+  "date": "2026-10-04",
+  "start_utc": "2026-10-04T15:02:33Z",
+  "end_utc": "2026-10-04T15:02:48Z",
+  "exit_code": 1,
+  "command": "/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/pip-audit --local --vulnerability-service pypi",
+  "head": "829ab544571f12efe50ecb5740f129c8acb3e16f",
+  "branch": "testnet/remediation-20260907",
+  "workflow_sha256": "baf53503673b70c5185f654f8f694f1feaf98af68ee56e29c83c01ee0cf0593c",
+  "pip_audit": {
+    "version": "2.10.1",
+    "sha256": "310dabedfa526a73c82ac3e0f80a8af761aa3ebf2ef4026c49d06352e7691b95"
+  },
+  "python": {
+    "version": "3.12.14",
+    "sha256": "aa01d96348989f33ed998b42c83e98593b41dba83914d9899730b90c36f2e5c9"
+  },
+  "inventory": {
+    "distributions": 103,
+    "sha256": "1cbec2a8b3e2c7b2d62a114f04ac3c79cd2a77a4af42c96f43f3b6d811b2c1a7"
+  },
+  "reported": {
+    "rows": 13,
+    "packages": 5,
+    "unique_advisory_ids": 12,
+    "severity": "not classified by command output"
+  },
+  "raw_capture": "/home/GodOfAgents/vams-evidence/m7-pip-audit-current-r1-20261004",
+  "raw_manifest_sha256": "d39aa144a0522b72e9f3c66bae675ff1f1ec4cb7d43b38519874a2daff6f1435",
+  "requirements_sha256": {
+    "gateway": "c442d01c246812c909fd28f6cf90c14c5e17921597d409c0492fbbf808e0f0b3",
+    "neuron": "a7563450beb54994461ebc0057ff4da02c9754c2b1dcf7690c533b84cb75734d"
+  }
+}

@@ -10,7 +10,15 @@ Implements dynamic DePIN incentives, regional bootstrap multipliers, and the com
 - `reward_engine.py`: Computes the final daily provider reward considering SLA tier, regional multipliers, and staking boosts.
 - `dec_regional.py`: Simulates continuous off-chain emission of Dynamic Emission Credits (DEC) based on a network-wide soft cap logic.
 - `composed_settlement.py`: Python SDK over the `ComposedSettlement` escrow contract. Handles multi-provider payment splits for composed instances.
-- `keeper.py`: An automated chron-job bot that synchronizes DEC limits to the blockchain at regular intervals.
+- `keeper.py`: A background loop for local epoch calculation/history; it does not submit or synchronize on-chain DEC state.
+- `yield_manager.py`: Read-only contract-query wrapper. Both incomplete yield write methods reject in every runtime before accessing a fund or signer. The selected restricted profile keeps real yield disabled; this SDK implements no authentic deployment, withdrawal or recovery transaction.
+
+Reward calculations, APR estimates and locally generated candidate roots are not
+proof of payouts or applied chain state. Restricted-profile rewards remain zero;
+local economic simulations do not enable them. A pass-through balance query is
+not authenticated custody evidence. Any future yield/recovery route needs its
+own chain-bound design, actual custody authorization and qualification; the former
+fabricated transaction hashes are no longer returned.
 
 ## Relevant Contracts
 - `RewardDistributor.sol`

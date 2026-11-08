@@ -1,0 +1,20 @@
+Command: /home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python -B scripts/audit/audit_program.py validate
+Execution: bwrap --unshare-net --ro-bind / / --tmpfs /tmp --dev-bind /dev /dev --proc /proc --chdir /home/GodOfAgents/code/VAMS-testnet --clearenv --setenv PATH /usr/bin:/bin --setenv PYTHONDONTWRITEBYTECODE 1
+Exit: 0
+Output: Audit program validation passed: 36 tracks and testnet profile valid.
+
+Command: /home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python -B scripts/audit/audit_program.py readiness --stage canary
+Execution: same network-isolated, read-only bwrap environment.
+Exit: 1
+Output:
+Audit program validation failed:
+  - canary readiness requires all applicable tracks verified; unresolved: T01=implemented, T02=implemented, T03=implemented, T04=partial, T05=partial, T06=partial, T07=partial, T08=partial, T09=partial, T10=partial, T11=partial, T12=partial, T13=partial, T14=partial, T15=partial, T16=blocked, T17=partial, T18=partial, T19=partial, T20=partial, T21=blocked, T22=partial, T23=partial, T24=partial, T25=partial, T26=partial, T27=partial, T28=partial, T29=partial, T30=blocked, T31=partial, T32=partial, T33=blocked, T34=partial, T35=partial
+  - readiness requires a clean working tree, including untracked files
+  - evidence manifest is missing or empty: /home/GodOfAgents/code/VAMS-testnet/docs/audit/evidence/audit-evidence.json
+  - evidence signature bundle is missing or empty: /home/GodOfAgents/code/VAMS-testnet/docs/audit/evidence/audit-evidence.sigstore.json
+  - assurance index is missing: /home/GodOfAgents/code/VAMS-testnet/docs/audit/evidence/assurance-index.json
+  - deployment manifest is missing: /home/GodOfAgents/code/VAMS-testnet/docs/audit/evidence/polygon-amoy-rehearsal.json
+  - deployment manifest is missing: /home/GodOfAgents/code/VAMS-testnet/docs/audit/evidence/cardano-preprod-rehearsal.json
+  - deployment manifests missing networks: cardano-preprod, polygon-amoy
+  - runtime integration report is missing: /home/GodOfAgents/code/VAMS-testnet/docs/audit/evidence/runtime-integration.json
+  - privacy review is missing: /home/GodOfAgents/code/VAMS-testnet/docs/audit/evidence/privacy-review.json

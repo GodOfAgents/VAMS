@@ -1,0 +1,7 @@
+Traceback (most recent call last):
+  File "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m3_f05_2a_signature_other_seed_r1/run_case.py", line 115, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m3_f05_2a_signature_other_seed_r1/run_case.py", line 58, in main
+    raise RuntimeError(f"positive control did not accept: {positive}")
+RuntimeError: positive control did not accept: {'accepted': False, 'exit': 101, 'cpu': None, 'mem': None, 'context_cbor_bytes': 1755, 'diagnostic': '    |    Operating System: linux |    Architecture:     x86_64 |    Version:          v1.1.21+42babe5 |     |    \x1b[35mcrates/uplc/src/parser.rs:110:57 |     |        \x1b[39mcalled `Result::unwrap()` on an `Err` value: "Default Function not found - verifySignature"'}

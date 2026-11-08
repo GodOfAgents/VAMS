@@ -1,0 +1,66 @@
+{
+  "date": "2026-10-03",
+  "slice": "M7 pytest collection split",
+  "checkout": "/home/GodOfAgents/code/VAMS-testnet",
+  "head": "829ab544571f12efe50ecb5740f129c8acb3e16f",
+  "interpreter": "/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python",
+  "python_version": "3.12.14",
+  "pytest_version": "9.1.1",
+  "workflow_commands": [
+    "VAMS_ENVOY_BIN=\"$RUNNER_TEMP/envoy\" pytest -v --tb=short --ignore=docs/remediation/m3_f05_design_r2/test_design.py",
+    "VAMS_ENVOY_BIN=\"$RUNNER_TEMP/envoy\" pytest -v --tb=short docs/remediation/m3_f05_design_r2/test_design.py"
+  ],
+  "fresh_collection": [
+    {
+      "command": "/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/pytest --collect-only -q --ignore=docs/remediation/m3_f05_design_r2/test_design.py",
+      "exit_code": 0,
+      "result": "1575 tests collected in 6.49s"
+    },
+    {
+      "command": "/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/pytest --collect-only -q docs/remediation/m3_f05_design_r2/test_design.py",
+      "exit_code": 0,
+      "result": "10 tests collected in 0.10s"
+    }
+  ],
+  "test_execution": [
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 pytest -v --tb=short --ignore=docs/remediation/m3_f05_design_r2/test_design.py",
+      "python_bin_directory": "/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin",
+      "exit_code": 1,
+      "duration_seconds": 204.88,
+      "result": "1569 passed, 6 failed, 441 passing subtests; 1575 pytest items"
+    },
+    {
+      "command": "pytest -v --tb=short docs/remediation/m3_f05_design_r2/test_design.py",
+      "python_bin_directory": "/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin",
+      "exit_code": 0,
+      "duration_seconds": 0.26,
+      "result": "10 passed"
+    }
+  ],
+  "failure_node_ids": [
+    "docs/remediation/m3_2b_r6/test_binding_guard.py::BindingGuardTests::test_guard_removal_mutation_fails_closed",
+    "neuron/tests/test_sentinel.py::TestSentinelNode::test_audit_node_success",
+    "scripts/remediation/test_f05_2a_tx_sim_evidence_contract.py::test_binding_runner_rejects_wrong_policy_and_unbound_false_positive",
+    "scripts/remediation/test_m3_1b_r9_provenance.py::test_authoritative_mutation_detected",
+    "scripts/remediation/test_m3_1b_r9_provenance.py::test_cleanup_after_injected_failure_and_network_boundary",
+    "scripts/remediation/test_m3_1b_r9_provenance.py::test_f04_forward_manifest_rebinds_current_lock_without_false_continuity"
+  ],
+  "aggregate": {
+    "collected_node_ids": 1585,
+    "passed": 1579,
+    "failed": 6,
+    "passing_subtests_nested_not_additional_node_ids": 441
+  },
+  "independent_review": {
+    "result": "PASS",
+    "reviewer": "/root/f05_identity_reverify_review",
+    "reran_tests": false,
+    "scope": "workflow pytest split hunk, collection partition, arithmetic"
+  },
+  "gate_status": "FAIL",
+  "readiness": "NOT_READY",
+  "f05_case_mutation_credit": "none",
+  "dirty_entries": 127,
+  "git_diff_check": "PASS"
+}

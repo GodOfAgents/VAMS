@@ -1,0 +1,64 @@
+{
+  "schema_version": "vams-m2-1-request-auth-run-v1",
+  "date": "2026-10-03",
+  "status": "independent_review_passed_focused_m2_1_scope",
+  "repository": {
+    "head": "829ab544571f12efe50ecb5740f129c8acb3e16f",
+    "branch": "testnet/remediation-20260907"
+  },
+  "toolchain": {
+    "python": "Python 3.12.14",
+    "pytest": "pytest 9.1.1",
+    "network": "bwrap --unshare-net",
+    "checkout_mount": "read-only; evidence directory writable"
+  },
+  "command": [
+    "bwrap",
+    "--unshare-net",
+    "--ro-bind",
+    "/",
+    "/",
+    "--tmpfs",
+    "/tmp",
+    "--dev-bind",
+    "/dev",
+    "/dev",
+    "--proc",
+    "/proc",
+    "--bind",
+    "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m2_1_gateway_request_auth_current_r1",
+    "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m2_1_gateway_request_auth_current_r1",
+    "--chdir",
+    "/home/GodOfAgents/code/VAMS-testnet",
+    "/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python",
+    "-B",
+    "-m",
+    "pytest",
+    "-q",
+    "--tb=short",
+    "-p",
+    "no:cacheprovider",
+    "--import-mode=importlib",
+    "neuron/tests/test_m2_1_gateway_request_auth.py"
+  ],
+  "source_sha256": {
+    "gateway/request_auth.py": "9b47c26f1e640f3bd85f2d88d223fa97f38cfe2d9bd90948389f11ed9474a926",
+    "neuron/runtime_safety.py": "b39c48ec63f20c34573e11e0a515ef622e3340f76964e1688c2dfa23b29d0079",
+    "neuron/secp256k1.py": "053aee70b63979d62ba18084f058e41e1d9c9a7df3881a0bab75c7a9a132d7f6",
+    "neuron/tests/test_m2_1_gateway_request_auth.py": "f1220f5cecbfd6f09ed0884533918e75c3197d80d7ed03021793f865d8583e6b"
+  },
+  "result": {
+    "exit_code": 0,
+    "passed": 96,
+    "failed": 0,
+    "stdout_sha256": "f164a41e02267946ad1bb84236edb937133197f0473ba9b36023772ff69e051c",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "coverage": "Fixed independently frozen canonical/signature vector; binds exact method, raw path/query/body bytes, audience, signer, nonce and timestamps; rejects malformed/noncanonical/oversized envelopes, invalid time/signatures, missing/duplicate/unknown/legacy headers, key/replay failures; verifies one-use atomicity for the process-local replay store and rejects that store in live modes.",
+  "limits": "Synthetic cryptographic keys, fixed clock, in-process TestClient and process-local replay store. No durable cross-process replay, real provider/identity resolver, live HTTP/TLS, parallel workers sharing durable storage, restart/revocation persistence, or testnet readiness established.",
+  "changes_by_run": [],
+  "independent_review": {
+    "status": "PASS",
+    "scope": "package checksums, four current source/test hashes, exact captures, listed canonical/auth/replay coverage and limitations"
+  }
+}

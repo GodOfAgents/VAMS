@@ -1,0 +1,138 @@
+{
+  "R4_1_sha256": "238b3da9296a6c60699dbc7201759c7e499c63defd932491023b80ec7916a171",
+  "case_ids_in_scope": [
+    "r2_signature_for_other_epoch"
+  ],
+  "case_package": "docs/remediation/m3_f05_2a_proof_other_epoch_mutant_r1_20261005/r2_signature_for_other_epoch",
+  "files": {
+    "SUMMARY.md": {
+      "bytes": 1094,
+      "sha256": "41442d1292c58a3a2c9d1cb9c128d855c3e0f219480bcb81677f00ea380e79c4"
+    },
+    "r2_signature_for_other_epoch/FIXTURE-MANIFEST.json": {
+      "bytes": 17723,
+      "sha256": "842370c7b4619a4bd7665961d577c377aee17ebecd390377958dc17bd76962d6"
+    },
+    "r2_signature_for_other_epoch/SHA256SUMS": {
+      "bytes": 2651,
+      "sha256": "611de91b6f7224c220246d0b76a28aab1ceb98029a07be438b3ad5ec72327572"
+    },
+    "r2_signature_for_other_epoch/SOURCE-DIFF.patch": {
+      "bytes": 466,
+      "sha256": "37859de466637e15ea40660596712fec719daa481eddeafccf65403579d2813f"
+    },
+    "r2_signature_for_other_epoch/mutant.applied-policy.cbor": {
+      "bytes": 3467,
+      "sha256": "76e502ca5ea6d390437cb78e0b87f9217d34831d19f2324c7749434e3d5f001d"
+    },
+    "r2_signature_for_other_epoch/mutant.genesis_ref.cbor": {
+      "bytes": 39,
+      "sha256": "51f08c55f440a2116b42e5283fc76d8be4d707788d3bc765023620199af45c75"
+    },
+    "r2_signature_for_other_epoch/mutant.initial_keys.cbor": {
+      "bytes": 172,
+      "sha256": "f37e5bf13b9a64a3e55809c8c554bab2b42fdd8979464cf8206e277d7edece3f"
+    },
+    "r2_signature_for_other_epoch/mutant.proof-message.bin": {
+      "bytes": 279,
+      "sha256": "1baa89bf447657a34d5f43f913fdffe128a8182a45e3d2b1563b0c39499813c0"
+    },
+    "r2_signature_for_other_epoch/mutant.raw_inputs.cbor": {
+      "bytes": 73,
+      "sha256": "5e935c48cc9d4e82e6dbedce94b2fbd3fb427f5e187bbe67ed376671ba5e4fec"
+    },
+    "r2_signature_for_other_epoch/mutant.raw_outputs.cbor": {
+      "bytes": 79,
+      "sha256": "b774f6e5907974a7e4c8e4569405227a3f079a1a1368b6475b2b9fb5fb7ba1cb"
+    },
+    "r2_signature_for_other_epoch/mutant.tx.cbor": {
+      "bytes": 5104,
+      "sha256": "f7a0939c83c3e1f64e7d0954af5eebce5346382e5e60d09e37700c9249d84549"
+    },
+    "r2_signature_for_other_epoch/positive-control.applied-policy.cbor": {
+      "bytes": 3467,
+      "sha256": "14bc2862bca0933da246c0fdd77d703fc174a9ed2a4ee46a492fd3b07a81bd74"
+    },
+    "r2_signature_for_other_epoch/positive-control.genesis_ref.cbor": {
+      "bytes": 39,
+      "sha256": "51f08c55f440a2116b42e5283fc76d8be4d707788d3bc765023620199af45c75"
+    },
+    "r2_signature_for_other_epoch/positive-control.initial_keys.cbor": {
+      "bytes": 172,
+      "sha256": "f37e5bf13b9a64a3e55809c8c554bab2b42fdd8979464cf8206e277d7edece3f"
+    },
+    "r2_signature_for_other_epoch/positive-control.proof-message.bin": {
+      "bytes": 279,
+      "sha256": "291f2f6db77827bd19553829e501c2954e573b23a710f4d927d96f0c65531d74"
+    },
+    "r2_signature_for_other_epoch/positive-control.raw_inputs.cbor": {
+      "bytes": 73,
+      "sha256": "5e935c48cc9d4e82e6dbedce94b2fbd3fb427f5e187bbe67ed376671ba5e4fec"
+    },
+    "r2_signature_for_other_epoch/positive-control.raw_outputs.cbor": {
+      "bytes": 79,
+      "sha256": "e92e5834ea46162f0d9db7320b5bb6abb5fc4bf31b23d5d358c0a571555f09d7"
+    },
+    "r2_signature_for_other_epoch/positive-control.tx.cbor": {
+      "bytes": 5104,
+      "sha256": "28818f0e4fa862fff96dfc935d0479fc81e623cdd84930b60138fd74a7829f68"
+    },
+    "r2_signature_for_other_epoch/prior-negative-review.md": {
+      "bytes": 2254,
+      "sha256": "5ce42ff9ba4a020ad4f4a8e8372782ec85d2364241115764d8c40ba8d7d241f0"
+    },
+    "r2_signature_for_other_epoch/prior-negative-run.json": {
+      "bytes": 4047,
+      "sha256": "02ac3c54834047e6a0fedb1b107bec7e37539b5b07ad0cd63998f936b1509d01"
+    },
+    "r2_signature_for_other_epoch/prior-positive-review.md": {
+      "bytes": 1938,
+      "sha256": "24fd754d809519e81601c17ce96cace9d5cb23b9c62e4f4c0f2eb0822a683377"
+    },
+    "r2_signature_for_other_epoch/prior-positive-run.json": {
+      "bytes": 3942,
+      "sha256": "932b2a1898482efd7326a667e345e3f129a861bfe2de1218dcdad43fbaae6093"
+    },
+    "r2_signature_for_other_epoch/prior-preexecution-review.md": {
+      "bytes": 3162,
+      "sha256": "73bad0f80d3d4f137f1d00987c5294ff893994beb134e292fd4e6c5d4c6eb073"
+    },
+    "r2_signature_for_other_epoch/reviewed-negative.applied-policy.cbor": {
+      "bytes": 3467,
+      "sha256": "14bc2862bca0933da246c0fdd77d703fc174a9ed2a4ee46a492fd3b07a81bd74"
+    },
+    "r2_signature_for_other_epoch/reviewed-negative.genesis_ref.cbor": {
+      "bytes": 39,
+      "sha256": "51f08c55f440a2116b42e5283fc76d8be4d707788d3bc765023620199af45c75"
+    },
+    "r2_signature_for_other_epoch/reviewed-negative.initial_keys.cbor": {
+      "bytes": 172,
+      "sha256": "f37e5bf13b9a64a3e55809c8c554bab2b42fdd8979464cf8206e277d7edece3f"
+    },
+    "r2_signature_for_other_epoch/reviewed-negative.proof-message.bin": {
+      "bytes": 279,
+      "sha256": "1baa89bf447657a34d5f43f913fdffe128a8182a45e3d2b1563b0c39499813c0"
+    },
+    "r2_signature_for_other_epoch/reviewed-negative.raw_inputs.cbor": {
+      "bytes": 73,
+      "sha256": "5e935c48cc9d4e82e6dbedce94b2fbd3fb427f5e187bbe67ed376671ba5e4fec"
+    },
+    "r2_signature_for_other_epoch/reviewed-negative.raw_outputs.cbor": {
+      "bytes": 79,
+      "sha256": "e92e5834ea46162f0d9db7320b5bb6abb5fc4bf31b23d5d358c0a571555f09d7"
+    },
+    "r2_signature_for_other_epoch/reviewed-negative.tx.cbor": {
+      "bytes": 5104,
+      "sha256": "38bbf76af57957881095dc42a0004ab1caa8a4a43065228066dbd7407eaa37f3"
+    }
+  },
+  "original_registry_sha256": "98a05d24d476b1aee2754768322dc4b794e5afb5fabec28ade17a2888285467d",
+  "prior_negative_run_sha256": "02ac3c54834047e6a0fedb1b107bec7e37539b5b07ad0cd63998f936b1509d01",
+  "prior_positive_run_sha256": "932b2a1898482efd7326a667e345e3f129a861bfe2de1218dcdad43fbaae6093",
+  "schema_version": "f05-2a-proof-domain-epoch-mutant-family-r1",
+  "scope": "synthetic one-guard alternate applied-policy mutant; no original-policy, ledger-admission, Pre-Prod, or live-network credit",
+  "source_before_sha256": "657f30dfc0ecb40f50b2c0442b78f4818de1644f540fb68d76cfb2de72cccdd3",
+  "source_mutant_sha256": "5be58f7b06c1e797571b2ad32d107367fbff59dcaa4ce041654519cbc0946eef",
+  "source_registry_status_handoff_unchanged": true,
+  "status": "candidate-awaiting-independent-byte-review; tx-sim-not-run; no credit"
+}

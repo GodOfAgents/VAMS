@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import {
   Layers,
@@ -34,7 +34,7 @@ import {
 } from 'lucide-react';
 import vamsLogo from './assets/vams-logo.png';
 import aseemProfile from './assets/aseem.jpg';
-import { GATEWAY_ORIGIN } from './config';
+import { resolveBrowserNodeTelemetry } from './nodeTelemetry';
 
 /* VAMS DESIGN SYSTEM 6.0: Immersive 3D Experiences
    - Added: Section-specific Three.js backgrounds
@@ -350,139 +350,6 @@ const SectionWrapper = ({ children, id, className = "" }) => (
 
 const Divider = ({ isDark }) => <div className={`w-full h-px ${isDark ? 'bg-gray-800' : 'bg-gray-200'} transition-colors duration-500`} role="presentation" />;
 
-// --- 4. CHC DECAGON RADAR CHART ---
-
-const CHCDecagonRadarChart = ({ profile, isDark }) => {
-  const width = 280;
-  const height = 280;
-  const cx = width / 2;
-  const cy = height / 2;
-  const radius = 90;
-
-  const domains = [
-    { key: 'K', label: 'Knowledge (K)' },
-    { key: 'RW', label: 'Read/Write (RW)' },
-    { key: 'M', label: 'Math (M)' },
-    { key: 'R', label: 'Fluid Reasoning (R)' },
-    { key: 'WM', label: 'Working Memory (WM)' },
-    { key: 'MS', label: 'Memory Storage (MS)' },
-    { key: 'MR', label: 'Memory Retrieval (MR)' },
-    { key: 'V', label: 'Visual Processing (V)' },
-    { key: 'A', label: 'Auditory Processing (A)' },
-    { key: 'S', label: 'Speed (S)' }
-  ];
-
-  const getCoordinates = (index, value) => {
-    const angle = (Math.PI * 2 * index) / 10 - Math.PI / 2;
-    const r = radius * value;
-    return {
-      x: cx + r * Math.cos(angle),
-      y: cy + r * Math.sin(angle)
-    };
-  };
-
-  const rings = [0.25, 0.50, 0.75, 1.0];
-  const points = domains.map((d, i) => {
-    const val = profile[d.key] !== undefined ? profile[d.key] : 0.5;
-    return getCoordinates(i, val);
-  });
-
-  const polygonPointsStr = points.map(p => `${p.x},${p.y}`).join(' ');
-
-  return (
-    <div className="flex flex-col items-center justify-center p-2">
-      <div className="relative">
-        <svg width={width} height={height} className="overflow-visible">
-          {/* Concentric rings */}
-          {rings.map((r, ringIdx) => {
-            const ringPoints = domains.map((_, i) => {
-              const p = getCoordinates(i, r);
-              return `${p.x},${p.y}`;
-            }).join(' ');
-            return (
-              <polygon
-                key={ringIdx}
-                points={ringPoints}
-                fill="none"
-                stroke={isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.08)'}
-                strokeWidth="1"
-              />
-            );
-          })}
-
-          {/* Radial axis lines */}
-          {domains.map((d, i) => {
-            const outer = getCoordinates(i, 1.0);
-            return (
-              <line
-                key={i}
-                x1={cx}
-                y1={cy}
-                x2={outer.x}
-                y2={outer.y}
-                stroke={isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'}
-                strokeWidth="1"
-              />
-            );
-          })}
-
-          {/* Filled Data Polygon */}
-          <polygon
-            points={polygonPointsStr}
-            fill={isDark ? 'rgba(124, 58, 237, 0.25)' : 'rgba(124, 58, 237, 0.15)'}
-            stroke="#7c3aed"
-            strokeWidth="2"
-            className="transition-all duration-500 ease-out"
-          />
-
-          {/* Vertex circles & labels */}
-          {domains.map((d, i) => {
-            const val = profile[d.key] !== undefined ? profile[d.key] : 0.5;
-            const p = getCoordinates(i, val);
-            const labelPos = getCoordinates(i, 1.22);
-
-            return (
-              <g key={i} className="group/node">
-                <circle
-                  cx={p.x}
-                  cy={p.y}
-                  r="3.5"
-                  fill="#7c3aed"
-                  className="cursor-pointer transition-all duration-300 hover:r-5 hover:fill-purple-400"
-                />
-
-                <text
-                  x={labelPos.x}
-                  y={labelPos.y}
-                  textAnchor="middle"
-                  alignmentBaseline="middle"
-                  className={`font-mono text-[8px] font-bold ${isDark ? 'fill-gray-400' : 'fill-gray-600'} hover:fill-purple-400 transition-colors cursor-help`}
-                >
-                  {d.key}
-                  <title>{d.label}: {(val * 100).toFixed(0)}%</title>
-                </text>
-              </g>
-            );
-          })}
-        </svg>
-      </div>
-
-      {/* Legend & Details */}
-      <div className="grid grid-cols-2 gap-x-4 gap-y-1 mt-3 text-[9px] font-mono w-full max-w-[260px]">
-        {domains.map((d, i) => {
-          const val = profile[d.key] !== undefined ? profile[d.key] : 0.5;
-          return (
-            <div key={i} className="flex justify-between items-center border-b border-white/5 pb-0.5">
-              <span className="opacity-50 text-[8px]">{d.label}</span>
-              <span className="text-purple-400 font-bold">{(val * 100).toFixed(0)}%</span>
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-};
-
 // --- 5. MAIN PAGE CONTENT ---
 
 export default function VAMS_Web3_Guild() {
@@ -490,127 +357,12 @@ export default function VAMS_Web3_Guild() {
   const [scrolled, setScrolled] = useState(false);
   const [isDark, setIsDark] = useState(true);
   const [activeTab, setActiveTab] = useState('terminal');
-  const [selectedNodeId, setSelectedNodeId] = useState('0x7f3...9a1');
-  const [gatewayMetrics, setGatewayMetrics] = useState({
-    connected: false,
-    status: 'connecting',
-    version: 'N/A',
-    totalNodes: 0,
-    onlineNodes: 0,
-    nodesList: [],
-    isMock: true,
-  });
-
-  const selectedNode = useMemo(() => {
-    if (!selectedNodeId) return null;
-    const found = gatewayMetrics.nodesList.find(n => (n.id || n.address || n.node_id) === selectedNodeId);
-    if (!found) return null;
-
-    return {
-      id: found.id || found.address || found.node_id || selectedNodeId,
-      region: found.region || 'us-east-1',
-      is_online: found.is_online !== undefined ? found.is_online : true,
-      uptime: found.uptime || '99.50%',
-      cost_per_hour: found.cost_per_hour || 0.15,
-      credit_score: found.credit_score || 720,
-      passports: found.passports || 'ERC-8004 Phala TEE',
-      skills: found.skills || ['token-swap', 'world-model'],
-      cognitive_profile: found.cognitive_profile || {
-        'K': 0.75, 'RW': 0.75, 'M': 0.75, 'R': 0.75, 'WM': 0.75, 'MS': 0.75, 'MR': 0.75, 'V': 0.50, 'A': 0.50, 'S': 0.75
-      }
-    };
-  }, [selectedNodeId, gatewayMetrics.nodesList]);
+  const nodeTelemetry = resolveBrowserNodeTelemetry();
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  useEffect(() => {
-    let active = true;
-    const fetchMetrics = async () => {
-      try {
-        const healthRes = await fetch(`${GATEWAY_ORIGIN}/health`);
-        if (!healthRes.ok) throw new Error('Gateway not healthy');
-        const healthData = await healthRes.json();
-
-        const nodesRes = await fetch(`${GATEWAY_ORIGIN}/nodes`);
-        if (!nodesRes.ok) throw new Error('Nodes endpoint failing');
-        const nodesData = await nodesRes.json();
-
-        if (active) {
-          setGatewayMetrics({
-            connected: true,
-            status: 'healthy',
-            version: healthData.version,
-            totalNodes: nodesData.total,
-            onlineNodes: nodesData.online,
-            nodesList: nodesData.nodes,
-            isMock: false,
-          });
-        }
-      } catch {
-        if (active) {
-          setGatewayMetrics({
-            connected: false,
-            status: 'offline',
-            version: '1.3.0-oms',
-            totalNodes: 3,
-            onlineNodes: 2,
-            nodesList: [
-              {
-                id: '0x7f3...9a1',
-                region: 'us-east-1',
-                is_online: true,
-                uptime: '99.98%',
-                cost_per_hour: 0.18,
-                credit_score: 782,
-                passports: 'Phala SGX TEE (0xabc...ef1)',
-                skills: ['token-swap', 'arbitrage-analysis', 'sentiment-extraction'],
-                cognitive_profile: {
-                  'K': 0.85, 'RW': 0.90, 'M': 0.95, 'R': 0.80, 'WM': 0.75, 'MS': 0.85, 'MR': 0.90, 'V': 0.40, 'A': 0.30, 'S': 0.95
-                }
-              },
-              {
-                id: '0x3bf...2e8',
-                region: 'af-south-1',
-                is_online: true,
-                uptime: '99.75%',
-                cost_per_hour: 0.12,
-                credit_score: 710,
-                passports: 'Akash SEV-SNP TEE (0x24a...bc8)',
-                skills: ['data-indexing', 'world-model-checkpointing'],
-                cognitive_profile: {
-                  'K': 0.70, 'RW': 0.75, 'M': 0.65, 'R': 0.60, 'WM': 0.90, 'MS': 0.95, 'MR': 0.90, 'V': 0.20, 'A': 0.15, 'S': 0.70
-                }
-              },
-              {
-                id: '0x9a2...1c4',
-                region: 'eu-west-1',
-                is_online: false,
-                uptime: '94.20%',
-                cost_per_hour: 0.25,
-                credit_score: 590,
-                passports: 'None (Unsecured CPU)',
-                skills: ['multimodal-transcription', 'speech-to-text'],
-                cognitive_profile: {
-                  'K': 0.92, 'RW': 0.95, 'M': 0.88, 'R': 0.85, 'WM': 0.80, 'MS': 0.75, 'MR': 0.70, 'V': 0.90, 'A': 0.95, 'S': 0.60
-                }
-              }
-            ],
-            isMock: true,
-          });
-        }
-      }
-    };
-
-    fetchMetrics();
-    const interval = setInterval(fetchMetrics, 5000);
-    return () => {
-      active = false;
-      clearInterval(interval);
-    };
   }, []);
 
   const toggleTheme = () => setIsDark(!isDark);
@@ -663,9 +415,9 @@ export default function VAMS_Web3_Guild() {
               )}
             </button>
 
-            <span className={`hidden lg:flex items-center gap-2 font-mono text-[9px] uppercase tracking-widest ${gatewayMetrics.connected ? 'text-green-500 border-green-500/20 bg-green-500/10' : 'text-yellow-500 border-yellow-500/20 bg-yellow-500/10'} px-3 py-1 rounded-full`}>
-              <span className={`w-1.5 h-1.5 rounded-full ${gatewayMetrics.connected ? 'bg-green-500 animate-pulse' : 'bg-yellow-500 animate-pulse'}`}></span>
-              {gatewayMetrics.connected ? 'System Normal' : 'Mock Mode'}
+            <span className="hidden lg:flex items-center gap-2 font-mono text-[9px] uppercase tracking-widest text-yellow-500 border-yellow-500/20 bg-yellow-500/10 px-3 py-1 rounded-full">
+              <span className="w-1.5 h-1.5 rounded-full bg-yellow-500"></span>
+              Telemetry unavailable
             </span>
             <a
               href="https://github.com/GodOfAgents/VAMS"
@@ -839,121 +591,20 @@ export default function VAMS_Web3_Guild() {
                 </div>
               </div>
             ) : (
-              <div className="p-6 font-mono text-xs md:text-sm leading-loose grid grid-cols-1 lg:grid-cols-12 gap-8">
-                {/* Left Panel: Telemetry & Node list (5 cols) */}
-                <div className="lg:col-span-5 space-y-4 border-b lg:border-b-0 lg:border-r border-white/5 pb-6 lg:pb-0 lg:pr-6">
-                  <div className="flex justify-between items-center border-b border-white/5 pb-2">
-                    <span className="text-gray-500">GATEWAY STATUS:</span>
-                    <span className={`font-bold ${gatewayMetrics.connected ? 'text-green-400' : 'text-yellow-400'}`}>
-                      {gatewayMetrics.status.toUpperCase()}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center border-b border-white/5 pb-2">
-                    <span className="text-gray-500">GATEWAY VERSION:</span>
-                    <span className={isDark ? 'text-white' : 'text-gray-800'}>{gatewayMetrics.version}</span>
-                  </div>
-                  <div className="flex justify-between items-center border-b border-white/5 pb-2">
-                    <span className="text-gray-500">PROVIDER NODES:</span>
-                    <span className="text-blue-400 font-bold">
-                      {gatewayMetrics.onlineNodes} / {gatewayMetrics.totalNodes} ONLINE
-                    </span>
-                  </div>
-
-                  <div className="mt-4">
-                    <div className="text-gray-500 mb-2">ACTIVE NODES REGISTRY:</div>
-                    <div className="space-y-2 max-h-[180px] overflow-y-auto pr-2">
-                      {gatewayMetrics.nodesList.length > 0 ? (
-                        gatewayMetrics.nodesList.map((node, index) => {
-                          const nId = node.id || node.address || `Node-${index}`;
-                          const isSelected = selectedNodeId === nId;
-                          return (
-                            <div
-                              key={index}
-                              onClick={() => setSelectedNodeId(nId)}
-                              className={`flex justify-between items-center p-2 rounded ${isSelected ? (isDark ? 'bg-purple-500/10 border-purple-500/50' : 'bg-purple-50 border-purple-300') : (isDark ? 'bg-white/5 hover:bg-white/10' : 'bg-black/5 hover:bg-black/10')} border border-white/5 cursor-pointer transition-all`}
-                            >
-                              <span className={`font-mono text-xs ${isSelected ? 'text-purple-400 font-semibold' : 'text-gray-300'}`}>{nId}</span>
-                              <div className="flex items-center gap-2">
-                                <span className="text-gray-500 text-[10px]">{node.region || 'N/A'}</span>
-                                <span className={`w-1.5 h-1.5 rounded-full ${node.is_online ? 'bg-green-400' : 'bg-red-400'}`}></span>
-                              </div>
-                            </div>
-                          );
-                        })
-                      ) : (
-                        <div className="text-gray-500 text-xs italic">No active nodes registered.</div>
-                      )}
-                    </div>
-                  </div>
-
-                  {gatewayMetrics.isMock && (
-                    <div className="text-[10px] text-yellow-500/70 border border-yellow-500/20 bg-yellow-500/5 p-2 rounded mt-2">
-                      ⚠️ Gateway is offline. Showing simulated telemetry data.
-                    </div>
-                  )}
+              <div
+                className="p-8 font-mono text-xs md:text-sm leading-loose"
+                data-node-telemetry-state={nodeTelemetry.status}
+              >
+                <div className="flex justify-between items-center border-b border-white/5 pb-2">
+                  <span className="text-gray-500">NODE TELEMETRY:</span>
+                  <span className="font-bold text-yellow-400">UNAVAILABLE</span>
                 </div>
-
-                {/* Right Panel: Selected Agent Profile & Decagon Graph (7 cols) */}
-                <div className="lg:col-span-7 flex flex-col justify-between">
-                  {selectedNode ? (
-                    <div className="space-y-4">
-                      <div className="flex justify-between items-center border-b border-white/5 pb-2">
-                        <span className="text-[10px] text-purple-400 uppercase tracking-widest font-bold">Node Identity Profile</span>
-                        <span className={`text-[10px] font-mono px-2 py-0.5 rounded ${selectedNode.is_online ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}`}>
-                          {selectedNode.is_online ? 'ONLINE' : 'OFFLINE'}
-                        </span>
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-x-8 gap-y-3 text-xs leading-normal">
-                        <div>
-                          <div className="text-gray-500 text-[9px] uppercase font-mono tracking-wider">Node ID</div>
-                          <div className="text-gray-300 font-mono break-all">{selectedNode.id}</div>
-                        </div>
-                        <div>
-                          <div className="text-gray-500 text-[9px] uppercase font-mono tracking-wider">Region</div>
-                          <div className="text-gray-300 font-mono">{selectedNode.region}</div>
-                        </div>
-                        <div>
-                          <div className="text-gray-500 text-[9px] uppercase font-mono tracking-wider">Uptime</div>
-                          <div className="text-gray-300 font-mono">{selectedNode.uptime}</div>
-                        </div>
-                        <div>
-                          <div className="text-gray-500 text-[9px] uppercase font-mono tracking-wider">Cost Per Hour</div>
-                          <div className="text-green-400 font-mono font-bold">${selectedNode.cost_per_hour.toFixed(2)}/hr</div>
-                        </div>
-                        <div>
-                          <div className="text-gray-500 text-[9px] uppercase font-mono tracking-wider">Credit Score</div>
-                          <div className="text-blue-400 font-mono font-bold">{selectedNode.credit_score} <span className="text-[9px] text-gray-500">(Spectral)</span></div>
-                        </div>
-                        <div>
-                          <div className="text-gray-500 text-[9px] uppercase font-mono tracking-wider">TEE Passport</div>
-                          <div className="text-yellow-400 font-mono text-[10px] break-words">{selectedNode.passports}</div>
-                        </div>
-                      </div>
-
-                      <div className="mt-2">
-                        <div className="text-gray-500 text-[9px] uppercase font-mono tracking-wider mb-1">Registered Skills</div>
-                        <div className="flex flex-wrap gap-1.5">
-                          {selectedNode.skills.map((s, idx) => (
-                            <span key={idx} className="text-[9px] font-mono px-2 py-0.5 rounded bg-purple-500/10 text-purple-400 border border-purple-500/20">
-                              {s}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-
-                      {/* CHC Decagon Graph Component */}
-                      <div className="mt-4 border-t border-white/5 pt-4">
-                        <div className="text-gray-500 text-[9px] uppercase font-mono tracking-wider mb-2 text-center">CHC Cognitive Decagon</div>
-                        <CHCDecagonRadarChart profile={selectedNode.cognitive_profile} isDark={isDark} />
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="h-full flex items-center justify-center text-gray-500 text-xs italic">
-                      Select a node from the registry to view its cognitive profile.
-                    </div>
-                  )}
+                <div className={`mt-6 text-base ${isDark ? 'text-gray-200' : 'text-gray-800'}`}>
+                  {nodeTelemetry.message}
                 </div>
+                <p className="mt-3 text-gray-500">
+                  No node request is sent and no simulated telemetry is displayed.
+                </p>
               </div>
             )}
           </div>

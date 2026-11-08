@@ -1,0 +1,236 @@
+{
+  "applied_parameters": {
+    "committee_public_keys_hex": [
+      "60878c2ddf61b36615928511b7e4e4453c8820d4a99da386e84bd4e937f15667",
+      "973c99887493de49a41e776a7a8e4bfff3b0de23381639b7f0e89441a2677949",
+      "c16455c794ee9b5a1b20e1e9f91bc5b0ac846f6a4d42345a366fe941d16ba021",
+      "e0cc5b162f3b2fccd0fbd0b4945e82fc8d60a19da44c11d43187b55ef760c497",
+      "f04b8da71cf91d4f522433271f488659e0f5cc6d68192547ccd54a4d364f0c7f"
+    ],
+    "parameter_cbor_sha256": "d3c9a2aeb2a47eecd7e004bb5c65cd569b9a569b6980ca5e752f48a07996cc9e",
+    "private_key_material_persisted": false,
+    "seed_ref": {
+      "output_index": 7,
+      "tx_hash": "abababababababababababababababababababababababababababababababab"
+    }
+  },
+  "applied_policy": {
+    "compiled_script_sha256": "9136d96103775a3140a77ae53ca0bc8e2bbb70265ae7aa732dad75cfcc68a170",
+    "policy_id": "4df3f2980f5fb625605e3198278670cbc9cb01535b6bbe3ee5d16e76",
+    "state_validator_hash": "b4a7b5de32fa88554a4eb44d8e8235e24e738a1c1d1fe1764a0a3e66"
+  },
+  "artifacts": {
+    "negative.applied-policy.cbor": {
+      "bytes": 3467,
+      "sha256": "9136d96103775a3140a77ae53ca0bc8e2bbb70265ae7aa732dad75cfcc68a170"
+    },
+    "negative.genesis_ref.cbor": {
+      "bytes": 39,
+      "sha256": "51f08c55f440a2116b42e5283fc76d8be4d707788d3bc765023620199af45c75"
+    },
+    "negative.initial_keys.cbor": {
+      "bytes": 172,
+      "sha256": "7a6b259efa80818833fa49505a0d56109b8df13f91f0d50cfb7773013acae3f2"
+    },
+    "negative.proof-message.bin": {
+      "bytes": 279,
+      "sha256": "5fa13e0c6240b7b75d154f152de2bf376f93d2af3dd8642c7d25f4757e2a8542"
+    },
+    "negative.raw_inputs.cbor": {
+      "bytes": 73,
+      "sha256": "5e935c48cc9d4e82e6dbedce94b2fbd3fb427f5e187bbe67ed376671ba5e4fec"
+    },
+    "negative.raw_outputs.cbor": {
+      "bytes": 79,
+      "sha256": "c4ba70814b665c3fc0133e8c3ea4d253f27613716209da83113dd1ab9ec59048"
+    },
+    "negative.tx.cbor": {
+      "bytes": 5104,
+      "sha256": "53526ecc1282cb83aaf9690a74c422361f25c4229da1378bbc68d8e78405534b"
+    },
+    "negative.validation": {
+      "ada_conservation": true,
+      "body_hash": "432b080980a2e5326fd3751f3b269eb6dc2c8b1d58074f72afbf0be6109ebd11",
+      "funding_signatures": 2,
+      "mint0_redeemer": {
+        "cbor_sha256": "e7c21b6c29e7bcd3d7a9b5540bb879ad507f98288bfd91568d30599d82b6f5dc",
+        "constructor_tag": 121,
+        "proof_count": 5,
+        "proof_signatures_hex": [
+          "922b9297b30d6b1649a5343323eaa92607a176dda89feace4b1df4300abeace64fe3e8dab19ee592601a3988ec0c1699bbebe3af1ea064516ad550cb81d6310a",
+          "a5aee160629ae662fc3fa8424d3632a0c38db91df8c18e0772a20c8ff3b5fc29693b22c2e19880e34f6bd382245a604fe91bc7894a11bb96f0a2d85202ceba05",
+          "56b2b4e89933b757915df7184b2baad4e37b69585369131e879d570cb9e312c61a27c32f0bc7171df8072887f15b76752c295ce6a661d828cff55fe8d2d4840e",
+          "cbec7559aae4621cf2ed793dc791d3e3230bdf812711c4fbeabaead6391ca3ad6a1e228c744ce8760ac9a0b0811d84444a97ea46ceae30af46fe8149d0be9404",
+          "36c295c579d1a330193200b7db343a95ace185d49830d8eed42473c9dda9fc309a2631883f97327d0d6bb1f37b29417a43c4434a41e174dbe3b536d68a1db601"
+        ]
+      },
+      "native_asset_conservation": true,
+      "private_keys_persisted": false,
+      "valid_body_bound_ephemeral_signatures": true
+    },
+    "positive-control.applied-policy.cbor": {
+      "bytes": 3467,
+      "sha256": "9136d96103775a3140a77ae53ca0bc8e2bbb70265ae7aa732dad75cfcc68a170"
+    },
+    "positive-control.genesis_ref.cbor": {
+      "bytes": 39,
+      "sha256": "51f08c55f440a2116b42e5283fc76d8be4d707788d3bc765023620199af45c75"
+    },
+    "positive-control.initial_keys.cbor": {
+      "bytes": 172,
+      "sha256": "7a6b259efa80818833fa49505a0d56109b8df13f91f0d50cfb7773013acae3f2"
+    },
+    "positive-control.proof-message.bin": {
+      "bytes": 279,
+      "sha256": "dd7f979a1c9aaf8716069f6ccc7424ba9143b5c29f8ba20bf87d9d7336f95d3d"
+    },
+    "positive-control.raw_inputs.cbor": {
+      "bytes": 73,
+      "sha256": "5e935c48cc9d4e82e6dbedce94b2fbd3fb427f5e187bbe67ed376671ba5e4fec"
+    },
+    "positive-control.raw_outputs.cbor": {
+      "bytes": 79,
+      "sha256": "d137c61cbd332ec1d13900844e51ee075abb99fe4a9cd838d9ead465e2a6ca95"
+    },
+    "positive-control.tx.cbor": {
+      "bytes": 5104,
+      "sha256": "040a2fb4deff2265ec1bcc6d7f5ae78170ff3a2855cb7145729fddf6d101a555"
+    },
+    "positive-control.validation": {
+      "ada_conservation": true,
+      "body_hash": "432b080980a2e5326fd3751f3b269eb6dc2c8b1d58074f72afbf0be6109ebd11",
+      "funding_signatures": 2,
+      "mint0_redeemer": {
+        "cbor_sha256": "809eb749c7e7b19751a58f64f8d823a01d47c57761265c113f9568016d982c09",
+        "constructor_tag": 121,
+        "proof_count": 5,
+        "proof_signatures_hex": [
+          "47af947accd3a74c3acc9de16ce6a6330600157ed5be839a617beba0868afd9db120aee59caf6d5b52a8df379c25652478a391d0410027f213fa605c1f4b620f",
+          "a57c4e9d8504a80b98199428a7bc1563e935c13b55f8a60e935c86c64f5a59c50cd8d6d4b811adb410b7aed8ca6edaae9cb3df57425256a70d97fc195b003d00",
+          "f0803ea55c9e1f3f0e1489900cf0d546b8ced953375e06d494ffdc5968e87cd1fe9eda363431caa0fb5dd0362d4932790b99989e5c8dea65c8e00867655d070d",
+          "873f550db8bf3de3d0f3c8d2d8bb3017f7cd30e16d4bc4f258c7996d0bf821ded057a5e9210a6f8016b1c88d6207270ed343e4eb00601722e813f8388509d609",
+          "a5855d4b28dcb86d1439142f469aa2fceb8470d57411ac9e0b63628c75a90febb3de02d31d22338146f75b8e7e488d7319e86bbe94ca9144dd8e2db3c498c401"
+        ]
+      },
+      "native_asset_conservation": true,
+      "private_keys_persisted": false,
+      "valid_body_bound_ephemeral_signatures": true
+    }
+  },
+  "case_id": "r2_signature_for_other_seed",
+  "credit": {
+    "ledger_admission": false,
+    "live_network": false,
+    "negative_case": null,
+    "original_policy": false
+  },
+  "decision": "R4.1 proof-domain B",
+  "entrypoint": "f05_authority_policy.f05_authority_policy.mint / Plutus V3 / Mint[0]",
+  "execution": "not run; awaits independent byte review",
+  "fixture_family": "proof_domain",
+  "funding_and_conservation": {
+    "authority_output_lovelace": 10000000,
+    "change_output_lovelace": 6000000,
+    "collateral": {
+      "lovelace": 0,
+      "present": false
+    },
+    "fee_lovelace": 1000000,
+    "inputs_lovelace": 17000000,
+    "native_asset_equation": "exactly one authority NFT under this applied policy is minted and preserved in the authority output",
+    "value_equation": "17000000 = 10000000 + 6000000 + 1000000"
+  },
+  "negative": {
+    "applied_policy_id": "4df3f2980f5fb625605e3198278670cbc9cb01535b6bbe3ee5d16e76",
+    "applied_seed_ref_retained": {
+      "output_index": 7,
+      "tx_hash": "abababababababababababababababababababababababababababababababab"
+    },
+    "changed_condition": "ephemeral committee signs the exact R2 tuple with alternate seed tx hash ad repeated 32 bytes; policy parameters, datum and transaction retain seed tx hash ab repeated 32 bytes",
+    "compiled_script_sha256": "9136d96103775a3140a77ae53ca0bc8e2bbb70265ae7aa732dad75cfcc68a170",
+    "mint_applied_v3_witness_identity_verified": true,
+    "named_condition_attribution": "pending simulator execution and independent compiled Mint[0] review; none inferred from construction",
+    "proof_message_sha256": "5fa13e0c6240b7b75d154f152de2bf376f93d2af3dd8642c7d25f4757e2a8542",
+    "raw_inputs_sha256": "5e935c48cc9d4e82e6dbedce94b2fbd3fb427f5e187bbe67ed376671ba5e4fec",
+    "raw_outputs_sha256": "c4ba70814b665c3fc0133e8c3ea4d253f27613716209da83113dd1ab9ec59048",
+    "signed_seed_ref": {
+      "output_index": 7,
+      "tx_hash": "adadadadadadadadadadadadadadadadadadadadadadadadadadadadadadadad"
+    },
+    "status": "PENDING",
+    "transaction_sha256": "53526ecc1282cb83aaf9690a74c422361f25c4229da1378bbc68d8e78405534b",
+    "validation": {
+      "ada_conservation": true,
+      "body_hash": "432b080980a2e5326fd3751f3b269eb6dc2c8b1d58074f72afbf0be6109ebd11",
+      "funding_signatures": 2,
+      "mint0_redeemer": {
+        "cbor_sha256": "e7c21b6c29e7bcd3d7a9b5540bb879ad507f98288bfd91568d30599d82b6f5dc",
+        "constructor_tag": 121,
+        "proof_count": 5,
+        "proof_signatures_hex": [
+          "922b9297b30d6b1649a5343323eaa92607a176dda89feace4b1df4300abeace64fe3e8dab19ee592601a3988ec0c1699bbebe3af1ea064516ad550cb81d6310a",
+          "a5aee160629ae662fc3fa8424d3632a0c38db91df8c18e0772a20c8ff3b5fc29693b22c2e19880e34f6bd382245a604fe91bc7894a11bb96f0a2d85202ceba05",
+          "56b2b4e89933b757915df7184b2baad4e37b69585369131e879d570cb9e312c61a27c32f0bc7171df8072887f15b76752c295ce6a661d828cff55fe8d2d4840e",
+          "cbec7559aae4621cf2ed793dc791d3e3230bdf812711c4fbeabaead6391ca3ad6a1e228c744ce8760ac9a0b0811d84444a97ea46ceae30af46fe8149d0be9404",
+          "36c295c579d1a330193200b7db343a95ace185d49830d8eed42473c9dda9fc309a2631883f97327d0d6bb1f37b29417a43c4434a41e174dbe3b536d68a1db601"
+        ]
+      },
+      "native_asset_conservation": true,
+      "private_keys_persisted": false,
+      "valid_body_bound_ephemeral_signatures": true
+    }
+  },
+  "original_assertion": {
+    "id": "r2_signature_for_other_seed",
+    "mutation": "sign_same_tuple_with_alternate_seed"
+  },
+  "original_case_id_preserved": true,
+  "original_policy_id": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+  "positive_control": {
+    "applied_policy_id": "4df3f2980f5fb625605e3198278670cbc9cb01535b6bbe3ee5d16e76",
+    "compiled_script_sha256": "9136d96103775a3140a77ae53ca0bc8e2bbb70265ae7aa732dad75cfcc68a170",
+    "mint_applied_v3_witness_identity_verified": true,
+    "proof_message_sha256": "dd7f979a1c9aaf8716069f6ccc7424ba9143b5c29f8ba20bf87d9d7336f95d3d",
+    "raw_inputs_sha256": "5e935c48cc9d4e82e6dbedce94b2fbd3fb427f5e187bbe67ed376671ba5e4fec",
+    "raw_outputs_sha256": "d137c61cbd332ec1d13900844e51ee075abb99fe4a9cd838d9ead465e2a6ca95",
+    "signed_seed_ref": {
+      "output_index": 7,
+      "tx_hash": "abababababababababababababababababababababababababababababababab"
+    },
+    "status": "PENDING",
+    "transaction_sha256": "040a2fb4deff2265ec1bcc6d7f5ae78170ff3a2855cb7145729fddf6d101a555",
+    "validation": {
+      "ada_conservation": true,
+      "body_hash": "432b080980a2e5326fd3751f3b269eb6dc2c8b1d58074f72afbf0be6109ebd11",
+      "funding_signatures": 2,
+      "mint0_redeemer": {
+        "cbor_sha256": "809eb749c7e7b19751a58f64f8d823a01d47c57761265c113f9568016d982c09",
+        "constructor_tag": 121,
+        "proof_count": 5,
+        "proof_signatures_hex": [
+          "47af947accd3a74c3acc9de16ce6a6330600157ed5be839a617beba0868afd9db120aee59caf6d5b52a8df379c25652478a391d0410027f213fa605c1f4b620f",
+          "a57c4e9d8504a80b98199428a7bc1563e935c13b55f8a60e935c86c64f5a59c50cd8d6d4b811adb410b7aed8ca6edaae9cb3df57425256a70d97fc195b003d00",
+          "f0803ea55c9e1f3f0e1489900cf0d546b8ced953375e06d494ffdc5968e87cd1fe9eda363431caa0fb5dd0362d4932790b99989e5c8dea65c8e00867655d070d",
+          "873f550db8bf3de3d0f3c8d2d8bb3017f7cd30e16d4bc4f258c7996d0bf821ded057a5e9210a6f8016b1c88d6207270ed343e4eb00601722e813f8388509d609",
+          "a5855d4b28dcb86d1439142f469aa2fceb8470d57411ac9e0b63628c75a90febb3de02d31d22338146f75b8e7e488d7319e86bbe94ca9144dd8e2db3c498c401"
+        ]
+      },
+      "native_asset_conservation": true,
+      "private_keys_persisted": false,
+      "valid_body_bound_ephemeral_signatures": true
+    }
+  },
+  "preserved_security_assertion": {
+    "expected_result": "reject at compiled target Mint[0]",
+    "target_ref": "cardano/validators/f05_authority_policy.ak#f05_authority_policy.mint",
+    "verifier_property": "valid_bootstrap_proofs(initial_keys, proofs, bootstrap_message)"
+  },
+  "schema_version": "f05-2a-proof-domain-case-r1",
+  "scope": "synthetic test-only alternate applied policy; no original-policy, full-ledger-admission, Pre-Prod, or live-network credit",
+  "status": "candidate-awaiting-independent-byte-review; tx-sim-not-run; no credit",
+  "toolchain": {
+    "aiken_binary_sha256": "07f3f927f1a8c71fc61273fdff850d9b98edb28dde207c8a32585991f2c88e79",
+    "aiken_version": "aiken v1.1.21+42babe5",
+    "python_version": "Python 3.12.14"
+  }
+}

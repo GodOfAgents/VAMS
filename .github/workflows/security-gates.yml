@@ -19,6 +19,9 @@ on:
 permissions:
   contents: read
 
+env:
+  VAMS_ENV: test
+
 jobs:
   changes:
     name: Detect Changed Files
@@ -80,7 +83,7 @@ jobs:
 
       - name: Install Audit Test Dependencies
         run: |
-          python -m pip install pip==26.1.2
+          python -m pip install pip==26.2
           python -m pip install git-filter-repo==2.47.0
 
       - name: Validate Audit Program
@@ -95,6 +98,8 @@ jobs:
         run: |
           python scripts/audit/deployment_readiness.py
           python scripts/audit/test_deployment_readiness.py
+          VAMS_ENV=testnet python scripts/security/runtime_mode_preflight.py --require-live --expected-mode testnet
+          python -m pytest -q scripts/security/test_runtime_mode_preflight.py
 
       - name: Validate Architecture And Invariant Traceability
         run: |
@@ -228,6 +233,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
+          submodules: recursive
 
       - name: Fetch Complete Git History
         shell: bash
@@ -249,6 +255,14 @@ jobs:
       - name: Verify Narrow GitLeaks Allowlists
         run: python scripts/security/gitleaks_allowlist_regression.py
 
+      - name: Enforce Current-Tree Vendor Baseline
+        shell: bash
+        run: |
+          set -euo pipefail
+          python scripts/security/m0_4_vendor_baseline_gate.py \
+            --gitleaks /usr/local/bin/gitleaks \
+            --output "$RUNNER_TEMP/m0-4-current-tree-summary.json"
+
       - name: Run Complete-History GitLeaks
         id: gitleaks_scan
         continue-on-error: true
@@ -256,9 +270,7 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p raw-gate
-          gitleaks git . --config .gitleaks.toml --redact=100 \
-            --report-format json --report-path raw-gate/gitleaks-report.json \
-            --log-opts=--all --exit-code 1
+          gitleaks git --log-opts="--all -m" . --config .gitleaks.toml --redact=100 --report-format json --report-path raw-gate/gitleaks-report.json --exit-code 1
           test -s raw-gate/gitleaks-report.json
 
       - name: Upload GitLeaks Raw Gate Evidence
@@ -370,7 +382,7 @@ jobs:
 
       - name: Install Slither
         run: |
-          python -m pip install pip==26.1.2
+          python -m pip install pip==26.2
           pip install slither-analyzer==0.11.5
 
       - name: Run Slither
@@ -453,9 +465,9 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          python -m pip install pip==26.1.2
-          pip install pytest==9.1.1 pytest-asyncio==1.4.0 anyio==4.14.1
-          pip install httpx==0.28.1 httpx2==2.5.0 bandit==1.9.4 pip-audit==2.10.1
+          python -m pip install pip==26.2
+          pip install pytest==9.1.1 pytest-asyncio==1.4.0 anyio==4.14.2
+          pip install httpx==0.28.1 httpx2==2.12.0 bandit==1.9.4 pip-audit==2.10.1
           pip install git-filter-repo==2.47.0
           pip install -r gateway/requirements.txt
           pip install -r neuron/requirements.txt
@@ -464,14 +476,27 @@ jobs:
         run: |
           pip-audit -r gateway/requirements.txt
           pip-audit -r neuron/requirements.txt
+          pip-audit --local --vulnerability-service pypi
 
       - name: Run Bandit (Security Linter)
         run: |
           bandit -r neuron/ gateway/ -ll -ii
 
+      - name: Acquire Checksum-Verified Envoy 1.39.1
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --location --silent --show-error \
+            --output "$RUNNER_TEMP/envoy" \
+            https://github.com/envoyproxy/envoy/releases/download/v1.39.1/envoy-1.39.1-linux-x86_64
+          echo "002c6e1c69ed0fa0ea381887247cadadfaec9481375fa8d8d2b1731eeabf40b8  $RUNNER_TEMP/envoy" | sha256sum --check --strict
+          chmod 0755 "$RUNNER_TEMP/envoy"
+          "$RUNNER_TEMP/envoy" --version | grep -F "/1.39.1/Clean/RELEASE/BoringSSL"
+
       - name: Run PyTest Suite
         run: |
-          pytest -v --tb=short
+          VAMS_ENVOY_BIN="$RUNNER_TEMP/envoy" pytest -v --tb=short --ignore=docs/remediation/m3_f05_design_r2/test_design.py
+          VAMS_ENVOY_BIN="$RUNNER_TEMP/envoy" pytest -v --tb=short docs/remediation/m3_f05_design_r2/test_design.py
 
   semgrep-gate:
     name: Semgrep Static Analysis
@@ -489,7 +514,7 @@ jobs:
 
       - name: Install Semgrep
         run: |
-          python -m pip install pip==26.1.2
+          python -m pip install pip==26.2
           pip install semgrep==1.169.0
 
       - name: Run Reviewed Semgrep Gate
@@ -547,6 +572,11 @@ jobs:
           cd frontend-vite
           npm ci
 
+      - name: Run Frontend Telemetry Security Tests
+        run: |
+          cd frontend-vite
+          npm test
+
       - name: Audit NPM Packages
         run: |
           cd frontend-vite
@@ -563,8 +593,13 @@ jobs:
           cd frontend-vite
           npm run build
 
+      - name: Scan Production Bundle
+        run: |
+          cd frontend-vite
+          npm run scan:bundle
+
   gateway-config-gate:
-    name: Gateway Caddy Config Check
+    name: Gateway Envoy Config Check
     runs-on: ubuntu-latest
     needs: changes
     if: github.event_name != 'pull_request' || needs.changes.outputs.docs_only != 'true'
@@ -572,29 +607,43 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - name: Adapt Caddy Config
+      - name: Acquire Checksum-Verified Envoy 1.39.1
+        shell: bash
         run: |
-          mkdir -p "$RUNNER_TEMP/caddy-ci"
+          set -euo pipefail
+          curl --fail --location --silent --show-error \
+            --output "$RUNNER_TEMP/envoy" \
+            https://github.com/envoyproxy/envoy/releases/download/v1.39.1/envoy-1.39.1-linux-x86_64
+          echo "002c6e1c69ed0fa0ea381887247cadadfaec9481375fa8d8d2b1731eeabf40b8  $RUNNER_TEMP/envoy" | sha256sum --check --strict
+          chmod 0755 "$RUNNER_TEMP/envoy"
+          "$RUNNER_TEMP/envoy" --version | grep -F "/1.39.1/Clean/RELEASE/BoringSSL"
+
+      - name: Validate Envoy Gateway Contract and Configuration
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/envoy-ci"
           openssl req -x509 -newkey rsa:2048 -nodes \
             -subj "/CN=VAMS CI Root" -days 1 \
-            -keyout "$RUNNER_TEMP/caddy-ci/ca-key.pem" \
-            -out "$RUNNER_TEMP/caddy-ci/ca.pem"
-
-          docker run --rm \
-            -v "$PWD/gateway/Caddyfile.testnet.example:/etc/caddy/Caddyfile:ro" \
-            -v "$RUNNER_TEMP/caddy-ci/ca.pem:/etc/caddy/certs/vams-root-ca.crt:ro" \
-            -e VAMS_GATEWAY_DOMAIN=localhost \
-            -e VAMS_ROOT_CA_CERT=/etc/caddy/certs/vams-root-ca.crt \
-            caddy:2.11.4-alpine@sha256:5f5c8640aae01df9654968d946d8f1a56c497f1dd5c5cda4cf95ab7c14d58648 \
-            caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile
-
-          docker run --rm \
-            -v "$PWD/gateway/Caddyfile.testnet.example:/etc/caddy/Caddyfile:ro" \
-            -v "$RUNNER_TEMP/caddy-ci/ca.pem:/etc/caddy/certs/vams-root-ca.crt:ro" \
-            -e VAMS_GATEWAY_DOMAIN=localhost \
-            -e VAMS_ROOT_CA_CERT=/etc/caddy/certs/vams-root-ca.crt \
-            caddy:2.11.4-alpine@sha256:5f5c8640aae01df9654968d946d8f1a56c497f1dd5c5cda4cf95ab7c14d58648 \
-            caddy adapt --config /etc/caddy/Caddyfile --adapter caddyfile --pretty
+            -keyout "$RUNNER_TEMP/envoy-ci/ca-key.pem" \
+            -out "$RUNNER_TEMP/envoy-ci/ca.pem" >/dev/null 2>&1
+          openssl req -newkey rsa:2048 -nodes \
+            -subj "/CN=localhost" \
+            -keyout "$RUNNER_TEMP/envoy-ci/server.key" \
+            -out "$RUNNER_TEMP/envoy-ci/server.csr" >/dev/null 2>&1
+          openssl x509 -req -days 1 \
+            -in "$RUNNER_TEMP/envoy-ci/server.csr" \
+            -CA "$RUNNER_TEMP/envoy-ci/ca.pem" \
+            -CAkey "$RUNNER_TEMP/envoy-ci/ca-key.pem" \
+            -CAcreateserial \
+            -out "$RUNNER_TEMP/envoy-ci/server.crt" >/dev/null 2>&1
+          sed \
+            -e "s#/etc/vams/gateway/tls/server.crt#$RUNNER_TEMP/envoy-ci/server.crt#g" \
+            -e "s#/etc/vams/gateway/tls/server.key#$RUNNER_TEMP/envoy-ci/server.key#g" \
+            -e "s#/etc/vams/gateway/tls/client-ca.crt#$RUNNER_TEMP/envoy-ci/ca.pem#g" \
+            gateway/envoy.testnet.yaml > "$RUNNER_TEMP/envoy-ci/envoy.yaml"
+          python scripts/security/validate_envoy_gateway.py
+          "$RUNNER_TEMP/envoy" --mode validate -c "$RUNNER_TEMP/envoy-ci/envoy.yaml"
 
   sbom-generation:
     name: SBOM Generation & Signing

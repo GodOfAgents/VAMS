@@ -6,9 +6,8 @@ import {IVAMSProofPlugin} from "../../interfaces/IVAMSProofPlugin.sol";
 /**
  * @title TEEProofPlugin
  * @notice Proof plugin for TEE (Trusted Execution Environment) attestation verification.
- * @dev Verifies Intel SGX, AWS Nitro, and ARM CCA attestation proofs.
- *      In production, calls the Automata DCAP attestation verifier.
- *      This plugin replaces the legacy PHALA_EXECUTION proof type.
+ * @dev Retired, rejecting compatibility plugin. No hardware scheme is verified
+ *      by this format. Use the separately qualified action-bound DCAP path.
  */
 contract TEEProofPlugin is IVAMSProofPlugin {
 
@@ -46,43 +45,14 @@ contract TEEProofPlugin is IVAMSProofPlugin {
         return keccak256(abi.encodePacked("PHALA_EXECUTION"));
     }
 
-    function verify(
-        bytes32 serviceHash,
-        bytes32 deliveryHash,
-        bytes calldata proofData
-    ) external view override returns (bool valid) {
-        if (proofData.length == 0) return false;
-
-        // Decode the TEE attestation elements individually
-        (
-            bytes memory sgxQuote,
-            bytes32 mrenclave,
-            bytes32 mrsigner,
-            address attestedAgent
-        ) = abi.decode(proofData, (bytes, bytes32, bytes32, address));
-
-        // 1. Verify sgxQuote is non-empty
-        if (sgxQuote.length == 0) return false;
-
-        // 2. Verify mrenclave is in the allowlist
-        if (!allowedEnclaves[mrenclave]) return false;
-
-        // 3. Verify the quote binds to the service + delivery hashes
-        //    In production: Automata DCAP verification of the raw quote
-        //    For now: verify the quote contains the expected binding
-        bytes32 expectedBinding = keccak256(abi.encodePacked(serviceHash, deliveryHash));
-        bytes32 quoteBinding = keccak256(sgxQuote);
-        
-        // Commitment: the quote must have been generated FOR this specific service/delivery pair.
-        // Full Automata DCAP verification extracts report_data from the raw quote.
-        // For Phase 1: use a deterministic hash commitment.
-        if (quoteBinding != expectedBinding) return false;
-
-        return true;
+    function verify(bytes32, bytes32, bytes calldata) external pure override returns (bool) {
+        // Historical hash concatenation is not hardware attestation. Qualified
+        // action-bound evidence uses the separate versioned verifier path.
+        return false;
     }
 
     function trustWeight() external pure override returns (uint256) {
-        return 2500; // 25% — high trust (execution integrity)
+        return 0; // No qualification or trust credit for the retired proof format.
     }
 
     function name() external pure override returns (string memory) {

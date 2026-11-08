@@ -1,0 +1,158 @@
+{
+  "accepted_overlay_current_counts": {
+    "mutations": "18/21",
+    "negative_cases": "45/55"
+  },
+  "capture_command": " /home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python -B docs/remediation/m3_f05_2a_r4_family_freeze_r1/capture_simulator.py",
+  "case_count_change": 0,
+  "command": "bwrap --unshare-net --ro-bind / / --tmpfs /tmp --ro-bind /home/GodOfAgents/.cache /home/GodOfAgents/.cache --dev-bind /dev /dev --proc /proc --setenv HOME /home/GodOfAgents --chdir /home/GodOfAgents/code/VAMS-testnet /home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python -B docs/remediation/m3_f05_2a_r4_family_freeze_r1/run_family.py",
+  "count_note": "All three IDs already appear as PASS in docs/remediation/m3_f05_2a_evidence_classification_r1/CASE-STATUS.json under evidence seed_reference_and_datum_binding; this supplemental exact replay adds no count. The frozen family manifests remain immutable at their pre-execution PENDING snapshot.",
+  "date": "2026-10-03",
+  "family_manifest_admission_status": "PENDING until independent result review",
+  "first_attempt": {
+    "exit": 1,
+    "exit_file_sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+    "failure": "Harness version-prefix assertion expected a leading v; actual pinned output was aiken v1.1.21+42babe5. Failure occurred before runner loop and before any transaction simulator invocation.",
+    "stderr_sha256": "45faf7b3fde2a49863f36894b455c084805d4c9cb80b5744c0bd541c2817c2fa",
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "independent_result_review": {
+    "limitation": "compiled target rejection only; no precise internal guard trace, Cardano ledger admission, or live-network evidence",
+    "path": "docs/remediation/m3_f05_2a_r4_family_freeze_r1/SIMULATION-REVIEW.md",
+    "replayed_cases": [
+      "seed_missing",
+      "seed_datum_hash",
+      "seed_datum_index"
+    ],
+    "result": "PASS",
+    "reviewer": "f05_uplc_backend_review",
+    "scope": "independent hash/transcript verification and replay of exact network-isolated command for three frozen cases",
+    "sha256": "0bc8589d62ad74b898daade4cabbdf86b056d88da9abbdd81f608960dd53d1b2"
+  },
+  "inputs": {
+    "aiken_sha256": "07f3f927f1a8c71fc61273fdff850d9b98edb28dde207c8a32585991f2c88e79",
+    "aiken_version": "aiken v1.1.21+42babe5",
+    "applied_policy_id": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+    "capture_script_sha256": "e18727c7322848b58facde99b0dc4c6503e9b24fed1efc7055352e5c25cbe71d",
+    "family_manifest": "docs/remediation/m3_f05_2a_r4_tx_families/seed_reference_and_datum_binding/FAMILY-MANIFEST.json",
+    "freeze_sha256": "df7d882ad8aa26b59692c65457bf888204cfbfdc3586ce2619a99f1749115c6b",
+    "harness_sha256": "13b926b618045f04171aa74877cf5d02f3de3f7cffcd3feb2c17b4e5ba0adfb4",
+    "runner_sha256": "3088ade0a316f6af59c04fe3e1675733100b58be826fa22af3c25e40a086ea5c"
+  },
+  "ledger_admission": false,
+  "live_network_evidence": false,
+  "network_isolated": true,
+  "pre_simulation_review": {
+    "result": "PASS",
+    "review_path": "docs/remediation/m3_f05_2a_r4_family_freeze_r1/REVIEW.md",
+    "reviewed_freeze_sha256": "df7d882ad8aa26b59692c65457bf888204cfbfdc3586ce2619a99f1749115c6b"
+  },
+  "registered_negative_or_mutation_credit": "none pending independent result review",
+  "schema_version": "f05-2a-r4-seed-reference-simulator-r1",
+  "status": "three_exact_frozen_cases_passed_expected_rejection_independently_reviewed_synthetic_only",
+  "successful_attempt": {
+    "exit": 0,
+    "exit_file_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "result": {
+      "aiken_sha256": "07f3f927f1a8c71fc61273fdff850d9b98edb28dde207c8a32585991f2c88e79",
+      "aiken_version": "aiken v1.1.21+42babe5",
+      "applied_policy_id": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+      "cases": [
+        {
+          "classification": {
+            "stage": "compiled_evaluation",
+            "target_script_invoked": true
+          },
+          "cleanup": {
+            "child_reaped": true,
+            "process_group_empty": true,
+            "snapshot_descriptors_closed": true,
+            "status": "clean"
+          },
+          "expected": "reject at compiled target Mint[0]",
+          "id": "seed_missing",
+          "simulator_child_exit": 1,
+          "submitted_sha256": {
+            "raw_inputs": "1f4c86aa7a6d64cc0ebac3bf8633e98b5c91fa7ded58bdb70427fdd9ffa0e778",
+            "raw_outputs": "5a02a590dd2df85f220c273837e014bc5a6c75f6b1dfa8cd9d6770322e89c232",
+            "transaction": "216c52f1803f8ea2de78e3f4c14ff7905ecaaab5dff10a83af2aca9e3c9c80ab"
+          },
+          "target_mint_binding": {
+            "compiled_script_hash": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+            "expected_policy_id": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+            "policy_ids": [
+              "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731"
+            ]
+          },
+          "wrapper_exit": 0
+        },
+        {
+          "classification": {
+            "stage": "compiled_evaluation",
+            "target_script_invoked": true
+          },
+          "cleanup": {
+            "child_reaped": true,
+            "process_group_empty": true,
+            "snapshot_descriptors_closed": true,
+            "status": "clean"
+          },
+          "expected": "reject at compiled target Mint[0]",
+          "id": "seed_datum_hash",
+          "simulator_child_exit": 1,
+          "submitted_sha256": {
+            "raw_inputs": "4b20e2b2cf4bd58b1f6e385c90ffd098d583df69d95fbc7b1fcc2591da72b9fe",
+            "raw_outputs": "6b0a4e1175feea6778d2c9c782a2843317f97905ee2efba20824939d2e1a2d5a",
+            "transaction": "72cb5d0bd2db739be30485a489e31d758db23ee553e26232575fb66720e0bad3"
+          },
+          "target_mint_binding": {
+            "compiled_script_hash": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+            "expected_policy_id": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+            "policy_ids": [
+              "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731"
+            ]
+          },
+          "wrapper_exit": 0
+        },
+        {
+          "classification": {
+            "stage": "compiled_evaluation",
+            "target_script_invoked": true
+          },
+          "cleanup": {
+            "child_reaped": true,
+            "process_group_empty": true,
+            "snapshot_descriptors_closed": true,
+            "status": "clean"
+          },
+          "expected": "reject at compiled target Mint[0]",
+          "id": "seed_datum_index",
+          "simulator_child_exit": 1,
+          "submitted_sha256": {
+            "raw_inputs": "4b20e2b2cf4bd58b1f6e385c90ffd098d583df69d95fbc7b1fcc2591da72b9fe",
+            "raw_outputs": "0cb03db687d95740f58d1e47ffcb7b273a4be864ec45a7995d1d9a45ae6e395c",
+            "transaction": "78a81a65568686d545adf424e70e2933f6beeb5201e7f5ae83ab4730293c3f65"
+          },
+          "target_mint_binding": {
+            "compiled_script_hash": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+            "expected_policy_id": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+            "policy_ids": [
+              "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731"
+            ]
+          },
+          "wrapper_exit": 0
+        }
+      ],
+      "evidence_class": "synthetic_local_snapshot_bound_transaction_simulator",
+      "family_id": "seed_reference_and_datum_binding",
+      "family_manifest_admission_status": "PENDING",
+      "freeze_sha256": "df7d882ad8aa26b59692c65457bf888204cfbfdc3586ce2619a99f1749115c6b",
+      "ledger_admission": false,
+      "live_network_evidence": false,
+      "runner_sha256": "3088ade0a316f6af59c04fe3e1675733100b58be826fa22af3c25e40a086ea5c",
+      "status": "pass_pending_independent_result_review"
+    },
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "2d69ca79e8aa07038a944a41b97df59580dbd06d33a76acf6a75c75740f3c5ce"
+  }
+}

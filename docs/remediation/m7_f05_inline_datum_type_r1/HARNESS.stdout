@@ -1,0 +1,801 @@
+{
+  "compiled_mutations": [
+    {
+      "detected": true,
+      "mutation": "remove_seed_guard",
+      "negative_fixture": "seed_missing"
+    },
+    {
+      "detected": true,
+      "mutation": "remove_target_output_cardinality_guard",
+      "negative_fixture": "authority_output_extra_target"
+    },
+    {
+      "detected": true,
+      "mutation": "remove_exact_mint_guard",
+      "negative_fixture": "mint_extra_name"
+    },
+    {
+      "detected": true,
+      "mutation": "remove_state_validator_credential_binding",
+      "negative_fixture": "r2_wrong_state_address"
+    },
+    {
+      "detected": true,
+      "mutation": "remove_no_stake_credential_guard",
+      "negative_fixture": "output_stake_credential"
+    },
+    {
+      "detected": true,
+      "mutation": "remove_singleton_quantity_guard",
+      "negative_fixture": "authority_output_quantity_two"
+    },
+    {
+      "detected": true,
+      "mutation": "remove_exact_lovelace_guard",
+      "negative_fixture": "authority_value_minus_one"
+    },
+    {
+      "detected": true,
+      "mutation": "remove_no_extra_asset_guard",
+      "negative_fixture": "authority_extra_native_asset"
+    },
+    {
+      "detected": true,
+      "mutation": "remove_inline_datum_guard",
+      "negative_fixture": "datum_missing"
+    },
+    {
+      "detected": true,
+      "mutation": "remove_schema_version_guard",
+      "negative_fixture": "datum_schema_version"
+    },
+    {
+      "detected": true,
+      "mutation": "remove_seed_hash_guard",
+      "negative_fixture": "seed_datum_hash"
+    },
+    {
+      "detected": true,
+      "mutation": "remove_seed_index_guard",
+      "negative_fixture": "seed_datum_index"
+    },
+    {
+      "detected": true,
+      "mutation": "remove_epoch_guard",
+      "negative_fixture": "datum_epoch"
+    },
+    {
+      "detected": true,
+      "mutation": "remove_threshold_guard",
+      "negative_fixture": "datum_threshold"
+    },
+    {
+      "detected": true,
+      "mutation": "remove_status_guard",
+      "negative_fixture": "datum_status"
+    },
+    {
+      "detected": true,
+      "mutation": "remove_pending_canonicality_guard",
+      "negative_fixture": "datum_pending_noncanonical"
+    },
+    {
+      "detected": true,
+      "mutation": "remove_key_uniqueness_order_guard",
+      "negative_fixture": "applied_keys_duplicate"
+    },
+    {
+      "detected": true,
+      "mutation": "remove_key_binding_guard",
+      "negative_fixture": "datum_key_binding"
+    },
+    {
+      "detected": true,
+      "mutation": "remove_key_order_guard",
+      "negative_fixture": "applied_keys_unsorted"
+    },
+    {
+      "detected": true,
+      "mutation": "remove_bootstrap_proof_of_possession_verification",
+      "negative_fixture": "r2_invalid_proof_0"
+    },
+    {
+      "detected": true,
+      "mutation": "unconditional_success",
+      "negative_fixture": "seed_missing"
+    }
+  ],
+  "contract_id": "F05.1-R4",
+  "entrypoint": "f05_authority_policy.f05_authority_policy.mint",
+  "failures": [],
+  "ledger": "Plutus V3",
+  "positive_and_negative_cases": 57,
+  "results": [
+    {
+      "accepted": true,
+      "actual": "accept",
+      "context_cbor_bytes": 1755,
+      "cpu": 431999255,
+      "diagnostic": "    \"mem\": 35 |   }, |   { |     \"fun\": \"byteStringToInteger\", |     \"cpu\": 9476392, |     \"mem\": 32 |   } | ]",
+      "exit": 0,
+      "expected": "accept",
+      "id": "valid_bootstrap",
+      "mem": 424440,
+      "verify_signature_alias_count": 5
+    },
+    {
+      "accepted": false,
+      "actual": "reject",
+      "context_cbor_bytes": 1647,
+      "cpu": null,
+      "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 12292775 | memory: 42253",
+      "exit": 1,
+      "expected": "reject",
+      "id": "seed_missing",
+      "mem": null,
+      "verify_signature_alias_count": 5
+    },
+    {
+      "accepted": false,
+      "actual": "reject",
+      "context_cbor_bytes": 1863,
+      "cpu": null,
+      "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 20320501 | memory: 63993",
+      "exit": 1,
+      "expected": "reject",
+      "id": "seed_duplicate",
+      "mem": null,
+      "verify_signature_alias_count": 5
+    },
+    {
+      "accepted": false,
+      "actual": "reject",
+      "context_cbor_bytes": 1755,
+      "cpu": null,
+      "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 89773272 | memory: 274454",
+      "exit": 1,
+      "expected": "reject",
+      "id": "seed_datum_hash",
+      "mem": null,
+      "verify_signature_alias_count": 5
+    },
+    {
+      "accepted": false,
+      "actual": "reject",
+      "context_cbor_bytes": 1755,
+      "cpu": null,
+      "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 90687591 | memory: 274808",
+      "exit": 1,
+      "expected": "reject",
+      "id": "seed_datum_index",
+      "mem": null,
+      "verify_signature_alias_count": 5
+    },
+    {
+      "accepted": false,
+      "actual": "reject",
+      "context_cbor_bytes": 1755,
+      "cpu": null,
+      "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 13561804 | memory: 42704",
+      "exit": 1,
+      "expected": "reject",
+      "id": "applied_genesis_parameter",
+      "mem": null,
+      "verify_signature_alias_count": 5
+    },
+    {
+      "accepted": false,
+      "actual": "reject",
+      "context_cbor_bytes": 1755,
+      "cpu": null,
+      "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 116695473 | memory: 317032",
+      "exit": 1,
+      "expected": "reject",
+      "id": "applied_keys_parameter",
+      "mem": null,
+      "verify_signature_alias_count": 5
+    },
+    {
+      "accepted": false,
+      "actual": "reject",
+      "context_cbor_bytes": 1823,
+      "cpu": null,
+      "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 99869277 | memory: 296483",
+      "exit": 1,
+      "expected": "reject",
+      "id": "applied_keys_bad_count",
+      "mem": null,
+      "verify_signature_alias_count": 5
+    },
+    {
+      "accepted": false,
+      "actual": "reject",
+      "context_cbor_bytes": 1753,
+      "cpu": null,
+      "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 100218270 | memory: 296687",
+      "exit": 1,
+      "expected": "reject",
+      "id": "applied_keys_bad_length",
+      "mem": null,
+      "verify_signature_alias_count": 5
+    },
+    {
+      "accepted": false,
+      "actual": "reject",
+      "context_cbor_bytes": 1755,
+      "cpu": null,
+      "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 106512258 | memory: 316745",
+      "exit": 1,
+      "expected": "reject",
+      "id": "applied_keys_duplicate",
+      "mem": null,
+      "verify_signature_alias_count": 5
+    },
+    {
+      "accepted": false,
+      "actual": "reject",
+      "context_cbor_bytes": 1755,
+      "cpu": null,
+      "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 109004318 | memory: 316755",
+      "exit": 1,
+      "expected": "reject",
+      "id": "applied_keys_unsorted",
+      "mem": null,
+      "verify_signature_alias_count": 5
+    },
+    {
+      "accepted": false,
+      "actual": "reject",
+      "context_cbor_bytes": 1755,
+      "cpu": null,
+      "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 29351527 | memory: 84675",
+      "exit": 1,
+      "expected": "reject",
+      "id": "mint_wrong_policy",
+      "mem": null,
+      "verify_signature_alias_count": 5
+    },
+    {
+      "accepted": false,
+      "actual": "reject",
+      "context_cbor_bytes": 1744,
+      "cpu": null,
+      "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 30135175 | memory: 84899",
+      "exit": 1,
+      "expected": "reject",
+      "id": "mint_wrong_name",
+      "mem": null,
+      "verify_signature_alias_count": 5
+    },
+    {
+      "accepted": false,
+      "actual": "reject",
+      "context_cbor_bytes": 1755,
+      "cpu": null,
+      "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 30162454 | memory: 84899",
+      "exit": 1,
+      "expected": "reject",
+      "id": "mint_quantity_two",
+      "mem": null,
+      "verify_signature_alias_count": 5
+    },
+    {
+      "accepted": false,
+      "actual": "reject",
+      "context_cbor_bytes": 1762,
+      "cpu": null,
+      "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 30162454 | memory: 84899",
+      "exit": 1,
+      "expected": "reject",
+      "id": "mint_extra_name",
+      "mem": null,
+      "verify_signature_alias_count": 5
+    },
+    {
+      "accepted": false,
+      "actual": "reject",
+      "context_cbor_bytes": 1820,
+      "cpu": null,
+      "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 56399835 | memory: 168234",
+      "exit": 1,
+      "expected": "reject",
+      "id": "output_wrong_payment_credential",
+      "mem": null,
+      "verify_signature_alias_count": 5
+    },
+    {
+      "accepted": false,
+      "actual": "reject",
+      "context_cbor_bytes": 1789,
+      "cpu": null,
+      "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 50525002 | memory: 147521",
+      "exit": 1,
+      "expected": "reject",
+      "id": "output_stake_credential",
+      "mem": null,
+      "verify_signature_alias_count": 5
+    },
+    {
+      "accepted": false,
+      "actual": "reject",
+      "context_cbor_bytes": 1362,
+      "cpu": null,
+      "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 71895928 | memory: 211273",
+      "exit": 1,
+      "expected": "reject",
+      "id": "datum_missing",
+      "mem": null,
+      "verify_signature_alias_count": 5
+    },
+    {
+      "accepted": false,
+      "actual": "reject",
+      "context_cbor_bytes": 1396,
+      "cpu": null,
+      "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 71895928 | memory: 211273",
+      "exit": 1,
+      "expected": "reject",
+      "id": "datum_hash_only",
+      "mem": null,
+      "verify_signature_alias_count": 5
+    },
+    {
+      "accepted": false,
+      "actual": "reject",
+      "context_cbor_bytes": 1367,
+      "cpu": null,
+      "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 72440523 | memory: 211435",
+      "exit": 1,
+      "expected": "reject",
+      "id": "datum_unknown_constructor",
+      "mem": null,
+      "verify_signature_alias_count": 5
+    },
+    {
+      "accepted": false,
+      "actual": "reject",
+      "context_cbor_bytes": 1755,
+      "cpu": null,
+      "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 89046166 | memory: 274164",
+      "exit": 1,
+      "expected": "reject",
+      "id": "datum_schema_version",
+      "mem": null,
+      "verify_signature_alias_count": 5
+    },
+    {
+      "accepted": false,
+      "actual": "reject",
+      "context_cbor_bytes": 1755,
+      "cpu": null,
+      "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 89773272 | memory: 274454",
+      "exit": 1,
+      "expected": "reject",
+      "id": "datum_seed_hash",
+      "mem": null,
+      "verify_signature_alias_count": 5
+    },
+    {
+      "accepted": false,
+      "actual": "reject",
+      "context_cbor_bytes": 1755,
+      "cpu": null,
+      "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 90687591 | memory: 274808",
+      "exit": 1,
+      "expected": "reject",
+      "id": "datum_seed_index",
+      "mem": null,
+      "verify_signature_alias_count": 5
+    },
+    {
+      "accepted": false,
+      "actual": "reject",
+      "context_cbor_bytes": 1755,
+      "cpu": null,
+      "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 92438808 | memory: 275422",
+      "exit": 1,
+      "expected": "reject",
+      "id": "datum_epoch",
+      "mem": null,
+      "verify_signature_alias_count": 5
+    },
+    {
+      "accepted": false,
+      "actual": "reject",
+      "context_cbor_bytes": 1789,
+      "cpu": null,
+      "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 117015045 | memory: 317160",
+      "exit": 1,
+      "expected": "reject",
+      "id": "datum_key_count",
+      "mem": null,
+      "verify_signature_alias_count": 5
+    },
+    {
+      "accepted": false,
+      "actual": "reject",
+      "context_cbor_bytes": 1754,
+      "cpu": null,
+      "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 116697096 | memory: 317032",
+      "exit": 1,
+      "expected": "reject",
+      "id": "datum_key_length",
+      "mem": null,
+      "verify_signature_alias_count": 5
+    },
+    {
+      "accepted": false,
+      "actual": "reject",
+      "context_cbor_bytes": 1755,
+      "cpu": null,
+      "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 116697096 | memory: 317032",
+      "exit": 1,
+      "expected": "reject",
+      "id": "datum_duplicate_key",
+      "mem": null,
+      "verify_signature_alias_count": 5
+    },
+    {
+      "accepted": false,
+      "actual": "reject",
+      "context_cbor_bytes": 1755,
+      "cpu": null,
+      "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 116697096 | memory: 317032",
+      "exit": 1,
+      "expected": "reject",
+      "id": "datum_key_order",
+      "mem": null,
+      "verify_signature_alias_count": 5
+    },
+    {
+      "accepted": false,
+      "actual": "reject",
+      "context_cbor_bytes": 1755,
+      "cpu": null,
+      "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 116697096 | memory: 317032",
+      "exit": 1,
+      "expected": "reject",
+      "id": "datum_key_binding",
+      "mem": null,
+      "verify_signature_alias_count": 5
+    },
+    {
+      "accepted": false,
+      "actual": "reject",
+      "context_cbor_bytes": 1755,
+      "cpu": null,
+      "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 96445979 | memory: 295712",
+      "exit": 1,
+      "expected": "reject",
+      "id": "datum_threshold",
+      "mem": null,
+      "verify_signature_alias_count": 5
+    },
+    {
+      "accepted": false,
+      "actual": "reject",
+      "context_cbor_bytes": 1755,
+      "cpu": null,
+      "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 98397382 | memory: 296004",
+      "exit": 1,
+      "expected": "reject",
+      "id": "datum_status",
+      "mem": null,
+      "verify_signature_alias_count": 5
+    },
+    {
+      "accepted": false,
+      "actual": "reject",
+      "context_cbor_bytes": 1755,
+      "cpu": null,
+      "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 119055941 | memory: 317453",
+      "exit": 1,
+      "expected": "reject",
+      "id": "datum_pending_kind",
+      "mem": null,
+      "verify_signature_alias_count": 5
+    },
+    {
+      "accepted": false,
+      "actual": "reject",
+      "context_cbor_bytes": 1755,
+      "cpu": null,
+      "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 127459499 | memory: 338922",
+      "exit": 1,
+      "expected": "reject",
+      "id": "datum_pending_noncanonical",
+      "mem": null,
+      "verify_signature_alias_count": 5
+    },
+    {
+      "accepted": false,
+      "actual": "reject",
+      "context_cbor_bytes": 1755,
+      "cpu": null,
+      "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 64029898 | memory: 189695",
+      "exit": 1,
+      "expected": "reject",
+      "id": "authority_value_minus_one",
+      "mem": null,
+      "verify_signature_alias_count": 5
+    },
+    {
+      "accepted": false,
+      "actual": "reject",
+      "context_cbor_bytes": 1755,
+      "cpu": null,
+      "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 64029898 | memory: 189695",
+      "exit": 1,
+      "expected": "reject",
+      "id": "authority_value_plus_one",
+      "mem": null,
+      "verify_signature_alias_count": 5
+    },
+    {
+      "accepted": false,
+      "actual": "reject",
+      "context_cbor_bytes": 1755,
+      "cpu": null,
+      "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 64029898 | memory: 189695",
+      "exit": 1,
+      "expected": "reject",
+      "id": "fee_diversion",
+      "mem": null,
+      "verify_signature_alias_count": 5
+    },
+    {
+      "accepted": false,
+      "actual": "reject",
+      "context_cbor_bytes": 1790,
+      "cpu": null,
+      "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 75531034 | memory: 231428",
+      "exit": 1,
+      "expected": "reject",
+      "id": "authority_extra_native_asset",
+      "mem": null,
+      "verify_signature_alias_count": 5
+    },
+    {
+      "accepted": false,
+      "actual": "reject",
+      "context_cbor_bytes": 2263,
+      "cpu": null,
+      "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 56651109 | memory: 168720",
+      "exit": 1,
+      "expected": "reject",
+      "id": "authority_output_duplicate_nft",
+      "mem": null,
+      "verify_signature_alias_count": 5
+    },
+    {
+      "accepted": false,
+      "actual": "reject",
+      "context_cbor_bytes": 1820,
+      "cpu": null,
+      "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 29296426 | memory: 84639",
+      "exit": 1,
+      "expected": "reject",
+      "id": "authority_output_extra_target",
+      "mem": null,
+      "verify_signature_alias_count": 5
+    },
+    {
+      "accepted": false,
+      "actual": "reject",
+      "context_cbor_bytes": 1755,
+      "cpu": null,
+      "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 57560157 | memory: 168689",
+      "exit": 1,
+      "expected": "reject",
+      "id": "authority_output_quantity_two",
+      "mem": null,
+      "verify_signature_alias_count": 5
+    },
+    {
+      "accepted": false,
+      "actual": "reject",
+      "context_cbor_bytes": 1247,
+      "cpu": null,
+      "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 20933322 | memory: 63735",
+      "exit": 1,
+      "expected": "reject",
+      "id": "authority_output_missing",
+      "mem": null,
+      "verify_signature_alias_count": 5
+    },
+    {
+      "accepted": false,
+      "actual": "reject",
+      "context_cbor_bytes": 1689,
+      "cpu": null,
+      "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 156960753 | memory: 401914",
+      "exit": 1,
+      "expected": "reject",
+      "id": "r2_proof_missing",
+      "mem": null,
+      "verify_signature_alias_count": 5
+    },
+    {
+      "accepted": false,
+      "actual": "reject",
+      "context_cbor_bytes": 1821,
+      "cpu": null,
+      "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 157811308 | memory: 402234",
+      "exit": 1,
+      "expected": "reject",
+      "id": "r2_proof_extra",
+      "mem": null,
+      "verify_signature_alias_count": 5
+    },
+    {
+      "accepted": false,
+      "actual": "reject",
+      "context_cbor_bytes": 1755,
+      "cpu": null,
+      "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 212724044 | memory: 402497",
+      "exit": 1,
+      "expected": "reject",
+      "id": "r2_invalid_proof_0",
+      "mem": null,
+      "verify_signature_alias_count": 5
+    },
+    {
+      "accepted": false,
+      "actual": "reject",
+      "context_cbor_bytes": 1755,
+      "cpu": null,
+      "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 266685859 | memory: 402508",
+      "exit": 1,
+      "expected": "reject",
+      "id": "r2_invalid_proof_1",
+      "mem": null,
+      "verify_signature_alias_count": 5
+    },
+    {
+      "accepted": false,
+      "actual": "reject",
+      "context_cbor_bytes": 1755,
+      "cpu": null,
+      "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 323847674 | memory: 422519",
+      "exit": 1,
+      "expected": "reject",
+      "id": "r2_invalid_proof_2",
+      "mem": null,
+      "verify_signature_alias_count": 5
+    },
+    {
+      "accepted": false,
+      "actual": "reject",
+      "context_cbor_bytes": 1755,
+      "cpu": null,
+      "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 377809489 | memory: 422530",
+      "exit": 1,
+      "expected": "reject",
+      "id": "r2_invalid_proof_3",
+      "mem": null,
+      "verify_signature_alias_count": 5
+    },
+    {
+      "accepted": false,
+      "actual": "reject",
+      "context_cbor_bytes": 1755,
+      "cpu": null,
+      "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 431695255 | memory: 422540",
+      "exit": 1,
+      "expected": "reject",
+      "id": "r2_invalid_proof_4",
+      "mem": null,
+      "verify_signature_alias_count": 5
+    },
+    {
+      "accepted": false,
+      "actual": "reject",
+      "context_cbor_bytes": 1755,
+      "cpu": null,
+      "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 212724044 | memory: 402497",
+      "exit": 1,
+      "expected": "reject",
+      "id": "r2_wrong_key_pairing",
+      "mem": null,
+      "verify_signature_alias_count": 5
+    },
+    {
+      "accepted": false,
+      "actual": "reject",
+      "context_cbor_bytes": 1755,
+      "cpu": null,
+      "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 212724044 | memory: 402497",
+      "exit": 1,
+      "expected": "reject",
+      "id": "r2_signature_for_other_seed",
+      "mem": null,
+      "verify_signature_alias_count": 5
+    },
+    {
+      "accepted": false,
+      "actual": "reject",
+      "context_cbor_bytes": 1755,
+      "cpu": null,
+      "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 212724044 | memory: 402497",
+      "exit": 1,
+      "expected": "reject",
+      "id": "r2_signature_for_other_network",
+      "mem": null,
+      "verify_signature_alias_count": 5
+    },
+    {
+      "accepted": false,
+      "actual": "reject",
+      "context_cbor_bytes": 1755,
+      "cpu": null,
+      "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 212724044 | memory: 402497",
+      "exit": 1,
+      "expected": "reject",
+      "id": "r2_signature_for_other_validator_hash",
+      "mem": null,
+      "verify_signature_alias_count": 5
+    },
+    {
+      "accepted": false,
+      "actual": "reject",
+      "context_cbor_bytes": 1755,
+      "cpu": null,
+      "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 212724044 | memory: 402497",
+      "exit": 1,
+      "expected": "reject",
+      "id": "r2_signature_for_other_epoch",
+      "mem": null,
+      "verify_signature_alias_count": 5
+    },
+    {
+      "accepted": false,
+      "actual": "reject",
+      "context_cbor_bytes": 1755,
+      "cpu": null,
+      "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 116697096 | memory: 317032",
+      "exit": 1,
+      "expected": "reject",
+      "id": "r2_swapped_datum_keys",
+      "mem": null,
+      "verify_signature_alias_count": 5
+    },
+    {
+      "accepted": false,
+      "actual": "reject",
+      "context_cbor_bytes": 1755,
+      "cpu": null,
+      "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 116697096 | memory: 317032",
+      "exit": 1,
+      "expected": "reject",
+      "id": "r2_duplicate_datum_key",
+      "mem": null,
+      "verify_signature_alias_count": 5
+    },
+    {
+      "accepted": false,
+      "actual": "reject",
+      "context_cbor_bytes": 1820,
+      "cpu": null,
+      "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 56399835 | memory: 168234",
+      "exit": 1,
+      "expected": "reject",
+      "id": "r2_wrong_state_address",
+      "mem": null,
+      "verify_signature_alias_count": 5
+    },
+    {
+      "accepted": false,
+      "actual": "reject",
+      "context_cbor_bytes": 1820,
+      "cpu": null,
+      "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 56399835 | memory: 168234",
+      "exit": 1,
+      "expected": "reject",
+      "id": "r2_wrong_state_validator_hash_constant",
+      "mem": null,
+      "verify_signature_alias_count": 5
+    }
+  ],
+  "status": "pass"
+}

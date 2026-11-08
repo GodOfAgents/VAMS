@@ -7,14 +7,13 @@ Interfaces with VAMSHardwareRegistry.sol on-chain.
 Part of Phase 2: Hardware Layer (Sprint 1).
 """
 
-import hashlib
 import json
 import logging
 import time
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any, Dict, List, Optional, Tuple
-from functools import lru_cache
+from neuron.runtime_safety import load_runtime_policy
 
 logger = logging.getLogger(__name__)
 
@@ -23,7 +22,6 @@ logger = logging.getLogger(__name__)
 
 def _class_id(name: str) -> bytes:
     """Compute bytes32 class ID matching Solidity keccak256(name)."""
-    from eth_abi import encode
     from eth_utils import keccak
     return keccak(name.encode("utf-8"))
 
@@ -62,6 +60,20 @@ class HardwareClassInfo:
     min_collateral: int
     min_benchmark_score: int
     is_active: bool
+    simulated: bool = False
+    evidence_classification: str = "provider-observation"
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "class_id": "0x" + self.class_id.hex(),
+            "name": self.name,
+            "category": self.category,
+            "min_collateral": self.min_collateral,
+            "min_benchmark_score": self.min_benchmark_score,
+            "is_active": self.is_active,
+            "simulated": self.simulated,
+            "evidence_classification": self.evidence_classification,
+        }
 
 
 @dataclass
@@ -216,6 +228,7 @@ class HardwareRegistryClient:
         self.registry_address = registry_address
         self.contract = None
         self.w3 = None
+        self._account = None
         self._cache: Dict[str, _CacheEntry] = {}
         self._class_name_map: Dict[bytes, str] = {}
 
@@ -236,8 +249,20 @@ class HardwareRegistryClient:
                 )
             except ImportError:
                 logger.warning("web3 not installed -- using offline mode")
-            except Exception as e:
-                logger.error("Failed to connect: %s", e)
+            except Exception:
+                logger.error("Hardware registry connection failed")
+
+    @property
+    def account_address(self) -> Optional[str]:
+        """Address of the explicitly selected key account, if available."""
+        account = self._account
+        if account is None:
+            return None
+        try:
+            address = account.address
+        except Exception:
+            return None
+        return address if isinstance(address, str) else None
 
     # ═══════════════════ Cache Helpers ═══════════════════
 
@@ -277,6 +302,8 @@ class HardwareRegistryClient:
                 min_collateral=raw[3],
                 min_benchmark_score=raw[4],
                 is_active=raw[5],
+                simulated=False,
+                evidence_classification="provider-observation",
             )
             classes.append(info)
             self._class_name_map[raw[0]] = raw[1]
@@ -286,6 +313,7 @@ class HardwareRegistryClient:
 
     def _offline_classes(self) -> List[HardwareClassInfo]:
         """Return pre-seeded classes for offline/testing mode."""
+        load_runtime_policy().authorize_component_mock("HardwareRegistryClient", True)
         defaults = {
             HardwareClass.GPU_H100: ("GPU", 50_000, 8000),
             HardwareClass.GPU_A100: ("GPU", 25_000, 7500),
@@ -301,12 +329,14 @@ class HardwareRegistryClient:
         }
         return [
             HardwareClassInfo(
-                class_id=hashlib.sha3_256(name.encode()).digest(),
+                class_id=_class_id(name),
                 name=name,
                 category=cat,
-                min_collateral=int(col * 1e18),
+                min_collateral=col * 10**18,
                 min_benchmark_score=bench,
                 is_active=True,
+                simulated=True,
+                evidence_classification="non-authoritative",
             )
             for name, (cat, col, bench) in defaults.items()
         ]
@@ -385,10 +415,15 @@ class HardwareRegistryClient:
     def get_summary(self) -> Dict[str, Any]:
         """Get registry summary for dashboards."""
         classes = self.get_all_classes()
+        simulated = any(c.simulated for c in classes)
         return {
             "total_classes": len(classes),
             "active_classes": sum(1 for c in classes if c.is_active),
             "total_nodes": self.get_total_nodes(),
+            "simulated": simulated,
+            "evidence_classification": (
+                "non-authoritative" if simulated else "provider-observation"
+            ),
             "classes": [
                 {
                     "name": c.name,
@@ -396,6 +431,8 @@ class HardwareRegistryClient:
                     "min_collateral_vams": c.min_collateral / 1e18,
                     "min_benchmark": c.min_benchmark_score,
                     "active": c.is_active,
+                    "simulated": c.simulated,
+                    "evidence_classification": c.evidence_classification,
                 }
                 for c in classes
             ],

@@ -1,0 +1,5 @@
+# Exact Aiken dependency commit pin
+
+Accepted fuzz and stdlib bytes are pinned to identified upstream commits in declarations, lock, package index, and provenance manifest. Two independent offline temporary builds returned the unchanged blueprint SHA-256; all 26 program hashes are unchanged. The focused provenance tests passed 22/22, the direct verifier passed, and the final source-bound Python suite passed 1,607 tests with 444 subtests. Strict Aiken still exits 1: 1,865 checks, zero errors, seven warnings.
+
+Independent read-only review PASS on the exact integrated result, including 8 source hashes, all 54 accepted dependency files, 22 focused tests, and a fresh offline provenance rebuild. The two earlier temporary rebuild transcripts are not retained; the independent rebuild matched the same blueprint and 26 program hashes. This is offline local build evidence, not ledger admission or live-network evidence. Readiness remains NOT READY; deployment, Deposit, Slash activation, and ExecuteIntent stay disabled.

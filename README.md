@@ -1,94 +1,77 @@
-# VAMS
+# VAMS Cardano — Brain Layer
 
-**Verifiable and Agentic Modular Stack**
-**Architecture:** v0.8.0
-**Status:** Hardened pre-testnet candidate
+**Lifecycle:** Implemented source; Cardano Pre-Prod deployment pending
 **Last verified:** 2026-07-12
 
-VAMS is a multi-layer protocol implementation for verifiable agent execution,
-resource composition, identity, and economic coordination. It includes Solidity
-contracts, Cardano validators, a Python Neuron runtime, a FastAPI Gateway, and
-a React frontend.
+> **"The Brain"** — Governance sovereignty, insurance custody, and agent identity on Cardano.
 
-VAMS is not mainnet-ready and has not been deployed to public testnet. The
-first testnet profile is faucet-only: staking rewards, real fiat, real yield,
-and wallet transactions are disabled. Deployment and readiness evidence is
-tracked fail-closed in [the status report](REPO_STATUS_REPORT.md),
-[deployment register](contracts/CONTRACTS.md), and
-[audit program](docs/audit/AUDIT_PROGRAM.md).
+## Architecture
 
-## Documentation
-
-- [Documentation index](docs/README.md)
-- [Current architecture](docs/ARCHITECTURE.md)
-- [Versioning](docs/VERSIONING.md)
-- [Repository status and roadmap](REPO_STATUS_REPORT.md)
-- [Developer guide](docs/DEVELOPER_GUIDE.md)
-- [Node operator guide](docs/NODE_OPERATORS.md)
-- [Gateway API reference](docs/API_REFERENCE.md)
-- [Audit and architecture report](audit.md)
-
-## Repository Layout
-
-| Path | Purpose |
-| --- | --- |
-| `contracts/` | Foundry Solidity contracts, tests, and deployment scripts. |
-| `cardano/` | Aiken validators for governance, timelock, insurance, identity, and agent NFTs. |
-| `neuron/` | Python runtime, SDK, DA, composer, economics, sentinel, and bridge components. |
-| `gateway/` | FastAPI control-plane service and Caddy testnet template. |
-| `frontend-vite/` | Read-only testnet frontend. |
-| `docs/` | Current guides, architecture history, audit controls, and research context. |
-
-## Implementation Boundary
-
-| Component | Current state |
-| --- | --- |
-| EVM contracts | Implemented in source; Polygon Amoy deployment evidence pending. |
-| Cardano validators | Implemented in source; Cardano Pre-Prod deployment evidence pending. |
-| Celestia and Near DA | Live-capable code paths; receipt evidence pending. |
-| Avail and EigenDA DA | Structured stubs; blocked from live environments. |
-| OMS, Trails, Coinme, TEE, bridge, interrupts, storage | Mock-default or incomplete paths fail closed in live environments. |
-| Gateway | Implemented; live DID, mTLS, TLS, rate-limit, and load evidence pending. |
-| Frontend | Read-only profile; wallet transactions disabled. |
-
-## Local Verification
-
-Install the toolchains before running the relevant subsystem commands.
-
-```bash
-git clone https://github.com/GodOfAgents/VAMS.git
-cd VAMS
-git submodule update --init --recursive
-
-cd contracts
-forge build --sizes
-forge test -vvv
-
-cd ../cardano
-aiken check --deny --seed 20260711 --max-success 250
-
-cd ..
-python -m pip install -r gateway/requirements.txt -r neuron/requirements.txt
-python -m pytest -q --tb=short -p no:cacheprovider
-
-cd frontend-vite
-npm ci
-npm audit --audit-level=high
-npm run build
+```
+cardano/
+├── aiken.toml              # Project config
+├── lib/vams/
+│   ├── types.ak            # Shared datums & redeemers
+│   ├── utils.ak            # Math, validation, time helpers
+│   └── icb.ak              # ICB bridge verification
+├── validators/
+│   ├── governor.ak         # Quadratic voting governance
+│   ├── timelock.ak         # Intent emission → Polygon
+│   ├── insurance_fund.ak   # Capital custody + claims
+│   └── agent_registry.ak  # Agent DID + NFT identity
+│   └── agent_nft.ak       # One-shot agent NFT minting policy
+└── plutus.json             # Generated blueprint (after build)
 ```
 
-Run the documentation and audit structure checks from the repository root:
+## Prerequisites
+
+- [Aiken](https://aiken-lang.org) (`aikup` → `aiken`)
+- WSL (Windows) or native Linux/macOS
 
 ```bash
-python scripts/docs/validate_docs.py
-python scripts/audit/audit_program.py validate
-python scripts/audit/validate_traceability.py
+# Install Aiken
+curl -sSfL https://install.aiken-lang.org | bash
+aikup
+aiken --version
 ```
 
-Passing local checks is not release evidence. The canary and public readiness
-commands require a clean commit, signed evidence, live integration records, and
-deployment manifests.
+## Build & Test
+
+```bash
+cd cardano/
+
+# Type-check and run tests
+aiken check
+
+# Compile to Plutus Core
+aiken build
+
+# View generated blueprint
+cat plutus.json
+```
+
+## Validators
+
+| Validator | Purpose | Key Features |
+|-----------|---------|-------------|
+| `governor` | On-chain governance | Quadratic voting, quorum, double-vote prevention |
+| `timelock` | Intent relay | 48h/24h delay, Mithril proof, nonce replay protection |
+| `insurance_fund` | Capital custody | Bridge deposits, guardian multisig claims, 50% max payout |
+| `agent_registry` | Agent DID | NFT identity (CIP-68), reputation scoring, stake slashing |
+
+## Cross-Chain Flow
+
+```
+Cardano (Brain)          ICB Bridge            Polygon (Hands)
+─────────────────       ──────────            ─────────────────
+Governor: Propose
+  → Vote (quadratic)
+  → Pass ──────────→ Timelock: Queue
+                        → Delay 48h
+                        → Execute ──→ ICB Relay ──→ GovernorExecutor
+                                                     → Apply on Polygon
+```
 
 ## License
 
-MIT. See [LICENSE](LICENSE).
+MIT — VAMS Protocol

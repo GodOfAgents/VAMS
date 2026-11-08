@@ -5,6 +5,39 @@ import {Test, console2} from "forge-std/Test.sol";
 import {ComposedSettlement} from "../../src/economic/ComposedSettlement.sol";
 import {IComposedSettlement} from "../../src/economic/IComposedSettlement.sol";
 
+import {IServiceBlockRegistry} from "../../src/interfaces/IServiceBlockRegistry.sol";
+import {IComposedDeliveryVerifier} from "../../src/economic/IComposedDeliveryVerifier.sol";
+
+// Explicit unit-test doubles, never deployment backends.
+contract SettlementRegistryFixture {
+    mapping(bytes32 => IServiceBlockRegistry.ServiceBlock) private blocks;
+    function setTerms(bytes32 id, address builder, uint256 bps) external {
+        IServiceBlockRegistry.ServiceBlock storage b = blocks[id];
+        b.blockId = id; b.builder = builder; b.revenueShareBps = bps;
+        b.isVerified = true; b.isActive = true;
+        b.manifestHash = keccak256("manifest"); b.manifestVersion = 1; b.manifestSigner = builder;
+    }
+    function quarantine(bytes32 id) external { blocks[id].isQuarantined = true; }
+    function getServiceBlock(bytes32 id) external view returns (IServiceBlockRegistry.ServiceBlock memory) {
+        return blocks[id];
+    }
+}
+contract SettlementVerifierFixture {
+    mapping(bytes32 => bool) private accepted;
+    bool public admit = true;
+    function setAdmission(bool value) external { admit = value; }
+    function challengePolicy(address, bytes32, uint256) external pure returns (bytes32, uint256, uint256) {
+        return (keccak256("policy"), 1, 1);
+    }
+    function authorizeEscrow(address, address[] calldata, bytes32[] calldata, uint256, uint256)
+        external view returns (bool) { return admit; }
+    function accept(bytes32 context) external { accepted[context] = true; }
+    function verifyDelivery(IComposedDeliveryVerifier.ExpectedDelivery calldata expected, bytes32 outputHash, bytes calldata proof)
+        external view returns (bool, bytes32) {
+        return (accepted[expected.context] && outputHash == keccak256("output") && keccak256(proof) == keccak256(hex"01"), expected.nonce);
+    }
+}
+
 // ═══════════════════ Mock Contracts ═══════════════════
 
 contract MockToken {
@@ -49,6 +82,7 @@ contract MockBondRegistry {
     // Stubs for interface compliance
     function acceptRequest(address, bytes32, uint256) external {}
     function completeRequest(address, bytes32) external {}
+    function cancelRequest(address, bytes32) external {}
 }
 
 // ═══════════════════ Test Suite ═══════════════════
@@ -57,6 +91,8 @@ contract ComposedSettlementTest is Test {
     ComposedSettlement public settlement;
     MockToken public token;
     MockBondRegistry public bondRegistry;
+    SettlementRegistryFixture internal registry;
+    SettlementVerifierFixture internal verifier;
 
     address public admin = address(0xAD);
     address public agent = address(0xAA);
@@ -70,11 +106,16 @@ contract ComposedSettlementTest is Test {
         token = new MockToken();
         bondRegistry = new MockBondRegistry();
 
+        registry = new SettlementRegistryFixture();
+        verifier = new SettlementVerifierFixture();
+        registry.setTerms(keccak256("service-block-1"), builder, 500);
         settlement = new ComposedSettlement(
             admin,
             address(token),
             address(bondRegistry),
-            treasuryAddr
+            treasuryAddr,
+            address(registry),
+            address(verifier)
         );
 
         vm.startPrank(admin);
@@ -92,6 +133,30 @@ contract ComposedSettlementTest is Test {
 
     // ═══════════════════ Helper ═══════════════════
 
+    function _createBound(address[] memory providers, uint256[] memory amounts,
+        uint256 validForSeconds, bytes32 blueprintHash, bytes32 serviceBlockId,
+        uint256 expectedBps, address expectedBuilder) internal returns (bytes32) {
+        // Pure expected-value construction avoids consuming caller prank on a view call.
+        bytes32 terms = serviceBlockId == bytes32(0) ? bytes32(0) : _expectedTerms(
+            serviceBlockId, expectedBuilder, expectedBps);
+        bytes32[] memory workloads = new bytes32[](providers.length);
+        for (uint256 i; i < workloads.length; ++i) workloads[i] = keccak256("expected-workload");
+        return settlement.createComposedEscrowV2(IComposedSettlement.EscrowRequestV2(
+            providers, amounts, validForSeconds, blueprintHash, serviceBlockId, terms, workloads));
+    }
+
+    function _expectedTerms(bytes32 id, address expectedBuilder, uint256 bps) internal view returns (bytes32) {
+        return keccak256(abi.encode(block.chainid, address(registry), id, expectedBuilder, bps,
+            keccak256("manifest"), uint256(1), bytes32(0), bytes32(0), uint256(0), expectedBuilder));
+    }
+
+    function _acceptProof(bytes32 id, uint256 index) internal {
+        address provider = settlement.getProviderAlloc(id, index).provider;
+        vm.prank(provider);
+        settlement.issueDeliveryChallenge(id, index);
+        verifier.accept(settlement.getDeliveryContext(id, index));
+    }
+
     function _createAllocation2Providers() internal returns (bytes32) {
         address[] memory providers = new address[](2);
         providers[0] = provider1;
@@ -102,7 +167,7 @@ contract ComposedSettlementTest is Test {
         amounts[1] = 400 ether;
 
         vm.prank(agent);
-        return settlement.createComposedEscrow(
+        return _createBound(
             providers,
             amounts,
             1 hours,
@@ -123,7 +188,7 @@ contract ComposedSettlementTest is Test {
         amounts[1] = 500 ether;
 
         vm.prank(agent);
-        return settlement.createComposedEscrow(
+        return _createBound(
             providers,
             amounts,
             1 hours,
@@ -162,7 +227,7 @@ contract ComposedSettlementTest is Test {
         amounts[2] = 300 ether;
 
         vm.prank(agent);
-        bytes32 allocId = settlement.createComposedEscrow(
+        bytes32 allocId = _createBound(
             providers, amounts, 2 hours, keccak256("3p"), bytes32(0), 0, address(0)
         );
 
@@ -177,7 +242,7 @@ contract ComposedSettlementTest is Test {
 
         vm.prank(agent);
         vm.expectRevert(IComposedSettlement.ZeroProviders.selector);
-        settlement.createComposedEscrow(providers, amounts, 1 hours, bytes32(0), bytes32(0), 0, address(0));
+        _createBound(providers, amounts, 1 hours, bytes32(0), bytes32(0), 0, address(0));
     }
 
     function test_createComposedEscrow_reverts_arrayMismatch() public {
@@ -189,7 +254,7 @@ contract ComposedSettlementTest is Test {
 
         vm.prank(agent);
         vm.expectRevert(IComposedSettlement.ArrayLengthMismatch.selector);
-        settlement.createComposedEscrow(providers, amounts, 1 hours, bytes32(0), bytes32(0), 0, address(0));
+        _createBound(providers, amounts, 1 hours, bytes32(0), bytes32(0), 0, address(0));
     }
 
     // ═══════════════════ Claim Tests ═══════════════════
@@ -198,11 +263,11 @@ contract ComposedSettlementTest is Test {
         bytes32 allocId = _createAllocation2Providers();
 
         vm.prank(admin);
-        settlement.verifyProviderProof(allocId, 0);
+        _acceptProof(allocId, 0);
 
         // Provider 1 claims
         vm.prank(provider1);
-        settlement.claimProviderShare(allocId, 0);
+        settlement.claimProviderShareV2(allocId, 0, keccak256("output"), hex"01");
 
         IComposedSettlement.ProviderAlloc memory pAlloc = settlement.getProviderAlloc(allocId, 0);
         assertTrue(pAlloc.claimed);
@@ -223,14 +288,14 @@ contract ComposedSettlementTest is Test {
         bytes32 allocId = _createAllocation2Providers();
 
         vm.prank(admin);
-        settlement.verifyProviderProof(allocId, 0);
+        _acceptProof(allocId, 0);
         vm.prank(provider1);
-        settlement.claimProviderShare(allocId, 0);
+        settlement.claimProviderShareV2(allocId, 0, keccak256("output"), hex"01");
 
         vm.prank(admin);
-        settlement.verifyProviderProof(allocId, 1);
+        _acceptProof(allocId, 1);
         vm.prank(provider2);
-        settlement.claimProviderShare(allocId, 1);
+        settlement.claimProviderShareV2(allocId, 1, keccak256("output"), hex"01");
 
         IComposedSettlement.ComposedAllocation memory alloc = settlement.getComposedAllocation(allocId);
         assertEq(uint8(alloc.status), uint8(IComposedSettlement.AllocationStatus.FULLY_CLAIMED));
@@ -241,10 +306,10 @@ contract ComposedSettlementTest is Test {
         bytes32 allocId = _createAllocation2Providers();
 
         vm.prank(admin);
-        settlement.verifyProviderProof(allocId, 1);
+        _acceptProof(allocId, 1);
         // Provider 2 claims first (order doesn't matter)
         vm.prank(provider2);
-        settlement.claimProviderShare(allocId, 1);
+        settlement.claimProviderShareV2(allocId, 1, keccak256("output"), hex"01");
 
         IComposedSettlement.ProviderAlloc memory p2Alloc = settlement.getProviderAlloc(allocId, 1);
         assertTrue(p2Alloc.claimed);
@@ -258,27 +323,27 @@ contract ComposedSettlementTest is Test {
         bytes32 allocId = _createAllocation2Providers();
 
         vm.prank(admin);
-        settlement.verifyProviderProof(allocId, 0);
+        _acceptProof(allocId, 0);
         vm.prank(provider2); // Wrong provider for index 0
         vm.expectRevert(
             abi.encodeWithSelector(IComposedSettlement.ProviderMismatch.selector, provider1, provider2)
         );
-        settlement.claimProviderShare(allocId, 0);
+        settlement.claimProviderShareV2(allocId, 0, keccak256("output"), hex"01");
     }
 
     function test_claimProviderShare_reverts_alreadyClaimed() public {
         bytes32 allocId = _createAllocation2Providers();
 
         vm.prank(admin);
-        settlement.verifyProviderProof(allocId, 0);
+        _acceptProof(allocId, 0);
         vm.prank(provider1);
-        settlement.claimProviderShare(allocId, 0);
+        settlement.claimProviderShareV2(allocId, 0, keccak256("output"), hex"01");
 
         vm.prank(provider1);
         vm.expectRevert(
             abi.encodeWithSelector(IComposedSettlement.ProviderAlreadyClaimed.selector, allocId, 0)
         );
-        settlement.claimProviderShare(allocId, 0);
+        settlement.claimProviderShareV2(allocId, 0, keccak256("output"), hex"01");
     }
 
     // ═══════════════════ Builder Revenue Tests ═══════════════════
@@ -287,9 +352,9 @@ contract ComposedSettlementTest is Test {
         bytes32 allocId = _createAllocationWithBuilder();
 
         vm.prank(admin);
-        settlement.verifyProviderProof(allocId, 0);
+        _acceptProof(allocId, 0);
         vm.prank(provider1);
-        settlement.claimProviderShare(allocId, 0);
+        settlement.claimProviderShareV2(allocId, 0, keccak256("output"), hex"01");
 
         // 500 ether × 5% builder = 25 ether
         // 500 ether × 0.05% fee = 0.025 ether
@@ -327,10 +392,10 @@ contract ComposedSettlementTest is Test {
         bytes32 allocId = _createAllocation2Providers();
 
         vm.prank(admin);
-        settlement.verifyProviderProof(allocId, 0);
+        _acceptProof(allocId, 0);
         // Provider 1 claims before expiry
         vm.prank(provider1);
-        settlement.claimProviderShare(allocId, 0);
+        settlement.claimProviderShareV2(allocId, 0, keccak256("output"), hex"01");
 
         // Advance past expiry
         vm.warp(block.timestamp + 2 hours);
@@ -364,4 +429,85 @@ contract ComposedSettlementTest is Test {
         bytes32[] memory allocs = settlement.getAgentAllocations(agent);
         assertEq(allocs.length, 2);
     }
+    function test_legacyCreationAndVerifierAlwaysReject() public {
+        address[] memory providers = new address[](1); providers[0] = provider1;
+        uint256[] memory amounts = new uint256[](1); amounts[0] = 1 ether;
+        vm.expectRevert(IComposedSettlement.LegacyInterfaceDisabled.selector);
+        settlement.createComposedEscrow(providers, amounts, 1 hours, bytes32(0), bytes32(0), 10_000, builder);
+        vm.prank(admin);
+        vm.expectRevert(IComposedSettlement.LegacyInterfaceDisabled.selector);
+        settlement.verifyProviderProof(bytes32(0), 0);
+        assertEq(settlement.allocationCount(), 0);
+        assertEq(token.balanceOf(address(settlement)), 0);
+    }
+
+    function test_directDeniedAdmissionAcceptsNoFunds() public {
+        verifier.setAdmission(false);
+        vm.expectRevert(IComposedSettlement.InvalidDeliveryProof.selector);
+        _createAllocation2Providers();
+        assertEq(token.balanceOf(address(settlement)), 0);
+        assertEq(settlement.allocationCount(), 0);
+    }
+
+    function test_builderMaximumPlusOneRejectsBeforeFunding() public {
+        registry.setTerms(keccak256("service-block-1"), builder, 5001);
+        vm.expectRevert(IComposedSettlement.InvalidServiceTerms.selector);
+        _createAllocationWithBuilder();
+        assertEq(settlement.allocationCount(), 0);
+        assertEq(token.balanceOf(address(settlement)), 0);
+    }
+
+    function test_forgedTermsRejectBeforeFunding() public {
+        registry.setTerms(keccak256("service-block-1"), address(0xBAD), 500);
+        vm.expectRevert(IComposedSettlement.InvalidServiceTerms.selector);
+        _createAllocationWithBuilder();
+        assertEq(settlement.allocationCount(), 0);
+    }
+
+    function test_quarantinedListingRejectsBeforeFunding() public {
+        registry.quarantine(keccak256("service-block-1"));
+        vm.expectRevert(abi.encodeWithSelector(IComposedSettlement.UnqualifiedServiceBlock.selector,
+            keccak256("service-block-1")));
+        _createAllocationWithBuilder();
+        assertEq(token.balanceOf(address(settlement)), 0);
+    }
+
+    function test_registryChangesCannotRewriteEarnedTerms() public {
+        bytes32 id = _createAllocationWithBuilder();
+        bytes32 frozen = settlement.allocationTermsHash(id);
+        registry.setTerms(keccak256("service-block-1"), address(0xBAD), 5000);
+        _acceptProof(id, 0);
+        vm.prank(provider1);
+        settlement.claimProviderShareV2(id, 0, keccak256("output"), hex"01");
+        assertEq(token.balanceOf(builder), 25 ether);
+        assertEq(token.balanceOf(address(0xBAD)), 0);
+        assertEq(settlement.allocationTermsHash(id), frozen);
+    }
+
+    function test_unverifiedOutputCannotPay() public {
+        bytes32 id = _createAllocation2Providers();
+        _acceptProof(id, 0);
+        vm.prank(provider1);
+        vm.expectRevert(IComposedSettlement.InvalidDeliveryProof.selector);
+        settlement.claimProviderShareV2(id, 0, keccak256("another-output"), hex"01");
+        assertEq(token.balanceOf(provider1), 0);
+        assertFalse(settlement.getProviderAlloc(id, 0).claimed);
+    }
+
+    function testFuzz_maxFeeConservesWithoutMultiplicationOverflow(uint256 amount) public {
+        amount = bound(amount, 1, type(uint256).max - 1_000_000 ether);
+        registry.setTerms(keccak256("service-block-1"), builder, 5000);
+        token.mint(agent, amount);
+        address[] memory providers = new address[](1); providers[0] = provider1;
+        uint256[] memory amounts = new uint256[](1); amounts[0] = amount;
+        vm.prank(agent);
+        bytes32 id = _createBound(providers, amounts, 1 hours, keccak256("fuzz"),
+            keccak256("service-block-1"), 5000, builder);
+        _acceptProof(id, 0);
+        vm.prank(provider1);
+        settlement.claimProviderShareV2(id, 0, keccak256("output"), hex"01");
+        assertEq(token.balanceOf(provider1) + token.balanceOf(builder) + token.balanceOf(treasuryAddr), amount);
+        assertEq(token.balanceOf(address(settlement)), 0);
+    }
+
 }

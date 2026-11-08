@@ -1,0 +1,41 @@
+{
+  "checkout": {
+    "branch": "testnet/remediation-20260907",
+    "dirty_tree": true,
+    "head": "829ab544571f12efe50ecb5740f129c8acb3e16f"
+  },
+  "date": "2026-10-03",
+  "independent_review": {
+    "caveat": "current cached/nonignored-untracked path set only; ignored files and repository history are out of scope. The scanner itself does not exclude its evidence package; only the inventory comparison does. Workflow uses runner-provided Python.",
+    "finding": [
+      "exit 0 and summary reproduced",
+      "inventory hash and count matched",
+      "blocked path rules were reviewed"
+    ],
+    "outcome": "PASS",
+    "scope": "workflow wiring, scanner, runner, path inventory, and independent offline rerun"
+  },
+  "schema": "m7-public-content-policy-record-v1",
+  "status": "PASS",
+  "toolchain": {
+    "python": "3.12.14"
+  },
+  "verification": {
+    "command": [
+      "/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python",
+      "-B",
+      "scripts/security/public_content_policy_scan.py"
+    ],
+    "exit_code": 0,
+    "finding_count": 0,
+    "outer_command": "bwrap --unshare-net --ro-bind / / --tmpfs /tmp --dev-bind /dev /dev --proc /proc --bind docs/remediation/m7_public_content_policy_current_r1 docs/remediation/m7_public_content_policy_current_r1 --chdir /home/GodOfAgents/code/VAMS-testnet --clearenv --setenv PATH /home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin:/usr/bin:/bin --setenv PYTHONDONTWRITEBYTECODE 1 /home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python -B docs/remediation/m7_public_content_policy_current_r1/run_verification.py",
+    "path_inventory": {
+      "count": 1694,
+      "evidence_package_excluded_for_inventory": true,
+      "sha256": "51359db032ebb08334c411e03a5aad6fefa5a76959640fb808854e12601c276f",
+      "unchanged": true
+    },
+    "raw_output_retained": false,
+    "summary": "Public content policy scan passed."
+  }
+}

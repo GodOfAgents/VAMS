@@ -54,6 +54,7 @@ class EconomicsKeeper:
         # Thread control
         self._running = False
         self._thread: Optional[threading.Thread] = None
+        self._stop_event = threading.Event()
 
     # ──────────────────────────────────────────────────
     # Epoch Automation
@@ -124,21 +125,25 @@ class EconomicsKeeper:
             for _ in range(10):
                 if not self._running:
                     break
-                time.sleep(1)
+                self._stop_event.wait(1)
 
     def start(self):
         """Start the background keeper thread."""
         if self._running:
             return
+        self._stop_event.clear()
         self._running = True
-        self._thread = threading.Thread(target=self._loop, daemon=True)
+        self._thread = threading.Thread(
+            target=self._loop, daemon=True, name="vams-economics-keeper"
+        )
         self._thread.start()
 
     def stop(self):
         """Stop the background keeper thread."""
         self._running = False
+        self._stop_event.set()
         if self._thread:
-            self._thread.join(timeout=2.0)
+            self._thread.join()
 
     # ──────────────────────────────────────────────────
     # Observability Lookups

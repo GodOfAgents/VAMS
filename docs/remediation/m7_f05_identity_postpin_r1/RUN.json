@@ -1,0 +1,27 @@
+{
+  "schema": "m7-f05-identity-postpin-run-v1",
+  "command_template": "PYTHONDONTWRITEBYTECODE=1 bwrap --unshare-net --ro-bind / / --dev /dev --proc /proc --bind /tmp /tmp --bind /home/GodOfAgents/code/VAMS-testnet/docs/remediation/m7_f05_identity_postpin_r1 /home/GodOfAgents/code/VAMS-testnet/docs/remediation/m7_f05_identity_postpin_r1 --chdir /home/GodOfAgents/code/VAMS-testnet /home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python -B /home/GodOfAgents/vams-evidence/m3-f05-2a-identity-gate-20261002-r1/identity_probe.py --evidence /home/GodOfAgents/code/VAMS-testnet/docs/remediation/m7_f05_identity_postpin_r1/runN",
+  "run1_outer_exit": 0,
+  "run2_outer_exit": 0,
+  "all_16_inner_aiken_exits_zero": true,
+  "git_diff_check_exit": 0,
+  "review": {
+    "outcome": "PASS",
+    "scope": "current-lock synthetic original applied-policy identity only",
+    "independent_checks": [
+      "7/7 package checksums",
+      "21 current protected Cardano inputs match before/after",
+      "fixture datum and both parameter CBOR encodings independently decoded",
+      "3467-byte script equal to frozen artifact, tx witness, and four build outputs",
+      "BLAKE2b-224 0x03||script equals tx mint policy ID",
+      "separate network-disabled read-only reproduction passed two builds/eight inner exits",
+      "ledger remains 45/55 negatives and 18/21 mutations"
+    ],
+    "limits": "No validator verdict, simulator/ledger admission, live network, or new case credit."
+  },
+  "limitations": [
+    "No negative-case or mutation credit.",
+    "No transaction simulation, ledger admission, rehearsal, live network or deployment evidence.",
+    "F05 applied-parameter and proof-domain evidence-class owner decisions remain open."
+  ]
+}

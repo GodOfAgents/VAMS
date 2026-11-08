@@ -1,0 +1,39 @@
+{
+  "ast_parse": {
+    "exit_code": 0,
+    "output": "AST parse PASS"
+  },
+  "documentation_unit_tests": {
+    "exit_code": 0,
+    "failed": 0,
+    "output": "Ran 2 tests; OK.",
+    "passed": 2
+  },
+  "documentation_validation": {
+    "exit_code": 0,
+    "output": "Documentation validation passed.\n"
+  },
+  "focused_test": {
+    "exit_code": 0,
+    "failed": 0,
+    "output": ".                                                                        [100%]\n1 passed in 0.21s\n",
+    "passed": 1
+  },
+  "git_diff_check": {
+    "exit_code": 0
+  },
+  "invariant_impact": {
+    "INV-1": "not touched; only a test source-string expectation changed",
+    "INV-10": "not touched; only a test source-string expectation changed",
+    "INV-2": "not touched; only a test source-string expectation changed",
+    "INV-3": "not touched; only a test source-string expectation changed",
+    "INV-4": "not touched; only a test source-string expectation changed",
+    "INV-5": "not touched; only a test source-string expectation changed",
+    "INV-6": "not touched; only a test source-string expectation changed",
+    "INV-7": "not touched; only a test source-string expectation changed",
+    "INV-8": "not touched; only a test source-string expectation changed",
+    "INV-9": "not touched; only a test source-string expectation changed"
+  },
+  "readiness": "NOT READY; this focused test does not pass the complete Python gate or any deployment criterion",
+  "schema": "m7-f04-test-assertion-result-r1"
+}

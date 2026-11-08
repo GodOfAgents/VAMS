@@ -1,0 +1,4 @@
+Script started on 2026-10-02 20:01:27+00:00 [COMMAND="bwrap --unshare-net --ro-bind / / --dev /dev --proc /proc --bind /tmp /tmp --bind /home/GodOfAgents/code/VAMS-testnet/docs/remediation/m7_f05_warning_identity_r1 /home/GodOfAgents/code/VAMS-testnet/docs/remediation/m7_f05_warning_identity_r1 --chdir /tmp/vams-f05-warning-g1-20261003-r1 /home/GodOfAgents/vams-evidence/toolchains/aiken-1.1.21/unpacked/aiken-x86_64-unknown-linux-musl/aiken check --deny --skip-tests" <not executed on terminal>]
+bwrap: Can't chdir to /tmp/vams-f05-warning-g1-20261003-r1: No such file or directory
+
+Script done on 2026-10-02 20:01:27+00:00 [COMMAND_EXIT_CODE="1"]

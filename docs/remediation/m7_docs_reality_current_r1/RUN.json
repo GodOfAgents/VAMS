@@ -1,0 +1,51 @@
+{
+  "checkout": {
+    "branch": "testnet/remediation-20260907",
+    "dirty_tree": true,
+    "head": "829ab544571f12efe50ecb5740f129c8acb3e16f"
+  },
+  "date": "2026-10-03",
+  "independent_review": {
+    "caveat": "targeted heuristic only; manifest last_verified is 2026-07-12 and the validator does not enforce freshness. It checks 14 current docs for configured patterns/links, not comprehensive semantic source consistency.",
+    "count_correction": "The review summary called the scope 13 documents; direct canonical manifest enumeration confirms 14. Command results and independent reruns are unchanged.",
+    "outcome": "PASS",
+    "scope": "workflow wiring, validator/tests, exact commands, source inventory and independent reproduction"
+  },
+  "schema": "m7-docs-reality-current-record-v1",
+  "status": "PASS",
+  "toolchain": {
+    "python": "3.12.14"
+  },
+  "verification": {
+    "commands": [
+      {
+        "argv": [
+          "python",
+          "-B",
+          "scripts/docs/validate_docs.py"
+        ],
+        "exit_code": 0,
+        "summary": "Documentation validation passed."
+      },
+      {
+        "argv": [
+          "python",
+          "-B",
+          "-m",
+          "unittest",
+          "scripts/docs/test_validate_docs.py"
+        ],
+        "exit_code": 0,
+        "summary": "2 tests; OK"
+      }
+    ],
+    "inventory": {
+      "count": 1696,
+      "evidence_package_excluded": true,
+      "sha256": "b4bfc7031d665473c5081a9130972999340483efc2d2e7241bb8c1a24a34a458",
+      "unchanged": true
+    },
+    "manifest_current_document_count": 14,
+    "raw_output_retained": false
+  }
+}

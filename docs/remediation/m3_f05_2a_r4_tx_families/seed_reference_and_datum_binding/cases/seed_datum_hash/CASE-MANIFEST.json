@@ -1,0 +1,50 @@
+{
+  "conservation": {
+    "fee_lovelace": 1000000,
+    "input_lovelace": 17000000,
+    "lovelace_conserved": true,
+    "minted_output_assets_match": true,
+    "output_lovelace": 16000000
+  },
+  "delta": "change only AuthorityStateV3.bootstrap_tx_hash from aa\u2026aa to bb\u2026bb; retain applied seed, proof message, keys, value, mint and outputs",
+  "expected_result": "reject at compiled target Mint[0]",
+  "family_id": "seed_reference_and_datum_binding",
+  "files": {
+    "raw_inputs": {
+      "path": "cases/seed_datum_hash/raw_inputs.cbor",
+      "sha256": "4b20e2b2cf4bd58b1f6e385c90ffd098d583df69d95fbc7b1fcc2591da72b9fe",
+      "size_bytes": 73
+    },
+    "raw_outputs": {
+      "path": "cases/seed_datum_hash/raw_outputs.cbor",
+      "sha256": "6b0a4e1175feea6778d2c9c782a2843317f97905ee2efba20824939d2e1a2d5a",
+      "size_bytes": 79
+    },
+    "transaction": {
+      "path": "cases/seed_datum_hash/transaction.cbor",
+      "sha256": "72cb5d0bd2db739be30485a489e31d758db23ee553e26232575fb66720e0bad3",
+      "size_bytes": 5099
+    }
+  },
+  "funding_witnesses": {
+    "count": 2,
+    "private_material_persisted": false,
+    "verified_against_serialized_body": true
+  },
+  "id": "seed_datum_hash",
+  "original_registry_assertion": {
+    "path": "expected.every_negative_case",
+    "value": "reject"
+  },
+  "registry_assertion": "state.bootstrap_tx_hash == genesis_ref.transaction_id",
+  "schema_version": "f05-2a-r4-family-case-v1",
+  "script_invoked": false,
+  "simulator_result": "not run pending coordinator freeze and independent review",
+  "status": "PENDING",
+  "target": {
+    "applied_script_hash": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+    "policy_id": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+    "purpose": "Mint[0]"
+  },
+  "transaction_body_hash_blake2b_256": "306ce077dcae7dbd48a65ec5d7fb6e424a4546be0ae9e7f2a24f9c577bcd553f"
+}

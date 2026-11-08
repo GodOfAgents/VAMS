@@ -1,0 +1,12 @@
+{
+  "schema": "vams.authority-generation-v4.fixture.v1",
+  "scope": "PYTHON_ONLY_NOT_NATIVE_OR_LIVE_QUALIFICATION",
+  "effect_receipt_version": 3,
+  "storage_revision": 4,
+  "scope_id": "e6914e98e68b3940c1b5ee939ed22d1a6c8455977c52c8a5e90ff0283a82d057",
+  "first_generation": "20be26fec08dd0aaeb074e3edb1a05596cf1bd13f8d0d1968e6b13d9a81fc51e",
+  "successor_generation": "de270c1ff3166874de39392f1e0c9c39ec8bfa50715aed90492281596ea1c7a6",
+  "first_scope_sha256": "d6c72ed2bb008b6b9d4e6e7e5cfd023885d81b4548845f035a529c2386074bea",
+  "successor_scope_sha256": "dfbbf6d79a65c86b6e39a9f8aa4f74a5fa052398734cb05f814091619f9293df",
+  "helper_sha256": "3c74e80c8bbe5fffedea60dd340a71af3d7990b711c0f53be9e5d0daf7e03e71"
+}

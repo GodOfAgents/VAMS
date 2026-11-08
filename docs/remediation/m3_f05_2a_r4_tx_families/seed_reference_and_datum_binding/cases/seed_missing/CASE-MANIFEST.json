@@ -1,0 +1,50 @@
+{
+  "conservation": {
+    "fee_lovelace": 1000000,
+    "input_lovelace": 17000000,
+    "lovelace_conserved": true,
+    "minted_output_assets_match": true,
+    "output_lovelace": 16000000
+  },
+  "delta": "replace the unique applied genesis input reference aa\u2026aa#7 by dd\u2026dd#8 in both transaction inputs and ordered raw-input vector; retain resolved UTxO values, mint, outputs and fee",
+  "expected_result": "reject at compiled target Mint[0]",
+  "family_id": "seed_reference_and_datum_binding",
+  "files": {
+    "raw_inputs": {
+      "path": "cases/seed_missing/raw_inputs.cbor",
+      "sha256": "1f4c86aa7a6d64cc0ebac3bf8633e98b5c91fa7ded58bdb70427fdd9ffa0e778",
+      "size_bytes": 73
+    },
+    "raw_outputs": {
+      "path": "cases/seed_missing/raw_outputs.cbor",
+      "sha256": "5a02a590dd2df85f220c273837e014bc5a6c75f6b1dfa8cd9d6770322e89c232",
+      "size_bytes": 79
+    },
+    "transaction": {
+      "path": "cases/seed_missing/transaction.cbor",
+      "sha256": "216c52f1803f8ea2de78e3f4c14ff7905ecaaab5dff10a83af2aca9e3c9c80ab",
+      "size_bytes": 5099
+    }
+  },
+  "funding_witnesses": {
+    "count": 2,
+    "private_material_persisted": false,
+    "verified_against_serialized_body": true
+  },
+  "id": "seed_missing",
+  "original_registry_assertion": {
+    "path": "expected.every_negative_case",
+    "value": "reject"
+  },
+  "registry_assertion": "count_seed_input(tx.inputs, genesis_ref) == 1",
+  "schema_version": "f05-2a-r4-family-case-v1",
+  "script_invoked": false,
+  "simulator_result": "not run pending coordinator freeze and independent review",
+  "status": "PENDING",
+  "target": {
+    "applied_script_hash": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+    "policy_id": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+    "purpose": "Mint[0]"
+  },
+  "transaction_body_hash_blake2b_256": "e0127f544b238b586a4b947642d05cd7469dd5e495e40d52e21643a398bcf149"
+}

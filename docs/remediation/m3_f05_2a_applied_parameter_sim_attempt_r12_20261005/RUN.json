@@ -1,0 +1,96 @@
+{
+  "schema_version": "f05-2a-applied-keys-parameter-mutant-sim-attempt-r3",
+  "attempt": {
+    "label": "applied_keys_parameter one-guard mutant control through immutable R3 runner",
+    "argv": [
+      "/home/GodOfAgents/vams-evidence/toolchains/python/bin/python3.12",
+      "/home/GodOfAgents/code/VAMS-testnet/scripts/remediation/f05_2a_tx_sim_runner_r3.py",
+      "--aiken",
+      "/home/GodOfAgents/vams-evidence/toolchains/aiken-1.1.21/aiken",
+      "--tx",
+      "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m3_f05_2a_applied_keys_parameter_mutant_r1_20261005/one-guard-mutant-control.tx.cbor",
+      "--raw-inputs",
+      "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m3_f05_2a_applied_keys_parameter_mutant_r1_20261005/one-guard-mutant-control.raw_inputs.cbor",
+      "--raw-outputs",
+      "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m3_f05_2a_applied_keys_parameter_mutant_r1_20261005/one-guard-mutant-control.raw_outputs.cbor",
+      "--policy-id",
+      "5fe25c314f2f1bea85b8bc03e078d0c98ac549d62e630382f488cf16"
+    ],
+    "cwd": "/home/GodOfAgents/code/VAMS-testnet",
+    "python_version": "Python 3.12.14",
+    "aiken_version": "aiken v1.1.21+42babe5",
+    "aiken_sha256": "07f3f927f1a8c71fc61273fdff850d9b98edb28dde207c8a32585991f2c88e79",
+    "runner_sha256": "3088ade0a316f6af59c04fe3e1675733100b58be826fa22af3c25e40a086ea5c",
+    "policy_id": "5fe25c314f2f1bea85b8bc03e078d0c98ac549d62e630382f488cf16",
+    "wrapper_exit_code": 0,
+    "runner_result": {
+      "schema_version": "f05-2a-tx-sim-run-result-r3",
+      "simulator_child_exit": 0,
+      "simulator_result": {
+        "stage": "script_accepted",
+        "target_script_invoked": true
+      },
+      "cleanup": {
+        "child_reaped": true,
+        "process_group_empty": true,
+        "snapshot_descriptors_closed": true,
+        "status": "clean"
+      },
+      "submitted_sha256": {
+        "transaction": "ea258404d05a61f4d325f09e699c14bd205577757268590d1f879a131246557b",
+        "raw_inputs": "4b20e2b2cf4bd58b1f6e385c90ffd098d583df69d95fbc7b1fcc2591da72b9fe",
+        "raw_outputs": "37d8e797caf2b6daa8fdd3e436e426f7995777b7ec11c835985bc86d3fdefad9"
+      },
+      "submitted_size_bytes": {
+        "transaction": 5092,
+        "raw_inputs": 73,
+        "raw_outputs": 79
+      },
+      "target_mint_binding": {
+        "expected_policy_id": "5fe25c314f2f1bea85b8bc03e078d0c98ac549d62e630382f488cf16",
+        "compiled_script_hash": "5fe25c314f2f1bea85b8bc03e078d0c98ac549d62e630382f488cf16",
+        "policy_ids": [
+          "5fe25c314f2f1bea85b8bc03e078d0c98ac549d62e630382f488cf16"
+        ]
+      }
+    },
+    "capture_note": "Exact structured runner result returned by scoped execution and transcribed locally; raw simulator stdout/stderr and external attestation are not retained."
+  },
+  "candidate": {
+    "path": "docs/remediation/m3_f05_2a_applied_keys_parameter_mutant_r1_20261005",
+    "manifest_sha256": "b92446fd7cee50318e5c75f591459507a913a552c13de14305691f822d969ede",
+    "package_sha256sums_sha256": "f0536546c48dad129aabc9ddfbf5fc41202418f68df875c14257d78bdf4bb710",
+    "mutant_policy_code_sha256": "bfcbc1361e57d2a8869848737c00b8f4d4af405ec734faa1a4ee4904413c5c42",
+    "mutant_policy_id": "5fe25c314f2f1bea85b8bc03e078d0c98ac549d62e630382f488cf16",
+    "mutation": "remove only state.ordered_keys == initial_keys",
+    "pre_execution_validation": {
+      "valid_pop_count": 5,
+      "funding_signatures": 2,
+      "valid_body_bound_ephemeral_signatures": true,
+      "ada_conservation": true,
+      "native_asset_conservation": true,
+      "private_keys_persisted": false
+    }
+  },
+  "paired_attempts": {
+    "positive_r10_run_sha256": "fdd13ca0572ba92c302d0e5537ee2670520570dcf25977feb39ebebaa6a3a2c9",
+    "negative_r11_run_sha256": "ca0e17acffdffe5877ee6f1b6ffc2facefbbb70a89ab29c78f488b9c5da92cad",
+    "mutant_candidate_review_sha256": "6925ef8a27c7e50c9476527d9578640c19f35df8f09109d314389019e122ebd9"
+  },
+  "controls": {
+    "positive_accepted": true,
+    "negative_rejected_compiled_mint0": true,
+    "one_guard_mutant_accepted_compiled_mint0": true,
+    "clean_cleanup": true
+  },
+  "credit": {
+    "case": "pending independent triad review",
+    "mutation": null,
+    "original_policy": false,
+    "ledger_admission": false,
+    "live_network": false
+  },
+  "evidence_scope": "local synthetic alternate-policy positive/negative/mutant simulator triad; no original-policy, full-ledger-admission, Cardano Pre-Prod, or live-network credit",
+  "case_status": "PENDING until independent triad review",
+  "status": "one-guard mutant accepted at compiled Mint[0]; independent triad attribution review pending"
+}

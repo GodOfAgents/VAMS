@@ -1,0 +1,29 @@
+{
+  "schema_version": "m3-f04-r4-fixture-reconciliation-v1",
+  "source_fixture": "docs/remediation/m3_f04_fixtures_r1/FIXTURES.json",
+  "source_fixture_sha256": "18e2252e38d474c13ffece96b78bc0ee18d50b7327636f57be289063312fa224",
+  "reason": "The immutable pre-remediation rows marked mint-side burn payout/value-loss cases as accepted. The corrected direct burn contract now rejects these unsafe cases; the fixture is retained unchanged and the current contract expectation is recorded explicitly.",
+  "amendments": [
+    {
+      "row_id": "deregister_wrong_payout",
+      "entrypoint": "agent_registry.mint",
+      "original_expected": "accept",
+      "current_expected": "reject",
+      "guard": "exact owner payout"
+    },
+    {
+      "row_id": "deregister_duplicate_payout",
+      "entrypoint": "agent_registry.mint",
+      "original_expected": "accept",
+      "current_expected": "reject",
+      "guard": "single owner payout"
+    },
+    {
+      "row_id": "deregister_non_ada_loss",
+      "entrypoint": "agent_registry.mint",
+      "original_expected": "accept",
+      "current_expected": "reject",
+      "guard": "non-identity value conservation"
+    }
+  ]
+}

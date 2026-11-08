@@ -1,0 +1,8 @@
+a7563450beb54994461ebc0057ff4da02c9754c2b1dcf7690c533b84cb75734d  neuron/requirements.txt
+c442d01c246812c909fd28f6cf90c14c5e17921597d409c0492fbbf808e0f0b3  gateway/requirements.txt
+baf53503673b70c5185f654f8f694f1feaf98af68ee56e29c83c01ee0cf0593c  .github/workflows/security-gates.yml
+310dabedfa526a73c82ac3e0f80a8af761aa3ebf2ef4026c49d06352e7691b95  /home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/pip-audit
+01fd59a6611d7619c782634e5fb3604e39765f74f33064d06f521a84ca76aa0c  /home/GodOfAgents/vams-evidence/m7-pip-audit-local-provenance-r1-20261006/pip-show.txt
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  /home/GodOfAgents/vams-evidence/m7-pip-audit-local-provenance-r1-20261006/first-party-import-search.txt
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  /home/GodOfAgents/vams-evidence/m7-pip-audit-local-provenance-r1-20261006/direct-requirement-search.txt
+c62914dd2328c5025001dcc38c4a9e0f6a2fff176c6d945256b20df483755bdc  /home/GodOfAgents/vams-evidence/m7-pip-audit-local-provenance-r1-20261006/workflow-audit-install.txt

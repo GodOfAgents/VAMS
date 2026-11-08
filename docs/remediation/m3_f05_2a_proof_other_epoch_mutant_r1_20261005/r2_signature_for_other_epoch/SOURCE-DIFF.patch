@@ -1,0 +1,11 @@
+--- a/cardano/lib/vams/f05_authority.ak
++++ b/cardano/lib/vams/f05_authority.ak
+@@ -119,7 +119,7 @@
+                       bytearray.from_int_big_endian(list.length(keys), 1),
+                       bytearray.concat(
+                         encoded_ordered_keys(keys),
+-                        bytearray.from_int_big_endian(0, 8),
++                        bytearray.from_int_big_endian(1, 8),
+                       ),
+                     ),
+                   ),

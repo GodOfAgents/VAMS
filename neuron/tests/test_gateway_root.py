@@ -11,19 +11,37 @@ root_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__fil
 # Insert root_dir at index 0 of sys.path
 sys.path.insert(0, root_dir)
 
-# Clear any already loaded 'gateway' modules from sys.modules to prevent cross-contamination
-for mod in list(sys.modules.keys()):
-    if mod.startswith("gateway"):
-        del sys.modules[mod]
-
 os.environ["GATEWAY_ADMIN_PASSWORD"] = "SecureTestPassword123!"
+os.environ["VAMS_ENV"] = "test"
 
 from gateway.server import app
+from neuron.tests.m2_gateway_helpers import (
+    AUDIENCE,
+    SIGNER,
+    compact_json,
+    signed_headers,
+)
 
 class TestGatewayRoot(unittest.TestCase):
     
     def setUp(self):
-        self.client = TestClient(app)
+        self.environment = patch.dict(
+            os.environ,
+            {
+                "VAMS_ENV": "test",
+                "GATEWAY_ADMIN_PASSWORD": "SecureTestPassword123!",
+                "GATEWAY_ADMIN_DID": SIGNER,
+                "GATEWAY_AUTH_AUDIENCE": AUDIENCE,
+            },
+            clear=False,
+        )
+        self.environment.start()
+        self.client_context = TestClient(app)
+        self.client = self.client_context.__enter__()
+
+    def tearDown(self):
+        self.client_context.__exit__(None, None, None)
+        self.environment.stop()
 
     @patch("gateway.server.composer")
     def test_compose_endpoint_premium(self, mock_composer):
@@ -67,9 +85,13 @@ class TestGatewayRoot(unittest.TestCase):
         mock_composer.provision_blueprint.return_value = instance
 
         # Call the compose endpoint
-        auth = ("admin", "SecureTestPassword123!")
         payload = {"blueprint_name": "ServiceBlock_OMS_v1"}
-        response = self.client.post("/compose", json=payload, auth=auth)
+        body = compact_json(payload)
+        response = self.client.post(
+            "/compose",
+            content=body,
+            headers=signed_headers("POST", "/compose", body=body),
+        )
 
         # Assertions
         self.assertEqual(response.status_code, 200)

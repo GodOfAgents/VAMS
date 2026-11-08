@@ -1,0 +1,36 @@
+{
+  "command": "aiken check --deny --seed 20260711 --max-success 250",
+  "isolation": "bubblewrap --unshare-net; complete Cardano source copied to a disposable temporary path; no tool/dependency installation or network fetch",
+  "version": "aiken v1.1.21+42babe5",
+  "version_exit": 0,
+  "binary_path": "/home/GodOfAgents/vams-evidence/toolchains/aiken-1.1.21/unpacked/aiken-x86_64-unknown-linux-musl/aiken",
+  "binary_sha256": "07f3f927f1a8c71fc61273fdff850d9b98edb28dde207c8a32585991f2c88e79",
+  "workflow_sha256": "7ddeb89794f498393e9c3bb460ca1aaa74dde7b9637c590d76cdae3bbc3ec83a",
+  "source_test_sha256": "a3bc9ccafa26ae4219207a620940ca7da3296608d576725c325a4558b958336d",
+  "input_count": 73,
+  "project_ak_count": 15,
+  "summary": {
+    "total": 122,
+    "passed": 122,
+    "failed": 0,
+    "kind": {
+      "unit": 115,
+      "property": 7
+    }
+  },
+  "module_count": 7,
+  "f05_test_module": {
+    "total": 2,
+    "passed": 2,
+    "failed": 0,
+    "kind": {
+      "unit": 2,
+      "property": 0
+    }
+  },
+  "failed_cases": [],
+  "process_exit": 1,
+  "stdout_sha256": "33b4f396b899731c82dbedcd03d0d77a93e533470796c6ce3ffc9961db590084",
+  "stderr_sha256": "d41cb0d124b5eeaf2aca5364610ad8856c8d73a3da95d805c141a1d82dc6fd2f",
+  "inputs_manifest_sha256": "983405323bfa6907eeb9b01e8fbbdfc0ca4a6dc62026a549265a71820f8a63c1"
+}

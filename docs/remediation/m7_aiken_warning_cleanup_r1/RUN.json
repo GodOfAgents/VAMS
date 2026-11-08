@@ -1,0 +1,56 @@
+{
+  "schema": "m7-aiken-warning-cleanup-run-v1",
+  "commands": [
+    {
+      "command": "git diff --check",
+      "exit_code": 0
+    },
+    {
+      "command": "pinned Aiken 1.1.21 aiken check --deny --seed 20260711 --max-success 250",
+      "isolation": "bwrap network-disabled fresh tmpfs project",
+      "exit_code": 0,
+      "checks": 1865,
+      "errors": 0,
+      "warnings": 0
+    },
+    {
+      "command": "pinned Python -B scripts/remediation/verify_m3_1b_r9.py",
+      "isolation": "bwrap network-disabled read-only checkout and temporary build",
+      "exit_code": 0,
+      "check_exit": 0,
+      "build_exit": 0
+    },
+    {
+      "command": "pinned Python -B -m unittest scripts.remediation.test_m3_1b_r9_provenance -v",
+      "isolation": "bwrap network-disabled read-only checkout",
+      "exit_code": 0,
+      "passed": 22
+    },
+    {
+      "command": "pinned Python -B scripts/docs/validate_docs.py",
+      "exit_code": 0
+    },
+    {
+      "command": "pinned Python -B -m unittest scripts.docs.test_validate_docs -v",
+      "exit_code": 0,
+      "passed": 2
+    },
+    {
+      "command": "pinned Aiken 1.1.21 aiken test --seed 20260711 --max-success 250",
+      "exit_code": 1,
+      "note": "unsupported subcommand; aiken check is documented to run tests"
+    }
+  ],
+  "review": {
+    "outcome": "PASS",
+    "scope": "exact integrated warning-cleanup slice",
+    "independent_checks": [
+      "11/11 evidence checksums and RESULT source hashes matched",
+      "fresh offline strict Aiken check exit 0; JSON run 122/122 tests",
+      "fresh offline provenance check/build exit 0; identical blueprint and 26 program hashes",
+      "focused provenance unittest 22/22 OK",
+      "git diff --check exit 0"
+    ],
+    "limits": "The 1865/0/0 check summary is bound to full retained diagnostic; direct reviewer output was truncated. No F04 normative, ledger, or live-network acceptance."
+  }
+}

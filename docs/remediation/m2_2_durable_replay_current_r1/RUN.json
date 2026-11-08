@@ -1,0 +1,66 @@
+{
+  "schema_version": "vams-m2-2-durable-replay-run-v1",
+  "date": "2026-10-03",
+  "status": "independent_review_passed_focused_m2_2_sqlite_scope",
+  "repository": {
+    "head": "829ab544571f12efe50ecb5740f129c8acb3e16f",
+    "branch": "testnet/remediation-20260907"
+  },
+  "toolchain": {
+    "python": "Python 3.12.14",
+    "pytest": "pytest 9.1.1",
+    "network": "bwrap --unshare-net",
+    "checkout_mount": "read-only; evidence directory writable"
+  },
+  "command": [
+    "bwrap",
+    "--unshare-net",
+    "--ro-bind",
+    "/",
+    "/",
+    "--tmpfs",
+    "/tmp",
+    "--dev-bind",
+    "/dev",
+    "/dev",
+    "--proc",
+    "/proc",
+    "--bind",
+    "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m2_2_durable_replay_current_r1",
+    "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m2_2_durable_replay_current_r1",
+    "--chdir",
+    "/home/GodOfAgents/code/VAMS-testnet",
+    "/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python",
+    "-B",
+    "-m",
+    "pytest",
+    "-q",
+    "--tb=short",
+    "-p",
+    "no:cacheprovider",
+    "--import-mode=importlib",
+    "neuron/tests/test_m2_2_durable_replay.py"
+  ],
+  "source_sha256": {
+    "gateway/replay_store.py": "0c10719bc399e932e763b9d80635f262f8caea683d4e7b37de4370a0a4ebc9de",
+    "gateway/request_auth.py": "9b47c26f1e640f3bd85f2d88d223fa97f38cfe2d9bd90948389f11ed9474a926",
+    "gateway/server.py": "ace02242ab38aa9fa5afa4371be21a1a7d2329d5b9241dec30c7d503ff393c7e",
+    "neuron/runtime_safety.py": "b39c48ec63f20c34573e11e0a515ef622e3340f76964e1688c2dfa23b29d0079",
+    "neuron/secp256k1.py": "053aee70b63979d62ba18084f058e41e1d9c9a7df3881a0bab75c7a9a132d7f6",
+    "neuron/tests/test_m2_2_durable_replay.py": "c106dfdd66dd9754fd3f591fa421aa47be4fed9e83f26752f48e62bf6b495e8d"
+  },
+  "result": {
+    "exit_code": 0,
+    "passed": 29,
+    "failed": 0,
+    "stdout_sha256": "a68dc021e8ce6d04f86da00b04bf9094b9c7e4a3113298e81b2377afef0db929",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "coverage": "Disposable SQLite tests cover synchronized same-nonce races across spawned processes, distinct-nonce concurrency, restart persistence, revocation visibility and race ordering, durable reservation retention, transactional failure, bounded cleanup, lock timeout, missing/corrupt/incompatible/read-only/symlink/path failures, live factory requirements/no fallback, fail-closed authentication before nonce consumption, raw-material exclusion, and gateway lifespan initialization before activity.",
+  "limits": "Synthetic identities/clock and temporary local SQLite only. Shared-filesystem deployment boundary is one host; this does not establish PostgreSQL, multi-host/distributed storage, production DID provider, real ingress/TLS, operator custody, or testnet readiness. No live database, key, transaction, or network used.",
+  "changes_by_run": [],
+  "independent_review": {
+    "status": "PASS",
+    "scope": "checksums, six current source/test hashes, captures, SQLite multiprocess behaviors and single-host limits"
+  }
+}

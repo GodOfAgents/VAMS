@@ -1,0 +1,9 @@
+{
+  "accepted": true,
+  "exit": 0,
+  "cpu": 431999255,
+  "mem": 424440,
+  "context_cbor_bytes": 1755,
+  "verify_signature_alias_count": 5,
+  "diagnostic": "    \"mem\": 35 |   }, |   { |     \"fun\": \"byteStringToInteger\", |     \"cpu\": 9476392, |     \"mem\": 32 |   } | ]"
+}

@@ -1,0 +1,4 @@
+  File "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m3_f05_2a_positive_diag_current_r1/probe.py", line 21
+    pathlib.Path(sys.argv[2]).write_text(json.dumps(observed,indent=2)+"
+                                                                       ^
+SyntaxError: unterminated string literal (detected at line 21)

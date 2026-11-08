@@ -1,0 +1,89 @@
+{
+  "date": "2026-10-03",
+  "slice": "F05 typed transaction mint-binding guard",
+  "checkout": "/home/GodOfAgents/code/VAMS-testnet",
+  "head": "829ab544571f12efe50ecb5740f129c8acb3e16f",
+  "changed_dirty_files": [
+    {
+      "path": "scripts/remediation/f05_2a_tx_sim_evidence_contract.py",
+      "status_before": "untracked",
+      "sha256_after": "d82e2b5592eb604e04553eac93a0857546545d4eb8c4854d649b40312111a8ef"
+    },
+    {
+      "path": "scripts/remediation/test_f05_2a_tx_sim_evidence_contract.py",
+      "status_before": "untracked",
+      "sha256_after": "d7a78314eeadbbf0fb805b4ad9b879a4503019f99c759c453032374cf8557a3a"
+    }
+  ],
+  "environment": {
+    "python": "3.12.14",
+    "pytest": "9.1.1",
+    "envoy_path": "/home/GodOfAgents/vams-evidence/toolchains/envoy-1.39.1/envoy",
+    "envoy_sha256": "002c6e1c69ed0fa0ea381887247cadadfaec9481375fa8d8d2b1731eeabf40b8"
+  },
+  "focused_results": [
+    {
+      "command": "pytest -vv --tb=short scripts/remediation/test_f05_2a_tx_sim_evidence_contract.py",
+      "exit_code": 0,
+      "duration_seconds": 0.06,
+      "result": "2 passed"
+    },
+    {
+      "command": "pytest -v --tb=short scripts/remediation/test_f05_2a_tx_sim_evidence_r2.py scripts/remediation/test_f05_2a_tx_sim_evidence_contract.py scripts/remediation/test_f05_2a_tx_sim_runner_r3.py",
+      "exit_code": 0,
+      "duration_seconds": 0.87,
+      "result": "21 passed, 15 subtests passed"
+    }
+  ],
+  "diagnostic_attempts": [
+    {
+      "command": "pytest -vv --tb=long scripts/remediation/test_f05_2a_tx_sim_evidence_contract.py::test_binding_runner_rejects_wrong_policy_and_unbound_false_positive",
+      "exit_code": 1,
+      "result": "Before test helper correction, CBOR objects from a second helper-module instance caused CBORError: unsupported fixture value."
+    },
+    {
+      "command": "env PYTHONDONTWRITEBYTECODE=1 VAMS_ENVOY_BIN=/home/GodOfAgents/vams-evidence/toolchains/envoy-1.39.1/envoy /home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/pytest -v --tb=short --ignore=docs/remediation/m3_f05_design_r2/test_design.py",
+      "exit_code": 1,
+      "result": "Initial full attempt omitted pinned Python bin directory from PATH; history-rewrite test subprocess could not find Python. Not final gate result."
+    }
+  ],
+  "final_python_gate": {
+    "command": "env PATH=/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin PYTHONDONTWRITEBYTECODE=1 VAMS_ENVOY_BIN=/home/GodOfAgents/vams-evidence/toolchains/envoy-1.39.1/envoy /home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/pytest -v --tb=short --ignore=docs/remediation/m3_f05_design_r2/test_design.py",
+    "exit_code": 1,
+    "duration_seconds": 200.09,
+    "result": "1570 passed, 5 failed, 441 nested subtests passed; 1575 root pytest items",
+    "failures": [
+      "docs/remediation/m3_2b_r6/test_binding_guard.py::BindingGuardTests::test_guard_removal_mutation_fails_closed",
+      "neuron/tests/test_sentinel.py::TestSentinelNode::test_audit_node_success",
+      "scripts/remediation/test_m3_1b_r9_provenance.py::R11BoundaryTests::test_authoritative_mutation_detected",
+      "scripts/remediation/test_m3_1b_r9_provenance.py::R11BoundaryTests::test_cleanup_after_injected_failure_and_network_boundary",
+      "scripts/remediation/test_m3_1b_r9_provenance.py::R11BoundaryTests::test_f04_forward_manifest_rebinds_current_lock_without_false_continuity"
+    ]
+  },
+  "separate_f05_design_file": {
+    "command": "env PATH=/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin PYTHONDONTWRITEBYTECODE=1 VAMS_ENVOY_BIN=/home/GodOfAgents/vams-evidence/toolchains/envoy-1.39.1/envoy /home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/pytest -v --tb=short docs/remediation/m3_f05_design_r2/test_design.py",
+    "exit_code": 0,
+    "duration_seconds": 0.25,
+    "result": "10 passed"
+  },
+  "aggregate": {
+    "collected_node_ids": 1585,
+    "passed": 1580,
+    "failed": 5,
+    "nested_subtests_not_additional_node_ids": 441
+  },
+  "independent_review": {
+    "result": "PASS",
+    "reviewer": "/root/f05_other_seed_blocker_review",
+    "reran_tests": false,
+    "scope": "F05 verifier/test source, duplicate-key behavior, and scope"
+  },
+  "git_diff_check": "PASS",
+  "f05_counts": {
+    "negative_cases": "45/55",
+    "mutations": "18/21",
+    "new_credit": "none"
+  },
+  "readiness": "NOT_READY",
+  "gated_activation": "disabled"
+}

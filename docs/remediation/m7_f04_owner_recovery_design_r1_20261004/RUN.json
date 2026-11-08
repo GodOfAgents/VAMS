@@ -1,0 +1,53 @@
+{
+  "schema_version": "m7-f04-owner-recovery-design-v1",
+  "date": "2026-10-04",
+  "classification": "design-only",
+  "canonical_checkout": "/home/GodOfAgents/code/VAMS-testnet",
+  "git": {
+    "head": "829ab544571f12efe50ecb5740f129c8acb3e16f",
+    "branch": "testnet/remediation-20260907",
+    "dirty_entries_at_capture": 142,
+    "dirty_work_preserved": true
+  },
+  "source_sha256": {
+    "cardano/validators/agent_nft.ak": "e28ff520d07f73a622a093b362f66411678d535bbb48cf2aecbcd8011204caba",
+    "cardano/validators/agent_registry.ak": "7655acb5d48cb0abcfe85dadfe9aa9c80046bff3aeeaf0720cb706084adbb5cd",
+    "cardano/lib/vams/types.ak": "c420d7481f6104b16c69ec6cddde2a81b19e91ec13d97968ae072d17ace8853e",
+    "cardano/plutus.json": "c4230410d0caac45f2c71d36e45a539c78087697128ce1533306d17e96a48008"
+  },
+  "design_artifact_sha256": {
+    "DESIGN.md": "8A988E60F4BD0D4CA5EF1BC689DAB9F12B6D4673EB5647ABCE16439E5D51FC65",
+    "TEST-MATRIX.md": "B9328C7CEDB8BE75B96885EBA7A6F235C5E76E4A4D2597AE5DD94552C77658F9",
+    "INVARIANT-ANALYSIS.md": "E05EC02DC3F5DDD24FE76DB7F96241CA16EEB662668EED95432AFC7BF729A343"
+  },
+  "inspection_commands": [
+    "git rev-parse HEAD",
+    "git branch --show-current",
+    "git status --short",
+    "sha256sum cardano/validators/agent_nft.ak cardano/validators/agent_registry.ak cardano/lib/vams/types.ak cardano/plutus.json",
+    "sed -n '1,220p' cardano/validators/agent_nft.ak",
+    "grep -nE 'MintIdentity|BurnIdentity|AgentDatumV1|DeregisterAgent' cardano/validators/agent_registry.ak cardano/lib/vams/types.ak",
+    "sed -n '100,220p' cardano/validators/agent_registry.ak"
+  ],
+  "tests": {
+    "repository_tests": "NOT_RUN",
+    "reason": "design-only slice; no source or test implementation changed",
+    "compiled_evaluator": "NOT_RUN",
+    "ledger_admission": "NOT_RUN",
+    "live_network": "NOT_RUN"
+  },
+  "independent_review": {
+    "design_security": "PASS",
+    "targeted_tests_and_invariants": "PASS",
+    "review_record": "REVIEW.md",
+    "integrated_package_and_records": "PASS"
+  },
+  "evidence_classification": "design and proposed test specification only; no executed tests or ledger evidence",
+  "readiness": {
+    "status": "NOT READY",
+    "deployment_enabled": false,
+    "deposit_enabled": false,
+    "slash_activation_enabled": false,
+    "execute_intent_enabled": false
+  }
+}

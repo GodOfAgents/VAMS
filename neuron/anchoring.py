@@ -11,14 +11,22 @@ Pillar 2 of Immortal Agents: L1 STATE ANCHORING
 """
 
 import hashlib
-import logging
+import os
 import time
 import json
-import threading
 from dataclasses import dataclass
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Mapping, Optional
 
-logger = logging.getLogger(__name__)
+from neuron.runtime_safety import (
+    ImmutableRuntimeConfiguration,
+    LiveModeSafetyError,
+    RuntimePolicy,
+    load_runtime_policy,
+    resolve_component_mock_mode,
+)
+
+
+ANCHOR_MOCK_VARIABLE = "ANCHOR_MOCK_MODE"
 
 
 @dataclass
@@ -42,7 +50,7 @@ class AnchorReceipt:
         }
 
 
-class L1StateAnchor:
+class L1StateAnchor(ImmutableRuntimeConfiguration):
     """
     Simulates L1 State Anchoring (Pillar 2 of Immortal Agents).
 
@@ -63,9 +71,36 @@ class L1StateAnchor:
     SIMULATED_BLOCK_TIME = 2  # seconds
     BASE_BLOCK_NUMBER = 19_283_102
 
-    def __init__(self):
+    _immutable_runtime_fields = frozenset({"mock_mode", "runtime_policy"})
+
+    def __init__(
+        self,
+        mock_mode: Optional[bool] = None,
+        *,
+        environ: Optional[Mapping[str, str]] = None,
+        policy: Optional[RuntimePolicy] = None,
+    ):
+        source = os.environ if environ is None else environ
+        self.runtime_policy = policy or load_runtime_policy(source)
+        self.mock_mode = resolve_component_mock_mode(
+            "L1StateAnchor",
+            ANCHOR_MOCK_VARIABLE,
+            mock_mode,
+            policy=self.runtime_policy,
+            environ=source,
+        )
+        if self.runtime_policy.is_live:
+            raise LiveModeSafetyError(
+                "L1StateAnchor live execution is disabled until transaction "
+                "confirmation and exact on-chain read-back are implemented"
+            )
+        if not self.mock_mode:
+            raise LiveModeSafetyError(
+                "L1StateAnchor has no authoritative non-simulated implementation"
+            )
         self._anchor_count = 0
         self._last_block = self.BASE_BLOCK_NUMBER
+        self._freeze_runtime_configuration()
 
     def compute_merkle_root(
         self, checkpoint_data: List[Dict[str, Any]]
@@ -114,68 +149,16 @@ class L1StateAnchor:
         """
         Submit state anchor to L1.
 
-        If Web3 client is configured, sends real transaction.
-        Otherwise falls back to simulation.
+        Produce an explicitly requested non-authoritative demo receipt.
         """
         self._anchor_count += 1
 
-        tx_hash = ""
-        block_number = self._last_block + 1
-        simulated = True
-
-        # Try real Web3 submission
-        try:
-            from neuron.eth_client.registration import (
-                AgentRegistryClient,
-            )
-            client = AgentRegistryClient()
-            if client.contract:
-                root_bytes = bytes.fromhex(merkle_root[2:])
-                agent_id = hashlib.sha256(b"agent").digest()
-
-                tx_hash_str = client.submit_checkpoint(
-                    root_bytes, agent_id
-                )
-                tx_hash = tx_hash_str
-                block_number = client.w3.eth.block_number
-                simulated = False
-        except ImportError:
-            pass  # Module not found or dependency missing
-        except (ConnectionError, TimeoutError) as e:
-            logger.warning(
-                "Web3 submission failed (network): %s. "
-                "Falling back to simulation.", e
-            )
-        except ValueError as e:
-            logger.error(
-                "Web3 submission failed (bad data): %s. "
-                "Falling back to simulation.", e
-            )
-        except Exception:
-            logger.exception(
-                "Web3 submission failed unexpectedly. "
-                "Falling back to simulation."
-            )
-
-        # Update internal block tracker
-        if simulated:
-            self._last_block += 1
-            block_number = self._last_block
-
-            # Generate simulated tx hash
-            tx_data = (
-                f"{merkle_root}:{self._anchor_count}"
-                f":{time.time()}"
-            )
-            tx_hash_val = hashlib.sha256(
-                tx_data.encode('utf-8')
-            ).hexdigest()
-            tx_hash = f"0x{tx_hash_val}"
-
-            # Simulate brief delay (L1 submission)
-            time.sleep(0.1)
-        else:
-            self._last_block = block_number
+        self._last_block += 1
+        block_number = self._last_block
+        tx_data = f"{merkle_root}:{self._anchor_count}:{time.time()}"
+        tx_hash_val = hashlib.sha256(tx_data.encode("utf-8")).hexdigest()
+        tx_hash = f"simulated:sha256:{tx_hash_val}"
+        time.sleep(0.1)
 
         return AnchorReceipt(
             merkle_root=merkle_root,
@@ -183,7 +166,7 @@ class L1StateAnchor:
             block_number=block_number,
             timestamp=time.time(),
             checkpoints_included=checkpoints_count,
-            simulated=simulated
+            simulated=True
         )
 
     def verify_anchor(
@@ -238,18 +221,12 @@ class L1StateAnchor:
         )
 
 
-# Thread-safe singleton
-_anchor_instance: Optional[L1StateAnchor] = None
-_anchor_lock = threading.Lock()
+def get_anchor(
+    mock_mode: Optional[bool] = None,
+    *,
+    environ: Optional[Mapping[str, str]] = None,
+    policy: Optional[RuntimePolicy] = None,
+) -> L1StateAnchor:
+    """Construct an anchor under the caller's immutable runtime policy."""
 
-
-def get_anchor() -> L1StateAnchor:
-    """Get the singleton L1StateAnchor instance (thread-safe)."""
-    global _anchor_instance
-    if _anchor_instance is None:
-        # NOTE: GIL-dependent double-check pattern
-        # Safe in CPython, but requires review if porting to PyPy or Cython
-        with _anchor_lock:
-            if _anchor_instance is None:
-                _anchor_instance = L1StateAnchor()
-    return _anchor_instance
+    return L1StateAnchor(mock_mode=mock_mode, environ=environ, policy=policy)

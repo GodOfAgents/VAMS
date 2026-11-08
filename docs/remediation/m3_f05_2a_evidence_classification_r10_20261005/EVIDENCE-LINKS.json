@@ -1,0 +1,61 @@
+{
+  "files": [
+    {
+      "path": "docs/remediation/m3_f05_2a_evidence_classification_r9_20261005/AMENDMENT.md",
+      "role": "retained R9 baseline",
+      "sha256": "5aaa7062720deccebfa620c0f639b1f02ca49d674629a9925b767b17da6d04ff"
+    },
+    {
+      "path": "docs/remediation/m3_f05_2a_evidence_classification_r9_20261005/CASE-STATUS.json",
+      "role": "retained R9 baseline",
+      "sha256": "e451d01483bf42e808523ca99943c44f49642d86f83d83cb574a03c99218eebb"
+    },
+    {
+      "path": "docs/remediation/m3_f05_2a_evidence_classification_r9_20261005/COMPARISON.json",
+      "role": "retained R9 baseline",
+      "sha256": "7d360ad13d77c4f67178fe59685b7c0d96f9d23a2988eef1e757038e0236ac23"
+    },
+    {
+      "path": "docs/remediation/m3_f05_2a_evidence_classification_r9_20261005/EVIDENCE-LINKS.json",
+      "role": "retained R9 baseline",
+      "sha256": "b0ac749128f51ea5b16070fdd8b43b9b75f853bf8405726ad7cc2aea1cdc6dc7"
+    },
+    {
+      "path": "docs/remediation/m3_f05_2a_evidence_classification_r10_20261005/AMENDMENT.md",
+      "role": "R10 mutation overlay",
+      "sha256": "e90d61168529bad7a8c33c198dddf58b02fb1cca69ee67e2233c0a163f53eb5a"
+    },
+    {
+      "path": "docs/remediation/m3_f05_2a_evidence_classification_r10_20261005/CASE-STATUS.json",
+      "role": "R10 mutation overlay",
+      "sha256": "5ef6fb8e4ecb13f175523df42f832e987d6de1689e6d5b5f65940c014b377b56"
+    },
+    {
+      "path": "docs/remediation/m3_f05_2a_evidence_classification_r10_20261005/COMPARISON.json",
+      "role": "R10 mutation overlay",
+      "sha256": "9258c25855c9a926f6cff718b57dde1cb6e659c488e2bb2f0e04e05ebea61d92"
+    },
+    {
+      "path": "docs/remediation/m3_f05_2a_unconditional_full_r2_20261005/RUN.json",
+      "role": "unconditional synthetic capture or review",
+      "sha256": "0ba7df6632bdca84bfc71ae43c02f36fb2b4e44884ae31c40e15e4b44d0244e3"
+    },
+    {
+      "path": "docs/remediation/m3_f05_2a_unconditional_full_r2_20261005/ASSESSMENT.md",
+      "role": "unconditional synthetic capture or review",
+      "sha256": "bf06cb340cd6953dc4a091d9c8f9143ed4b2e123585b1b53bd21337ae1eaa64e"
+    },
+    {
+      "path": "docs/remediation/m3_f05_2a_unconditional_rebinding_review_r1_20261005/INDEPENDENT-REVIEW.md",
+      "role": "unconditional synthetic capture or review",
+      "sha256": "f2b6f964f796afbbe74d6db18a3850225a2276f107d2f711a1ba3914cef89774"
+    },
+    {
+      "path": "docs/remediation/m3_f05_2a_unconditional_full_r2_review_r1_20261005/INDEPENDENT-REVIEW.md",
+      "role": "unconditional synthetic capture or review",
+      "sha256": "dedc934f93958fcc14fefe26a8669cad4aa2e562bfde6f972b2c3c9aca375f7d"
+    }
+  ],
+  "schema_version": "f05-2a-r10-mutation-evidence-links-v1",
+  "source_overlay": "docs/remediation/m3_f05_2a_evidence_classification_r9_20261005"
+}

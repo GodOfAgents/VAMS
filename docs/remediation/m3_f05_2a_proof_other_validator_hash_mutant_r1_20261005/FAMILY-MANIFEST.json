@@ -1,0 +1,138 @@
+{
+  "R4_1_sha256": "238b3da9296a6c60699dbc7201759c7e499c63defd932491023b80ec7916a171",
+  "case_ids_in_scope": [
+    "r2_signature_for_other_validator_hash"
+  ],
+  "case_package": "docs/remediation/m3_f05_2a_proof_other_validator_hash_mutant_r1_20261005/r2_signature_for_other_validator_hash",
+  "files": {
+    "SUMMARY.md": {
+      "bytes": 1158,
+      "sha256": "f111847c9ce128d47cb2dcdbf98f7cd2e92da6abf5eb80f3fe1bd7b9fd0d49d3"
+    },
+    "r2_signature_for_other_validator_hash/FIXTURE-MANIFEST.json": {
+      "bytes": 17897,
+      "sha256": "c99fdab2744215883170fe3806cabe33244e1ad5bbb3a0e40637c879695fa5bd"
+    },
+    "r2_signature_for_other_validator_hash/SHA256SUMS": {
+      "bytes": 2651,
+      "sha256": "c977bb61f1fef7f6d2840a1b61d35b6ee53418b46a6d10c93b79ac9675535c2b"
+    },
+    "r2_signature_for_other_validator_hash/SOURCE-DIFF.patch": {
+      "bytes": 452,
+      "sha256": "d741ec9b6d083eec0af0c0cfae1c7bfe46a0b466ff6dc3189543023b2fb32738"
+    },
+    "r2_signature_for_other_validator_hash/mutant.applied-policy.cbor": {
+      "bytes": 3467,
+      "sha256": "e8da6de647840db9fa387e045b7d3403a4690165dcc00766109fad0ff684a8a1"
+    },
+    "r2_signature_for_other_validator_hash/mutant.genesis_ref.cbor": {
+      "bytes": 39,
+      "sha256": "51f08c55f440a2116b42e5283fc76d8be4d707788d3bc765023620199af45c75"
+    },
+    "r2_signature_for_other_validator_hash/mutant.initial_keys.cbor": {
+      "bytes": 172,
+      "sha256": "a7cd5c35689dece281de4dfb4f2e0a0d29bb5129b63d7bf3971f1663bf04391c"
+    },
+    "r2_signature_for_other_validator_hash/mutant.proof-message.bin": {
+      "bytes": 279,
+      "sha256": "608b46934b1a315c3c905c96f250e3d23d75eadb483cd5b893bc6e386c47a22e"
+    },
+    "r2_signature_for_other_validator_hash/mutant.raw_inputs.cbor": {
+      "bytes": 73,
+      "sha256": "5e935c48cc9d4e82e6dbedce94b2fbd3fb427f5e187bbe67ed376671ba5e4fec"
+    },
+    "r2_signature_for_other_validator_hash/mutant.raw_outputs.cbor": {
+      "bytes": 79,
+      "sha256": "a3993e8db5134ee6ae9329a366ae66d6706a08ac3174720317359d85faa4cefd"
+    },
+    "r2_signature_for_other_validator_hash/mutant.tx.cbor": {
+      "bytes": 5104,
+      "sha256": "d4950fb424627e5492589643e078f2239cd2661f4133b7d6276a978b097b7821"
+    },
+    "r2_signature_for_other_validator_hash/positive-control.applied-policy.cbor": {
+      "bytes": 3467,
+      "sha256": "8002a87a2f9b285197518bd865c7da7afae26b5362a0683d7a1c723716424dbd"
+    },
+    "r2_signature_for_other_validator_hash/positive-control.genesis_ref.cbor": {
+      "bytes": 39,
+      "sha256": "51f08c55f440a2116b42e5283fc76d8be4d707788d3bc765023620199af45c75"
+    },
+    "r2_signature_for_other_validator_hash/positive-control.initial_keys.cbor": {
+      "bytes": 172,
+      "sha256": "a7cd5c35689dece281de4dfb4f2e0a0d29bb5129b63d7bf3971f1663bf04391c"
+    },
+    "r2_signature_for_other_validator_hash/positive-control.proof-message.bin": {
+      "bytes": 279,
+      "sha256": "4b1e030c5639db1e22d6dac2e10a7ee63313319b0121bb4c8fcc844fc9797e74"
+    },
+    "r2_signature_for_other_validator_hash/positive-control.raw_inputs.cbor": {
+      "bytes": 73,
+      "sha256": "5e935c48cc9d4e82e6dbedce94b2fbd3fb427f5e187bbe67ed376671ba5e4fec"
+    },
+    "r2_signature_for_other_validator_hash/positive-control.raw_outputs.cbor": {
+      "bytes": 79,
+      "sha256": "fccf32f91dd3541e33bdb9a92f61ab002bdf93ba7275a270101c70309fa044b9"
+    },
+    "r2_signature_for_other_validator_hash/positive-control.tx.cbor": {
+      "bytes": 5104,
+      "sha256": "8eb0a4f8b11c30231d1788ab3399823a542c7ae86e75bc1902aa452f527f0f4b"
+    },
+    "r2_signature_for_other_validator_hash/prior-negative-review.md": {
+      "bytes": 3504,
+      "sha256": "e6c7e441db3a25392f49f44a25af158fb465ff1df17118172e56b6c935cf3e3d"
+    },
+    "r2_signature_for_other_validator_hash/prior-negative-run.json": {
+      "bytes": 4181,
+      "sha256": "5e89f1f022fcb11e3e6311cb13c0bb3bdb7821b8e44d97863d991f5673ce86c0"
+    },
+    "r2_signature_for_other_validator_hash/prior-positive-review.md": {
+      "bytes": 2763,
+      "sha256": "5d31f9251a73343eef9d8641031bd80691582b8d471caeabf2a02f69a6bd4bed"
+    },
+    "r2_signature_for_other_validator_hash/prior-positive-run.json": {
+      "bytes": 4022,
+      "sha256": "18b04228b885bc428441aab701fa100f7dd280d53efd4a87d4fef4b3375d1e6d"
+    },
+    "r2_signature_for_other_validator_hash/prior-preexecution-review.md": {
+      "bytes": 5214,
+      "sha256": "7a29a359240fe715c5ec9405c551dfc31ab40f90c39755205f616387d1b0adf4"
+    },
+    "r2_signature_for_other_validator_hash/reviewed-negative.applied-policy.cbor": {
+      "bytes": 3467,
+      "sha256": "8002a87a2f9b285197518bd865c7da7afae26b5362a0683d7a1c723716424dbd"
+    },
+    "r2_signature_for_other_validator_hash/reviewed-negative.genesis_ref.cbor": {
+      "bytes": 39,
+      "sha256": "51f08c55f440a2116b42e5283fc76d8be4d707788d3bc765023620199af45c75"
+    },
+    "r2_signature_for_other_validator_hash/reviewed-negative.initial_keys.cbor": {
+      "bytes": 172,
+      "sha256": "a7cd5c35689dece281de4dfb4f2e0a0d29bb5129b63d7bf3971f1663bf04391c"
+    },
+    "r2_signature_for_other_validator_hash/reviewed-negative.proof-message.bin": {
+      "bytes": 279,
+      "sha256": "608b46934b1a315c3c905c96f250e3d23d75eadb483cd5b893bc6e386c47a22e"
+    },
+    "r2_signature_for_other_validator_hash/reviewed-negative.raw_inputs.cbor": {
+      "bytes": 73,
+      "sha256": "5e935c48cc9d4e82e6dbedce94b2fbd3fb427f5e187bbe67ed376671ba5e4fec"
+    },
+    "r2_signature_for_other_validator_hash/reviewed-negative.raw_outputs.cbor": {
+      "bytes": 79,
+      "sha256": "fccf32f91dd3541e33bdb9a92f61ab002bdf93ba7275a270101c70309fa044b9"
+    },
+    "r2_signature_for_other_validator_hash/reviewed-negative.tx.cbor": {
+      "bytes": 5104,
+      "sha256": "b1113e0ee4172a49d7ce4a3e30a31d03b017c54cadb5546b72b60ec5c054dd2d"
+    }
+  },
+  "original_registry_sha256": "98a05d24d476b1aee2754768322dc4b794e5afb5fabec28ade17a2888285467d",
+  "prior_negative_run_sha256": "5e89f1f022fcb11e3e6311cb13c0bb3bdb7821b8e44d97863d991f5673ce86c0",
+  "prior_positive_run_sha256": "18b04228b885bc428441aab701fa100f7dd280d53efd4a87d4fef4b3375d1e6d",
+  "schema_version": "f05-2a-proof-domain-validator-hash-mutant-family-r1",
+  "scope": "synthetic one-guard alternate applied-policy mutant; no original-policy, ledger-admission, Pre-Prod, or live-network credit",
+  "source_before_sha256": "e9d3ac9cbb14b9e7693dc12430234694c82eb52e61d176e1e39992fb9cbeafa8",
+  "source_mutant_sha256": "e3d83c99174f0380c61374695209d0ac83ed8f07ed5cb673675a337494be0f23",
+  "source_registry_status_handoff_unchanged": true,
+  "status": "candidate-awaiting-independent-byte-review; tx-sim-not-run; no credit"
+}

@@ -18,6 +18,7 @@ Architecture Reference:
 from __future__ import annotations
 
 import logging
+import math
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -51,10 +52,32 @@ class ScorerWeights:
     cognitive_alignment: float = 0.0  # CHC Phase 7: Shortfall cognitive alignment
 
     def validate(self) -> None:
-        total = self.price + self.sla + self.latency + self.regional + self.skill_alignment + self.cognitive_alignment
+        names = ("price", "sla", "latency", "regional", "skill_alignment", "cognitive_alignment")
+        values = []
+        for name in names:
+            value = getattr(self, name)
+            if isinstance(value, bool) or not isinstance(value, (int, float)):
+                raise ValueError(f"Scorer weight '{name}' must be a finite nonnegative number; got {value!r}")
+            if isinstance(value, float) and not math.isfinite(value):
+                raise ValueError(f"Scorer weight '{name}' must be a finite nonnegative number; got {value!r}")
+            if value < 0:
+                raise ValueError(f"Scorer weight '{name}' must be a finite nonnegative number; got {value!r}")
+            values.append(value)
+
+        for name, value in zip(names, values):
+            # With nonnegative terms, a component above the existing total
+            # tolerance is already guaranteed to fail the unchanged sum rule.
+            # Catch it here to keep arbitrary-size Python integers from
+            # overflowing during a mixed int/float total calculation.
+            if value > 1.001:
+                raise ValueError(f"Scorer weights must sum to 1.0; '{name}' alone exceeds the accepted total tolerance")
+
+        total = sum(values)
+        if isinstance(total, float) and not math.isfinite(total):
+            raise ValueError("Scorer weights must sum to 1.0 using finite values")
         if abs(total - 1.0) > 0.001:
             raise ValueError(
-                f"Scorer weights must sum to 1.0, got {total:.3f}. "
+                f"Scorer weights must sum to 1.0, got {total!r}. "
                 f"Adjust weights: price={self.price}, sla={self.sla}, "
                 f"latency={self.latency}, regional={self.regional}, "
                 f"skill_alignment={self.skill_alignment}, "
@@ -140,6 +163,10 @@ class CandidateScorer:
             List of ScoredCandidate, sorted by total_score descending.
             Empty list if no candidates pass hard filters.
         """
+        # Configuration objects are mutable; revalidate before filtering or any
+        # early return so invalid live weights cannot bypass the score boundary.
+        self.weights.validate()
+
         # Step 1: Hard filter
         eligible = self._filter_eligible(blueprint, nodes)
         if not eligible:
@@ -154,21 +181,23 @@ class CandidateScorer:
         has_skills = bool(blueprint.skill_vector)
         has_cog = bool(blueprint.cognitive_requirements)
 
-        if (has_skills and weights.skill_alignment == 0.0) or (has_cog and weights.cognitive_alignment == 0.0):
+        if has_skills or has_cog:
             skill_w = 0.10 if has_skills else 0.0
             cog_w = 0.10 if has_cog else 0.0
             remaining = 1.0 - (skill_w + cog_w)
             non_align_sum = weights.price + weights.sla + weights.latency + weights.regional
-            if non_align_sum > 0:
-                scale = remaining / non_align_sum
-                weights = ScorerWeights(
-                    price=weights.price * scale,
-                    sla=weights.sla * scale,
-                    latency=weights.latency * scale,
-                    regional=weights.regional * scale,
-                    skill_alignment=skill_w,
-                    cognitive_alignment=cog_w
-                )
+            if non_align_sum <= 0:
+                raise ValueError("Dynamic scorer weights require a positive base-weight sum")
+            # Form bounded proportions first: remaining / a tiny positive
+            # base sum can overflow even when every final weight is finite.
+            weights = ScorerWeights(
+                price=(weights.price / non_align_sum) * remaining,
+                sla=(weights.sla / non_align_sum) * remaining,
+                latency=(weights.latency / non_align_sum) * remaining,
+                regional=(weights.regional / non_align_sum) * remaining,
+                skill_alignment=skill_w,
+                cognitive_alignment=cog_w
+            )
 
         # Step 2: Compute dimension ranges for normalization
         price_range = self._compute_range([n.reservation_price for n in eligible])

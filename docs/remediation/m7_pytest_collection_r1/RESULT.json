@@ -1,0 +1,54 @@
+{
+  "schema": "m7-root-pytest-source-bound-v1",
+  "python": "3.12.14",
+  "pytest_version": "pytest 9.1.1",
+  "source_inventory": {
+    "file_count_before": 342,
+    "sha256_before": "0d31424ca11ea9873d7fff5ab43799a5c5c3e592f854fa1afb68abb6596806b0",
+    "file_count_after": 342,
+    "sha256_after": "0d31424ca11ea9873d7fff5ab43799a5c5c3e592f854fa1afb68abb6596806b0",
+    "unchanged_during_run": true,
+    "changed_paths": []
+  },
+  "collection": {
+    "command": [
+      "/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python",
+      "-B",
+      "-m",
+      "pytest",
+      "--collect-only",
+      "-q",
+      "-p",
+      "no:cacheprovider"
+    ],
+    "exit_code": 0,
+    "collected": 1596,
+    "summary": null,
+    "stdout_sha256": "96bf5dfb0563441336a81bda4b7b896bdf2459ad5527eb316bfb7fda9355f9ee",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "raw_output_retained": false
+  },
+  "full_suite": {
+    "command": [
+      "/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python",
+      "-B",
+      "-m",
+      "pytest",
+      "-v",
+      "--tb=short",
+      "-p",
+      "no:cacheprovider"
+    ],
+    "exit_code": 0,
+    "collected": null,
+    "summary": {
+      "passed": 1596,
+      "failed": 0,
+      "subtests_passed": 441,
+      "duration_seconds": 241.55
+    },
+    "stdout_sha256": "bdbf3505b1f9ca282b3a2fad246c014d2e281950fdfc268db91bd343fcbdeee0",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "raw_output_retained": false
+  }
+}

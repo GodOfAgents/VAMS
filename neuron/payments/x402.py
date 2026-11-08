@@ -1,7 +1,7 @@
 import logging
 import time
 import os
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Mapping, Optional
 
 # web3 import - handle case where we have a local web3 folder
 try:
@@ -11,19 +11,51 @@ try:
 except (ImportError, AttributeError):
     Web3 = None
 
-from payments.payment_channel import PaymentChannelManager
-from payments.delivery_proof import create_proof
-from payments.batch_settlement import Payment
+from .payment_channel import PaymentChannelManager
+from .delivery_proof import create_proof
+from .batch_settlement import Payment
+from neuron.runtime_safety import (
+    ImmutableRuntimeConfiguration,
+    LiveModeSafetyError,
+    RuntimePolicy,
+    load_runtime_policy,
+    resolve_component_mock_mode,
+)
 
 logger = logging.getLogger("VAMSx402")
 
-class X402Client:
+X402_MOCK_VARIABLE = "X402_MOCK_MODE"
+
+
+class X402Client(ImmutableRuntimeConfiguration):
     """
     Economic Layer (Layer 5) - x402 Payment Protocol Client.
     Handles HTTP 402 responses, channel management, and atomic payments.
     """
     
-    def __init__(self, private_key: Optional[str] = None, session_key: Optional[str] = None, smart_wallet_address: Optional[str] = None, rpc_url: Optional[str] = None, circuit_breaker: Optional[Any] = None):
+    _immutable_runtime_fields = frozenset(
+        {"mock_mode", "runtime_policy", "rpc_url", "private_key", "session_key"}
+    )
+
+    def __init__(self, private_key: Optional[str] = None, session_key: Optional[str] = None, smart_wallet_address: Optional[str] = None, rpc_url: Optional[str] = None, circuit_breaker: Optional[Any] = None, mock_mode: Optional[bool] = None, *, environ: Optional[Mapping[str, str]] = None, policy: Optional[RuntimePolicy] = None):
+        source = os.environ if environ is None else environ
+        self.runtime_policy = policy or load_runtime_policy(source)
+        self.mock_mode = resolve_component_mock_mode(
+            "X402Client",
+            X402_MOCK_VARIABLE,
+            mock_mode,
+            policy=self.runtime_policy,
+            environ=source,
+        )
+        if self.runtime_policy.is_live:
+            raise LiveModeSafetyError(
+                "X402Client live execution is disabled until payment channel funding, "
+                "signing, broadcast, and confirmation are implemented"
+            )
+        if not self.mock_mode:
+            raise LiveModeSafetyError(
+                "X402Client has no authoritative non-simulated implementation"
+            )
         self.private_key = private_key
         self.session_key = session_key
         self.smart_wallet_address = smart_wallet_address
@@ -31,14 +63,18 @@ class X402Client:
         self.breaker = circuit_breaker
         
         # Initialize Managers
-        self.channel_manager = PaymentChannelManager()
+        self.channel_manager = PaymentChannelManager(
+            mock_mode=True,
+            environ=source,
+            policy=self.runtime_policy,
+        )
         
         # Initialize Web3
         if Web3 is not None and rpc_url:
             try:
                 self.w3 = Web3(Web3.HTTPProvider(self.rpc_url))
                 try:
-                    from sdk.signer import SignerFactory
+                    from ..sdk.signer import SignerFactory
                     if self.session_key and self.smart_wallet_address:
                         self.signer = SignerFactory.create({
                             "session_key": self.session_key,
@@ -67,7 +103,11 @@ class X402Client:
             self.w3 = None
             self.address = "0xMockAgentAddress"
 
-        logger.info(f"X402 Client initialized (Address: {self.address})")
+        self._freeze_runtime_configuration()
+        logger.info(
+            "X402Client initialized (mode=%s, classification=non-authoritative)",
+            self.runtime_policy.mode.value,
+        )
 
     def open_channel(self, counterparty: str, deposit: float, duration_hours: int = 24) -> Optional[str]:
         """
@@ -185,4 +225,3 @@ class X402Client:
         if not channel:
             return 0
         return channel.deposit_amount - channel.spent_amount
-

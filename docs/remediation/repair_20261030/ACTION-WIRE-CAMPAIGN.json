@@ -1,0 +1,299 @@
+{
+  "schema": "vams.action-wire-v1-decode-campaign.v1",
+  "status": "INTEGRATED_SOLIDITY_PYTHON_VERIFIED_RUST_AIKEN_PENDING",
+  "vector_path": "docs/remediation/repair_20261030/ACTION-WIRE-VECTORS.json",
+  "vector_sha256": "128f95c6903af1516963f4756bfaa352eb66b21207708e1957db2861958fb97c",
+  "python_result_sha256": "921c5ebb028d8c8330c5ed786186de8916a2a8cbcd656d4e20ef3564f6294943",
+  "literal_review_sha256": "28ced0c001da5e9dd7fe9f4cb04cb27577d963a6e5d961b829051779749c77f3",
+  "cases": [
+    {
+      "id": "valid_base",
+      "accepted": true,
+      "python_status": "LOCAL_UNIT_PASS",
+      "solidity_status": "LOCAL_NATIVE_VM_CANONICAL_PASS",
+      "rust_status": "PREPARED_NOT_RUN",
+      "aiken_status": "PREPARED_NOT_RUN"
+    },
+    {
+      "id": "valid_cardano_root",
+      "accepted": true,
+      "python_status": "LOCAL_UNIT_PASS",
+      "solidity_status": "LOCAL_NATIVE_VM_CANONICAL_PASS",
+      "rust_status": "PREPARED_NOT_RUN",
+      "aiken_status": "PREPARED_NOT_RUN"
+    },
+    {
+      "id": "valid_full_uint256",
+      "accepted": true,
+      "python_status": "LOCAL_UNIT_PASS",
+      "solidity_status": "LOCAL_NATIVE_VM_CANONICAL_PASS",
+      "rust_status": "PREPARED_NOT_RUN",
+      "aiken_status": "PREPARED_NOT_RUN"
+    },
+    {
+      "id": "valid_zero_budget",
+      "accepted": true,
+      "python_status": "LOCAL_UNIT_PASS",
+      "solidity_status": "LOCAL_NATIVE_VM_CANONICAL_PASS",
+      "rust_status": "PREPARED_NOT_RUN",
+      "aiken_status": "PREPARED_NOT_RUN"
+    },
+    {
+      "id": "valid_start_zero",
+      "accepted": true,
+      "python_status": "LOCAL_UNIT_PASS",
+      "solidity_status": "LOCAL_NATIVE_VM_CANONICAL_PASS",
+      "rust_status": "PREPARED_NOT_RUN",
+      "aiken_status": "PREPARED_NOT_RUN"
+    },
+    {
+      "id": "valid_nonzero_model",
+      "accepted": true,
+      "python_status": "LOCAL_UNIT_PASS",
+      "solidity_status": "LOCAL_NATIVE_VM_CANONICAL_PASS",
+      "rust_status": "PREPARED_NOT_RUN",
+      "aiken_status": "PREPARED_NOT_RUN"
+    },
+    {
+      "id": "reject_empty",
+      "accepted": false,
+      "python_status": "LOCAL_UNIT_PASS",
+      "solidity_status": "LOCAL_NATIVE_VM_CANONICAL_PASS",
+      "rust_status": "PREPARED_NOT_RUN",
+      "aiken_status": "PREPARED_NOT_RUN"
+    },
+    {
+      "id": "reject_truncated",
+      "accepted": false,
+      "python_status": "LOCAL_UNIT_PASS",
+      "solidity_status": "LOCAL_NATIVE_VM_CANONICAL_PASS",
+      "rust_status": "PREPARED_NOT_RUN",
+      "aiken_status": "PREPARED_NOT_RUN"
+    },
+    {
+      "id": "reject_trailing",
+      "accepted": false,
+      "python_status": "LOCAL_UNIT_PASS",
+      "solidity_status": "LOCAL_NATIVE_VM_CANONICAL_PASS",
+      "rust_status": "PREPARED_NOT_RUN",
+      "aiken_status": "PREPARED_NOT_RUN"
+    },
+    {
+      "id": "reject_wrong_domain",
+      "accepted": false,
+      "python_status": "LOCAL_UNIT_PASS",
+      "solidity_status": "LOCAL_NATIVE_VM_CANONICAL_PASS",
+      "rust_status": "PREPARED_NOT_RUN",
+      "aiken_status": "PREPARED_NOT_RUN"
+    },
+    {
+      "id": "reject_wrong_version",
+      "accepted": false,
+      "python_status": "LOCAL_UNIT_PASS",
+      "solidity_status": "LOCAL_NATIVE_VM_CANONICAL_PASS",
+      "rust_status": "PREPARED_NOT_RUN",
+      "aiken_status": "PREPARED_NOT_RUN"
+    },
+    {
+      "id": "reject_evm_root_padding",
+      "accepted": false,
+      "python_status": "LOCAL_UNIT_PASS",
+      "solidity_status": "LOCAL_NATIVE_VM_CANONICAL_PASS",
+      "rust_status": "PREPARED_NOT_RUN",
+      "aiken_status": "PREPARED_NOT_RUN"
+    },
+    {
+      "id": "reject_cardano_root_padding",
+      "accepted": false,
+      "python_status": "LOCAL_UNIT_PASS",
+      "solidity_status": "LOCAL_NATIVE_VM_CANONICAL_PASS",
+      "rust_status": "PREPARED_NOT_RUN",
+      "aiken_status": "PREPARED_NOT_RUN"
+    },
+    {
+      "id": "reject_zero_actor_root",
+      "accepted": false,
+      "python_status": "LOCAL_UNIT_PASS",
+      "solidity_status": "LOCAL_NATIVE_VM_CANONICAL_PASS",
+      "rust_status": "PREPARED_NOT_RUN",
+      "aiken_status": "PREPARED_NOT_RUN"
+    },
+    {
+      "id": "reject_zero_provider",
+      "accepted": false,
+      "python_status": "LOCAL_UNIT_PASS",
+      "solidity_status": "LOCAL_NATIVE_VM_CANONICAL_PASS",
+      "rust_status": "PREPARED_NOT_RUN",
+      "aiken_status": "PREPARED_NOT_RUN"
+    },
+    {
+      "id": "reject_zero_runtime",
+      "accepted": false,
+      "python_status": "LOCAL_UNIT_PASS",
+      "solidity_status": "LOCAL_NATIVE_VM_CANONICAL_PASS",
+      "rust_status": "PREPARED_NOT_RUN",
+      "aiken_status": "PREPARED_NOT_RUN"
+    },
+    {
+      "id": "reject_zero_host",
+      "accepted": false,
+      "python_status": "LOCAL_UNIT_PASS",
+      "solidity_status": "LOCAL_NATIVE_VM_CANONICAL_PASS",
+      "rust_status": "PREPARED_NOT_RUN",
+      "aiken_status": "PREPARED_NOT_RUN"
+    },
+    {
+      "id": "reject_zero_workflow",
+      "accepted": false,
+      "python_status": "LOCAL_UNIT_PASS",
+      "solidity_status": "LOCAL_NATIVE_VM_CANONICAL_PASS",
+      "rust_status": "PREPARED_NOT_RUN",
+      "aiken_status": "PREPARED_NOT_RUN"
+    },
+    {
+      "id": "reject_zero_intent",
+      "accepted": false,
+      "python_status": "LOCAL_UNIT_PASS",
+      "solidity_status": "LOCAL_NATIVE_VM_CANONICAL_PASS",
+      "rust_status": "PREPARED_NOT_RUN",
+      "aiken_status": "PREPARED_NOT_RUN"
+    },
+    {
+      "id": "reject_zero_action",
+      "accepted": false,
+      "python_status": "LOCAL_UNIT_PASS",
+      "solidity_status": "LOCAL_NATIVE_VM_CANONICAL_PASS",
+      "rust_status": "PREPARED_NOT_RUN",
+      "aiken_status": "PREPARED_NOT_RUN"
+    },
+    {
+      "id": "reject_zero_input",
+      "accepted": false,
+      "python_status": "LOCAL_UNIT_PASS",
+      "solidity_status": "LOCAL_NATIVE_VM_CANONICAL_PASS",
+      "rust_status": "PREPARED_NOT_RUN",
+      "aiken_status": "PREPARED_NOT_RUN"
+    },
+    {
+      "id": "reject_zero_policy",
+      "accepted": false,
+      "python_status": "LOCAL_UNIT_PASS",
+      "solidity_status": "LOCAL_NATIVE_VM_CANONICAL_PASS",
+      "rust_status": "PREPARED_NOT_RUN",
+      "aiken_status": "PREPARED_NOT_RUN"
+    },
+    {
+      "id": "reject_zero_target",
+      "accepted": false,
+      "python_status": "LOCAL_UNIT_PASS",
+      "solidity_status": "LOCAL_NATIVE_VM_CANONICAL_PASS",
+      "rust_status": "PREPARED_NOT_RUN",
+      "aiken_status": "PREPARED_NOT_RUN"
+    },
+    {
+      "id": "reject_zero_nonce",
+      "accepted": false,
+      "python_status": "LOCAL_UNIT_PASS",
+      "solidity_status": "LOCAL_NATIVE_VM_CANONICAL_PASS",
+      "rust_status": "PREPARED_NOT_RUN",
+      "aiken_status": "PREPARED_NOT_RUN"
+    },
+    {
+      "id": "reject_zero_budget_unit",
+      "accepted": false,
+      "python_status": "LOCAL_UNIT_PASS",
+      "solidity_status": "LOCAL_NATIVE_VM_CANONICAL_PASS",
+      "rust_status": "PREPARED_NOT_RUN",
+      "aiken_status": "PREPARED_NOT_RUN"
+    },
+    {
+      "id": "reject_scheme_0",
+      "accepted": false,
+      "python_status": "LOCAL_UNIT_PASS",
+      "solidity_status": "LOCAL_NATIVE_VM_CANONICAL_PASS",
+      "rust_status": "PREPARED_NOT_RUN",
+      "aiken_status": "PREPARED_NOT_RUN"
+    },
+    {
+      "id": "reject_scheme_3",
+      "accepted": false,
+      "python_status": "LOCAL_UNIT_PASS",
+      "solidity_status": "LOCAL_NATIVE_VM_CANONICAL_PASS",
+      "rust_status": "PREPARED_NOT_RUN",
+      "aiken_status": "PREPARED_NOT_RUN"
+    },
+    {
+      "id": "reject_zero_epoch",
+      "accepted": false,
+      "python_status": "LOCAL_UNIT_PASS",
+      "solidity_status": "LOCAL_NATIVE_VM_CANONICAL_PASS",
+      "rust_status": "PREPARED_NOT_RUN",
+      "aiken_status": "PREPARED_NOT_RUN"
+    },
+    {
+      "id": "reject_zero_version",
+      "accepted": false,
+      "python_status": "LOCAL_UNIT_PASS",
+      "solidity_status": "LOCAL_NATIVE_VM_CANONICAL_PASS",
+      "rust_status": "PREPARED_NOT_RUN",
+      "aiken_status": "PREPARED_NOT_RUN"
+    },
+    {
+      "id": "reject_zero_capabilities",
+      "accepted": false,
+      "python_status": "LOCAL_UNIT_PASS",
+      "solidity_status": "LOCAL_NATIVE_VM_CANONICAL_PASS",
+      "rust_status": "PREPARED_NOT_RUN",
+      "aiken_status": "PREPARED_NOT_RUN"
+    },
+    {
+      "id": "reject_zero_chain",
+      "accepted": false,
+      "python_status": "LOCAL_UNIT_PASS",
+      "solidity_status": "LOCAL_NATIVE_VM_CANONICAL_PASS",
+      "rust_status": "PREPARED_NOT_RUN",
+      "aiken_status": "PREPARED_NOT_RUN"
+    },
+    {
+      "id": "reject_equal_times",
+      "accepted": false,
+      "python_status": "LOCAL_UNIT_PASS",
+      "solidity_status": "LOCAL_NATIVE_VM_CANONICAL_PASS",
+      "rust_status": "PREPARED_NOT_RUN",
+      "aiken_status": "PREPARED_NOT_RUN"
+    },
+    {
+      "id": "reject_reversed_times",
+      "accepted": false,
+      "python_status": "LOCAL_UNIT_PASS",
+      "solidity_status": "LOCAL_NATIVE_VM_CANONICAL_PASS",
+      "rust_status": "PREPARED_NOT_RUN",
+      "aiken_status": "PREPARED_NOT_RUN"
+    }
+  ],
+  "solidity_fuzz": [
+    "testFuzz_fullUint256Budget",
+    "testFuzz_cardanoRoot"
+  ],
+  "rust_module_tests_prepared": 35,
+  "aiken_module_tests_prepared": 36,
+  "solidity_tests_prepared": 35,
+  "native_parity": false,
+  "aiken_invoked": false,
+  "rust_invoked": false,
+  "official_promotions": 0,
+  "focused_solidity_result_sha256": "b2853e17b82bebce15642fcc310863556369db49811b1aa589ac10a64fa002fb",
+  "full_solidity_candidate_result_sha256": "2504e105eba78211bb55f9c5a19e09a31898067752789ff3b733c6361ad1d4ca",
+  "full_solidity_candidate_tests": 855,
+  "fuzz_runs_per_case": 256,
+  "canonical_status": "SOLIDITY_AND_PYTHON_LOCAL_PASS",
+  "canonical_solidity_tests": 855,
+  "canonical_solidity_result_sha256": "4bbb2bf79a8775fbff122f5b6bfc6708b828c03721bafd4ef3850032a6fb83fa",
+  "canonical_python_result_sha256": "d751904e940662a030d9b0e8498488fe851179b58abd58736018a9fd13fdf01c",
+  "canonical_sizes_result_sha256": "449620310359bfcd7ebad7f02f542dfe1f20f58a1a3aed5f996b50796413a6df",
+  "focused_scan_evidence": {
+    "artifact": "ACTION-WIRE-FOCUSED-SECRETS-21.json",
+    "algorithm": "SHA-256",
+    "digest": "c9661c45223a82a8fff169ac53e0dd3b1de4425a5231922c99c0d9a0376ac8b1"
+  }
+}

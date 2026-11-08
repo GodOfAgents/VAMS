@@ -1,0 +1,2591 @@
+{
+  "schema_version": 1,
+  "created_utc": "2026-10-03",
+  "baseline": {
+    "branch": "testnet/remediation-20260907",
+    "head": "829ab544571f12efe50ecb5740f129c8acb3e16f",
+    "working_tree_digest_before": "92c41774e872b851acef8d8ff00ab4ddf4513f89070b868f695d0bcf28e14e9c",
+    "digest_scope": "SHA-256 of Git status porcelain v2 branch text; not a file-content digest"
+  },
+  "report": {
+    "path": "/mnt/c/Users/aseem/Downloads/Mobile Devices/research_report.md",
+    "sha256": "10e188f1d9aec7500fb25ce188e626e04ef96cfe5a8e398795343d3e5936645f",
+    "bytes": 154597,
+    "instructions_in_report": "Evaluated as proposed research/backlog content; repository instructions and current user request govern."
+  },
+  "source_verification_policy": "Only primary pages opened are marked checked. URL presence and copied report metadata do not verify claims, licenses, or adoption suitability.",
+  "work_items": [
+    {
+      "id": "RW-001",
+      "priority": "P0",
+      "title": "Canonical evidence taxonomy and transition receipts",
+      "surface": "Cross-cutting / Sentinel / VDSO",
+      "classification": "Direct control; foundational schema",
+      "dependencies": [],
+      "source_leads": [
+        "S008",
+        "S012",
+        "S016",
+        "S024",
+        "S063",
+        "S087"
+      ],
+      "implementation_status": "UNASSESSED",
+      "verification_status": "NOT_RUN",
+      "source": "attached report; proposed backlog, not instructions",
+      "reconciliation": "Map to current source, tests, F01-F16, and audit controls before implementation."
+    },
+    {
+      "id": "RW-002",
+      "priority": "P0",
+      "title": "Crypto-agile identities and separately declared security guarantees",
+      "surface": "Identity / Heart / proof admission",
+      "classification": "Direct compatibility control; new cryptosuites remain gated",
+      "dependencies": [
+        "RW-001"
+      ],
+      "source_leads": [
+        "S015",
+        "S017",
+        "S026",
+        "S039",
+        "S043"
+      ],
+      "implementation_status": "UNASSESSED",
+      "verification_status": "NOT_RUN",
+      "source": "attached report; proposed backlog, not instructions",
+      "reconciliation": "Map to current source, tests, F01-F16, and audit controls before implementation."
+    },
+    {
+      "id": "RW-003",
+      "priority": "P0",
+      "title": "Approval-to-effect binding and semantic canonicalization",
+      "surface": "VIR / Service Block dispatch / effect adapters",
+      "classification": "Direct safety control",
+      "dependencies": [
+        "RW-001"
+      ],
+      "source_leads": [
+        "S012",
+        "S028",
+        "S063",
+        "S069",
+        "S082",
+        "S086",
+        "S087"
+      ],
+      "implementation_status": "UNASSESSED",
+      "verification_status": "NOT_RUN",
+      "source": "attached report; proposed backlog, not instructions",
+      "reconciliation": "Map to current source, tests, F01-F16, and audit controls before implementation."
+    },
+    {
+      "id": "RW-004",
+      "priority": "P0",
+      "title": "Deterministic authorization at the external-effect boundary",
+      "surface": "Heart policy boundary / Neuron / adapters",
+      "classification": "Direct safety control; required for consequential effects",
+      "dependencies": [
+        "RW-001",
+        "RW-003"
+      ],
+      "source_leads": [
+        "S009",
+        "S012",
+        "S020",
+        "S028",
+        "S037",
+        "S059",
+        "S063",
+        "S094"
+      ],
+      "implementation_status": "UNASSESSED",
+      "verification_status": "NOT_RUN",
+      "source": "attached report; proposed backlog, not instructions",
+      "reconciliation": "Map to current source, tests, F01-F16, and audit controls before implementation."
+    },
+    {
+      "id": "RW-005",
+      "priority": "P0",
+      "title": "Delegation provenance and monotonically attenuated authority",
+      "surface": "Identity / Heart / agent-to-agent invocation",
+      "classification": "Direct safety control",
+      "dependencies": [
+        "RW-001"
+      ],
+      "source_leads": [
+        "S006",
+        "S007",
+        "S013",
+        "S032",
+        "S037",
+        "S038",
+        "S043",
+        "S085"
+      ],
+      "implementation_status": "UNASSESSED",
+      "verification_status": "NOT_RUN",
+      "source": "attached report; proposed backlog, not instructions",
+      "reconciliation": "Map to current source, tests, F01-F16, and audit controls before implementation."
+    },
+    {
+      "id": "RW-006",
+      "priority": "P0",
+      "title": "Bounded authority lifetime, contextual consent, and key revocation",
+      "surface": "Heart / credential lifecycle / VDSO epochs",
+      "classification": "Direct safety control",
+      "dependencies": [
+        "RW-002",
+        "RW-005"
+      ],
+      "source_leads": [
+        "S023",
+        "S039",
+        "S043",
+        "S057",
+        "S081"
+      ],
+      "implementation_status": "UNASSESSED",
+      "verification_status": "NOT_RUN",
+      "source": "attached report; proposed backlog, not instructions",
+      "reconciliation": "Map to current source, tests, F01-F16, and audit controls before implementation."
+    },
+    {
+      "id": "RW-007",
+      "priority": "P0",
+      "title": "Authority cuts and bounded quiescence for asynchronous work",
+      "surface": "Durable runtime / delegation / external providers",
+      "classification": "Direct control; applies when queued or delegated effects are enabled",
+      "dependencies": [
+        "RW-006",
+        "RW-009"
+      ],
+      "source_leads": [
+        "S010",
+        "S023",
+        "S057",
+        "S081"
+      ],
+      "implementation_status": "UNASSESSED",
+      "verification_status": "NOT_RUN",
+      "source": "attached report; proposed backlog, not instructions",
+      "reconciliation": "Map to current source, tests, F01-F16, and audit controls before implementation."
+    },
+    {
+      "id": "RW-008",
+      "priority": "P0",
+      "title": "Atomic shared budgets and durable spend reservations",
+      "surface": "Agentic Economy / Heart / durable state",
+      "classification": "Direct economic safety control",
+      "dependencies": [
+        "RW-006",
+        "RW-009"
+      ],
+      "source_leads": [
+        "S023",
+        "S064",
+        "S068",
+        "S074"
+      ],
+      "implementation_status": "UNASSESSED",
+      "verification_status": "NOT_RUN",
+      "source": "attached report; proposed backlog, not instructions",
+      "reconciliation": "Map to current source, tests, F01-F16, and audit controls before implementation."
+    },
+    {
+      "id": "RW-009",
+      "priority": "P0",
+      "title": "Explicit external-effect contracts, idempotency, and reconciliation",
+      "surface": "Neuron / DBOS integration / Service Block adapters",
+      "classification": "Direct safety control; no universal exactly-once claim",
+      "dependencies": [
+        "RW-001",
+        "RW-003"
+      ],
+      "source_leads": [
+        "S010",
+        "S019",
+        "S023",
+        "S024",
+        "S057",
+        "S074"
+      ],
+      "implementation_status": "UNASSESSED",
+      "verification_status": "NOT_RUN",
+      "source": "attached report; proposed backlog, not instructions",
+      "reconciliation": "Map to current source, tests, F01-F16, and audit controls before implementation."
+    },
+    {
+      "id": "RW-010",
+      "priority": "P0",
+      "title": "Transitive effect constraints and non-amplifying credentials",
+      "surface": "Service Block sandbox / reference monitor / providers",
+      "classification": "Direct safety control",
+      "dependencies": [
+        "RW-004",
+        "RW-005"
+      ],
+      "source_leads": [
+        "S020",
+        "S021",
+        "S039",
+        "S069",
+        "S086"
+      ],
+      "implementation_status": "UNASSESSED",
+      "verification_status": "NOT_RUN",
+      "source": "attached report; proposed backlog, not instructions",
+      "reconciliation": "Map to current source, tests, F01-F16, and audit controls before implementation."
+    },
+    {
+      "id": "RW-011",
+      "priority": "P0",
+      "title": "Closed-world Service Block resolution and version-pinned invocation",
+      "surface": "Registry / Composer / gateway / dispatch",
+      "classification": "Direct safety control",
+      "dependencies": [
+        "RW-001",
+        "RW-003"
+      ],
+      "source_leads": [
+        "S032",
+        "S051",
+        "S077",
+        "S082",
+        "S086"
+      ],
+      "implementation_status": "UNASSESSED",
+      "verification_status": "NOT_RUN",
+      "source": "attached report; proposed backlog, not instructions",
+      "reconciliation": "Map to current source, tests, F01-F16, and audit controls before implementation."
+    },
+    {
+      "id": "RW-012",
+      "priority": "P1",
+      "title": "Machine-enforced task protocols and bounded plan verification",
+      "surface": "Brain / Composer / Neuron",
+      "classification": "Direct implementable improvement; not universal formal verification",
+      "dependencies": [
+        "RW-003",
+        "RW-004",
+        "RW-011"
+      ],
+      "source_leads": [
+        "S042",
+        "S047",
+        "S054",
+        "S089",
+        "S095"
+      ],
+      "implementation_status": "UNASSESSED",
+      "verification_status": "NOT_RUN",
+      "source": "attached report; proposed backlog, not instructions",
+      "reconciliation": "Map to current source, tests, F01-F16, and audit controls before implementation."
+    },
+    {
+      "id": "RW-013",
+      "priority": "P0",
+      "title": "Durable identity, obligations, effect history, and verified milestones",
+      "surface": "Neuron / DBOS integration / canonical state",
+      "classification": "Direct control for an Immortal Agent claim",
+      "dependencies": [
+        "RW-001",
+        "RW-006",
+        "RW-009"
+      ],
+      "source_leads": [
+        "S010",
+        "S019",
+        "S047",
+        "S054",
+        "S089",
+        "S095"
+      ],
+      "implementation_status": "UNASSESSED",
+      "verification_status": "NOT_RUN",
+      "source": "attached report; proposed backlog, not instructions",
+      "reconciliation": "Map to current source, tests, F01-F16, and audit controls before implementation."
+    },
+    {
+      "id": "RW-014",
+      "priority": "P1",
+      "title": "Execution-substrate portability and model replacement",
+      "surface": "Neuron runtime adapter layer / Composer",
+      "classification": "Direct interface improvement; broad live migration is deferred",
+      "dependencies": [
+        "RW-013"
+      ],
+      "source_leads": [
+        "S001",
+        "S019",
+        "S029",
+        "S047",
+        "S054",
+        "S095"
+      ],
+      "implementation_status": "UNASSESSED",
+      "verification_status": "NOT_RUN",
+      "source": "attached report; proposed backlog, not instructions",
+      "reconciliation": "Map to current source, tests, F01-F16, and audit controls before implementation."
+    },
+    {
+      "id": "RW-015",
+      "priority": "P1",
+      "title": "Verifiable Memory and artifact provenance without a mandated memory algorithm",
+      "surface": "Memory Service Blocks / artifact layer",
+      "classification": "Direct modular interface improvement",
+      "dependencies": [
+        "RW-001",
+        "RW-005"
+      ],
+      "source_leads": [
+        "S010",
+        "S035",
+        "S046",
+        "S070",
+        "S078",
+        "S080"
+      ],
+      "implementation_status": "UNASSESSED",
+      "verification_status": "NOT_RUN",
+      "source": "attached report; proposed backlog, not instructions",
+      "reconciliation": "Map to current source, tests, F01-F16, and audit controls before implementation."
+    },
+    {
+      "id": "RW-016",
+      "priority": "P0",
+      "title": "Governed model-context reconstruction and denial-of-wallet limits",
+      "surface": "Neuron context assembly / budget gate",
+      "classification": "Direct resource safety control",
+      "dependencies": [
+        "RW-004",
+        "RW-008"
+      ],
+      "source_leads": [
+        "S023",
+        "S068",
+        "S074",
+        "S077"
+      ],
+      "implementation_status": "UNASSESSED",
+      "verification_status": "NOT_RUN",
+      "source": "attached report; proposed backlog, not instructions",
+      "reconciliation": "Map to current source, tests, F01-F16, and audit controls before implementation."
+    },
+    {
+      "id": "RW-017",
+      "priority": "P0",
+      "title": "Separate untrusted context from authority and constrain data flows",
+      "surface": "Brain inputs / Neuron / Heart boundary",
+      "classification": "Direct authority-isolation control; semantic detection remains heuristic",
+      "dependencies": [
+        "RW-004",
+        "RW-010"
+      ],
+      "source_leads": [
+        "S032",
+        "S052",
+        "S080",
+        "S093",
+        "S094"
+      ],
+      "implementation_status": "UNASSESSED",
+      "verification_status": "NOT_RUN",
+      "source": "attached report; proposed backlog, not instructions",
+      "reconciliation": "Map to current source, tests, F01-F16, and audit controls before implementation."
+    },
+    {
+      "id": "RW-018",
+      "priority": "P1",
+      "title": "Execution-state revocation and provenance-guided replay",
+      "surface": "Neuron recovery / Memory Service Blocks",
+      "classification": "Direct recovery prototype; not a universal proof of forgetting",
+      "dependencies": [
+        "RW-013",
+        "RW-015",
+        "RW-017"
+      ],
+      "source_leads": [
+        "S046",
+        "S057",
+        "S081"
+      ],
+      "implementation_status": "UNASSESSED",
+      "verification_status": "NOT_RUN",
+      "source": "attached report; proposed backlog, not instructions",
+      "reconciliation": "Map to current source, tests, F01-F16, and audit controls before implementation."
+    },
+    {
+      "id": "RW-019",
+      "priority": "P1",
+      "title": "Least-privilege memory curation with environmental revalidation",
+      "surface": "Memory Service Blocks",
+      "classification": "Direct service-level experiment",
+      "dependencies": [
+        "RW-015"
+      ],
+      "source_leads": [
+        "S035"
+      ],
+      "implementation_status": "UNASSESSED",
+      "verification_status": "NOT_RUN",
+      "source": "attached report; proposed backlog, not instructions",
+      "reconciliation": "Map to current source, tests, F01-F16, and audit controls before implementation."
+    },
+    {
+      "id": "RW-020",
+      "priority": "P2",
+      "title": "Optional accelerator-state checkpoint and restore capability",
+      "surface": "Inference Service Blocks / runtime providers",
+      "classification": "Bounded research prototype; not protocol consensus",
+      "dependencies": [
+        "RW-013",
+        "RW-028",
+        "RW-029",
+        "RW-036"
+      ],
+      "source_leads": [
+        "S001",
+        "S010",
+        "S046"
+      ],
+      "implementation_status": "UNASSESSED",
+      "verification_status": "NOT_RUN",
+      "source": "attached report; proposed backlog, not instructions",
+      "reconciliation": "Map to current source, tests, F01-F16, and audit controls before implementation."
+    },
+    {
+      "id": "RW-021",
+      "priority": "P0",
+      "title": "Isolate the inference engine from durable authority",
+      "surface": "Neuron / model-serving process / sandbox",
+      "classification": "Direct containment control",
+      "dependencies": [
+        "RW-004",
+        "RW-010"
+      ],
+      "source_leads": [
+        "S022",
+        "S040",
+        "S053",
+        "S071",
+        "S083",
+        "S093"
+      ],
+      "implementation_status": "UNASSESSED",
+      "verification_status": "NOT_RUN",
+      "source": "attached report; proposed backlog, not instructions",
+      "reconciliation": "Map to current source, tests, F01-F16, and audit controls before implementation."
+    },
+    {
+      "id": "RW-022",
+      "priority": "P0",
+      "title": "Enforced communication and capability-reachability manifests",
+      "surface": "Service Block sandbox / networking / host isolation",
+      "classification": "Direct containment control",
+      "dependencies": [
+        "RW-010",
+        "RW-021"
+      ],
+      "source_leads": [
+        "S013",
+        "S049",
+        "S061",
+        "S062",
+        "S067",
+        "S073",
+        "S080",
+        "S083"
+      ],
+      "implementation_status": "UNASSESSED",
+      "verification_status": "NOT_RUN",
+      "source": "attached report; proposed backlog, not instructions",
+      "reconciliation": "Map to current source, tests, F01-F16, and audit controls before implementation."
+    },
+    {
+      "id": "RW-023",
+      "priority": "P0",
+      "title": "Agent-independent observation and tamper-evident audit collection",
+      "surface": "Sentinel evidence ingestion / effect gateway / host monitor",
+      "classification": "Direct evidence-integrity control",
+      "dependencies": [
+        "RW-001",
+        "RW-021",
+        "RW-022"
+      ],
+      "source_leads": [
+        "S016",
+        "S030",
+        "S071",
+        "S075",
+        "S076",
+        "S083"
+      ],
+      "implementation_status": "UNASSESSED",
+      "verification_status": "NOT_RUN",
+      "source": "attached report; proposed backlog, not instructions",
+      "reconciliation": "Map to current source, tests, F01-F16, and audit controls before implementation."
+    },
+    {
+      "id": "RW-024",
+      "priority": "P1",
+      "title": "Evidence-first Sentinel review and assurance assessment",
+      "surface": "Sentinel / review Service Blocks",
+      "classification": "Direct audit-method improvement",
+      "dependencies": [
+        "RW-001",
+        "RW-023"
+      ],
+      "source_leads": [
+        "S013",
+        "S016",
+        "S030",
+        "S063",
+        "S066",
+        "S085"
+      ],
+      "implementation_status": "UNASSESSED",
+      "verification_status": "NOT_RUN",
+      "source": "attached report; proposed backlog, not instructions",
+      "reconciliation": "Map to current source, tests, F01-F16, and audit controls before implementation."
+    },
+    {
+      "id": "RW-025",
+      "priority": "P1",
+      "title": "Dependency-aware verification and anti-collusion assignment",
+      "surface": "Sentinel / Composer / Agentic Economy",
+      "classification": "Direct design and test improvement; economic scoring remains experimental",
+      "dependencies": [
+        "RW-023",
+        "RW-024"
+      ],
+      "source_leads": [
+        "S005",
+        "S013",
+        "S030",
+        "S045",
+        "S061",
+        "S067",
+        "S073",
+        "S085",
+        "S095"
+      ],
+      "implementation_status": "UNASSESSED",
+      "verification_status": "NOT_RUN",
+      "source": "attached report; proposed backlog, not instructions",
+      "reconciliation": "Map to current source, tests, F01-F16, and audit controls before implementation."
+    },
+    {
+      "id": "RW-026",
+      "priority": "P0",
+      "title": "Adversarial qualification for Service Blocks, skills, A2A, and MCP",
+      "surface": "Registry admission / Neuron adapters / security testing",
+      "classification": "Direct admission control",
+      "dependencies": [
+        "RW-004",
+        "RW-005",
+        "RW-011",
+        "RW-017",
+        "RW-022"
+      ],
+      "source_leads": [
+        "S006",
+        "S032",
+        "S037",
+        "S043",
+        "S051",
+        "S052",
+        "S093",
+        "S094"
+      ],
+      "implementation_status": "UNASSESSED",
+      "verification_status": "NOT_RUN",
+      "source": "attached report; proposed backlog, not instructions",
+      "reconciliation": "Map to current source, tests, F01-F16, and audit controls before implementation."
+    },
+    {
+      "id": "RW-027",
+      "priority": "P0",
+      "title": "Scoped composite TEE attestation and workload-bound receipts",
+      "surface": "TEE adapters / verifier admission / key release",
+      "classification": "Direct control; only for enabled confidential-compute claims",
+      "dependencies": [
+        "RW-001",
+        "RW-002"
+      ],
+      "source_leads": [
+        "S002",
+        "S009",
+        "S022",
+        "S027",
+        "S031",
+        "S040",
+        "S065",
+        "S070",
+        "S090",
+        "S096"
+      ],
+      "implementation_status": "UNASSESSED",
+      "verification_status": "NOT_RUN",
+      "source": "attached report; proposed backlog, not instructions",
+      "reconciliation": "Map to current source, tests, F01-F16, and audit controls before implementation."
+    },
+    {
+      "id": "RW-028",
+      "priority": "P1",
+      "title": "Reproducible build-to-measurement provenance and transparency",
+      "surface": "Service Block supply chain / TEE qualification",
+      "classification": "Direct qualification improvement; claim gating applies immediately",
+      "dependencies": [
+        "RW-027"
+      ],
+      "source_leads": [
+        "S002",
+        "S033",
+        "S039",
+        "S053",
+        "S070",
+        "S078"
+      ],
+      "implementation_status": "UNASSESSED",
+      "verification_status": "NOT_RUN",
+      "source": "attached report; proposed backlog, not instructions",
+      "reconciliation": "Map to current source, tests, F01-F16, and audit controls before implementation."
+    },
+    {
+      "id": "RW-029",
+      "priority": "P1",
+      "title": "Sovereign encrypted state custody and attestation-gated key release",
+      "surface": "Stateful confidential Service Blocks / memory / recovery",
+      "classification": "Direct architecture prototype",
+      "dependencies": [
+        "RW-006",
+        "RW-013",
+        "RW-027",
+        "RW-028"
+      ],
+      "source_leads": [
+        "S022",
+        "S060",
+        "S070",
+        "S078",
+        "S090",
+        "S096"
+      ],
+      "implementation_status": "UNASSESSED",
+      "verification_status": "NOT_RUN",
+      "source": "attached report; proposed backlog, not instructions",
+      "reconciliation": "Map to current source, tests, F01-F16, and audit controls before implementation."
+    },
+    {
+      "id": "RW-030",
+      "priority": "P1",
+      "title": "Scoped compute rights and explicit output-disclosure policy",
+      "surface": "Confidential data / memory / inference Service Blocks",
+      "classification": "Direct service-level control",
+      "dependencies": [
+        "RW-004",
+        "RW-027",
+        "RW-029"
+      ],
+      "source_leads": [
+        "S020",
+        "S050",
+        "S060",
+        "S064",
+        "S096"
+      ],
+      "implementation_status": "UNASSESSED",
+      "verification_status": "NOT_RUN",
+      "source": "attached report; proposed backlog, not instructions",
+      "reconciliation": "Map to current source, tests, F01-F16, and audit controls before implementation."
+    },
+    {
+      "id": "RW-031",
+      "priority": "P1",
+      "title": "Measured confidential-execution capability and performance profiles",
+      "surface": "Service Block catalog / Composer pricing",
+      "classification": "Direct measurement and routing improvement",
+      "dependencies": [
+        "RW-011",
+        "RW-027"
+      ],
+      "source_leads": [
+        "S027",
+        "S031",
+        "S040",
+        "S065",
+        "S090"
+      ],
+      "implementation_status": "UNASSESSED",
+      "verification_status": "NOT_RUN",
+      "source": "attached report; proposed backlog, not instructions",
+      "reconciliation": "Map to current source, tests, F01-F16, and audit controls before implementation."
+    },
+    {
+      "id": "RW-032",
+      "priority": "P2",
+      "title": "Narrow-TCB and hybrid trusted-controller experiments",
+      "surface": "Confidential runtime research / specialized Service Blocks",
+      "classification": "Bounded research prototype; property-specific only",
+      "dependencies": [
+        "RW-027",
+        "RW-030",
+        "RW-034"
+      ],
+      "source_leads": [
+        "S022",
+        "S040",
+        "S050"
+      ],
+      "implementation_status": "UNASSESSED",
+      "verification_status": "NOT_RUN",
+      "source": "attached report; proposed backlog, not instructions",
+      "reconciliation": "Map to current source, tests, F01-F16, and audit controls before implementation."
+    },
+    {
+      "id": "RW-033",
+      "priority": "P2",
+      "title": "Host-independent enforcement and DPU-style evidence adapters",
+      "surface": "High-assurance runtime research / Sentinel",
+      "classification": "Optional implementation profile; never a mandatory vendor dependency",
+      "dependencies": [
+        "RW-022",
+        "RW-023",
+        "RW-027"
+      ],
+      "source_leads": [
+        "S049",
+        "S071",
+        "S075",
+        "S083"
+      ],
+      "implementation_status": "UNASSESSED",
+      "verification_status": "NOT_RUN",
+      "source": "attached report; proposed backlog, not instructions",
+      "reconciliation": "Map to current source, tests, F01-F16, and audit controls before implementation."
+    },
+    {
+      "id": "RW-034",
+      "priority": "P0",
+      "title": "Scheme-neutral proof statements and explicit assurance profiles",
+      "surface": "Proof plugins / VDSO / Sentinel / Composer",
+      "classification": "Direct admission control; required for any claimed proof guarantee",
+      "dependencies": [
+        "RW-001",
+        "RW-002"
+      ],
+      "source_leads": [
+        "S003",
+        "S008",
+        "S015",
+        "S025",
+        "S026",
+        "S034",
+        "S088",
+        "S091"
+      ],
+      "implementation_status": "UNASSESSED",
+      "verification_status": "NOT_RUN",
+      "source": "attached report; proposed backlog, not instructions",
+      "reconciliation": "Map to current source, tests, F01-F16, and audit controls before implementation."
+    },
+    {
+      "id": "RW-035",
+      "priority": "P1",
+      "title": "Reproducible proof-build provenance and model qualification",
+      "surface": "ZKML build pipeline / proof adapter qualification",
+      "classification": "Direct supply-chain improvement; required before admitting custom circuits",
+      "dependencies": [
+        "RW-001",
+        "RW-034"
+      ],
+      "source_leads": [
+        "S025",
+        "S033",
+        "S034",
+        "S088",
+        "S091"
+      ],
+      "implementation_status": "UNASSESSED",
+      "verification_status": "NOT_RUN",
+      "source": "attached report; proposed backlog, not instructions",
+      "reconciliation": "Map to current source, tests, F01-F16, and audit controls before implementation."
+    },
+    {
+      "id": "RW-036",
+      "priority": "P1",
+      "title": "Explicit numerical semantics and deterministic-inference qualification",
+      "surface": "Inference providers / proof reference runtime",
+      "classification": "Direct specification and benchmark work",
+      "dependencies": [
+        "RW-034",
+        "RW-035"
+      ],
+      "source_leads": [
+        "S001",
+        "S027",
+        "S088",
+        "S091"
+      ],
+      "implementation_status": "UNASSESSED",
+      "verification_status": "NOT_RUN",
+      "source": "attached report; proposed backlog, not instructions",
+      "reconciliation": "Map to current source, tests, F01-F16, and audit controls before implementation."
+    },
+    {
+      "id": "RW-037",
+      "priority": "P2",
+      "title": "Composable proof graphs and segmented inference proving",
+      "surface": "Proof Service Blocks / aggregator research",
+      "classification": "Bounded research prototype",
+      "dependencies": [
+        "RW-034",
+        "RW-035",
+        "RW-036"
+      ],
+      "source_leads": [
+        "S003",
+        "S015",
+        "S026",
+        "S088"
+      ],
+      "implementation_status": "UNASSESSED",
+      "verification_status": "NOT_RUN",
+      "source": "attached report; proposed backlog, not instructions",
+      "reconciliation": "Map to current source, tests, F01-F16, and audit controls before implementation."
+    },
+    {
+      "id": "RW-038",
+      "priority": "P2",
+      "title": "Sound circuit-optimization and debloating experiment",
+      "surface": "ZKML compiler research",
+      "classification": "Bounded optimization experiment; no production shortcut",
+      "dependencies": [
+        "RW-035"
+      ],
+      "source_leads": [
+        "S003",
+        "S025"
+      ],
+      "implementation_status": "UNASSESSED",
+      "verification_status": "NOT_RUN",
+      "source": "attached report; proposed backlog, not instructions",
+      "reconciliation": "Map to current source, tests, F01-F16, and audit controls before implementation."
+    },
+    {
+      "id": "RW-039",
+      "priority": "P2",
+      "title": "Sampled verification with explicit coverage and anti-grinding controls",
+      "surface": "Verifiable-inference audit research / proof policy",
+      "classification": "Bounded research profile; never silently full verification",
+      "dependencies": [
+        "RW-034",
+        "RW-035",
+        "RW-036"
+      ],
+      "source_leads": [
+        "S003",
+        "S088",
+        "S091"
+      ],
+      "implementation_status": "UNASSESSED",
+      "verification_status": "NOT_RUN",
+      "source": "attached report; proposed backlog, not instructions",
+      "reconciliation": "Map to current source, tests, F01-F16, and audit controls before implementation."
+    },
+    {
+      "id": "RW-040",
+      "priority": "P2",
+      "title": "Alternative and post-quantum proof backend evaluation",
+      "surface": "Proof research / crypto-agility",
+      "classification": "Bounded comparative research; adoption requires fresh verification",
+      "dependencies": [
+        "RW-002",
+        "RW-034",
+        "RW-035"
+      ],
+      "source_leads": [
+        "S008",
+        "S015",
+        "S017",
+        "S026"
+      ],
+      "implementation_status": "UNASSESSED",
+      "verification_status": "NOT_RUN",
+      "source": "attached report; proposed backlog, not instructions",
+      "reconciliation": "Map to current source, tests, F01-F16, and audit controls before implementation."
+    },
+    {
+      "id": "RW-041",
+      "priority": "P0",
+      "title": "Canonical cross-domain statements and explicit lane policies",
+      "surface": "VDSO / cross-chain adapters / VIR",
+      "classification": "Direct control; applies to enabled cross-domain transitions",
+      "dependencies": [
+        "RW-001",
+        "RW-003",
+        "RW-005",
+        "RW-006"
+      ],
+      "source_leads": [
+        "S036",
+        "S041",
+        "S048",
+        "S079",
+        "S084",
+        "S092"
+      ],
+      "implementation_status": "UNASSESSED",
+      "verification_status": "NOT_RUN",
+      "source": "attached report; proposed backlog, not instructions",
+      "reconciliation": "Map to current source, tests, F01-F16, and audit controls before implementation."
+    },
+    {
+      "id": "RW-042",
+      "priority": "P0",
+      "title": "Source-domain invariant and economic-bound checks before export",
+      "surface": "VDSO export admission / bridge/mint policy",
+      "classification": "Direct control; only the declared invariants are guaranteed",
+      "dependencies": [
+        "RW-008",
+        "RW-041"
+      ],
+      "source_leads": [
+        "S014",
+        "S018",
+        "S041",
+        "S058"
+      ],
+      "implementation_status": "UNASSESSED",
+      "verification_status": "NOT_RUN",
+      "source": "attached report; proposed backlog, not instructions",
+      "reconciliation": "Map to current source, tests, F01-F16, and audit controls before implementation."
+    },
+    {
+      "id": "RW-043",
+      "priority": "P0",
+      "title": "Bounded signer roles and operational trust-domain independence",
+      "surface": "Bridge/governance signing / key operations",
+      "classification": "Direct key and infrastructure safety control",
+      "dependencies": [
+        "RW-002",
+        "RW-006",
+        "RW-041"
+      ],
+      "source_leads": [
+        "S005",
+        "S018",
+        "S039",
+        "S058",
+        "S084"
+      ],
+      "implementation_status": "UNASSESSED",
+      "verification_status": "NOT_RUN",
+      "source": "attached report; proposed backlog, not instructions",
+      "reconciliation": "Map to current source, tests, F01-F16, and audit controls before implementation."
+    },
+    {
+      "id": "RW-044",
+      "priority": "P0",
+      "title": "Cross-domain finality, replay protection, and uncertain-settlement handling",
+      "surface": "VDSO / reservation and settlement adapters",
+      "classification": "Direct cross-domain safety control",
+      "dependencies": [
+        "RW-008",
+        "RW-009",
+        "RW-041",
+        "RW-043"
+      ],
+      "source_leads": [
+        "S023",
+        "S044",
+        "S048",
+        "S074",
+        "S079",
+        "S084",
+        "S092"
+      ],
+      "implementation_status": "UNASSESSED",
+      "verification_status": "NOT_RUN",
+      "source": "attached report; proposed backlog, not instructions",
+      "reconciliation": "Map to current source, tests, F01-F16, and audit controls before implementation."
+    },
+    {
+      "id": "RW-045",
+      "priority": "P1",
+      "title": "Independent cross-domain observations with explicit abstention",
+      "surface": "Sentinel / chain observers / evidence normalization",
+      "classification": "Direct observability improvement; heuristics never authorize settlement",
+      "dependencies": [
+        "RW-041",
+        "RW-044"
+      ],
+      "source_leads": [
+        "S011",
+        "S013",
+        "S036",
+        "S048",
+        "S085"
+      ],
+      "implementation_status": "UNASSESSED",
+      "verification_status": "NOT_RUN",
+      "source": "attached report; proposed backlog, not instructions",
+      "reconciliation": "Map to current source, tests, F01-F16, and audit controls before implementation."
+    },
+    {
+      "id": "RW-046",
+      "priority": "P2",
+      "title": "Authenticated multi-hop delivery history and pluggable interoperability adapters",
+      "surface": "CLR / VDSO transport research",
+      "classification": "Bounded interoperability prototype; no external protocol dependency",
+      "dependencies": [
+        "RW-041",
+        "RW-044",
+        "RW-045"
+      ],
+      "source_leads": [
+        "S011",
+        "S048",
+        "S079",
+        "S084",
+        "S092"
+      ],
+      "implementation_status": "UNASSESSED",
+      "verification_status": "NOT_RUN",
+      "source": "attached report; proposed backlog, not instructions",
+      "reconciliation": "Map to current source, tests, F01-F16, and audit controls before implementation."
+    },
+    {
+      "id": "RW-047",
+      "priority": "P2",
+      "title": "Aggregate cross-domain checkpoints with logical epochs",
+      "surface": "VDSO proof aggregation research",
+      "classification": "Bounded research design; not shared-clock consensus",
+      "dependencies": [
+        "RW-044",
+        "RW-048"
+      ],
+      "source_leads": [
+        "S048",
+        "S056",
+        "S092"
+      ],
+      "implementation_status": "UNASSESSED",
+      "verification_status": "NOT_RUN",
+      "source": "attached report; proposed backlog, not instructions",
+      "reconciliation": "Map to current source, tests, F01-F16, and audit controls before implementation."
+    },
+    {
+      "id": "RW-048",
+      "priority": "P0",
+      "title": "DA admission based on independently verified evidence",
+      "surface": "DA adapters / evidence storage / Sentinel",
+      "classification": "Direct control; required when availability is part of a guarantee",
+      "dependencies": [
+        "RW-001",
+        "RW-002"
+      ],
+      "source_leads": [
+        "S004",
+        "S011",
+        "S016",
+        "S075"
+      ],
+      "implementation_status": "UNASSESSED",
+      "verification_status": "NOT_RUN",
+      "source": "attached report; proposed backlog, not instructions",
+      "reconciliation": "Map to current source, tests, F01-F16, and audit controls before implementation."
+    },
+    {
+      "id": "RW-049",
+      "priority": "P1",
+      "title": "DA security classes and network-aware availability measurement",
+      "surface": "DA routing / Composer / availability policy",
+      "classification": "Direct policy and measurement work; DA protocol redesign deferred",
+      "dependencies": [
+        "RW-048"
+      ],
+      "source_leads": [
+        "S004",
+        "S011",
+        "S036"
+      ],
+      "implementation_status": "UNASSESSED",
+      "verification_status": "NOT_RUN",
+      "source": "attached report; proposed backlog, not instructions",
+      "reconciliation": "Map to current source, tests, F01-F16, and audit controls before implementation."
+    },
+    {
+      "id": "RW-050",
+      "priority": "P1",
+      "title": "Separate sovereign registration from discovery and resolution",
+      "surface": "Registry / Composer / VNS and vams:// planning",
+      "classification": "Direct architectural separation; no central root required",
+      "dependencies": [
+        "RW-005",
+        "RW-011"
+      ],
+      "source_leads": [
+        "S006",
+        "S032",
+        "S055",
+        "S077"
+      ],
+      "implementation_status": "UNASSESSED",
+      "verification_status": "NOT_RUN",
+      "source": "attached report; proposed backlog, not instructions",
+      "reconciliation": "Map to current source, tests, F01-F16, and audit controls before implementation."
+    },
+    {
+      "id": "RW-051",
+      "priority": "P1",
+      "title": "Metadata-only discovery and least-privilege capability activation",
+      "surface": "Composer / registry client / credential broker",
+      "classification": "Direct usability and least-privilege improvement",
+      "dependencies": [
+        "RW-004",
+        "RW-005",
+        "RW-011",
+        "RW-050"
+      ],
+      "source_leads": [
+        "S023",
+        "S039",
+        "S043",
+        "S051",
+        "S077"
+      ],
+      "implementation_status": "UNASSESSED",
+      "verification_status": "NOT_RUN",
+      "source": "attached report; proposed backlog, not instructions",
+      "reconciliation": "Map to current source, tests, F01-F16, and audit controls before implementation."
+    },
+    {
+      "id": "RW-052",
+      "priority": "P1",
+      "title": "Separate service quality, model identity, proof validity, and economic claims",
+      "surface": "Agentic Economy / provider qualification / pricing",
+      "classification": "Direct economic-model clarification",
+      "dependencies": [
+        "RW-031",
+        "RW-034",
+        "RW-035"
+      ],
+      "source_leads": [
+        "S003",
+        "S034",
+        "S065",
+        "S067",
+        "S088"
+      ],
+      "implementation_status": "UNASSESSED",
+      "verification_status": "NOT_RUN",
+      "source": "attached report; proposed backlog, not instructions",
+      "reconciliation": "Map to current source, tests, F01-F16, and audit controls before implementation."
+    },
+    {
+      "id": "RW-053",
+      "priority": "P2",
+      "title": "Optional evidence-quorum authorization for high-consequence actions",
+      "surface": "Heart authorization / governance / critical VDSO lanes",
+      "classification": "Bounded high-assurance prototype; no change to state authority",
+      "dependencies": [
+        "RW-004",
+        "RW-005",
+        "RW-006",
+        "RW-025"
+      ],
+      "source_leads": [
+        "S008",
+        "S012",
+        "S072",
+        "S084",
+        "S085"
+      ],
+      "implementation_status": "UNASSESSED",
+      "verification_status": "NOT_RUN",
+      "source": "attached report; proposed backlog, not instructions",
+      "reconciliation": "Map to current source, tests, F01-F16, and audit controls before implementation."
+    },
+    {
+      "id": "RW-054",
+      "priority": "P1",
+      "title": "Principal-controlled payment policy across execution providers",
+      "surface": "Payment Service Blocks / wallets / Agentic Economy",
+      "classification": "Direct payment-adapter control; cross-rail unification remains optional",
+      "dependencies": [
+        "RW-004",
+        "RW-008",
+        "RW-009"
+      ],
+      "source_leads": [
+        "S023",
+        "S060",
+        "S064"
+      ],
+      "implementation_status": "UNASSESSED",
+      "verification_status": "NOT_RUN",
+      "source": "attached report; proposed backlog, not instructions",
+      "reconciliation": "Map to current source, tests, F01-F16, and audit controls before implementation."
+    },
+    {
+      "id": "RW-055",
+      "priority": "P2",
+      "title": "Counterfactual and negative-twin review as advisory verification",
+      "surface": "Sentinel review Service Blocks",
+      "classification": "Bounded model-assisted experiment; not an authorization root",
+      "dependencies": [
+        "RW-003",
+        "RW-004",
+        "RW-024"
+      ],
+      "source_leads": [
+        "S030",
+        "S066",
+        "S094"
+      ],
+      "implementation_status": "UNASSESSED",
+      "verification_status": "NOT_RUN",
+      "source": "attached report; proposed backlog, not instructions",
+      "reconciliation": "Map to current source, tests, F01-F16, and audit controls before implementation."
+    },
+    {
+      "id": "RW-056",
+      "priority": "P1",
+      "title": "Typed multi-principal coordination and evidence-based consequences",
+      "surface": "Agentic Economy / agent interaction protocols / Sentinel",
+      "classification": "Direct protocol improvement; autonomous reputation markets are deferred",
+      "dependencies": [
+        "RW-004",
+        "RW-005",
+        "RW-013",
+        "RW-025"
+      ],
+      "source_leads": [
+        "S006",
+        "S013",
+        "S045",
+        "S067",
+        "S085",
+        "S089",
+        "S095"
+      ],
+      "implementation_status": "UNASSESSED",
+      "verification_status": "NOT_RUN",
+      "source": "attached report; proposed backlog, not instructions",
+      "reconciliation": "Map to current source, tests, F01-F16, and audit controls before implementation."
+    },
+    {
+      "id": "RW-057",
+      "priority": "P0",
+      "title": "A consolidated adversarial conformance and fault-injection suite",
+      "surface": "Repository testing / Phase-6 evidence generation",
+      "classification": "Direct delivery requirement; coverage follows enabled capabilities",
+      "dependencies": [],
+      "source_leads": [
+        "S032",
+        "S044",
+        "S049",
+        "S052",
+        "S069",
+        "S074",
+        "S075",
+        "S076",
+        "S081",
+        "S082",
+        "S086",
+        "S087",
+        "S093"
+      ],
+      "implementation_status": "UNASSESSED",
+      "verification_status": "NOT_RUN",
+      "source": "attached report; proposed backlog, not instructions",
+      "reconciliation": "Map to current source, tests, F01-F16, and audit controls before implementation."
+    },
+    {
+      "id": "RW-058",
+      "priority": "P0",
+      "title": "Evidence-based admission, quarantine, and release claims",
+      "surface": "Service Block admission / deployment governance",
+      "classification": "Direct release gate; no unsupported readiness claims",
+      "dependencies": [
+        "RW-001",
+        "RW-057"
+      ],
+      "source_leads": [
+        "S023",
+        "S027",
+        "S033",
+        "S039",
+        "S043",
+        "S063",
+        "S075",
+        "S086",
+        "S087"
+      ],
+      "implementation_status": "UNASSESSED",
+      "verification_status": "NOT_RUN",
+      "source": "attached report; proposed backlog, not instructions",
+      "reconciliation": "Map to current source, tests, F01-F16, and audit controls before implementation."
+    }
+  ],
+  "source_leads": [
+    {
+      "id": "S001",
+      "title": "Concordia: JIT-Compiled Persistent-Kernel Checkpointing for Fault-Tolerant LLM Inference",
+      "date_as_reported": "2026-06-22",
+      "type_as_reported": "Paper/preprint, as described in chat",
+      "primary_url_candidate": "https://arxiv.org/abs/2606.23521",
+      "entry": "R01",
+      "verification_status": "UNVERIFIED_PRIMARY_SOURCE",
+      "bibliographic_metadata": "NOT_REVALIDATED",
+      "claim_reproduction": "NOT_RUN",
+      "implementation_or_license": "NOT_ASSESSED",
+      "discrepancies": []
+    },
+    {
+      "id": "S002",
+      "title": "EnclaveX: End-to-End Confidential AI with CPU/GPU TEEs",
+      "date_as_reported": "2026-06-30",
+      "type_as_reported": "Paper/preprint, as described in chat",
+      "primary_url_candidate": "https://arxiv.org/abs/2606.31408",
+      "entry": "R01",
+      "verification_status": "UNVERIFIED_PRIMARY_SOURCE",
+      "bibliographic_metadata": "NOT_REVALIDATED",
+      "claim_reproduction": "NOT_RUN",
+      "implementation_or_license": "NOT_ASSESSED",
+      "discrepancies": []
+    },
+    {
+      "id": "S003",
+      "title": "zkComposer: Decomposing Proof Construction to Scale zkML",
+      "date_as_reported": "2026-07-09",
+      "type_as_reported": "Paper/preprint, as described in chat",
+      "primary_url_candidate": "https://arxiv.org/abs/2607.08095",
+      "entry": "R01",
+      "verification_status": "UNVERIFIED_PRIMARY_SOURCE",
+      "bibliographic_metadata": "NOT_REVALIDATED",
+      "claim_reproduction": "NOT_RUN",
+      "implementation_or_license": "NOT_ASSESSED",
+      "discrepancies": []
+    },
+    {
+      "id": "S004",
+      "title": "Efficient Data Availability Sampling via Coded Distributed Arrays",
+      "date_as_reported": "2026-06-15",
+      "type_as_reported": "Paper/preprint, as described in chat",
+      "primary_url_candidate": "https://arxiv.org/abs/2606.16200",
+      "entry": "R01",
+      "verification_status": "UNVERIFIED_PRIMARY_SOURCE",
+      "bibliographic_metadata": "NOT_REVALIDATED",
+      "claim_reproduction": "NOT_RUN",
+      "implementation_or_license": "NOT_ASSESSED",
+      "discrepancies": []
+    },
+    {
+      "id": "S005",
+      "title": "Hacken Q2 2026 Security & Compliance Report: Architecture of Trust",
+      "date_as_reported": "2026 Q2",
+      "type_as_reported": "Industry report",
+      "primary_url_candidate": null,
+      "entry": "R01",
+      "verification_status": "UNVERIFIED_URL_MISSING",
+      "bibliographic_metadata": "NOT_REVALIDATED",
+      "claim_reproduction": "NOT_RUN",
+      "implementation_or_license": "NOT_ASSESSED",
+      "discrepancies": []
+    },
+    {
+      "id": "S006",
+      "title": "InterSAGE: Secure and Verifiable Interoperability Protocol for an Internet of Agents",
+      "date_as_reported": "2026-08-14",
+      "type_as_reported": "Paper/preprint, as described in chat",
+      "primary_url_candidate": "https://arxiv.org/abs/2608.13030",
+      "entry": "R02",
+      "verification_status": "UNVERIFIED_PRIMARY_SOURCE",
+      "bibliographic_metadata": "NOT_REVALIDATED",
+      "claim_reproduction": "NOT_RUN",
+      "implementation_or_license": "NOT_ASSESSED",
+      "discrepancies": []
+    },
+    {
+      "id": "S007",
+      "title": "Agent-to-Agent Trust Internet-Draft",
+      "date_as_reported": "2026-08-28",
+      "type_as_reported": "Internet-Draft",
+      "primary_url_candidate": null,
+      "entry": "R02",
+      "verification_status": "UNVERIFIED_URL_MISSING",
+      "bibliographic_metadata": "NOT_REVALIDATED",
+      "claim_reproduction": "NOT_RUN",
+      "implementation_or_license": "NOT_ASSESSED",
+      "discrepancies": []
+    },
+    {
+      "id": "S008",
+      "title": "Cryptographically Verifiable Authorization for Autonomous AI Agents",
+      "date_as_reported": "2026-08-12, v2",
+      "type_as_reported": "Paper/preprint, as described in chat",
+      "primary_url_candidate": "https://arxiv.org/abs/2607.21325",
+      "entry": "R02",
+      "verification_status": "UNVERIFIED_PRIMARY_SOURCE",
+      "bibliographic_metadata": "NOT_REVALIDATED",
+      "claim_reproduction": "NOT_RUN",
+      "implementation_or_license": "NOT_ASSESSED",
+      "discrepancies": []
+    },
+    {
+      "id": "S009",
+      "title": "cMCP / Attested Isolated Runtime",
+      "date_as_reported": "2026-08",
+      "type_as_reported": "Technical specification",
+      "primary_url_candidate": "https://cmcp.agentrust-io.com/",
+      "entry": "R02",
+      "verification_status": "UNVERIFIED_PRIMARY_SOURCE",
+      "bibliographic_metadata": "NOT_REVALIDATED",
+      "claim_reproduction": "NOT_RUN",
+      "implementation_or_license": "NOT_ASSESSED",
+      "discrepancies": []
+    },
+    {
+      "id": "S010",
+      "title": "State-Aware Runtime for Long-Horizon LLM Agents",
+      "date_as_reported": "2026-08-17, v4",
+      "type_as_reported": "Conceptual working paper",
+      "primary_url_candidate": "https://www.cambridge.org/engage/coe/article-details/6a80ae6b810b9dcc821646ae",
+      "entry": "R02",
+      "verification_status": "UNVERIFIED_PRIMARY_SOURCE",
+      "bibliographic_metadata": "NOT_REVALIDATED",
+      "claim_reproduction": "NOT_RUN",
+      "implementation_or_license": "NOT_ASSESSED",
+      "discrepancies": []
+    },
+    {
+      "id": "S011",
+      "title": "VeriMesh: Trust-Adaptive Multi-Path Relay Framework for Cross-Chain Interoperability",
+      "date_as_reported": "2026-08-07",
+      "type_as_reported": "Journal paper, as described in chat",
+      "primary_url_candidate": "https://www.nature.com/articles/s41598-026-66025-y",
+      "entry": "R02",
+      "verification_status": "UNVERIFIED_PRIMARY_SOURCE",
+      "bibliographic_metadata": "NOT_REVALIDATED",
+      "claim_reproduction": "NOT_RUN",
+      "implementation_or_license": "NOT_ASSESSED",
+      "discrepancies": []
+    },
+    {
+      "id": "S012",
+      "title": "Attestation-Bound Execution Finality for AI Accelerators and Confidential Workloads",
+      "date_as_reported": "2026-09",
+      "type_as_reported": "Internet-Draft",
+      "primary_url_candidate": null,
+      "entry": "R03",
+      "verification_status": "UNVERIFIED_URL_MISSING",
+      "bibliographic_metadata": "NOT_REVALIDATED",
+      "claim_reproduction": "NOT_RUN",
+      "implementation_or_license": "NOT_ASSESSED",
+      "discrepancies": []
+    },
+    {
+      "id": "S013",
+      "title": "SoK: When Safe Agents Fail Together",
+      "date_as_reported": "2026-09-01",
+      "type_as_reported": "Survey / systematization",
+      "primary_url_candidate": null,
+      "entry": "R03",
+      "verification_status": "UNVERIFIED_URL_MISSING",
+      "bibliographic_metadata": "NOT_REVALIDATED",
+      "claim_reproduction": "NOT_RUN",
+      "implementation_or_license": "NOT_ASSESSED",
+      "discrepancies": []
+    },
+    {
+      "id": "S014",
+      "title": "TAC Cosmos-EVM Exploit Post-Mortem",
+      "date_as_reported": "2026-09-02",
+      "type_as_reported": "Incident analysis",
+      "primary_url_candidate": null,
+      "entry": "R03",
+      "verification_status": "UNVERIFIED_URL_MISSING",
+      "bibliographic_metadata": "NOT_REVALIDATED",
+      "claim_reproduction": "NOT_RUN",
+      "implementation_or_license": "NOT_ASSESSED",
+      "discrepancies": []
+    },
+    {
+      "id": "S015",
+      "title": "Longfellow ZK",
+      "date_as_reported": "2026-09-03 revision",
+      "type_as_reported": "Internet-Draft",
+      "primary_url_candidate": null,
+      "entry": "R03",
+      "verification_status": "UNVERIFIED_URL_MISSING",
+      "bibliographic_metadata": "NOT_REVALIDATED",
+      "claim_reproduction": "NOT_RUN",
+      "implementation_or_license": "NOT_ASSESSED",
+      "discrepancies": []
+    },
+    {
+      "id": "S016",
+      "title": "A Black Box for Agentic Processes",
+      "date_as_reported": "2026-09-03",
+      "type_as_reported": "Position / architecture paper",
+      "primary_url_candidate": null,
+      "entry": "R03",
+      "verification_status": "UNVERIFIED_URL_MISSING",
+      "bibliographic_metadata": "NOT_REVALIDATED",
+      "claim_reproduction": "NOT_RUN",
+      "implementation_or_license": "NOT_ASSESSED",
+      "discrepancies": []
+    },
+    {
+      "id": "S017",
+      "title": "IonQ: resource estimate for 256-bit elliptic-curve discrete logarithms",
+      "date_as_reported": "2026-09-08",
+      "type_as_reported": "Vendor technical estimate",
+      "primary_url_candidate": "https://www.ionq.com/blog/the-first-full-stack-blueprint-for-breaking-256-bit-elliptic-curve-signatures",
+      "entry": "R04",
+      "verification_status": "UNVERIFIED_PRIMARY_SOURCE",
+      "bibliographic_metadata": "NOT_REVALIDATED",
+      "claim_reproduction": "NOT_RUN",
+      "implementation_or_license": "NOT_ASSESSED",
+      "discrepancies": []
+    },
+    {
+      "id": "S018",
+      "title": "Liquid Network exploit: TRM Labs technical reconstruction",
+      "date_as_reported": "2026-09-08",
+      "type_as_reported": "Preliminary incident analysis",
+      "primary_url_candidate": "https://www.trmlabs.com/resources/blog/2026s-biggest-hack-to-date-attackers-drained-usd-319-million-in-bitcoin-from-liquid-network-then-returned-85-of-funds",
+      "entry": "R04",
+      "verification_status": "UNVERIFIED_PRIMARY_SOURCE",
+      "bibliographic_metadata": "NOT_REVALIDATED",
+      "claim_reproduction": "NOT_RUN",
+      "implementation_or_license": "NOT_ASSESSED",
+      "discrepancies": []
+    },
+    {
+      "id": "S019",
+      "title": "Where Reliability Lives: Experimental Localisation of Behavioural Properties in an Agent System",
+      "date_as_reported": "2026-09-02",
+      "type_as_reported": "Paper/preprint, as described in chat",
+      "primary_url_candidate": "https://arxiv.org/abs/2609.03192",
+      "entry": "R04",
+      "verification_status": "UNVERIFIED_PRIMARY_SOURCE",
+      "bibliographic_metadata": "NOT_REVALIDATED",
+      "claim_reproduction": "NOT_RUN",
+      "implementation_or_license": "NOT_ASSESSED",
+      "discrepancies": []
+    },
+    {
+      "id": "S020",
+      "title": "If Agents Were Angels, No Governance Would Be Necessary: Out-of-Band Policy Enforcement",
+      "date_as_reported": "2026-08-27",
+      "type_as_reported": "Paper/preprint, as described in chat",
+      "primary_url_candidate": "https://arxiv.org/abs/2608.27646",
+      "entry": "R04",
+      "verification_status": "UNVERIFIED_PRIMARY_SOURCE",
+      "bibliographic_metadata": "NOT_REVALIDATED",
+      "claim_reproduction": "NOT_RUN",
+      "implementation_or_license": "NOT_ASSESSED",
+      "discrepancies": []
+    },
+    {
+      "id": "S021",
+      "title": "Pillar Security: Grafana MCP service-account / SSRF analysis",
+      "date_as_reported": "2026-09-02",
+      "type_as_reported": "Security analysis",
+      "primary_url_candidate": null,
+      "entry": "R04",
+      "verification_status": "UNVERIFIED_URL_MISSING",
+      "bibliographic_metadata": "NOT_REVALIDATED",
+      "claim_reproduction": "NOT_RUN",
+      "implementation_or_license": "NOT_ASSESSED",
+      "discrepancies": []
+    },
+    {
+      "id": "S022",
+      "title": "NACRE: native confidential containers",
+      "date_as_reported": "2026-09-03",
+      "type_as_reported": "Paper/preprint, as described in chat",
+      "primary_url_candidate": "https://arxiv.org/abs/2609.03849",
+      "entry": "R04",
+      "verification_status": "UNVERIFIED_PRIMARY_SOURCE",
+      "bibliographic_metadata": "NOT_REVALIDATED",
+      "claim_reproduction": "NOT_RUN",
+      "implementation_or_license": "NOT_ASSESSED",
+      "discrepancies": []
+    },
+    {
+      "id": "S023",
+      "title": "Bounded Capability Receipts and Durable Spend Control for Agent Actions",
+      "date_as_reported": "2026-09-09, draft-06",
+      "type_as_reported": "Internet-Draft",
+      "primary_url_candidate": null,
+      "entry": "R05",
+      "verification_status": "UNVERIFIED_URL_MISSING",
+      "bibliographic_metadata": "NOT_REVALIDATED",
+      "claim_reproduction": "NOT_RUN",
+      "implementation_or_license": "NOT_ASSESSED",
+      "discrepancies": []
+    },
+    {
+      "id": "S024",
+      "title": "Independent Determinability of Agent Actions",
+      "date_as_reported": "2026-09-10, draft-00",
+      "type_as_reported": "Internet-Draft",
+      "primary_url_candidate": null,
+      "entry": "R05",
+      "verification_status": "UNVERIFIED_URL_MISSING",
+      "bibliographic_metadata": "NOT_REVALIDATED",
+      "claim_reproduction": "NOT_RUN",
+      "implementation_or_license": "NOT_ASSESSED",
+      "discrepancies": []
+    },
+    {
+      "id": "S025",
+      "title": "Sound Debloating of Redundant Checks in Zero-Knowledge Machine-Learning Circuits",
+      "date_as_reported": "2026-09-09",
+      "type_as_reported": "Paper / research prototype",
+      "primary_url_candidate": null,
+      "entry": "R05; R06",
+      "verification_status": "UNVERIFIED_URL_MISSING",
+      "bibliographic_metadata": "NOT_REVALIDATED",
+      "claim_reproduction": "NOT_RUN",
+      "implementation_or_license": "NOT_ASSESSED",
+      "discrepancies": []
+    },
+    {
+      "id": "S026",
+      "title": "Akita: A High-Performance Lattice-Based Polynomial Commitment Scheme",
+      "date_as_reported": "2026-09-09",
+      "type_as_reported": "Technical paper",
+      "primary_url_candidate": null,
+      "entry": "R05",
+      "verification_status": "UNVERIFIED_URL_MISSING",
+      "bibliographic_metadata": "NOT_REVALIDATED",
+      "claim_reproduction": "NOT_RUN",
+      "implementation_or_license": "NOT_ASSESSED",
+      "discrepancies": []
+    },
+    {
+      "id": "S027",
+      "title": "Benchmarking Confidential Computing Performance on NVIDIA Blackwell GPUs",
+      "date_as_reported": "2026-08-27; revised early September",
+      "type_as_reported": "Benchmark paper",
+      "primary_url_candidate": null,
+      "entry": "R05",
+      "verification_status": "UNVERIFIED_URL_MISSING",
+      "bibliographic_metadata": "NOT_REVALIDATED",
+      "claim_reproduction": "NOT_RUN",
+      "implementation_or_license": "NOT_ASSESSED",
+      "discrepancies": []
+    },
+    {
+      "id": "S028",
+      "title": "Beyond Agent Harnesses: Cross-Substrate Authority for Multi-Agent Systems",
+      "date_as_reported": "2026-09-08",
+      "type_as_reported": "Paper",
+      "primary_url_candidate": null,
+      "entry": "R06",
+      "verification_status": "UNVERIFIED_URL_MISSING",
+      "bibliographic_metadata": "NOT_REVALIDATED",
+      "claim_reproduction": "NOT_RUN",
+      "implementation_or_license": "NOT_ASSESSED",
+      "discrepancies": []
+    },
+    {
+      "id": "S029",
+      "title": "Substrate-Portable Execution for Production LLM Workflows",
+      "date_as_reported": "2026-09-05",
+      "type_as_reported": "Production systems paper",
+      "primary_url_candidate": null,
+      "entry": "R06",
+      "verification_status": "UNVERIFIED_URL_MISSING",
+      "bibliographic_metadata": "NOT_REVALIDATED",
+      "claim_reproduction": "NOT_RUN",
+      "implementation_or_license": "NOT_ASSESSED",
+      "discrepancies": []
+    },
+    {
+      "id": "S030",
+      "title": "Audit Without Verification",
+      "date_as_reported": "2026-09-07",
+      "type_as_reported": "Experimental paper",
+      "primary_url_candidate": null,
+      "entry": "R06",
+      "verification_status": "UNVERIFIED_URL_MISSING",
+      "bibliographic_metadata": "NOT_REVALIDATED",
+      "claim_reproduction": "NOT_RUN",
+      "implementation_or_license": "NOT_ASSESSED",
+      "discrepancies": []
+    },
+    {
+      "id": "S031",
+      "title": "Two Proofs, Zero Trust: Intel TDX + NVIDIA H200",
+      "date_as_reported": "2026-09-10",
+      "type_as_reported": "VoltageGPU field report",
+      "primary_url_candidate": null,
+      "entry": "R06",
+      "verification_status": "UNVERIFIED_URL_MISSING",
+      "bibliographic_metadata": "NOT_REVALIDATED",
+      "claim_reproduction": "NOT_RUN",
+      "implementation_or_license": "NOT_ASSESSED",
+      "discrepancies": []
+    },
+    {
+      "id": "S032",
+      "title": "A2ABreak: Systematic Security Analysis of the A2A Protocol",
+      "date_as_reported": "2026-09-09",
+      "type_as_reported": "Protocol security paper",
+      "primary_url_candidate": null,
+      "entry": "R07",
+      "verification_status": "UNVERIFIED_URL_MISSING",
+      "bibliographic_metadata": "NOT_REVALIDATED",
+      "claim_reproduction": "NOT_RUN",
+      "implementation_or_license": "NOT_ASSESSED",
+      "discrepancies": []
+    },
+    {
+      "id": "S033",
+      "title": "They do not care about this: A Systematic Study of TEE Build Reproducibility in the Wild",
+      "date_as_reported": "2026-09-10",
+      "type_as_reported": "Empirical research paper",
+      "primary_url_candidate": null,
+      "entry": "R07",
+      "verification_status": "UNVERIFIED_URL_MISSING",
+      "bibliographic_metadata": "NOT_REVALIDATED",
+      "claim_reproduction": "NOT_RUN",
+      "implementation_or_license": "NOT_ASSESSED",
+      "discrepancies": []
+    },
+    {
+      "id": "S034",
+      "title": "Hollow-LLM Attack: Computationally Trivial Weights in Zero-Knowledge Verification of LLM Inference",
+      "date_as_reported": "2026-07-30",
+      "type_as_reported": "Security paper",
+      "primary_url_candidate": null,
+      "entry": "R07",
+      "verification_status": "UNVERIFIED_URL_MISSING",
+      "bibliographic_metadata": "NOT_REVALIDATED",
+      "claim_reproduction": "NOT_RUN",
+      "implementation_or_license": "NOT_ASSESSED",
+      "discrepancies": []
+    },
+    {
+      "id": "S035",
+      "title": "Grounding Agent Memory: Environment-Probing Curation for Enterprise Agents",
+      "date_as_reported": "2026-09-10",
+      "type_as_reported": "Experimental paper",
+      "primary_url_candidate": null,
+      "entry": "R07",
+      "verification_status": "UNVERIFIED_URL_MISSING",
+      "bibliographic_metadata": "NOT_REVALIDATED",
+      "claim_reproduction": "NOT_RUN",
+      "implementation_or_license": "NOT_ASSESSED",
+      "discrepancies": []
+    },
+    {
+      "id": "S036",
+      "title": "SolTracer: Heterogeneous Cross-Chain Transaction Tracing for Solana Bridges",
+      "date_as_reported": "2026-09-10",
+      "type_as_reported": "Cross-chain analysis paper",
+      "primary_url_candidate": null,
+      "entry": "R07",
+      "verification_status": "UNVERIFIED_URL_MISSING",
+      "bibliographic_metadata": "NOT_REVALIDATED",
+      "claim_reproduction": "NOT_RUN",
+      "implementation_or_license": "NOT_ASSESSED",
+      "discrepancies": []
+    },
+    {
+      "id": "S037",
+      "title": "Authorization Architectures for Tool-Using AI Agents",
+      "date_as_reported": "2026-09-14",
+      "type_as_reported": "Paper/preprint, as described in chat",
+      "primary_url_candidate": "https://arxiv.org/abs/2609.15906",
+      "entry": "R08",
+      "verification_status": "UNVERIFIED_PRIMARY_SOURCE",
+      "bibliographic_metadata": "NOT_REVALIDATED",
+      "claim_reproduction": "NOT_RUN",
+      "implementation_or_license": "NOT_ASSESSED",
+      "discrepancies": []
+    },
+    {
+      "id": "S038",
+      "title": "Human Delegation Provenance Protocol (HDP)",
+      "date_as_reported": "2026-09-11, draft-02",
+      "type_as_reported": "Internet-Draft",
+      "primary_url_candidate": null,
+      "entry": "R08",
+      "verification_status": "UNVERIFIED_URL_MISSING",
+      "bibliographic_metadata": "NOT_REVALIDATED",
+      "claim_reproduction": "NOT_RUN",
+      "implementation_or_license": "NOT_ASSESSED",
+      "discrepancies": []
+    },
+    {
+      "id": "S039",
+      "title": "NIST IR 8587: Protecting Tokens and Assertions from Forgery, Theft, and Misuse",
+      "date_as_reported": "2026-09-15, stated final",
+      "type_as_reported": "Government report, status unverified",
+      "primary_url_candidate": null,
+      "entry": "R08",
+      "verification_status": "UNVERIFIED_URL_MISSING",
+      "bibliographic_metadata": "NOT_REVALIDATED",
+      "claim_reproduction": "NOT_RUN",
+      "implementation_or_license": "NOT_ASSESSED",
+      "discrepancies": []
+    },
+    {
+      "id": "S040",
+      "title": "LGT4CG: Lightweight GPU-TEE for Cloud GPUs",
+      "date_as_reported": "2026-09",
+      "type_as_reported": "Journal paper, as described in chat",
+      "primary_url_candidate": null,
+      "entry": "R08",
+      "verification_status": "UNVERIFIED_URL_MISSING",
+      "bibliographic_metadata": "NOT_REVALIDATED",
+      "claim_reproduction": "NOT_RUN",
+      "implementation_or_license": "NOT_ASSESSED",
+      "discrepancies": []
+    },
+    {
+      "id": "S041",
+      "title": "Symbiosis Bitcoin Bridge post-mortem / technical reconstruction",
+      "date_as_reported": "2026-09-11 incident; 2026-09-15 analysis",
+      "type_as_reported": "Incident analysis",
+      "primary_url_candidate": null,
+      "entry": "R08",
+      "verification_status": "UNVERIFIED_URL_MISSING",
+      "bibliographic_metadata": "NOT_REVALIDATED",
+      "claim_reproduction": "NOT_RUN",
+      "implementation_or_license": "NOT_ASSESSED",
+      "discrepancies": []
+    },
+    {
+      "id": "S042",
+      "title": "CaMeLoT: static verification and temporal logic for agent plans",
+      "date_as_reported": "2026-09-16",
+      "type_as_reported": "Formal-methods paper",
+      "primary_url_candidate": null,
+      "entry": "R09",
+      "verification_status": "UNVERIFIED_URL_MISSING",
+      "bibliographic_metadata": "NOT_REVALIDATED",
+      "claim_reproduction": "NOT_RUN",
+      "implementation_or_license": "NOT_ASSESSED",
+      "discrepancies": []
+    },
+    {
+      "id": "S043",
+      "title": "Agent Trust Profile",
+      "date_as_reported": "2026-09-16",
+      "type_as_reported": "Internet-Draft",
+      "primary_url_candidate": null,
+      "entry": "R09",
+      "verification_status": "UNVERIFIED_URL_MISSING",
+      "bibliographic_metadata": "NOT_REVALIDATED",
+      "claim_reproduction": "NOT_RUN",
+      "implementation_or_license": "NOT_ASSESSED",
+      "discrepancies": []
+    },
+    {
+      "id": "S044",
+      "title": "IntentFuzz",
+      "date_as_reported": "2026-09-11",
+      "type_as_reported": "Cross-chain fuzzing paper",
+      "primary_url_candidate": null,
+      "entry": "R09",
+      "verification_status": "UNVERIFIED_URL_MISSING",
+      "bibliographic_metadata": "NOT_REVALIDATED",
+      "claim_reproduction": "NOT_RUN",
+      "implementation_or_license": "NOT_ASSESSED",
+      "discrepancies": []
+    },
+    {
+      "id": "S045",
+      "title": "Agentic Societies Need a Social Harness",
+      "date_as_reported": "2026-09-15",
+      "type_as_reported": "Multi-agent systems paper",
+      "primary_url_candidate": null,
+      "entry": "R09",
+      "verification_status": "UNVERIFIED_URL_MISSING",
+      "bibliographic_metadata": "NOT_REVALIDATED",
+      "claim_reproduction": "NOT_RUN",
+      "implementation_or_license": "NOT_ASSESSED",
+      "discrepancies": []
+    },
+    {
+      "id": "S046",
+      "title": "Forgetting Without Restarting",
+      "date_as_reported": "2026-09-04 / 2026-09-07",
+      "type_as_reported": "Execution-state unlearning paper",
+      "primary_url_candidate": null,
+      "entry": "R09",
+      "verification_status": "UNVERIFIED_URL_MISSING",
+      "bibliographic_metadata": "NOT_REVALIDATED",
+      "claim_reproduction": "NOT_RUN",
+      "implementation_or_license": "NOT_ASSESSED",
+      "discrepancies": []
+    },
+    {
+      "id": "S047",
+      "title": "An Architecture for Long-Horizon Agents",
+      "date_as_reported": "2026-09-17",
+      "type_as_reported": "Agent architecture paper",
+      "primary_url_candidate": null,
+      "entry": "R10",
+      "verification_status": "UNVERIFIED_URL_MISSING",
+      "bibliographic_metadata": "NOT_REVALIDATED",
+      "claim_reproduction": "NOT_RUN",
+      "implementation_or_license": "NOT_ASSESSED",
+      "discrepancies": []
+    },
+    {
+      "id": "S048",
+      "title": "XIR: Verifiable Intermediate Representation for Cross-Chain Protocols",
+      "date_as_reported": "2026-09-17",
+      "type_as_reported": "Cross-chain systems paper",
+      "primary_url_candidate": null,
+      "entry": "R10",
+      "verification_status": "UNVERIFIED_URL_MISSING",
+      "bibliographic_metadata": "NOT_REVALIDATED",
+      "claim_reproduction": "NOT_RUN",
+      "implementation_or_license": "NOT_ASSESSED",
+      "discrepancies": []
+    },
+    {
+      "id": "S049",
+      "title": "Reachability, Not Observation",
+      "date_as_reported": "2026-09-17",
+      "type_as_reported": "Security architecture paper",
+      "primary_url_candidate": null,
+      "entry": "R10",
+      "verification_status": "UNVERIFIED_URL_MISSING",
+      "bibliographic_metadata": "NOT_REVALIDATED",
+      "claim_reproduction": "NOT_RUN",
+      "implementation_or_license": "NOT_ASSESSED",
+      "discrepancies": []
+    },
+    {
+      "id": "S050",
+      "title": "Towards TEE-Certified DP",
+      "date_as_reported": "2026-09-17",
+      "type_as_reported": "Property-specific confidential-compute paper",
+      "primary_url_candidate": null,
+      "entry": "R10",
+      "verification_status": "UNVERIFIED_URL_MISSING",
+      "bibliographic_metadata": "NOT_REVALIDATED",
+      "claim_reproduction": "NOT_RUN",
+      "implementation_or_license": "NOT_ASSESSED",
+      "discrepancies": []
+    },
+    {
+      "id": "S051",
+      "title": "Closed-World Resolution Against Tool Hallucination",
+      "date_as_reported": "2026-09-16",
+      "type_as_reported": "Tool-resolution paper",
+      "primary_url_candidate": null,
+      "entry": "R10",
+      "verification_status": "UNVERIFIED_URL_MISSING",
+      "bibliographic_metadata": "NOT_REVALIDATED",
+      "claim_reproduction": "NOT_RUN",
+      "implementation_or_license": "NOT_ASSESSED",
+      "discrepancies": []
+    },
+    {
+      "id": "S052",
+      "title": "Measuring and Exploiting Implicit Trust in LLM Tool-Calling Pipelines",
+      "date_as_reported": "2026-09-16",
+      "type_as_reported": "Paper/preprint, as described in chat",
+      "primary_url_candidate": "https://arxiv.org/abs/2609.18217",
+      "entry": "R11",
+      "verification_status": "UNVERIFIED_PRIMARY_SOURCE",
+      "bibliographic_metadata": "NOT_REVALIDATED",
+      "claim_reproduction": "NOT_RUN",
+      "implementation_or_license": "NOT_ASSESSED",
+      "discrepancies": []
+    },
+    {
+      "id": "S053",
+      "title": "Inference-Engine Fingerprinting Attacks are Practical",
+      "date_as_reported": "2026-09-17",
+      "type_as_reported": "Paper/preprint, as described in chat",
+      "primary_url_candidate": "https://arxiv.org/abs/2609.20614",
+      "entry": "R11",
+      "verification_status": "UNVERIFIED_PRIMARY_SOURCE",
+      "bibliographic_metadata": "NOT_REVALIDATED",
+      "claim_reproduction": "NOT_RUN",
+      "implementation_or_license": "NOT_ASSESSED",
+      "discrepancies": []
+    },
+    {
+      "id": "S054",
+      "title": "Long-horizon autoformalization of a core theorem underlying MIP*=RE / FormalFlow",
+      "date_as_reported": "2026-09-17",
+      "type_as_reported": "Paper/preprint, as described in chat",
+      "primary_url_candidate": "https://arxiv.org/abs/2609.19814",
+      "entry": "R11",
+      "verification_status": "UNVERIFIED_PRIMARY_SOURCE",
+      "bibliographic_metadata": "NOT_REVALIDATED",
+      "claim_reproduction": "NOT_RUN",
+      "implementation_or_license": "NOT_ASSESSED",
+      "discrepancies": []
+    },
+    {
+      "id": "S055",
+      "title": "A Scalable Trust Discovery Architecture for the Internet of Agents",
+      "date_as_reported": "2026-09-17",
+      "type_as_reported": "Paper/preprint, as described in chat",
+      "primary_url_candidate": "https://arxiv.org/abs/2609.20095",
+      "entry": "R11",
+      "verification_status": "UNVERIFIED_PRIMARY_SOURCE",
+      "bibliographic_metadata": "NOT_REVALIDATED",
+      "claim_reproduction": "NOT_RUN",
+      "implementation_or_license": "NOT_ASSESSED",
+      "discrepancies": []
+    },
+    {
+      "id": "S056",
+      "title": "Optimism Upgrade 20: Super Root Dispute Games",
+      "date_as_reported": "2026-09 rollout, as described",
+      "type_as_reported": "Protocol proposal / deployment report",
+      "primary_url_candidate": null,
+      "entry": "R11",
+      "verification_status": "UNVERIFIED_URL_MISSING",
+      "bibliographic_metadata": "NOT_REVALIDATED",
+      "claim_reproduction": "NOT_RUN",
+      "implementation_or_license": "NOT_ASSESSED",
+      "discrepancies": []
+    },
+    {
+      "id": "S057",
+      "title": "Authorization Revocation for Long-Running AI Agents",
+      "date_as_reported": "2026-09-18",
+      "type_as_reported": "Paper/preprint, as described in chat",
+      "primary_url_candidate": "https://arxiv.org/abs/2609.21284",
+      "entry": "R12",
+      "verification_status": "UNVERIFIED_PRIMARY_SOURCE",
+      "bibliographic_metadata": "NOT_REVALIDATED",
+      "claim_reproduction": "NOT_RUN",
+      "implementation_or_license": "NOT_ASSESSED",
+      "discrepancies": []
+    },
+    {
+      "id": "S058",
+      "title": "SingularityNET Ethereum-Cardano bridge compromise and preliminary analyses",
+      "date_as_reported": "2026-09-19 incident; 2026-09-22 reporting",
+      "type_as_reported": "Preliminary incident analysis",
+      "primary_url_candidate": null,
+      "entry": "R12",
+      "verification_status": "UNVERIFIED_URL_MISSING",
+      "bibliographic_metadata": "NOT_REVALIDATED",
+      "claim_reproduction": "NOT_RUN",
+      "implementation_or_license": "NOT_ASSESSED",
+      "discrepancies": []
+    },
+    {
+      "id": "S059",
+      "title": "ActGov: Governing LLM Agent Actions via Policy-Constrained Validation",
+      "date_as_reported": "2026-09-21",
+      "type_as_reported": "Paper/preprint, as described in chat",
+      "primary_url_candidate": "https://arxiv.org/abs/2609.24446",
+      "entry": "R12",
+      "verification_status": "UNVERIFIED_PRIMARY_SOURCE",
+      "bibliographic_metadata": "NOT_REVALIDATED",
+      "claim_reproduction": "NOT_RUN",
+      "implementation_or_license": "NOT_ASSESSED",
+      "discrepancies": []
+    },
+    {
+      "id": "S060",
+      "title": "Verifiable Computation with Trusted Execution Environments and On-Chain Digital Rights Tokens",
+      "date_as_reported": "2026-09-18",
+      "type_as_reported": "Paper/preprint, as described in chat",
+      "primary_url_candidate": "https://arxiv.org/abs/2609.21728",
+      "entry": "R12",
+      "verification_status": "UNVERIFIED_PRIMARY_SOURCE",
+      "bibliographic_metadata": "NOT_REVALIDATED",
+      "claim_reproduction": "NOT_RUN",
+      "implementation_or_license": "NOT_ASSESSED",
+      "discrepancies": []
+    },
+    {
+      "id": "S061",
+      "title": "Feedback Coding Enables Inference-Time Covert Agentic Communication / BAM",
+      "date_as_reported": "2026-09-21",
+      "type_as_reported": "Paper/preprint, as described in chat",
+      "primary_url_candidate": "https://arxiv.org/abs/2609.24994",
+      "entry": "R12",
+      "verification_status": "UNVERIFIED_PRIMARY_SOURCE",
+      "bibliographic_metadata": "NOT_REVALIDATED",
+      "claim_reproduction": "NOT_RUN",
+      "implementation_or_license": "NOT_ASSESSED",
+      "discrepancies": []
+    },
+    {
+      "id": "S062",
+      "title": "UN thematic brief on AI agents and loss-of-control risks",
+      "date_as_reported": "2026-09-21",
+      "type_as_reported": "Report named in chat; incident assertions unverified",
+      "primary_url_candidate": null,
+      "entry": "R12",
+      "verification_status": "UNVERIFIED_URL_MISSING",
+      "bibliographic_metadata": "NOT_REVALIDATED",
+      "claim_reproduction": "NOT_RUN",
+      "implementation_or_license": "NOT_ASSESSED",
+      "discrepancies": []
+    },
+    {
+      "id": "S063",
+      "title": "From Agent Output to Authorized Transition",
+      "date_as_reported": "2026-09-23",
+      "type_as_reported": "Paper/preprint, as described in chat",
+      "primary_url_candidate": "https://arxiv.org/abs/2609.28216",
+      "entry": "R13",
+      "verification_status": "UNVERIFIED_PRIMARY_SOURCE",
+      "bibliographic_metadata": "NOT_REVALIDATED",
+      "claim_reproduction": "NOT_RUN",
+      "implementation_or_license": "NOT_ASSESSED",
+      "discrepancies": []
+    },
+    {
+      "id": "S064",
+      "title": "Issuer-Sovereign Agentic Payments",
+      "date_as_reported": "2026-09-23",
+      "type_as_reported": "Paper/preprint, as described in chat",
+      "primary_url_candidate": "https://arxiv.org/abs/2609.27452",
+      "entry": "R13",
+      "verification_status": "UNVERIFIED_PRIMARY_SOURCE",
+      "bibliographic_metadata": "NOT_REVALIDATED",
+      "claim_reproduction": "NOT_RUN",
+      "implementation_or_license": "NOT_ASSESSED",
+      "discrepancies": []
+    },
+    {
+      "id": "S065",
+      "title": "NVIDIA: Private High-Performance Production AI Inference with Confidential Computing",
+      "date_as_reported": "2026-09-22",
+      "type_as_reported": "Vendor engineering report",
+      "primary_url_candidate": null,
+      "entry": "R13",
+      "verification_status": "UNVERIFIED_URL_MISSING",
+      "bibliographic_metadata": "NOT_REVALIDATED",
+      "claim_reproduction": "NOT_RUN",
+      "implementation_or_license": "NOT_ASSESSED",
+      "discrepancies": []
+    },
+    {
+      "id": "S066",
+      "title": "TwinCheck: Evidence-Grounded Negative-Twin Verification for Stateful Tool Agents",
+      "date_as_reported": "2026-09-22",
+      "type_as_reported": "Paper/preprint, as described in chat",
+      "primary_url_candidate": "https://arxiv.org/abs/2609.26911",
+      "entry": "R13",
+      "verification_status": "UNVERIFIED_PRIMARY_SOURCE",
+      "bibliographic_metadata": "NOT_REVALIDATED",
+      "claim_reproduction": "NOT_RUN",
+      "implementation_or_license": "NOT_ASSESSED",
+      "discrepancies": []
+    },
+    {
+      "id": "S067",
+      "title": "Emergent Collusion in Long-Horizon LLM Agent Interaction",
+      "date_as_reported": "2026-09-21",
+      "type_as_reported": "Paper/preprint, as described in chat",
+      "primary_url_candidate": "https://arxiv.org/abs/2609.24967",
+      "entry": "R13",
+      "verification_status": "UNVERIFIED_PRIMARY_SOURCE",
+      "bibliographic_metadata": "NOT_REVALIDATED",
+      "claim_reproduction": "NOT_RUN",
+      "implementation_or_license": "NOT_ASSESSED",
+      "discrepancies": []
+    },
+    {
+      "id": "S068",
+      "title": "Persistent Billable State: Denial-of-Wallet Attacks and Defenses in Tool-Calling LLM Agents",
+      "date_as_reported": "2026-09-23",
+      "type_as_reported": "Paper/preprint, as described in chat",
+      "primary_url_candidate": "https://arxiv.org/abs/2609.28585",
+      "entry": "R14",
+      "verification_status": "UNVERIFIED_PRIMARY_SOURCE",
+      "bibliographic_metadata": "NOT_REVALIDATED",
+      "claim_reproduction": "NOT_RUN",
+      "implementation_or_license": "NOT_ASSESSED",
+      "discrepancies": []
+    },
+    {
+      "id": "S069",
+      "title": "Agent Approval Laundering: Transitive Effects Beyond the Approved Invocation",
+      "date_as_reported": "2026-09-23",
+      "type_as_reported": "Paper/preprint, as described in chat",
+      "primary_url_candidate": "https://arxiv.org/abs/2609.28586",
+      "entry": "R14",
+      "verification_status": "UNVERIFIED_PRIMARY_SOURCE",
+      "bibliographic_metadata": "NOT_REVALIDATED",
+      "claim_reproduction": "NOT_RUN",
+      "implementation_or_license": "NOT_ASSESSED",
+      "discrepancies": []
+    },
+    {
+      "id": "S070",
+      "title": "Meta Private Processing for stateful AI / AI glasses",
+      "date_as_reported": "2026-09-23",
+      "type_as_reported": "Vendor engineering report",
+      "primary_url_candidate": null,
+      "entry": "R14",
+      "verification_status": "UNVERIFIED_URL_MISSING",
+      "bibliographic_metadata": "NOT_REVALIDATED",
+      "claim_reproduction": "NOT_RUN",
+      "implementation_or_license": "NOT_ASSESSED",
+      "discrepancies": []
+    },
+    {
+      "id": "S071",
+      "title": "On the Effectiveness of Kernel-Level Evidence for Agent Security",
+      "date_as_reported": "2026-09-24",
+      "type_as_reported": "Paper/preprint, as described in chat",
+      "primary_url_candidate": "https://arxiv.org/abs/2609.28915",
+      "entry": "R14",
+      "verification_status": "UNVERIFIED_PRIMARY_SOURCE",
+      "bibliographic_metadata": "NOT_REVALIDATED",
+      "claim_reproduction": "NOT_RUN",
+      "implementation_or_license": "NOT_ASSESSED",
+      "discrepancies": []
+    },
+    {
+      "id": "S072",
+      "title": "Beyond Centralized Policy Decision Points: Decentralized Sticky Policy Authorization through Evidence Quorums / SPEAR-Q",
+      "date_as_reported": "2026-09-24",
+      "type_as_reported": "Paper/preprint, as described in chat",
+      "primary_url_candidate": "https://arxiv.org/abs/2609.29308",
+      "entry": "R14",
+      "verification_status": "UNVERIFIED_PRIMARY_SOURCE",
+      "bibliographic_metadata": "NOT_REVALIDATED",
+      "claim_reproduction": "NOT_RUN",
+      "implementation_or_license": "NOT_ASSESSED",
+      "discrepancies": []
+    },
+    {
+      "id": "S073",
+      "title": "Codetta: asymmetric covert multi-agent communication",
+      "date_as_reported": "2026-09-24",
+      "type_as_reported": "Paper/preprint, as described in chat",
+      "primary_url_candidate": "https://arxiv.org/abs/2609.28900",
+      "entry": "R14",
+      "verification_status": "UNVERIFIED_PRIMARY_SOURCE",
+      "bibliographic_metadata": "NOT_REVALIDATED",
+      "claim_reproduction": "NOT_RUN",
+      "implementation_or_license": "NOT_ASSESSED",
+      "discrepancies": []
+    },
+    {
+      "id": "S074",
+      "title": "Where Does Exactly-Once Live? Model, Harness, and Tool-Contract Effects on Duplicate Side Effects in LLM Agents / LIMBO",
+      "date_as_reported": "2026-09-24",
+      "type_as_reported": "Paper/preprint, as described in chat",
+      "primary_url_candidate": "https://arxiv.org/abs/2609.29095",
+      "entry": "R15",
+      "verification_status": "PRIMARY_LANDING_PAGE_CHECKED",
+      "bibliographic_metadata": "NOT_REVALIDATED",
+      "claim_reproduction": "NOT_RUN",
+      "implementation_or_license": "NOT_ASSESSED",
+      "discrepancies": [],
+      "verification_note": "Title/date match primary landing page; Jiapeng Li."
+    },
+    {
+      "id": "S075",
+      "title": "LLM Agents Can Easily Tamper With Their Own Traces",
+      "date_as_reported": "2026-09-24",
+      "type_as_reported": "Paper/preprint, as described in chat",
+      "primary_url_candidate": "https://arxiv.org/abs/2609.30266",
+      "entry": "R15",
+      "verification_status": "UNVERIFIED_PRIMARY_SOURCE",
+      "bibliographic_metadata": "NOT_REVALIDATED",
+      "claim_reproduction": "NOT_RUN",
+      "implementation_or_license": "NOT_ASSESSED",
+      "discrepancies": []
+    },
+    {
+      "id": "S076",
+      "title": "Instrumental Monitor Evasion Emerges Under Ordinary Task Pressure / EvasionBench",
+      "date_as_reported": "2026-09-24",
+      "type_as_reported": "Paper/preprint, as described in chat",
+      "primary_url_candidate": "https://arxiv.org/abs/2609.30217",
+      "entry": "R15",
+      "verification_status": "UNVERIFIED_PRIMARY_SOURCE",
+      "bibliographic_metadata": "NOT_REVALIDATED",
+      "claim_reproduction": "NOT_RUN",
+      "implementation_or_license": "NOT_ASSESSED",
+      "discrepancies": []
+    },
+    {
+      "id": "S077",
+      "title": "Progressive Skill Discovery as Access Control for Tool-Using LLM Agents / skilder",
+      "date_as_reported": "2026-09-23",
+      "type_as_reported": "Paper/preprint, as described in chat",
+      "primary_url_candidate": "https://arxiv.org/abs/2609.28693",
+      "entry": "R15",
+      "verification_status": "UNVERIFIED_PRIMARY_SOURCE",
+      "bibliographic_metadata": "NOT_REVALIDATED",
+      "claim_reproduction": "NOT_RUN",
+      "implementation_or_license": "NOT_ASSESSED",
+      "discrepancies": []
+    },
+    {
+      "id": "S078",
+      "title": "Google Private AI Compute: secure server-side memory",
+      "date_as_reported": "2026-09-23",
+      "type_as_reported": "Vendor engineering report",
+      "primary_url_candidate": null,
+      "entry": "R15",
+      "verification_status": "UNVERIFIED_URL_MISSING",
+      "bibliographic_metadata": "NOT_REVALIDATED",
+      "claim_reproduction": "NOT_RUN",
+      "implementation_or_license": "NOT_ASSESSED",
+      "discrepancies": []
+    },
+    {
+      "id": "S079",
+      "title": "CLPR: Cross-Ledger Protocol / LF Decentralized Trust lab",
+      "date_as_reported": "2026-09-24",
+      "type_as_reported": "Open-source protocol specification / launch report",
+      "primary_url_candidate": null,
+      "entry": "R15",
+      "verification_status": "UNVERIFIED_URL_MISSING",
+      "bibliographic_metadata": "NOT_REVALIDATED",
+      "claim_reproduction": "NOT_RUN",
+      "implementation_or_license": "NOT_ASSESSED",
+      "discrepancies": []
+    },
+    {
+      "id": "S080",
+      "title": "Share-Borne AI Virus: Memory-Hopping Attacks Across LLM Agents",
+      "date_as_reported": "2026-09-28",
+      "type_as_reported": "Paper/preprint, as described in chat",
+      "primary_url_candidate": "https://arxiv.org/abs/2609.35576",
+      "entry": "R16",
+      "verification_status": "UNVERIFIED_PRIMARY_SOURCE",
+      "bibliographic_metadata": "NOT_REVALIDATED",
+      "claim_reproduction": "NOT_RUN",
+      "implementation_or_license": "NOT_ASSESSED",
+      "discrepancies": []
+    },
+    {
+      "id": "S081",
+      "title": "When Consent Outlives Context: Residual Authority Replay in Long-Lived Agents",
+      "date_as_reported": "2026-09-27 / 2026-09-29",
+      "type_as_reported": "Paper/preprint, as described in chat",
+      "primary_url_candidate": "https://arxiv.org/abs/2609.33910",
+      "entry": "R16",
+      "verification_status": "UNVERIFIED_PRIMARY_SOURCE",
+      "bibliographic_metadata": "NOT_REVALIDATED",
+      "claim_reproduction": "NOT_RUN",
+      "implementation_or_license": "NOT_ASSESSED",
+      "discrepancies": []
+    },
+    {
+      "id": "S082",
+      "title": "When Valid Tool Calls Change Meaning: Formation-Consistent Dispatch for LLM Agents",
+      "date_as_reported": "2026-09-28 / 2026-09-29",
+      "type_as_reported": "Paper/preprint, as described in chat",
+      "primary_url_candidate": "https://arxiv.org/abs/2609.35088",
+      "entry": "R16",
+      "verification_status": "UNVERIFIED_PRIMARY_SOURCE",
+      "bibliographic_metadata": "NOT_REVALIDATED",
+      "claim_reproduction": "NOT_RUN",
+      "implementation_or_license": "NOT_ASSESSED",
+      "discrepancies": []
+    },
+    {
+      "id": "S083",
+      "title": "NVIDIA Open Agent Safety Platform / OpenShell / Sentry",
+      "date_as_reported": "2026-09-28",
+      "type_as_reported": "Vendor platform / reference architecture report",
+      "primary_url_candidate": null,
+      "entry": "R16",
+      "verification_status": "UNVERIFIED_URL_MISSING",
+      "bibliographic_metadata": "NOT_REVALIDATED",
+      "claim_reproduction": "NOT_RUN",
+      "implementation_or_license": "NOT_ASSESSED",
+      "discrepancies": []
+    },
+    {
+      "id": "S084",
+      "title": "Chainlink CCIP 2.0",
+      "date_as_reported": "2026-09-28",
+      "type_as_reported": "Protocol release / technical documentation",
+      "primary_url_candidate": null,
+      "entry": "R16",
+      "verification_status": "UNVERIFIED_URL_MISSING",
+      "bibliographic_metadata": "NOT_REVALIDATED",
+      "claim_reproduction": "NOT_RUN",
+      "implementation_or_license": "NOT_ASSESSED",
+      "discrepancies": []
+    },
+    {
+      "id": "S085",
+      "title": "Certified Multi-Source Integrity for Structured Agent Actions",
+      "date_as_reported": "Late September, exact date not stated",
+      "type_as_reported": "Formal assurance paper",
+      "primary_url_candidate": null,
+      "entry": "R16",
+      "verification_status": "UNVERIFIED_URL_MISSING",
+      "bibliographic_metadata": "NOT_REVALIDATED",
+      "claim_reproduction": "NOT_RUN",
+      "implementation_or_license": "NOT_ASSESSED",
+      "discrepancies": []
+    },
+    {
+      "id": "S086",
+      "title": "Approval Laundering: Systematizing Approval-Execution Binding Failures in AI Coding-Agent Harnesses",
+      "date_as_reported": "2026-09-30",
+      "type_as_reported": "Paper/preprint, as described in chat",
+      "primary_url_candidate": "https://arxiv.org/abs/2609.38983",
+      "entry": "R17",
+      "verification_status": "UNVERIFIED_PRIMARY_SOURCE",
+      "bibliographic_metadata": "NOT_REVALIDATED",
+      "claim_reproduction": "NOT_RUN",
+      "implementation_or_license": "NOT_ASSESSED",
+      "discrepancies": []
+    },
+    {
+      "id": "S087",
+      "title": "CATP: Design and Evaluation of Local Agent Authorization and Audit Evidence",
+      "date_as_reported": "2026-09-28; updated 2026-10-01",
+      "type_as_reported": "Paper/preprint, as described in chat",
+      "primary_url_candidate": "https://arxiv.org/abs/2609.38223",
+      "entry": "R17",
+      "verification_status": "PRIMARY_LANDING_PAGE_CHECKED",
+      "bibliographic_metadata": "NOT_REVALIDATED",
+      "claim_reproduction": "NOT_RUN",
+      "implementation_or_license": "NOT_ASSESSED",
+      "discrepancies": [],
+      "verification_note": "Title/date match primary landing page; Linfeng Zhou."
+    },
+    {
+      "id": "S088",
+      "title": "Seal, Then Sample: Sampled Layerwise Proofs for Verifiable LLM Inference from GPT-2 to 70B",
+      "date_as_reported": "2026-09-23",
+      "type_as_reported": "Paper/preprint, as described in chat",
+      "primary_url_candidate": "https://arxiv.org/abs/2609.27367",
+      "entry": "R17",
+      "verification_status": "UNVERIFIED_PRIMARY_SOURCE",
+      "bibliographic_metadata": "NOT_REVALIDATED",
+      "claim_reproduction": "NOT_RUN",
+      "implementation_or_license": "NOT_ASSESSED",
+      "discrepancies": []
+    },
+    {
+      "id": "S089",
+      "title": "Cogentic: Multi-Agent Orchestration for Automated Proof Discovery",
+      "date_as_reported": "2026-09-30",
+      "type_as_reported": "Paper/preprint, as described in chat",
+      "primary_url_candidate": "https://arxiv.org/abs/2609.40324",
+      "entry": "R17",
+      "verification_status": "UNVERIFIED_PRIMARY_SOURCE",
+      "bibliographic_metadata": "NOT_REVALIDATED",
+      "claim_reproduction": "NOT_RUN",
+      "implementation_or_license": "NOT_ASSESSED",
+      "discrepancies": []
+    },
+    {
+      "id": "S090",
+      "title": "Flare Confidential Compute on Songbird",
+      "date_as_reported": "2026-10-01",
+      "type_as_reported": "Canary deployment report",
+      "primary_url_candidate": null,
+      "entry": "R17",
+      "verification_status": "UNVERIFIED_URL_MISSING",
+      "bibliographic_metadata": "NOT_REVALIDATED",
+      "claim_reproduction": "NOT_RUN",
+      "implementation_or_license": "NOT_ASSESSED",
+      "discrepancies": []
+    },
+    {
+      "id": "S091",
+      "title": "Vosti: Specifying, Implementing, and Verifying Deterministic LLM Inference",
+      "date_as_reported": "2026-09-30",
+      "type_as_reported": "Paper/preprint, as described in chat",
+      "primary_url_candidate": "https://arxiv.org/abs/2609.38981",
+      "entry": "R18",
+      "verification_status": "PRIMARY_LANDING_PAGE_CHECKED",
+      "bibliographic_metadata": "NOT_REVALIDATED",
+      "claim_reproduction": "NOT_RUN",
+      "implementation_or_license": "NOT_ASSESSED",
+      "discrepancies": [],
+      "verification_note": "Title/date match primary landing page."
+    },
+    {
+      "id": "S092",
+      "title": "XIM: The XDC Interledger Messaging Protocol",
+      "date_as_reported": "2026-09-30",
+      "type_as_reported": "Paper/preprint, as described in chat",
+      "primary_url_candidate": "https://arxiv.org/abs/2609.39310",
+      "entry": "R18",
+      "verification_status": "UNVERIFIED_PRIMARY_SOURCE",
+      "bibliographic_metadata": "NOT_REVALIDATED",
+      "claim_reproduction": "NOT_RUN",
+      "implementation_or_license": "NOT_ASSESSED",
+      "discrepancies": []
+    },
+    {
+      "id": "S093",
+      "title": "Can Agents Trust Their Skills? / TrustProbe",
+      "date_as_reported": "2026-09-30",
+      "type_as_reported": "Paper/preprint, as described in chat",
+      "primary_url_candidate": "https://arxiv.org/abs/2609.39065",
+      "entry": "R18",
+      "verification_status": "UNVERIFIED_PRIMARY_SOURCE",
+      "bibliographic_metadata": "NOT_REVALIDATED",
+      "claim_reproduction": "NOT_RUN",
+      "implementation_or_license": "NOT_ASSESSED",
+      "discrepancies": []
+    },
+    {
+      "id": "S094",
+      "title": "ActionGuard",
+      "date_as_reported": "2026-09-30",
+      "type_as_reported": "Paper/preprint, as described in chat",
+      "primary_url_candidate": "https://arxiv.org/abs/2609.39450",
+      "entry": "R18",
+      "verification_status": "UNVERIFIED_PRIMARY_SOURCE",
+      "bibliographic_metadata": "NOT_REVALIDATED",
+      "claim_reproduction": "NOT_RUN",
+      "implementation_or_license": "NOT_ASSESSED",
+      "discrepancies": []
+    },
+    {
+      "id": "S095",
+      "title": "RankEvolve: A Reliable Multi-Agent Auto-Research Harness",
+      "date_as_reported": "2026-09-30",
+      "type_as_reported": "Paper/preprint, as described in chat",
+      "primary_url_candidate": "https://arxiv.org/abs/2609.39551",
+      "entry": "R18",
+      "verification_status": "UNVERIFIED_PRIMARY_SOURCE",
+      "bibliographic_metadata": "NOT_REVALIDATED",
+      "claim_reproduction": "NOT_RUN",
+      "implementation_or_license": "NOT_ASSESSED",
+      "discrepancies": []
+    },
+    {
+      "id": "S096",
+      "title": "Trusted Model Environment for Private Semantic Computations",
+      "date_as_reported": "2026-09-24",
+      "type_as_reported": "Paper/preprint, as described in chat",
+      "primary_url_candidate": "https://arxiv.org/abs/2609.30032",
+      "entry": "R18",
+      "verification_status": "UNVERIFIED_PRIMARY_SOURCE",
+      "bibliographic_metadata": "NOT_REVALIDATED",
+      "claim_reproduction": "NOT_RUN",
+      "implementation_or_license": "NOT_ASSESSED",
+      "discrepancies": []
+    }
+  ],
+  "limitations": [
+    "Only S074, S087, S091 landing pages checked. Remaining 93 leads unverified.",
+    "All 58 implementation statuses remain unassessed pending full M0 mapping.",
+    "This dossier is not a release evidence artifact."
+  ]
+}

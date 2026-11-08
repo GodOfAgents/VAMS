@@ -29,7 +29,7 @@ interface IProviderBondRegistry {
      * @param pendingSettlements Sum of in-flight request values
      * @param activeRequests Count of active requests
      * @param registeredAt Registration timestamp
-     * @param totalEarned Lifetime earnings
+     * @param totalEarned Lifetime successfully completed gross request value; not a reward credit
      * @param totalSlashed Lifetime slashed amount
      * @param isActive Whether provider is accepting requests
      * @param withdrawalUnlockTime Time when withdrawal is unlocked (0 if none pending)
@@ -105,6 +105,7 @@ interface IProviderBondRegistry {
         address indexed provider, 
         bytes32 indexed escrowId
     );
+    event RequestCancelled(address indexed provider, bytes32 indexed escrowId);
     event MaxRequestValueUpdated(
         address indexed provider,
         uint256 oldValue,
@@ -154,6 +155,8 @@ interface IProviderBondRegistry {
     
     /// @notice Escrow not found or already completed
     error EscrowNotFound(bytes32 escrowId);
+    error InvalidEscrowId();
+    error EscrowIdAlreadyUsed(bytes32 escrowId);
     
     /// @notice Slash amount exceeds bond
     error SlashExceedsBond(uint256 slash, uint256 bond);
@@ -292,6 +295,11 @@ interface IProviderBondRegistry {
      * @param escrowId Escrow identifier
      */
     function completeRequest(address provider, bytes32 escrowId) external;
+
+    /// @notice Release an unfulfilled reservation without recording delivery earnings.
+    /// @dev Only the creating escrow may cancel, including after new-admission role revocation.
+    /// IDs remain consumed. This releases existing obligations and cannot admit new work.
+    function cancelRequest(address provider, bytes32 escrowId) external;
     
     /**
      * @notice Slash provider for failure

@@ -25,7 +25,6 @@ WORKFLOW_DB_PATH = os.getenv("VAMS_WORKFLOW_DB", "workflow_checkpoints.db")
 REQUEST_TIMEOUT = 10  # seconds
 MAX_RETRY_ATTEMPTS = 3
 RETRY_BACKOFF = 2
-MOCK_MODE = os.getenv("VAMS_MOCK_MODE", "true").lower() == "true"
 
 # =============================================================================
 # LAYER 0: POLYGON AMOY (ECONOMIC LAYER)
@@ -249,7 +248,6 @@ ENABLE_ACCESS_LOG = os.getenv("VAMS_SMMU_ACCESS_LOG", "true").lower() == "true"
 # Interrupt Vector Table (x402 Interrupt Handler)
 IVT_TIMEOUT_MS = int(os.getenv("VAMS_IVT_TIMEOUT", "30000"))         # HTLC timelock
 IVT_MAX_RETRIES = int(os.getenv("VAMS_IVT_MAX_RETRIES", "2"))        # Provider failover attempts
-IVT_MOCK_MODE = os.getenv("VAMS_IVT_MOCK", "true").lower() == "true" # Mock x402 payments
 
 # Cognitive Drift Detection & Sync Pulses  
 DRIFT_THETA = float(os.getenv("VAMS_DRIFT_THETA", "0.3"))            # CSP trigger threshold

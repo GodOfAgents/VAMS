@@ -16,19 +16,17 @@ Endpoints:
 import time
 import json
 import os
-import secrets
 import asyncio
 import threading
-import hashlib
+import logging
 from datetime import datetime
+from html import escape as escape_html
 from typing import Dict, List, Optional
 from dataclasses import dataclass, field, asdict
 
 try:
-    from fastapi import FastAPI, HTTPException, Depends
+    from fastapi import FastAPI, HTTPException, Query
     from fastapi.responses import HTMLResponse
-    from fastapi.security import HTTPBasic, HTTPBasicCredentials
-    from starlette.status import HTTP_401_UNAUTHORIZED, HTTP_500_INTERNAL_SERVER_ERROR
     from pydantic import BaseModel
     import uvicorn
     from neuron.secp256k1 import verify_message
@@ -40,7 +38,27 @@ except ImportError:
     sys.exit(1)
 
 
-from neuron.runtime_safety import current_environment, is_live_environment
+from neuron.runtime_safety import (
+    LiveModeSafetyError,
+    RuntimePolicy,
+    load_runtime_policy,
+)
+from gateway.replay_store import build_gateway_replay_store
+from gateway.request_auth import (
+    ConfiguredAdminDIDResolver,
+    GatewayRequestAuthenticator,
+    KeyStatus,
+    SystemClock,
+    configured_gateway_audience,
+)
+from gateway.route_policy import validate_route_policy
+from gateway.route_security import (
+    GatewayRouteSecurityMiddleware,
+    TRUSTED_INGRESS_VALUE,
+)
+
+
+logger = logging.getLogger("vams.gateway")
 
 
 # --- CONFIGURATION ---
@@ -48,18 +66,13 @@ VERSION = "v0.2.0-alpha"
 NODE_TIMEOUT = 120  # Seconds before node is considered offline
 MAX_NODES = 5000
 CLEANUP_INTERVAL = 3600 # 1 hour
-AUTH_REPLAY_WINDOW_SECONDS = 300
 LIVE_BIND_HOST = "127.0.0.1"
 LOCAL_BIND_HOST = "127.0.0.1"
 CLIENT_CERT_VERIFIED_HEADERS = (
     "X-VAMS-Client-Cert-Verified",
-    "X-Forwarded-Tls-Client-Cert-Verified",
-    "X-SSL-Client-Verify",
 )
 CLIENT_CERT_FINGERPRINT_HEADERS = (
     "X-VAMS-Client-Cert-Fingerprint",
-    "X-Forwarded-Tls-Client-Cert-Fingerprint",
-    "X-SSL-Client-Fingerprint",
 )
 CLIENT_CERT_VERIFIED_VALUES = {"1", "true", "success", "verified"}
 DEFAULT_LOCAL_ALLOWED_ORIGINS = [
@@ -108,37 +121,121 @@ class NodeInfo:
         else:
             return f"{int(seconds // 3600)}h {int((seconds % 3600) // 60)}m"
     
+    @property
+    def last_seen_formatted(self) -> str:
+        return datetime.fromtimestamp(self.last_seen).strftime("%H:%M:%S")
+
     def to_dict(self) -> dict:
         return {
             **asdict(self),
             "is_online": self.is_online,
             "uptime": self.uptime,
-            "last_seen_formatted": datetime.fromtimestamp(self.last_seen).strftime("%H:%M:%S")
+            "last_seen_formatted": self.last_seen_formatted
         }
 
 
 from contextlib import asynccontextmanager
 
+cleanup_task: Optional[asyncio.Task] = None
+active_runtime_policy: Optional[RuntimePolicy] = None
+auth_replay_store = None
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup tasks
+    global active_runtime_policy, auth_replay_store, cleanup_task, da_audit_log
+
+    # Runtime policy is the first startup boundary. No owned task or thread may
+    # start before this immutable configuration has passed validation.
+    policy = load_runtime_policy()
+    validate_route_policy(app)
+    resolve_allowed_origins(policy=policy)
     admin_password = os.getenv("GATEWAY_ADMIN_PASSWORD")
     if not admin_password:
         raise RuntimeError("CRITICAL: GATEWAY_ADMIN_PASSWORD is not set in the environment.")
     # Reject the removed legacy password rather than treating it as a credential.
     if admin_password == "vams2026":  # nosec B105
         raise RuntimeError("CRITICAL: GATEWAY_ADMIN_PASSWORD is set to the default insecure value 'vams2026'. Please change it.")
-    if is_live_environment() and not os.getenv("GATEWAY_ADMIN_DID"):
+    if policy.is_live and not os.getenv("GATEWAY_ADMIN_DID"):
         raise RuntimeError(
-            f"CRITICAL: GATEWAY_ADMIN_DID is required when VAMS_ENV={current_environment()}."
+            f"CRITICAL: GATEWAY_ADMIN_DID is required when VAMS_ENV={policy.mode.value}."
         )
-    if is_live_environment() and not os.getenv("GATEWAY_HEARTBEAT_CERT_FINGERPRINTS"):
+    if policy.is_live and not os.getenv("GATEWAY_HEARTBEAT_CERT_FINGERPRINTS"):
         raise RuntimeError(
-            f"CRITICAL: GATEWAY_HEARTBEAT_CERT_FINGERPRINTS is required when VAMS_ENV={current_environment()}."
+            "CRITICAL: GATEWAY_HEARTBEAT_CERT_FINGERPRINTS is required when "
+            f"VAMS_ENV={policy.mode.value}."
         )
-        
-    asyncio.create_task(cleanup_offline_nodes())
-    yield
+
+    audience = configured_gateway_audience()
+    key_resolver = ConfiguredAdminDIDResolver()
+    configured_did = os.getenv("GATEWAY_ADMIN_DID", "")
+    if policy.is_live and key_resolver.resolve(configured_did).status is not KeyStatus.AVAILABLE:
+        raise RuntimeError(
+            "CRITICAL: GATEWAY_ADMIN_DID is invalid for live M2 authentication."
+        )
+
+    # Only demo startup may opt in to the local Composer/catalogue simulation.
+    # Other Gateway functionality remains available with this path disabled.
+    _bind_resource_composer(policy)
+
+    # M2.2 storage is initialized before any owned background activity. Live
+    # modes require an explicit durable database; no process-local fallback is
+    # possible through this factory.
+    candidate_auth_replay_store = build_gateway_replay_store(policy)
+    candidate_gateway_authenticator = GatewayRequestAuthenticator(
+        expected_audience=audience,
+        clock=SystemClock(),
+        key_resolver=key_resolver,
+        replay_store=candidate_auth_replay_store,
+    )
+
+    candidate_audit_log = None
+    if DA_AUDIT_AVAILABLE:
+        candidate_audit_log = PerformanceAuditLog(
+            mock_mode=policy.gateway_mock_enabled
+        )
+
+    logger.info(
+        "gateway runtime mode=%s classification=%s evidence=%s gateway_mock=%s "
+        "live_ingress=%s",
+        policy.mode.value,
+        policy.runtime_classification,
+        policy.evidence_classification,
+        policy.gateway_mock_enabled,
+        TRUSTED_INGRESS_VALUE.decode("ascii") if policy.is_live else "direct-non-live",
+    )
+
+    app.state.runtime_policy = policy
+    app.state.auth_replay_store = candidate_auth_replay_store
+    app.state.gateway_authenticator = candidate_gateway_authenticator
+    active_runtime_policy = policy
+    auth_replay_store = candidate_auth_replay_store
+    da_audit_log = candidate_audit_log
+    keeper_started = False
+    try:
+        if ECONOMICS_AVAILABLE and keeper is not None:
+            keeper.start()
+            keeper_started = True
+        cleanup_task = asyncio.create_task(cleanup_offline_nodes())
+        yield
+    finally:
+        if cleanup_task is not None:
+            cleanup_task.cancel()
+            try:
+                await cleanup_task
+            except asyncio.CancelledError:
+                pass
+            cleanup_task = None
+        if keeper_started and keeper is not None:
+            keeper.stop()
+        da_audit_log = None
+        auth_replay_store = None
+        active_runtime_policy = None
+        if hasattr(app.state, "runtime_policy"):
+            del app.state.runtime_policy
+        if hasattr(app.state, "auth_replay_store"):
+            del app.state.auth_replay_store
+        if hasattr(app.state, "gateway_authenticator"):
+            del app.state.gateway_authenticator
 
 # --- APPLICATION ---
 app = FastAPI(
@@ -203,6 +300,22 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         return await call_next(request)
 
 
+class RuntimeClassificationMiddleware(BaseHTTPMiddleware):
+    """Attach the sanitized runtime/evidence classification to every response."""
+
+    async def dispatch(self, request: Request, call_next):
+        policy = _request_runtime_policy(request)
+        response = await call_next(request)
+        response.headers["X-VAMS-Runtime-Mode"] = policy.mode.value
+        response.headers["X-VAMS-Runtime-Classification"] = (
+            policy.runtime_classification
+        )
+        response.headers["X-VAMS-Evidence-Classification"] = (
+            policy.evidence_classification
+        )
+        return response
+
+
 class RequestSizeLimitMiddleware:
     def __init__(self, app, max_bytes: int = 1_048_576):
         self.app = app
@@ -218,8 +331,20 @@ class RequestSizeLimitMiddleware:
             for key, value in scope.get("headers", [])
             if key.lower() == b"content-length"
         ]
+        transfer_encodings = [
+            value
+            for key, value in scope.get("headers", [])
+            if key.lower() == b"transfer-encoding"
+        ]
+        if transfer_encodings:
+            await self._reject(
+                scope, receive, send, 400, "unsupported_transfer_encoding"
+            )
+            return
         if len(content_lengths) > 1:
-            await self._reject(scope, receive, send, 400, "Multiple Content-Length headers.")
+            await self._reject(
+                scope, receive, send, 400, "ambiguous_content_length"
+            )
             return
         if content_lengths:
             try:
@@ -227,10 +352,12 @@ class RequestSizeLimitMiddleware:
                 if content_length < 0:
                     raise ValueError
             except (UnicodeDecodeError, ValueError):
-                await self._reject(scope, receive, send, 400, "Invalid Content-Length header.")
+                await self._reject(
+                    scope, receive, send, 400, "malformed_content_length"
+                )
                 return
             if content_length > self.max_bytes:
-                await self._reject(scope, receive, send, 413, "Request body exceeds the gateway limit.")
+                await self._reject(scope, receive, send, 413, "body_too_large")
                 return
 
         buffered_messages = []
@@ -244,10 +371,16 @@ class RequestSizeLimitMiddleware:
                 continue
             received_bytes += len(message.get("body", b""))
             if received_bytes > self.max_bytes:
-                await self._reject(scope, receive, send, 413, "Request body exceeds the gateway limit.")
+                await self._reject(scope, receive, send, 413, "body_too_large")
                 return
             if not message.get("more_body", False):
                 break
+
+        if content_lengths and received_bytes != content_length:
+            await self._reject(
+                scope, receive, send, 400, "content_length_mismatch"
+            )
+            return
 
         message_index = 0
 
@@ -262,51 +395,64 @@ class RequestSizeLimitMiddleware:
         await self.app(scope, replay_receive, send)
 
     @staticmethod
-    async def _reject(scope, receive, send, status_code: int, detail: str):
-        response = JSONResponse(status_code=status_code, content={"detail": detail})
+    async def _reject(scope, receive, send, status_code: int, code: str):
+        response = JSONResponse(
+            status_code=status_code,
+            content={"detail": f"gateway_request_denied:{code}"},
+        )
         await response(scope, receive, send)
 
 # Configure CORS
-def resolve_allowed_origins(raw_origins: Optional[str] = None) -> List[str]:
+def _parse_allowed_origins(raw_origins: str) -> List[str]:
+    if raw_origins:
+        return [origin.strip() for origin in raw_origins.split(",") if origin.strip()]
+    return list(DEFAULT_LOCAL_ALLOWED_ORIGINS)
+
+
+def resolve_allowed_origins(
+    raw_origins: Optional[str] = None,
+    *,
+    policy: Optional[RuntimePolicy] = None,
+) -> List[str]:
+    effective_policy = policy or load_runtime_policy()
     allowed_origins_str = (
         os.getenv("GATEWAY_ALLOWED_ORIGINS", "")
         if raw_origins is None
         else raw_origins
     )
-    if is_live_environment() and not allowed_origins_str:
+    if effective_policy.is_live and not allowed_origins_str:
         raise RuntimeError(
-            f"GATEWAY_ALLOWED_ORIGINS is required when VAMS_ENV={current_environment()}."
+            "GATEWAY_ALLOWED_ORIGINS is required when "
+            f"VAMS_ENV={effective_policy.mode.value}."
         )
-    if allowed_origins_str:
-        allowed_origins = [
-            origin.strip()
-            for origin in allowed_origins_str.split(",")
-            if origin.strip()
-        ]
-    else:
-        allowed_origins = list(DEFAULT_LOCAL_ALLOWED_ORIGINS)
+    allowed_origins = _parse_allowed_origins(allowed_origins_str)
 
-    if is_live_environment() and any("*" in origin for origin in allowed_origins):
+    if effective_policy.is_live and any("*" in origin for origin in allowed_origins):
         raise RuntimeError(
-            f"Wildcard CORS origins are not allowed when VAMS_ENV={current_environment()}."
+            "Wildcard CORS origins are not allowed when "
+            f"VAMS_ENV={effective_policy.mode.value}."
         )
     return allowed_origins
 
 
-allowed_origins = resolve_allowed_origins()
+allowed_origins = _parse_allowed_origins(os.getenv("GATEWAY_ALLOWED_ORIGINS", ""))
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=allowed_origins,
     allow_credentials=True,
-    allow_methods=["GET", "POST", "DELETE", "OPTIONS"],
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allow_headers=[
         "Authorization",
         "Content-Type",
-        "X-VAMS-DID",
-        "X-VAMS-Signature",
-        "X-VAMS-Timestamp",
-        "X-VAMS-Content-SHA256",
+        "X-VAMS-Auth-Version",
+        "X-VAMS-Auth-Algorithm",
+        "X-VAMS-Auth-Audience",
+        "X-VAMS-Auth-Signer",
+        "X-VAMS-Auth-Nonce",
+        "X-VAMS-Auth-Issued-At",
+        "X-VAMS-Auth-Expires-At",
+        "X-VAMS-Auth-Signature",
     ],
 )
 
@@ -329,11 +475,12 @@ app.add_middleware(
     limit=limit_val,
     window_sec=window_val
 )
+app.add_middleware(GatewayRouteSecurityMiddleware)
 app.add_middleware(RequestSizeLimitMiddleware, max_bytes=1_048_576)
+app.add_middleware(RuntimeClassificationMiddleware)
 
 # In-memory node registry
 nodes: Dict[str, NodeInfo] = {}
-used_did_signatures: Dict[str, float] = {}
 
 # --- RESOURCE COMPOSER (Phase 3) ---
 try:
@@ -350,6 +497,24 @@ except ImportError:
     composer = None
     print("\u26a0\ufe0f Resource Composer not available — Phase 3 endpoints disabled")
 
+
+def _bind_resource_composer(policy: RuntimePolicy) -> None:
+    global composer, service_client
+    if COMPOSER_AVAILABLE:
+        service_client = ServiceBlockClient(simulation=policy.is_demo, policy=policy)
+        composer = VAMSResourceComposer(
+            service_client=service_client, simulation=policy.is_demo, policy=policy,
+        )
+
+
+def _require_composer_simulation() -> None:
+    if not COMPOSER_AVAILABLE:
+        raise HTTPException(status_code=503, detail="Resource Composer not available")
+    try:
+        composer.assert_simulation_available()
+    except LiveModeSafetyError:
+        raise HTTPException(status_code=503, detail="Authenticated Composer execution unavailable")
+
 # --- ECONOMIC LAYER (Phase 4) ---
 try:
     from neuron.economics.keeper import EconomicsKeeper
@@ -358,7 +523,6 @@ try:
     
     econ_engine = RewardEngine(regional_economics=RegionalEconomics())
     keeper = EconomicsKeeper(reward_engine=econ_engine)
-    keeper.start()
     ECONOMICS_AVAILABLE = True
 except ImportError:
     ECONOMICS_AVAILABLE = False
@@ -370,105 +534,17 @@ except ImportError:
 try:
     from neuron.da.performance_audit import PerformanceAuditLog
     from neuron.da.models import DAProtocol
-    from neuron.runtime_safety import require_not_live_mock
-    mock_mode_flag = os.getenv("VAMS_MOCK_MODE", "true").lower() == "true"
-    require_not_live_mock("Gateway DA audit log", mock_mode_flag)
-    da_audit_log = PerformanceAuditLog(mock_mode=mock_mode_flag)
     DA_AUDIT_AVAILABLE = True
+    da_audit_log = None
 except ImportError:
     DA_AUDIT_AVAILABLE = False
     da_audit_log = None
     print("\u26a0\ufe0f DA Audit Layer not available — Phase 0 endpoints disabled")
 
-security = HTTPBasic(auto_error=False)
-
-def verify_did_signature(did: str, signature_hex: str, timestamp_str: str, method: str, path: str) -> bool:
-    try:
-        ts = float(timestamp_str)
-        now = time.time()
-        if abs(now - ts) > AUTH_REPLAY_WINDOW_SECONDS:
-            return False
-
-        # Store only a digest of the credential tuple; raw signatures remain out of memory logs/state.
-        replay_key = hashlib.sha256(
-            f"{did}:{signature_hex}:{timestamp_str}:{method}:{path}".encode("utf-8")
-        ).hexdigest()
-        expired_keys = [
-            key for key, seen_at in used_did_signatures.items()
-            if now - seen_at > AUTH_REPLAY_WINDOW_SECONDS
-        ]
-        for key in expired_keys:
-            del used_did_signatures[key]
-        if replay_key in used_did_signatures:
-            return False
-
-        pubkey_hex = did
-        if did.startswith("did:key:"):
-            pubkey_hex = did[len("did:key:"):]
-
-        authorized_did = os.getenv("GATEWAY_ADMIN_DID")
-        if not authorized_did:
-            return False
-
-        auth_pubkey = authorized_did[len("did:key:"):] if authorized_did.startswith("did:key:") else authorized_did
-        if pubkey_hex.lower() != auth_pubkey.lower():
-            return False
-
-        message = f"VAMS_ADMIN_AUTH:{method}:{path}:{timestamp_str}"
-        verified = verify_message(
-            bytes.fromhex(pubkey_hex),
-            message.encode(),
-            bytes.fromhex(signature_hex),
-        )
-        if verified:
-            used_did_signatures[replay_key] = now
-        return verified
-    except Exception:
-        return False
-
-from fastapi import Request
-
-def get_current_username(request: Request, credentials: Optional[HTTPBasicCredentials] = Depends(security)):
-    # Check headers for DID Auth first
-    did = request.headers.get("X-VAMS-DID")
-    signature = request.headers.get("X-VAMS-Signature")
-    timestamp = request.headers.get("X-VAMS-Timestamp")
-
-    if did and signature and timestamp:
-        if verify_did_signature(did, signature, timestamp, request.method, request.url.path):
-            return did
-        raise HTTPException(
-            status_code=HTTP_401_UNAUTHORIZED,
-            detail="Invalid DID signature or timestamp expired",
-            headers={"WWW-Authenticate": "Basic"},
-        )
-
-    if is_live_environment():
-        raise HTTPException(
-            status_code=HTTP_401_UNAUTHORIZED,
-            detail="DID authentication is required for live gateway control-plane routes.",
-        )
-
-    # Fallback to Basic Auth
-    if credentials:
-        admin_user = os.getenv("GATEWAY_ADMIN_USER", "admin")
-        admin_password = os.getenv("GATEWAY_ADMIN_PASSWORD")
-        if not admin_password:
-            raise HTTPException(
-                status_code=HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Server configuration error: Admin password not configured"
-            )
-        correct_username = secrets.compare_digest(credentials.username, admin_user)
-        correct_password = secrets.compare_digest(credentials.password, admin_password)
-        if correct_username and correct_password:
-            return credentials.username
-            
-    raise HTTPException(
-        status_code=HTTP_401_UNAUTHORIZED,
-        detail="Not authenticated. Provide DID headers or Basic Auth.",
-        headers={"WWW-Authenticate": "Basic"},
-    )
-
+def _request_runtime_policy(request: Request) -> RuntimePolicy:
+    state = getattr(getattr(request, "app", None), "state", None)
+    policy = getattr(state, "runtime_policy", None)
+    return policy if isinstance(policy, RuntimePolicy) else load_runtime_policy()
 
 def _normalize_cert_fingerprint(value: str) -> str:
     return value.replace(":", "").replace(" ", "").strip().lower()
@@ -485,7 +561,7 @@ def _configured_heartbeat_fingerprints() -> set[str]:
 
 def verify_heartbeat_client_certificate(request: Request) -> Optional[str]:
     """Require proxy-verified mTLS client identity for live heartbeat telemetry."""
-    if not is_live_environment():
+    if not _request_runtime_policy(request).is_live:
         return None
 
     verified = any(
@@ -531,7 +607,7 @@ async def cleanup_offline_nodes():
 # Lifespan handles startup events.
 
 @app.get("/", response_class=HTMLResponse)
-async def dashboard(username: str = Depends(get_current_username)):
+async def dashboard():
     """Simple HTML dashboard showing connected nodes."""
     online_nodes = [n for n in nodes.values() if n.is_online]
     offline_nodes = [n for n in nodes.values() if not n.is_online]
@@ -540,24 +616,24 @@ async def dashboard(username: str = Depends(get_current_username)):
     for node in sorted(online_nodes, key=lambda n: n.last_seen, reverse=True):
         rows += f"""
         <tr>
-            <td><span class="status online">●</span> {node.node_id}</td>
+            <td><span class="status online">●</span> {escape_html(str(node.node_id))}</td>
             <td>{node.last_block:,}</td>
-            <td>{node.network}</td>
+            <td>{escape_html(str(node.network))}</td>
             <td>{node.heartbeat_count}</td>
-            <td>{node.uptime}</td>
-            <td>{node.last_seen_formatted}</td>
+            <td>{escape_html(str(node.uptime))}</td>
+            <td>{escape_html(str(node.last_seen_formatted))}</td>
         </tr>
         """
     
     for node in offline_nodes:
         rows += f"""
         <tr class="offline">
-            <td><span class="status">●</span> {node.node_id}</td>
+            <td><span class="status">●</span> {escape_html(str(node.node_id))}</td>
             <td>{node.last_block:,}</td>
-            <td>{node.network}</td>
+            <td>{escape_html(str(node.network))}</td>
             <td>{node.heartbeat_count}</td>
-            <td>{node.uptime}</td>
-            <td>{node.last_seen_formatted}</td>
+            <td>{escape_html(str(node.uptime))}</td>
+            <td>{escape_html(str(node.last_seen_formatted))}</td>
         </tr>
         """
     
@@ -695,7 +771,9 @@ async def receive_heartbeat(heartbeat: HeartbeatRequest, http_request: Request):
                     detail="First heartbeat must include public_key in payload"
                 )
             
-            if pub_key_hex and not verify_message(
+            if not isinstance(pub_key_hex, str) or not pub_key_hex:
+                raise ValueError("signature verification failed")
+            if not verify_message(
                 bytes.fromhex(pub_key_hex),
                 heartbeat.payload.encode(),
                 bytes.fromhex(heartbeat.signature),
@@ -759,7 +837,7 @@ async def receive_heartbeat(heartbeat: HeartbeatRequest, http_request: Request):
         if not node.public_key and "public_key" in payload:
             node.public_key = payload["public_key"]
         
-        print(f"[{datetime.now().strftime('%H:%M:%S')}] Heartbeat from {node_id}: Block #{block_height}")
+        logger.info("gateway heartbeat accepted")
         
         return {
             "status": "ok",
@@ -771,8 +849,8 @@ async def receive_heartbeat(heartbeat: HeartbeatRequest, http_request: Request):
         raise HTTPException(status_code=400, detail="Invalid payload JSON")
     except HTTPException:
         raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    except Exception:
+        raise HTTPException(status_code=500, detail="Heartbeat processing failed")
 
 
 @app.get("/nodes")
@@ -786,9 +864,14 @@ async def list_nodes():
 
 
 @app.get("/health")
-async def health_check():
+async def health_check(request: Request):
     """Health check endpoint."""
-    return {"status": "healthy", "version": VERSION, "composer_available": COMPOSER_AVAILABLE}
+    return {
+        "status": "healthy",
+        "version": VERSION,
+        "composer_available": COMPOSER_AVAILABLE,
+        "runtime": _request_runtime_policy(request).sanitized_summary(),
+    }
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -816,10 +899,9 @@ class ComposeRequest(BaseModel):
 
 
 @app.post("/compose")
-async def compose_resources(request: ComposeRequest, username: str = Depends(get_current_username)):
-    """Submit a blueprint to provision resources."""
-    if not COMPOSER_AVAILABLE:
-        raise HTTPException(status_code=503, detail="Resource Composer not available")
+async def compose_resources(request: ComposeRequest):
+    """Submit a blueprint for explicit demo simulation; no provider execution."""
+    _require_composer_simulation()
 
     try:
         from neuron.economics.gas_premium import GasAbstractionPremiumCalculator
@@ -840,7 +922,9 @@ async def compose_resources(request: ComposeRequest, username: str = Depends(get
             total_hourly = total_base + total_premium
             
             return {
-                "status": "provisioned",
+                "status": "simulated",
+                "simulation": True,
+                "evidence_classification": "non-authoritative",
                 "instances": [i.to_dict() for i in instances],
                 "base_hourly_cost": round(total_base, 6),
                 "premium_rate_bps": 0,
@@ -864,7 +948,6 @@ async def compose_resources(request: ComposeRequest, username: str = Depends(get
                 max_replicas=request.max_replicas,
                 required_service_blocks=request.required_service_blocks if hasattr(request, 'required_service_blocks') else []
             )
-            # Wait, ComposeRequest might not have required_service_blocks. Let's check ComposeRequest to be safe.
             instance = composer.provision(bp)
         else:
             raise HTTPException(status_code=400, detail="Provide blueprint_name or custom blueprint fields")
@@ -879,7 +962,9 @@ async def compose_resources(request: ComposeRequest, username: str = Depends(get
         total_hourly_cost = calculator.calculate_total_cost(base_hourly_cost, required_blocks)
 
         return {
-            "status": "provisioned",
+            "status": "simulated",
+            "simulation": True,
+            "evidence_classification": "non-authoritative",
             "instance": instance.to_dict(),
             "base_hourly_cost": round(base_hourly_cost, 6),
             "premium_rate_bps": premium_rate_bps,
@@ -887,33 +972,40 @@ async def compose_resources(request: ComposeRequest, username: str = Depends(get
             "total_hourly_cost": round(total_hourly_cost, 6),
         }
 
+    except LiveModeSafetyError:
+        raise HTTPException(status_code=503, detail="Authenticated Composer execution unavailable")
     except (ComposerError, KeyError) as e:
         raise HTTPException(status_code=422, detail=str(e))
 
 
 @app.delete("/compose/{instance_id}")
-async def deprovision_resources(instance_id: str, username: str = Depends(get_current_username)):
-    """Deprovision an active composed instance."""
+async def deprovision_resources(instance_id: str):
+    """Remove a local simulation only; no provider release or settlement."""
     if not COMPOSER_AVAILABLE:
         raise HTTPException(status_code=503, detail="Resource Composer not available")
 
-    success = composer.deprovision(instance_id)
+    try:
+        success = composer.deprovision(instance_id)
+    except LiveModeSafetyError:
+        raise HTTPException(status_code=503, detail="Authenticated provider deprovisioning unavailable")
     if not success:
         raise HTTPException(status_code=404, detail=f"Instance {instance_id} not found")
-    return {"status": "deprovisioned", "instance_id": instance_id}
+    return {"status": "simulation_removed", "instance_id": instance_id,
+            "simulation": True, "evidence_classification": "non-authoritative"}
 
 
 @app.get("/compose/instances")
-async def list_composed_instances(username: str = Depends(get_current_username)):
-    """List all active composed instances."""
+async def list_composed_instances():
+    """Inspect local records, including simulations after runtime drift."""
     if not COMPOSER_AVAILABLE:
         raise HTTPException(status_code=503, detail="Resource Composer not available")
 
-    instances = composer.list_active_instances()
+    instances = composer.list_instances()
     return {
         "total": len(instances),
         "instances": [i.to_dict() for i in instances],
         "stats": composer.get_stats(),
+        "evidence_classification": "non-authoritative",
     }
 
 
@@ -923,23 +1015,24 @@ async def list_available_blueprints():
     if not COMPOSER_AVAILABLE:
         raise HTTPException(status_code=503, detail="Resource Composer not available")
 
-    return {"blueprints": list_blueprints()}
+    return {"blueprints": list_blueprints(), "catalogue_kind": "static-planning-templates",
+            "registry_verified": False, "evidence_classification": "non-authoritative"}
 
 
 @app.get("/services/blocks")
 async def list_service_blocks(category: Optional[str] = None):
-    """List available service blocks from the registry."""
-    if not COMPOSER_AVAILABLE:
-        raise HTTPException(status_code=503, detail="Resource Composer not available")
-    return {"blocks": service_client.list_blocks(category=category)}
+    """List explicit demo declarations; no authenticated registry read."""
+    _require_composer_simulation()
+    return {"blocks": service_client.list_blocks(category=category), "simulation": True,
+            "registry_verified": False, "evidence_classification": "non-authoritative"}
 
 
 @app.get("/services/macros")
 async def list_macro_blocks():
     """List pre-defined macro composite blocks."""
-    if not COMPOSER_AVAILABLE:
-        raise HTTPException(status_code=503, detail="Resource Composer not available")
-    return {"macros": list_macros()}
+    _require_composer_simulation()
+    return {"macros": service_client.list_macros(), "simulation": True,
+            "registry_verified": False, "evidence_classification": "non-authoritative"}
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -1003,25 +1096,27 @@ async def estimate_apr(
 # ============================================================
 
 @app.get("/da/status")
-async def da_status():
+async def da_status(request: Request):
     """Get live connectivity status for all DA layer adapters."""
-    if not DA_AUDIT_AVAILABLE:
+    if not DA_AUDIT_AVAILABLE or da_audit_log is None:
         raise HTTPException(status_code=503, detail="DA Audit Layer not available")
     
     status = await da_audit_log.get_adapter_status()
     return {
         "version": VERSION,
         "da_layer": "Phase 0 Foundation",
+        "runtime": _request_runtime_policy(request).sanitized_summary(),
         "adapters": status,
     }
 
 @app.get("/da/anchors")
 async def da_anchors(
+    request: Request,
     protocol: Optional[str] = None,
-    limit: int = 50,
+    limit: int = Query(default=50, ge=1),
 ):
     """Query anchored performance audit records."""
-    if not DA_AUDIT_AVAILABLE:
+    if not DA_AUDIT_AVAILABLE or da_audit_log is None:
         raise HTTPException(status_code=503, detail="DA Audit Layer not available")
     
     history = da_audit_log.get_audit_history(limit=limit)
@@ -1033,19 +1128,23 @@ async def da_anchors(
     return {
         "total": len(history),
         "protocol_filter": protocol,
+        "runtime": _request_runtime_policy(request).sanitized_summary(),
         "anchors": history,
     }
 
 
 def main():
     """Run the gateway server."""
-    bind_host = LIVE_BIND_HOST if is_live_environment() else LOCAL_BIND_HOST
+    policy = load_runtime_policy()
+    bind_host = LIVE_BIND_HOST if policy.is_live else LOCAL_BIND_HOST
     print()
     print("⚡ VAMS Gateway Server")
     print(f"   Version: {VERSION}")
     print(f"   Dashboard: http://localhost:8000")
     print(f"   API Docs: http://localhost:8000/docs")
     print(f"   Bind Host: {bind_host}")
+    print(f"   Runtime: {policy.mode.value} ({policy.runtime_classification})")
+    print(f"   Evidence: {policy.evidence_classification}")
     print()
 
     uvicorn.run(app, host=bind_host, port=8000)

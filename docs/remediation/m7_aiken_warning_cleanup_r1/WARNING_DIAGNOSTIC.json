@@ -1,0 +1,49 @@
+{
+  "schema": "m7-aiken-warning-pty-diagnostic-v1",
+  "command": [
+    "aiken",
+    "check",
+    "--deny",
+    "--seed",
+    "20260711",
+    "--max-success",
+    "250"
+  ],
+  "tool": {
+    "path": "/home/GodOfAgents/vams-evidence/toolchains/aiken-1.1.21/unpacked/aiken-x86_64-unknown-linux-musl/aiken",
+    "version": "v1.1.21+42babe5",
+    "sha256": "07f3f927f1a8c71fc61273fdff850d9b98edb28dde207c8a32585991f2c88e79"
+  },
+  "isolation": "Canonical Cardano tree read-only; fresh tmpfs project copy; network namespace disabled; no tools or dependencies fetched by this runner.",
+  "source": {
+    "file_count_before": 21,
+    "sha256_before": "437ac6eef5acb1807d8f6a68b47fdff2e9b3fbe7ed7ca3e39715a767edf59f86",
+    "file_count_after": 21,
+    "sha256_after": "437ac6eef5acb1807d8f6a68b47fdff2e9b3fbe7ed7ca3e39715a767edf59f86",
+    "unchanged": true
+  },
+  "exit_code": 0,
+  "summary": {
+    "checks": 1865,
+    "errors": 0,
+    "warnings": 0
+  },
+  "warning_line_count": 1,
+  "warning_lines": [
+    "Summary 1865 checks, 0 errors, 0 warnings"
+  ],
+  "warning_context": [
+    "",
+    "",
+    "      Summary 1865 checks, 0 errors, 0 warnings"
+  ],
+  "diagnostic_lines": [
+    "Summary 1865 checks, 0 errors, 0 warnings"
+  ],
+  "capture_note": null,
+  "raw_output_sha256": "8d01ac12606a3477f206762590704a82fad2650f6f31d12de3015a6f2c46eb6d",
+  "raw_output_retained": false,
+  "sanitized_transcript": "WARNING_DIAGNOSTIC.txt",
+  "sanitized_transcript_sha256": "8064a42ee1e6e1f23098e7f9efbbe72b519c59a2a9975588d3d697de6edf82d2",
+  "sanitized_transcript_retained": true
+}

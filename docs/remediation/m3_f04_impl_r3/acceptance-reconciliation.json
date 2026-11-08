@@ -1,0 +1,11 @@
+{
+  "status": "PARTIAL",
+  "versioned_interface": "implemented",
+  "identity_policy_binding": "static guards implemented; compiled execution pending",
+  "authority_exactness": "static guards implemented; compiled execution pending",
+  "value_topology": "static guards implemented; compiled execution pending",
+  "did_canonicalization": "implemented and covered by Aiken check",
+  "public_handler_rows": {"executed": 0, "pending": 49},
+  "compiled_mutations": "pending",
+  "f04_local_acceptance": "REVALIDATED_OPEN"
+}

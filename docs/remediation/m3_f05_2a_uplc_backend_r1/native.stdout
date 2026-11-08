@@ -1,0 +1,49 @@
+{
+  "seed": 3196714929,
+  "summary": {
+    "total": 2,
+    "passed": 2,
+    "failed": 0,
+    "kind": {
+      "unit": 2,
+      "property": 0
+    }
+  },
+  "modules": [
+    {
+      "name": "f05_authority_policy.test",
+      "summary": {
+        "total": 2,
+        "passed": 2,
+        "failed": 0,
+        "kind": {
+          "unit": 2,
+          "property": 0
+        }
+      },
+      "tests": [
+        {
+          "title": "public_applied_policy_fixture_accepts",
+          "status": "pass",
+          "on_failure": "fail_immediately",
+          "execution_units": {
+            "mem": 482609,
+            "cpu": 448498419
+          }
+        },
+        {
+          "title": "public_seed_missing_regression_rejects",
+          "status": "pass",
+          "on_failure": "succeed_eventually",
+          "execution_units": {
+            "mem": 127481,
+            "cpu": 34998198
+          },
+          "traces": [
+            "the validator crashed / exited prematurely"
+          ]
+        }
+      ]
+    }
+  ]
+}

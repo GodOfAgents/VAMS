@@ -1,0 +1,25 @@
+{
+  "evidence_id": "m7_inv10_proof_payload_separation_r1",
+  "evidence_class": "synthetic_structural_local_test",
+  "gate": "INV-10",
+  "command": "bwrap --unshare-net --ro-bind / / --tmpfs /tmp --dev-bind /dev /dev --proc /proc --chdir /home/GodOfAgents/code/VAMS-testnet /usr/bin/env -i HOME=/tmp TMPDIR=/tmp VAMS_ENV=test PATH=/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin:/usr/bin:/bin LANG=C.UTF-8 LC_ALL=C.UTF-8 TZ=UTC PYTHONDONTWRITEBYTECODE=1 PYTHONNOUSERSITE=1 /home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python -B -m pytest -q --tb=short -p no:cacheprovider neuron/tests/test_m1_2c_payment_bridge_recovery_runtime.py::test_bridge_proof_and_payload_hash_remain_separate_values",
+  "exit_code": 0,
+  "stdout": ".                                                                        [100%]\n1 passed in 2.09s",
+  "toolchain": {
+    "python": "3.12.14",
+    "pytest": "9.1.1"
+  },
+  "source_snapshot_sha256": {
+    "neuron/bridge_executor.py": "d5d6c8d7a6c18aa694b10e1714a690642f42f7815a6bf83437e34efe4b4ae0fb",
+    "neuron/tests/test_m1_2c_payment_bridge_recovery_runtime.py": "4a519dee8b8522670ea9a23a441ab5e8edf412c514b133f4947be2fface68494"
+  },
+  "review": {
+    "pre_run_independent_source_review": "PASS",
+    "post_run_independent_result_review": "Consistency review PASS; the reviewer could not freshly re-read canonical files in its host."
+  },
+  "limitations": [
+    "Structural separation only; no cryptographic proof validation.",
+    "No ledger, Pre-Prod, live-network, or deployment evidence.",
+    "No source or test changes."
+  ]
+}

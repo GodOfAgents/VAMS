@@ -1,0 +1,72 @@
+{
+  "schema_version": "vams-m1-runtime-containment-run-v1",
+  "date": "2026-10-03",
+  "status": "current_source_run_independent_review_pending",
+  "repository": {
+    "head": "829ab544571f12efe50ecb5740f129c8acb3e16f",
+    "branch": "testnet/remediation-20260907"
+  },
+  "toolchain": {
+    "python": "Python 3.12.14",
+    "pytest": "pytest 9.1.1",
+    "network": "bwrap --unshare-net",
+    "checkout_mount": "read-only"
+  },
+  "command": [
+    "bwrap",
+    "--unshare-net",
+    "--ro-bind",
+    "/",
+    "/",
+    "--tmpfs",
+    "/tmp",
+    "--dev-bind",
+    "/dev",
+    "/dev",
+    "--proc",
+    "/proc",
+    "--setenv",
+    "PYTHONDONTWRITEBYTECODE",
+    "1",
+    "--chdir",
+    "/home/GodOfAgents/code/VAMS-testnet",
+    "/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python",
+    "-B",
+    "-m",
+    "pytest",
+    "-q",
+    "--tb=short",
+    "-p",
+    "no:cacheprovider",
+    "--import-mode=importlib",
+    "scripts/security/test_runtime_mode_preflight.py",
+    "neuron/tests/test_runtime_mode_contract.py",
+    "neuron/tests/test_m1_2a_identity_tee_runtime.py",
+    "neuron/tests/test_m1_2b_da_trails_runtime.py",
+    "neuron/tests/test_m1_2c_payment_bridge_recovery_runtime.py",
+    "neuron/tests/test_m1_3_entrypoint_containment.py"
+  ],
+  "source_test_sha256": {
+    "neuron/runtime_safety.py": "b39c48ec63f20c34573e11e0a515ef622e3340f76964e1688c2dfa23b29d0079",
+    "scripts/security/runtime_mode_preflight.py": "49c78cfc8c640fa8ca1f018f276985643d4176ca9ea9b24a567c83bd5053d879",
+    "scripts/security/test_runtime_mode_preflight.py": "63228a688f640cc971511d9acbe8277dd7cede8d84bdfc1cf307895a70d3be50",
+    "neuron/tests/test_runtime_mode_contract.py": "429f940124a5264d9fbe8cd44677e585cf08907c4541bb2db2d142eafe165fe1",
+    "neuron/tests/test_m1_2a_identity_tee_runtime.py": "c66d7d84e2774e235b39f75cc2f12fee5f63af66f0c8b172442654047b6dbe8f",
+    "neuron/tests/test_m1_2b_da_trails_runtime.py": "05a68b9229252568c4250d34bd96961f7083f25fe2cdeedb62223e54e94649fc",
+    "neuron/tests/test_m1_2c_payment_bridge_recovery_runtime.py": "4a519dee8b8522670ea9a23a441ab5e8edf412c514b133f4947be2fface68494",
+    "neuron/tests/test_m1_3_entrypoint_containment.py": "2ff062bdd395f30a08980351aecc56a6d19a1e78ff2cc03b3cf8b4b2a3b2d931"
+  },
+  "result": {
+    "exit_code": 0,
+    "passed": 362,
+    "failed": 0,
+    "elapsed": "4.01s",
+    "stdout_sha256": "d44f1818fe7f371c551495beb184bccef76ce38241789327a111b3f170b6bcce",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "scope": {
+    "covers": "runtime-mode parsing/preflight, aggregate registered mock flags, identity/TEE, DA/Trails, payment/bridge-recovery, and selected entrypoint containment regressions in the six listed files",
+    "does_not_establish": "all mock provider paths, live external integrations, ledger behavior, testnet readiness, or security/dependency scan completion"
+  },
+  "changes_by_run": []
+}

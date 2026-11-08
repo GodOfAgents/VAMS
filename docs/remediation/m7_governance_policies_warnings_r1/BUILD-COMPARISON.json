@@ -1,0 +1,72 @@
+{
+  "schema": "m7-governance-policies-warning-build-comparison-v1",
+  "tool": "aiken v1.1.21+42babe5",
+  "aiken_sha256": "07f3f927f1a8c71fc61273fdff850d9b98edb28dde207c8a32585991f2c88e79",
+  "network": "disabled with bubblewrap --unshare-net",
+  "baseline_source_sha256": "60e53d156574b3fb3ac8d9f7f71533d55412fbfb717199c84521f2c8a92e6f44",
+  "candidate_source_sha256": "da0df0fc78e55182dea92921970bb8f127e71b83eaf171b1e18a8a5022bbf73c",
+  "runs": {
+    "baseline": {
+      "plutus_sha256": "c4230410d0caac45f2c71d36e45a539c78087697128ce1533306d17e96a48008",
+      "compiled_codes_sha256": {
+        "agent_nft.agent_nft.mint": "f706581ca7b5c2807bed395c6088d230fd0fc1e7e3a03709f18b5264dc67908c",
+        "agent_nft.agent_nft.else": "f706581ca7b5c2807bed395c6088d230fd0fc1e7e3a03709f18b5264dc67908c",
+        "agent_registry.agent_registry.mint": "c5d4ab792f530756283a8ffde9d389f6ff7ed2e87a82112d56480fe0127b4a8f",
+        "agent_registry.agent_registry.spend": "c5d4ab792f530756283a8ffde9d389f6ff7ed2e87a82112d56480fe0127b4a8f",
+        "agent_registry.agent_registry.else": "c5d4ab792f530756283a8ffde9d389f6ff7ed2e87a82112d56480fe0127b4a8f",
+        "f05_authority_policy.f05_authority_policy.mint": "79fa7f79202336db7effb9743a65b9d8d7c012d59842b4143e0b21772c1b876e",
+        "f05_authority_policy.f05_authority_policy.else": "79fa7f79202336db7effb9743a65b9d8d7c012d59842b4143e0b21772c1b876e",
+        "f05_authority_state.f05_authority_state.spend": "10406445a9c22ce762602e46d9a1d97207dea421c120bbe781d8fd40f6988de7",
+        "f05_authority_state.f05_authority_state.else": "10406445a9c22ce762602e46d9a1d97207dea421c120bbe781d8fd40f6988de7",
+        "governance_policies.authority_policy.mint": "ca6e57bc34571514e55b5393e3248c31d0753751818b244592be9f4f648762ae",
+        "governance_policies.authority_policy.else": "ca6e57bc34571514e55b5393e3248c31d0753751818b244592be9f4f648762ae",
+        "governance_policies.intent_policy.mint": "03dc37b2465d47afecff2f288693760c38386dd3795542ae86d1943054f0b457",
+        "governance_policies.intent_policy.else": "03dc37b2465d47afecff2f288693760c38386dd3795542ae86d1943054f0b457",
+        "governance_policies.proposal_policy.mint": "2d8fd96b0066b54fcb25c4afed1cc20856b3c6d205f5e115f14d0886ae085a22",
+        "governance_policies.proposal_policy.else": "2d8fd96b0066b54fcb25c4afed1cc20856b3c6d205f5e115f14d0886ae085a22",
+        "governance_policies.receipt_policy.mint": "e63ebc389dcc34969d58d3e4f070caeb7f3d6624fd78e52e4a292e3b97af9008",
+        "governance_policies.receipt_policy.else": "e63ebc389dcc34969d58d3e4f070caeb7f3d6624fd78e52e4a292e3b97af9008",
+        "governor.authority_validator.spend": "736156859ea6c4491a9ccb4641c8d41be3e5e94a06fb54326283e8f879fa93e3",
+        "governor.authority_validator.else": "736156859ea6c4491a9ccb4641c8d41be3e5e94a06fb54326283e8f879fa93e3",
+        "governor.governor_validator.spend": "19c66458d3fd1f389688fb572c0a580e13c7fb4047d693d2c67ccb887a57a224",
+        "governor.governor_validator.else": "19c66458d3fd1f389688fb572c0a580e13c7fb4047d693d2c67ccb887a57a224",
+        "insurance_fund.insurance_fund.mint": "4bdefcf0731c54e39b1cf97d29c06d465cd7e503a6f524f4d486dcd5309f0e38",
+        "insurance_fund.insurance_fund.spend": "4bdefcf0731c54e39b1cf97d29c06d465cd7e503a6f524f4d486dcd5309f0e38",
+        "insurance_fund.insurance_fund.else": "4bdefcf0731c54e39b1cf97d29c06d465cd7e503a6f524f4d486dcd5309f0e38",
+        "timelock.timelock_validator.spend": "f4c00027e1c8f461b9e34d378090a665647ddbe637031f9f811bec8429428553",
+        "timelock.timelock_validator.else": "f4c00027e1c8f461b9e34d378090a665647ddbe637031f9f811bec8429428553"
+      }
+    },
+    "candidate": {
+      "plutus_sha256": "c4230410d0caac45f2c71d36e45a539c78087697128ce1533306d17e96a48008",
+      "compiled_codes_sha256": {
+        "agent_nft.agent_nft.mint": "f706581ca7b5c2807bed395c6088d230fd0fc1e7e3a03709f18b5264dc67908c",
+        "agent_nft.agent_nft.else": "f706581ca7b5c2807bed395c6088d230fd0fc1e7e3a03709f18b5264dc67908c",
+        "agent_registry.agent_registry.mint": "c5d4ab792f530756283a8ffde9d389f6ff7ed2e87a82112d56480fe0127b4a8f",
+        "agent_registry.agent_registry.spend": "c5d4ab792f530756283a8ffde9d389f6ff7ed2e87a82112d56480fe0127b4a8f",
+        "agent_registry.agent_registry.else": "c5d4ab792f530756283a8ffde9d389f6ff7ed2e87a82112d56480fe0127b4a8f",
+        "f05_authority_policy.f05_authority_policy.mint": "79fa7f79202336db7effb9743a65b9d8d7c012d59842b4143e0b21772c1b876e",
+        "f05_authority_policy.f05_authority_policy.else": "79fa7f79202336db7effb9743a65b9d8d7c012d59842b4143e0b21772c1b876e",
+        "f05_authority_state.f05_authority_state.spend": "10406445a9c22ce762602e46d9a1d97207dea421c120bbe781d8fd40f6988de7",
+        "f05_authority_state.f05_authority_state.else": "10406445a9c22ce762602e46d9a1d97207dea421c120bbe781d8fd40f6988de7",
+        "governance_policies.authority_policy.mint": "ca6e57bc34571514e55b5393e3248c31d0753751818b244592be9f4f648762ae",
+        "governance_policies.authority_policy.else": "ca6e57bc34571514e55b5393e3248c31d0753751818b244592be9f4f648762ae",
+        "governance_policies.intent_policy.mint": "03dc37b2465d47afecff2f288693760c38386dd3795542ae86d1943054f0b457",
+        "governance_policies.intent_policy.else": "03dc37b2465d47afecff2f288693760c38386dd3795542ae86d1943054f0b457",
+        "governance_policies.proposal_policy.mint": "2d8fd96b0066b54fcb25c4afed1cc20856b3c6d205f5e115f14d0886ae085a22",
+        "governance_policies.proposal_policy.else": "2d8fd96b0066b54fcb25c4afed1cc20856b3c6d205f5e115f14d0886ae085a22",
+        "governance_policies.receipt_policy.mint": "e63ebc389dcc34969d58d3e4f070caeb7f3d6624fd78e52e4a292e3b97af9008",
+        "governance_policies.receipt_policy.else": "e63ebc389dcc34969d58d3e4f070caeb7f3d6624fd78e52e4a292e3b97af9008",
+        "governor.authority_validator.spend": "736156859ea6c4491a9ccb4641c8d41be3e5e94a06fb54326283e8f879fa93e3",
+        "governor.authority_validator.else": "736156859ea6c4491a9ccb4641c8d41be3e5e94a06fb54326283e8f879fa93e3",
+        "governor.governor_validator.spend": "19c66458d3fd1f389688fb572c0a580e13c7fb4047d693d2c67ccb887a57a224",
+        "governor.governor_validator.else": "19c66458d3fd1f389688fb572c0a580e13c7fb4047d693d2c67ccb887a57a224",
+        "insurance_fund.insurance_fund.mint": "4bdefcf0731c54e39b1cf97d29c06d465cd7e503a6f524f4d486dcd5309f0e38",
+        "insurance_fund.insurance_fund.spend": "4bdefcf0731c54e39b1cf97d29c06d465cd7e503a6f524f4d486dcd5309f0e38",
+        "insurance_fund.insurance_fund.else": "4bdefcf0731c54e39b1cf97d29c06d465cd7e503a6f524f4d486dcd5309f0e38",
+        "timelock.timelock_validator.spend": "f4c00027e1c8f461b9e34d378090a665647ddbe637031f9f811bec8429428553",
+        "timelock.timelock_validator.else": "f4c00027e1c8f461b9e34d378090a665647ddbe637031f9f811bec8429428553"
+      }
+    }
+  }
+}

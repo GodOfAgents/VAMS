@@ -1,0 +1,47 @@
+{
+  "checkout": {
+    "branch": "testnet/remediation-20260907",
+    "dirty_tree": true,
+    "head": "829ab544571f12efe50ecb5740f129c8acb3e16f"
+  },
+  "date": "2026-10-03",
+  "independent_review": {
+    "caveats": [
+      "scanner checks literal snippets in a fixed path map; it does not execute guards, analyze control flow, enumerate unlisted sinks, or test environment combinations",
+      "scanner source is modified in the working tree; result applies to current hash, not committed HEAD"
+    ],
+    "outcome": "PASS_FOR_STRUCTURAL_EVIDENCE_ONLY",
+    "reproduced": "exit 0; exact output reproduced under pinned Python 3.12.14, no network, read-only checkout",
+    "reviewer": "separate read-only reviewer"
+  },
+  "scanner": {
+    "path": "scripts/security/mock_mode_promotion_scan.py",
+    "sha256": "e83134853144995110597b0fcc74b9cc5a3596d52e7fc777fa3161c7a2c88168",
+    "was_preexisting_dirty_work": true
+  },
+  "schema": "m7-mock-mode-promotion-record-v1",
+  "scope": {
+    "behavioral_containment": false,
+    "deployment_readiness": false,
+    "evidence_class": "current-working-tree structural scan only",
+    "ledger_evidence": false,
+    "live_network_evidence": false
+  },
+  "status": "PASS",
+  "toolchain": {
+    "python": "3.12.14"
+  },
+  "verification": {
+    "exit_code": 0,
+    "inner_argv": [
+      "/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python",
+      "-B",
+      "scripts/security/mock_mode_promotion_scan.py"
+    ],
+    "outer": "bwrap --unshare-net --ro-bind / / --tmpfs /tmp --dev-bind /dev /dev --proc /proc --bind docs/remediation/m7_mock_mode_promotion_current_r1 docs/remediation/m7_mock_mode_promotion_current_r1 --chdir /home/GodOfAgents/code/VAMS-testnet --clearenv --setenv PATH /home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin:/usr/bin:/bin --setenv PYTHONDONTWRITEBYTECODE 1 /home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python -B docs/remediation/m7_mock_mode_promotion_current_r1/run_verification.py",
+    "source_inventory_unchanged": true,
+    "source_paths_checked": 35,
+    "stderr": "",
+    "stdout": "Mock-mode promotion scan passed.\n"
+  }
+}

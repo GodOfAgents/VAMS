@@ -1,0 +1,241 @@
+{
+  "classification": "pending independent review and classification overlay",
+  "credit": {
+    "cardano_pre_prod": false,
+    "deployment_readiness": false,
+    "ledger_admission": false,
+    "live_network": false,
+    "mutation_suite": true,
+    "negative_case": false,
+    "original_policy": false
+  },
+  "decision": "R4.1 applied-parameter C",
+  "entrypoint": "f05_authority_policy.f05_authority_policy.mint / Mint[0]",
+  "evidence_scope": "synthetic alternate-applied-policy transaction-simulator mutation capture only",
+  "fixture_family": "docs/remediation/m3_f05_2a_applied_parameter_family_r5_20261005/applied_keys_duplicate",
+  "fixture_registry_unchanged": true,
+  "mutation": "remove_key_uniqueness_order_guard",
+  "mutation_suite": true,
+  "paired_negative_id": "applied_keys_duplicate",
+  "runs": [
+    {
+      "command": [
+        "/home/GodOfAgents/vams-evidence/toolchains/python/bin/python3.12",
+        "/home/GodOfAgents/code/VAMS-testnet/scripts/remediation/f05_2a_tx_sim_runner_r3.py",
+        "--aiken",
+        "/home/GodOfAgents/vams-evidence/toolchains/aiken-1.1.21/aiken",
+        "--tx",
+        "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m3_f05_2a_applied_parameter_family_r5_20261005/applied_keys_duplicate/positive-control.tx.cbor",
+        "--raw-inputs",
+        "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m3_f05_2a_applied_parameter_family_r5_20261005/applied_keys_duplicate/positive-control.raw_inputs.cbor",
+        "--raw-outputs",
+        "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m3_f05_2a_applied_parameter_family_r5_20261005/applied_keys_duplicate/positive-control.raw_outputs.cbor",
+        "--policy-id",
+        "d0aaa03aebd9d5b9ae49f6de7e71387ac095353f52c936858c010113"
+      ],
+      "label": "positive_control",
+      "manifest_validation": {
+        "ada_conservation": true,
+        "body_hash": "db47ad4abc319f12901adcad6ca31336d5fdef24042b7d71c042b46633ab4421",
+        "funding_signatures": 2,
+        "mint0_redeemer": {
+          "cbor_sha256": "c1fce44293cc5508d81c9ee9ee20318cd5c5aca4c99a7ba3b1282fd106c194ee",
+          "constructor_tag": 121,
+          "proof_count": 5,
+          "proof_signatures_hex": [
+            "26821a1e9195fecacc6565e462f60f98715cd55a3cf08d582ce9b50aaef6b5d98125d3ff7ed559f09c2f8e3d69bda5c1a277a8c55a35c01da2ac678d7b63ae0b",
+            "d8d7a7b89f3673363d02137c38bef6cd433997849f7efb2e6bff2f880b7b842b56ee64bc9e051dfae371ffec7b175b0039ec68e755ab8f96edfe6a3639e71c08",
+            "16c14c902991c9c0e60aa6021b00d702c6a4ac7d2d88a24fd16a2ce725b766aacd49642ba93931d81c7319d09b5491b6bcf83c1c10ba2ede79bee816ac1d4805",
+            "1a129eaae77be6ec45a06a096ff4fd34c00c69ba6dd2b89c5e7dece21b235a5a1844f75c8f8765d824fde6cff6ea5e347b7227c83919fc3154129560a850c704",
+            "3f2ae9044181f693027fe340113a68c25986c0066d894d2ad7ef4e0d4961dd69f14562c5d390dc29ee4eb6a7761557b769305c5886834474435f18a649eb0e0f"
+          ]
+        },
+        "native_asset_conservation": true,
+        "private_keys_persisted": false,
+        "valid_body_bound_ephemeral_signatures": true
+      },
+      "result": {
+        "cleanup": {
+          "child_reaped": true,
+          "process_group_empty": true,
+          "snapshot_descriptors_closed": true,
+          "status": "clean"
+        },
+        "schema_version": "f05-2a-tx-sim-run-result-r3",
+        "simulator_child_exit": 0,
+        "simulator_result": {
+          "stage": "script_accepted",
+          "target_script_invoked": true
+        },
+        "submitted_sha256": {
+          "raw_inputs": "4b20e2b2cf4bd58b1f6e385c90ffd098d583df69d95fbc7b1fcc2591da72b9fe",
+          "raw_outputs": "96dedee44615469a5d89d6a210d96fdb67c63d5b806080cd5cd814ac2ed04347",
+          "transaction": "aa933eaee5ac96e1f5ad472abc13989bfd35db75d365f28d9956a2eb7b0c58ba"
+        },
+        "submitted_size_bytes": {
+          "raw_inputs": 73,
+          "raw_outputs": 79,
+          "transaction": 5104
+        },
+        "target_mint_binding": {
+          "compiled_script_hash": "d0aaa03aebd9d5b9ae49f6de7e71387ac095353f52c936858c010113",
+          "expected_policy_id": "d0aaa03aebd9d5b9ae49f6de7e71387ac095353f52c936858c010113",
+          "policy_ids": [
+            "d0aaa03aebd9d5b9ae49f6de7e71387ac095353f52c936858c010113"
+          ]
+        },
+        "wrapper_exit_code": 0
+      },
+      "runner_exit": 0
+    },
+    {
+      "command": [
+        "/home/GodOfAgents/vams-evidence/toolchains/python/bin/python3.12",
+        "/home/GodOfAgents/code/VAMS-testnet/scripts/remediation/f05_2a_tx_sim_runner_r3.py",
+        "--aiken",
+        "/home/GodOfAgents/vams-evidence/toolchains/aiken-1.1.21/aiken",
+        "--tx",
+        "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m3_f05_2a_applied_parameter_family_r5_20261005/applied_keys_duplicate/negative.tx.cbor",
+        "--raw-inputs",
+        "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m3_f05_2a_applied_parameter_family_r5_20261005/applied_keys_duplicate/negative.raw_inputs.cbor",
+        "--raw-outputs",
+        "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m3_f05_2a_applied_parameter_family_r5_20261005/applied_keys_duplicate/negative.raw_outputs.cbor",
+        "--policy-id",
+        "d1f886d981117ada5f4e92370e1921c1c3616ce37b558b3fc42b65b9"
+      ],
+      "label": "original_negative",
+      "manifest_validation": {
+        "ada_conservation": true,
+        "body_hash": "340ac34ad37339aad17403751435950d85de0ea020d598bec76dfc2592ebaecb",
+        "funding_signatures": 2,
+        "mint0_redeemer": {
+          "cbor_sha256": "2e91b8d2e297fd4779bda1160bcc3dc1c8dc15a979e5f1b9b418a78bcbf6c4d0",
+          "constructor_tag": 121,
+          "proof_count": 5,
+          "proof_signatures_hex": [
+            "0ca5595d1aa1bb50398c6d18f0d3ccdb51175a6540497b558c9817c4a9cecc8d9c9d1014b05e2b2f52258819cea788552041e1df79add371a12f462177d40000",
+            "0ca5595d1aa1bb50398c6d18f0d3ccdb51175a6540497b558c9817c4a9cecc8d9c9d1014b05e2b2f52258819cea788552041e1df79add371a12f462177d40000",
+            "dd62fe06c71448ab8c9eaa3746d279be07057b3125d54da5e8e74b4caf4501bd56b89456209a19db2161855525135a1d483165ef01ff43005158208a3abe460d",
+            "d56a3974830830bdf40211819857bfc01844be6175e2be80e1dfb485dc9f3d6abca59e702562cab490643142f86dc55d390ac84d51cff3a68c875f5d5b0b6a0b",
+            "2e009c675f3d562f6960a49bf0e5f5add7be33e7d4696c6b6f993e7561c4690e339173fd4887a826e9bce690be686cd63f55ffb68daef5ccadb43040e8adac0f"
+          ]
+        },
+        "native_asset_conservation": true,
+        "private_keys_persisted": false,
+        "valid_body_bound_ephemeral_signatures": true
+      },
+      "result": {
+        "cleanup": {
+          "child_reaped": true,
+          "process_group_empty": true,
+          "snapshot_descriptors_closed": true,
+          "status": "clean"
+        },
+        "schema_version": "f05-2a-tx-sim-run-result-r3",
+        "simulator_child_exit": 1,
+        "simulator_result": {
+          "stage": "compiled_evaluation",
+          "target_script_invoked": true
+        },
+        "submitted_sha256": {
+          "raw_inputs": "4b20e2b2cf4bd58b1f6e385c90ffd098d583df69d95fbc7b1fcc2591da72b9fe",
+          "raw_outputs": "b46446ed205485e9831b6cf6111350620368f5e8dd3b1b6d03cec2ae02fbd0e4",
+          "transaction": "4e538bf83ddef70b48c7d3536a8f3ea1daac7151f2f8534667ff541c9f8a52ac"
+        },
+        "submitted_size_bytes": {
+          "raw_inputs": 73,
+          "raw_outputs": 79,
+          "transaction": 5104
+        },
+        "target_mint_binding": {
+          "compiled_script_hash": "d1f886d981117ada5f4e92370e1921c1c3616ce37b558b3fc42b65b9",
+          "expected_policy_id": "d1f886d981117ada5f4e92370e1921c1c3616ce37b558b3fc42b65b9",
+          "policy_ids": [
+            "d1f886d981117ada5f4e92370e1921c1c3616ce37b558b3fc42b65b9"
+          ]
+        },
+        "wrapper_exit_code": 0
+      },
+      "runner_exit": 0
+    },
+    {
+      "command": [
+        "/home/GodOfAgents/vams-evidence/toolchains/python/bin/python3.12",
+        "/home/GodOfAgents/code/VAMS-testnet/scripts/remediation/f05_2a_tx_sim_runner_r3.py",
+        "--aiken",
+        "/home/GodOfAgents/vams-evidence/toolchains/aiken-1.1.21/aiken",
+        "--tx",
+        "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m3_f05_2a_applied_parameter_family_r5_20261005/applied_keys_duplicate/one-guard-mutant-control.tx.cbor",
+        "--raw-inputs",
+        "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m3_f05_2a_applied_parameter_family_r5_20261005/applied_keys_duplicate/one-guard-mutant-control.raw_inputs.cbor",
+        "--raw-outputs",
+        "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m3_f05_2a_applied_parameter_family_r5_20261005/applied_keys_duplicate/one-guard-mutant-control.raw_outputs.cbor",
+        "--policy-id",
+        "1b8e1c1bbc466063dc2602bf2696ec4a4e6cd2f2e6048c2376e5afd5"
+      ],
+      "label": "matching_mutant",
+      "manifest_validation": {
+        "ada_conservation": true,
+        "body_hash": "a57d36d7a58eb29270926bedfff6396a33aeca4896ec6fa796083c53cc27918c",
+        "funding_signatures": 2,
+        "mint0_redeemer": {
+          "cbor_sha256": "2e91b8d2e297fd4779bda1160bcc3dc1c8dc15a979e5f1b9b418a78bcbf6c4d0",
+          "constructor_tag": 121,
+          "proof_count": 5,
+          "proof_signatures_hex": [
+            "0ca5595d1aa1bb50398c6d18f0d3ccdb51175a6540497b558c9817c4a9cecc8d9c9d1014b05e2b2f52258819cea788552041e1df79add371a12f462177d40000",
+            "0ca5595d1aa1bb50398c6d18f0d3ccdb51175a6540497b558c9817c4a9cecc8d9c9d1014b05e2b2f52258819cea788552041e1df79add371a12f462177d40000",
+            "dd62fe06c71448ab8c9eaa3746d279be07057b3125d54da5e8e74b4caf4501bd56b89456209a19db2161855525135a1d483165ef01ff43005158208a3abe460d",
+            "d56a3974830830bdf40211819857bfc01844be6175e2be80e1dfb485dc9f3d6abca59e702562cab490643142f86dc55d390ac84d51cff3a68c875f5d5b0b6a0b",
+            "2e009c675f3d562f6960a49bf0e5f5add7be33e7d4696c6b6f993e7561c4690e339173fd4887a826e9bce690be686cd63f55ffb68daef5ccadb43040e8adac0f"
+          ]
+        },
+        "native_asset_conservation": true,
+        "private_keys_persisted": false,
+        "valid_body_bound_ephemeral_signatures": true
+      },
+      "result": {
+        "cleanup": {
+          "child_reaped": true,
+          "process_group_empty": true,
+          "snapshot_descriptors_closed": true,
+          "status": "clean"
+        },
+        "schema_version": "f05-2a-tx-sim-run-result-r3",
+        "simulator_child_exit": 0,
+        "simulator_result": {
+          "stage": "script_accepted",
+          "target_script_invoked": true
+        },
+        "submitted_sha256": {
+          "raw_inputs": "4b20e2b2cf4bd58b1f6e385c90ffd098d583df69d95fbc7b1fcc2591da72b9fe",
+          "raw_outputs": "ff6527fab75c8c2e175dbc2a4391de063b841a3f2d52d2773d06359467cecbf7",
+          "transaction": "dc7e2ed5088a7d7d10e03c116f408ca99f0324de2f412c40414ba4fe00d257b9"
+        },
+        "submitted_size_bytes": {
+          "raw_inputs": 73,
+          "raw_outputs": 79,
+          "transaction": 5092
+        },
+        "target_mint_binding": {
+          "compiled_script_hash": "1b8e1c1bbc466063dc2602bf2696ec4a4e6cd2f2e6048c2376e5afd5",
+          "expected_policy_id": "1b8e1c1bbc466063dc2602bf2696ec4a4e6cd2f2e6048c2376e5afd5",
+          "policy_ids": [
+            "1b8e1c1bbc466063dc2602bf2696ec4a4e6cd2f2e6048c2376e5afd5"
+          ]
+        },
+        "wrapper_exit_code": 0
+      },
+      "runner_exit": 0
+    }
+  ],
+  "schema_version": "f05-2a-duplicate-mutation-suite-capture-r1",
+  "security": {
+    "ada_and_native_asset_conservation": true,
+    "body_bound_funding_signatures": true,
+    "ephemeral_test_keys_only": true,
+    "private_keys_persisted": false
+  },
+  "source_unchanged": true,
+  "status": "pass"
+}

@@ -12,8 +12,14 @@ DELIVERY_HASH = b"\x22" * 32
 ROOT_EOA = b"\x33" * 20
 
 class TestTEEPlugin:
+    @pytest.fixture(autouse=True)
+    def explicit_local_tee_policy(self, monkeypatch):
+        monkeypatch.setenv("VAMS_ENV", "test")
+        monkeypatch.setenv("PHALA_MOCK_MODE", "true")
+        monkeypatch.delenv("PHALA_API_KEY", raising=False)
+
     def test_generate_and_verify(self):
-        plugin = TEEProofPlugin()
+        plugin = TEEProofPlugin(mock_mode=True)
         result = plugin.generate_proof(SERVICE_HASH, DELIVERY_HASH, root_address=ROOT_EOA)
         assert result.valid
         assert plugin.verify_proof(SERVICE_HASH, DELIVERY_HASH, result.proof_data)
@@ -23,7 +29,7 @@ class TestTEEPlugin:
         assert plugin.PROOF_TYPE_ID == Web3.keccak(text="PHALA_EXECUTION")
 
     def test_abi_round_trip(self):
-        plugin = TEEProofPlugin()
+        plugin = TEEProofPlugin(mock_mode=True)
         result = plugin.generate_proof(SERVICE_HASH, DELIVERY_HASH, root_address=ROOT_EOA)
         decoded = decode(['bytes', 'bytes32', 'bytes32', 'address'], result.proof_data)
         assert len(decoded) == 4
@@ -31,12 +37,12 @@ class TestTEEPlugin:
         assert isinstance(decoded[1], bytes)
 
     def test_requires_explicit_root_eoa(self):
-        plugin = TEEProofPlugin()
+        plugin = TEEProofPlugin(mock_mode=True)
         with pytest.raises(ValueError, match="root EOA"):
             plugin.generate_proof(SERVICE_HASH, DELIVERY_HASH)
 
     def test_rejects_session_key_as_root_identity(self):
-        plugin = TEEProofPlugin()
+        plugin = TEEProofPlugin(mock_mode=True)
         with pytest.raises(ValueError, match="session key"):
             plugin.generate_proof(
                 SERVICE_HASH,
@@ -46,21 +52,20 @@ class TestTEEPlugin:
             )
 
 class TestZKMLPlugin:
-    def test_generate_and_verify(self):
+    def test_placeholder_generation_and_verification_fail_closed(self):
         plugin = ZKMLProofPlugin()
         result = plugin.generate_proof(SERVICE_HASH, DELIVERY_HASH)
-        assert result.valid
-        assert plugin.verify_proof(SERVICE_HASH, DELIVERY_HASH, result.proof_data)
+        assert not result.valid
+        assert result.proof_data == b""
+        assert not plugin.verify_proof(SERVICE_HASH, DELIVERY_HASH, b"\x01" * 256)
 
     def test_hash_matches_keccak256(self):
         plugin = ZKMLProofPlugin()
         assert plugin.PROOF_TYPE_ID == Web3.keccak(text="ZKML_VERIFICATION")
 
-    def test_abi_round_trip(self):
-        plugin = ZKMLProofPlugin()
-        result = plugin.generate_proof(SERVICE_HASH, DELIVERY_HASH)
-        decoded = decode(['bytes', 'bytes32', 'bytes32', 'bytes32', 'bytes'], result.proof_data)
-        assert len(decoded) == 5
+    def test_placeholder_is_explicitly_non_authoritative(self):
+        result = ZKMLProofPlugin().generate_proof(SERVICE_HASH, DELIVERY_HASH)
+        assert result.metadata == {"evidence_classification": "disabled-placeholder"}
 
 class TestOutputHashPlugin:
     def test_generate_and_verify(self):
@@ -82,9 +87,10 @@ class TestOutputHashPlugin:
 class TestPluginDiscovery:
     def test_discover_plugins(self):
         plugins = discover_plugins()
-        assert len(plugins) == 3
+        assert len(plugins) == 2
         types = set(p.proof_type() for p in plugins)
-        assert len(types) == 3
+        assert len(types) == 2
+        assert ZKMLProofPlugin.PROOF_TYPE_ID not in types
 
 class TestHashConsistency:
     def test_python_keccak_expected_solidity(self):

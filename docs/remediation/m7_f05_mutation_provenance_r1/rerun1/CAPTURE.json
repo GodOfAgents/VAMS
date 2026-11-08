@@ -1,0 +1,1269 @@
+{
+  "aiken_executable_sha256": "07f3f927f1a8c71fc61273fdff850d9b98edb28dde207c8a32585991f2c88e79",
+  "aiken_version": "aiken v1.1.21+42babe5",
+  "capture_script_sha256": "59f1554eca67f9b3d70bd2f091bd8f34447c6ae5eecc58e495d893abb8f0ce61",
+  "cleanup": {
+    "all_signing_memfds_closed": true,
+    "signing_key_count": 5,
+    "workroots": [
+      {
+        "path": "/tmp/f05-2a-public-v3-a9ob_e_q",
+        "removed": true
+      }
+    ]
+  },
+  "commands": 542,
+  "compiles": 35,
+  "coverage_assertions_pass": true,
+  "evaluations": 134,
+  "evidence_class": "synthetic-compiled-UPLC-only; no ledger admission or live-network evidence",
+  "outcome": {
+    "compiled_mutations": [
+      {
+        "detected": true,
+        "mutation": "remove_seed_guard",
+        "negative_fixture": "seed_missing"
+      },
+      {
+        "detected": true,
+        "mutation": "remove_target_output_cardinality_guard",
+        "negative_fixture": "authority_output_extra_target"
+      },
+      {
+        "detected": true,
+        "mutation": "remove_exact_mint_guard",
+        "negative_fixture": "mint_extra_name"
+      },
+      {
+        "detected": true,
+        "mutation": "remove_state_validator_credential_binding",
+        "negative_fixture": "r2_wrong_state_address"
+      },
+      {
+        "detected": true,
+        "mutation": "remove_no_stake_credential_guard",
+        "negative_fixture": "output_stake_credential"
+      },
+      {
+        "detected": true,
+        "mutation": "remove_singleton_quantity_guard",
+        "negative_fixture": "authority_output_quantity_two"
+      },
+      {
+        "detected": true,
+        "mutation": "remove_exact_lovelace_guard",
+        "negative_fixture": "authority_value_minus_one"
+      },
+      {
+        "detected": true,
+        "mutation": "remove_no_extra_asset_guard",
+        "negative_fixture": "authority_extra_native_asset"
+      },
+      {
+        "detected": true,
+        "mutation": "remove_inline_datum_guard",
+        "negative_fixture": "datum_missing"
+      },
+      {
+        "detected": true,
+        "mutation": "remove_schema_version_guard",
+        "negative_fixture": "datum_schema_version"
+      },
+      {
+        "detected": true,
+        "mutation": "remove_seed_hash_guard",
+        "negative_fixture": "seed_datum_hash"
+      },
+      {
+        "detected": true,
+        "mutation": "remove_seed_index_guard",
+        "negative_fixture": "seed_datum_index"
+      },
+      {
+        "detected": true,
+        "mutation": "remove_epoch_guard",
+        "negative_fixture": "datum_epoch"
+      },
+      {
+        "detected": true,
+        "mutation": "remove_threshold_guard",
+        "negative_fixture": "datum_threshold"
+      },
+      {
+        "detected": true,
+        "mutation": "remove_status_guard",
+        "negative_fixture": "datum_status"
+      },
+      {
+        "detected": true,
+        "mutation": "remove_pending_canonicality_guard",
+        "negative_fixture": "datum_pending_noncanonical"
+      },
+      {
+        "detected": true,
+        "mutation": "remove_key_uniqueness_order_guard",
+        "negative_fixture": "applied_keys_duplicate"
+      },
+      {
+        "detected": true,
+        "mutation": "remove_key_binding_guard",
+        "negative_fixture": "datum_key_binding"
+      },
+      {
+        "detected": true,
+        "mutation": "remove_key_order_guard",
+        "negative_fixture": "applied_keys_unsorted"
+      },
+      {
+        "detected": true,
+        "mutation": "remove_bootstrap_proof_of_possession_verification",
+        "negative_fixture": "r2_invalid_proof_0"
+      },
+      {
+        "detected": true,
+        "mutation": "unconditional_success",
+        "negative_fixture": "seed_missing",
+        "subcases": [
+          {
+            "accepted": true,
+            "context_sha256": "c30d5ae0d0b333d719ec6049947f9c4a3517bcc6c60aca7d9c9546cd5af6dce4",
+            "exit": 0,
+            "id": "seed_missing",
+            "policy_id": "493650aafaf59dfd81f35087d0d52485e6a3ab9bcc00ffde40350841",
+            "script_sha256": "7db06510da8eea273314721bc9b535ca6a54006436708b461dbc17a2be3adfab"
+          },
+          {
+            "accepted": true,
+            "context_sha256": "54833bcf6b35e404658991cd7a786175716dd32533e77eb2daac95251597e807",
+            "exit": 0,
+            "id": "seed_duplicate",
+            "policy_id": "493650aafaf59dfd81f35087d0d52485e6a3ab9bcc00ffde40350841",
+            "script_sha256": "7db06510da8eea273314721bc9b535ca6a54006436708b461dbc17a2be3adfab"
+          },
+          {
+            "accepted": true,
+            "context_sha256": "068da081de91e613aacd06cef4dd5f9ea84b65341b8f38f167f828a3b10608c3",
+            "exit": 0,
+            "id": "seed_datum_hash",
+            "policy_id": "493650aafaf59dfd81f35087d0d52485e6a3ab9bcc00ffde40350841",
+            "script_sha256": "7db06510da8eea273314721bc9b535ca6a54006436708b461dbc17a2be3adfab"
+          },
+          {
+            "accepted": true,
+            "context_sha256": "bda86fbf37011a319b3331ae93be358ecd984760a2649503593c655e31beb7f7",
+            "exit": 0,
+            "id": "seed_datum_index",
+            "policy_id": "493650aafaf59dfd81f35087d0d52485e6a3ab9bcc00ffde40350841",
+            "script_sha256": "7db06510da8eea273314721bc9b535ca6a54006436708b461dbc17a2be3adfab"
+          },
+          {
+            "accepted": true,
+            "context_sha256": "1b292700843544ed9a0f87d0a7427cb0483a9727387faaa1909f22849c53121e",
+            "exit": 0,
+            "id": "applied_genesis_parameter",
+            "policy_id": "d36402a897a757b83a5c00f648c4163dd6df66f939aaeceaf9c00aba",
+            "script_sha256": "f81360519372b0bc98cc0cda41fa81a95f72d772b40444df0be70edc65b2b229"
+          },
+          {
+            "accepted": true,
+            "context_sha256": "7521090acaf7952f29482d128bb8368a213e4e6208f2afe6c59585900037a05f",
+            "exit": 0,
+            "id": "applied_keys_parameter",
+            "policy_id": "191e14457b2a2ba0d341148d44ce09aa1a5639c830866221ef7dbbe3",
+            "script_sha256": "751f8580690e179151ca55e6aa9009f6e2b3b33427c7577adb627c9fb78e91cf"
+          },
+          {
+            "accepted": true,
+            "context_sha256": "fdea659c5af17cb01643d791b6c01c0d60e95ffbe59642aba0ffea87022cc2af",
+            "exit": 0,
+            "id": "applied_keys_bad_count",
+            "policy_id": "0593424da3bdaa8be30c7f4038027b20429962d8de927de9a9ecc1da",
+            "script_sha256": "d2051b17f91d12a1c317dbab0c363bebf9e76e2b5a8150987a8b9c31d6035f41"
+          },
+          {
+            "accepted": true,
+            "context_sha256": "224f5ee671f721993b57dc01d30d8cffeada02942feb0e0a08d7e30a26406ae4",
+            "exit": 0,
+            "id": "applied_keys_bad_length",
+            "policy_id": "a8fb99a985c91714980df8961dffb2a054a17bc3ebacab10145e5220",
+            "script_sha256": "b9f08ac17316b7271a25d5ba4553495f5afa0961b8d61fc6f264ea85a911c525"
+          },
+          {
+            "accepted": true,
+            "context_sha256": "14aa60bd09508943724bab7efdc1aa90d958698d7c0075f9e608a5bdb52305ed",
+            "exit": 0,
+            "id": "applied_keys_duplicate",
+            "policy_id": "73eaa72a4c827382c711b28bffe4d5daf01001a5c261857f8a5e66ab",
+            "script_sha256": "1b4b18def3f84b4ac185daa8bc12b0f9cf7d7311dbc02fb1023096029b644ee1"
+          },
+          {
+            "accepted": true,
+            "context_sha256": "ef11718231e481adb8e130cd13d95d2a814b4844bfd8f09f9029bf4540e4aeee",
+            "exit": 0,
+            "id": "applied_keys_unsorted",
+            "policy_id": "612ed28727357d4639cd6ca06987506c7abe9164fdfc0b1dc1f06848",
+            "script_sha256": "d32bbf340cfbc7d25e177581a3d13e879ebe51be76277243b60734d98ecdd7d0"
+          },
+          {
+            "accepted": true,
+            "context_sha256": "6ca0541073678e8edce28a51101ae3fcbae84562e71ebe93184f522ac6f0585b",
+            "exit": 0,
+            "id": "mint_wrong_policy",
+            "policy_id": "493650aafaf59dfd81f35087d0d52485e6a3ab9bcc00ffde40350841",
+            "script_sha256": "7db06510da8eea273314721bc9b535ca6a54006436708b461dbc17a2be3adfab"
+          },
+          {
+            "accepted": true,
+            "context_sha256": "8764a22f8647fd3c865d5cee1f574c5b200b007b0a6793451f0e3230dae99bf9",
+            "exit": 0,
+            "id": "mint_wrong_name",
+            "policy_id": "493650aafaf59dfd81f35087d0d52485e6a3ab9bcc00ffde40350841",
+            "script_sha256": "7db06510da8eea273314721bc9b535ca6a54006436708b461dbc17a2be3adfab"
+          },
+          {
+            "accepted": true,
+            "context_sha256": "16397d371ea81a857f2c6b601aa80f3a0fa9e103ef00aa897f2f9a4e5f326276",
+            "exit": 0,
+            "id": "mint_quantity_two",
+            "policy_id": "493650aafaf59dfd81f35087d0d52485e6a3ab9bcc00ffde40350841",
+            "script_sha256": "7db06510da8eea273314721bc9b535ca6a54006436708b461dbc17a2be3adfab"
+          },
+          {
+            "accepted": true,
+            "context_sha256": "988a98b0718cace52641218909a0b2c1795f92efa5b5e416bd2449ba8d91e3e9",
+            "exit": 0,
+            "id": "mint_extra_name",
+            "policy_id": "493650aafaf59dfd81f35087d0d52485e6a3ab9bcc00ffde40350841",
+            "script_sha256": "7db06510da8eea273314721bc9b535ca6a54006436708b461dbc17a2be3adfab"
+          },
+          {
+            "accepted": true,
+            "context_sha256": "493e2975cdafb2634076e48ec1a465abd8c4bed10a12fd0fd7943b4a20023549",
+            "exit": 0,
+            "id": "output_wrong_payment_credential",
+            "policy_id": "493650aafaf59dfd81f35087d0d52485e6a3ab9bcc00ffde40350841",
+            "script_sha256": "7db06510da8eea273314721bc9b535ca6a54006436708b461dbc17a2be3adfab"
+          },
+          {
+            "accepted": true,
+            "context_sha256": "3bdf12c55f37c0da3f13979b711e787b67ee5482a102dd755fd22e8b95ef233a",
+            "exit": 0,
+            "id": "output_stake_credential",
+            "policy_id": "493650aafaf59dfd81f35087d0d52485e6a3ab9bcc00ffde40350841",
+            "script_sha256": "7db06510da8eea273314721bc9b535ca6a54006436708b461dbc17a2be3adfab"
+          },
+          {
+            "accepted": true,
+            "context_sha256": "734351fd184199cb25ca3e4463f769ef13995e63c8d5220f4b375b1ab62129ac",
+            "exit": 0,
+            "id": "datum_missing",
+            "policy_id": "493650aafaf59dfd81f35087d0d52485e6a3ab9bcc00ffde40350841",
+            "script_sha256": "7db06510da8eea273314721bc9b535ca6a54006436708b461dbc17a2be3adfab"
+          },
+          {
+            "accepted": true,
+            "context_sha256": "6a1ba3409752c04bb283c63c8a3dd065d19c53a1170488e77ad8dd9c484d1aa7",
+            "exit": 0,
+            "id": "datum_hash_only",
+            "policy_id": "493650aafaf59dfd81f35087d0d52485e6a3ab9bcc00ffde40350841",
+            "script_sha256": "7db06510da8eea273314721bc9b535ca6a54006436708b461dbc17a2be3adfab"
+          },
+          {
+            "accepted": true,
+            "context_sha256": "3286260d6386f77eb0069fb9d82ae9598b5467ccff1ba965df4704137041197f",
+            "exit": 0,
+            "id": "datum_unknown_constructor",
+            "policy_id": "493650aafaf59dfd81f35087d0d52485e6a3ab9bcc00ffde40350841",
+            "script_sha256": "7db06510da8eea273314721bc9b535ca6a54006436708b461dbc17a2be3adfab"
+          },
+          {
+            "accepted": true,
+            "context_sha256": "c8c1f9f70f12c1fb5c450b0c783321bd19264bdc79e5ae220a526631e781cb98",
+            "exit": 0,
+            "id": "datum_schema_version",
+            "policy_id": "493650aafaf59dfd81f35087d0d52485e6a3ab9bcc00ffde40350841",
+            "script_sha256": "7db06510da8eea273314721bc9b535ca6a54006436708b461dbc17a2be3adfab"
+          },
+          {
+            "accepted": true,
+            "context_sha256": "068da081de91e613aacd06cef4dd5f9ea84b65341b8f38f167f828a3b10608c3",
+            "exit": 0,
+            "id": "datum_seed_hash",
+            "policy_id": "493650aafaf59dfd81f35087d0d52485e6a3ab9bcc00ffde40350841",
+            "script_sha256": "7db06510da8eea273314721bc9b535ca6a54006436708b461dbc17a2be3adfab"
+          },
+          {
+            "accepted": true,
+            "context_sha256": "bda86fbf37011a319b3331ae93be358ecd984760a2649503593c655e31beb7f7",
+            "exit": 0,
+            "id": "datum_seed_index",
+            "policy_id": "493650aafaf59dfd81f35087d0d52485e6a3ab9bcc00ffde40350841",
+            "script_sha256": "7db06510da8eea273314721bc9b535ca6a54006436708b461dbc17a2be3adfab"
+          },
+          {
+            "accepted": true,
+            "context_sha256": "a47867b159aaf328378729dbda2ae590c2ffa636678c008ad22ac6ed51c6557b",
+            "exit": 0,
+            "id": "datum_epoch",
+            "policy_id": "493650aafaf59dfd81f35087d0d52485e6a3ab9bcc00ffde40350841",
+            "script_sha256": "7db06510da8eea273314721bc9b535ca6a54006436708b461dbc17a2be3adfab"
+          },
+          {
+            "accepted": true,
+            "context_sha256": "2062aa4926739506ea1c3702772c1e33d06a9ccf04b8745efe739132ca80ad13",
+            "exit": 0,
+            "id": "datum_key_count",
+            "policy_id": "493650aafaf59dfd81f35087d0d52485e6a3ab9bcc00ffde40350841",
+            "script_sha256": "7db06510da8eea273314721bc9b535ca6a54006436708b461dbc17a2be3adfab"
+          },
+          {
+            "accepted": true,
+            "context_sha256": "e2dce168048bae71c3a67c79bd1e6244e22dc638b206e9338c946c53a309d4f4",
+            "exit": 0,
+            "id": "datum_key_length",
+            "policy_id": "493650aafaf59dfd81f35087d0d52485e6a3ab9bcc00ffde40350841",
+            "script_sha256": "7db06510da8eea273314721bc9b535ca6a54006436708b461dbc17a2be3adfab"
+          },
+          {
+            "accepted": true,
+            "context_sha256": "7a3651448895583f7b55b13880d8118576346fc456fe7e72fb18c11cb98fff30",
+            "exit": 0,
+            "id": "datum_duplicate_key",
+            "policy_id": "493650aafaf59dfd81f35087d0d52485e6a3ab9bcc00ffde40350841",
+            "script_sha256": "7db06510da8eea273314721bc9b535ca6a54006436708b461dbc17a2be3adfab"
+          },
+          {
+            "accepted": true,
+            "context_sha256": "11aa668dda974a79bfab67869fcd557fe8032bdf2d5b539125b1542ad3c9657e",
+            "exit": 0,
+            "id": "datum_key_order",
+            "policy_id": "493650aafaf59dfd81f35087d0d52485e6a3ab9bcc00ffde40350841",
+            "script_sha256": "7db06510da8eea273314721bc9b535ca6a54006436708b461dbc17a2be3adfab"
+          },
+          {
+            "accepted": true,
+            "context_sha256": "48608081aceccbee90482d5e07b62d308b2349a72cad613528effcaf60d12718",
+            "exit": 0,
+            "id": "datum_key_binding",
+            "policy_id": "493650aafaf59dfd81f35087d0d52485e6a3ab9bcc00ffde40350841",
+            "script_sha256": "7db06510da8eea273314721bc9b535ca6a54006436708b461dbc17a2be3adfab"
+          },
+          {
+            "accepted": true,
+            "context_sha256": "3bf239a8df633d9a9409cbd46ae46013cd8ff0b1681c9ff07a55f32e977c78bc",
+            "exit": 0,
+            "id": "datum_threshold",
+            "policy_id": "493650aafaf59dfd81f35087d0d52485e6a3ab9bcc00ffde40350841",
+            "script_sha256": "7db06510da8eea273314721bc9b535ca6a54006436708b461dbc17a2be3adfab"
+          },
+          {
+            "accepted": true,
+            "context_sha256": "1865f051ef56dc3be412cbab414f296c35bbaddfb0d69c1f5c7ab251d898eb00",
+            "exit": 0,
+            "id": "datum_status",
+            "policy_id": "493650aafaf59dfd81f35087d0d52485e6a3ab9bcc00ffde40350841",
+            "script_sha256": "7db06510da8eea273314721bc9b535ca6a54006436708b461dbc17a2be3adfab"
+          },
+          {
+            "accepted": true,
+            "context_sha256": "357b4f9aa4ce12cb0d1ae6c20ac6ff640afc7c864c23f8c2c300a0650ca300ff",
+            "exit": 0,
+            "id": "datum_pending_kind",
+            "policy_id": "493650aafaf59dfd81f35087d0d52485e6a3ab9bcc00ffde40350841",
+            "script_sha256": "7db06510da8eea273314721bc9b535ca6a54006436708b461dbc17a2be3adfab"
+          },
+          {
+            "accepted": true,
+            "context_sha256": "5bedf815b22d544268dc06b7f8242ddbe57bad32db46015752b214c48e05b1fc",
+            "exit": 0,
+            "id": "datum_pending_noncanonical",
+            "policy_id": "493650aafaf59dfd81f35087d0d52485e6a3ab9bcc00ffde40350841",
+            "script_sha256": "7db06510da8eea273314721bc9b535ca6a54006436708b461dbc17a2be3adfab"
+          },
+          {
+            "accepted": true,
+            "context_sha256": "fac20a3e81b3c78622a2bff87e2abf3aef51f2fb4d6ae4643a751ce31973316d",
+            "exit": 0,
+            "id": "authority_value_minus_one",
+            "policy_id": "493650aafaf59dfd81f35087d0d52485e6a3ab9bcc00ffde40350841",
+            "script_sha256": "7db06510da8eea273314721bc9b535ca6a54006436708b461dbc17a2be3adfab"
+          },
+          {
+            "accepted": true,
+            "context_sha256": "cc66005ed97b2c619941f7e8617c5edaa6653e690f569847c886b442180382d5",
+            "exit": 0,
+            "id": "authority_value_plus_one",
+            "policy_id": "493650aafaf59dfd81f35087d0d52485e6a3ab9bcc00ffde40350841",
+            "script_sha256": "7db06510da8eea273314721bc9b535ca6a54006436708b461dbc17a2be3adfab"
+          },
+          {
+            "accepted": true,
+            "context_sha256": "87a19aa6e4ab23129f37267aca423de45c96d50fe1cbfbaea42f1b1002a3e9db",
+            "exit": 0,
+            "id": "fee_diversion",
+            "policy_id": "493650aafaf59dfd81f35087d0d52485e6a3ab9bcc00ffde40350841",
+            "script_sha256": "7db06510da8eea273314721bc9b535ca6a54006436708b461dbc17a2be3adfab"
+          },
+          {
+            "accepted": true,
+            "context_sha256": "bdccd82758714f299e34351d755ece8f05d3bdc08dee6253df2c048fb939a29b",
+            "exit": 0,
+            "id": "authority_extra_native_asset",
+            "policy_id": "493650aafaf59dfd81f35087d0d52485e6a3ab9bcc00ffde40350841",
+            "script_sha256": "7db06510da8eea273314721bc9b535ca6a54006436708b461dbc17a2be3adfab"
+          },
+          {
+            "accepted": true,
+            "context_sha256": "58c2d2758ca0774fe461c31a29a27615bb4fc38a32f9f6a70e2f45f73847a787",
+            "exit": 0,
+            "id": "authority_output_duplicate_nft",
+            "policy_id": "493650aafaf59dfd81f35087d0d52485e6a3ab9bcc00ffde40350841",
+            "script_sha256": "7db06510da8eea273314721bc9b535ca6a54006436708b461dbc17a2be3adfab"
+          },
+          {
+            "accepted": true,
+            "context_sha256": "b7fab03093b067fdf984aa78b93c9ca4671c32a20fe2fd5531c26845d0aae9ca",
+            "exit": 0,
+            "id": "authority_output_extra_target",
+            "policy_id": "493650aafaf59dfd81f35087d0d52485e6a3ab9bcc00ffde40350841",
+            "script_sha256": "7db06510da8eea273314721bc9b535ca6a54006436708b461dbc17a2be3adfab"
+          },
+          {
+            "accepted": true,
+            "context_sha256": "6a46a18db96cff6b5dc41fe97921c97033bc707a180fe2b49cbc016565477fc9",
+            "exit": 0,
+            "id": "authority_output_quantity_two",
+            "policy_id": "493650aafaf59dfd81f35087d0d52485e6a3ab9bcc00ffde40350841",
+            "script_sha256": "7db06510da8eea273314721bc9b535ca6a54006436708b461dbc17a2be3adfab"
+          },
+          {
+            "accepted": true,
+            "context_sha256": "2ec61bb258f9db5cfc0a4c607f103f7828a5dfc27c7522ad1354ee105d7c1c0b",
+            "exit": 0,
+            "id": "authority_output_missing",
+            "policy_id": "493650aafaf59dfd81f35087d0d52485e6a3ab9bcc00ffde40350841",
+            "script_sha256": "7db06510da8eea273314721bc9b535ca6a54006436708b461dbc17a2be3adfab"
+          },
+          {
+            "accepted": true,
+            "context_sha256": "15d70ebaa34c637c576006989e3a54c14ec6d54b2a980f26e81b77a6edfb16d0",
+            "exit": 0,
+            "id": "r2_proof_missing",
+            "policy_id": "493650aafaf59dfd81f35087d0d52485e6a3ab9bcc00ffde40350841",
+            "script_sha256": "7db06510da8eea273314721bc9b535ca6a54006436708b461dbc17a2be3adfab"
+          },
+          {
+            "accepted": true,
+            "context_sha256": "0bcb34af23bad4e6adcdd2651609936a31cd07c43779e5ab4d6660cd383cf979",
+            "exit": 0,
+            "id": "r2_proof_extra",
+            "policy_id": "493650aafaf59dfd81f35087d0d52485e6a3ab9bcc00ffde40350841",
+            "script_sha256": "7db06510da8eea273314721bc9b535ca6a54006436708b461dbc17a2be3adfab"
+          },
+          {
+            "accepted": true,
+            "context_sha256": "e3edf80b29027c71f68657d5a175cdda256bda91ff9a690de181b5d9bd6754de",
+            "exit": 0,
+            "id": "r2_invalid_proof_0",
+            "policy_id": "493650aafaf59dfd81f35087d0d52485e6a3ab9bcc00ffde40350841",
+            "script_sha256": "7db06510da8eea273314721bc9b535ca6a54006436708b461dbc17a2be3adfab"
+          },
+          {
+            "accepted": true,
+            "context_sha256": "4b13d1fd6fa44d2ecda842bf3ff72e85862192d862f6f9a521df31f8e3b1e838",
+            "exit": 0,
+            "id": "r2_invalid_proof_1",
+            "policy_id": "493650aafaf59dfd81f35087d0d52485e6a3ab9bcc00ffde40350841",
+            "script_sha256": "7db06510da8eea273314721bc9b535ca6a54006436708b461dbc17a2be3adfab"
+          },
+          {
+            "accepted": true,
+            "context_sha256": "80c75e4c242ba92475ff89827da95d847f154a2c516e5fca7e6c30a4aa845652",
+            "exit": 0,
+            "id": "r2_invalid_proof_2",
+            "policy_id": "493650aafaf59dfd81f35087d0d52485e6a3ab9bcc00ffde40350841",
+            "script_sha256": "7db06510da8eea273314721bc9b535ca6a54006436708b461dbc17a2be3adfab"
+          },
+          {
+            "accepted": true,
+            "context_sha256": "8fac35b75260b277002d5a9a0baa153855473bb8fe4b1214980536afa11ea0b6",
+            "exit": 0,
+            "id": "r2_invalid_proof_3",
+            "policy_id": "493650aafaf59dfd81f35087d0d52485e6a3ab9bcc00ffde40350841",
+            "script_sha256": "7db06510da8eea273314721bc9b535ca6a54006436708b461dbc17a2be3adfab"
+          },
+          {
+            "accepted": true,
+            "context_sha256": "62ab8fb29d956031502cbda6d58da8169765256ce49e50b5a86ca378856952be",
+            "exit": 0,
+            "id": "r2_invalid_proof_4",
+            "policy_id": "493650aafaf59dfd81f35087d0d52485e6a3ab9bcc00ffde40350841",
+            "script_sha256": "7db06510da8eea273314721bc9b535ca6a54006436708b461dbc17a2be3adfab"
+          },
+          {
+            "accepted": true,
+            "context_sha256": "360f4f578e2fa944aa066407c6611533aedf9827cbbb7052b8c6a5d25cc8f48a",
+            "exit": 0,
+            "id": "r2_wrong_key_pairing",
+            "policy_id": "493650aafaf59dfd81f35087d0d52485e6a3ab9bcc00ffde40350841",
+            "script_sha256": "7db06510da8eea273314721bc9b535ca6a54006436708b461dbc17a2be3adfab"
+          },
+          {
+            "accepted": true,
+            "context_sha256": "66a40698649fff30c68f7ed06804adbb83ccd9d2a1028f85af3e15d1623ad3d6",
+            "exit": 0,
+            "id": "r2_signature_for_other_seed",
+            "policy_id": "493650aafaf59dfd81f35087d0d52485e6a3ab9bcc00ffde40350841",
+            "script_sha256": "7db06510da8eea273314721bc9b535ca6a54006436708b461dbc17a2be3adfab"
+          },
+          {
+            "accepted": true,
+            "context_sha256": "e9b1c7e4feef15b602155ba43f0da88e85c101014c9489e31faebe4dda63266e",
+            "exit": 0,
+            "id": "r2_signature_for_other_network",
+            "policy_id": "493650aafaf59dfd81f35087d0d52485e6a3ab9bcc00ffde40350841",
+            "script_sha256": "7db06510da8eea273314721bc9b535ca6a54006436708b461dbc17a2be3adfab"
+          },
+          {
+            "accepted": true,
+            "context_sha256": "c7e85e6d73755b9664b595103d334266e03df7bfda24354e5e2e6416698a002f",
+            "exit": 0,
+            "id": "r2_signature_for_other_validator_hash",
+            "policy_id": "493650aafaf59dfd81f35087d0d52485e6a3ab9bcc00ffde40350841",
+            "script_sha256": "7db06510da8eea273314721bc9b535ca6a54006436708b461dbc17a2be3adfab"
+          },
+          {
+            "accepted": true,
+            "context_sha256": "ef8e84b350aa71d2a7ded8ad9d8275109be99ab06c79bae1398d7d9dcb13a056",
+            "exit": 0,
+            "id": "r2_signature_for_other_epoch",
+            "policy_id": "493650aafaf59dfd81f35087d0d52485e6a3ab9bcc00ffde40350841",
+            "script_sha256": "7db06510da8eea273314721bc9b535ca6a54006436708b461dbc17a2be3adfab"
+          },
+          {
+            "accepted": true,
+            "context_sha256": "964e6a794d4e9bc265a2289ea69341a27871eba0724bb6749b5ad4562de22c20",
+            "exit": 0,
+            "id": "r2_swapped_datum_keys",
+            "policy_id": "493650aafaf59dfd81f35087d0d52485e6a3ab9bcc00ffde40350841",
+            "script_sha256": "7db06510da8eea273314721bc9b535ca6a54006436708b461dbc17a2be3adfab"
+          },
+          {
+            "accepted": true,
+            "context_sha256": "7a3651448895583f7b55b13880d8118576346fc456fe7e72fb18c11cb98fff30",
+            "exit": 0,
+            "id": "r2_duplicate_datum_key",
+            "policy_id": "493650aafaf59dfd81f35087d0d52485e6a3ab9bcc00ffde40350841",
+            "script_sha256": "7db06510da8eea273314721bc9b535ca6a54006436708b461dbc17a2be3adfab"
+          },
+          {
+            "accepted": true,
+            "context_sha256": "493e2975cdafb2634076e48ec1a465abd8c4bed10a12fd0fd7943b4a20023549",
+            "exit": 0,
+            "id": "r2_wrong_state_address",
+            "policy_id": "493650aafaf59dfd81f35087d0d52485e6a3ab9bcc00ffde40350841",
+            "script_sha256": "7db06510da8eea273314721bc9b535ca6a54006436708b461dbc17a2be3adfab"
+          }
+        ]
+      }
+    ],
+    "contract_id": "F05.1-R4",
+    "entrypoint": "f05_authority_policy.f05_authority_policy.mint",
+    "failures": [],
+    "ledger": "Plutus V3",
+    "positive_and_negative_cases": 57,
+    "results": [
+      {
+        "accepted": true,
+        "actual": "accept",
+        "context_cbor_bytes": 1755,
+        "cpu": 431999255,
+        "diagnostic": "    \"mem\": 35 |   }, |   { |     \"fun\": \"byteStringToInteger\", |     \"cpu\": 9476392, |     \"mem\": 32 |   } | ]",
+        "exit": 0,
+        "expected": "accept",
+        "id": "valid_bootstrap",
+        "mem": 424440,
+        "verify_signature_alias_count": 5
+      },
+      {
+        "accepted": false,
+        "actual": "reject",
+        "context_cbor_bytes": 1647,
+        "cpu": null,
+        "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 12292775 | memory: 42253",
+        "exit": 1,
+        "expected": "reject",
+        "id": "seed_missing",
+        "mem": null,
+        "verify_signature_alias_count": 5
+      },
+      {
+        "accepted": false,
+        "actual": "reject",
+        "context_cbor_bytes": 1863,
+        "cpu": null,
+        "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 20320501 | memory: 63993",
+        "exit": 1,
+        "expected": "reject",
+        "id": "seed_duplicate",
+        "mem": null,
+        "verify_signature_alias_count": 5
+      },
+      {
+        "accepted": false,
+        "actual": "reject",
+        "context_cbor_bytes": 1755,
+        "cpu": null,
+        "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 89773272 | memory: 274454",
+        "exit": 1,
+        "expected": "reject",
+        "id": "seed_datum_hash",
+        "mem": null,
+        "verify_signature_alias_count": 5
+      },
+      {
+        "accepted": false,
+        "actual": "reject",
+        "context_cbor_bytes": 1755,
+        "cpu": null,
+        "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 90687591 | memory: 274808",
+        "exit": 1,
+        "expected": "reject",
+        "id": "seed_datum_index",
+        "mem": null,
+        "verify_signature_alias_count": 5
+      },
+      {
+        "accepted": false,
+        "actual": "reject",
+        "context_cbor_bytes": 1755,
+        "cpu": null,
+        "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 13561804 | memory: 42704",
+        "exit": 1,
+        "expected": "reject",
+        "id": "applied_genesis_parameter",
+        "mem": null,
+        "verify_signature_alias_count": 5
+      },
+      {
+        "accepted": false,
+        "actual": "reject",
+        "context_cbor_bytes": 1755,
+        "cpu": null,
+        "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 116695473 | memory: 317032",
+        "exit": 1,
+        "expected": "reject",
+        "id": "applied_keys_parameter",
+        "mem": null,
+        "verify_signature_alias_count": 5
+      },
+      {
+        "accepted": false,
+        "actual": "reject",
+        "context_cbor_bytes": 1823,
+        "cpu": null,
+        "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 99869277 | memory: 296483",
+        "exit": 1,
+        "expected": "reject",
+        "id": "applied_keys_bad_count",
+        "mem": null,
+        "verify_signature_alias_count": 5
+      },
+      {
+        "accepted": false,
+        "actual": "reject",
+        "context_cbor_bytes": 1753,
+        "cpu": null,
+        "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 100218270 | memory: 296687",
+        "exit": 1,
+        "expected": "reject",
+        "id": "applied_keys_bad_length",
+        "mem": null,
+        "verify_signature_alias_count": 5
+      },
+      {
+        "accepted": false,
+        "actual": "reject",
+        "context_cbor_bytes": 1755,
+        "cpu": null,
+        "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 106512258 | memory: 316745",
+        "exit": 1,
+        "expected": "reject",
+        "id": "applied_keys_duplicate",
+        "mem": null,
+        "verify_signature_alias_count": 5
+      },
+      {
+        "accepted": false,
+        "actual": "reject",
+        "context_cbor_bytes": 1755,
+        "cpu": null,
+        "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 109004318 | memory: 316755",
+        "exit": 1,
+        "expected": "reject",
+        "id": "applied_keys_unsorted",
+        "mem": null,
+        "verify_signature_alias_count": 5
+      },
+      {
+        "accepted": false,
+        "actual": "reject",
+        "context_cbor_bytes": 1755,
+        "cpu": null,
+        "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 29351527 | memory: 84675",
+        "exit": 1,
+        "expected": "reject",
+        "id": "mint_wrong_policy",
+        "mem": null,
+        "verify_signature_alias_count": 5
+      },
+      {
+        "accepted": false,
+        "actual": "reject",
+        "context_cbor_bytes": 1744,
+        "cpu": null,
+        "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 30135175 | memory: 84899",
+        "exit": 1,
+        "expected": "reject",
+        "id": "mint_wrong_name",
+        "mem": null,
+        "verify_signature_alias_count": 5
+      },
+      {
+        "accepted": false,
+        "actual": "reject",
+        "context_cbor_bytes": 1755,
+        "cpu": null,
+        "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 30162454 | memory: 84899",
+        "exit": 1,
+        "expected": "reject",
+        "id": "mint_quantity_two",
+        "mem": null,
+        "verify_signature_alias_count": 5
+      },
+      {
+        "accepted": false,
+        "actual": "reject",
+        "context_cbor_bytes": 1762,
+        "cpu": null,
+        "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 30162454 | memory: 84899",
+        "exit": 1,
+        "expected": "reject",
+        "id": "mint_extra_name",
+        "mem": null,
+        "verify_signature_alias_count": 5
+      },
+      {
+        "accepted": false,
+        "actual": "reject",
+        "context_cbor_bytes": 1820,
+        "cpu": null,
+        "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 56399835 | memory: 168234",
+        "exit": 1,
+        "expected": "reject",
+        "id": "output_wrong_payment_credential",
+        "mem": null,
+        "verify_signature_alias_count": 5
+      },
+      {
+        "accepted": false,
+        "actual": "reject",
+        "context_cbor_bytes": 1789,
+        "cpu": null,
+        "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 50525002 | memory: 147521",
+        "exit": 1,
+        "expected": "reject",
+        "id": "output_stake_credential",
+        "mem": null,
+        "verify_signature_alias_count": 5
+      },
+      {
+        "accepted": false,
+        "actual": "reject",
+        "context_cbor_bytes": 1362,
+        "cpu": null,
+        "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 71895928 | memory: 211273",
+        "exit": 1,
+        "expected": "reject",
+        "id": "datum_missing",
+        "mem": null,
+        "verify_signature_alias_count": 5
+      },
+      {
+        "accepted": false,
+        "actual": "reject",
+        "context_cbor_bytes": 1396,
+        "cpu": null,
+        "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 71895928 | memory: 211273",
+        "exit": 1,
+        "expected": "reject",
+        "id": "datum_hash_only",
+        "mem": null,
+        "verify_signature_alias_count": 5
+      },
+      {
+        "accepted": false,
+        "actual": "reject",
+        "context_cbor_bytes": 1367,
+        "cpu": null,
+        "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 72440523 | memory: 211435",
+        "exit": 1,
+        "expected": "reject",
+        "id": "datum_unknown_constructor",
+        "mem": null,
+        "verify_signature_alias_count": 5
+      },
+      {
+        "accepted": false,
+        "actual": "reject",
+        "context_cbor_bytes": 1755,
+        "cpu": null,
+        "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 89046166 | memory: 274164",
+        "exit": 1,
+        "expected": "reject",
+        "id": "datum_schema_version",
+        "mem": null,
+        "verify_signature_alias_count": 5
+      },
+      {
+        "accepted": false,
+        "actual": "reject",
+        "context_cbor_bytes": 1755,
+        "cpu": null,
+        "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 89773272 | memory: 274454",
+        "exit": 1,
+        "expected": "reject",
+        "id": "datum_seed_hash",
+        "mem": null,
+        "verify_signature_alias_count": 5
+      },
+      {
+        "accepted": false,
+        "actual": "reject",
+        "context_cbor_bytes": 1755,
+        "cpu": null,
+        "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 90687591 | memory: 274808",
+        "exit": 1,
+        "expected": "reject",
+        "id": "datum_seed_index",
+        "mem": null,
+        "verify_signature_alias_count": 5
+      },
+      {
+        "accepted": false,
+        "actual": "reject",
+        "context_cbor_bytes": 1755,
+        "cpu": null,
+        "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 92438808 | memory: 275422",
+        "exit": 1,
+        "expected": "reject",
+        "id": "datum_epoch",
+        "mem": null,
+        "verify_signature_alias_count": 5
+      },
+      {
+        "accepted": false,
+        "actual": "reject",
+        "context_cbor_bytes": 1789,
+        "cpu": null,
+        "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 117015045 | memory: 317160",
+        "exit": 1,
+        "expected": "reject",
+        "id": "datum_key_count",
+        "mem": null,
+        "verify_signature_alias_count": 5
+      },
+      {
+        "accepted": false,
+        "actual": "reject",
+        "context_cbor_bytes": 1754,
+        "cpu": null,
+        "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 116697096 | memory: 317032",
+        "exit": 1,
+        "expected": "reject",
+        "id": "datum_key_length",
+        "mem": null,
+        "verify_signature_alias_count": 5
+      },
+      {
+        "accepted": false,
+        "actual": "reject",
+        "context_cbor_bytes": 1755,
+        "cpu": null,
+        "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 116697096 | memory: 317032",
+        "exit": 1,
+        "expected": "reject",
+        "id": "datum_duplicate_key",
+        "mem": null,
+        "verify_signature_alias_count": 5
+      },
+      {
+        "accepted": false,
+        "actual": "reject",
+        "context_cbor_bytes": 1755,
+        "cpu": null,
+        "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 116697096 | memory: 317032",
+        "exit": 1,
+        "expected": "reject",
+        "id": "datum_key_order",
+        "mem": null,
+        "verify_signature_alias_count": 5
+      },
+      {
+        "accepted": false,
+        "actual": "reject",
+        "context_cbor_bytes": 1755,
+        "cpu": null,
+        "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 116697096 | memory: 317032",
+        "exit": 1,
+        "expected": "reject",
+        "id": "datum_key_binding",
+        "mem": null,
+        "verify_signature_alias_count": 5
+      },
+      {
+        "accepted": false,
+        "actual": "reject",
+        "context_cbor_bytes": 1755,
+        "cpu": null,
+        "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 96445979 | memory: 295712",
+        "exit": 1,
+        "expected": "reject",
+        "id": "datum_threshold",
+        "mem": null,
+        "verify_signature_alias_count": 5
+      },
+      {
+        "accepted": false,
+        "actual": "reject",
+        "context_cbor_bytes": 1755,
+        "cpu": null,
+        "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 98397382 | memory: 296004",
+        "exit": 1,
+        "expected": "reject",
+        "id": "datum_status",
+        "mem": null,
+        "verify_signature_alias_count": 5
+      },
+      {
+        "accepted": false,
+        "actual": "reject",
+        "context_cbor_bytes": 1755,
+        "cpu": null,
+        "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 119055941 | memory: 317453",
+        "exit": 1,
+        "expected": "reject",
+        "id": "datum_pending_kind",
+        "mem": null,
+        "verify_signature_alias_count": 5
+      },
+      {
+        "accepted": false,
+        "actual": "reject",
+        "context_cbor_bytes": 1755,
+        "cpu": null,
+        "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 127459499 | memory: 338922",
+        "exit": 1,
+        "expected": "reject",
+        "id": "datum_pending_noncanonical",
+        "mem": null,
+        "verify_signature_alias_count": 5
+      },
+      {
+        "accepted": false,
+        "actual": "reject",
+        "context_cbor_bytes": 1755,
+        "cpu": null,
+        "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 64029898 | memory: 189695",
+        "exit": 1,
+        "expected": "reject",
+        "id": "authority_value_minus_one",
+        "mem": null,
+        "verify_signature_alias_count": 5
+      },
+      {
+        "accepted": false,
+        "actual": "reject",
+        "context_cbor_bytes": 1755,
+        "cpu": null,
+        "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 64029898 | memory: 189695",
+        "exit": 1,
+        "expected": "reject",
+        "id": "authority_value_plus_one",
+        "mem": null,
+        "verify_signature_alias_count": 5
+      },
+      {
+        "accepted": false,
+        "actual": "reject",
+        "context_cbor_bytes": 1755,
+        "cpu": null,
+        "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 64029898 | memory: 189695",
+        "exit": 1,
+        "expected": "reject",
+        "id": "fee_diversion",
+        "mem": null,
+        "verify_signature_alias_count": 5
+      },
+      {
+        "accepted": false,
+        "actual": "reject",
+        "context_cbor_bytes": 1790,
+        "cpu": null,
+        "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 75531034 | memory: 231428",
+        "exit": 1,
+        "expected": "reject",
+        "id": "authority_extra_native_asset",
+        "mem": null,
+        "verify_signature_alias_count": 5
+      },
+      {
+        "accepted": false,
+        "actual": "reject",
+        "context_cbor_bytes": 2263,
+        "cpu": null,
+        "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 56651109 | memory: 168720",
+        "exit": 1,
+        "expected": "reject",
+        "id": "authority_output_duplicate_nft",
+        "mem": null,
+        "verify_signature_alias_count": 5
+      },
+      {
+        "accepted": false,
+        "actual": "reject",
+        "context_cbor_bytes": 1820,
+        "cpu": null,
+        "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 29296426 | memory: 84639",
+        "exit": 1,
+        "expected": "reject",
+        "id": "authority_output_extra_target",
+        "mem": null,
+        "verify_signature_alias_count": 5
+      },
+      {
+        "accepted": false,
+        "actual": "reject",
+        "context_cbor_bytes": 1755,
+        "cpu": null,
+        "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 57560157 | memory: 168689",
+        "exit": 1,
+        "expected": "reject",
+        "id": "authority_output_quantity_two",
+        "mem": null,
+        "verify_signature_alias_count": 5
+      },
+      {
+        "accepted": false,
+        "actual": "reject",
+        "context_cbor_bytes": 1247,
+        "cpu": null,
+        "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 20933322 | memory: 63735",
+        "exit": 1,
+        "expected": "reject",
+        "id": "authority_output_missing",
+        "mem": null,
+        "verify_signature_alias_count": 5
+      },
+      {
+        "accepted": false,
+        "actual": "reject",
+        "context_cbor_bytes": 1689,
+        "cpu": null,
+        "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 156960753 | memory: 401914",
+        "exit": 1,
+        "expected": "reject",
+        "id": "r2_proof_missing",
+        "mem": null,
+        "verify_signature_alias_count": 5
+      },
+      {
+        "accepted": false,
+        "actual": "reject",
+        "context_cbor_bytes": 1821,
+        "cpu": null,
+        "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 157811308 | memory: 402234",
+        "exit": 1,
+        "expected": "reject",
+        "id": "r2_proof_extra",
+        "mem": null,
+        "verify_signature_alias_count": 5
+      },
+      {
+        "accepted": false,
+        "actual": "reject",
+        "context_cbor_bytes": 1755,
+        "cpu": null,
+        "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 212724044 | memory: 402497",
+        "exit": 1,
+        "expected": "reject",
+        "id": "r2_invalid_proof_0",
+        "mem": null,
+        "verify_signature_alias_count": 5
+      },
+      {
+        "accepted": false,
+        "actual": "reject",
+        "context_cbor_bytes": 1755,
+        "cpu": null,
+        "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 266685859 | memory: 402508",
+        "exit": 1,
+        "expected": "reject",
+        "id": "r2_invalid_proof_1",
+        "mem": null,
+        "verify_signature_alias_count": 5
+      },
+      {
+        "accepted": false,
+        "actual": "reject",
+        "context_cbor_bytes": 1755,
+        "cpu": null,
+        "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 323847674 | memory: 422519",
+        "exit": 1,
+        "expected": "reject",
+        "id": "r2_invalid_proof_2",
+        "mem": null,
+        "verify_signature_alias_count": 5
+      },
+      {
+        "accepted": false,
+        "actual": "reject",
+        "context_cbor_bytes": 1755,
+        "cpu": null,
+        "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 377809489 | memory: 422530",
+        "exit": 1,
+        "expected": "reject",
+        "id": "r2_invalid_proof_3",
+        "mem": null,
+        "verify_signature_alias_count": 5
+      },
+      {
+        "accepted": false,
+        "actual": "reject",
+        "context_cbor_bytes": 1755,
+        "cpu": null,
+        "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 431695255 | memory: 422540",
+        "exit": 1,
+        "expected": "reject",
+        "id": "r2_invalid_proof_4",
+        "mem": null,
+        "verify_signature_alias_count": 5
+      },
+      {
+        "accepted": false,
+        "actual": "reject",
+        "context_cbor_bytes": 1755,
+        "cpu": null,
+        "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 212724044 | memory: 402497",
+        "exit": 1,
+        "expected": "reject",
+        "id": "r2_wrong_key_pairing",
+        "mem": null,
+        "verify_signature_alias_count": 5
+      },
+      {
+        "accepted": false,
+        "actual": "reject",
+        "context_cbor_bytes": 1755,
+        "cpu": null,
+        "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 212724044 | memory: 402497",
+        "exit": 1,
+        "expected": "reject",
+        "id": "r2_signature_for_other_seed",
+        "mem": null,
+        "verify_signature_alias_count": 5
+      },
+      {
+        "accepted": false,
+        "actual": "reject",
+        "context_cbor_bytes": 1755,
+        "cpu": null,
+        "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 212724044 | memory: 402497",
+        "exit": 1,
+        "expected": "reject",
+        "id": "r2_signature_for_other_network",
+        "mem": null,
+        "verify_signature_alias_count": 5
+      },
+      {
+        "accepted": false,
+        "actual": "reject",
+        "context_cbor_bytes": 1755,
+        "cpu": null,
+        "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 212724044 | memory: 402497",
+        "exit": 1,
+        "expected": "reject",
+        "id": "r2_signature_for_other_validator_hash",
+        "mem": null,
+        "verify_signature_alias_count": 5
+      },
+      {
+        "accepted": false,
+        "actual": "reject",
+        "context_cbor_bytes": 1755,
+        "cpu": null,
+        "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 212724044 | memory: 402497",
+        "exit": 1,
+        "expected": "reject",
+        "id": "r2_signature_for_other_epoch",
+        "mem": null,
+        "verify_signature_alias_count": 5
+      },
+      {
+        "accepted": false,
+        "actual": "reject",
+        "context_cbor_bytes": 1755,
+        "cpu": null,
+        "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 116697096 | memory: 317032",
+        "exit": 1,
+        "expected": "reject",
+        "id": "r2_swapped_datum_keys",
+        "mem": null,
+        "verify_signature_alias_count": 5
+      },
+      {
+        "accepted": false,
+        "actual": "reject",
+        "context_cbor_bytes": 1755,
+        "cpu": null,
+        "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 116697096 | memory: 317032",
+        "exit": 1,
+        "expected": "reject",
+        "id": "r2_duplicate_datum_key",
+        "mem": null,
+        "verify_signature_alias_count": 5
+      },
+      {
+        "accepted": false,
+        "actual": "reject",
+        "context_cbor_bytes": 1820,
+        "cpu": null,
+        "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 56399835 | memory: 168234",
+        "exit": 1,
+        "expected": "reject",
+        "id": "r2_wrong_state_address",
+        "mem": null,
+        "verify_signature_alias_count": 5
+      },
+      {
+        "accepted": false,
+        "actual": "reject",
+        "context_cbor_bytes": 1820,
+        "cpu": null,
+        "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 56399835 | memory: 168234",
+        "exit": 1,
+        "expected": "reject",
+        "id": "r2_wrong_state_validator_hash_constant",
+        "mem": null,
+        "verify_signature_alias_count": 5
+      }
+    ],
+    "status": "pass"
+  },
+  "policy_identity_class": "synthetic ephemeral committee; not frozen original applied-script identity",
+  "protected_file_count": 46,
+  "protected_unchanged": true,
+  "schema": "f05-public-synthetic-mutation-provenance-v1",
+  "sensitivity": "Public scripts, synthetic contexts, ephemeral public keys and signatures retained; private key bytes are never written.",
+  "status": "suite_returned"
+}

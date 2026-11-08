@@ -12,16 +12,23 @@ Uses: DA_PROVIDERS["avail"]["rpc"] from config.py
 
 import hashlib
 import logging
-from typing import Optional
+from typing import Mapping, Optional
 
 from neuron.da.adapters.base import DAAdapter
 from neuron.da.models import DAProtocol, DAReceipt
-from neuron.runtime_safety import require_not_live_mock
+from neuron.runtime_safety import (
+    ImmutableRuntimeConfiguration,
+    LiveModeSafetyError,
+    RuntimePolicy,
+    load_runtime_policy,
+    resolve_component_mock_mode,
+)
 
 logger = logging.getLogger("VAMS-DA-Avail")
+AVAIL_ADAPTER_MOCK_VARIABLE = "AVAIL_ADAPTER_MOCK_MODE"
 
 
-class AvailDAAdapter(DAAdapter):
+class AvailDAAdapter(ImmutableRuntimeConfiguration, DAAdapter):
     """
     Stub adapter for Avail.
 
@@ -32,18 +39,42 @@ class AvailDAAdapter(DAAdapter):
 
     protocol = DAProtocol.AVAIL
     name = "Avail (KZG Backup)"
+    _immutable_runtime_fields = frozenset(
+        {"rpc_url", "namespace", "mock_mode", "runtime_policy"}
+    )
 
-    def __init__(self, rpc_url: str = "https://avail-turing.api.onfinality.io/public", mock_mode: bool = True):
-        require_not_live_mock("AvailDAAdapter", True)
-        super().__init__(rpc_url, namespace=b"vams-perf-v1", mock_mode=True)  # Always mock for now
+    def __init__(
+        self,
+        rpc_url: str = "https://avail-turing.api.onfinality.io/public",
+        mock_mode: Optional[bool] = None,
+        *,
+        runtime_policy: Optional[RuntimePolicy] = None,
+        environ: Optional[Mapping[str, str]] = None,
+    ):
+        policy = runtime_policy or load_runtime_policy(environ)
+        resolved_mock = resolve_component_mock_mode(
+            "AvailDAAdapter",
+            AVAIL_ADAPTER_MOCK_VARIABLE,
+            mock_mode,
+            policy=policy,
+            environ=environ,
+        )
+        if not resolved_mock:
+            raise LiveModeSafetyError(
+                "AvailDAAdapter is a structured stub and cannot be selected for live submission"
+            )
+        super().__init__(rpc_url, namespace=b"vams-perf-v1", mock_mode=True)
+        self.runtime_policy = policy
         self._mock_height = 200
+        self._freeze_runtime_configuration()
 
     async def submit_blob(self, data: bytes, namespace: Optional[bytes] = None) -> DAReceipt:
         self._mock_height += 1
-        commitment = "0x" + hashlib.sha256(data).hexdigest()
-        blob_id = f"avail:{self._mock_height}:{hashlib.sha256(data).hexdigest()[:16]}"
+        digest = hashlib.sha256(data).hexdigest()
+        commitment = f"simulated:sha256:{digest}"
+        blob_id = f"simulated:avail:{self._mock_height}:{digest[:16]}"
 
-        logger.info(f"[STUB] Avail blob at block {self._mock_height}")
+        logger.info("AvailDAAdapter simulated submission completed (non-authoritative)")
 
         return DAReceipt(
             protocol=DAProtocol.AVAIL,
@@ -51,12 +82,15 @@ class AvailDAAdapter(DAAdapter):
             height=self._mock_height,
             commitment=commitment,
             verified=False,
+            simulated=True,
+            runtime_classification=self.runtime_policy.runtime_classification,
+            evidence_classification="non-authoritative",
         )
 
     async def verify_blob(self, receipt: DAReceipt) -> bool:
-        logger.info(f"[STUB] Avail verification for {receipt.blob_id}")
+        logger.info("AvailDAAdapter simulated receipts are never verified")
         return False
 
     async def get_blob(self, blob_id: str) -> Optional[bytes]:
-        logger.info(f"[STUB] Avail blob retrieval not implemented for {blob_id}")
+        logger.info("AvailDAAdapter simulated retrieval is unavailable")
         return None

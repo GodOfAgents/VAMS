@@ -1,0 +1,161 @@
+{
+  "cases": [
+    {
+      "artifacts": {
+        "raw_inputs": {
+          "path": "cases/seed_missing/raw_inputs.cbor",
+          "sha256": "1f4c86aa7a6d64cc0ebac3bf8633e98b5c91fa7ded58bdb70427fdd9ffa0e778",
+          "size_bytes": 73
+        },
+        "raw_outputs": {
+          "path": "cases/seed_missing/raw_outputs.cbor",
+          "sha256": "5a02a590dd2df85f220c273837e014bc5a6c75f6b1dfa8cd9d6770322e89c232",
+          "size_bytes": 79
+        },
+        "transaction": {
+          "path": "cases/seed_missing/transaction.cbor",
+          "sha256": "216c52f1803f8ea2de78e3f4c14ff7905ecaaab5dff10a83af2aca9e3c9c80ab",
+          "size_bytes": 5099
+        }
+      },
+      "id": "seed_missing",
+      "status": "PENDING",
+      "transaction_body_hash_blake2b_256": "e0127f544b238b586a4b947642d05cd7469dd5e495e40d52e21643a398bcf149"
+    },
+    {
+      "artifacts": {
+        "raw_inputs": {
+          "path": "cases/seed_datum_hash/raw_inputs.cbor",
+          "sha256": "4b20e2b2cf4bd58b1f6e385c90ffd098d583df69d95fbc7b1fcc2591da72b9fe",
+          "size_bytes": 73
+        },
+        "raw_outputs": {
+          "path": "cases/seed_datum_hash/raw_outputs.cbor",
+          "sha256": "6b0a4e1175feea6778d2c9c782a2843317f97905ee2efba20824939d2e1a2d5a",
+          "size_bytes": 79
+        },
+        "transaction": {
+          "path": "cases/seed_datum_hash/transaction.cbor",
+          "sha256": "72cb5d0bd2db739be30485a489e31d758db23ee553e26232575fb66720e0bad3",
+          "size_bytes": 5099
+        }
+      },
+      "id": "seed_datum_hash",
+      "status": "PENDING",
+      "transaction_body_hash_blake2b_256": "306ce077dcae7dbd48a65ec5d7fb6e424a4546be0ae9e7f2a24f9c577bcd553f"
+    },
+    {
+      "artifacts": {
+        "raw_inputs": {
+          "path": "cases/seed_datum_index/raw_inputs.cbor",
+          "sha256": "4b20e2b2cf4bd58b1f6e385c90ffd098d583df69d95fbc7b1fcc2591da72b9fe",
+          "size_bytes": 73
+        },
+        "raw_outputs": {
+          "path": "cases/seed_datum_index/raw_outputs.cbor",
+          "sha256": "0cb03db687d95740f58d1e47ffcb7b273a4be864ec45a7995d1d9a45ae6e395c",
+          "size_bytes": 79
+        },
+        "transaction": {
+          "path": "cases/seed_datum_index/transaction.cbor",
+          "sha256": "78a81a65568686d545adf424e70e2933f6beeb5201e7f5ae83ab4730293c3f65",
+          "size_bytes": 5099
+        }
+      },
+      "id": "seed_datum_index",
+      "status": "PENDING",
+      "transaction_body_hash_blake2b_256": "d45ccdcb5b2ca38824e0e6271401ca6ef61924e9248e687e9c0ed5416f5520fa"
+    }
+  ],
+  "checksum_command": "sha256sum -c SHA256SUMS",
+  "checksum_exit": 0,
+  "coordinator_scope": "Freeze exact local fixture bytes for independent review only; no Aiken simulator invocation or case admission is authorized by this record.",
+  "date": "2026-10-03",
+  "executions": 0,
+  "family_fixture_count": 3,
+  "family_id": "seed_reference_and_datum_binding",
+  "family_manifest_sha256": "28f19203e16ed23fba6b5d9fb8d49b634dc9bc5835f099ed157a5a434f0e33cb",
+  "files": {
+    "FAMILY-MANIFEST.json": {
+      "sha256": "28f19203e16ed23fba6b5d9fb8d49b634dc9bc5835f099ed157a5a434f0e33cb",
+      "size_bytes": 9310
+    },
+    "SHA256SUMS": {
+      "sha256": "9b35cb6a9dfb21a971e41a8420574cfbfcee39114b7364288b596f3343acf57b",
+      "size_bytes": 1840
+    },
+    "build_seed_reference_family.py": {
+      "sha256": "29cadde11e3ee11917e740e4a525a94e2e76f8a1b994a660eab5b8f96a1d1266",
+      "size_bytes": 17798
+    },
+    "cases/seed_datum_hash/CASE-MANIFEST.json": {
+      "sha256": "7a817ff38142234bb5cfe862737723fe899557b92e9345716992f54966eb5b9d",
+      "size_bytes": 1892
+    },
+    "cases/seed_datum_hash/raw_inputs.cbor": {
+      "sha256": "4b20e2b2cf4bd58b1f6e385c90ffd098d583df69d95fbc7b1fcc2591da72b9fe",
+      "size_bytes": 73
+    },
+    "cases/seed_datum_hash/raw_outputs.cbor": {
+      "sha256": "6b0a4e1175feea6778d2c9c782a2843317f97905ee2efba20824939d2e1a2d5a",
+      "size_bytes": 79
+    },
+    "cases/seed_datum_hash/transaction.cbor": {
+      "sha256": "72cb5d0bd2db739be30485a489e31d758db23ee553e26232575fb66720e0bad3",
+      "size_bytes": 5099
+    },
+    "cases/seed_datum_index/CASE-MANIFEST.json": {
+      "sha256": "956b19583f70d31832f5309b3e74583ec873776a0f697ec5f09f12df7023ded8",
+      "size_bytes": 1886
+    },
+    "cases/seed_datum_index/raw_inputs.cbor": {
+      "sha256": "4b20e2b2cf4bd58b1f6e385c90ffd098d583df69d95fbc7b1fcc2591da72b9fe",
+      "size_bytes": 73
+    },
+    "cases/seed_datum_index/raw_outputs.cbor": {
+      "sha256": "0cb03db687d95740f58d1e47ffcb7b273a4be864ec45a7995d1d9a45ae6e395c",
+      "size_bytes": 79
+    },
+    "cases/seed_datum_index/transaction.cbor": {
+      "sha256": "78a81a65568686d545adf424e70e2933f6beeb5201e7f5ae83ab4730293c3f65",
+      "size_bytes": 5099
+    },
+    "cases/seed_missing/CASE-MANIFEST.json": {
+      "sha256": "6724844eae1211a5f0f7cc9ab6bd0929344cdca3d73a2f0d1d8911b82065838f",
+      "size_bytes": 1916
+    },
+    "cases/seed_missing/raw_inputs.cbor": {
+      "sha256": "1f4c86aa7a6d64cc0ebac3bf8633e98b5c91fa7ded58bdb70427fdd9ffa0e778",
+      "size_bytes": 73
+    },
+    "cases/seed_missing/raw_outputs.cbor": {
+      "sha256": "5a02a590dd2df85f220c273837e014bc5a6c75f6b1dfa8cd9d6770322e89c232",
+      "size_bytes": 79
+    },
+    "cases/seed_missing/transaction.cbor": {
+      "sha256": "216c52f1803f8ea2de78e3f4c14ff7905ecaaab5dff10a83af2aca9e3c9c80ab",
+      "size_bytes": 5099
+    },
+    "positive_control/CASE-MANIFEST.json": {
+      "sha256": "95d750abdd706e8619c24122412b298e0d13a30c71209cab2a4a49dc04e09a0a",
+      "size_bytes": 1179
+    },
+    "positive_control/raw_inputs.cbor": {
+      "sha256": "4b20e2b2cf4bd58b1f6e385c90ffd098d583df69d95fbc7b1fcc2591da72b9fe",
+      "size_bytes": 73
+    },
+    "positive_control/raw_outputs.cbor": {
+      "sha256": "9cdf345a785f51763bdb43f1b1ba0c20b5545051f03051e6a7bf726ea128c56a",
+      "size_bytes": 79
+    },
+    "positive_control/transaction.cbor": {
+      "sha256": "765c717f16b543c746b88742e8b775cd3ecabca4fef6edd16702184683780a28",
+      "size_bytes": 5099
+    }
+  },
+  "fixture_file_count": 18,
+  "freeze_gate": "Independent family approval is still required before any Aiken simulator invocation.",
+  "schema_version": "f05-2a-r4-coordinator-freeze-r1",
+  "sha256sums_file_sha256": "9b35cb6a9dfb21a971e41a8420574cfbfcee39114b7364288b596f3343acf57b",
+  "status": "coordinator_frozen_pending_independent_family_approval"
+}

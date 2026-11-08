@@ -1,0 +1,21 @@
+{
+  "changed_source_documents": [
+    "README.md",
+    "docs/L3_CHAIN_AND_DA.md"
+  ],
+  "claim": "Near is mock-only locally and blocked from live audit routing until signed submission, verification, exact retrieval, and independent evidence exist. Celestia has a live-capable path but is not release-evidence eligible without independent observation.",
+  "date": "2026-10-03",
+  "dirty_tree": true,
+  "head": "829ab544571f12efe50ecb5740f129c8acb3e16f",
+  "next_single_slice": "Correct docs/ARCHITECTURE.md Celestia live-failure fallback claim against current adapter source.",
+  "readiness": "NOT READY",
+  "schema": "m7-near-docs-reality-v1",
+  "scope": "DOC-01 Near live-capability correction only; other architecture claims remain for separate review.",
+  "source_hashes": {
+    "README.md": "f3d0d6ced369a89b6fb91e32c35a00740785633ecd3d0a082bdd9780a2c4ebf9",
+    "docs/L3_CHAIN_AND_DA.md": "f1971760cae86b6e24c2504293b34e85b3d950db08f9e819274fe5f450a41019",
+    "neuron/da/adapters/celestia_adapter.py": "0498c0c4fc3d69ab72bd989efae82577917e6f1c601efb43f59957f98fef1f3e",
+    "neuron/da/adapters/near_adapter.py": "6d797515bbce468c3e7e0579e38ef315002798ed766505a7cc7985db97ea338b",
+    "neuron/da/performance_audit.py": "79b1dde2a6e1162bb019f13100a78d5dcc939c5c1b9a64a7f06f748a206aa474"
+  }
+}

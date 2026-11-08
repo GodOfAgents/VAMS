@@ -1,0 +1,15 @@
+{
+  "base": {
+    "policy_id": "633cb9f354d3fa797c763819c221d104e781f90d02586beae02fc24a",
+    "compiled_bytes": 3467
+  },
+  "valid": {
+    "accepted": false,
+    "exit": 101,
+    "cpu": null,
+    "mem": null,
+    "context_cbor_bytes": 1755,
+    "diagnostic": "    |    Operating System: linux |    Architecture:     x86_64 |    Version:          v1.1.21+42babe5 |     |    \u001b[35mcrates/uplc/src/parser.rs:110:57 |     |        \u001b[39mcalled `Result::unwrap()` on an `Err` value: \"Default Function not found - verifySignature\""
+  },
+  "exception": "AssertionError: canonical F05.2a bootstrap fixture rejected by compiled Plutus V3"
+}

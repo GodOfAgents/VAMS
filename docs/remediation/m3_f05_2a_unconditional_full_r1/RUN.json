@@ -1,0 +1,67 @@
+{
+  "schema_version": "vams-diagnostic-run-v1",
+  "purpose": "F05.2a unconditional_success full-harness execution diagnosis; no acceptance credit",
+  "date_utc": "2026-10-03",
+  "repository": {
+    "path": "/home/GodOfAgents/code/VAMS-testnet",
+    "branch": "testnet/remediation-20260907",
+    "head": "829ab544571f12efe50ecb5740f129c8acb3e16f",
+    "source_mutations_by_this_run": false
+  },
+  "toolchain": {
+    "python": "Python 3.12.14",
+    "aiken": "aiken v1.1.21+42babe5",
+    "network": "bwrap --unshare-net",
+    "source_mount": "read-only root bind; only dedicated evidence directory bind-mounted writable"
+  },
+  "command": [
+    "bwrap",
+    "--unshare-net",
+    "--ro-bind",
+    "/",
+    "/",
+    "--tmpfs",
+    "/tmp",
+    "--dev-bind",
+    "/dev",
+    "/dev",
+    "--proc",
+    "/proc",
+    "--bind",
+    "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m3_f05_2a_unconditional_full_r1",
+    "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m3_f05_2a_unconditional_full_r1",
+    "--chdir",
+    "/home/GodOfAgents/code/VAMS-testnet",
+    "/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python",
+    "-B",
+    "scripts/remediation/test_f05_2a_authority_bootstrap_public.py",
+    "--aiken",
+    "/home/GodOfAgents/vams-evidence/toolchains/aiken-1.1.21/unpacked/aiken-x86_64-unknown-linux-musl/aiken",
+    "--output",
+    "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m3_f05_2a_unconditional_full_r1/RESULT.json"
+  ],
+  "result": {
+    "process_exit_code": 1,
+    "stdout_path": "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m3_f05_2a_unconditional_full_r1/RUN.stdout",
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr_path": "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m3_f05_2a_unconditional_full_r1/RUN.stderr",
+    "stderr_sha256": "40e5233cf293b108ab4980fd7b45de1dc7d6cf79d31efbb578c8faeec08bbfac",
+    "result_json_created": false,
+    "failing_stage": "scripts/remediation/test_f05_2a_authority_bootstrap_public.py:_run_suite, line 895; canonical positive bootstrap fixture control",
+    "exception": "AssertionError: canonical F05.2a bootstrap fixture rejected by compiled Plutus V3",
+    "negative_cases_executed": 0,
+    "mutations_executed": 0
+  },
+  "interpretation": {
+    "classified_as": "harness/backend execution blocker",
+    "validator_defect_established": false,
+    "f05_negative_or_mutation_credit": false,
+    "simulator_ledger_or_live_network_evidence": false,
+    "prior_RUN_exit_disposition": "The one-byte prior RUN.exit was an invalid/empty wrapper capture; this direct invocation supplies the authoritative process exit code."
+  },
+  "source_sha256": {
+    "scripts/remediation/test_f05_2a_authority_bootstrap_public.py": "f6689e80ab2cbac78a8b05b76917ec0e9eac122e5023f1c37d3dd21afd5d6570",
+    "docs/remediation/m3_f05_design_r2/CONTRACT.json": "fac481585ade94c499da00519a6c64b0ae3513e1e2c67da2f8461c16bdd378b2",
+    "docs/remediation/m3_f05_2a/tx_sim_evidence_contract_r3_1.json": "0ff2673605ebae030762b44144d67fd634cd53b0261467fbfabede61e5981933"
+  }
+}

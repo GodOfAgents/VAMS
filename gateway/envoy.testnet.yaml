@@ -1,0 +1,122 @@
+# Sole supported public ingress for the live VAMS Gateway.
+# Envoy 1.39.1; official binary SHA-256:
+# 002c6e1c69ed0fa0ea381887247cadadfaec9481375fa8d8d2b1731eeabf40b8
+# https://github.com/envoyproxy/envoy/releases/download/v1.39.1/envoy-1.39.1-linux-x86_64
+# Uvicorn must listen only on 127.0.0.1:8000.
+static_resources:
+  listeners:
+  - name: vams_gateway_ingress
+    address:
+      socket_address: {address: 0.0.0.0, port_value: 8443}
+    per_connection_buffer_limit_bytes: 1048576
+    filter_chains:
+    - transport_socket:
+        name: envoy.transport_sockets.tls
+        typed_config:
+          "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.DownstreamTlsContext
+          require_client_certificate: true
+          common_tls_context:
+            tls_params:
+              tls_minimum_protocol_version: TLSv1_2
+              tls_maximum_protocol_version: TLSv1_3
+            alpn_protocols: [http/1.1]
+            tls_certificates:
+            - certificate_chain: {filename: /etc/vams/gateway/tls/server.crt}
+              private_key: {filename: /etc/vams/gateway/tls/server.key}
+            validation_context:
+              trusted_ca: {filename: /etc/vams/gateway/tls/client-ca.crt}
+      filters:
+      - name: envoy.filters.network.http_connection_manager
+        typed_config:
+          "@type": type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
+          stat_prefix: vams_gateway
+          codec_type: HTTP1
+          use_remote_address: true
+          skip_xff_append: true
+          generate_request_id: false
+          forward_client_cert_details: SANITIZE_SET
+          set_current_client_cert_details: {}
+          max_request_headers_kb: 16
+          request_headers_timeout: 2s
+          request_timeout: 5s
+          stream_idle_timeout: 5s
+          common_http_protocol_options:
+            idle_timeout: 5s
+            max_headers_count: 100
+            headers_with_underscores_action: REJECT_REQUEST
+          http_protocol_options:
+            allow_absolute_url: false
+            accept_http_10: false
+            allow_chunked_length: false
+            override_stream_error_on_invalid_http_message: false
+          normalize_path: true
+          merge_slashes: false
+          path_with_escaped_slashes_action: REJECT_REQUEST
+          stream_error_on_invalid_http_message: false
+          route_config:
+            name: vams_gateway_routes
+            request_headers_to_remove:
+            - forwarded
+            - x-forwarded-for
+            - x-forwarded-host
+            - x-forwarded-proto
+            - x-forwarded-port
+            - x-real-ip
+            - x-vams-ingress-trust
+            - x-vams-ingress-version
+            - x-vams-client-cert-verified
+            - x-vams-client-cert-fingerprint
+            - x-forwarded-tls-client-cert-verified
+            - x-forwarded-tls-client-cert-fingerprint
+            - x-ssl-client-verify
+            - x-ssl-client-fingerprint
+            request_headers_to_add:
+            - header: {key: x-forwarded-for, value: "%DOWNSTREAM_DIRECT_REMOTE_ADDRESS_WITHOUT_PORT%"}
+              append_action: OVERWRITE_IF_EXISTS_OR_ADD
+            - header: {key: x-forwarded-host, value: "%REQ(:AUTHORITY)%"}
+              append_action: OVERWRITE_IF_EXISTS_OR_ADD
+            - header: {key: x-forwarded-proto, value: https}
+              append_action: OVERWRITE_IF_EXISTS_OR_ADD
+            - header: {key: x-real-ip, value: "%DOWNSTREAM_DIRECT_REMOTE_ADDRESS_WITHOUT_PORT%"}
+              append_action: OVERWRITE_IF_EXISTS_OR_ADD
+            - header: {key: x-vams-ingress-version, value: envoy-1.39.1-v1}
+              append_action: OVERWRITE_IF_EXISTS_OR_ADD
+            - header: {key: x-vams-client-cert-verified, value: success}
+              append_action: OVERWRITE_IF_EXISTS_OR_ADD
+            - header: {key: x-vams-client-cert-fingerprint, value: "%DOWNSTREAM_PEER_FINGERPRINT_256%"}
+              append_action: OVERWRITE_IF_EXISTS_OR_ADD
+            virtual_hosts:
+            - name: vams_gateway
+              domains: ["*"]
+              routes:
+              - match:
+                  prefix: "/"
+                  headers:
+                  - name: ":method"
+                    string_match:
+                      safe_regex:
+                        regex: "^(GET|HEAD|POST|PUT|PATCH|DELETE|OPTIONS)$"
+                route:
+                  cluster: loopback_uvicorn
+                  timeout: 3s
+              - match: {prefix: "/"}
+                direct_response: {status: 405}
+          http_filters:
+          - name: envoy.filters.http.buffer
+            typed_config:
+              "@type": type.googleapis.com/envoy.extensions.filters.http.buffer.v3.Buffer
+              max_request_bytes: 1048576
+          - name: envoy.filters.http.router
+            typed_config:
+              "@type": type.googleapis.com/envoy.extensions.filters.http.router.v3.Router
+  clusters:
+  - name: loopback_uvicorn
+    type: STATIC
+    connect_timeout: 1s
+    load_assignment:
+      cluster_name: loopback_uvicorn
+      endpoints:
+      - lb_endpoints:
+        - endpoint:
+            address:
+              socket_address: {address: 127.0.0.1, port_value: 8000}

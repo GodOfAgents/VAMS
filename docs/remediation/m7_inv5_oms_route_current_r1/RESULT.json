@@ -1,0 +1,28 @@
+{
+  "schema": "m7-inv5-oms-route-result-r1",
+  "focused_suite": {
+    "exit_code": 0,
+    "failed": 0,
+    "passed": 88,
+    "output": "........................................................................ [ 81%]\\n................                                                         [100%]\\n88 passed in 1.79s\\n"
+  },
+  "test_file_syntax": {
+    "exit_code": 0,
+    "method": "AST parse under pinned Python 3.12.14"
+  },
+  "git_diff_check": {
+    "exit_code": 0,
+    "note": "The added test file is tracked as a modified file here, but prior dirty work exists; this check establishes no whitespace errors in the tracked diff, not a clean baseline."
+  },
+  "coverage": {
+    "INV-5": [
+      "P3 requires ServiceBlock_OMS_v1",
+      "verifier construction failure denies",
+      "only live-provider verified evidence routes",
+      "explicit unverified provider response, HTTP 503, malformed response, and timeout each deny P3 end-to-end"
+    ],
+    "review_gap_closed": "Four provider non-verification cases each deny through CLRouter.route and assert exactly one provider transport call."
+  },
+  "production_source_changed": false,
+  "readiness": "NOT READY; local synthetic-provider tests do not establish live OMS/provider, external permission, hosted CI, chain, or deployment evidence."
+}

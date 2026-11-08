@@ -122,6 +122,12 @@ class TestComputeManager:
 
 class TestTrustManager:
     """Tests for TrustManager."""
+
+    @pytest.fixture(autouse=True)
+    def explicit_local_runtime(self):
+        """Legacy healthy statuses are explicit local fixtures, not TEE evidence."""
+        with patch.dict(os.environ, {"VAMS_ENV": "test"}, clear=True):
+            yield
     
     def test_mock_mode_all_healthy(self):
         """Test that mock mode returns all healthy providers."""
@@ -154,14 +160,15 @@ class TestTrustManager:
         assert "automata" in manager.providers
     
     def test_get_healthy_providers_after_mock_check(self):
-        """Test healthy providers after mock check."""
+        """Fixture health cannot admit an eligible TEE provider."""
         manager = TrustManager(mock_mode=True)
         manager.check_all_status()
         
         healthy = manager.get_healthy_providers()
         
-        assert len(healthy) == 3
-        assert set(healthy) == {"phala", "marlin", "automata"}
+        assert healthy == []
+        assert set(manager.status_cache) == {"phala", "marlin", "automata"}
+        assert all(info.simulated for info in manager.status_cache.values())
     
     def test_list_providers_format(self):
         """Test list_providers returns correct format."""

@@ -1,0 +1,9 @@
+{
+  "accepted": false,
+  "exit": 1,
+  "cpu": null,
+  "mem": null,
+  "context_cbor_bytes": 1755,
+  "verify_signature_alias_count": 5,
+  "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 50525002 | memory: 147521"
+}

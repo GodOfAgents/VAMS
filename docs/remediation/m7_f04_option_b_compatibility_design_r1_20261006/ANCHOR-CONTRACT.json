@@ -1,0 +1,317 @@
+{
+  "schema": "vams.f04.option-b.anchor-contract.v1",
+  "status": "DESIGN_ONLY_PENDING_IMPLEMENTATION",
+  "owner_option": "B_PER_BOOTSTRAP_MULTIPLE_CANDIDATE_ANCHORS",
+  "global_did_uniqueness": false,
+  "datum": {
+    "name": "AnchorDatumV2",
+    "constructor": 0,
+    "schema_version": 2,
+    "fields": [
+      {
+        "index": 0,
+        "name": "schema_version",
+        "data_type": "Int",
+        "constraint": "2"
+      },
+      {
+        "index": 1,
+        "name": "anchor_seed",
+        "data_type": "OutputReference",
+        "constraint": "tx_id bytes32,index u32"
+      },
+      {
+        "index": 2,
+        "name": "bootstrap_ref",
+        "data_type": "OutputReference",
+        "constraint": "tx_id bytes32,index u32; different from anchor_seed"
+      },
+      {
+        "index": 3,
+        "name": "identity_policy_id",
+        "data_type": "ByteArray",
+        "constraint": "28 bytes"
+      },
+      {
+        "index": 4,
+        "name": "identity_asset_name",
+        "data_type": "ByteArray",
+        "constraint": "32 bytes; existing identity formula"
+      },
+      {
+        "index": 5,
+        "name": "did",
+        "data_type": "ByteArray",
+        "constraint": "valid UTF-8 32..256 bytes; no normalization"
+      },
+      {
+        "index": 6,
+        "name": "founding_owner_vkh",
+        "data_type": "ByteArray",
+        "constraint": "28 bytes"
+      },
+      {
+        "index": 7,
+        "name": "initial_controller_vkh",
+        "data_type": "ByteArray",
+        "constraint": "28 bytes"
+      },
+      {
+        "index": 8,
+        "name": "initial_operator_vkh",
+        "data_type": "ByteArray",
+        "constraint": "28 bytes"
+      },
+      {
+        "index": 9,
+        "name": "initial_guardians",
+        "data_type": "List<ByteArray>",
+        "constraint": "exactly five sorted ascending distinct 28-byte keys disjoint founder/controller/operator"
+      },
+      {
+        "index": 10,
+        "name": "registry_script_hash",
+        "data_type": "ByteArray",
+        "constraint": "28 bytes"
+      },
+      {
+        "index": 11,
+        "name": "initial_metadata_hash",
+        "data_type": "ByteArray",
+        "constraint": "32 bytes"
+      },
+      {
+        "index": 12,
+        "name": "genesis_control_epoch",
+        "data_type": "Int",
+        "constraint": "0"
+      },
+      {
+        "index": 13,
+        "name": "genesis_guardian_epoch",
+        "data_type": "Int",
+        "constraint": "0"
+      },
+      {
+        "index": 14,
+        "name": "anchor_lovelace",
+        "data_type": "Int",
+        "constraint": "1..2^64-1 and ledger minimum"
+      },
+      {
+        "index": 15,
+        "name": "initial_stake_lovelace",
+        "data_type": "Int",
+        "constraint": "1000000000..2^64-1"
+      },
+      {
+        "index": 16,
+        "name": "initial_reputation_bps",
+        "data_type": "Int",
+        "constraint": "5000"
+      }
+    ],
+    "output_reference": {
+      "constructor": 0,
+      "fields": [
+        "transaction_id:Bytes32",
+        "output_index:Int_u32"
+      ]
+    }
+  },
+  "redeemer": {
+    "name": "IssueAnchor",
+    "constructor": 0,
+    "fields": [
+      "anchor_seed:OutputReference"
+    ],
+    "all_other_redeemers_reject": true
+  },
+  "script_graph": [
+    {
+      "role": "S0",
+      "parameters": [],
+      "behavior": "fixed unspendable anchor lock"
+    },
+    {
+      "role": "P0",
+      "parameters": [
+        "S0"
+      ],
+      "behavior": "fixed shared anchor mint policy"
+    },
+    {
+      "role": "R",
+      "parameters": [
+        "S0",
+        "P0"
+      ],
+      "behavior": "shared V2 registry; all mint purposes reject"
+    },
+    {
+      "role": "N",
+      "parameters": [
+        "bootstrap_ref",
+        "R",
+        "S0",
+        "P0"
+      ],
+      "behavior": "standalone per-bootstrap identity mint/burn"
+    }
+  ],
+  "hash_binding": "all role hashes are ledger applied Plutus V3 hash bytes28; none are source SHA256",
+  "name_serialization": {
+    "hash": "blake2b_256",
+    "identity_domain_ascii_nul": "VAMS/agent/v1\\0",
+    "identity_fields": [
+      "u16_be(len(did))",
+      "did",
+      "founding_owner_vkh",
+      "bootstrap_ref.transaction_id",
+      "u32_be(bootstrap_ref.output_index)"
+    ],
+    "anchor_domain_ascii_nul": "VAMS/agent-anchor/v2\\0",
+    "anchor_fields": [
+      "u16_be(schema_version)",
+      "anchor_seed.transaction_id",
+      "u32_be(anchor_seed.output_index)",
+      "bootstrap_ref.transaction_id",
+      "u32_be(bootstrap_ref.output_index)",
+      "identity_policy_id",
+      "identity_asset_name",
+      "u16_be(len(did))",
+      "did",
+      "founding_owner_vkh",
+      "initial_controller_vkh",
+      "initial_operator_vkh",
+      "initial_guardians[0]",
+      "initial_guardians[1]",
+      "initial_guardians[2]",
+      "initial_guardians[3]",
+      "initial_guardians[4]",
+      "registry_script_hash",
+      "initial_metadata_hash",
+      "u64_be(genesis_control_epoch)",
+      "u64_be(genesis_guardian_epoch)",
+      "u64_be(anchor_lovelace)",
+      "u64_be(initial_stake_lovelace)",
+      "u16_be(initial_reputation_bps)"
+    ],
+    "excluded_self_reference": "derived anchor asset name is not in its own preimage",
+    "identity_domain_hex": "56414d532f6167656e742f763100",
+    "anchor_domain_hex": "56414d532f6167656e742d616e63686f722f763200"
+  },
+  "bounds": {
+    "max_datum_cbor_bytes": 2048,
+    "max_inputs": 16,
+    "max_reference_inputs": 4,
+    "max_outputs": 16,
+    "max_non_ada_mint_entries": 16,
+    "issuance_non_ada_mint_entries": 1,
+    "did_bytes_min": 32,
+    "did_bytes_max": 256,
+    "key_hash_bytes": 28,
+    "script_hash_bytes": 28,
+    "asset_name_bytes": 32,
+    "tx_id_bytes": 32,
+    "guardians": 5,
+    "guardian_threshold": 3,
+    "u32_max": 4294967295,
+    "u64_max": "18446744073709551615",
+    "minimum_genesis_stake_lovelace": 1000000000,
+    "max_selected_authorization_signers": 8,
+    "selected_authorization_signer_scope": "Selected action-authorization list only: guardian rotation needs old quorum3 plus new guardians5; unrelated funding signatories are not counted or transaction-wide bounded by this rule."
+  },
+  "issuance": {
+    "founder_signature": true,
+    "guardian_quorum": 3,
+    "genesis_controller_signature_not_required_at_issuance": true,
+    "bootstrap_reference_required": true,
+    "bootstrap_consumption_forbidden": true,
+    "anchor_seed_consumed_exactly_once": true,
+    "anchor_seed_distinct_bootstrap": true,
+    "mint_quantity": 1,
+    "output_payment_credential": "Script(S0)",
+    "output_stake_credential": "None",
+    "output_reference_script": "None",
+    "output_datum": "Inline AnchorDatumV2",
+    "value": "exact anchor_lovelace ADA plus P0/derived_name quantity1; no other assets",
+    "all_burns_reject": true
+  },
+  "registration": {
+    "founder_signature": true,
+    "initial_controller_signature": true,
+    "all_five_guardian_signatures": true,
+    "bootstrap_is_unique_registry_pregenesis_own_ref": true,
+    "bootstrap_consumed_exactly_once": true,
+    "matching_anchor_references": 1,
+    "matching_reference_rule_scope": "transaction-local; not global uniqueness",
+    "standalone_mint_and_register_same_transaction": true,
+    "registry_mint_rejects": true,
+    "checks": "full datum/name/value/address/bounds; compare every genesis field and own policy/hash/mint/unique output bindings"
+  },
+  "recovery": {
+    "anchor_projection": [
+      "did",
+      "founding_owner_vkh",
+      "bootstrap_ref",
+      "identity_policy_id",
+      "identity_asset_name",
+      "registry_script_hash"
+    ],
+    "mutable_authority_from": "prior V2 state plus independently validated accepted recovery transition",
+    "initial_guardians_are_not_current_epoch_authority": true,
+    "preserve_prior_reviewed_recovery_design": true
+  },
+  "guarantees": {
+    "multiple_anchor_seeds_per_bootstrap_allowed": true,
+    "one_ledger_admitted_registration_per_bootstrap": "reviewed/pinned VAMS R/N route only: all authorized candidates consume same bootstrap_ref; P0 quorum does not prove arbitrary alternative code behavior",
+    "different_bootstrap_same_did_allowed": true,
+    "onchain_build_provenance": false,
+    "quorum_can_authorize_alternative_code": true,
+    "signatures_require_offchain_reproducible_source_build_parameter_review": true,
+    "registration_route_scope": "Reviewed/pinned VAMS R/N applied bytes only; no bootstrap-consumption or single-registration guarantee is awarded to arbitrary alternative quorum-approved code"
+  },
+  "evidence": {
+    "design_checks": "STRUCTURAL_ONLY",
+    "compiled_v3": "PENDING",
+    "ledger_admission": "PENDING",
+    "live_preprod": "PENDING",
+    "worst_state_budgets": "PENDING; actual PreProd parameters and reviewed margin required"
+  },
+  "golden_vector": {
+    "classification": "independent direct Python bytes serialization; STRUCTURAL_ONLY, no compiled credit",
+    "did_hex": "6469643a76616d733a666978747572653a616c7068612d303030303030303030",
+    "anchor_seed": {
+      "transaction_id": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "output_index": 1
+    },
+    "bootstrap_ref": {
+      "transaction_id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "output_index": 7
+    },
+    "identity_policy_id": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+    "registry_script_hash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+    "founding_owner_vkh": "11111111111111111111111111111111111111111111111111111111",
+    "initial_controller_vkh": "22222222222222222222222222222222222222222222222222222222",
+    "initial_operator_vkh": "33333333333333333333333333333333333333333333333333333333",
+    "initial_guardians": [
+      "50505050505050505050505050505050505050505050505050505050",
+      "51515151515151515151515151515151515151515151515151515151",
+      "52525252525252525252525252525252525252525252525252525252",
+      "53535353535353535353535353535353535353535353535353535353",
+      "54545454545454545454545454545454545454545454545454545454"
+    ],
+    "initial_metadata_hash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+    "schema_version": 2,
+    "genesis_control_epoch": 0,
+    "genesis_guardian_epoch": 0,
+    "anchor_lovelace": 3000000,
+    "initial_stake_lovelace": 1000000000,
+    "initial_reputation_bps": 5000,
+    "identity_preimage_hex": "56414d532f6167656e742f76310000206469643a76616d733a666978747572653a616c7068612d30303030303030303011111111111111111111111111111111111111111111111111111111aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa00000007",
+    "identity_asset_name": "8225f8a29c444220873d3adf61c3f6cab252124f7ee964d40edd7a8d61851c3b",
+    "anchor_preimage_hex": "56414d532f6167656e742d616e63686f722f7632000002bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb00000001aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa00000007dddddddddddddddddddddddddddddddddddddddddddddddddddddddd8225f8a29c444220873d3adf61c3f6cab252124f7ee964d40edd7a8d61851c3b00206469643a76616d733a666978747572653a616c7068612d3030303030303030301111111111111111111111111111111111111111111111111111111122222222222222222222222222222222222222222222222222222222333333333333333333333333333333333333333333333333333333335050505050505050505050505050505050505050505050505050505051515151515151515151515151515151515151515151515151515151525252525252525252525252525252525252525252525252525252525353535353535353535353535353535353535353535353535353535354545454545454545454545454545454545454545454545454545454cccccccccccccccccccccccccccccccccccccccccccccccccccccccceeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee0000000000000000000000000000000000000000002dc6c0000000003b9aca001388",
+    "anchor_asset_name": "cb80232ec3e145ad454efea86e5aa2d78b2db62cc923fa614a00107f98dee66b"
+  }
+}

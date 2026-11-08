@@ -1,0 +1,462 @@
+{
+  "schema": "vams.cardano-governance-timing-campaign.v1",
+  "status": "PREPARED_NOT_RUN",
+  "native_source": "cardano/validators/governance_v2.test.ak",
+  "native_source_sha256": "6a668692844f8000600f96285ca62570911813668135e1d81614c2e70d709519",
+  "existing_cases": 88,
+  "added_cases": 53,
+  "total_cases": 141,
+  "protocol_expectations": {
+    "ACCEPT": 28,
+    "REJECT": 111,
+    "REFERENCE_MATCH": 2
+  },
+  "cases": [
+    {
+      "id": "upper_anchor_identifier_matches_reference_bytes",
+      "native_status": "NOT_RUN",
+      "ledger_status": "NOT_RUN",
+      "budget_status": "NOT_RUN",
+      "protocol_expectation": "REFERENCE_MATCH",
+      "expected_test_result": "PASS_IF_REQUIRED_PROPERTY_HOLDS"
+    },
+    {
+      "id": "timing_upper_anchor_transition_accepts",
+      "native_status": "NOT_RUN",
+      "ledger_status": "NOT_RUN",
+      "budget_status": "NOT_RUN",
+      "protocol_expectation": "ACCEPT",
+      "expected_test_result": "PASS_IF_REQUIRED_PROPERTY_HOLDS"
+    },
+    {
+      "id": "timing_backdated_lower_anchor_transition_rejects",
+      "native_status": "NOT_RUN",
+      "ledger_status": "NOT_RUN",
+      "budget_status": "NOT_RUN",
+      "protocol_expectation": "REJECT",
+      "expected_test_result": "PASS_IF_REQUIRED_PROPERTY_HOLDS"
+    },
+    {
+      "id": "timing_queue_overflow_transition_rejects",
+      "native_status": "NOT_RUN",
+      "ledger_status": "NOT_RUN",
+      "budget_status": "NOT_RUN",
+      "protocol_expectation": "REJECT",
+      "expected_test_result": "PASS_IF_REQUIRED_PROPERTY_HOLDS"
+    },
+    {
+      "id": "timing_upper_anchor_authority_accepts",
+      "native_status": "NOT_RUN",
+      "ledger_status": "NOT_RUN",
+      "budget_status": "NOT_RUN",
+      "protocol_expectation": "ACCEPT",
+      "expected_test_result": "PASS_IF_REQUIRED_PROPERTY_HOLDS"
+    },
+    {
+      "id": "timing_backdated_lower_anchor_authority_rejects",
+      "native_status": "NOT_RUN",
+      "ledger_status": "NOT_RUN",
+      "budget_status": "NOT_RUN",
+      "protocol_expectation": "REJECT",
+      "expected_test_result": "PASS_IF_REQUIRED_PROPERTY_HOLDS"
+    },
+    {
+      "id": "timing_queue_overflow_authority_rejects",
+      "native_status": "NOT_RUN",
+      "ledger_status": "NOT_RUN",
+      "budget_status": "NOT_RUN",
+      "protocol_expectation": "REJECT",
+      "expected_test_result": "PASS_IF_REQUIRED_PROPERTY_HOLDS"
+    },
+    {
+      "id": "timing_upper_anchor_governor_accepts",
+      "native_status": "NOT_RUN",
+      "ledger_status": "NOT_RUN",
+      "budget_status": "NOT_RUN",
+      "protocol_expectation": "ACCEPT",
+      "expected_test_result": "PASS_IF_REQUIRED_PROPERTY_HOLDS"
+    },
+    {
+      "id": "timing_backdated_lower_anchor_governor_rejects",
+      "native_status": "NOT_RUN",
+      "ledger_status": "NOT_RUN",
+      "budget_status": "NOT_RUN",
+      "protocol_expectation": "REJECT",
+      "expected_test_result": "PASS_IF_REQUIRED_PROPERTY_HOLDS"
+    },
+    {
+      "id": "timing_queue_overflow_governor_rejects",
+      "native_status": "NOT_RUN",
+      "ledger_status": "NOT_RUN",
+      "budget_status": "NOT_RUN",
+      "protocol_expectation": "REJECT",
+      "expected_test_result": "PASS_IF_REQUIRED_PROPERTY_HOLDS"
+    },
+    {
+      "id": "timing_upper_anchor_proposal_policy_accepts",
+      "native_status": "NOT_RUN",
+      "ledger_status": "NOT_RUN",
+      "budget_status": "NOT_RUN",
+      "protocol_expectation": "ACCEPT",
+      "expected_test_result": "PASS_IF_REQUIRED_PROPERTY_HOLDS"
+    },
+    {
+      "id": "timing_backdated_lower_anchor_proposal_policy_rejects",
+      "native_status": "NOT_RUN",
+      "ledger_status": "NOT_RUN",
+      "budget_status": "NOT_RUN",
+      "protocol_expectation": "REJECT",
+      "expected_test_result": "PASS_IF_REQUIRED_PROPERTY_HOLDS"
+    },
+    {
+      "id": "timing_queue_overflow_proposal_policy_rejects",
+      "native_status": "NOT_RUN",
+      "ledger_status": "NOT_RUN",
+      "budget_status": "NOT_RUN",
+      "protocol_expectation": "REJECT",
+      "expected_test_result": "PASS_IF_REQUIRED_PROPERTY_HOLDS"
+    },
+    {
+      "id": "timing_upper_anchor_receipt_policy_accepts",
+      "native_status": "NOT_RUN",
+      "ledger_status": "NOT_RUN",
+      "budget_status": "NOT_RUN",
+      "protocol_expectation": "ACCEPT",
+      "expected_test_result": "PASS_IF_REQUIRED_PROPERTY_HOLDS"
+    },
+    {
+      "id": "timing_backdated_lower_anchor_receipt_policy_rejects",
+      "native_status": "NOT_RUN",
+      "ledger_status": "NOT_RUN",
+      "budget_status": "NOT_RUN",
+      "protocol_expectation": "REJECT",
+      "expected_test_result": "PASS_IF_REQUIRED_PROPERTY_HOLDS"
+    },
+    {
+      "id": "timing_queue_overflow_receipt_policy_rejects",
+      "native_status": "NOT_RUN",
+      "ledger_status": "NOT_RUN",
+      "budget_status": "NOT_RUN",
+      "protocol_expectation": "REJECT",
+      "expected_test_result": "PASS_IF_REQUIRED_PROPERTY_HOLDS"
+    },
+    {
+      "id": "timing_upper_anchor_intent_policy_accepts",
+      "native_status": "NOT_RUN",
+      "ledger_status": "NOT_RUN",
+      "budget_status": "NOT_RUN",
+      "protocol_expectation": "ACCEPT",
+      "expected_test_result": "PASS_IF_REQUIRED_PROPERTY_HOLDS"
+    },
+    {
+      "id": "timing_backdated_lower_anchor_intent_policy_rejects",
+      "native_status": "NOT_RUN",
+      "ledger_status": "NOT_RUN",
+      "budget_status": "NOT_RUN",
+      "protocol_expectation": "REJECT",
+      "expected_test_result": "PASS_IF_REQUIRED_PROPERTY_HOLDS"
+    },
+    {
+      "id": "timing_queue_overflow_intent_policy_rejects",
+      "native_status": "NOT_RUN",
+      "ledger_status": "NOT_RUN",
+      "budget_status": "NOT_RUN",
+      "protocol_expectation": "REJECT",
+      "expected_test_result": "PASS_IF_REQUIRED_PROPERTY_HOLDS"
+    },
+    {
+      "id": "timing_closed_vote_transition_rejects",
+      "native_status": "NOT_RUN",
+      "ledger_status": "NOT_RUN",
+      "budget_status": "NOT_RUN",
+      "protocol_expectation": "REJECT",
+      "expected_test_result": "PASS_IF_REQUIRED_PROPERTY_HOLDS"
+    },
+    {
+      "id": "timing_closed_vote_governor_rejects",
+      "native_status": "NOT_RUN",
+      "ledger_status": "NOT_RUN",
+      "budget_status": "NOT_RUN",
+      "protocol_expectation": "REJECT",
+      "expected_test_result": "PASS_IF_REQUIRED_PROPERTY_HOLDS"
+    },
+    {
+      "id": "timing_closed_vote_receipt_policy_rejects",
+      "native_status": "NOT_RUN",
+      "ledger_status": "NOT_RUN",
+      "budget_status": "NOT_RUN",
+      "protocol_expectation": "REJECT",
+      "expected_test_result": "PASS_IF_REQUIRED_PROPERTY_HOLDS"
+    },
+    {
+      "id": "timing_open_lower_vote_transition_rejects",
+      "native_status": "NOT_RUN",
+      "ledger_status": "NOT_RUN",
+      "budget_status": "NOT_RUN",
+      "protocol_expectation": "REJECT",
+      "expected_test_result": "PASS_IF_REQUIRED_PROPERTY_HOLDS"
+    },
+    {
+      "id": "timing_open_lower_vote_governor_rejects",
+      "native_status": "NOT_RUN",
+      "ledger_status": "NOT_RUN",
+      "budget_status": "NOT_RUN",
+      "protocol_expectation": "REJECT",
+      "expected_test_result": "PASS_IF_REQUIRED_PROPERTY_HOLDS"
+    },
+    {
+      "id": "timing_open_lower_vote_receipt_policy_rejects",
+      "native_status": "NOT_RUN",
+      "ledger_status": "NOT_RUN",
+      "budget_status": "NOT_RUN",
+      "protocol_expectation": "REJECT",
+      "expected_test_result": "PASS_IF_REQUIRED_PROPERTY_HOLDS"
+    },
+    {
+      "id": "timing_empty_vote_transition_rejects",
+      "native_status": "NOT_RUN",
+      "ledger_status": "NOT_RUN",
+      "budget_status": "NOT_RUN",
+      "protocol_expectation": "REJECT",
+      "expected_test_result": "PASS_IF_REQUIRED_PROPERTY_HOLDS"
+    },
+    {
+      "id": "timing_empty_vote_governor_rejects",
+      "native_status": "NOT_RUN",
+      "ledger_status": "NOT_RUN",
+      "budget_status": "NOT_RUN",
+      "protocol_expectation": "REJECT",
+      "expected_test_result": "PASS_IF_REQUIRED_PROPERTY_HOLDS"
+    },
+    {
+      "id": "timing_empty_vote_receipt_policy_rejects",
+      "native_status": "NOT_RUN",
+      "ledger_status": "NOT_RUN",
+      "budget_status": "NOT_RUN",
+      "protocol_expectation": "REJECT",
+      "expected_test_result": "PASS_IF_REQUIRED_PROPERTY_HOLDS"
+    },
+    {
+      "id": "timing_inverted_vote_transition_rejects",
+      "native_status": "NOT_RUN",
+      "ledger_status": "NOT_RUN",
+      "budget_status": "NOT_RUN",
+      "protocol_expectation": "REJECT",
+      "expected_test_result": "PASS_IF_REQUIRED_PROPERTY_HOLDS"
+    },
+    {
+      "id": "timing_inverted_vote_governor_rejects",
+      "native_status": "NOT_RUN",
+      "ledger_status": "NOT_RUN",
+      "budget_status": "NOT_RUN",
+      "protocol_expectation": "REJECT",
+      "expected_test_result": "PASS_IF_REQUIRED_PROPERTY_HOLDS"
+    },
+    {
+      "id": "timing_inverted_vote_receipt_policy_rejects",
+      "native_status": "NOT_RUN",
+      "ledger_status": "NOT_RUN",
+      "budget_status": "NOT_RUN",
+      "protocol_expectation": "REJECT",
+      "expected_test_result": "PASS_IF_REQUIRED_PROPERTY_HOLDS"
+    },
+    {
+      "id": "timing_too_wide_vote_transition_rejects",
+      "native_status": "NOT_RUN",
+      "ledger_status": "NOT_RUN",
+      "budget_status": "NOT_RUN",
+      "protocol_expectation": "REJECT",
+      "expected_test_result": "PASS_IF_REQUIRED_PROPERTY_HOLDS"
+    },
+    {
+      "id": "timing_too_wide_vote_governor_rejects",
+      "native_status": "NOT_RUN",
+      "ledger_status": "NOT_RUN",
+      "budget_status": "NOT_RUN",
+      "protocol_expectation": "REJECT",
+      "expected_test_result": "PASS_IF_REQUIRED_PROPERTY_HOLDS"
+    },
+    {
+      "id": "timing_too_wide_vote_receipt_policy_rejects",
+      "native_status": "NOT_RUN",
+      "ledger_status": "NOT_RUN",
+      "budget_status": "NOT_RUN",
+      "protocol_expectation": "REJECT",
+      "expected_test_result": "PASS_IF_REQUIRED_PROPERTY_HOLDS"
+    },
+    {
+      "id": "timing_negative_vote_transition_rejects",
+      "native_status": "NOT_RUN",
+      "ledger_status": "NOT_RUN",
+      "budget_status": "NOT_RUN",
+      "protocol_expectation": "REJECT",
+      "expected_test_result": "PASS_IF_REQUIRED_PROPERTY_HOLDS"
+    },
+    {
+      "id": "timing_negative_vote_governor_rejects",
+      "native_status": "NOT_RUN",
+      "ledger_status": "NOT_RUN",
+      "budget_status": "NOT_RUN",
+      "protocol_expectation": "REJECT",
+      "expected_test_result": "PASS_IF_REQUIRED_PROPERTY_HOLDS"
+    },
+    {
+      "id": "timing_negative_vote_receipt_policy_rejects",
+      "native_status": "NOT_RUN",
+      "ledger_status": "NOT_RUN",
+      "budget_status": "NOT_RUN",
+      "protocol_expectation": "REJECT",
+      "expected_test_result": "PASS_IF_REQUIRED_PROPERTY_HOLDS"
+    },
+    {
+      "id": "timing_upper_overflow_vote_transition_rejects",
+      "native_status": "NOT_RUN",
+      "ledger_status": "NOT_RUN",
+      "budget_status": "NOT_RUN",
+      "protocol_expectation": "REJECT",
+      "expected_test_result": "PASS_IF_REQUIRED_PROPERTY_HOLDS"
+    },
+    {
+      "id": "timing_upper_overflow_vote_governor_rejects",
+      "native_status": "NOT_RUN",
+      "ledger_status": "NOT_RUN",
+      "budget_status": "NOT_RUN",
+      "protocol_expectation": "REJECT",
+      "expected_test_result": "PASS_IF_REQUIRED_PROPERTY_HOLDS"
+    },
+    {
+      "id": "timing_upper_overflow_vote_receipt_policy_rejects",
+      "native_status": "NOT_RUN",
+      "ledger_status": "NOT_RUN",
+      "budget_status": "NOT_RUN",
+      "protocol_expectation": "REJECT",
+      "expected_test_result": "PASS_IF_REQUIRED_PROPERTY_HOLDS"
+    },
+    {
+      "id": "timing_deadline_straddle_vote_transition_rejects",
+      "native_status": "NOT_RUN",
+      "ledger_status": "NOT_RUN",
+      "budget_status": "NOT_RUN",
+      "protocol_expectation": "REJECT",
+      "expected_test_result": "PASS_IF_REQUIRED_PROPERTY_HOLDS"
+    },
+    {
+      "id": "timing_deadline_straddle_vote_governor_rejects",
+      "native_status": "NOT_RUN",
+      "ledger_status": "NOT_RUN",
+      "budget_status": "NOT_RUN",
+      "protocol_expectation": "REJECT",
+      "expected_test_result": "PASS_IF_REQUIRED_PROPERTY_HOLDS"
+    },
+    {
+      "id": "timing_deadline_straddle_vote_receipt_policy_rejects",
+      "native_status": "NOT_RUN",
+      "ledger_status": "NOT_RUN",
+      "budget_status": "NOT_RUN",
+      "protocol_expectation": "REJECT",
+      "expected_test_result": "PASS_IF_REQUIRED_PROPERTY_HOLDS"
+    },
+    {
+      "id": "timing_vote_until_exclusive_deadline_transition_accepts",
+      "native_status": "NOT_RUN",
+      "ledger_status": "NOT_RUN",
+      "budget_status": "NOT_RUN",
+      "protocol_expectation": "ACCEPT",
+      "expected_test_result": "PASS_IF_REQUIRED_PROPERTY_HOLDS"
+    },
+    {
+      "id": "timing_vote_until_exclusive_deadline_governor_accepts",
+      "native_status": "NOT_RUN",
+      "ledger_status": "NOT_RUN",
+      "budget_status": "NOT_RUN",
+      "protocol_expectation": "ACCEPT",
+      "expected_test_result": "PASS_IF_REQUIRED_PROPERTY_HOLDS"
+    },
+    {
+      "id": "timing_vote_until_exclusive_deadline_receipt_policy_accepts",
+      "native_status": "NOT_RUN",
+      "ledger_status": "NOT_RUN",
+      "budget_status": "NOT_RUN",
+      "protocol_expectation": "ACCEPT",
+      "expected_test_result": "PASS_IF_REQUIRED_PROPERTY_HOLDS"
+    },
+    {
+      "id": "timing_queue_one_ms_accepts",
+      "native_status": "NOT_RUN",
+      "ledger_status": "NOT_RUN",
+      "budget_status": "NOT_RUN",
+      "protocol_expectation": "ACCEPT",
+      "expected_test_result": "PASS_IF_REQUIRED_PROPERTY_HOLDS"
+    },
+    {
+      "id": "timing_queue_max_width_accepts",
+      "native_status": "NOT_RUN",
+      "ledger_status": "NOT_RUN",
+      "budget_status": "NOT_RUN",
+      "protocol_expectation": "ACCEPT",
+      "expected_test_result": "PASS_IF_REQUIRED_PROPERTY_HOLDS"
+    },
+    {
+      "id": "timing_queue_last_safe_u64_accepts",
+      "native_status": "NOT_RUN",
+      "ledger_status": "NOT_RUN",
+      "budget_status": "NOT_RUN",
+      "protocol_expectation": "ACCEPT",
+      "expected_test_result": "PASS_IF_REQUIRED_PROPERTY_HOLDS"
+    },
+    {
+      "id": "timing_expiry_straddle_timelock_rejects",
+      "native_status": "NOT_RUN",
+      "ledger_status": "NOT_RUN",
+      "budget_status": "NOT_RUN",
+      "protocol_expectation": "REJECT",
+      "expected_test_result": "PASS_IF_REQUIRED_PROPERTY_HOLDS"
+    },
+    {
+      "id": "timing_expiry_exact_lower_timelock_accepts",
+      "native_status": "NOT_RUN",
+      "ledger_status": "NOT_RUN",
+      "budget_status": "NOT_RUN",
+      "protocol_expectation": "ACCEPT",
+      "expected_test_result": "PASS_IF_REQUIRED_PROPERTY_HOLDS"
+    },
+    {
+      "id": "timing_expiry_straddle_intent_policy_rejects",
+      "native_status": "NOT_RUN",
+      "ledger_status": "NOT_RUN",
+      "budget_status": "NOT_RUN",
+      "protocol_expectation": "REJECT",
+      "expected_test_result": "PASS_IF_REQUIRED_PROPERTY_HOLDS"
+    },
+    {
+      "id": "timing_expiry_exact_lower_intent_policy_accepts",
+      "native_status": "NOT_RUN",
+      "ledger_status": "NOT_RUN",
+      "budget_status": "NOT_RUN",
+      "protocol_expectation": "ACCEPT",
+      "expected_test_result": "PASS_IF_REQUIRED_PROPERTY_HOLDS"
+    }
+  ],
+  "source_changes": [
+    "finite nonempty half-open envelope",
+    "upper-bound Queue anchor",
+    "explicit ledger-shaped valid fixture intervals",
+    "expiry fixture offsets and distinct current vector"
+  ],
+  "historical_encoding_inputs_unchanged": [
+    "GOLDEN-VECTORS.json",
+    "DATA-SCHEMA.json",
+    "governance_contract.py"
+  ],
+  "native_executions": 0,
+  "ledger_executions": 0,
+  "budget_executions": 0,
+  "aiken_invoked": false,
+  "acceptance_credit": false,
+  "official_promotions": 0,
+  "limits": [
+    "Metadata/name checks are not compilation or behavioral evidence.",
+    "Extreme timestamps and malformed ranges do not imply ledger reachability.",
+    "All81parent obligations and exact cross-caller campaign remain required."
+  ]
+}

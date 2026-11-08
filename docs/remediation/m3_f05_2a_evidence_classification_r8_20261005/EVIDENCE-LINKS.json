@@ -1,0 +1,452 @@
+{
+  "schema_version": "f05-2a-r8-evidence-links-v1",
+  "files": [
+    {
+      "path": "docs/remediation/m3_f05_2a/authority_bootstrap_public_fixtures.json",
+      "sha256": "98a05d24d476b1aee2754768322dc4b794e5afb5fabec28ade17a2888285467d",
+      "role": "retained fixture, run, review, contract, registry, or R7 artifact"
+    },
+    {
+      "path": "docs/remediation/m3_f05_2a/tx_sim_evidence_contract_r4_1.json",
+      "sha256": "238b3da9296a6c60699dbc7201759c7e499c63defd932491023b80ec7916a171",
+      "role": "retained fixture, run, review, contract, registry, or R7 artifact"
+    },
+    {
+      "path": "docs/remediation/m3_f05_2a_evidence_classification_r7_20261005/AMENDMENT.md",
+      "sha256": "3dd9fc9e3c517e7bd948a5453fba1d2e9a3d57c51a2d881b16a75d7b0780df17",
+      "role": "retained fixture, run, review, contract, registry, or R7 artifact"
+    },
+    {
+      "path": "docs/remediation/m3_f05_2a_evidence_classification_r7_20261005/CASE-STATUS.json",
+      "sha256": "a2b95b91ff427585a7275f8f9d970e0dfa8cd22b4d7013d960b1834196e29bee",
+      "role": "retained fixture, run, review, contract, registry, or R7 artifact"
+    },
+    {
+      "path": "docs/remediation/m3_f05_2a_evidence_classification_r7_20261005/SHA256SUMS",
+      "sha256": "ab134d4ead6e20f19c16eaf14a8d0ccd91b716853a7fa075555a296d0840ccac",
+      "role": "retained fixture, run, review, contract, registry, or R7 artifact"
+    },
+    {
+      "path": "docs/remediation/m3_f05_2a_evidence_classification_r7_review_r1_20261005/INDEPENDENT-REVIEW.md",
+      "sha256": "f20240c3e16241234aeacccd547a83ea1128b93d45d04f842a9a09b822ccb6b2",
+      "role": "retained fixture, run, review, contract, registry, or R7 artifact"
+    },
+    {
+      "path": "docs/remediation/m3_f05_2a_evidence_classification_r7_review_r1_20261005/SHA256SUMS",
+      "sha256": "fc4e97a86b6a532b3952121a4afecb095b6b065ba95a3470f89b86e003215499",
+      "role": "retained fixture, run, review, contract, registry, or R7 artifact"
+    },
+    {
+      "path": "docs/remediation/m3_f05_2a_proof_other_validator_hash_mutant_attempt_r1_20261005/RUN.json",
+      "sha256": "7bde6d12d63430142e0ec155c48e568159122bbc9092fbed0249e30b55eb9a57",
+      "role": "retained fixture, run, review, contract, registry, or R7 artifact"
+    },
+    {
+      "path": "docs/remediation/m3_f05_2a_proof_other_validator_hash_mutant_attempt_r1_20261005/SHA256SUMS",
+      "sha256": "2073b9400e47717249ce53788da24b2c815cd0166276db30b4b5ae3ddc5d46cb",
+      "role": "retained fixture, run, review, contract, registry, or R7 artifact"
+    },
+    {
+      "path": "docs/remediation/m3_f05_2a_proof_other_validator_hash_mutant_preexecution_review_r1_20261005/INDEPENDENT-REVIEW.md",
+      "sha256": "6880c4be08b833e41796c0a4dba4203f4ee9615e525883d31db315712ab0d890",
+      "role": "retained fixture, run, review, contract, registry, or R7 artifact"
+    },
+    {
+      "path": "docs/remediation/m3_f05_2a_proof_other_validator_hash_mutant_preexecution_review_r1_20261005/SHA256SUMS",
+      "sha256": "0d754009efac04c69b16d6a9c4c7c8db9497b5949a3523b32b6607aaf450060a",
+      "role": "retained fixture, run, review, contract, registry, or R7 artifact"
+    },
+    {
+      "path": "docs/remediation/m3_f05_2a_proof_other_validator_hash_mutant_r1_20261005/FAMILY-MANIFEST.json",
+      "sha256": "b2d124182e583fbaa83093b0ef08c325b35a15e238d8703a5a52bd8ea1afb30c",
+      "role": "retained fixture, run, review, contract, registry, or R7 artifact"
+    },
+    {
+      "path": "docs/remediation/m3_f05_2a_proof_other_validator_hash_mutant_r1_20261005/SHA256SUMS",
+      "sha256": "7ea5a8d5452b8590b117665e1e846c9ce6383d1f914f3c886dd9813a12731ee9",
+      "role": "retained fixture, run, review, contract, registry, or R7 artifact"
+    },
+    {
+      "path": "docs/remediation/m3_f05_2a_proof_other_validator_hash_mutant_r1_20261005/SUMMARY.md",
+      "sha256": "f111847c9ce128d47cb2dcdbf98f7cd2e92da6abf5eb80f3fe1bd7b9fd0d49d3",
+      "role": "retained fixture, run, review, contract, registry, or R7 artifact"
+    },
+    {
+      "path": "docs/remediation/m3_f05_2a_proof_other_validator_hash_mutant_r1_20261005/r2_signature_for_other_validator_hash/FIXTURE-MANIFEST.json",
+      "sha256": "c99fdab2744215883170fe3806cabe33244e1ad5bbb3a0e40637c879695fa5bd",
+      "role": "retained fixture, run, review, contract, registry, or R7 artifact"
+    },
+    {
+      "path": "docs/remediation/m3_f05_2a_proof_other_validator_hash_mutant_r1_20261005/r2_signature_for_other_validator_hash/SHA256SUMS",
+      "sha256": "c977bb61f1fef7f6d2840a1b61d35b6ee53418b46a6d10c93b79ac9675535c2b",
+      "role": "retained fixture, run, review, contract, registry, or R7 artifact"
+    },
+    {
+      "path": "docs/remediation/m3_f05_2a_proof_other_validator_hash_mutant_r1_20261005/r2_signature_for_other_validator_hash/SOURCE-DIFF.patch",
+      "sha256": "d741ec9b6d083eec0af0c0cfae1c7bfe46a0b466ff6dc3189543023b2fb32738",
+      "role": "retained fixture, run, review, contract, registry, or R7 artifact"
+    },
+    {
+      "path": "docs/remediation/m3_f05_2a_proof_other_validator_hash_mutant_r1_20261005/r2_signature_for_other_validator_hash/mutant.applied-policy.cbor",
+      "sha256": "e8da6de647840db9fa387e045b7d3403a4690165dcc00766109fad0ff684a8a1",
+      "role": "retained fixture, run, review, contract, registry, or R7 artifact"
+    },
+    {
+      "path": "docs/remediation/m3_f05_2a_proof_other_validator_hash_mutant_r1_20261005/r2_signature_for_other_validator_hash/mutant.genesis_ref.cbor",
+      "sha256": "51f08c55f440a2116b42e5283fc76d8be4d707788d3bc765023620199af45c75",
+      "role": "retained fixture, run, review, contract, registry, or R7 artifact"
+    },
+    {
+      "path": "docs/remediation/m3_f05_2a_proof_other_validator_hash_mutant_r1_20261005/r2_signature_for_other_validator_hash/mutant.initial_keys.cbor",
+      "sha256": "a7cd5c35689dece281de4dfb4f2e0a0d29bb5129b63d7bf3971f1663bf04391c",
+      "role": "retained fixture, run, review, contract, registry, or R7 artifact"
+    },
+    {
+      "path": "docs/remediation/m3_f05_2a_proof_other_validator_hash_mutant_r1_20261005/r2_signature_for_other_validator_hash/mutant.proof-message.bin",
+      "sha256": "608b46934b1a315c3c905c96f250e3d23d75eadb483cd5b893bc6e386c47a22e",
+      "role": "retained fixture, run, review, contract, registry, or R7 artifact"
+    },
+    {
+      "path": "docs/remediation/m3_f05_2a_proof_other_validator_hash_mutant_r1_20261005/r2_signature_for_other_validator_hash/mutant.raw_inputs.cbor",
+      "sha256": "5e935c48cc9d4e82e6dbedce94b2fbd3fb427f5e187bbe67ed376671ba5e4fec",
+      "role": "retained fixture, run, review, contract, registry, or R7 artifact"
+    },
+    {
+      "path": "docs/remediation/m3_f05_2a_proof_other_validator_hash_mutant_r1_20261005/r2_signature_for_other_validator_hash/mutant.raw_outputs.cbor",
+      "sha256": "a3993e8db5134ee6ae9329a366ae66d6706a08ac3174720317359d85faa4cefd",
+      "role": "retained fixture, run, review, contract, registry, or R7 artifact"
+    },
+    {
+      "path": "docs/remediation/m3_f05_2a_proof_other_validator_hash_mutant_r1_20261005/r2_signature_for_other_validator_hash/mutant.tx.cbor",
+      "sha256": "d4950fb424627e5492589643e078f2239cd2661f4133b7d6276a978b097b7821",
+      "role": "retained fixture, run, review, contract, registry, or R7 artifact"
+    },
+    {
+      "path": "docs/remediation/m3_f05_2a_proof_other_validator_hash_mutant_r1_20261005/r2_signature_for_other_validator_hash/positive-control.applied-policy.cbor",
+      "sha256": "8002a87a2f9b285197518bd865c7da7afae26b5362a0683d7a1c723716424dbd",
+      "role": "retained fixture, run, review, contract, registry, or R7 artifact"
+    },
+    {
+      "path": "docs/remediation/m3_f05_2a_proof_other_validator_hash_mutant_r1_20261005/r2_signature_for_other_validator_hash/positive-control.genesis_ref.cbor",
+      "sha256": "51f08c55f440a2116b42e5283fc76d8be4d707788d3bc765023620199af45c75",
+      "role": "retained fixture, run, review, contract, registry, or R7 artifact"
+    },
+    {
+      "path": "docs/remediation/m3_f05_2a_proof_other_validator_hash_mutant_r1_20261005/r2_signature_for_other_validator_hash/positive-control.initial_keys.cbor",
+      "sha256": "a7cd5c35689dece281de4dfb4f2e0a0d29bb5129b63d7bf3971f1663bf04391c",
+      "role": "retained fixture, run, review, contract, registry, or R7 artifact"
+    },
+    {
+      "path": "docs/remediation/m3_f05_2a_proof_other_validator_hash_mutant_r1_20261005/r2_signature_for_other_validator_hash/positive-control.proof-message.bin",
+      "sha256": "4b1e030c5639db1e22d6dac2e10a7ee63313319b0121bb4c8fcc844fc9797e74",
+      "role": "retained fixture, run, review, contract, registry, or R7 artifact"
+    },
+    {
+      "path": "docs/remediation/m3_f05_2a_proof_other_validator_hash_mutant_r1_20261005/r2_signature_for_other_validator_hash/positive-control.raw_inputs.cbor",
+      "sha256": "5e935c48cc9d4e82e6dbedce94b2fbd3fb427f5e187bbe67ed376671ba5e4fec",
+      "role": "retained fixture, run, review, contract, registry, or R7 artifact"
+    },
+    {
+      "path": "docs/remediation/m3_f05_2a_proof_other_validator_hash_mutant_r1_20261005/r2_signature_for_other_validator_hash/positive-control.raw_outputs.cbor",
+      "sha256": "fccf32f91dd3541e33bdb9a92f61ab002bdf93ba7275a270101c70309fa044b9",
+      "role": "retained fixture, run, review, contract, registry, or R7 artifact"
+    },
+    {
+      "path": "docs/remediation/m3_f05_2a_proof_other_validator_hash_mutant_r1_20261005/r2_signature_for_other_validator_hash/positive-control.tx.cbor",
+      "sha256": "8eb0a4f8b11c30231d1788ab3399823a542c7ae86e75bc1902aa452f527f0f4b",
+      "role": "retained fixture, run, review, contract, registry, or R7 artifact"
+    },
+    {
+      "path": "docs/remediation/m3_f05_2a_proof_other_validator_hash_mutant_r1_20261005/r2_signature_for_other_validator_hash/prior-negative-review.md",
+      "sha256": "e6c7e441db3a25392f49f44a25af158fb465ff1df17118172e56b6c935cf3e3d",
+      "role": "retained fixture, run, review, contract, registry, or R7 artifact"
+    },
+    {
+      "path": "docs/remediation/m3_f05_2a_proof_other_validator_hash_mutant_r1_20261005/r2_signature_for_other_validator_hash/prior-negative-run.json",
+      "sha256": "5e89f1f022fcb11e3e6311cb13c0bb3bdb7821b8e44d97863d991f5673ce86c0",
+      "role": "retained fixture, run, review, contract, registry, or R7 artifact"
+    },
+    {
+      "path": "docs/remediation/m3_f05_2a_proof_other_validator_hash_mutant_r1_20261005/r2_signature_for_other_validator_hash/prior-positive-review.md",
+      "sha256": "5d31f9251a73343eef9d8641031bd80691582b8d471caeabf2a02f69a6bd4bed",
+      "role": "retained fixture, run, review, contract, registry, or R7 artifact"
+    },
+    {
+      "path": "docs/remediation/m3_f05_2a_proof_other_validator_hash_mutant_r1_20261005/r2_signature_for_other_validator_hash/prior-positive-run.json",
+      "sha256": "18b04228b885bc428441aab701fa100f7dd280d53efd4a87d4fef4b3375d1e6d",
+      "role": "retained fixture, run, review, contract, registry, or R7 artifact"
+    },
+    {
+      "path": "docs/remediation/m3_f05_2a_proof_other_validator_hash_mutant_r1_20261005/r2_signature_for_other_validator_hash/prior-preexecution-review.md",
+      "sha256": "7a29a359240fe715c5ec9405c551dfc31ab40f90c39755205f616387d1b0adf4",
+      "role": "retained fixture, run, review, contract, registry, or R7 artifact"
+    },
+    {
+      "path": "docs/remediation/m3_f05_2a_proof_other_validator_hash_mutant_r1_20261005/r2_signature_for_other_validator_hash/reviewed-negative.applied-policy.cbor",
+      "sha256": "8002a87a2f9b285197518bd865c7da7afae26b5362a0683d7a1c723716424dbd",
+      "role": "retained fixture, run, review, contract, registry, or R7 artifact"
+    },
+    {
+      "path": "docs/remediation/m3_f05_2a_proof_other_validator_hash_mutant_r1_20261005/r2_signature_for_other_validator_hash/reviewed-negative.genesis_ref.cbor",
+      "sha256": "51f08c55f440a2116b42e5283fc76d8be4d707788d3bc765023620199af45c75",
+      "role": "retained fixture, run, review, contract, registry, or R7 artifact"
+    },
+    {
+      "path": "docs/remediation/m3_f05_2a_proof_other_validator_hash_mutant_r1_20261005/r2_signature_for_other_validator_hash/reviewed-negative.initial_keys.cbor",
+      "sha256": "a7cd5c35689dece281de4dfb4f2e0a0d29bb5129b63d7bf3971f1663bf04391c",
+      "role": "retained fixture, run, review, contract, registry, or R7 artifact"
+    },
+    {
+      "path": "docs/remediation/m3_f05_2a_proof_other_validator_hash_mutant_r1_20261005/r2_signature_for_other_validator_hash/reviewed-negative.proof-message.bin",
+      "sha256": "608b46934b1a315c3c905c96f250e3d23d75eadb483cd5b893bc6e386c47a22e",
+      "role": "retained fixture, run, review, contract, registry, or R7 artifact"
+    },
+    {
+      "path": "docs/remediation/m3_f05_2a_proof_other_validator_hash_mutant_r1_20261005/r2_signature_for_other_validator_hash/reviewed-negative.raw_inputs.cbor",
+      "sha256": "5e935c48cc9d4e82e6dbedce94b2fbd3fb427f5e187bbe67ed376671ba5e4fec",
+      "role": "retained fixture, run, review, contract, registry, or R7 artifact"
+    },
+    {
+      "path": "docs/remediation/m3_f05_2a_proof_other_validator_hash_mutant_r1_20261005/r2_signature_for_other_validator_hash/reviewed-negative.raw_outputs.cbor",
+      "sha256": "fccf32f91dd3541e33bdb9a92f61ab002bdf93ba7275a270101c70309fa044b9",
+      "role": "retained fixture, run, review, contract, registry, or R7 artifact"
+    },
+    {
+      "path": "docs/remediation/m3_f05_2a_proof_other_validator_hash_mutant_r1_20261005/r2_signature_for_other_validator_hash/reviewed-negative.tx.cbor",
+      "sha256": "b1113e0ee4172a49d7ce4a3e30a31d03b017c54cadb5546b72b60ec5c054dd2d",
+      "role": "retained fixture, run, review, contract, registry, or R7 artifact"
+    },
+    {
+      "path": "docs/remediation/m3_f05_2a_proof_other_validator_hash_negative_attempt_r1_20261005/RUN.json",
+      "sha256": "5e89f1f022fcb11e3e6311cb13c0bb3bdb7821b8e44d97863d991f5673ce86c0",
+      "role": "retained fixture, run, review, contract, registry, or R7 artifact"
+    },
+    {
+      "path": "docs/remediation/m3_f05_2a_proof_other_validator_hash_negative_attempt_r1_20261005/SHA256SUMS",
+      "sha256": "85fd5019d5a18a91865fb24beed95f899f6a9d8cda929ab0f38799ea7262447b",
+      "role": "retained fixture, run, review, contract, registry, or R7 artifact"
+    },
+    {
+      "path": "docs/remediation/m3_f05_2a_proof_other_validator_hash_negative_review_r1_20261005/INDEPENDENT-REVIEW.md",
+      "sha256": "e6c7e441db3a25392f49f44a25af158fb465ff1df17118172e56b6c935cf3e3d",
+      "role": "retained fixture, run, review, contract, registry, or R7 artifact"
+    },
+    {
+      "path": "docs/remediation/m3_f05_2a_proof_other_validator_hash_negative_review_r1_20261005/SHA256SUMS",
+      "sha256": "dfe12d1a557a14f1a068126bef705e8af8b55c803454f8c1c5fc4ab2991d1783",
+      "role": "retained fixture, run, review, contract, registry, or R7 artifact"
+    },
+    {
+      "path": "docs/remediation/m3_f05_2a_proof_other_validator_hash_positive_attempt_r1_20261005/RUN.json",
+      "sha256": "18b04228b885bc428441aab701fa100f7dd280d53efd4a87d4fef4b3375d1e6d",
+      "role": "retained fixture, run, review, contract, registry, or R7 artifact"
+    },
+    {
+      "path": "docs/remediation/m3_f05_2a_proof_other_validator_hash_positive_attempt_r1_20261005/SHA256SUMS",
+      "sha256": "678c4e3fa20cf0200a552551195c5a11c543878f4a6b69f73d673bb432d0c685",
+      "role": "retained fixture, run, review, contract, registry, or R7 artifact"
+    },
+    {
+      "path": "docs/remediation/m3_f05_2a_proof_other_validator_hash_positive_review_r1_20261005/INDEPENDENT-REVIEW.md",
+      "sha256": "5d31f9251a73343eef9d8641031bd80691582b8d471caeabf2a02f69a6bd4bed",
+      "role": "retained fixture, run, review, contract, registry, or R7 artifact"
+    },
+    {
+      "path": "docs/remediation/m3_f05_2a_proof_other_validator_hash_positive_review_r1_20261005/SHA256SUMS",
+      "sha256": "4d076f37b339361a6646204cde39124e0ed73b94c35d7bade90294dc66821ce1",
+      "role": "retained fixture, run, review, contract, registry, or R7 artifact"
+    },
+    {
+      "path": "docs/remediation/m3_f05_2a_proof_other_validator_hash_preexecution_review_r1_20261005/INDEPENDENT-REVIEW.md",
+      "sha256": "7a29a359240fe715c5ec9405c551dfc31ab40f90c39755205f616387d1b0adf4",
+      "role": "retained fixture, run, review, contract, registry, or R7 artifact"
+    },
+    {
+      "path": "docs/remediation/m3_f05_2a_proof_other_validator_hash_preexecution_review_r1_20261005/SHA256SUMS",
+      "sha256": "f07ef3d89a184c4a853cd7823a7ffbdf923034573982bac647bb778f9b38b453",
+      "role": "retained fixture, run, review, contract, registry, or R7 artifact"
+    },
+    {
+      "path": "docs/remediation/m3_f05_2a_proof_other_validator_hash_r1_20261005/FAMILY-MANIFEST.json",
+      "sha256": "7627b4d544aa35b79837465e22f46b1e642eacf2207b0dc0b759042b49cd1aa4",
+      "role": "retained fixture, run, review, contract, registry, or R7 artifact"
+    },
+    {
+      "path": "docs/remediation/m3_f05_2a_proof_other_validator_hash_r1_20261005/SHA256SUMS",
+      "sha256": "593b3428aa3781f6a8bbe8c8a0c7b2d7f341a0e9340a2e254728e4d303145065",
+      "role": "retained fixture, run, review, contract, registry, or R7 artifact"
+    },
+    {
+      "path": "docs/remediation/m3_f05_2a_proof_other_validator_hash_r1_20261005/SUMMARY.md",
+      "sha256": "817cfd110ecf08a1dfa8dd011181ba6e175502451f12bce4a5801ce630cdf681",
+      "role": "retained fixture, run, review, contract, registry, or R7 artifact"
+    },
+    {
+      "path": "docs/remediation/m3_f05_2a_proof_other_validator_hash_r1_20261005/r2_signature_for_other_validator_hash/FIXTURE-MANIFEST.json",
+      "sha256": "f995861dfcffadb916a83dc51f88fde0f54e9a66b3a88385ce420f61feda6a4e",
+      "role": "retained fixture, run, review, contract, registry, or R7 artifact"
+    },
+    {
+      "path": "docs/remediation/m3_f05_2a_proof_other_validator_hash_r1_20261005/r2_signature_for_other_validator_hash/SHA256SUMS",
+      "sha256": "79e964dfe8f74a9cd415cf5f95a1e3e34b61a4fbc051a4827f4befe49a608bcc",
+      "role": "retained fixture, run, review, contract, registry, or R7 artifact"
+    },
+    {
+      "path": "docs/remediation/m3_f05_2a_proof_other_validator_hash_r1_20261005/r2_signature_for_other_validator_hash/negative.applied-policy.cbor",
+      "sha256": "8002a87a2f9b285197518bd865c7da7afae26b5362a0683d7a1c723716424dbd",
+      "role": "retained fixture, run, review, contract, registry, or R7 artifact"
+    },
+    {
+      "path": "docs/remediation/m3_f05_2a_proof_other_validator_hash_r1_20261005/r2_signature_for_other_validator_hash/negative.genesis_ref.cbor",
+      "sha256": "51f08c55f440a2116b42e5283fc76d8be4d707788d3bc765023620199af45c75",
+      "role": "retained fixture, run, review, contract, registry, or R7 artifact"
+    },
+    {
+      "path": "docs/remediation/m3_f05_2a_proof_other_validator_hash_r1_20261005/r2_signature_for_other_validator_hash/negative.initial_keys.cbor",
+      "sha256": "a7cd5c35689dece281de4dfb4f2e0a0d29bb5129b63d7bf3971f1663bf04391c",
+      "role": "retained fixture, run, review, contract, registry, or R7 artifact"
+    },
+    {
+      "path": "docs/remediation/m3_f05_2a_proof_other_validator_hash_r1_20261005/r2_signature_for_other_validator_hash/negative.proof-message.bin",
+      "sha256": "608b46934b1a315c3c905c96f250e3d23d75eadb483cd5b893bc6e386c47a22e",
+      "role": "retained fixture, run, review, contract, registry, or R7 artifact"
+    },
+    {
+      "path": "docs/remediation/m3_f05_2a_proof_other_validator_hash_r1_20261005/r2_signature_for_other_validator_hash/negative.raw_inputs.cbor",
+      "sha256": "5e935c48cc9d4e82e6dbedce94b2fbd3fb427f5e187bbe67ed376671ba5e4fec",
+      "role": "retained fixture, run, review, contract, registry, or R7 artifact"
+    },
+    {
+      "path": "docs/remediation/m3_f05_2a_proof_other_validator_hash_r1_20261005/r2_signature_for_other_validator_hash/negative.raw_outputs.cbor",
+      "sha256": "fccf32f91dd3541e33bdb9a92f61ab002bdf93ba7275a270101c70309fa044b9",
+      "role": "retained fixture, run, review, contract, registry, or R7 artifact"
+    },
+    {
+      "path": "docs/remediation/m3_f05_2a_proof_other_validator_hash_r1_20261005/r2_signature_for_other_validator_hash/negative.tx.cbor",
+      "sha256": "b1113e0ee4172a49d7ce4a3e30a31d03b017c54cadb5546b72b60ec5c054dd2d",
+      "role": "retained fixture, run, review, contract, registry, or R7 artifact"
+    },
+    {
+      "path": "docs/remediation/m3_f05_2a_proof_other_validator_hash_r1_20261005/r2_signature_for_other_validator_hash/positive-control.applied-policy.cbor",
+      "sha256": "8002a87a2f9b285197518bd865c7da7afae26b5362a0683d7a1c723716424dbd",
+      "role": "retained fixture, run, review, contract, registry, or R7 artifact"
+    },
+    {
+      "path": "docs/remediation/m3_f05_2a_proof_other_validator_hash_r1_20261005/r2_signature_for_other_validator_hash/positive-control.genesis_ref.cbor",
+      "sha256": "51f08c55f440a2116b42e5283fc76d8be4d707788d3bc765023620199af45c75",
+      "role": "retained fixture, run, review, contract, registry, or R7 artifact"
+    },
+    {
+      "path": "docs/remediation/m3_f05_2a_proof_other_validator_hash_r1_20261005/r2_signature_for_other_validator_hash/positive-control.initial_keys.cbor",
+      "sha256": "a7cd5c35689dece281de4dfb4f2e0a0d29bb5129b63d7bf3971f1663bf04391c",
+      "role": "retained fixture, run, review, contract, registry, or R7 artifact"
+    },
+    {
+      "path": "docs/remediation/m3_f05_2a_proof_other_validator_hash_r1_20261005/r2_signature_for_other_validator_hash/positive-control.proof-message.bin",
+      "sha256": "4b1e030c5639db1e22d6dac2e10a7ee63313319b0121bb4c8fcc844fc9797e74",
+      "role": "retained fixture, run, review, contract, registry, or R7 artifact"
+    },
+    {
+      "path": "docs/remediation/m3_f05_2a_proof_other_validator_hash_r1_20261005/r2_signature_for_other_validator_hash/positive-control.raw_inputs.cbor",
+      "sha256": "5e935c48cc9d4e82e6dbedce94b2fbd3fb427f5e187bbe67ed376671ba5e4fec",
+      "role": "retained fixture, run, review, contract, registry, or R7 artifact"
+    },
+    {
+      "path": "docs/remediation/m3_f05_2a_proof_other_validator_hash_r1_20261005/r2_signature_for_other_validator_hash/positive-control.raw_outputs.cbor",
+      "sha256": "fccf32f91dd3541e33bdb9a92f61ab002bdf93ba7275a270101c70309fa044b9",
+      "role": "retained fixture, run, review, contract, registry, or R7 artifact"
+    },
+    {
+      "path": "docs/remediation/m3_f05_2a_proof_other_validator_hash_r1_20261005/r2_signature_for_other_validator_hash/positive-control.tx.cbor",
+      "sha256": "8eb0a4f8b11c30231d1788ab3399823a542c7ae86e75bc1902aa452f527f0f4b",
+      "role": "retained fixture, run, review, contract, registry, or R7 artifact"
+    },
+    {
+      "path": "docs/remediation/m3_f05_2a_proof_other_validator_hash_triad_review_r1_20261005/INDEPENDENT-REVIEW.md",
+      "sha256": "0d0ab5989ee71555dc207424990136b403116aed556fc65eba12e55f38b86698",
+      "role": "retained fixture, run, review, contract, registry, or R7 artifact"
+    },
+    {
+      "path": "docs/remediation/m3_f05_2a_proof_other_validator_hash_triad_review_r1_20261005/SHA256SUMS",
+      "sha256": "f32c68a4a0d656ae15dd0265fd4b50c621945615b68ee58a5a46a2c44e8c0521",
+      "role": "retained fixture, run, review, contract, registry, or R7 artifact"
+    }
+  ],
+  "case_evidence": {
+    "case_id": "r2_signature_for_other_validator_hash",
+    "original_assertion": {
+      "id": "r2_signature_for_other_validator_hash",
+      "mutation": "sign_tuple_with_another_state_validator_hash"
+    },
+    "triad_review": {
+      "path": "docs/remediation/m3_f05_2a_proof_other_validator_hash_triad_review_r1_20261005/INDEPENDENT-REVIEW.md",
+      "sha256": "0d0ab5989ee71555dc207424990136b403116aed556fc65eba12e55f38b86698",
+      "role": "independent integrated triad review"
+    },
+    "positive_run": {
+      "path": "docs/remediation/m3_f05_2a_proof_other_validator_hash_positive_attempt_r1_20261005/RUN.json",
+      "sha256": "18b04228b885bc428441aab701fa100f7dd280d53efd4a87d4fef4b3375d1e6d",
+      "role": "positive control"
+    },
+    "positive_review": {
+      "path": "docs/remediation/m3_f05_2a_proof_other_validator_hash_positive_review_r1_20261005/INDEPENDENT-REVIEW.md",
+      "sha256": "5d31f9251a73343eef9d8641031bd80691582b8d471caeabf2a02f69a6bd4bed",
+      "role": "positive review"
+    },
+    "negative_run": {
+      "path": "docs/remediation/m3_f05_2a_proof_other_validator_hash_negative_attempt_r1_20261005/RUN.json",
+      "sha256": "5e89f1f022fcb11e3e6311cb13c0bb3bdb7821b8e44d97863d991f5673ce86c0",
+      "role": "negative attempt"
+    },
+    "negative_review": {
+      "path": "docs/remediation/m3_f05_2a_proof_other_validator_hash_negative_review_r1_20261005/INDEPENDENT-REVIEW.md",
+      "sha256": "e6c7e441db3a25392f49f44a25af158fb465ff1df17118172e56b6c935cf3e3d",
+      "role": "negative review"
+    },
+    "negative_preexecution_review": {
+      "path": "docs/remediation/m3_f05_2a_proof_other_validator_hash_preexecution_review_r1_20261005/INDEPENDENT-REVIEW.md",
+      "sha256": "7a29a359240fe715c5ec9405c551dfc31ab40f90c39755205f616387d1b0adf4",
+      "role": "pre-execution review"
+    },
+    "mutant_run": {
+      "path": "docs/remediation/m3_f05_2a_proof_other_validator_hash_mutant_attempt_r1_20261005/RUN.json",
+      "sha256": "7bde6d12d63430142e0ec155c48e568159122bbc9092fbed0249e30b55eb9a57",
+      "role": "mutant attempt"
+    },
+    "mutant_preexecution_review": {
+      "path": "docs/remediation/m3_f05_2a_proof_other_validator_hash_mutant_preexecution_review_r1_20261005/INDEPENDENT-REVIEW.md",
+      "sha256": "6880c4be08b833e41796c0a4dba4203f4ee9615e525883d31db315712ab0d890",
+      "role": "mutant review"
+    },
+    "normal_fixture_family": {
+      "path": "docs/remediation/m3_f05_2a_proof_other_validator_hash_r1_20261005/FAMILY-MANIFEST.json",
+      "sha256": "7627b4d544aa35b79837465e22f46b1e642eacf2207b0dc0b759042b49cd1aa4",
+      "role": "normal fixture family"
+    },
+    "mutant_fixture_family": {
+      "path": "docs/remediation/m3_f05_2a_proof_other_validator_hash_mutant_r1_20261005/FAMILY-MANIFEST.json",
+      "sha256": "b2d124182e583fbaa83093b0ef08c325b35a15e238d8703a5a52bd8ea1afb30c",
+      "role": "mutant fixture family"
+    },
+    "contract": {
+      "path": "docs/remediation/m3_f05_2a/tx_sim_evidence_contract_r4_1.json",
+      "sha256": "238b3da9296a6c60699dbc7201759c7e499c63defd932491023b80ec7916a171",
+      "role": "R4.1 contract"
+    },
+    "registry": {
+      "path": "docs/remediation/m3_f05_2a/authority_bootstrap_public_fixtures.json",
+      "sha256": "98a05d24d476b1aee2754768322dc4b794e5afb5fabec28ade17a2888285467d",
+      "role": "original registry"
+    },
+    "scope": {
+      "normal_policy_id": "409712d7175aa2f7d372364919d50f55a048b83c7770a646826a1df4",
+      "mutant_policy_id": "f69665acd72650e6789b38151419ac429ae83782cfffe45d91496f7b",
+      "synthetic_only": true,
+      "mutation_suite": false,
+      "original_policy": false,
+      "ledger_admission": false,
+      "pre_prod": false,
+      "live_network": false
+    }
+  }
+}

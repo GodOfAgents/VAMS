@@ -192,11 +192,23 @@ class TestBittensorSubnet:
 # ============================================================================
 
 class TestPhalaTEE:
-    """Tests for Phala TEE SDK."""
+    """Tests for Phala TEE SDK with explicit local policy and transport."""
+
+    @pytest.fixture(autouse=True)
+    def explicit_local_tee_policy(self, monkeypatch):
+        monkeypatch.setenv("VAMS_ENV", "test")
+        monkeypatch.setenv("PHALA_MOCK_MODE", "true")
+        monkeypatch.delenv("PHALA_API_KEY", raising=False)
+        session = MagicMock()
+        session.headers = {}
+        session.get.return_value.status_code = 200
+        session.get.return_value.json.return_value = {}
+        session.post.side_effect = AssertionError("Unexpected transport in local TEE test")
+        monkeypatch.setattr("sdk.phala_tee.requests.Session", lambda: session)
     
     def test_init_default(self):
         """Test default initialization."""
-        tee = PhalaTEE()
+        tee = PhalaTEE(mock_mode=True)
         assert tee.network == "testnet"
         assert "phala" in tee.phala_rpc
     
@@ -207,10 +219,10 @@ class TestPhalaTEE:
     
     def test_simulate_attestation_sgx(self):
         """Test simulated SGX attestation."""
-        tee = PhalaTEE()
+        tee = PhalaTEE(mock_mode=True)
         fake_quote = b"fake_sgx_quote_data"
         
-        report = tee._simulate_attestation(fake_quote, TEEProvider.PHALA)
+        report = tee.verify_sgx_quote(fake_quote)
         
         assert isinstance(report, AttestationReport)
         assert report.provider == TEEProvider.PHALA
@@ -220,10 +232,10 @@ class TestPhalaTEE:
     
     def test_simulate_attestation_nitro(self):
         """Test simulated Nitro attestation."""
-        tee = PhalaTEE()
+        tee = PhalaTEE(mock_mode=True)
         fake_doc = b"fake_nitro_attestation_document"
         
-        report = tee._simulate_attestation(fake_doc, TEEProvider.MARLIN)
+        report = tee.verify_nitro_quote(fake_doc)
         
         assert report.provider == TEEProvider.MARLIN
         assert report.is_valid == True
@@ -245,7 +257,7 @@ class TestPhalaTEE:
     
     def test_health_check_structure(self):
         """Test health check returns correct structure."""
-        tee = PhalaTEE()
+        tee = PhalaTEE(mock_mode=True)
         health = tee.check_health()
         
         assert "status" in health
@@ -254,7 +266,7 @@ class TestPhalaTEE:
     
     def test_verify_multi_tee_all_valid(self):
         """Test multi-TEE verification with all valid quotes."""
-        tee = PhalaTEE()
+        tee = PhalaTEE(mock_mode=True)
         quotes = {
             TEEProvider.PHALA: b"quote1",
             TEEProvider.MARLIN: b"quote2",
@@ -270,7 +282,21 @@ class TestPhalaTEE:
 
 class TestMarlinOyster:
     """Tests for Marlin Oyster SDK."""
-    
+
+    @pytest.fixture(autouse=True)
+    def local_health_transport(self, monkeypatch):
+        monkeypatch.setenv("VAMS_ENV", "test")
+        monkeypatch.delenv("PHALA_API_KEY", raising=False)
+        response = MagicMock()
+        response.status_code = 200
+        response.close.return_value = None
+        response.json.side_effect = AssertionError("Health fixture body must remain unread")
+        session = MagicMock()
+        session.headers = {}
+        session.get.return_value = response
+        session.post.return_value = response
+        monkeypatch.setattr("sdk.phala_tee.requests.Session", lambda: session)
+
     def test_init_default(self):
         """Test default initialization."""
         marlin = MarlinOyster()
@@ -288,7 +314,21 @@ class TestMarlinOyster:
 
 class TestAutomataMultiProver:
     """Tests for Automata Multi-Prover SDK."""
-    
+
+    @pytest.fixture(autouse=True)
+    def local_health_transport(self, monkeypatch):
+        monkeypatch.setenv("VAMS_ENV", "test")
+        monkeypatch.delenv("PHALA_API_KEY", raising=False)
+        response = MagicMock()
+        response.status_code = 200
+        response.close.return_value = None
+        response.json.side_effect = AssertionError("Health fixture body must remain unread")
+        session = MagicMock()
+        session.headers = {}
+        session.get.return_value = response
+        session.post.return_value = response
+        monkeypatch.setattr("sdk.phala_tee.requests.Session", lambda: session)
+
     def test_init(self):
         """Test initialization."""
         automata = AutomataMultiProver()
@@ -364,13 +404,19 @@ class TestSigner:
 # ============================================================================
 
 class TestTrustPlugins:
+    @pytest.fixture(autouse=True)
+    def explicit_local_tee_policy(self, monkeypatch):
+        monkeypatch.setenv("VAMS_ENV", "test")
+        monkeypatch.setenv("PHALA_MOCK_MODE", "true")
+        monkeypatch.delenv("PHALA_API_KEY", raising=False)
+
     def test_tee_attestation_root_binding(self):
         import sys
         import os
         sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
         from trust_plugins.tee_plugin import TEEProofPlugin
         
-        plugin = TEEProofPlugin()
+        plugin = TEEProofPlugin(mock_mode=True)
         root_addr = b"\x01" * 20
         session_addr = b"\x02" * 20
         

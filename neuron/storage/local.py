@@ -12,7 +12,7 @@ from datetime import datetime
 from typing import Optional, List, Dict, Any
 from pathlib import Path
 
-from config import DATABASE_PATH
+from ..config import DATABASE_PATH
 
 
 class NeuronStorage:

@@ -11,6 +11,11 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Any
 
+try:
+    from scripts.audit.restricted_profile_v1 import validate_testnet_profile
+except ModuleNotFoundError:
+    from restricted_profile_v1 import validate_testnet_profile
+
 
 ROOT = Path(__file__).resolve().parents[2]
 PROFILE_PATH = ROOT / "docs" / "audit" / "testnet-profile.json"
@@ -33,6 +38,9 @@ def _concentration(shares: dict[str, float]) -> dict[str, float]:
 
 
 def evaluate(snapshot: dict[str, Any], profile: dict[str, Any]) -> dict[str, Any]:
+    errors = validate_testnet_profile(profile)
+    if errors:
+        raise ValueError("invalid restricted testnet profile: " + "; ".join(errors))
     providers = snapshot.get("providers")
     if not isinstance(providers, list) or not providers:
         raise ValueError("snapshot must contain at least one provider")

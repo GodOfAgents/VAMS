@@ -1,0 +1,264 @@
+{
+  "schema": "f05-2a-original-identity-v1",
+  "work": "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m7_f05_identity_current_r2/run1",
+  "parameters": {
+    "genesis_ref": {
+      "constructor": 0,
+      "fields": [
+        {
+          "bytes": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        {
+          "int": 7
+        }
+      ]
+    },
+    "initial_keys": {
+      "list": [
+        {
+          "bytes": "0f9e7d3242059f40158094de9b9f35491f02af6061212ffa63ea555e09ebd258"
+        },
+        {
+          "bytes": "d149658ea1009933d948573e2e447b5e17d031e6a90423a7522c4e449fbe009a"
+        },
+        {
+          "bytes": "de8ad1ded00aab5700c0f6b51057b74034b38f4efd1bd78a988ff9f82bc24d84"
+        },
+        {
+          "bytes": "ef6d7b49b4e7f1d78156f4f33372253555123d91bc34155b253268fa10c35b95"
+        },
+        {
+          "bytes": "f894dc38674c091488082554bd5e5f7f6ed8d85c5fbf894307e3a3f42e505191"
+        }
+      ]
+    }
+  },
+  "builds": [
+    {
+      "label": "a",
+      "policy_id": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+      "state_hash": "b4a7b5de32fa88554a4eb44d8e8235e24e738a1c1d1fe1764a0a3e66",
+      "compiled_sha256": "fc8726cff89172d4944e257a2eb2659d35363c8e5a4d423ed8a2112eb5af7e59",
+      "matches_original_artifact": true,
+      "matches_tx_witness": true,
+      "script_hash": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+      "encoded_bytes": 3467,
+      "decoded_program_bytes": 3464,
+      "parameters_cbor": [
+        "d8799f5820aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa07ff",
+        "9f58200f9e7d3242059f40158094de9b9f35491f02af6061212ffa63ea555e09ebd2585820d149658ea1009933d948573e2e447b5e17d031e6a90423a7522c4e449fbe009a5820de8ad1ded00aab5700c0f6b51057b74034b38f4efd1bd78a988ff9f82bc24d845820ef6d7b49b4e7f1d78156f4f33372253555123d91bc34155b253268fa10c35b955820f894dc38674c091488082554bd5e5f7f6ed8d85c5fbf894307e3a3f42e505191ff"
+      ],
+      "blueprint_sha256": "c4230410d0caac45f2c71d36e45a539c78087697128ce1533306d17e96a48008",
+      "lock_sha256": "acffff4aee9569e1ee1de468839077af467b5e403fd96450290cd367b339c651",
+      "lock_nonvolatile_equal": true
+    },
+    {
+      "label": "b",
+      "policy_id": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+      "state_hash": "b4a7b5de32fa88554a4eb44d8e8235e24e738a1c1d1fe1764a0a3e66",
+      "compiled_sha256": "fc8726cff89172d4944e257a2eb2659d35363c8e5a4d423ed8a2112eb5af7e59",
+      "matches_original_artifact": true,
+      "matches_tx_witness": true,
+      "script_hash": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+      "encoded_bytes": 3467,
+      "decoded_program_bytes": 3464,
+      "parameters_cbor": [
+        "d8799f5820aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa07ff",
+        "9f58200f9e7d3242059f40158094de9b9f35491f02af6061212ffa63ea555e09ebd2585820d149658ea1009933d948573e2e447b5e17d031e6a90423a7522c4e449fbe009a5820de8ad1ded00aab5700c0f6b51057b74034b38f4efd1bd78a988ff9f82bc24d845820ef6d7b49b4e7f1d78156f4f33372253555123d91bc34155b253268fa10c35b955820f894dc38674c091488082554bd5e5f7f6ed8d85c5fbf894307e3a3f42e505191ff"
+      ],
+      "blueprint_sha256": "c4230410d0caac45f2c71d36e45a539c78087697128ce1533306d17e96a48008",
+      "lock_sha256": "acffff4aee9569e1ee1de468839077af467b5e403fd96450290cd367b339c651",
+      "lock_nonvolatile_equal": true
+    }
+  ],
+  "commands": [
+    {
+      "argv": [
+        "/home/GodOfAgents/vams-evidence/toolchains/aiken-1.1.21/unpacked/aiken-x86_64-unknown-linux-musl/aiken",
+        "build"
+      ],
+      "cwd": "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m7_f05_identity_current_r2/run1/a/cardano",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "    Compiling GodOfAgents/vams-cardano 0.1.0 (.)\n    Resolving GodOfAgents/vams-cardano\n        Using uncertain local version for aiken-lang/stdlib\n        \u21b3 You're seeing this message because the package version is unpinned and the network is not accessible.\n        Using uncertain local version for aiken-lang/fuzz\n        \u21b3 You're seeing this message because the package version is unpinned and the network is not accessible.\n      Fetched 2 packages in 10.06s from cache\n    Compiling aiken-lang/stdlib v2 (./build/packages/aiken-lang-stdlib)\n    Compiling aiken-lang/fuzz v2 (./build/packages/aiken-lang-fuzz)\n   Generating project's blueprint (./plutus.json)\n"
+    },
+    {
+      "argv": [
+        "/home/GodOfAgents/vams-evidence/toolchains/aiken-1.1.21/unpacked/aiken-x86_64-unknown-linux-musl/aiken",
+        "blueprint",
+        "apply",
+        "-i",
+        "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m7_f05_identity_current_r2/run1/a/cardano/plutus.json",
+        "-o",
+        "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m7_f05_identity_current_r2/run1/a/applied-1.json",
+        "-m",
+        "f05_authority_policy",
+        "-v",
+        "f05_authority_policy",
+        "d8799f5820aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa07ff"
+      ],
+      "cwd": "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m7_f05_identity_current_r2/run1/a/cardano",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "    Analyzing blueprint\n      Parsing inputs\n     Applying d8799f5820aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n              aaaaaaaaaaaaaaaaaaaaaaaaaa07ff\n         Done\n      Summary 0 errors, 0 warnings\n"
+    },
+    {
+      "argv": [
+        "/home/GodOfAgents/vams-evidence/toolchains/aiken-1.1.21/unpacked/aiken-x86_64-unknown-linux-musl/aiken",
+        "blueprint",
+        "apply",
+        "-i",
+        "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m7_f05_identity_current_r2/run1/a/applied-1.json",
+        "-o",
+        "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m7_f05_identity_current_r2/run1/a/applied-2.json",
+        "-m",
+        "f05_authority_policy",
+        "-v",
+        "f05_authority_policy",
+        "9f58200f9e7d3242059f40158094de9b9f35491f02af6061212ffa63ea555e09ebd2585820d149658ea1009933d948573e2e447b5e17d031e6a90423a7522c4e449fbe009a5820de8ad1ded00aab5700c0f6b51057b74034b38f4efd1bd78a988ff9f82bc24d845820ef6d7b49b4e7f1d78156f4f33372253555123d91bc34155b253268fa10c35b955820f894dc38674c091488082554bd5e5f7f6ed8d85c5fbf894307e3a3f42e505191ff"
+      ],
+      "cwd": "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m7_f05_identity_current_r2/run1/a/cardano",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "    Analyzing blueprint\n      Parsing inputs\n     Applying 9f58200f9e7d3242059f40158094de9b9f35491f02af6061\n              212ffa63ea555e09ebd2585820d149658ea1009933d94857\n              3e2e447b5e17d031e6a90423a7522c4e449fbe009a5820de\n              8ad1ded00aab5700c0f6b51057b74034b38f4efd1bd78a98\n              8ff9f82bc24d845820ef6d7b49b4e7f1d78156f4f3337225\n              3555123d91bc34155b253268fa10c35b955820f894dc3867\n              4c091488082554bd5e5f7f6ed8d85c5fbf894307e3a3f42e\n              505191ff\n         Done\n      Summary 0 errors, 0 warnings\n"
+    },
+    {
+      "argv": [
+        "/home/GodOfAgents/vams-evidence/toolchains/aiken-1.1.21/unpacked/aiken-x86_64-unknown-linux-musl/aiken",
+        "blueprint",
+        "policy",
+        "-i",
+        "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m7_f05_identity_current_r2/run1/a/applied-2.json",
+        "-m",
+        "f05_authority_policy",
+        "-v",
+        "f05_authority_policy",
+        "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m7_f05_identity_current_r2/run1/a/cardano"
+      ],
+      "cwd": "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m7_f05_identity_current_r2/run1/a/cardano",
+      "exit": 0,
+      "stdout": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/home/GodOfAgents/vams-evidence/toolchains/aiken-1.1.21/unpacked/aiken-x86_64-unknown-linux-musl/aiken",
+        "build"
+      ],
+      "cwd": "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m7_f05_identity_current_r2/run1/b/cardano",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "    Compiling GodOfAgents/vams-cardano 0.1.0 (.)\n    Resolving GodOfAgents/vams-cardano\n        Using uncertain local version for aiken-lang/stdlib\n        \u21b3 You're seeing this message because the package version is unpinned and the network is not accessible.\n        Using uncertain local version for aiken-lang/fuzz\n        \u21b3 You're seeing this message because the package version is unpinned and the network is not accessible.\n      Fetched 2 packages in 10.05s from cache\n    Compiling aiken-lang/stdlib v2 (./build/packages/aiken-lang-stdlib)\n    Compiling aiken-lang/fuzz v2 (./build/packages/aiken-lang-fuzz)\n   Generating project's blueprint (./plutus.json)\n"
+    },
+    {
+      "argv": [
+        "/home/GodOfAgents/vams-evidence/toolchains/aiken-1.1.21/unpacked/aiken-x86_64-unknown-linux-musl/aiken",
+        "blueprint",
+        "apply",
+        "-i",
+        "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m7_f05_identity_current_r2/run1/b/cardano/plutus.json",
+        "-o",
+        "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m7_f05_identity_current_r2/run1/b/applied-1.json",
+        "-m",
+        "f05_authority_policy",
+        "-v",
+        "f05_authority_policy",
+        "d8799f5820aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa07ff"
+      ],
+      "cwd": "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m7_f05_identity_current_r2/run1/b/cardano",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "    Analyzing blueprint\n      Parsing inputs\n     Applying d8799f5820aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n              aaaaaaaaaaaaaaaaaaaaaaaaaa07ff\n         Done\n      Summary 0 errors, 0 warnings\n"
+    },
+    {
+      "argv": [
+        "/home/GodOfAgents/vams-evidence/toolchains/aiken-1.1.21/unpacked/aiken-x86_64-unknown-linux-musl/aiken",
+        "blueprint",
+        "apply",
+        "-i",
+        "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m7_f05_identity_current_r2/run1/b/applied-1.json",
+        "-o",
+        "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m7_f05_identity_current_r2/run1/b/applied-2.json",
+        "-m",
+        "f05_authority_policy",
+        "-v",
+        "f05_authority_policy",
+        "9f58200f9e7d3242059f40158094de9b9f35491f02af6061212ffa63ea555e09ebd2585820d149658ea1009933d948573e2e447b5e17d031e6a90423a7522c4e449fbe009a5820de8ad1ded00aab5700c0f6b51057b74034b38f4efd1bd78a988ff9f82bc24d845820ef6d7b49b4e7f1d78156f4f33372253555123d91bc34155b253268fa10c35b955820f894dc38674c091488082554bd5e5f7f6ed8d85c5fbf894307e3a3f42e505191ff"
+      ],
+      "cwd": "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m7_f05_identity_current_r2/run1/b/cardano",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "    Analyzing blueprint\n      Parsing inputs\n     Applying 9f58200f9e7d3242059f40158094de9b9f35491f02af6061\n              212ffa63ea555e09ebd2585820d149658ea1009933d94857\n              3e2e447b5e17d031e6a90423a7522c4e449fbe009a5820de\n              8ad1ded00aab5700c0f6b51057b74034b38f4efd1bd78a98\n              8ff9f82bc24d845820ef6d7b49b4e7f1d78156f4f3337225\n              3555123d91bc34155b253268fa10c35b955820f894dc3867\n              4c091488082554bd5e5f7f6ed8d85c5fbf894307e3a3f42e\n              505191ff\n         Done\n      Summary 0 errors, 0 warnings\n"
+    },
+    {
+      "argv": [
+        "/home/GodOfAgents/vams-evidence/toolchains/aiken-1.1.21/unpacked/aiken-x86_64-unknown-linux-musl/aiken",
+        "blueprint",
+        "policy",
+        "-i",
+        "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m7_f05_identity_current_r2/run1/b/applied-2.json",
+        "-m",
+        "f05_authority_policy",
+        "-v",
+        "f05_authority_policy",
+        "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m7_f05_identity_current_r2/run1/b/cardano"
+      ],
+      "cwd": "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m7_f05_identity_current_r2/run1/b/cardano",
+      "exit": 0,
+      "stdout": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731\n",
+      "stderr": ""
+    }
+  ],
+  "canonical_before": {
+    "cardano/README.md": "3dd07afbfa204a205d66ea8904efbce5bb84aebf84b20a3a0f4ff82a817e59e6",
+    "cardano/aiken-dependency-manifest.json": "0edce714d52d21ea201db1b251f0d2c72f6b273f5ec3b7e4b6045fa1211ddddf",
+    "cardano/aiken.lock": "acffff4aee9569e1ee1de468839077af467b5e403fd96450290cd367b339c651",
+    "cardano/aiken.toml": "55984b24927897c47dbf45933911b804047d0200bdf9a47942efded8b6ed4683",
+    "cardano/lib/vams/f05_authority.ak": "657f30dfc0ecb40f50b2c0442b78f4818de1644f540fb68d76cfb2de72cccdd3",
+    "cardano/lib/vams/governance.ak": "b288f800f70d5aae566a745a5853067a173dd5cc8ad3225e7ea8d4bb89d29e55",
+    "cardano/lib/vams/icb.ak": "6df86d4549e9289734b80d2193cc77fffedcb856b46fe41e29d3d8134a8b7917",
+    "cardano/lib/vams/types.ak": "c420d7481f6104b16c69ec6cddde2a81b19e91ec13d97968ae072d17ace8853e",
+    "cardano/lib/vams/utils.ak": "67ed2476a33225453942221b2dc621a2687ffd9112f7bbbbe52b43f004f2a939",
+    "cardano/lib/vams/vdso.ak": "4ba68b11378d968df6e37f4a787c040aba1dbe05dc88368ca01ee5e0ecefcea3",
+    "cardano/plutus.json": "c4230410d0caac45f2c71d36e45a539c78087697128ce1533306d17e96a48008",
+    "cardano/typescript": "cdb0e6222665a05ab3b10c4032fa5537b70f6679ad444c676ba10cf404972a45",
+    "cardano/validators/agent_nft.ak": "7653cd2a9db99a69424f79164c123ce35d274db75f25f74e0a9f4c4c9b9d36bd",
+    "cardano/validators/agent_registry.ak": "7655acb5d48cb0abcfe85dadfe9aa9c80046bff3aeeaf0720cb706084adbb5cd",
+    "cardano/validators/f05_authority_policy.ak": "e9d3ac9cbb14b9e7693dc12430234694c82eb52e61d176e1e39992fb9cbeafa8",
+    "cardano/validators/f05_authority_policy.test.ak": "a3bc9ccafa26ae4219207a620940ca7da3296608d576725c325a4558b958336d",
+    "cardano/validators/f05_authority_state.ak": "ad15a7416d2069127138d8817b41a920223bbd3d875fdb7b0c9fc3bb60944774",
+    "cardano/validators/governance_policies.ak": "da0df0fc78e55182dea92921970bb8f127e71b83eaf171b1e18a8a5022bbf73c",
+    "cardano/validators/governor.ak": "f9383fce703a59a38bece4c78b107e636554e6c427671a83ac0aa6b4b96ace6e",
+    "cardano/validators/insurance_fund.ak": "184d5c19c65037ee37999af0988166dca2d28a2e2772e268e1c1738a382ecf5f",
+    "cardano/validators/timelock.ak": "7a2a07f6ef576901fd7fceea059ccfe7cbafde424249a9c5a7d19bba60d4dae3"
+  },
+  "limits": [
+    "synthetic fixture identity only",
+    "not ledger admission or live evidence",
+    "no new negative or mutation PASS"
+  ],
+  "canonical_after": {
+    "cardano/README.md": "3dd07afbfa204a205d66ea8904efbce5bb84aebf84b20a3a0f4ff82a817e59e6",
+    "cardano/aiken-dependency-manifest.json": "0edce714d52d21ea201db1b251f0d2c72f6b273f5ec3b7e4b6045fa1211ddddf",
+    "cardano/aiken.lock": "acffff4aee9569e1ee1de468839077af467b5e403fd96450290cd367b339c651",
+    "cardano/aiken.toml": "55984b24927897c47dbf45933911b804047d0200bdf9a47942efded8b6ed4683",
+    "cardano/lib/vams/f05_authority.ak": "657f30dfc0ecb40f50b2c0442b78f4818de1644f540fb68d76cfb2de72cccdd3",
+    "cardano/lib/vams/governance.ak": "b288f800f70d5aae566a745a5853067a173dd5cc8ad3225e7ea8d4bb89d29e55",
+    "cardano/lib/vams/icb.ak": "6df86d4549e9289734b80d2193cc77fffedcb856b46fe41e29d3d8134a8b7917",
+    "cardano/lib/vams/types.ak": "c420d7481f6104b16c69ec6cddde2a81b19e91ec13d97968ae072d17ace8853e",
+    "cardano/lib/vams/utils.ak": "67ed2476a33225453942221b2dc621a2687ffd9112f7bbbbe52b43f004f2a939",
+    "cardano/lib/vams/vdso.ak": "4ba68b11378d968df6e37f4a787c040aba1dbe05dc88368ca01ee5e0ecefcea3",
+    "cardano/plutus.json": "c4230410d0caac45f2c71d36e45a539c78087697128ce1533306d17e96a48008",
+    "cardano/typescript": "cdb0e6222665a05ab3b10c4032fa5537b70f6679ad444c676ba10cf404972a45",
+    "cardano/validators/agent_nft.ak": "7653cd2a9db99a69424f79164c123ce35d274db75f25f74e0a9f4c4c9b9d36bd",
+    "cardano/validators/agent_registry.ak": "7655acb5d48cb0abcfe85dadfe9aa9c80046bff3aeeaf0720cb706084adbb5cd",
+    "cardano/validators/f05_authority_policy.ak": "e9d3ac9cbb14b9e7693dc12430234694c82eb52e61d176e1e39992fb9cbeafa8",
+    "cardano/validators/f05_authority_policy.test.ak": "a3bc9ccafa26ae4219207a620940ca7da3296608d576725c325a4558b958336d",
+    "cardano/validators/f05_authority_state.ak": "ad15a7416d2069127138d8817b41a920223bbd3d875fdb7b0c9fc3bb60944774",
+    "cardano/validators/governance_policies.ak": "da0df0fc78e55182dea92921970bb8f127e71b83eaf171b1e18a8a5022bbf73c",
+    "cardano/validators/governor.ak": "f9383fce703a59a38bece4c78b107e636554e6c427671a83ac0aa6b4b96ace6e",
+    "cardano/validators/insurance_fund.ak": "184d5c19c65037ee37999af0988166dca2d28a2e2772e268e1c1738a382ecf5f",
+    "cardano/validators/timelock.ak": "7a2a07f6ef576901fd7fceea059ccfe7cbafde424249a9c5a7d19bba60d4dae3"
+  },
+  "pass": true
+}

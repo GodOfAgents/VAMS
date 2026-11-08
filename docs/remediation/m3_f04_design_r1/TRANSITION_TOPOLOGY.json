@@ -1,0 +1,97 @@
+{
+  "schema_version": "m3-f04-r1-topology-v1",
+  "status": "design-only",
+  "transitions": [
+    {
+      "id": "register",
+      "redeemer": "RegisterAgent",
+      "inputs": {
+        "state": 0,
+        "bootstrap": 1,
+        "authority_reference": 1,
+        "collateral": 1
+      },
+      "outputs": {
+        "agent_state": 1,
+        "owner_release": 0,
+        "reserve": 0,
+        "change_max": 1
+      },
+      "identity_mint": 1,
+      "identity_burn": 0,
+      "authority_reference": "one RegistryAuthorityV1 reference; epoch and actual policy binding exact",
+      "continuation": "one registry-script output with AgentDatumV1 and identity unit",
+      "pre_f05": "accept_if_equations_hold"
+    },
+    {
+      "id": "update",
+      "redeemer": "UpdateAgent",
+      "inputs": {
+        "state": 1,
+        "bootstrap": 0,
+        "authority_reference": 1,
+        "collateral": 1
+      },
+      "outputs": {
+        "agent_state": 1,
+        "owner_release": 0,
+        "reserve": 0,
+        "change_max": 1
+      },
+      "identity_mint": 0,
+      "identity_burn": 0,
+      "authority_reference": "one RegistryAuthorityV1 reference; epoch equals input and output datum",
+      "continuation": "exactly one same registry script, same policy/token/DID/owner, one nonce increment",
+      "operator": "owner changes operator; owner or current operator changes metadata only",
+      "pre_f05": "accept_if_equations_hold"
+    },
+    {
+      "id": "slash",
+      "redeemer": "SlashAgent",
+      "inputs": {
+        "state": 1,
+        "bootstrap": 0,
+        "authority_reference": 1,
+        "evidence_reference": 1,
+        "collateral": 1,
+        "action_authorization": 1
+      },
+      "outputs": {
+        "agent_state": 1,
+        "owner_release": 0,
+        "reserve": 1,
+        "change_max": 1
+      },
+      "identity_mint": 0,
+      "identity_burn": 0,
+      "authority_reference": "one authority reference with exact policy/token/quantity/value/datum/address binding and slash_enabled=true post-F05",
+      "evidence_reference": "one verified EvidenceAttestationV1 bound to identity, epoch, nonce, slasher and expiry",
+      "reserve": "one unique output to the fixed reserve credential from the authority reference; registry stake cannot substitute",
+      "continuation": "exactly one same registry script, same identity, reduced stake/reputation and one nonce increment",
+      "pre_f05": "reject_unconditionally",
+      "action_authorization": "one consumed regular RegistryActionV1 input with exact action policy/token/quantity; burn exactly one unique action token on success"
+    },
+    {
+      "id": "deregister",
+      "redeemer": "DeregisterAgent",
+      "inputs": {
+        "state": 1,
+        "bootstrap": 0,
+        "authority_reference": 1,
+        "collateral": 1
+      },
+      "outputs": {
+        "agent_state": 0,
+        "owner_release": 1,
+        "reserve": 0,
+        "change_max": 1
+      },
+      "identity_mint": 0,
+      "identity_burn": -1,
+      "authority_reference": "one RegistryAuthorityV1 reference; epoch and nonce exact",
+      "owner_release": "exactly one owner key-credential payout containing stake and every non-identity state asset",
+      "continuation": "zero registry-script state outputs",
+      "pre_f05": "accept_if_equations_hold"
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+test_authoritative_contract (scripts.remediation.test_m3_1b_r9_provenance.R11BoundaryTests.test_authoritative_contract) ... ok
+test_authoritative_mutation_detected (scripts.remediation.test_m3_1b_r9_provenance.R11BoundaryTests.test_authoritative_mutation_detected) ... ok
+test_blueprint_drift_rejected (scripts.remediation.test_m3_1b_r9_provenance.R11BoundaryTests.test_blueprint_drift_rejected) ... ok
+test_cleanup_after_injected_failure_and_network_boundary (scripts.remediation.test_m3_1b_r9_provenance.R11BoundaryTests.test_cleanup_after_injected_failure_and_network_boundary) ... ok
+test_dependency_identifiers_and_path_escape_rejected (scripts.remediation.test_m3_1b_r9_provenance.R11BoundaryTests.test_dependency_identifiers_and_path_escape_rejected) ... ok
+test_m7_dependency_commits_reject_tag_and_malformed_identity (scripts.remediation.test_m3_1b_r9_provenance.R11BoundaryTests.test_m7_dependency_commits_reject_tag_and_malformed_identity) ... ok
+test_m7_forward_manifest_rebinds_current_lock_without_false_continuity (scripts.remediation.test_m3_1b_r9_provenance.R11BoundaryTests.test_m7_forward_manifest_rebinds_current_lock_without_false_continuity) ... ok
+test_m7_forward_reset_binding_mutations_reject (scripts.remediation.test_m3_1b_r9_provenance.R11BoundaryTests.test_m7_forward_reset_binding_mutations_reject) ... ok
+test_missing_cache_symlink_and_special_file_rejected (scripts.remediation.test_m3_1b_r9_provenance.R11BoundaryTests.test_missing_cache_symlink_and_special_file_rejected) ... ok
+test_package_and_lock_nonvolatile_mutations_fail_but_timestamps_pass (scripts.remediation.test_m3_1b_r9_provenance.R11BoundaryTests.test_package_and_lock_nonvolatile_mutations_fail_but_timestamps_pass) ... ok
+test_package_index_missing_unknown_and_mutated_rejected (scripts.remediation.test_m3_1b_r9_provenance.R11BoundaryTests.test_package_index_missing_unknown_and_mutated_rejected) ... ok
+test_package_topology_and_file_mutations_rejected (scripts.remediation.test_m3_1b_r9_provenance.R11BoundaryTests.test_package_topology_and_file_mutations_rejected) ... ok
+test_r13_canonical_manifest_and_cli_failure_are_controlled (scripts.remediation.test_m3_1b_r9_provenance.R11BoundaryTests.test_r13_canonical_manifest_and_cli_failure_are_controlled) ... ok
+test_r13_malformed_manifest_containers_rejected (scripts.remediation.test_m3_1b_r9_provenance.R11BoundaryTests.test_r13_malformed_manifest_containers_rejected) ... ok
+test_r15_cli_lock_timestamp_failure_is_sanitized (scripts.remediation.test_m3_1b_r9_provenance.R11BoundaryTests.test_r15_cli_lock_timestamp_failure_is_sanitized) ... ok
+test_r15_lock_timestamp_boolean_and_scalar_matrix (scripts.remediation.test_m3_1b_r9_provenance.R11BoundaryTests.test_r15_lock_timestamp_boolean_and_scalar_matrix) ... ok
+test_r15_package_index_parser_direct_matrix (scripts.remediation.test_m3_1b_r9_provenance.R11BoundaryTests.test_r15_package_index_parser_direct_matrix) ... ok
+test_r5_timestamp_only_semantic_rewrite_passes_nonvolatile_rewrite_fails (scripts.remediation.test_m3_1b_r9_provenance.R11BoundaryTests.test_r5_timestamp_only_semantic_rewrite_passes_nonvolatile_rewrite_fails) ... ok
+test_r9_normalized_lock_digest_allows_timestamp_only_bytes (scripts.remediation.test_m3_1b_r9_provenance.R11BoundaryTests.test_r9_normalized_lock_digest_allows_timestamp_only_bytes) ... ok
+test_r9_rebound_raw_hash_trailing_byte_fails_normalized_binding (scripts.remediation.test_m3_1b_r9_provenance.R11BoundaryTests.test_r9_rebound_raw_hash_trailing_byte_fails_normalized_binding) ... ok
+test_source_omission_addition_and_rebinding_rejected (scripts.remediation.test_m3_1b_r9_provenance.R11BoundaryTests.test_source_omission_addition_and_rebinding_rejected) ... ok
+test_unknown_and_duplicate_manifest_keys_rejected (scripts.remediation.test_m3_1b_r9_provenance.R11BoundaryTests.test_unknown_and_duplicate_manifest_keys_rejected) ... ok
+
+----------------------------------------------------------------------
+Ran 22 tests in 46.736s
+
+OK

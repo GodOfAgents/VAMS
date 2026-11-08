@@ -1,0 +1,232 @@
+{
+  "accepted_registry": {
+    "path": "docs/remediation/m3_f05_2a/authority_bootstrap_public_fixtures.json",
+    "sha256": "98a05d24d476b1aee2754768322dc4b794e5afb5fabec28ade17a2888285467d"
+  },
+  "all_cases_pending": true,
+  "base_positive_hashes": {
+    "raw_inputs": "4b20e2b2cf4bd58b1f6e385c90ffd098d583df69d95fbc7b1fcc2591da72b9fe",
+    "raw_outputs": "9cdf345a785f51763bdb43f1b1ba0c20b5545051f03051e6a7bf726ea128c56a",
+    "transaction": "765c717f16b543c746b88742e8b775cd3ecabca4fef6edd16702184683780a28"
+  },
+  "cases": [
+    {
+      "conservation": {
+        "fee_lovelace": 1000000,
+        "input_lovelace": 17000000,
+        "lovelace_conserved": true,
+        "minted_assets": {
+          "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731.56414d532d4630352d415554482d5634": 1
+        },
+        "minted_output_assets_match": true,
+        "output_assets": {
+          "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731.56414d532d4630352d415554482d5634": 1
+        },
+        "output_lovelace": 16000000
+      },
+      "delta": "rename the minted authority token and matching authority-output asset to VAMS-F05-AUTH-V4; all minted/output quantities remain equal",
+      "expected_result": "reject at compiled target Mint[0]",
+      "family_id": "mint_map_exactness",
+      "files": {
+        "raw_inputs": {
+          "path": "cases/mint_wrong_name/raw_inputs.cbor",
+          "sha256": "4b20e2b2cf4bd58b1f6e385c90ffd098d583df69d95fbc7b1fcc2591da72b9fe",
+          "size_bytes": 73
+        },
+        "raw_outputs": {
+          "path": "cases/mint_wrong_name/raw_outputs.cbor",
+          "sha256": "f2f5b21dee98e6d27aef5e744f1e2aa7b77514e26f903d734fdff51eb16207ac",
+          "size_bytes": 79
+        },
+        "transaction": {
+          "path": "cases/mint_wrong_name/transaction.cbor",
+          "sha256": "5df402093d6a384304ac4de518c5011edfdd20165b06b78f8354b5e71681b556",
+          "size_bytes": 5099
+        }
+      },
+      "funding_witnesses": {
+        "count": 2,
+        "private_material_persisted": false,
+        "verified_against_serialized_body": true
+      },
+      "id": "mint_wrong_name",
+      "original_registry_assertion": {
+        "path": "expected.every_negative_case",
+        "value": "reject"
+      },
+      "registry_assertion": "dict.to_pairs(assets.tokens(tx.mint, policy_id)) == [Pair(authority_asset_name, 1)]",
+      "schema_version": "f05-2a-r4-family-case-v1",
+      "script_invoked": false,
+      "simulator_result": "not run pending independent family review and coordinator freeze",
+      "status": "PENDING",
+      "target": {
+        "applied_script_hash": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+        "policy_id": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+        "purpose": "Mint[0]"
+      },
+      "transaction_body_hash_blake2b_256": "096dc07877741c4a223cef8eac599d97d0de121cc1a831d1effee61eb9e8e7e7"
+    },
+    {
+      "conservation": {
+        "fee_lovelace": 1000000,
+        "input_lovelace": 17000000,
+        "lovelace_conserved": true,
+        "minted_assets": {
+          "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731.56414d532d4630352d415554482d5633": 2
+        },
+        "minted_output_assets_match": true,
+        "output_assets": {
+          "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731.56414d532d4630352d415554482d5633": 2
+        },
+        "output_lovelace": 16000000
+      },
+      "delta": "change only the authority NFT quantity from one to two in both mint and authority output; ledger asset conservation remains exact",
+      "expected_result": "reject at compiled target Mint[0]",
+      "family_id": "mint_map_exactness",
+      "files": {
+        "raw_inputs": {
+          "path": "cases/mint_quantity_two/raw_inputs.cbor",
+          "sha256": "4b20e2b2cf4bd58b1f6e385c90ffd098d583df69d95fbc7b1fcc2591da72b9fe",
+          "size_bytes": 73
+        },
+        "raw_outputs": {
+          "path": "cases/mint_quantity_two/raw_outputs.cbor",
+          "sha256": "e16e9e28e4b0d2b2ffd08d0988cca5c1387f34d58d998f84674f8cbc8b928507",
+          "size_bytes": 79
+        },
+        "transaction": {
+          "path": "cases/mint_quantity_two/transaction.cbor",
+          "sha256": "d81de689c7e2760ed11c0dd90ec5e7fb9d1f73e420e9108961f017baecff42bf",
+          "size_bytes": 5099
+        }
+      },
+      "funding_witnesses": {
+        "count": 2,
+        "private_material_persisted": false,
+        "verified_against_serialized_body": true
+      },
+      "id": "mint_quantity_two",
+      "original_registry_assertion": {
+        "path": "expected.every_negative_case",
+        "value": "reject"
+      },
+      "registry_assertion": "dict.to_pairs(assets.tokens(tx.mint, policy_id)) == [Pair(authority_asset_name, 1)]",
+      "schema_version": "f05-2a-r4-family-case-v1",
+      "script_invoked": false,
+      "simulator_result": "not run pending independent family review and coordinator freeze",
+      "status": "PENDING",
+      "target": {
+        "applied_script_hash": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+        "policy_id": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+        "purpose": "Mint[0]"
+      },
+      "transaction_body_hash_blake2b_256": "d8eac27a011c1a5416fbc673affbfae7fa37904141eb7598ad967868e7512f4a"
+    },
+    {
+      "conservation": {
+        "fee_lovelace": 1000000,
+        "input_lovelace": 17000000,
+        "lovelace_conserved": true,
+        "minted_assets": {
+          "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731.56414d532d4630352d415554482d5633": 1,
+          "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731.56414d532d4630352d4558545241": 1
+        },
+        "minted_output_assets_match": true,
+        "output_assets": {
+          "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731.56414d532d4630352d415554482d5633": 1,
+          "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731.56414d532d4630352d4558545241": 1
+        },
+        "output_lovelace": 16000000
+      },
+      "delta": "add one extra policy asset name to both mint and authority output; singleton amount and every other field remain unchanged",
+      "expected_result": "reject at compiled target Mint[0]",
+      "family_id": "mint_map_exactness",
+      "files": {
+        "raw_inputs": {
+          "path": "cases/mint_extra_name/raw_inputs.cbor",
+          "sha256": "4b20e2b2cf4bd58b1f6e385c90ffd098d583df69d95fbc7b1fcc2591da72b9fe",
+          "size_bytes": 73
+        },
+        "raw_outputs": {
+          "path": "cases/mint_extra_name/raw_outputs.cbor",
+          "sha256": "693ebb7904f54518425cc0e394b002594ebf80671711f2d3ef54953cddfa5cde",
+          "size_bytes": 79
+        },
+        "transaction": {
+          "path": "cases/mint_extra_name/transaction.cbor",
+          "sha256": "8b9ac39b039007aed1421aecd9bcb9cab617b13921a66a1ec8133c5a47a59e2f",
+          "size_bytes": 5131
+        }
+      },
+      "funding_witnesses": {
+        "count": 2,
+        "private_material_persisted": false,
+        "verified_against_serialized_body": true
+      },
+      "id": "mint_extra_name",
+      "original_registry_assertion": {
+        "path": "expected.every_negative_case",
+        "value": "reject"
+      },
+      "registry_assertion": "dict.to_pairs(assets.tokens(tx.mint, policy_id)) == [Pair(authority_asset_name, 1)]",
+      "schema_version": "f05-2a-r4-family-case-v1",
+      "script_invoked": false,
+      "simulator_result": "not run pending independent family review and coordinator freeze",
+      "status": "PENDING",
+      "target": {
+        "applied_script_hash": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+        "policy_id": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+        "purpose": "Mint[0]"
+      },
+      "transaction_body_hash_blake2b_256": "4e5b9427df052c1ae270ebc8815b66220007f4cb63934648c9cc64f65b892466"
+    }
+  ],
+  "conservation_rule": "resolved inputs equal outputs plus fee, and every minted asset name/quantity equals aggregate output assets",
+  "executions": 0,
+  "family_fixture_count": 3,
+  "family_id": "mint_map_exactness",
+  "freeze_gate": "coordinator freezes exact family hashes and Agent C independently approves before simulator invocation",
+  "funding_signature_method": "Blake2b-256 of exact serialized body; deterministic synthetic test-only Ed25519 signers derived in memory per case; resolved funding payment credentials rebound; serialized witnesses reverified; no private material persisted",
+  "positive_control": {
+    "expected_result": "accept control",
+    "family_id": "mint_map_exactness",
+    "files": {
+      "raw_inputs": {
+        "path": "positive_control/raw_inputs.cbor",
+        "sha256": "4b20e2b2cf4bd58b1f6e385c90ffd098d583df69d95fbc7b1fcc2591da72b9fe",
+        "size_bytes": 73
+      },
+      "raw_outputs": {
+        "path": "positive_control/raw_outputs.cbor",
+        "sha256": "9cdf345a785f51763bdb43f1b1ba0c20b5545051f03051e6a7bf726ea128c56a",
+        "size_bytes": 79
+      },
+      "transaction": {
+        "path": "positive_control/transaction.cbor",
+        "sha256": "765c717f16b543c746b88742e8b775cd3ecabca4fef6edd16702184683780a28",
+        "size_bytes": 5099
+      }
+    },
+    "funding_witnesses": "accepted base-witness set; byte-identical copy",
+    "id": "valid_positive_control",
+    "schema_version": "f05-2a-r4-family-positive-control-v1",
+    "source": "accepted typed positive control copied byte-for-byte",
+    "status": "control-only; no new simulator execution",
+    "target": {
+      "applied_script_hash": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+      "policy_id": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+      "purpose": "Mint[0]"
+    }
+  },
+  "r2_contract": {
+    "path": "docs/remediation/m3_f05_2a/tx_sim_evidence_contract_r2.json",
+    "sha256": "3510e127d369e9eab24a7ebe5a5dea10daaf55fd9589a297d78776bda940f6e9"
+  },
+  "schema_version": "f05-2a-r4-transaction-family-manifest-v1",
+  "status": "fixtures prepared; pending independent review; no simulator execution",
+  "target": {
+    "applied_script_hash": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+    "policy_id": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+    "purpose": "Mint[0]"
+  }
+}

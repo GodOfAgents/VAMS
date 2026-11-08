@@ -1,0 +1,733 @@
+{
+  "schema_version": "f05-2a-tx-simulator-evidence-contract-r4",
+  "status": "owner-authorized amendment; no fixtures generated or executed; no credit promoted",
+  "supersedes": {
+    "path": "docs/remediation/m3_f05_2a/tx_sim_evidence_contract_r3_1.json",
+    "sha256": "0ff2673605ebae030762b44144d67fd634cd53b0261467fbfabede61e5981933",
+    "scope": "only the ten listed pending rows; other terms retained"
+  },
+  "lineage": {
+    "r1": {
+      "path": "docs/remediation/m3_f05_2a/tx_sim_evidence_contract_r1.json",
+      "sha256": "c06fa1e93ee8881fece804ecc4d23f26995d3035d488906736caeb516090ca9c"
+    },
+    "r2": {
+      "path": "docs/remediation/m3_f05_2a/tx_sim_evidence_contract_r2.json",
+      "sha256": "3510e127d369e9eab24a7ebe5a5dea10daaf55fd9589a297d78776bda940f6e9"
+    },
+    "r3": {
+      "path": "docs/remediation/m3_f05_2a/tx_sim_evidence_contract_r3.json",
+      "sha256": "952d5f0c8a379da4732d6aeb67e23f3bad41342db4ea30dc93de3efa6a109a77"
+    },
+    "r3_1": {
+      "path": "docs/remediation/m3_f05_2a/tx_sim_evidence_contract_r3_1.json",
+      "sha256": "0ff2673605ebae030762b44144d67fd634cd53b0261467fbfabede61e5981933"
+    },
+    "accepted_registry": {
+      "path": "docs/remediation/m3_f05_2a/authority_bootstrap_public_fixtures.json",
+      "sha256": "98a05d24d476b1aee2754768322dc4b794e5afb5fabec28ade17a2888285467d",
+      "negative_cases": 55,
+      "compiled_mutations": 21,
+      "modified": false
+    }
+  },
+  "owner_decisions": {
+    "applied_parameter": {
+      "choice": "C",
+      "case_ids": [
+        "applied_genesis_parameter",
+        "applied_keys_parameter",
+        "applied_keys_bad_count",
+        "applied_keys_bad_length",
+        "applied_keys_duplicate",
+        "applied_keys_unsorted"
+      ],
+      "scope": "new CBOR transactions rebound to alternate applied policy; no keep-transaction semantics"
+    },
+    "proof_domain": {
+      "choice": "B",
+      "case_ids": [
+        "r2_signature_for_other_seed",
+        "r2_signature_for_other_network",
+        "r2_signature_for_other_validator_hash",
+        "r2_signature_for_other_epoch"
+      ],
+      "scope": "test-only parameter-bound CBOR; ephemeral test keys only"
+    }
+  },
+  "case_overrides": [
+    {
+      "id": "applied_genesis_parameter",
+      "original_r2_case_contract": {
+        "category": "ledger_tx_sim",
+        "compiled_target_policy_id": null,
+        "compiled_target_policy_id_status": "parameter-derived policy pending isolated compile",
+        "evidence_ref": "docs/remediation/m3_f05_2a/authority_bootstrap_public_fixtures.json#negative_cases/applied_genesis_parameter",
+        "executor": "pinned Aiken parameterized compile + tx-sim",
+        "expected_base_policy_id": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+        "expected_result": "reject at compiled target Mint[0]",
+        "historical_evidence_ref": null,
+        "id": "applied_genesis_parameter",
+        "mutation": "compile_with_different_genesis_ref_keep_transaction",
+        "original_assertion": {
+          "path": "expected.every_negative_case",
+          "value": "reject"
+        },
+        "preservation_delta": null,
+        "status": "PENDING",
+        "status_reason": "parameter-derived hash and simulation pending isolated compile",
+        "target_policy_hash": null,
+        "target_policy_hash_note": "parameter-derived hash pending isolated compile",
+        "target_ref": "cardano/validators/f05_authority_policy.ak#f05_authority_policy.mint",
+        "verifier_property": "count_seed_input(tx.inputs, genesis_ref) == 1"
+      },
+      "preserved_security_assertion": {
+        "original_assertion": {
+          "path": "expected.every_negative_case",
+          "value": "reject"
+        },
+        "verifier_property": "count_seed_input(tx.inputs, genesis_ref) == 1",
+        "expected_result": "reject at compiled target Mint[0]",
+        "target_ref": "cardano/validators/f05_authority_policy.ak#f05_authority_policy.mint"
+      },
+      "amended_contract": {
+        "decision": "C",
+        "fixture_family": "applied_parameter",
+        "evidence_category": "synthetic_parameter_bound_tx_sim",
+        "status": "PENDING",
+        "changed_condition": "alternate genesis OutputReference in applied policy; transaction omits that reference",
+        "preserved_verifier_property": "count_seed_input(tx.inputs, genesis_ref) == 1",
+        "expected_compiled_entrypoint": "cardano/validators/f05_authority_policy.ak#f05_authority_policy.mint / Mint[0]",
+        "expected_target_invoked": true,
+        "expected_result": "reject for named condition",
+        "positive_control": "same alternate policy with exactly one matching genesis reference; valid bootstrap and ephemeral PoPs accept",
+        "applied_policy_id": null,
+        "applied_script_hash": null,
+        "parameter_cbor_sha256": null,
+        "compiled_program_bytes_sha256": null,
+        "transaction_cbor_sha256": null,
+        "raw_inputs_sha256": null,
+        "raw_outputs_sha256": null,
+        "witness_binding": "mint policy ID == applied policy ID == Plutus V3 witness script hash",
+        "funding": "valid final-body-bound funding signatures made with ephemeral test keys only",
+        "conservation": "all input values equal outputs plus fee; conserve every native asset; account for collateral and change separately",
+        "attribution": "condition-isolated compiled mutant or equivalent reviewer-verified entrypoint evidence must accept same negative when only named guard is removed; otherwise PENDING",
+        "independent_byte_review": "required before execution for params, compiled bytes/hash, policy ID, transaction/vectors, signatures, bindings, one-condition delta, and conservation",
+        "credit": {
+          "original_policy": false,
+          "ledger_admission": false,
+          "live_network": false,
+          "negative_case": null
+        }
+      }
+    },
+    {
+      "id": "applied_keys_parameter",
+      "original_r2_case_contract": {
+        "category": "ledger_tx_sim",
+        "compiled_target_policy_id": null,
+        "compiled_target_policy_id_status": "parameter-derived policy pending isolated compile",
+        "evidence_ref": "docs/remediation/m3_f05_2a/authority_bootstrap_public_fixtures.json#negative_cases/applied_keys_parameter",
+        "executor": "pinned Aiken parameterized compile + tx-sim",
+        "expected_base_policy_id": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+        "expected_result": "reject at compiled target Mint[0]",
+        "historical_evidence_ref": null,
+        "id": "applied_keys_parameter",
+        "mutation": "compile_with_different_sorted_keys_keep_datum",
+        "original_assertion": {
+          "path": "expected.every_negative_case",
+          "value": "reject"
+        },
+        "preservation_delta": null,
+        "status": "PENDING",
+        "status_reason": "parameter-derived hash and simulation pending isolated compile",
+        "target_policy_hash": null,
+        "target_policy_hash_note": "parameter-derived hash pending isolated compile",
+        "target_ref": "cardano/validators/f05_authority_policy.ak#f05_authority_policy.mint",
+        "verifier_property": "state.ordered_keys == initial_keys"
+      },
+      "preserved_security_assertion": {
+        "original_assertion": {
+          "path": "expected.every_negative_case",
+          "value": "reject"
+        },
+        "verifier_property": "state.ordered_keys == initial_keys",
+        "expected_result": "reject at compiled target Mint[0]",
+        "target_ref": "cardano/validators/f05_authority_policy.ak#f05_authority_policy.mint"
+      },
+      "amended_contract": {
+        "decision": "C",
+        "fixture_family": "applied_parameter",
+        "evidence_category": "synthetic_parameter_bound_tx_sim",
+        "status": "PENDING",
+        "changed_condition": "different valid ordered five-key policy parameters while datum retains original keys",
+        "preserved_verifier_property": "state.ordered_keys == initial_keys",
+        "expected_compiled_entrypoint": "cardano/validators/f05_authority_policy.ak#f05_authority_policy.mint / Mint[0]",
+        "expected_target_invoked": true,
+        "expected_result": "reject for named condition",
+        "positive_control": "same alternate five-key policy with matching datum and ephemeral PoPs accepts",
+        "applied_policy_id": null,
+        "applied_script_hash": null,
+        "parameter_cbor_sha256": null,
+        "compiled_program_bytes_sha256": null,
+        "transaction_cbor_sha256": null,
+        "raw_inputs_sha256": null,
+        "raw_outputs_sha256": null,
+        "witness_binding": "mint policy ID == applied policy ID == Plutus V3 witness script hash",
+        "funding": "valid final-body-bound funding signatures made with ephemeral test keys only",
+        "conservation": "all input values equal outputs plus fee; conserve every native asset; account for collateral and change separately",
+        "attribution": "condition-isolated compiled mutant or equivalent reviewer-verified entrypoint evidence must accept same negative when only named guard is removed; otherwise PENDING",
+        "independent_byte_review": "required before execution for params, compiled bytes/hash, policy ID, transaction/vectors, signatures, bindings, one-condition delta, and conservation",
+        "credit": {
+          "original_policy": false,
+          "ledger_admission": false,
+          "live_network": false,
+          "negative_case": null
+        }
+      }
+    },
+    {
+      "id": "applied_keys_bad_count",
+      "original_r2_case_contract": {
+        "category": "ledger_tx_sim",
+        "compiled_target_policy_id": null,
+        "compiled_target_policy_id_status": "parameter-derived policy pending isolated compile",
+        "evidence_ref": "docs/remediation/m3_f05_2a/authority_bootstrap_public_fixtures.json#negative_cases/applied_keys_bad_count",
+        "executor": "pinned Aiken parameterized compile + tx-sim",
+        "expected_base_policy_id": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+        "expected_result": "reject at compiled target Mint[0]",
+        "historical_evidence_ref": null,
+        "id": "applied_keys_bad_count",
+        "mutation": "compile_with_six_keys_and_matching_datum",
+        "original_assertion": {
+          "path": "expected.every_negative_case",
+          "value": "reject"
+        },
+        "preservation_delta": null,
+        "status": "PENDING",
+        "status_reason": "parameter-derived hash and simulation pending isolated compile",
+        "target_policy_hash": null,
+        "target_policy_hash_note": "parameter-derived hash pending isolated compile",
+        "target_ref": "cardano/validators/f05_authority_policy.ak#f05_authority_policy.mint",
+        "verifier_property": "valid_ordered_keys requires exactly five keys"
+      },
+      "preserved_security_assertion": {
+        "original_assertion": {
+          "path": "expected.every_negative_case",
+          "value": "reject"
+        },
+        "verifier_property": "valid_ordered_keys requires exactly five keys",
+        "expected_result": "reject at compiled target Mint[0]",
+        "target_ref": "cardano/validators/f05_authority_policy.ak#f05_authority_policy.mint"
+      },
+      "amended_contract": {
+        "decision": "C",
+        "fixture_family": "applied_parameter",
+        "evidence_category": "synthetic_parameter_bound_tx_sim",
+        "status": "PENDING",
+        "changed_condition": "six applied keys with matching datum/proof shape",
+        "preserved_verifier_property": "valid_ordered_keys requires exactly five keys",
+        "expected_compiled_entrypoint": "cardano/validators/f05_authority_policy.ak#f05_authority_policy.mint / Mint[0]",
+        "expected_target_invoked": true,
+        "expected_result": "reject for named condition",
+        "positive_control": "canonical valid five-key policy transaction accepts as harness control",
+        "applied_policy_id": null,
+        "applied_script_hash": null,
+        "parameter_cbor_sha256": null,
+        "compiled_program_bytes_sha256": null,
+        "transaction_cbor_sha256": null,
+        "raw_inputs_sha256": null,
+        "raw_outputs_sha256": null,
+        "witness_binding": "mint policy ID == applied policy ID == Plutus V3 witness script hash",
+        "funding": "valid final-body-bound funding signatures made with ephemeral test keys only",
+        "conservation": "all input values equal outputs plus fee; conserve every native asset; account for collateral and change separately",
+        "attribution": "condition-isolated compiled mutant or equivalent reviewer-verified entrypoint evidence must accept same negative when only named guard is removed; otherwise PENDING",
+        "independent_byte_review": "required before execution for params, compiled bytes/hash, policy ID, transaction/vectors, signatures, bindings, one-condition delta, and conservation",
+        "credit": {
+          "original_policy": false,
+          "ledger_admission": false,
+          "live_network": false,
+          "negative_case": null
+        }
+      }
+    },
+    {
+      "id": "applied_keys_bad_length",
+      "original_r2_case_contract": {
+        "category": "ledger_tx_sim",
+        "compiled_target_policy_id": null,
+        "compiled_target_policy_id_status": "parameter-derived policy pending isolated compile",
+        "evidence_ref": "docs/remediation/m3_f05_2a/authority_bootstrap_public_fixtures.json#negative_cases/applied_keys_bad_length",
+        "executor": "pinned Aiken parameterized compile + tx-sim",
+        "expected_base_policy_id": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+        "expected_result": "reject at compiled target Mint[0]",
+        "historical_evidence_ref": null,
+        "id": "applied_keys_bad_length",
+        "mutation": "compile_with_short_key_and_matching_datum",
+        "original_assertion": {
+          "path": "expected.every_negative_case",
+          "value": "reject"
+        },
+        "preservation_delta": null,
+        "status": "PENDING",
+        "status_reason": "parameter-derived hash and simulation pending isolated compile",
+        "target_policy_hash": null,
+        "target_policy_hash_note": "parameter-derived hash pending isolated compile",
+        "target_ref": "cardano/validators/f05_authority_policy.ak#f05_authority_policy.mint",
+        "verifier_property": "bytearray.length(first) == authority_key_bytes"
+      },
+      "preserved_security_assertion": {
+        "original_assertion": {
+          "path": "expected.every_negative_case",
+          "value": "reject"
+        },
+        "verifier_property": "bytearray.length(first) == authority_key_bytes",
+        "expected_result": "reject at compiled target Mint[0]",
+        "target_ref": "cardano/validators/f05_authority_policy.ak#f05_authority_policy.mint"
+      },
+      "amended_contract": {
+        "decision": "C",
+        "fixture_family": "applied_parameter",
+        "evidence_category": "synthetic_parameter_bound_tx_sim",
+        "status": "PENDING",
+        "changed_condition": "one 31-byte applied key with matching datum/proof shape",
+        "preserved_verifier_property": "bytearray.length(first) == authority_key_bytes",
+        "expected_compiled_entrypoint": "cardano/validators/f05_authority_policy.ak#f05_authority_policy.mint / Mint[0]",
+        "expected_target_invoked": true,
+        "expected_result": "reject for named condition",
+        "positive_control": "canonical valid five-key policy transaction accepts as harness control",
+        "applied_policy_id": null,
+        "applied_script_hash": null,
+        "parameter_cbor_sha256": null,
+        "compiled_program_bytes_sha256": null,
+        "transaction_cbor_sha256": null,
+        "raw_inputs_sha256": null,
+        "raw_outputs_sha256": null,
+        "witness_binding": "mint policy ID == applied policy ID == Plutus V3 witness script hash",
+        "funding": "valid final-body-bound funding signatures made with ephemeral test keys only",
+        "conservation": "all input values equal outputs plus fee; conserve every native asset; account for collateral and change separately",
+        "attribution": "condition-isolated compiled mutant or equivalent reviewer-verified entrypoint evidence must accept same negative when only named guard is removed; otherwise PENDING",
+        "independent_byte_review": "required before execution for params, compiled bytes/hash, policy ID, transaction/vectors, signatures, bindings, one-condition delta, and conservation",
+        "credit": {
+          "original_policy": false,
+          "ledger_admission": false,
+          "live_network": false,
+          "negative_case": null
+        }
+      }
+    },
+    {
+      "id": "applied_keys_duplicate",
+      "original_r2_case_contract": {
+        "category": "ledger_tx_sim",
+        "compiled_target_policy_id": null,
+        "compiled_target_policy_id_status": "parameter-derived policy pending isolated compile",
+        "evidence_ref": "docs/remediation/m3_f05_2a/authority_bootstrap_public_fixtures.json#negative_cases/applied_keys_duplicate",
+        "executor": "pinned Aiken parameterized compile + tx-sim",
+        "expected_base_policy_id": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+        "expected_result": "reject at compiled target Mint[0]",
+        "historical_evidence_ref": null,
+        "id": "applied_keys_duplicate",
+        "mutation": "compile_with_duplicate_keys_and_matching_datum",
+        "original_assertion": {
+          "path": "expected.every_negative_case",
+          "value": "reject"
+        },
+        "preservation_delta": null,
+        "status": "PENDING",
+        "status_reason": "parameter-derived hash and simulation pending isolated compile",
+        "target_policy_hash": null,
+        "target_policy_hash_note": "parameter-derived hash pending isolated compile",
+        "target_ref": "cardano/validators/f05_authority_policy.ak#f05_authority_policy.mint",
+        "verifier_property": "bytearray.to_int_big_endian(first) < bytearray.to_int_big_endian(second)"
+      },
+      "preserved_security_assertion": {
+        "original_assertion": {
+          "path": "expected.every_negative_case",
+          "value": "reject"
+        },
+        "verifier_property": "bytearray.to_int_big_endian(first) < bytearray.to_int_big_endian(second)",
+        "expected_result": "reject at compiled target Mint[0]",
+        "target_ref": "cardano/validators/f05_authority_policy.ak#f05_authority_policy.mint"
+      },
+      "amended_contract": {
+        "decision": "C",
+        "fixture_family": "applied_parameter",
+        "evidence_category": "synthetic_parameter_bound_tx_sim",
+        "status": "PENDING",
+        "changed_condition": "duplicate applied keys with matching datum/proof shape",
+        "preserved_verifier_property": "bytearray.to_int_big_endian(first) < bytearray.to_int_big_endian(second)",
+        "expected_compiled_entrypoint": "cardano/validators/f05_authority_policy.ak#f05_authority_policy.mint / Mint[0]",
+        "expected_target_invoked": true,
+        "expected_result": "reject for named condition",
+        "positive_control": "canonical valid five-key policy transaction accepts as harness control",
+        "applied_policy_id": null,
+        "applied_script_hash": null,
+        "parameter_cbor_sha256": null,
+        "compiled_program_bytes_sha256": null,
+        "transaction_cbor_sha256": null,
+        "raw_inputs_sha256": null,
+        "raw_outputs_sha256": null,
+        "witness_binding": "mint policy ID == applied policy ID == Plutus V3 witness script hash",
+        "funding": "valid final-body-bound funding signatures made with ephemeral test keys only",
+        "conservation": "all input values equal outputs plus fee; conserve every native asset; account for collateral and change separately",
+        "attribution": "condition-isolated compiled mutant or equivalent reviewer-verified entrypoint evidence must accept same negative when only named guard is removed; otherwise PENDING",
+        "independent_byte_review": "required before execution for params, compiled bytes/hash, policy ID, transaction/vectors, signatures, bindings, one-condition delta, and conservation",
+        "credit": {
+          "original_policy": false,
+          "ledger_admission": false,
+          "live_network": false,
+          "negative_case": null
+        }
+      }
+    },
+    {
+      "id": "applied_keys_unsorted",
+      "original_r2_case_contract": {
+        "category": "ledger_tx_sim",
+        "compiled_target_policy_id": null,
+        "compiled_target_policy_id_status": "parameter-derived policy pending isolated compile",
+        "evidence_ref": "docs/remediation/m3_f05_2a/authority_bootstrap_public_fixtures.json#negative_cases/applied_keys_unsorted",
+        "executor": "pinned Aiken parameterized compile + tx-sim",
+        "expected_base_policy_id": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+        "expected_result": "reject at compiled target Mint[0]",
+        "historical_evidence_ref": null,
+        "id": "applied_keys_unsorted",
+        "mutation": "compile_with_unsorted_keys_and_matching_datum",
+        "original_assertion": {
+          "path": "expected.every_negative_case",
+          "value": "reject"
+        },
+        "preservation_delta": null,
+        "status": "PENDING",
+        "status_reason": "parameter-derived hash and simulation pending isolated compile",
+        "target_policy_hash": null,
+        "target_policy_hash_note": "parameter-derived hash pending isolated compile",
+        "target_ref": "cardano/validators/f05_authority_policy.ak#f05_authority_policy.mint",
+        "verifier_property": "ordered_keys are strictly increasing by key bytes"
+      },
+      "preserved_security_assertion": {
+        "original_assertion": {
+          "path": "expected.every_negative_case",
+          "value": "reject"
+        },
+        "verifier_property": "ordered_keys are strictly increasing by key bytes",
+        "expected_result": "reject at compiled target Mint[0]",
+        "target_ref": "cardano/validators/f05_authority_policy.ak#f05_authority_policy.mint"
+      },
+      "amended_contract": {
+        "decision": "C",
+        "fixture_family": "applied_parameter",
+        "evidence_category": "synthetic_parameter_bound_tx_sim",
+        "status": "PENDING",
+        "changed_condition": "unsorted applied keys with matching datum/proof shape",
+        "preserved_verifier_property": "ordered_keys are strictly increasing by key bytes",
+        "expected_compiled_entrypoint": "cardano/validators/f05_authority_policy.ak#f05_authority_policy.mint / Mint[0]",
+        "expected_target_invoked": true,
+        "expected_result": "reject for named condition",
+        "positive_control": "canonical valid five-key policy transaction accepts as harness control",
+        "applied_policy_id": null,
+        "applied_script_hash": null,
+        "parameter_cbor_sha256": null,
+        "compiled_program_bytes_sha256": null,
+        "transaction_cbor_sha256": null,
+        "raw_inputs_sha256": null,
+        "raw_outputs_sha256": null,
+        "witness_binding": "mint policy ID == applied policy ID == Plutus V3 witness script hash",
+        "funding": "valid final-body-bound funding signatures made with ephemeral test keys only",
+        "conservation": "all input values equal outputs plus fee; conserve every native asset; account for collateral and change separately",
+        "attribution": "condition-isolated compiled mutant or equivalent reviewer-verified entrypoint evidence must accept same negative when only named guard is removed; otherwise PENDING",
+        "independent_byte_review": "required before execution for params, compiled bytes/hash, policy ID, transaction/vectors, signatures, bindings, one-condition delta, and conservation",
+        "credit": {
+          "original_policy": false,
+          "ledger_admission": false,
+          "live_network": false,
+          "negative_case": null
+        }
+      }
+    },
+    {
+      "id": "r2_signature_for_other_seed",
+      "original_r2_case_contract": {
+        "category": "ledger_tx_sim",
+        "compiled_target_policy_id": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+        "compiled_target_policy_id_status": "confirmed base policy id",
+        "evidence_ref": "docs/remediation/m3_f05_2a/authority_bootstrap_public_fixtures.json#negative_cases/r2_signature_for_other_seed",
+        "executor": "pinned Aiken tx simulate --cbor",
+        "expected_base_policy_id": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+        "expected_result": "reject at compiled target Mint[0]",
+        "historical_evidence_ref": null,
+        "id": "r2_signature_for_other_seed",
+        "mutation": "sign_same_tuple_with_alternate_seed",
+        "original_assertion": {
+          "path": "expected.every_negative_case",
+          "value": "reject"
+        },
+        "preservation_delta": null,
+        "status": "PENDING",
+        "status_reason": "not yet executed and independently reviewed",
+        "target_policy_hash": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+        "target_policy_hash_note": "accepted applied-policy hash",
+        "target_ref": "cardano/validators/f05_authority_policy.ak#f05_authority_policy.mint",
+        "verifier_property": "valid_bootstrap_proofs(initial_keys, proofs, bootstrap_message)"
+      },
+      "preserved_security_assertion": {
+        "original_assertion": {
+          "path": "expected.every_negative_case",
+          "value": "reject"
+        },
+        "verifier_property": "valid_bootstrap_proofs(initial_keys, proofs, bootstrap_message)",
+        "expected_result": "reject at compiled target Mint[0]",
+        "target_ref": "cardano/validators/f05_authority_policy.ak#f05_authority_policy.mint"
+      },
+      "amended_contract": {
+        "decision": "B",
+        "fixture_family": "proof_domain",
+        "evidence_category": "synthetic_parameter_bound_tx_sim",
+        "status": "PENDING",
+        "changed_condition": "ephemeral committee signs with alternate seed tx id ad repeated 32 bytes",
+        "preserved_verifier_property": "valid_bootstrap_proofs(initial_keys, proofs, bootstrap_message)",
+        "expected_compiled_entrypoint": "cardano/validators/f05_authority_policy.ak#f05_authority_policy.mint / Mint[0]",
+        "expected_target_invoked": true,
+        "expected_result": "reject for named condition",
+        "positive_control": "same test policy/transaction with proofs signing exact applied parameter-bound message accepts",
+        "applied_policy_id": null,
+        "applied_script_hash": null,
+        "parameter_cbor_sha256": null,
+        "compiled_program_bytes_sha256": null,
+        "transaction_cbor_sha256": null,
+        "raw_inputs_sha256": null,
+        "raw_outputs_sha256": null,
+        "witness_binding": "mint policy ID == applied policy ID == Plutus V3 witness script hash",
+        "funding": "valid final-body-bound funding signatures made with ephemeral test keys only",
+        "conservation": "all input values equal outputs plus fee; conserve every native asset; account for collateral and change separately",
+        "attribution": "condition-isolated compiled mutant or equivalent reviewer-verified entrypoint evidence must accept same negative when only named guard is removed; otherwise PENDING",
+        "independent_byte_review": "required before execution for params, compiled bytes/hash, policy ID, transaction/vectors, signatures, bindings, one-condition delta, and conservation",
+        "credit": {
+          "original_policy": false,
+          "ledger_admission": false,
+          "live_network": false,
+          "negative_case": null
+        }
+      }
+    },
+    {
+      "id": "r2_signature_for_other_network",
+      "original_r2_case_contract": {
+        "category": "ledger_tx_sim",
+        "compiled_target_policy_id": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+        "compiled_target_policy_id_status": "confirmed base policy id",
+        "evidence_ref": "docs/remediation/m3_f05_2a/authority_bootstrap_public_fixtures.json#negative_cases/r2_signature_for_other_network",
+        "executor": "pinned Aiken tx simulate --cbor",
+        "expected_base_policy_id": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+        "expected_result": "reject at compiled target Mint[0]",
+        "historical_evidence_ref": null,
+        "id": "r2_signature_for_other_network",
+        "mutation": "sign_tuple_with_another_network_magic",
+        "original_assertion": {
+          "path": "expected.every_negative_case",
+          "value": "reject"
+        },
+        "preservation_delta": null,
+        "status": "PENDING",
+        "status_reason": "not yet executed and independently reviewed",
+        "target_policy_hash": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+        "target_policy_hash_note": "accepted applied-policy hash",
+        "target_ref": "cardano/validators/f05_authority_policy.ak#f05_authority_policy.mint",
+        "verifier_property": "valid_bootstrap_proofs(initial_keys, proofs, bootstrap_message)"
+      },
+      "preserved_security_assertion": {
+        "original_assertion": {
+          "path": "expected.every_negative_case",
+          "value": "reject"
+        },
+        "verifier_property": "valid_bootstrap_proofs(initial_keys, proofs, bootstrap_message)",
+        "expected_result": "reject at compiled target Mint[0]",
+        "target_ref": "cardano/validators/f05_authority_policy.ak#f05_authority_policy.mint"
+      },
+      "amended_contract": {
+        "decision": "B",
+        "fixture_family": "proof_domain",
+        "evidence_category": "synthetic_parameter_bound_tx_sim",
+        "status": "PENDING",
+        "changed_condition": "ephemeral committee signs network_magic 0; test policy binds selected tuple",
+        "preserved_verifier_property": "valid_bootstrap_proofs(initial_keys, proofs, bootstrap_message)",
+        "expected_compiled_entrypoint": "cardano/validators/f05_authority_policy.ak#f05_authority_policy.mint / Mint[0]",
+        "expected_target_invoked": true,
+        "expected_result": "reject for named condition",
+        "positive_control": "same test policy/transaction with proofs signing exact applied parameter-bound message accepts",
+        "applied_policy_id": null,
+        "applied_script_hash": null,
+        "parameter_cbor_sha256": null,
+        "compiled_program_bytes_sha256": null,
+        "transaction_cbor_sha256": null,
+        "raw_inputs_sha256": null,
+        "raw_outputs_sha256": null,
+        "witness_binding": "mint policy ID == applied policy ID == Plutus V3 witness script hash",
+        "funding": "valid final-body-bound funding signatures made with ephemeral test keys only",
+        "conservation": "all input values equal outputs plus fee; conserve every native asset; account for collateral and change separately",
+        "attribution": "condition-isolated compiled mutant or equivalent reviewer-verified entrypoint evidence must accept same negative when only named guard is removed; otherwise PENDING",
+        "independent_byte_review": "required before execution for params, compiled bytes/hash, policy ID, transaction/vectors, signatures, bindings, one-condition delta, and conservation",
+        "credit": {
+          "original_policy": false,
+          "ledger_admission": false,
+          "live_network": false,
+          "negative_case": null
+        }
+      }
+    },
+    {
+      "id": "r2_signature_for_other_validator_hash",
+      "original_r2_case_contract": {
+        "category": "ledger_tx_sim",
+        "compiled_target_policy_id": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+        "compiled_target_policy_id_status": "confirmed base policy id",
+        "evidence_ref": "docs/remediation/m3_f05_2a/authority_bootstrap_public_fixtures.json#negative_cases/r2_signature_for_other_validator_hash",
+        "executor": "pinned Aiken tx simulate --cbor",
+        "expected_base_policy_id": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+        "expected_result": "reject at compiled target Mint[0]",
+        "historical_evidence_ref": null,
+        "id": "r2_signature_for_other_validator_hash",
+        "mutation": "sign_tuple_with_another_state_validator_hash",
+        "original_assertion": {
+          "path": "expected.every_negative_case",
+          "value": "reject"
+        },
+        "preservation_delta": null,
+        "status": "PENDING",
+        "status_reason": "not yet executed and independently reviewed",
+        "target_policy_hash": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+        "target_policy_hash_note": "accepted applied-policy hash",
+        "target_ref": "cardano/validators/f05_authority_policy.ak#f05_authority_policy.mint",
+        "verifier_property": "valid_bootstrap_proofs(initial_keys, proofs, bootstrap_message)"
+      },
+      "preserved_security_assertion": {
+        "original_assertion": {
+          "path": "expected.every_negative_case",
+          "value": "reject"
+        },
+        "verifier_property": "valid_bootstrap_proofs(initial_keys, proofs, bootstrap_message)",
+        "expected_result": "reject at compiled target Mint[0]",
+        "target_ref": "cardano/validators/f05_authority_policy.ak#f05_authority_policy.mint"
+      },
+      "amended_contract": {
+        "decision": "B",
+        "fixture_family": "proof_domain",
+        "evidence_category": "synthetic_parameter_bound_tx_sim",
+        "status": "PENDING",
+        "changed_condition": "ephemeral committee signs validator hash cd repeated 28 bytes; test policy uses derived hash",
+        "preserved_verifier_property": "valid_bootstrap_proofs(initial_keys, proofs, bootstrap_message)",
+        "expected_compiled_entrypoint": "cardano/validators/f05_authority_policy.ak#f05_authority_policy.mint / Mint[0]",
+        "expected_target_invoked": true,
+        "expected_result": "reject for named condition",
+        "positive_control": "same test policy/transaction with proofs signing exact applied parameter-bound message accepts",
+        "applied_policy_id": null,
+        "applied_script_hash": null,
+        "parameter_cbor_sha256": null,
+        "compiled_program_bytes_sha256": null,
+        "transaction_cbor_sha256": null,
+        "raw_inputs_sha256": null,
+        "raw_outputs_sha256": null,
+        "witness_binding": "mint policy ID == applied policy ID == Plutus V3 witness script hash",
+        "funding": "valid final-body-bound funding signatures made with ephemeral test keys only",
+        "conservation": "all input values equal outputs plus fee; conserve every native asset; account for collateral and change separately",
+        "attribution": "condition-isolated compiled mutant or equivalent reviewer-verified entrypoint evidence must accept same negative when only named guard is removed; otherwise PENDING",
+        "independent_byte_review": "required before execution for params, compiled bytes/hash, policy ID, transaction/vectors, signatures, bindings, one-condition delta, and conservation",
+        "credit": {
+          "original_policy": false,
+          "ledger_admission": false,
+          "live_network": false,
+          "negative_case": null
+        }
+      }
+    },
+    {
+      "id": "r2_signature_for_other_epoch",
+      "original_r2_case_contract": {
+        "category": "ledger_tx_sim",
+        "compiled_target_policy_id": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+        "compiled_target_policy_id_status": "confirmed base policy id",
+        "evidence_ref": "docs/remediation/m3_f05_2a/authority_bootstrap_public_fixtures.json#negative_cases/r2_signature_for_other_epoch",
+        "executor": "pinned Aiken tx simulate --cbor",
+        "expected_base_policy_id": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+        "expected_result": "reject at compiled target Mint[0]",
+        "historical_evidence_ref": null,
+        "id": "r2_signature_for_other_epoch",
+        "mutation": "sign_tuple_with_nonzero_epoch",
+        "original_assertion": {
+          "path": "expected.every_negative_case",
+          "value": "reject"
+        },
+        "preservation_delta": null,
+        "status": "PENDING",
+        "status_reason": "not yet executed and independently reviewed",
+        "target_policy_hash": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+        "target_policy_hash_note": "accepted applied-policy hash",
+        "target_ref": "cardano/validators/f05_authority_policy.ak#f05_authority_policy.mint",
+        "verifier_property": "valid_bootstrap_proofs(initial_keys, proofs, bootstrap_message)"
+      },
+      "preserved_security_assertion": {
+        "original_assertion": {
+          "path": "expected.every_negative_case",
+          "value": "reject"
+        },
+        "verifier_property": "valid_bootstrap_proofs(initial_keys, proofs, bootstrap_message)",
+        "expected_result": "reject at compiled target Mint[0]",
+        "target_ref": "cardano/validators/f05_authority_policy.ak#f05_authority_policy.mint"
+      },
+      "amended_contract": {
+        "decision": "B",
+        "fixture_family": "proof_domain",
+        "evidence_category": "synthetic_parameter_bound_tx_sim",
+        "status": "PENDING",
+        "changed_condition": "ephemeral committee signs epoch 1; applied message binds epoch 0",
+        "preserved_verifier_property": "valid_bootstrap_proofs(initial_keys, proofs, bootstrap_message)",
+        "expected_compiled_entrypoint": "cardano/validators/f05_authority_policy.ak#f05_authority_policy.mint / Mint[0]",
+        "expected_target_invoked": true,
+        "expected_result": "reject for named condition",
+        "positive_control": "same test policy/transaction with proofs signing exact applied parameter-bound message accepts",
+        "applied_policy_id": null,
+        "applied_script_hash": null,
+        "parameter_cbor_sha256": null,
+        "compiled_program_bytes_sha256": null,
+        "transaction_cbor_sha256": null,
+        "raw_inputs_sha256": null,
+        "raw_outputs_sha256": null,
+        "witness_binding": "mint policy ID == applied policy ID == Plutus V3 witness script hash",
+        "funding": "valid final-body-bound funding signatures made with ephemeral test keys only",
+        "conservation": "all input values equal outputs plus fee; conserve every native asset; account for collateral and change separately",
+        "attribution": "condition-isolated compiled mutant or equivalent reviewer-verified entrypoint evidence must accept same negative when only named guard is removed; otherwise PENDING",
+        "independent_byte_review": "required before execution for params, compiled bytes/hash, policy ID, transaction/vectors, signatures, bindings, one-condition delta, and conservation",
+        "credit": {
+          "original_policy": false,
+          "ledger_admission": false,
+          "live_network": false,
+          "negative_case": null
+        }
+      }
+    }
+  ],
+  "ledger_effect": {
+    "negative_pass": 45,
+    "negative_pending": 10,
+    "mutation_pass": 18,
+    "mutation_pending": 3,
+    "negative_credit_awarded": 0,
+    "classification_overlay_modified": false,
+    "fixture_registry_modified": false
+  },
+  "execution_gates": [
+    "independent PASS of this exact amendment/hash before fixture generation or execution",
+    "one fixture family at a time: applied-parameter first, proof-domain second",
+    "independent review of fixture bytes and bindings before simulator execution",
+    "positive control, exact applied-policy/witness binding, valid body-bound funding witness, value conservation per case",
+    "target entrypoint must be invoked and rejection attributable to preserved named condition, else PENDING",
+    "no original committee or wallet credential access; ephemeral test keys only",
+    "no inference of original-policy, full ledger admission, or live-network credit"
+  ],
+  "readiness": {
+    "f05_m3": "OPEN",
+    "testnet": "NOT READY",
+    "deployment_deposit_slash_execute_intent": "DISABLED"
+  }
+}

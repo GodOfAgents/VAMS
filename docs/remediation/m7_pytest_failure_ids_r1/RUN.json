@@ -1,0 +1,57 @@
+{
+  "capture_script_sha256": "ef7c558de473909049ee1ab26df98c89d9f71ec0b462d53716cec35441cf67d8",
+  "counts_match_prior_capture": true,
+  "envoy": {
+    "path": "/home/GodOfAgents/vams-evidence/toolchains/envoy-1.39.1/envoy",
+    "sha256": "002c6e1c69ed0fa0ea381887247cadadfaec9481375fa8d8d2b1731eeabf40b8",
+    "version": "/home/GodOfAgents/vams-evidence/toolchains/envoy-1.39.1/envoy  version: b579d07d3ad7ee11d32b105e91a5a39ad24718d7/1.39.1/Clean/RELEASE/BoringSSL"
+  },
+  "evidence_credit": "Diagnostic only; no deployment, ledger, or live-network credit.",
+  "expected_failure_counts": {
+    "design_failure_count": 1,
+    "main_failure_count": 10
+  },
+  "expected_outer_command": [
+    "bwrap",
+    "--unshare-net",
+    "--ro-bind",
+    "/",
+    "/",
+    "--tmpfs",
+    "/tmp",
+    "--dev-bind",
+    "/dev",
+    "/dev",
+    "--proc",
+    "/proc",
+    "--bind",
+    "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m7_pytest_failure_ids_r1",
+    "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m7_pytest_failure_ids_r1",
+    "--chdir",
+    "/home/GodOfAgents/code/VAMS-testnet",
+    "/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python",
+    "-B",
+    "docs/remediation/m7_pytest_failure_ids_r1/capture_failure_ids.py"
+  ],
+  "git_after": {
+    "head": "829ab544571f12efe50ecb5740f129c8acb3e16f",
+    "status_sha256": "d9de95945ced0a65b53baac66e6eb76c8fe144c1f5c8fee543098f20a24613ad"
+  },
+  "git_before": {
+    "head": "829ab544571f12efe50ecb5740f129c8acb3e16f",
+    "status_sha256": "d9de95945ced0a65b53baac66e6eb76c8fe144c1f5c8fee543098f20a24613ad"
+  },
+  "invocation_attestation": "Expected bwrap invocation is recorded by the wrapper; this metadata is not independent process telemetry.",
+  "observed_failure_counts": {
+    "design_failure_count": 1,
+    "main_failure_count": 10
+  },
+  "pytest": "pytest 9.1.1",
+  "python": "3.12.14",
+  "python_inventory_after": "afe4691278a9eea777cdbaaa0f5434e94fcb12f554d9e59503d5fc0b1a733ea2",
+  "python_inventory_before": "afe4691278a9eea777cdbaaa0f5434e94fcb12f554d9e59503d5fc0b1a733ea2",
+  "result_sha256": "35f66510f6d00790ef77d4d455fe3e049ec00fe5cb8cdaf9c1206c44b507d667",
+  "schema": "m7-pytest-failure-identities-run-r1",
+  "workflow_sha256_after": "baf53503673b70c5185f654f8f694f1feaf98af68ee56e29c83c01ee0cf0593c",
+  "workflow_sha256_before": "baf53503673b70c5185f654f8f694f1feaf98af68ee56e29c83c01ee0cf0593c"
+}

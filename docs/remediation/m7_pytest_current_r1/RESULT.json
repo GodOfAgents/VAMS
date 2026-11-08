@@ -1,0 +1,110 @@
+{
+  "collection": {
+    "collected": 1693,
+    "command": [
+      "/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python",
+      "-B",
+      "-m",
+      "pytest",
+      "--collect-only",
+      "-q",
+      "-p",
+      "no:cacheprovider",
+      "--ignore=docs/remediation/m3_f05_design_r2/test_design.py"
+    ],
+    "exit_code": 0,
+    "raw_output_retained": false,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "8bd1af92735d8184c1d83c0f3ff74ac253364358675fcacad33d280a68e5f7d0",
+    "summary": null
+  },
+  "envoy": {
+    "path": "/home/GodOfAgents/vams-evidence/toolchains/envoy-1.39.1/envoy",
+    "sha256": "002c6e1c69ed0fa0ea381887247cadadfaec9481375fa8d8d2b1731eeabf40b8",
+    "version": "/home/GodOfAgents/vams-evidence/toolchains/envoy-1.39.1/envoy  version: b579d07d3ad7ee11d32b105e91a5a39ad24718d7/1.39.1/Clean/RELEASE/BoringSSL",
+    "version_sha256": "b16afab18a2f675b8efa7d41567691c6e35846f0b44adc0a27ec12cb663180b1"
+  },
+  "git_after": {
+    "head": "829ab544571f12efe50ecb5740f129c8acb3e16f",
+    "status_sha256": "71e0ffee46650648e412bcd7e7221d9a39e7ad56bb2cff6278fd318ef44806c9"
+  },
+  "git_before": {
+    "head": "829ab544571f12efe50ecb5740f129c8acb3e16f",
+    "status_sha256": "71e0ffee46650648e412bcd7e7221d9a39e7ad56bb2cff6278fd318ef44806c9"
+  },
+  "git_unchanged": true,
+  "main_suite": {
+    "collected": null,
+    "command": [
+      "/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python",
+      "-B",
+      "-m",
+      "pytest",
+      "-v",
+      "--tb=short",
+      "-p",
+      "no:cacheprovider",
+      "--ignore=docs/remediation/m3_f05_design_r2/test_design.py"
+    ],
+    "exit_code": 1,
+    "raw_output_retained": false,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "564384be60711a66b8d7714b66a74000651aa596826116b39e39df26c268bd81",
+    "summary": {
+      "counts": {
+        "failed": 10,
+        "passed": 1683,
+        "subtests_passed": 444
+      },
+      "duration_seconds": 169.47,
+      "line": "======= 10 failed, 1683 passed, 444 subtests passed in 169.47s (0:02:49) ======="
+    }
+  },
+  "network": "disabled by outer bwrap",
+  "pytest_version": "pytest 9.1.1",
+  "python": "3.12.14",
+  "python_path": "/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python",
+  "raw_test_output_retained": false,
+  "schema": "m7-root-pytest-source-bound-r3",
+  "scope_limit": "Local execution of the current workflow pytest split only; no hosted CI, ledger, testnet, or deployment credit. The pytest cache provider is disabled to respect the read-only checkout.",
+  "separate_design_suite": {
+    "collected": null,
+    "command": [
+      "/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python",
+      "-B",
+      "-m",
+      "pytest",
+      "-v",
+      "--tb=short",
+      "-p",
+      "no:cacheprovider",
+      "docs/remediation/m3_f05_design_r2/test_design.py"
+    ],
+    "exit_code": 1,
+    "raw_output_retained": false,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "9c8c820e42f5000172fcc95ee41184b61579e523f2c0f0c06f3c2cb5109e41ca",
+    "summary": {
+      "counts": {
+        "failed": 1,
+        "passed": 9
+      },
+      "duration_seconds": 0.15,
+      "line": "========================= 1 failed, 9 passed in 0.15s =========================="
+    }
+  },
+  "source_inventory": {
+    "changed_paths": [],
+    "file_count_after": 381,
+    "file_count_before": 381,
+    "sha256_after": "c7fb6aa004d7ef3b09280bc1b359bb01bc39aa12a465766a19df79ef2675d40b",
+    "sha256_before": "c7fb6aa004d7ef3b09280bc1b359bb01bc39aa12a465766a19df79ef2675d40b",
+    "unchanged_during_run": true
+  },
+  "workflow": {
+    "path": ".github/workflows/security-gates.yml",
+    "sha256_after": "baf53503673b70c5185f654f8f694f1feaf98af68ee56e29c83c01ee0cf0593c",
+    "sha256_before": "baf53503673b70c5185f654f8f694f1feaf98af68ee56e29c83c01ee0cf0593c",
+    "unchanged_during_run": true
+  }
+}

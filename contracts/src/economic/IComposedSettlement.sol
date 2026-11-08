@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
+import {ObjectEffectV3 as O} from "../trust/ObjectEffectV3.sol";
 
 /**
  * @title IComposedSettlement
@@ -33,6 +34,17 @@ interface IComposedSettlement {
         uint256 claimedAt;       // Timestamp of claim (0 if unclaimed)
     }
 
+    /// @notice Integer token amounts and the exact registry terms expected by the caller.
+    struct EscrowRequestV2 {
+        address[] providers;
+        uint256[] amounts;
+        uint256 validForSeconds;
+        bytes32 blueprintHash;
+        bytes32 serviceBlockId;
+        bytes32 expectedTermsHash;
+        bytes32[] workloadHashes;
+    }
+
     /// @notice A composed allocation spanning multiple providers
     struct ComposedAllocation {
         bytes32 allocationId;    // Unique identifier
@@ -48,6 +60,19 @@ interface IComposedSettlement {
         uint256 builderRevShareBps; // Builder revenue share in basis points
         address builderAddress;  // Builder who receives revenue share
     }
+
+    /// @notice On-chain delivery recognition, distinct from an off-chain effect receipt.
+    /// @dev Written only after action-bound verification under the current policy.
+    struct EarnedDeliveryV3 {
+        bytes32 outputHash;
+        bytes32 replayKey;
+        uint256 recordedAt;
+        address feeTreasury;
+        bool accepted;
+    }
+
+    event ProviderDeliveryEarned(bytes32 indexed allocationId, uint256 indexed providerIndex,
+        bytes32 outputHash, bytes32 replayKey, uint256 recordedAt);
 
     // ═══════════════════ Events ═══════════════════
 
@@ -89,6 +114,12 @@ interface IComposedSettlement {
     error ArrayLengthMismatch();
     error ZeroProviders();
     error AmountMismatch(uint256 expected, uint256 actual);
+    error LegacyInterfaceDisabled();
+    error InvalidServiceTerms();
+    error UnqualifiedServiceBlock(bytes32 blockId);
+    error InvalidDeliveryProof();
+    error DeliveryAlreadyEarned(bytes32 allocationId, uint256 index);
+    error DeliveryNotEarned(bytes32 allocationId, uint256 index);
 
     // ═══════════════════ Functions ═══════════════════
 
@@ -111,6 +142,37 @@ interface IComposedSettlement {
         address builderAddress
     ) external returns (bytes32 allocationId);
 
+    function createComposedEscrowV2(EscrowRequestV2 calldata request) external returns (bytes32 allocationId);
+
+    function getServiceTermsHash(bytes32 serviceBlockId) external view returns (bytes32);
+
+    function getDeliveryContext(bytes32 allocationId, uint256 providerIndex) external view returns (bytes32);
+
+    function claimProviderShareV2(
+        bytes32 allocationId, uint256 providerIndex, bytes32 outputHash, bytes calldata proof
+    ) external;
+
+    /// @notice Recognize verified delivery without attempting token payment.
+    /// @dev Pending evidence must satisfy the current policy and challenge before expiry.
+    function recordEarnedDeliveryV3(bytes32 allocationId, uint256 providerIndex,
+        bytes32 outputHash, bytes calldata proof) external;
+
+    /// @notice Pay a previously recognized delivery, including after policy/expiry changes.
+    /// @dev Protocol pause still blocks payout; no new proof or execution is authorized.
+    function claimEarnedProviderShareV3(bytes32 allocationId, uint256 providerIndex) external;
+
+    function getEarnedDeliveryV3(bytes32 allocationId, uint256 providerIndex)
+        external view returns (EarnedDeliveryV3 memory);
+
+    /// @notice Funded native admission; must finalize before provider dispatch.
+    function admitObjectV3(bytes32 allocationId, uint256 providerIndex, O.Admission calldata request) external;
+    /// @notice Historical authentication never grants new execution authority.
+    function resolveObjectCompletionV3(bytes32 allocationId, uint256 providerIndex,
+        O.ResolutionContext calldata context, bytes calldata receipt) external;
+    function resolveObjectAbsenceV3(bytes32 allocationId, uint256 providerIndex,
+        O.ResolutionContext calldata context, O.AbsenceEvidence calldata evidence) external;
+    function refundAbsentObjectV3(bytes32 allocationId, uint256 providerIndex) external;
+
     /// @notice Provider claims their share of a composed allocation
     /// @param allocationId The allocation to claim from
     /// @param providerIndex Index of the provider in the allocation
@@ -119,7 +181,7 @@ interface IComposedSettlement {
         uint256 providerIndex
     ) external;
 
-    /// @notice Refund expired and unclaimed portions to the agent
+    /// @notice Refund expired portions without a claim or accepted delivery; reserve earned liabilities
     /// @param allocationId The expired allocation
     function refundExpiredComposed(bytes32 allocationId) external;
 
@@ -135,6 +197,7 @@ interface IComposedSettlement {
         view
         returns (ProviderAlloc memory);
 
-    /// @notice Check if all providers in an allocation have claimed
+    /// @notice True only for an existing allocation whose providers have all been paid.
+    /// @dev Unknown IDs, earned-but-unpaid shares and refunded portions are not fully claimed.
     function isFullyClaimed(bytes32 allocationId) external view returns (bool);
 }

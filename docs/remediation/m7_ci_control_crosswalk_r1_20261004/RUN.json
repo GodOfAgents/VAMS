@@ -1,0 +1,27 @@
+{
+  "schema_version": "m7-control-matrix-crosswalk-r1",
+  "date": "2026-10-04",
+  "repository": "/home/GodOfAgents/code/VAMS-testnet",
+  "head": "829ab544571f12efe50ecb5740f129c8acb3e16f",
+  "branch": "testnet/remediation-20260907",
+  "dirty_tree_preserved": true,
+  "control_tracks": 36,
+  "source_sha256": {
+    "docs/audit/control-matrix.json": "28b9146bb2ace970c19441ab4cd8ee4f91937d56acf4f178b3639f5b4f493cf4",
+    ".github/workflows/security-gates.yml": "baf53503673b70c5185f654f8f694f1feaf98af68ee56e29c83c01ee0cf0593c",
+    "scripts/audit/audit_program.py": "9fd7e0ebfcf6caa6916524f98d4f926989b8906effdc071e992dd2493a595245"
+  },
+  "readiness_diagnostic": {
+    "python": "3.12.14",
+    "validate_exit": 0,
+    "readiness_canary_exit": 1,
+    "result_file": "READINESS-RESULT.txt",
+    "evidence_class": "local diagnostic; not release evidence"
+  },
+  "review_method": "Three disjoint read-only control ranges T01-T12, T13-T24, T25-T36, then coordinator integration. No tests, scans, network access, or CI runs were performed for the mapping.",
+  "scope_limits": [
+    "Workflow configuration is not evidence of a passing hosted run.",
+    "Existing evidence records were classified only within their recorded scope and source fingerprints.",
+    "The crosswalk does not change control-matrix status or satisfy any missing external evidence."
+  ]
+}

@@ -1,0 +1,295 @@
+{
+  "version": "F04-OPTION-B-GENESIS-CASES-1",
+  "status": "FROZEN_DESIGN_PENDING_REVIEW",
+  "all_execution_status": "PENDING_NOT_RUN",
+  "cases": [
+    {
+      "id": "F04B-G01",
+      "condition": "V2 paired genesis with founder+controller+all5 guardians; exact seed/anchor/value/epochs",
+      "expected": "ACCEPT",
+      "evidence": "compiled_paired",
+      "execution_status": "PENDING_NOT_RUN"
+    },
+    {
+      "id": "F04B-G02",
+      "condition": "registration only founder+3 guardians",
+      "expected": "REJECT",
+      "evidence": "compiled_paired",
+      "execution_status": "PENDING_NOT_RUN"
+    },
+    {
+      "id": "F04B-G03",
+      "condition": "anchor founder+3 guardians precedes full5 PoP registration",
+      "expected": "ACCEPT",
+      "evidence": "compiled_anchor_then_paired",
+      "execution_status": "PENDING_NOT_RUN"
+    },
+    {
+      "id": "F04B-G04",
+      "condition": "duplicate guardians or guardian overlaps founder/controller/operator",
+      "expected": "REJECT",
+      "evidence": "compiled_paired",
+      "execution_status": "PENDING_NOT_RUN"
+    },
+    {
+      "id": "F04B-G05",
+      "condition": "missing destination initial controller signature where distinct from founder",
+      "expected": "REJECT",
+      "evidence": "compiled_paired",
+      "execution_status": "PENDING_NOT_RUN"
+    },
+    {
+      "id": "F04B-G06",
+      "condition": "any nonzero genesis nonce/control_epoch/guardian_epoch; frozen or pending",
+      "expected": "REJECT",
+      "evidence": "compiled_paired",
+      "execution_status": "PENDING_NOT_RUN"
+    },
+    {
+      "id": "F04B-G07",
+      "condition": "genesis metadata/operator/guardians/controller/stake differ from immutable anchor or seed",
+      "expected": "REJECT",
+      "evidence": "compiled_paired",
+      "execution_status": "PENDING_NOT_RUN"
+    },
+    {
+      "id": "F04B-G08",
+      "condition": "same DID under different bootstrap references with otherwise valid anchors",
+      "expected": "ACCEPT_NO_GLOBAL_UNIQUENESS_CREDIT",
+      "evidence": "compiled_paired_ledger",
+      "execution_status": "PENDING_NOT_RUN"
+    },
+    {
+      "id": "F04B-G09",
+      "condition": "two candidate anchors distinct anchor seeds same bootstrap; first registers; second attempts spent bootstrap",
+      "expected": "REJECT_SECOND_BY_LEDGER_SINGLE_SPEND",
+      "evidence": "ledger_admission",
+      "execution_status": "PENDING_NOT_RUN"
+    },
+    {
+      "id": "F04B-G10",
+      "condition": "anchor reference reused for same identity update/recovery after controller/guardian changes",
+      "expected": "ACCEPT_WITH_CURRENT_STATE_AUTHORIZATION",
+      "evidence": "compiled_recovery",
+      "execution_status": "PENDING_NOT_RUN"
+    },
+    {
+      "id": "F04B-G11",
+      "condition": "post-recovery anchor initial controller/guardians unchanged and current state new epochs",
+      "expected": "ACCEPT",
+      "evidence": "compiled_recovery",
+      "execution_status": "PENDING_NOT_RUN"
+    },
+    {
+      "id": "F04B-G12",
+      "condition": "V1 or legacy8 field datum passed into V2 seed or V2 state decoder",
+      "expected": "REJECT",
+      "evidence": "compiled_decoder",
+      "execution_status": "PENDING_NOT_RUN"
+    },
+    {
+      "id": "F04B-G13",
+      "condition": "missing epochs/default0/coercion from V1 consumer state",
+      "expected": "REJECT",
+      "evidence": "consumer",
+      "execution_status": "PENDING_NOT_RUN"
+    },
+    {
+      "id": "F04B-G14",
+      "condition": "V1 legacy UTxO read-only interpretation under old address/schema",
+      "expected": "LEGACY_ONLY_NO_MIGRATION_OR_V2_AUTHORITY",
+      "evidence": "consumer",
+      "execution_status": "PENDING_NOT_RUN"
+    },
+    {
+      "id": "F04B-G15",
+      "condition": "invalid/genesis asset value, extra native assets, stake below1e9, conservation drift",
+      "expected": "REJECT",
+      "evidence": "compiled_paired",
+      "execution_status": "PENDING_NOT_RUN"
+    },
+    {
+      "id": "F04B-G16",
+      "condition": "controller recovery preserves immutable identity and economics; increments control_epoch/state_nonce exactly",
+      "expected": "ACCEPT_AFTER_7D_LEAVES_FROZEN",
+      "evidence": "compiled_recovery",
+      "execution_status": "PENDING_NOT_RUN"
+    },
+    {
+      "id": "F04B-G17",
+      "condition": "routine rotation needs controller+2 guardians+destination PoP full48h",
+      "expected": "ACCEPT_AT_BOUND_REJECT_ONE_MS_EARLY",
+      "evidence": "compiled_recovery",
+      "execution_status": "PENDING_NOT_RUN"
+    },
+    {
+      "id": "F04B-G18",
+      "condition": "guardian rotation3 old +5 new PoP full14d exact guardian_epoch increment",
+      "expected": "ACCEPT_AT_BOUND_REJECT_ONE_MS_EARLY",
+      "evidence": "compiled_recovery",
+      "execution_status": "PENDING_NOT_RUN"
+    },
+    {
+      "id": "F04B-G19",
+      "condition": "epoch or nonce overflow, stale request ID/base nonce/authority epochs",
+      "expected": "REJECT",
+      "evidence": "compiled_recovery",
+      "execution_status": "PENDING_NOT_RUN"
+    },
+    {
+      "id": "F04B-G20",
+      "condition": "old controller TEE/session/OMS/cache credential after recovered epoch",
+      "expected": "REJECT",
+      "evidence": "consumer",
+      "execution_status": "PENDING_NOT_RUN"
+    },
+    {
+      "id": "F04B-G21",
+      "condition": "new epochs/root with independent current authenticated association and live provider proof",
+      "expected": "ACCEPT_ONLY_WHEN_INTEGRATION_GATE_PASSED",
+      "evidence": "consumer",
+      "execution_status": "PENDING_NOT_RUN"
+    },
+    {
+      "id": "F04B-G22",
+      "condition": "current-state unavailable/stale/ambiguous/unfinalized/reorg",
+      "expected": "REJECT_NO_CACHED_ALLOW",
+      "evidence": "consumer",
+      "execution_status": "PENDING_NOT_RUN"
+    },
+    {
+      "id": "F04B-G23",
+      "condition": "28-byte controller substituted/truncated/padded as20-byte root EOA; session address substituted",
+      "expected": "REJECT",
+      "evidence": "consumer",
+      "execution_status": "PENDING_NOT_RUN"
+    },
+    {
+      "id": "F04B-G24",
+      "condition": "TEE proof verifies internally rootA but externally current expected rootB",
+      "expected": "REJECT",
+      "evidence": "consumer",
+      "execution_status": "PENDING_NOT_RUN"
+    },
+    {
+      "id": "F04B-G25",
+      "condition": "session24h at exact expiry;25h; outside whitelist; excess value",
+      "expected": "REJECT",
+      "evidence": "consumer",
+      "execution_status": "PENDING_NOT_RUN"
+    },
+    {
+      "id": "F04B-G26",
+      "condition": "session valid current binding under24h whitelisted allowed value",
+      "expected": "ACCEPT_ONLY_WHEN_INTEGRATION_GATE_PASSED",
+      "evidence": "consumer",
+      "execution_status": "PENDING_NOT_RUN"
+    },
+    {
+      "id": "F04B-G27",
+      "condition": "OMS offline/malformed/simulated/provider valid old subject/epoch",
+      "expected": "REJECT_P3",
+      "evidence": "consumer",
+      "execution_status": "PENDING_NOT_RUN"
+    },
+    {
+      "id": "F04B-G28",
+      "condition": "guardian epoch rotation or freeze invalidates cached authority/held grant",
+      "expected": "REJECT_UNTIL_FRESH_REAUTHORIZATION",
+      "evidence": "consumer",
+      "execution_status": "PENDING_NOT_RUN"
+    },
+    {
+      "id": "F04B-G29",
+      "condition": "cache same DID across distinct policy/bootstrap identities",
+      "expected": "ISOLATE_NO_ALIAS",
+      "evidence": "consumer",
+      "execution_status": "PENDING_NOT_RUN"
+    },
+    {
+      "id": "F04B-G30",
+      "condition": "registry-side mint purpose supplied any V1/V2 redeemer",
+      "expected": "REJECT",
+      "evidence": "compiled_registry_mint",
+      "execution_status": "PENDING_NOT_RUN"
+    },
+    {
+      "id": "F04B-G31",
+      "condition": "F05 action reference without founding owner/guardian PoP attempts F04 genesis/recovery",
+      "expected": "REJECT",
+      "evidence": "compiled_paired_recovery",
+      "execution_status": "PENDING_NOT_RUN"
+    },
+    {
+      "id": "F04B-G32",
+      "condition": "V2 action_epoch initialized0/slashersempty; no F05 reference creates recovery right",
+      "expected": "ACCEPT_GENESIS_SLASH_DISABLED",
+      "evidence": "compiled_paired",
+      "execution_status": "PENDING_NOT_RUN"
+    },
+    {
+      "id": "F04B-G33",
+      "condition": "registration time unbounded/exclusive/reversed/>300000ms/outsideu64 or wrong registered_at lower",
+      "expected": "REJECT",
+      "evidence": "compiled_paired",
+      "execution_status": "PENDING_NOT_RUN"
+    },
+    {
+      "id": "F04B-G34",
+      "condition": "anchor issuance bootstrap reference forged/wrong script/wrong seed datum/value or consumes bootstrap early",
+      "expected": "REJECT",
+      "evidence": "compiled_anchor",
+      "execution_status": "PENDING_NOT_RUN"
+    },
+    {
+      "id": "F04B-G35",
+      "condition": "association lacks either controller or EVM root PoP, wrong identity/epoch/network/verifier/config/binding nonce/expired proof",
+      "expected": "REJECT",
+      "evidence": "consumer_association_activation_gate",
+      "execution_status": "PENDING_NOT_RUN"
+    },
+    {
+      "id": "F04B-G36",
+      "condition": "held grant validated before epoch/freeze/reorg change; state changes before effect",
+      "expected": "REJECT_HANDLER_EFFECT_COUNT_ZERO",
+      "evidence": "consumer",
+      "execution_status": "PENDING_NOT_RUN"
+    },
+    {
+      "id": "F04B-G37",
+      "condition": "pending wrong constructor/arity/Option/Bool encoding, swapped field order or commitment/actiontag",
+      "expected": "REJECT",
+      "evidence": "compiled_wire_recovery",
+      "execution_status": "PENDING_NOT_RUN"
+    },
+    {
+      "id": "F04B-G38",
+      "condition": "guardian or controller no-op rotation, authsigner list >8, status2/unknown",
+      "expected": "REJECT",
+      "evidence": "compiled_recovery",
+      "execution_status": "PENDING_NOT_RUN"
+    },
+    {
+      "id": "F04B-G39",
+      "condition": "uncertain/rollback clock or expiry-extension old grant",
+      "expected": "REJECT_NO_EFFECT",
+      "evidence": "consumer",
+      "execution_status": "PENDING_NOT_RUN"
+    }
+  ],
+  "requirements": {
+    "compiled": "PlutusV3 current applied entrypoints, immutable source/compiler/parameter/script hashes; independently reviewed tx body/witness/value; positive controls; named reject attribution",
+    "consumer": "actual public API boundary later implemented; independent expected identity oracle; no mock authoritative evidence",
+    "ledger": "ledger-valid/bootstrap single-spend evidence distinct from synthetic script evaluation",
+    "mutations": [
+      "drop any guardian PoP check",
+      "omit epoch compare",
+      "derive expected root from proof",
+      "accept V1 asV2",
+      "omit full immutable tuple compare",
+      "cache by DID only",
+      "remove expiry/whitelist checks"
+    ],
+    "budgets": "at maximum DID256,5 guardians,maximum bounded metadata fields and maximal pending state; required node cost-model and fee/CPU/memory envelope pending actual implementation"
+  }
+}

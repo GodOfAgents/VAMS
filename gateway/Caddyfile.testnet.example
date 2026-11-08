@@ -1,6 +1,12 @@
-# VAMS public testnet gateway proxy example.
+# HISTORICAL TEMPLATE — UNSUPPORTED FOR M2/LIVE GATEWAY USE.
 #
-# Run Uvicorn on 127.0.0.1:8000 and expose HTTPS through Caddy.
+# Envoy 1.39.1 with gateway/envoy.testnet.yaml is the sole reviewed live
+# ingress. This Caddy template is retained only as historical context and must
+# not be used as a public, testnet, staging, or production Gateway boundary.
+#
+# VAMS public testnet gateway proxy example (superseded).
+#
+# Historical context only. Do not run this template for a VAMS Gateway.
 # Replace the domain and CA path with the live testnet values before deployment.
 
 {$VAMS_GATEWAY_DOMAIN:gateway.vams.network} {

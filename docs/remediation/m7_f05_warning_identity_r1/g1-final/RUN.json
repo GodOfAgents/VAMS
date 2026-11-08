@@ -1,0 +1,36 @@
+{
+  "aiken_sha256": "07f3f927f1a8c71fc61273fdff850d9b98edb28dde207c8a32585991f2c88e79",
+  "aiken_version": "aiken v1.1.21+42babe5",
+  "canonical_unchanged": true,
+  "command": [
+    "aiken",
+    "check",
+    "--deny",
+    "--seed",
+    "20260711",
+    "--max-success",
+    "250"
+  ],
+  "exit_code": 1,
+  "f05_source_sha256": "e9d3ac9cbb14b9e7693dc12430234694c82eb52e61d176e1e39992fb9cbeafa8",
+  "f05_test_source_sha256": "a3bc9ccafa26ae4219207a620940ca7da3296608d576725c325a4558b958336d",
+  "input_count": 73,
+  "inputs_sha256": "9a75958ac1bef19f2d9849604894549485c9f4f5c8255152a61506a2804e9e09",
+  "network": "disabled with bubblewrap --unshare-net",
+  "preflight_equal": true,
+  "schema": "m7-aiken-g1-run-v1",
+  "snapshot_unchanged": true,
+  "summary": {
+    "failed": 0,
+    "kind": {
+      "property": 7,
+      "unit": 115
+    },
+    "passed": 122,
+    "total": 122
+  },
+  "verification_stderr_sha256": "b55c3f5d58179e8c198d322c97972c9355651ea2174e1bff3942984b4e537df7",
+  "verification_stdout_sha256": "33b4f396b899731c82dbedcd03d0d77a93e533470796c6ce3ffc9961db590084",
+  "workflow_sha256": "7ddeb89794f498393e9c3bb460ca1aaa74dde7b9637c590d76cdae3bbc3ec83a",
+  "working_directory": "/tmp/vams-f05-warning-g1-final-20261003-r1"
+}

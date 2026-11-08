@@ -1,0 +1,66 @@
+{
+  "date_utc": "2026-10-04",
+  "head": "829ab544571f12efe50ecb5740f129c8acb3e16f",
+  "branch": "testnet/remediation-20260907",
+  "workflow_sha256": "baf53503673b70c5185f654f8f694f1feaf98af68ee56e29c83c01ee0cf0593c",
+  "manifest_sha256": "d4bbe77962932359f2d2d8598f7758b84868c9377aba23f96c103baefac7ec93",
+  "blueprint_sha256": "718845f253ebdfb9f1d565e34511534f6b565cf1dd898402b67109180dff6492",
+  "source_manifest_sha256": "4a896a2df8254afc022207fd8477087106cb4ff242d6d1b753026973afb8f960",
+  "source_count": 16,
+  "project_input_count": 3,
+  "program_count": 26,
+  "toolchain": {
+    "python": "3.12.14",
+    "python_sha256": "aa01d96348989f33ed998b42c83e98593b41dba83914d9899730b90c36f2e5c9",
+    "pytest": "9.1.1",
+    "pytest_sha256": "f3da0bf69becc0870ff998a0ad8c509522d4855c9a1d0290e3e2ddbf130ec7a5",
+    "aiken": "1.1.21+42babe5",
+    "aiken_sha256": "07f3f927f1a8c71fc61273fdff850d9b98edb28dde207c8a32585991f2c88e79",
+    "bwrap_sha256": "0abea81db798ebf6b4742ac0664802d97521547a353c2a0dbdc21d76cbbfd2c0"
+  },
+  "tests": [
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 /home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/pytest -v --tb=short scripts/remediation/test_m3_1b_r9_provenance.py",
+      "exit": 0,
+      "passed": 22,
+      "subtests_passed": 78,
+      "warnings": 1,
+      "start_utc": "2026-10-04T16:57:37Z",
+      "end_utc": "2026-10-04T16:58:16Z"
+    },
+    {
+      "command": "python -B scripts/remediation/verify_m3_1b_r9.py",
+      "runs": 2,
+      "both_exit": 0,
+      "structured_json_identical": true,
+      "output_sha256": "2bb7bcadc4fc1cd2f2bc26fc90a0123407c9c27144f7fddeb175735809623a98",
+      "start_utc": [
+        "2026-10-04T16:58:16Z",
+        "2026-10-04T16:58:55Z"
+      ],
+      "end_utc": [
+        "2026-10-04T16:58:55Z",
+        "2026-10-04T16:59:31Z"
+      ]
+    }
+  ],
+  "reproducible_builds": {
+    "fresh_network_isolated_runs": 2,
+    "bwrap_unshare_net": true,
+    "host_netns": "net:[4026531833]",
+    "child_netns": [
+      "net:[4026532231]",
+      "net:[4026532230]"
+    ],
+    "aiken_check_passed_each": 124,
+    "aiken_build_exit_each": 0,
+    "generated_blueprint_sha256": "718845f253ebdfb9f1d565e34511534f6b565cf1dd898402b67109180dff6492",
+    "raw_evidence": "/home/GodOfAgents/vams-evidence/m7-r11-aiken-netns-independent-r1-20261004/"
+  },
+  "independent_review": {
+    "source_artifact_review": "PASS",
+    "verification_capture_review": "PASS",
+    "reviewer": "/root/m4_m6_slice_inventory"
+  },
+  "classification": "local source/build provenance only; not ledger, chain, live-network, or deployment evidence"
+}

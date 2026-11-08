@@ -1,0 +1,26 @@
+{
+  "ast_parse": {
+    "exit_code": 0
+  },
+  "coverage": {
+    "INV-3": "24h creation accepted and remaining lifetime asserted <=24h; 25h and negative duration rejected; already-expired session denied.",
+    "INV-4": "empty request allowlist, unconfigured core whitelist, and out-of-whitelist contract denied; allowed contract scope remains tested.",
+    "limitations": [
+      "exact expires_at equality instant not tested (implementation uses now > expires_at)",
+      "configured test contracts are synthetic and do not establish production whitelist provenance"
+    ]
+  },
+  "focused_suite": {
+    "exit_code": 0,
+    "failed": 0,
+    "output": ".........                                                                [100%]\n9 passed in 0.78s\n",
+    "passed": 9
+  },
+  "git_diff_check": {
+    "exit_code": 0,
+    "scope_note": "git diff --check does not inspect the untracked test file; no whitespace cleanup was applied to pre-existing content."
+  },
+  "production_source_changed": false,
+  "readiness": "NOT READY; this focused suite is not full Python or deployment acceptance.",
+  "schema": "m7-inv3-inv4-session-key-result-r1"
+}

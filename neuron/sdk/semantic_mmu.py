@@ -20,6 +20,7 @@ import logging
 import os
 import re
 import secrets
+import tempfile
 from collections import OrderedDict
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -31,7 +32,7 @@ try:
     from neuron.sdk.sira_engine import SiraEngine
 except ImportError:
     try:
-        from sdk.sira_engine import SiraEngine
+        from .sira_engine import SiraEngine
     except ImportError:
         SiraEngine = None
 
@@ -40,6 +41,10 @@ logger = logging.getLogger("vams.semantic_mmu")
 MEMORY_ROOT = Path(".data") / "memory"
 SAFE_ADDRESS_PART = re.compile(r"^[A-Za-z0-9._-]{1,96}$")
 MAX_PATCH_BYTES = 65_536
+
+
+class MMUPersistenceError(RuntimeError):
+    """A local page could not be persisted; no path/content is exposed."""
 
 
 class MemoryTier(Enum):
@@ -170,7 +175,7 @@ class SemanticMMU:
     def _init_providers(self):
         """Lazily initialize real storage providers."""
         try:
-            from sdk.celestia import CelestiaDA
+            from .celestia import CelestiaDA
             # Near DA would be similar — using Celestia pattern
             logger.debug("Storage providers available for S-MMU")
         except ImportError:
@@ -219,11 +224,14 @@ class SemanticMMU:
             del self._access_log[: len(self._access_log) - 10_000]
 
     def _write_to_horma_fs(self, page: MemoryPage):
-        """Write page to the HORMA hierarchical filesystem (L3 Storage)."""
-        path = self._memory_path(page.address)
+        """Replace a complete local page; this is not remote/power-loss qualification."""
+        temporary = None
         try:
+            path = self._memory_path(page.address)
             path.parent.mkdir(parents=True, exist_ok=True)
-            with path.open('w', encoding="utf-8") as f:
+            with tempfile.NamedTemporaryFile(mode='w', encoding='utf-8', dir=path.parent,
+                    prefix='.vams-mmu-', suffix='.tmp', delete=False) as f:
+                temporary = Path(f.name)
                 # Store serialized page metadata and content
                 json.dump({
                     "address": page.address,
@@ -236,9 +244,19 @@ class SemanticMMU:
                     "last_accessed": page.last_accessed,
                     "created_at": page.created_at
                 }, f, indent=2)
-            logger.debug(f"HORMA FS write complete: {path}")
-        except Exception as e:
-            logger.error(f"Failed to write to HORMA FS: {e}")
+                f.flush()
+                os.fsync(f.fileno())
+            os.replace(temporary, path)
+            temporary = None
+            logger.debug("HORMA FS write complete")
+        except Exception:
+            if temporary is not None:
+                try:
+                    temporary.unlink(missing_ok=True)
+                except OSError:
+                    logger.error("HORMA temporary-file cleanup failed")
+            logger.error("HORMA FS persistence failed")
+            raise MMUPersistenceError("S-MMU L3 persistence failed") from None
 
     def evaluate_memory_value(self, content: Any) -> float:
         """
@@ -279,14 +297,18 @@ class SemanticMMU:
         and stores it in the HORMA directory layout.
         """
         self._validate_address(f"workflows/{workflow_id}/folded_summary")
-        trace_path = Path(raw_trace_path).resolve()
-        memory_root = MEMORY_ROOT.resolve()
+        try:
+            trace_path = Path(raw_trace_path).resolve()
+            memory_root = MEMORY_ROOT.resolve()
+        except Exception:
+            logger.error("HIPIF trace lookup failed")
+            return "HIPIF folding failed."
         if memory_root not in trace_path.parents:
             raise ValueError("HIPIF raw traces must be contained under .data/memory")
-        if not trace_path.exists() or not trace_path.is_file():
-            return "No raw trace found."
             
         try:
+            if not trace_path.exists() or not trace_path.is_file():
+                return "No raw trace found."
             with trace_path.open('r', encoding="utf-8") as f:
                 raw_content = f.read()
                 
@@ -312,11 +334,11 @@ class SemanticMMU:
             
             # Safely delete raw trace
             trace_path.unlink()
-            logger.info(f"HIPIF: Folded raw trace of {workflow_id} and deleted original.")
+            logger.info("HIPIF folding complete; raw trace removed")
             return folded_summary
-        except Exception as e:
-            logger.error(f"Failed to run HIPIF folding: {e}")
-            return f"HIPIF folding failed: {e}"
+        except Exception:
+            logger.error("HIPIF folding failed")
+            return "HIPIF folding failed."
 
     def apply_memory_patch(
         self,
@@ -359,18 +381,18 @@ class SemanticMMU:
             return False
 
         patch_dir = MEMORY_ROOT / "patches"
-        patch_dir.mkdir(parents=True, exist_ok=True)
         # Safe filename from address
         safe_name = address.replace("/", "_").replace("\\", "_")
         patch_path = patch_dir / f"{safe_name}.jsonl"
         
         try:
+            patch_dir.mkdir(parents=True, exist_ok=True)
             with patch_path.open('a', encoding="utf-8") as f:
                 f.write(encoded_patch + "\n")
-            logger.info(f"EvoMem: Appended memory patch for {address}.")
+            logger.info("EvoMem patch appended")
             return True
-        except Exception as e:
-            logger.error(f"Failed to apply EvoMem patch for {address}: {e}")
+        except Exception:
+            logger.error("EvoMem patch append failed")
             return False
     
     def store(
@@ -411,11 +433,11 @@ class SemanticMMU:
         elif tier == MemoryTier.L2_RAM:
             self._l2_store[address] = page
         elif tier == MemoryTier.L3_STORAGE:
-            self._l3_store[address] = page
             self._write_to_horma_fs(page)
+            self._l3_store[address] = page
         
         self._log_access(address, "write", tier)
-        logger.debug(f"S-MMU store: {address} -> {tier.value} (hash={content_hash[:12]})")
+        logger.debug("S-MMU store processed")
         
         return page
     
@@ -436,7 +458,7 @@ class SemanticMMU:
         """Demote a page from L1 to L2 (Near DA)."""
         page.tier = MemoryTier.L2_RAM
         self._l2_store[page.address] = page
-        logger.debug(f"S-MMU demote: {page.address} L1→L2")
+        logger.debug("S-MMU page demoted to L2")
     
     def _promote_to_l1(self, page: MemoryPage):
         """Promote a page to L1 cache."""
@@ -481,15 +503,20 @@ class SemanticMMU:
                 self._log_access(address, "read_promote_l2", MemoryTier.L2_RAM)
                 return page
             else:
-                logger.warning(f"S-MMU integrity check failed for {address} in L2!")
+                logger.warning("S-MMU L2 integrity check failed")
                 self._stats["page_faults"] += 1
         
         self._stats["l2_misses"] += 1
         
         # Try checking local HORMA FS if not in _l3_store dictionary
         if address not in self._l3_store:
-            path = self._memory_path(address)
-            if path.exists():
+            try:
+                path = self._memory_path(address)
+                exists = path.exists()
+            except OSError:
+                logger.warning("HORMA FS lookup failed")
+                exists = False
+            if exists:
                 try:
                     with path.open('r', encoding="utf-8") as f:
                         data = json.load(f)
@@ -505,8 +532,8 @@ class SemanticMMU:
                             created_at=data.get("created_at", time.time())
                         )
                         self._l3_store[address] = page
-                except Exception as e:
-                    logger.warning(f"Failed to read from HORMA FS for {address}: {e}")
+                except Exception:
+                    logger.warning("HORMA FS read failed")
         
         # Try L3 (Glacier/WeaveDB, <2s)
         if address in self._l3_store:
@@ -525,13 +552,13 @@ class SemanticMMU:
                 self._log_access(address, "read_promote_l3", MemoryTier.L3_STORAGE)
                 return page
             else:
-                logger.warning(f"S-MMU integrity check failed for {address} in L3!")
+                logger.warning("S-MMU L3 integrity check failed")
                 self._stats["page_faults"] += 1
         
         # Total cache miss
         self._stats["page_faults"] += 1
         self._log_access(address, "page_fault", MemoryTier.L0_ANCHOR)
-        logger.info(f"S-MMU page fault: {address} not found in any tier")
+        logger.info("S-MMU page fault; no valid page found")
         return None
     
     def invalidate(self, address: str):
@@ -566,10 +593,10 @@ class SemanticMMU:
                 provenance=page.provenance,
                 value_score=page.value_score
             )
-            self._l3_store[address] = page_copy
             self._write_to_horma_fs(page_copy)
+            self._l3_store[address] = page_copy
             self._log_access(address, "flush_l3", MemoryTier.L3_STORAGE)
-            logger.info(f"S-MMU flush: {address} → L3 (permanent)")
+            logger.info("S-MMU local L3 flush complete")
             return page_copy
         return None
 
@@ -585,7 +612,7 @@ class SemanticMMU:
             "request_payload": request_payload
         }
         self.store(address, checkpoint_data, tier=MemoryTier.L2_RAM)
-        logger.info(f"S-MMU checkpoint stored for interrupt {interrupt_id}")
+        logger.info("S-MMU interrupt checkpoint stored")
 
     def restore_interrupt_state(self, interrupt_id: str) -> Optional[Dict[str, Any]]:
         """Fetches the checkpoint from L2 (or L3 HORMA FS if L2 was evicted)."""

@@ -4,6 +4,15 @@ pragma solidity ^0.8.20;
 import {VAMSUpgradeableBase} from "../base/VAMSUpgradeableBase.sol";
 import {IVAMSTrustAggregator} from "../interfaces/IVAMSTrustAggregator.sol";
 import {IVAMSProofPlugin} from "../interfaces/IVAMSProofPlugin.sol";
+import {IComposedSettlement} from "../economic/IComposedSettlement.sol";
+
+interface ISettledDeliveryEvidenceV1 {
+    function getProviderAlloc(bytes32 allocationId, uint256 index)
+        external view returns (IComposedSettlement.ProviderAlloc memory);
+    function getDeliveryContext(bytes32 allocationId, uint256 index) external view returns (bytes32);
+    function verifiedProviderProofs(bytes32 allocationId, uint256 index) external view returns (bool);
+    function deliveredOutputHash(bytes32 allocationId, uint256 index) external view returns (bytes32);
+}
 
 /**
  * @title VAMSTrustAggregator
@@ -58,7 +67,13 @@ contract VAMSTrustAggregator is
     bool public legacyProofsEnabled;
 
     /// @dev Storage gap for future upgrades
-    uint256[43] private __gap;
+    mapping(address => bytes32) public settlementEvidenceSources;
+    mapping(bytes32 => address) public settledDeliveryRoots;
+    uint256[41] private __gap;
+
+    event SettlementEvidenceSourceConfigured(address indexed source, bytes32 runtimeHash);
+    event RootDeliveryEvidenceAccepted(address indexed root, address indexed settlement,
+        bytes32 indexed allocationId, uint256 providerIndex, bytes32 context, bytes32 outputHash);
 
     // ============================================================
     //                      CONSTRUCTOR
@@ -311,6 +326,34 @@ contract VAMSTrustAggregator is
     }
 
     // --- Admin ---
+
+    /// @notice Register exact reviewed settlement code as an evidence source.
+    /// @dev Source/dependency qualification is separate from code-hash equality.
+    function setSettlementEvidenceSource(address source, bytes32 runtimeHash) external onlyRole(UPGRADER_ROLE) {
+        require(source != address(0), "Missing evidence source");
+        if (runtimeHash != 0) require(source.code.length > 0 && source.codehash == runtimeHash, "Evidence source identity mismatch");
+        settlementEvidenceSources[source] = runtimeHash;
+        emit SettlementEvidenceSourceConfigured(source, runtimeHash);
+    }
+
+    /// @notice A relay records an authenticated settled delivery for its provider root.
+    /// @dev This records evidence only; it does not award an unqualified score or
+    /// authorize any effect. Caller identity never determines the credited root.
+    function submitSettledDeliveryProof(address source, bytes32 allocationId, uint256 providerIndex)
+        external returns (bytes32 key) {
+        bytes32 runtime = settlementEvidenceSources[source];
+        require(runtime != 0 && source.codehash == runtime, "Unapproved evidence source");
+        ISettledDeliveryEvidenceV1 evidence = ISettledDeliveryEvidenceV1(source);
+        IComposedSettlement.ProviderAlloc memory p = evidence.getProviderAlloc(allocationId, providerIndex);
+        require(p.provider != address(0) && p.claimed && evidence.verifiedProviderProofs(allocationId, providerIndex), "Unsettled delivery");
+        bytes32 output = evidence.deliveredOutputHash(allocationId, providerIndex);
+        bytes32 context = evidence.getDeliveryContext(allocationId, providerIndex);
+        require(output != 0 && context != 0, "Missing delivery evidence");
+        key = keccak256(abi.encode(block.chainid, source, allocationId, providerIndex));
+        require(settledDeliveryRoots[key] == address(0), "Delivery evidence already recorded");
+        settledDeliveryRoots[key] = p.provider;
+        emit RootDeliveryEvidenceAccepted(p.provider, source, allocationId, providerIndex, context, output);
+    }
     
     function setProofWeight(ProofType proofType, uint256 weight) external onlyRole(UPGRADER_ROLE) {
         proofWeights[proofType] = weight;

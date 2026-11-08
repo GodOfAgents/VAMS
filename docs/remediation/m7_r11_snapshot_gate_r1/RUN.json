@@ -1,0 +1,56 @@
+{
+  "date": "2026-10-03",
+  "slice": "R11 authoritative-source mutation test diagnosis",
+  "checkout": "/home/GodOfAgents/code/VAMS-testnet",
+  "head": "829ab544571f12efe50ecb5740f129c8acb3e16f",
+  "status": "BLOCKED_PENDING_OWNER_SNAPSHOT_DECISION",
+  "retained_source_or_manifest_rebind": false,
+  "verification": [
+    {
+      "command": "env PATH=/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin VAMS_ENV=test PYTHONDONTWRITEBYTECODE=1 VAMS_ENVOY_BIN=/home/GodOfAgents/vams-evidence/toolchains/envoy-1.39.1/envoy /home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/pytest -vv --tb=long scripts/remediation/test_m3_1b_r9_provenance.py::R11BoundaryTests::test_authoritative_mutation_detected",
+      "exit_code": 1,
+      "result": "1 failed before the injected mutation: authoritative project hash mismatch"
+    },
+    {
+      "description": "Read-only diagnostic: after a temporary lock-anchor-only manifest rebind, validation advanced but failed compilation source set or digest mismatch. The temporary lock-anchor edits were reverted."
+    },
+    {
+      "description": "git diff --check passed after reverting the temporary anchor edits."
+    }
+  ],
+  "current_evidence": {
+    "lock_raw_sha256": "acffff4aee9569e1ee1de468839077af467b5e403fd96450290cd367b339c651",
+    "manifest_lock_raw_sha256": "6f3b369ff5e7caf986ddf9b877af8bf1b71679307d90155e59f128313648d60f",
+    "normalized_lock_sha256": "f90d45886ca23d8661ae9973940ec03d9496ffc4e8caa9abe32fea69e938835a",
+    "manifest_source_count": 11,
+    "current_source_count": 15,
+    "additional_sources": [
+      "lib/vams/f05_authority.ak",
+      "validators/f05_authority_policy.ak",
+      "validators/f05_authority_policy.test.ak",
+      "validators/f05_authority_state.ak"
+    ],
+    "common_source_digest_drift": [
+      "lib/vams/governance.ak",
+      "validators/governance_policies.ak",
+      "validators/governor.ak",
+      "validators/insurance_fund.ak",
+      "validators/timelock.ak"
+    ]
+  },
+  "independent_review": {
+    "result": "PASS",
+    "reviewer": "/root/f05_status_reconciliation",
+    "scope": "read-only failure diagnosis and safe disposition",
+    "tests_rerun": false,
+    "edits": false
+  },
+  "f05_counts": {
+    "negative_cases": "45/55",
+    "mutations": "18/21",
+    "new_credit": "none"
+  },
+  "readiness": "NOT_READY",
+  "deployment_and_gated_activation": "disabled",
+  "next_slice": "owner decision on exact forward-only Cardano provenance snapshot; then one bounded rebaseline or immutable-baseline recovery slice"
+}

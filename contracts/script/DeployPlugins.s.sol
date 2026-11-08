@@ -4,8 +4,6 @@ pragma solidity ^0.8.20;
 import {Script, console} from "forge-std/Script.sol";
 import {VAMSTrustAggregator} from "../src/trust/VAMSTrustAggregator.sol";
 import {IVAMSProofPlugin} from "../src/interfaces/IVAMSProofPlugin.sol";
-import {TEEProofPlugin} from "../src/trust/plugins/TEEProofPlugin.sol";
-import {ZKMLProofPlugin} from "../src/trust/plugins/ZKMLProofPlugin.sol";
 import {OutputHashProofPlugin} from "../src/trust/plugins/OutputHashProofPlugin.sol";
 import {ERC8004IdentityPlugin} from "../src/trust/plugins/ERC8004IdentityPlugin.sol";
 import {WorldIDPlugin} from "../src/trust/plugins/WorldIDPlugin.sol";
@@ -48,11 +46,8 @@ contract DeployPlugins is Script {
         
         console.log("\n=== Deploying Proof Plugins ===\n");
 
-        TEEProofPlugin teePlugin = new TEEProofPlugin(deployer);
-        console.log("TEEProofPlugin:", address(teePlugin));
-
-        ZKMLProofPlugin zkmlPlugin = new ZKMLProofPlugin(deployer, address(0));
-        console.log("ZKMLProofPlugin:", address(zkmlPlugin));
+        // Retired TEE format is not deployed. New hardware/circuit backends need
+        // their exact qualified identities and a separate reviewed ceremony.
 
         OutputHashProofPlugin outputHashPlugin = new OutputHashProofPlugin(deployer);
         console.log("OutputHashProofPlugin:", address(outputHashPlugin));
@@ -73,11 +68,6 @@ contract DeployPlugins is Script {
 
             VAMSTrustAggregator aggregator = VAMSTrustAggregator(AGGREGATOR_PROXY);
 
-            aggregator.registerProofPlugin(teePlugin);
-            console.log("Registered: TEE");
-
-            aggregator.registerProofPlugin(zkmlPlugin);
-            console.log("Registered: ZKML");
 
             aggregator.registerProofPlugin(outputHashPlugin);
             console.log("Registered: OutputHash");

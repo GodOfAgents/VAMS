@@ -1,0 +1,81 @@
+{
+  "schema": "m7-aiken-warning-pty-diagnostic-v1",
+  "command": [
+    "aiken",
+    "check",
+    "--deny",
+    "--seed",
+    "20260711",
+    "--max-success",
+    "250"
+  ],
+  "tool": {
+    "path": "/home/GodOfAgents/vams-evidence/toolchains/aiken-1.1.21/unpacked/aiken-x86_64-unknown-linux-musl/aiken",
+    "version": "v1.1.21+42babe5",
+    "sha256": "07f3f927f1a8c71fc61273fdff850d9b98edb28dde207c8a32585991f2c88e79"
+  },
+  "isolation": "Canonical Cardano tree read-only; fresh tmpfs project copy; network namespace disabled; no tools or dependencies fetched by this runner.",
+  "source": {
+    "file_count_before": 21,
+    "sha256_before": "a83338d22f94d86bd074ee1c0a441eb197ad0a2afb45ab90b8e33c53ef914ec4",
+    "file_count_after": 21,
+    "sha256_after": "a83338d22f94d86bd074ee1c0a441eb197ad0a2afb45ab90b8e33c53ef914ec4",
+    "unchanged": true
+  },
+  "exit_code": 1,
+  "summary": {
+    "checks": 1865,
+    "errors": 0,
+    "warnings": 7
+  },
+  "warning_line_count": 3,
+  "warning_lines": [
+    "Summary 1865 checks, 0 errors, 7 warnings",
+    "_bootstrap_ref to get rid of that warning.",
+    "warning."
+  ],
+  "warning_context": [
+    "    \u2570\u2500\u2500\u2500\u2500",
+    "  help: No big deal, but you might want to remove it or use a discard",
+    "        _bootstrap_ref to get rid of that warning.",
+    "        ",
+    "        You should also know that, unlike in typical imperative languages,",
+    "    \u2570\u2500\u2500\u2500\u2500",
+    "  help: No big deal, but you might want to remove it to get rid of that",
+    "        warning.",
+    "",
+    "",
+    "    \u2570\u2500\u2500\u2500\u2500",
+    "  help: No big deal, but you might want to remove it to get rid of that",
+    "        warning.",
+    "",
+    "",
+    "    \u2570\u2500\u2500\u2500\u2500",
+    "  help: No big deal, but you might want to remove it to get rid of that",
+    "        warning.",
+    "",
+    "",
+    "   \u2570\u2500\u2500\u2500\u2500",
+    "  help: No big deal, but you might want to remove it to get rid of that",
+    "        warning.",
+    "",
+    "",
+    "   \u2570\u2500\u2500\u2500\u2500",
+    "  help: No big deal, but you might want to remove it to get rid of that",
+    "        warning.",
+    "",
+    "      Summary 1865 checks, 0 errors, 7 warnings"
+  ],
+  "diagnostic_lines": [
+    "Summary 1865 checks, 0 errors, 7 warnings",
+    "They will not produce any side-effect (such as error calls). Programs",
+    "_bootstrap_ref to get rid of that warning.",
+    "warning."
+  ],
+  "capture_note": null,
+  "raw_output_sha256": "7785d5b2401df517c238eca74cb3e10f1f3f36e1328e510b8fe3e189bc19b1ff",
+  "raw_output_retained": false,
+  "sanitized_transcript": "WARNING_DIAGNOSTIC.txt",
+  "sanitized_transcript_sha256": "e772799efdb629530bc5d12a44c707cebd1b553ac0b6e632c20efd2530564a13",
+  "sanitized_transcript_retained": true
+}

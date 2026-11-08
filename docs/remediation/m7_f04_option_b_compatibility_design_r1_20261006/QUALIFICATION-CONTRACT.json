@@ -1,0 +1,111 @@
+{
+  "schema": "vams.f04.option-b.qualification.v1",
+  "execution": "PENDING",
+  "roles": [
+    "S0.spend",
+    "P0.issue",
+    "P0.burn_reject",
+    "N.mint",
+    "N.burn",
+    "R.RegisterAgent_spend",
+    "R.mint_reject"
+  ],
+  "paired_transaction": "N.mint and R.RegisterAgent spend the same body with actual script purposes, exact redeemer map and inline data",
+  "fixtures": [
+    "source/dependency hashes",
+    "compiler binary/version/hash and offline invocation",
+    "fully applied PlutusV3 program bytes and ledger script hash",
+    "ordered parameters with Data/CBOR bytes",
+    "transaction body CBOR/hash",
+    "ephemeral body-bound funding witnesses",
+    "resolved inputs and references with provenance classification",
+    "datum/redeemer/context bytes",
+    "complete conserved value including fee/change/minimum ADA",
+    "independent expected oracle",
+    "accepted positive controls",
+    "named-entrypoint rejection attribution",
+    "actual evaluator argv/stdout/stderr/exit and CPU/memory",
+    "independent exact-byte review"
+  ],
+  "positive_control_exception": {
+    "always_reject": [
+      "S0.spend",
+      "R.mint",
+      "P0.burn"
+    ],
+    "proof": "correct purpose and decoder reached, named rejection; pair with valid P0.issue/N.mint/R.RegisterAgent acceptance. Never require acceptance for an always-reject purpose."
+  },
+  "mutation_requirements": [
+    "threshold",
+    "distinct guardians",
+    "founder signature",
+    "all5 genesis PoP",
+    "destination PoP",
+    "reference count",
+    "anchor credential/value/name",
+    "each datum binding",
+    "same bootstrap consumption",
+    "applied policy binding",
+    "registry mint rejection",
+    "DID and bounds",
+    "nonce/epoch/request domain",
+    "timelock/freeze",
+    "continuity/value",
+    "version distinction",
+    "stale credential denial"
+  ],
+  "mutation_binding": "build/review each mutant and rebind dependent hashes where needed; no evidence credit transfers between original/mutant or synthetic/original policies",
+  "worst_state": {
+    "did_bytes": 256,
+    "guardians": 5,
+    "selected_authorization_signers": 8,
+    "inputs": 16,
+    "reference_inputs": 4,
+    "outputs": 16,
+    "non_ada_mint_entries": 16,
+    "datum_cbor_bytes": 2048,
+    "pending": "maximal guardian rotation and checked u64 boundaries",
+    "signers": "funding signatories are separate from selected authorization list and included in body-size measurement",
+    "asset_maps": "exact registration/issuance assets; any recovery/terminal extension must be separately bounded"
+  },
+  "budget_acceptance": {
+    "snapshot": "approved current target protocol cost model, maxTxExUnits, maxTxSize, minimum ADA and fee parameters, hash bound",
+    "headroom": "freeze an explicit numeric reviewed CPU/memory/size margin before execution; do not infer defaults",
+    "measure": "whole paired transaction within envelope; maximum positive controls and one-over-bound negatives",
+    "status": "PENDING_NO_NUMERIC_BUDGET_OR_COMPILED_CREDIT"
+  },
+  "provenance": "two independent offline source-bound builds; applied params, program bytes and language-tag hashes recorded; authorizers inspect source/build/parameter/program/body; signatures are not on-chain compiler provenance",
+  "layers": [
+    "STRUCTURAL_DESIGN",
+    "AIKEN_UNIT_PROPERTY",
+    "COMPILED_PLUTUS_V3_SYNTHETIC",
+    "LEDGER_ADMISSION",
+    "LIVE_PREPROD"
+  ],
+  "credit": "layers execute and review separately; simulator acceptance gives no ledger/live/original-policy credit",
+  "consumer_gate": "authoritative resolver/finality and exact cross-chain association serialization/signature rules need separate reviewed design; failclosed until then",
+  "proposed_next_scope": {
+    "name": "immutable anchor foundation only",
+    "files": [
+      "cardano/lib/vams/f04_anchor_types.ak",
+      "cardano/validators/f04_anchor_lock.ak",
+      "cardano/validators/f04_anchor_policy.ak",
+      "new focused Cardano tests and external fixtures"
+    ],
+    "boundary": "implement fixed S0, shared P0(S0), anchor datum and issuance only; do not enable N/R registration, recovery, EVM consumers or gated operations; no existing blueprint/provenance/lockfile integration"
+  },
+  "readiness": "NOT READY",
+  "disabled": [
+    "deployment",
+    "Deposit",
+    "Slash",
+    "ExecuteIntent"
+  ],
+  "open": [
+    "F04",
+    "F05",
+    "INV-9",
+    "M5",
+    "historical M2 anomaly"
+  ]
+}

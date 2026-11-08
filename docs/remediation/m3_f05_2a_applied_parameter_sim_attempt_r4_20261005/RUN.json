@@ -1,0 +1,113 @@
+{
+  "attempt": {
+    "aiken_sha256": "07f3f927f1a8c71fc61273fdff850d9b98edb28dde207c8a32585991f2c88e79",
+    "aiken_version": "aiken v1.1.21+42babe5",
+    "argv": [
+      "/home/GodOfAgents/vams-evidence/toolchains/python/bin/python3.12",
+      "/home/GodOfAgents/code/VAMS-testnet/scripts/remediation/f05_2a_tx_sim_runner_r3.py",
+      "--aiken",
+      "/home/GodOfAgents/vams-evidence/toolchains/aiken-1.1.21/aiken",
+      "--tx",
+      "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m3_f05_2a_applied_parameter_family_r5_20261005/applied_keys_duplicate/negative.tx.cbor",
+      "--raw-inputs",
+      "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m3_f05_2a_applied_parameter_family_r5_20261005/applied_keys_duplicate/negative.raw_inputs.cbor",
+      "--raw-outputs",
+      "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m3_f05_2a_applied_parameter_family_r5_20261005/applied_keys_duplicate/negative.raw_outputs.cbor",
+      "--policy-id",
+      "d1f886d981117ada5f4e92370e1921c1c3616ce37b558b3fc42b65b9"
+    ],
+    "cwd": "/home/GodOfAgents/code/VAMS-testnet",
+    "label": "applied_keys_duplicate negative transaction through immutable R3 runner",
+    "policy_id": "d1f886d981117ada5f4e92370e1921c1c3616ce37b558b3fc42b65b9",
+    "runner_result": {
+      "cleanup": {
+        "child_reaped": true,
+        "process_group_empty": true,
+        "snapshot_descriptors_closed": true,
+        "status": "clean"
+      },
+      "schema_version": "f05-2a-tx-sim-run-result-r3",
+      "simulator_child_exit": 1,
+      "simulator_result": {
+        "stage": "compiled_evaluation",
+        "target_script_invoked": true
+      },
+      "submitted_sha256": {
+        "raw_inputs": "4b20e2b2cf4bd58b1f6e385c90ffd098d583df69d95fbc7b1fcc2591da72b9fe",
+        "raw_outputs": "b46446ed205485e9831b6cf6111350620368f5e8dd3b1b6d03cec2ae02fbd0e4",
+        "transaction": "4e538bf83ddef70b48c7d3536a8f3ea1daac7151f2f8534667ff541c9f8a52ac"
+      },
+      "submitted_size_bytes": {
+        "raw_inputs": 73,
+        "raw_outputs": 79,
+        "transaction": 5104
+      },
+      "target_mint_binding": {
+        "compiled_script_hash": "d1f886d981117ada5f4e92370e1921c1c3616ce37b558b3fc42b65b9",
+        "expected_policy_id": "d1f886d981117ada5f4e92370e1921c1c3616ce37b558b3fc42b65b9",
+        "policy_ids": [
+          "d1f886d981117ada5f4e92370e1921c1c3616ce37b558b3fc42b65b9"
+        ]
+      },
+      "wrapper_exit_code": 0
+    },
+    "runner_sha256": "3088ade0a316f6af59c04fe3e1675733100b58be826fa22af3c25e40a086ea5c",
+    "submitted_files": {
+      "raw_inputs": {
+        "bytes": 73,
+        "path": "docs/remediation/m3_f05_2a_applied_parameter_family_r5_20261005/applied_keys_duplicate/negative.raw_inputs.cbor",
+        "sha256": "4b20e2b2cf4bd58b1f6e385c90ffd098d583df69d95fbc7b1fcc2591da72b9fe"
+      },
+      "raw_outputs": {
+        "bytes": 79,
+        "path": "docs/remediation/m3_f05_2a_applied_parameter_family_r5_20261005/applied_keys_duplicate/negative.raw_outputs.cbor",
+        "sha256": "b46446ed205485e9831b6cf6111350620368f5e8dd3b1b6d03cec2ae02fbd0e4"
+      },
+      "transaction": {
+        "bytes": 5104,
+        "path": "docs/remediation/m3_f05_2a_applied_parameter_family_r5_20261005/applied_keys_duplicate/negative.tx.cbor",
+        "sha256": "4e538bf83ddef70b48c7d3536a8f3ea1daac7151f2f8534667ff541c9f8a52ac"
+      }
+    },
+    "wrapper_exit_code": 0
+  },
+  "classification": {
+    "named_condition_attribution": "pending one-guard mutant control",
+    "stage": "compiled_evaluation",
+    "target_script_invoked": true
+  },
+  "counts": {
+    "mutation": "18/21 PASS",
+    "negative": "45/55 PASS"
+  },
+  "credit": {
+    "ledger_admission": false,
+    "live_network": false,
+    "mutation": null,
+    "negative_case": null,
+    "original_policy": false
+  },
+  "evidence_scope": "local synthetic alternate-applied-policy compiled evaluation only; no named-condition attribution, case credit, mutation credit, original-policy, ledger-admission, or live-network evidence",
+  "fixture_package": {
+    "case_manifest_sha256": "7c7d3c779ef452df3fd808d1e0465c9eeef855058dfa5c3f5ce961b4b4536caa",
+    "family_manifest_sha256": "3d43acdc634f700c3bc709bae03a7869f26c35cd59941d4be0d94a89ca5c094e",
+    "path": "docs/remediation/m3_f05_2a_applied_parameter_family_r5_20261005",
+    "root_sha256sums_sha256": "ad27af4dd49aac3e8d0ba570468adf5c4fc32e02b5acc3303b2f40b67e5c71f0"
+  },
+  "ledger_effect": {
+    "case_statuses_modified": false,
+    "classification_overlay_modified": false,
+    "mutation_pass": 18,
+    "mutation_pending": 3,
+    "negative_pass": 45,
+    "negative_pending": 10
+  },
+  "r5_family_manifest_sha256": "3d43acdc634f700c3bc709bae03a7869f26c35cd59941d4be0d94a89ca5c094e",
+  "schema_version": "f05-2a-applied-parameter-negative-sim-attempt-r4",
+  "security": {
+    "ephemeral_funding_keys_only": true,
+    "private_key_material_persisted": false
+  },
+  "status": "compiled evaluation rejected at Mint[0]; named-condition attribution pending one-guard mutant acceptance; no case credit",
+  "stop_rule": "Only the R5 applied_keys_duplicate negative ran in this attempt; no other fixture ran."
+}

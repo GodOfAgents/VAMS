@@ -1,0 +1,20 @@
+{
+  "schema": "f05-rebind-order-slice-v1",
+  "source_sha256": "ec85595c1bdc42b3f4429c0e1948d9d1e47558ba60f46f7c29a7863fee44a77b",
+  "test_sha256": "aa073bc44a8ca807bada615ef1f511af520336bba5aeca8a6420a989aeb2155f",
+  "focused_tests": {
+    "command": "bwrap --unshare-net --ro-bind / / --tmpfs /tmp --dev-bind /dev /dev --proc /proc --chdir /home/GodOfAgents/code/VAMS-testnet -- /home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python -B -m pytest -q -p no:cacheprovider scripts/remediation/test_f05_2a_rebind_policy_order.py scripts/remediation/test_f05_2a_address_encoding.py scripts/remediation/test_f05_2a_uplc_alias.py scripts/remediation/test_f05_2a_harness_diagnostics.py",
+    "exit_code": 0,
+    "passed": 31
+  },
+  "full_harness": {
+    "exit_code": 1,
+    "result_created": false,
+    "protected_file_count": 24,
+    "protected_unchanged": true,
+    "failure": "mutation guard anchor must occur exactly once: InlineDatum, Input, OutputReference, Transaction",
+    "passed_prior_extra_asset_mutation_loop": "inferred from sequential loop; not standalone count credit"
+  },
+  "git_diff_check_exit": 0,
+  "classification": "synthetic harness correction only; no F05 ledger count"
+}

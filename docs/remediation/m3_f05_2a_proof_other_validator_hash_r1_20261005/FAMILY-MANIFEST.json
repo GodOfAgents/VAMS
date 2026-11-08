@@ -1,0 +1,87 @@
+{
+  "R4_1_sha256": "238b3da9296a6c60699dbc7201759c7e499c63defd932491023b80ec7916a171",
+  "case_ids_in_scope": [
+    "r2_signature_for_other_validator_hash"
+  ],
+  "case_package": "docs/remediation/m3_f05_2a_proof_other_validator_hash_r1_20261005/r2_signature_for_other_validator_hash",
+  "decision": "R4.1 proof-domain B",
+  "files": {
+    "SUMMARY.md": {
+      "bytes": 849,
+      "sha256": "817cfd110ecf08a1dfa8dd011181ba6e175502451f12bce4a5801ce630cdf681"
+    },
+    "r2_signature_for_other_validator_hash/FIXTURE-MANIFEST.json": {
+      "bytes": 17557,
+      "sha256": "f995861dfcffadb916a83dc51f88fde0f54e9a66b3a88385ce420f61feda6a4e"
+    },
+    "r2_signature_for_other_validator_hash/SHA256SUMS": {
+      "bytes": 1422,
+      "sha256": "79e964dfe8f74a9cd415cf5f95a1e3e34b61a4fbc051a4827f4befe49a608bcc"
+    },
+    "r2_signature_for_other_validator_hash/negative.applied-policy.cbor": {
+      "bytes": 3467,
+      "sha256": "8002a87a2f9b285197518bd865c7da7afae26b5362a0683d7a1c723716424dbd"
+    },
+    "r2_signature_for_other_validator_hash/negative.genesis_ref.cbor": {
+      "bytes": 39,
+      "sha256": "51f08c55f440a2116b42e5283fc76d8be4d707788d3bc765023620199af45c75"
+    },
+    "r2_signature_for_other_validator_hash/negative.initial_keys.cbor": {
+      "bytes": 172,
+      "sha256": "a7cd5c35689dece281de4dfb4f2e0a0d29bb5129b63d7bf3971f1663bf04391c"
+    },
+    "r2_signature_for_other_validator_hash/negative.proof-message.bin": {
+      "bytes": 279,
+      "sha256": "608b46934b1a315c3c905c96f250e3d23d75eadb483cd5b893bc6e386c47a22e"
+    },
+    "r2_signature_for_other_validator_hash/negative.raw_inputs.cbor": {
+      "bytes": 73,
+      "sha256": "5e935c48cc9d4e82e6dbedce94b2fbd3fb427f5e187bbe67ed376671ba5e4fec"
+    },
+    "r2_signature_for_other_validator_hash/negative.raw_outputs.cbor": {
+      "bytes": 79,
+      "sha256": "fccf32f91dd3541e33bdb9a92f61ab002bdf93ba7275a270101c70309fa044b9"
+    },
+    "r2_signature_for_other_validator_hash/negative.tx.cbor": {
+      "bytes": 5104,
+      "sha256": "b1113e0ee4172a49d7ce4a3e30a31d03b017c54cadb5546b72b60ec5c054dd2d"
+    },
+    "r2_signature_for_other_validator_hash/positive-control.applied-policy.cbor": {
+      "bytes": 3467,
+      "sha256": "8002a87a2f9b285197518bd865c7da7afae26b5362a0683d7a1c723716424dbd"
+    },
+    "r2_signature_for_other_validator_hash/positive-control.genesis_ref.cbor": {
+      "bytes": 39,
+      "sha256": "51f08c55f440a2116b42e5283fc76d8be4d707788d3bc765023620199af45c75"
+    },
+    "r2_signature_for_other_validator_hash/positive-control.initial_keys.cbor": {
+      "bytes": 172,
+      "sha256": "a7cd5c35689dece281de4dfb4f2e0a0d29bb5129b63d7bf3971f1663bf04391c"
+    },
+    "r2_signature_for_other_validator_hash/positive-control.proof-message.bin": {
+      "bytes": 279,
+      "sha256": "4b1e030c5639db1e22d6dac2e10a7ee63313319b0121bb4c8fcc844fc9797e74"
+    },
+    "r2_signature_for_other_validator_hash/positive-control.raw_inputs.cbor": {
+      "bytes": 73,
+      "sha256": "5e935c48cc9d4e82e6dbedce94b2fbd3fb427f5e187bbe67ed376671ba5e4fec"
+    },
+    "r2_signature_for_other_validator_hash/positive-control.raw_outputs.cbor": {
+      "bytes": 79,
+      "sha256": "fccf32f91dd3541e33bdb9a92f61ab002bdf93ba7275a270101c70309fa044b9"
+    },
+    "r2_signature_for_other_validator_hash/positive-control.tx.cbor": {
+      "bytes": 5104,
+      "sha256": "8eb0a4f8b11c30231d1788ab3399823a542c7ae86e75bc1902aa452f527f0f4b"
+    }
+  },
+  "no_source_registry_status_or_handoff_changed": true,
+  "registry_sha256": "98a05d24d476b1aee2754768322dc4b794e5afb5fabec28ade17a2888285467d",
+  "schema_version": "f05-2a-proof-domain-validator-hash-family-r1",
+  "scope": "synthetic test-only alternate applied policy; no original-policy, full-ledger-admission, Pre-Prod, or live-network credit",
+  "source_sha256": {
+    "cardano/lib/vams/f05_authority.ak": "657f30dfc0ecb40f50b2c0442b78f4818de1644f540fb68d76cfb2de72cccdd3",
+    "cardano/validators/f05_authority_policy.ak": "e9d3ac9cbb14b9e7693dc12430234694c82eb52e61d176e1e39992fb9cbeafa8"
+  },
+  "status": "candidate-awaiting-independent-byte-review; tx-sim-not-run; no credit"
+}

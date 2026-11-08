@@ -1,0 +1,81 @@
+{
+  "cases": [
+    {
+      "category": "ledger_tx_sim",
+      "executor": "pinned Aiken tx simulate --cbor",
+      "id": "r2_signature_for_other_seed",
+      "mutation": "sign_same_tuple_with_alternate_seed",
+      "status": "PENDING",
+      "target_policy_id": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731"
+    },
+    {
+      "category": "ledger_tx_sim",
+      "executor": "pinned Aiken tx simulate --cbor",
+      "id": "r2_signature_for_other_network",
+      "mutation": "sign_tuple_with_another_network_magic",
+      "status": "PENDING",
+      "target_policy_id": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731"
+    },
+    {
+      "category": "ledger_tx_sim",
+      "executor": "pinned Aiken tx simulate --cbor",
+      "id": "r2_signature_for_other_validator_hash",
+      "mutation": "sign_tuple_with_another_state_validator_hash",
+      "status": "PENDING",
+      "target_policy_id": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731"
+    },
+    {
+      "category": "ledger_tx_sim",
+      "executor": "pinned Aiken tx simulate --cbor",
+      "id": "r2_signature_for_other_epoch",
+      "mutation": "sign_tuple_with_nonzero_epoch",
+      "status": "PENDING",
+      "target_policy_id": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731"
+    }
+  ],
+  "commands": [
+    {
+      "command": "read current JSON contract, fixture registry and accepted overlay; assert the four rows are pending ledger_tx_sim with exact applied-policy target",
+      "result": "PASS"
+    },
+    {
+      "command": "inspect helper _ephemeral_committee/key.sign path and existing reviewed other-seed blocker assessment",
+      "result": "PASS"
+    }
+  ],
+  "counts": {
+    "case_count_change": 0,
+    "mutations": "18/21",
+    "negative_cases": "45/55"
+  },
+  "date": "2026-10-03",
+  "evidence_limits": [
+    "No original committee private-key fixture is present in the accepted public fixture registry.",
+    "The public helper generates fresh ephemeral committee keys per test and signs altered domain messages with those keys; this changes the applied policy parameters and cannot satisfy the exact applied-policy ID contract.",
+    "The exact transaction-simulator route needs authorized signatures for the original committee key set and each alternate domain message; do not derive or create live keys.",
+    "A contract change to a test-only policy/transaction-simulator route is a design decision, not implied by this audit."
+  ],
+  "independent_review": {
+    "limitation": "no evidence that an authorized original-committee signing facility exists; reviewer used no credentials, keys, builds, or simulator",
+    "result": "PASS",
+    "reviewer": "f05_other_seed_blocker_review",
+    "scope": "four exact pending rows, frozen contract and fixture hashes, helper signing behavior, and proposed decision routes"
+  },
+  "owner_decision": {
+    "route_A": "Keep exact applied-policy ledger_tx_sim contract; authorize a controlled existing-committee signing path that does not export private material, then construct/review exact CBOR transactions for all four domains.",
+    "route_B": "Amend the contract and build test-only parameter-bound synthetic CBOR transactions; classify only as synthetic simulator evidence, with no exact applied-policy, ledger-admission, or live claim.",
+    "route_C": "Keep all four PENDING until separate evidence/credential authorization."
+  },
+  "readiness": "NOT READY",
+  "schema_version": "f05-signature-domain-decision-audit-r1",
+  "scope": "read-only current source/contract/overlay reconciliation; no signing, key use, compile, or simulator invocation",
+  "sources": {
+    "docs/remediation/m3_f05_2a/authority_bootstrap_public_fixtures.json": "98a05d24d476b1aee2754768322dc4b794e5afb5fabec28ade17a2888285467d",
+    "docs/remediation/m3_f05_2a/tx_sim_evidence_contract_r2.json": "3510e127d369e9eab24a7ebe5a5dea10daaf55fd9589a297d78776bda940f6e9",
+    "docs/remediation/m3_f05_2a_evidence_classification_r1/CASE-STATUS.json": "8a571af3c92957ced0dc4d1c17c03776ac6a774d19a8ac20fce10c0fff1e5cc2",
+    "docs/remediation/m3_f05_2a_signature_other_seed_r1/ASSESSMENT.md": "f97f23560788e93fb1d02d4482ee55eef8ffe8c2be895f9866395256f4bdf37a",
+    "scripts/remediation/f05_2a_tx_sim_runner_r3.py": "3088ade0a316f6af59c04fe3e1675733100b58be826fa22af3c25e40a086ea5c",
+    "scripts/remediation/test_f05_2a_authority_bootstrap_public.py": "f6689e80ab2cbac78a8b05b76917ec0e9eac122e5023f1c37d3dd21afd5d6570"
+  },
+  "status": "four_rows_pending_same_evidence_contract; owner_decision_required"
+}

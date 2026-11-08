@@ -1,0 +1,36 @@
+{
+  "aiken_sha256": "07f3f927f1a8c71fc61273fdff850d9b98edb28dde207c8a32585991f2c88e79",
+  "aiken_version": "aiken v1.1.21+42babe5",
+  "canonical_unchanged": true,
+  "command": [
+    "aiken",
+    "check",
+    "--deny",
+    "--seed",
+    "20260711",
+    "--max-success",
+    "250"
+  ],
+  "exit_code": 1,
+  "f05_source_sha256": "e9d3ac9cbb14b9e7693dc12430234694c82eb52e61d176e1e39992fb9cbeafa8",
+  "governance_source_sha256": "b288f800f70d5aae566a745a5853067a173dd5cc8ad3225e7ea8d4bb89d29e55",
+  "input_count": 73,
+  "inputs_sha256": "36fed64c0cf8f55df182097b628c2c40408fc7ed416978aa74615f89b35ce35e",
+  "network": "disabled with bubblewrap --unshare-net",
+  "preflight_equal": true,
+  "schema": "m7-aiken-g1-run-v1",
+  "snapshot_unchanged": true,
+  "summary": {
+    "failed": 0,
+    "kind": {
+      "property": 7,
+      "unit": 115
+    },
+    "passed": 122,
+    "total": 122
+  },
+  "verification_stderr_sha256": "905b165053cacb443e93b7cae376513c0dc1d317483209637c634c923c4d931a",
+  "verification_stdout_sha256": "33b4f396b899731c82dbedcd03d0d77a93e533470796c6ce3ffc9961db590084",
+  "workflow_sha256": "7ddeb89794f498393e9c3bb460ca1aaa74dde7b9637c590d76cdae3bbc3ec83a",
+  "working_directory": "/tmp/vams-governance-g1-20261003-r1"
+}

@@ -1,0 +1,45 @@
+{
+  "schema": "m7-aiken-exact-commit-pin-run-v1",
+  "verification": [
+    {
+      "command": "git diff --check",
+      "exit_code": 0
+    },
+    {
+      "command": "python -B -m unittest scripts.remediation.test_m3_1b_r9_provenance",
+      "isolation": "bwrap offline read-only",
+      "passed": 22,
+      "exit_code": 0
+    },
+    {
+      "command": "python -B scripts/remediation/verify_m3_1b_r9.py",
+      "isolation": "bwrap offline read-only",
+      "exit_code": 0
+    },
+    {
+      "command": "python docs/remediation/m7_aiken_commit_pin_r1/run_pytest_snapshot.py",
+      "isolation": "bwrap offline overlay",
+      "exit_code": 0,
+      "result": "PYTEST_RESULT.json"
+    },
+    {
+      "command": "python docs/remediation/m7_aiken_commit_pin_r1/capture_warnings.py",
+      "isolation": "bwrap offline tmpfs",
+      "runner_exit_code": 0,
+      "aiken_exit_code": 1,
+      "result": "WARNING_DIAGNOSTIC.json"
+    }
+  ],
+  "review": {
+    "outcome": "PASS",
+    "scope": "exact integrated pin slice; strict Aiken remains open",
+    "independent_checks": [
+      "8 source hashes matched",
+      "cached archive and installed package bytes matched manifest 16/16 fuzz and 38/38 stdlib",
+      "focused unittest 22 OK offline/read-only",
+      "fresh independent provenance check/build exit 0 with unchanged blueprint and 26 program hashes",
+      "final full Python evidence inspected: 1607 passed, 444 subtests, 360 source files unchanged"
+    ],
+    "limitation": "Two implementer temporary rebuild transcripts are not retained; reviewer independently reproduced one matching rebuild."
+  }
+}

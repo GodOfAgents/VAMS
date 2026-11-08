@@ -1,17 +1,18 @@
 import hashlib
 import time
 import random
+import os
+from typing import Mapping, Optional
 from enum import Enum
 from neuron.verifiers.celestia_light_client import CelestiaLightClient
 from neuron.verifiers.polygon_dac_client import PolygonDACClient
-
-try:
-    from neuron.config import MOCK_MODE
-except ImportError:
-    try:
-        from config import MOCK_MODE
-    except ImportError:
-        MOCK_MODE = True
+from neuron.runtime_safety import (
+    ImmutableRuntimeConfiguration,
+    LiveModeSafetyError,
+    RuntimePolicy,
+    load_runtime_policy,
+    resolve_component_mock_mode,
+)
 
 # --- DA Providers ---
 class DAProvider(Enum):
@@ -28,15 +29,43 @@ DA_CONFIG = {
     DAProvider.AVAIL: {"cost": 0.003, "latency_ms": 20000, "reliability": 0.99}
 }
 
-class DARouter:
-    def __init__(self):
+DA_ROUTER_MOCK_VARIABLE = "DA_ROUTER_MOCK_MODE"
+
+
+class DARouter(ImmutableRuntimeConfiguration):
+    _immutable_runtime_fields = frozenset(
+        {"mock_mode", "runtime_policy", "da_mode", "primary_da", "fallback_da"}
+    )
+
+    def __init__(self, mock_mode: Optional[bool] = None, *, environ: Optional[Mapping[str, str]] = None, policy: Optional[RuntimePolicy] = None):
+        source = os.environ if environ is None else environ
+        self.runtime_policy = policy or load_runtime_policy(source)
+        self.mock_mode = resolve_component_mock_mode(
+            "DARouter",
+            DA_ROUTER_MOCK_VARIABLE,
+            mock_mode,
+            policy=self.runtime_policy,
+            environ=source,
+        )
+        if self.runtime_policy.is_live:
+            raise LiveModeSafetyError(
+                "DARouter live execution is disabled until every route submits and "
+                "independently verifies exact bytes in M5"
+            )
+        if not self.mock_mode:
+            raise LiveModeSafetyError(
+                "DARouter has no authoritative non-simulated implementation"
+            )
         self.da_mode = "validium" # Default for CDK L3
         self.primary_da = DAProvider.POLYGON
         self.fallback_da = DAProvider.CELESTIA
         
         # Initialize Verifiers
-        self.celestia_client = CelestiaLightClient()
+        self.celestia_client = CelestiaLightClient(
+            mock_mode=True, environ=source, policy=self.runtime_policy
+        )
         self.polygon_client = PolygonDACClient()
+        self._freeze_runtime_configuration()
         
     def route_data(self, data: bytes, criticality: str = "medium") -> dict:
         """
@@ -82,7 +111,7 @@ class DARouter:
         
         # Simulate Random Failure for fallback testing if MOCK_MODE is enabled
         # This branch injects non-security-critical failures in mock mode only.
-        if MOCK_MODE and random.random() < 0.1:  # nosec B311
+        if self.mock_mode and random.random() < 0.1:  # nosec B311
             raise Exception("Network Timeout (Simulated via MOCK_MODE)")
         
         tx_hash = hashlib.sha256(data + str(time.time()).encode()).hexdigest()
@@ -118,7 +147,8 @@ class DARouter:
 
 # --- Usage Example ---
 if __name__ == "__main__":
-    router = DARouter()
+    os.environ.setdefault("VAMS_ENV", "demo")
+    router = DARouter(mock_mode=True)
     
     # 1. Critical Transaction (Asset Transfer)
     router.route_data(b"Transfer 100 VAMS", criticality="high")

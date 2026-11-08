@@ -96,6 +96,11 @@ contract ProviderBondRegistry is
     
     /// @notice Count of registered providers
     uint256 public providerCount;
+
+    /// @notice Creating escrow and durable consumption marker for each request ID.
+    /// @dev Retained after completion/cancellation; consumes one reserved gap slot.
+    /// Legacy active requests with no recorded owner require reviewed migration.
+    mapping(bytes32 => address) public requestOwner;
     
     // ============ Initializer ============
     
@@ -422,6 +427,11 @@ contract ProviderBondRegistry is
         bytes32 escrowId, 
         uint256 value
     ) external override onlyRole(ESCROW_ROLE) whenNotPaused {
+        if (escrowId == bytes32(0)) revert InvalidEscrowId();
+        if (value == 0) revert ZeroAmount();
+        if (requestOwner[escrowId] != address(0) || _activeRequests[escrowId].provider != address(0)) {
+            revert EscrowIdAlreadyUsed(escrowId);
+        }
         ProviderBond storage bond = _bonds[provider];
         
         if (bond.registeredAt == 0) {
@@ -441,6 +451,7 @@ contract ProviderBondRegistry is
         }
         
         // Track active request
+        requestOwner[escrowId] = msg.sender;
         _activeRequests[escrowId] = ActiveRequest({
             value: value,
             startedAt: block.timestamp,
@@ -459,14 +470,23 @@ contract ProviderBondRegistry is
     function completeRequest(
         address provider, 
         bytes32 escrowId
-    ) external override onlyRole(ESCROW_ROLE) {
+    ) external override {
+        _releaseRequest(provider, escrowId, true);
+    }
+
+    /// @inheritdoc IProviderBondRegistry
+    function cancelRequest(address provider, bytes32 escrowId) external override {
+        _releaseRequest(provider, escrowId, false);
+    }
+
+    function _releaseRequest(address provider, bytes32 escrowId, bool delivered) private {
         ActiveRequest storage request = _activeRequests[escrowId];
         
         if (request.provider == address(0)) {
             revert EscrowNotFound(escrowId);
         }
         
-        if (request.provider != provider) {
+        if (request.provider != provider || requestOwner[escrowId] != msg.sender) {
             revert UnauthorizedCaller();
         }
         
@@ -475,12 +495,13 @@ contract ProviderBondRegistry is
         // Update provider state
         bond.pendingSettlements -= request.value;
         bond.activeRequests--;
-        bond.totalEarned += request.value;
+        if (delivered) bond.totalEarned += request.value;
         
         // Clear request
         delete _activeRequests[escrowId];
         
-        emit RequestCompleted(provider, escrowId);
+        if (delivered) emit RequestCompleted(provider, escrowId);
+        else emit RequestCancelled(provider, escrowId);
     }
     
     /// @inheritdoc IProviderBondRegistry
@@ -635,5 +656,5 @@ contract ProviderBondRegistry is
     // ============ Storage Gap ============
     
     /// @dev Reserved storage space for future upgrades
-    uint256[50] private __gap;
+    uint256[49] private __gap;
 }

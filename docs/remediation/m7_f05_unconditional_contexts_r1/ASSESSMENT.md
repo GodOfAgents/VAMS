@@ -1,0 +1,9 @@
+# F05 unconditional-success matching contexts
+
+The public harness previously evaluated its unconditional-success mutant against base-policy contexts for all 55 negatives. This slice rebinds 49 non-applied contexts to that mutant's policy ID. For each of six `applied_*` cases, it compiles an unconditional-success mutant with that case's applied parameters and rebuilds the corresponding context, datum keys and proofs. It retains intentionally wrong mint-policy and altered proof-domain cases. The result now records each subcase's policy ID, script hash, context hash, exit and verdict. No production validator, frozen fixture, blueprint or dependency bytes changed.
+
+A separately owned test file exercises all 55 cases and six direct applied-context rules. The integrated offline suite passed 99/99. The source-bound full public harness exited 0 with 26 protected inputs unchanged; its result has 57 case observations, 21 mutation rows, and 55 unconditional-success subcases, all accepted with exit 0. Seven distinct mutant policy IDs appear: base plus six applied variants.
+
+This is synthetic compiled-policy mutation sensitivity. The six applied-parameter and four proof-domain evidence scopes still await owner decisions, and individual mutant CBOR/policy derivation was not separately preserved. Independent review is pending. Existing F05 ledger remains 45/55 negatives and 18/21 mutations; no ledger admission, live-network evidence or deployment readiness follows. INV-1 through INV-10 enforcement paths were not touched. Deposit, Slash activation, ExecuteIntent and deployment remain disabled.
+
+The protected-file inventory omits the authority bootstrap public fixture JSON, amendment/contract records and frozen transaction-simulator inputs. The reviewer measured fixture SHA-256 98a05d24d476b1aee2754768322dc4b794e5afb5fabec28ade17a2888285467d. Input provenance must be expanded before ledger admission.

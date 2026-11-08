@@ -1,0 +1,103 @@
+{
+  "schema_version": "m3-f04-r1-value-rules-v1",
+  "status": "design-only",
+  "rules": {
+    "register": [
+      "identity_out == 1",
+      "state_lovelace == datum.stake_lovelace >= 1000000000",
+      "reputation == 5000",
+      "bootstrap consumed once",
+      "actual_policy_id == hash(compiled_policy(bootstrap_ref))"
+    ],
+    "update": [
+      "identity_out == identity_in == 1",
+      "stake_out == stake_in",
+      "all non-identity assets_out == assets_in",
+      "DID/owner/policy/token unchanged",
+      "nonce_out == nonce_in + 1",
+      "authority reference unique and epoch exact",
+      "operator role permits metadata only"
+    ],
+    "slash_post_f05": [
+      "0 < slash <= floor(stake_in * 1000 / 10000)",
+      "stake_out == stake_in - slash",
+      "reserve_delta == slash",
+      "all non-identity assets conserved",
+      "reputation_out == max(0, reputation_in - floor(reputation_in * slash / stake_in))",
+      "identity retained",
+      "nonce increments once",
+      "verified evidence reference binds identity/epoch/slasher/expiry",
+      "authority policy/token/quantity/value/datum/address exact",
+      "one action authorization input consumed and one unique action token burned",
+      "authority values cannot substitute registry stake"
+    ],
+    "deregister": [
+      "identity_in == 1",
+      "identity_delta == -1",
+      "state output count == 0",
+      "exactly one owner payout",
+      "payout_lovelace == state_lovelace",
+      "payout_non_identity_assets == state_non_identity_assets",
+      "identity asset absent from payout",
+      "nonce and authority epoch authenticated before removal"
+    ],
+    "replay": [
+      "replay_key == identity_policy_id || identity_asset_name || nonce || action_epoch",
+      "expected_nonce == input_datum.nonce",
+      "output_nonce == input_datum.nonce + 1",
+      "same replay key rejects across concurrent or restarted evaluation"
+    ],
+    "reserve": [
+      "post_f05 reserve credential == authority_reference.reserve_credential",
+      "reserve_delta == slash_amount",
+      "reserve output cardinality == 1",
+      "reserve routing mutation rejects",
+      "pre_f05 reserve output == 0",
+      "registry stake is not authority value and cannot satisfy authority binding"
+    ],
+    "inv10": [
+      "bridge_proof is distinct opaque proof input",
+      "payload_hash is distinct bytes32 action digest",
+      "bridge_proof cannot populate payload_hash",
+      "proof/payload alias or substitution rejects"
+    ],
+    "all": [
+      "exact policy/token bytes",
+      "non-governed assets conserved except declared fee/change",
+      "topology counts exact",
+      "duplicate signers/units/unknown fields reject",
+      "no implicit payout or residual state output"
+    ]
+  },
+  "operator_rules": {
+    "owner": [
+      "register",
+      "change_operator",
+      "change_metadata",
+      "deregister"
+    ],
+    "operator": [
+      "change_metadata"
+    ],
+    "operator_forbidden": [
+      "change_owner",
+      "change_identity",
+      "withdraw_stake",
+      "deregister",
+      "slash"
+    ]
+  },
+  "post_f05_slash_interface": {
+    "authority": "RegistryAuthorityV1.slash_enabled == true with exact policy/token/quantity/value/datum/address binding",
+    "action": "one consumed regular RegistryActionV1 input with exact action policy/token/quantity and one unique action token burned on success",
+    "evidence": "EvidenceAttestationV1(status=verified, identity/policy/token/epoch/nonce/slasher/evidence_hash exact, valid_until >= tx_upper_bound)",
+    "destination": "fixed reserve credential from authority reference",
+    "replay": "same identity/nonce/epoch evidence cannot be consumed twice",
+    "substitution": "authority/action values cannot substitute registry stake"
+  },
+  "integer_rules": {
+    "json_integer": "type(value) is int and not bool",
+    "overflow": "reject before arithmetic",
+    "division": "floor with nonzero bounded stake"
+  }
+}

@@ -1,0 +1,139 @@
+{
+  "schema_version": "f05-2a-tx-simulator-evidence-contract-r3.1",
+  "status": "single-case evidence overlay; not full F05.2a acceptance",
+  "supersedes": {
+    "path": "docs/remediation/m3_f05_2a/tx_sim_evidence_contract_r3.json",
+    "sha256": "952d5f0c8a379da4732d6aeb67e23f3bad41342db4ea30dc93de3efa6a109a77",
+    "scope": "overrides only the prior PENDING status of #33_authority_value_minus_one; all other R3 terms remain unchanged"
+  },
+  "extends": {
+    "r1": {
+      "path": "docs/remediation/m3_f05_2a/tx_sim_evidence_contract_r1.json",
+      "sha256": "c06fa1e93ee8881fece804ecc4d23f26995d3035d488906736caeb516090ca9c"
+    },
+    "r2": {
+      "path": "docs/remediation/m3_f05_2a/tx_sim_evidence_contract_r2.json",
+      "sha256": "3510e127d369e9eab24a7ebe5a5dea10daaf55fd9589a297d78776bda940f6e9"
+    },
+    "r3": {
+      "path": "docs/remediation/m3_f05_2a/tx_sim_evidence_contract_r3.json",
+      "sha256": "952d5f0c8a379da4732d6aeb67e23f3bad41342db4ea30dc93de3efa6a109a77"
+    },
+    "accepted_registry": {
+      "path": "docs/remediation/m3_f05_2a/authority_bootstrap_public_fixtures.json",
+      "sha256": "98a05d24d476b1aee2754768322dc4b794e5afb5fabec28ade17a2888285467d",
+      "negative_cases": 55,
+      "compiled_mutations": 21,
+      "modified": false
+    }
+  },
+  "#33_authority_value_minus_one": {
+    "original_assertion": "reject the bootstrap when the authority output has one lovelace less than the required amount",
+    "overlay_status": "PASS",
+    "status_scope": "this negative case only",
+    "target": {
+      "purpose": "Mint[0]",
+      "policy_id": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+      "applied_script_hash": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731"
+    },
+    "accepted_prior_package": {
+      "path": "/home/GodOfAgents/vams-evidence/m3-f05-2a-tx-pair-r1-20261001T045757Z-829ab544571f",
+      "sha256sums_sha256": "a518aec4155a39e6e00b89d4f184c777e4921edf65bc3bd0f656c39947249246"
+    },
+    "snapshot_run_record": {
+      "path": "/home/GodOfAgents/vams-evidence/m3-f05-2a-r3-immutable-handoff-20261001-829ab544571f/RUN-RESULTS.json",
+      "sha256": "bcbe70e83ed43d8e2e5427cd1a613d582f172008e1ada23c481813766135d821"
+    },
+    "review": {
+      "result": "independently approved for this single-case overlay",
+      "scope": "#33 evidence promotion only; no full-gate or protocol acceptance"
+    },
+    "fixtures": {
+      "accepted_positive": {
+        "transaction_sha256": "765c717f16b543c746b88742e8b775cd3ecabca4fef6edd16702184683780a28",
+        "raw_inputs_sha256": "4b20e2b2cf4bd58b1f6e385c90ffd098d583df69d95fbc7b1fcc2591da72b9fe",
+        "raw_outputs_sha256": "9cdf345a785f51763bdb43f1b1ba0c20b5545051f03051e6a7bf726ea128c56a"
+      },
+      "authority_value_minus_one": {
+        "transaction_sha256": "e50cc03bfd3afd224a388b32d84c0269f87cada0172dfaf83551109fd4d8c078",
+        "raw_inputs_sha256": "4b20e2b2cf4bd58b1f6e385c90ffd098d583df69d95fbc7b1fcc2591da72b9fe",
+        "raw_outputs_sha256": "2fc6880c06662d490a8af0eb2e03ebba3e9cc94572f0da3fc420df268bf44719"
+      }
+    },
+    "runtimes": [
+      {
+        "version": "Aiken v1.1.21+42babe5",
+        "binary_sha256": "07f3f927f1a8c71fc61273fdff850d9b98edb28dde207c8a32585991f2c88e79",
+        "positive": {
+          "child_exit": 0,
+          "wrapper_exit": 0,
+          "target_invoked": true,
+          "invoked_policy_id": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+          "applied_script_hash": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+          "result": "accepted"
+        },
+        "authority_value_minus_one": {
+          "child_exit": 1,
+          "wrapper_exit": 0,
+          "target_invoked": true,
+          "invoked_policy_id": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+          "applied_script_hash": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+          "result": "compiled evaluation rejected"
+        }
+      },
+      {
+        "version": "Aiken v1.1.23+8949565",
+        "binary_sha256": "748b9d45785fbded901ed87475072b6d20ee259bb4588c72428c12a19e8902d3",
+        "positive": {
+          "child_exit": 0,
+          "wrapper_exit": 0,
+          "target_invoked": true,
+          "invoked_policy_id": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+          "applied_script_hash": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+          "result": "accepted"
+        },
+        "authority_value_minus_one": {
+          "child_exit": 1,
+          "wrapper_exit": 0,
+          "target_invoked": true,
+          "invoked_policy_id": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+          "applied_script_hash": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+          "result": "compiled evaluation rejected"
+        }
+      }
+    ],
+    "output_interpretation": "Simulator child status and wrapper status are separate. A child exit of 1 is a script rejection only because the snapshot-bound classifier confirmed the exact Mint[0] invocation and target policy/script hash; successful bounded capture, classification, and cleanup yield wrapper exit 0.",
+    "assertion_attribution": "The simulator emits a generic failed-script diagnostic, not a named guard trace. Rejection is attributed to the one reviewed authority-output value delta with target-script invocation established; no named trace is claimed."
+  },
+  "status_overlay": {
+    "negative_case_counts": {
+      "total": 55,
+      "pass": 1,
+      "pending": 54,
+      "fail": 0
+    },
+    "compiled_mutation_counts": {
+      "total": 21,
+      "pass": 0,
+      "pending": 21,
+      "fail": 0
+    },
+    "unchanged_dispositions": {
+      "context_only_negative_cases": "remain PENDING under R2; no context-only execution or reclassification",
+      "mint_wrong_policy": "remains PENDING as a routing control; it is not a rejection by an uninvoked policy",
+      "context_only_mutation": "remains PENDING under R2",
+      "composite_mutation": "remains PENDING under R2",
+      "all_other_cases": "inherit R2 assertions and remain PENDING"
+    },
+    "full_f05_2a_acceptance": false,
+    "registry_modified": false
+  },
+  "limitations": {
+    "synthetic_simulation_is_not_ledger_admission": true,
+    "script_data_hash_and_collateral": "not established by these fixtures",
+    "preprod_minimum_ada": "inconclusive pending provenance-bound network parameters",
+    "f05_and_m3": "remain open",
+    "deposit_slash_execute_intent": "remain disabled",
+    "promotion": "NOT READY"
+  }
+}

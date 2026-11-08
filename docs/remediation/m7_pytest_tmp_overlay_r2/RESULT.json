@@ -1,0 +1,145 @@
+{
+  "design_suite": {
+    "command": [
+      "/usr/bin/bwrap",
+      "--bind",
+      "/",
+      "/",
+      "--bind",
+      "/tmp",
+      "/tmp",
+      "--dev-bind",
+      "/dev",
+      "/dev",
+      "--proc",
+      "/proc",
+      "--bind",
+      "/home/GodOfAgents/code/VAMS-testnet",
+      "/home/GodOfAgents/code/VAMS-testnet",
+      "--ro-bind",
+      "/tmp/vams-evidence",
+      "/tmp/vams-evidence",
+      "--chdir",
+      "/home/GodOfAgents/code/VAMS-testnet",
+      "--",
+      "/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python",
+      "-B",
+      "-m",
+      "pytest",
+      "-q",
+      "--tb=no",
+      "-p",
+      "no:cacheprovider",
+      "docs/remediation/m3_f05_design_r2/test_design.py",
+      "--junitxml=/tmp/vams-pytest-junit-scbkn94k/report.xml"
+    ],
+    "declared_error_count": 0,
+    "declared_failure_count": 0,
+    "exit_code": 0,
+    "failing_tests": [],
+    "junit_raw_retained": false,
+    "junit_sha256": "34a1f2b18435773cfbcd2003c8a11a9a6424398de896d14f1a238c7ff0bd1a47",
+    "label": "design",
+    "outcome_counts": {
+      "passed": 10
+    },
+    "raw_output_retained": false,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "ac7ee2c43368e57d190c6ac089b2190a1f05864eabdfdc3e6d564b749e85fcc3",
+    "testcase_count": 10
+  },
+  "environment": {
+    "VAMS_ENV": "test",
+    "VAMS_ENVOY_BIN": "/home/GodOfAgents/vams-evidence/toolchains/envoy-1.39.1/envoy",
+    "ambient_environment_inherited": false
+  },
+  "envoy": {
+    "path": "/home/GodOfAgents/vams-evidence/toolchains/envoy-1.39.1/envoy",
+    "sha256": "002c6e1c69ed0fa0ea381887247cadadfaec9481375fa8d8d2b1731eeabf40b8",
+    "version": "/home/GodOfAgents/vams-evidence/toolchains/envoy-1.39.1/envoy  version: b579d07d3ad7ee11d32b105e91a5a39ad24718d7/1.39.1/Clean/RELEASE/BoringSSL"
+  },
+  "exit_semantics_match": {
+    "design": true,
+    "main": true
+  },
+  "gate_pass": true,
+  "git_after": {
+    "head": "829ab544571f12efe50ecb5740f129c8acb3e16f",
+    "status_sha256": "8084db4edd5d3bc3193de3f07d7028aed1c4fe64f88e5db08e0f8b83758c67ca"
+  },
+  "git_before": {
+    "head": "829ab544571f12efe50ecb5740f129c8acb3e16f",
+    "status_sha256": "8084db4edd5d3bc3193de3f07d7028aed1c4fe64f88e5db08e0f8b83758c67ca"
+  },
+  "git_unchanged": true,
+  "main_suite": {
+    "command": [
+      "/usr/bin/bwrap",
+      "--bind",
+      "/",
+      "/",
+      "--bind",
+      "/tmp",
+      "/tmp",
+      "--dev-bind",
+      "/dev",
+      "/dev",
+      "--proc",
+      "/proc",
+      "--bind",
+      "/home/GodOfAgents/code/VAMS-testnet",
+      "/home/GodOfAgents/code/VAMS-testnet",
+      "--ro-bind",
+      "/tmp/vams-evidence",
+      "/tmp/vams-evidence",
+      "--chdir",
+      "/home/GodOfAgents/code/VAMS-testnet",
+      "--",
+      "/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python",
+      "-B",
+      "-m",
+      "pytest",
+      "-q",
+      "--tb=no",
+      "-p",
+      "no:cacheprovider",
+      "--ignore=docs/remediation/m3_f05_design_r2/test_design.py",
+      "--junitxml=/tmp/vams-pytest-junit-fcvrw425/report.xml"
+    ],
+    "declared_error_count": 0,
+    "declared_failure_count": 0,
+    "exit_code": 0,
+    "failing_tests": [],
+    "junit_raw_retained": false,
+    "junit_sha256": "2bbd8656893c84389477a07504257b95bb481ac2227ed2ba23bb4f8e7b10945f",
+    "label": "main",
+    "outcome_counts": {
+      "passed": 1693
+    },
+    "raw_output_retained": false,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "f352898e4fa83d55f5e3c9690f75a29799fbf018e072e1aa826937ab0081df5c",
+    "testcase_count": 1693
+  },
+  "network": "disabled by outer bwrap",
+  "pytest_version": "pytest 9.1.1",
+  "python": "3.12.14",
+  "python_inventory": {
+    "count_after": 384,
+    "count_before": 384,
+    "sha256_after": "03df53edb30eecbe904a23b072ac46ca33044fd9d60462f1cc8aa7ba53d1fa4b",
+    "sha256_before": "03df53edb30eecbe904a23b072ac46ca33044fd9d60462f1cc8aa7ba53d1fa4b",
+    "unchanged": true
+  },
+  "python_path": "/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python",
+  "redaction": "JUnit XML and raw pytest output were temporary; only normalized module/function IDs, parameter-fragment hashes, outcomes, safe exception types, and output hashes are retained.",
+  "schema": "m7-pytest-tmp-overlay-r2",
+  "scope_limit": "Local current-workflow pytest execution only; no hosted CI, ledger, testnet, or deployment credit.",
+  "workflow": {
+    "path": ".github/workflows/security-gates.yml",
+    "sha256_after": "baf53503673b70c5185f654f8f694f1feaf98af68ee56e29c83c01ee0cf0593c",
+    "sha256_before": "baf53503673b70c5185f654f8f694f1feaf98af68ee56e29c83c01ee0cf0593c",
+    "unchanged": true
+  },
+  "writable_checkout": "bwrap tmp-overlay over the canonical checkout; all test writes discarded at teardown"
+}

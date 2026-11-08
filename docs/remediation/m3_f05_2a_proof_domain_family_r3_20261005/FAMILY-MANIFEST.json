@@ -1,0 +1,99 @@
+{
+  "R4_1_sha256": "238b3da9296a6c60699dbc7201759c7e499c63defd932491023b80ec7916a171",
+  "applied_policy_id": "704a7ed54317bfa9c9879a9be02d8ae8859e999ce1a04298697d69ad",
+  "case_ids_in_scope": [
+    "r2_signature_for_other_epoch"
+  ],
+  "case_package": "docs/remediation/m3_f05_2a_proof_domain_family_r3_20261005/r2_signature_for_other_epoch",
+  "decision": "R4.1 proof-domain B",
+  "files": {
+    "SUMMARY.md": {
+      "bytes": 1615,
+      "sha256": "cdd5cc88313a8200ab34c3aa0a1c39f51efa5e3a85047de9025eeccb6cb47bda"
+    },
+    "r2_signature_for_other_epoch/FIXTURE-MANIFEST.json": {
+      "bytes": 12376,
+      "sha256": "c41b8d8fe7829b6baf5abca3224a3539509e1250bf1fb806eb1143baf979f0a0"
+    },
+    "r2_signature_for_other_epoch/SHA256SUMS": {
+      "bytes": 1422,
+      "sha256": "236618bba0c13fb27b2f070477a535e73142ffc6f0ea1d12b17f46e87a830c4e"
+    },
+    "r2_signature_for_other_epoch/negative.applied-policy.cbor": {
+      "bytes": 3467,
+      "sha256": "14bc2862bca0933da246c0fdd77d703fc174a9ed2a4ee46a492fd3b07a81bd74"
+    },
+    "r2_signature_for_other_epoch/negative.genesis_ref.cbor": {
+      "bytes": 39,
+      "sha256": "51f08c55f440a2116b42e5283fc76d8be4d707788d3bc765023620199af45c75"
+    },
+    "r2_signature_for_other_epoch/negative.initial_keys.cbor": {
+      "bytes": 172,
+      "sha256": "f37e5bf13b9a64a3e55809c8c554bab2b42fdd8979464cf8206e277d7edece3f"
+    },
+    "r2_signature_for_other_epoch/negative.proof-message.bin": {
+      "bytes": 279,
+      "sha256": "1baa89bf447657a34d5f43f913fdffe128a8182a45e3d2b1563b0c39499813c0"
+    },
+    "r2_signature_for_other_epoch/negative.raw_inputs.cbor": {
+      "bytes": 73,
+      "sha256": "5e935c48cc9d4e82e6dbedce94b2fbd3fb427f5e187bbe67ed376671ba5e4fec"
+    },
+    "r2_signature_for_other_epoch/negative.raw_outputs.cbor": {
+      "bytes": 79,
+      "sha256": "e92e5834ea46162f0d9db7320b5bb6abb5fc4bf31b23d5d358c0a571555f09d7"
+    },
+    "r2_signature_for_other_epoch/negative.tx.cbor": {
+      "bytes": 5104,
+      "sha256": "38bbf76af57957881095dc42a0004ab1caa8a4a43065228066dbd7407eaa37f3"
+    },
+    "r2_signature_for_other_epoch/positive-control.applied-policy.cbor": {
+      "bytes": 3467,
+      "sha256": "14bc2862bca0933da246c0fdd77d703fc174a9ed2a4ee46a492fd3b07a81bd74"
+    },
+    "r2_signature_for_other_epoch/positive-control.genesis_ref.cbor": {
+      "bytes": 39,
+      "sha256": "51f08c55f440a2116b42e5283fc76d8be4d707788d3bc765023620199af45c75"
+    },
+    "r2_signature_for_other_epoch/positive-control.initial_keys.cbor": {
+      "bytes": 172,
+      "sha256": "f37e5bf13b9a64a3e55809c8c554bab2b42fdd8979464cf8206e277d7edece3f"
+    },
+    "r2_signature_for_other_epoch/positive-control.proof-message.bin": {
+      "bytes": 279,
+      "sha256": "291f2f6db77827bd19553829e501c2954e573b23a710f4d927d96f0c65531d74"
+    },
+    "r2_signature_for_other_epoch/positive-control.raw_inputs.cbor": {
+      "bytes": 73,
+      "sha256": "5e935c48cc9d4e82e6dbedce94b2fbd3fb427f5e187bbe67ed376671ba5e4fec"
+    },
+    "r2_signature_for_other_epoch/positive-control.raw_outputs.cbor": {
+      "bytes": 79,
+      "sha256": "e92e5834ea46162f0d9db7320b5bb6abb5fc4bf31b23d5d358c0a571555f09d7"
+    },
+    "r2_signature_for_other_epoch/positive-control.tx.cbor": {
+      "bytes": 5104,
+      "sha256": "28818f0e4fa862fff96dfc935d0479fc81e623cdd84930b60138fd74a7829f68"
+    }
+  },
+  "generator_invocation": {
+    "argv": [
+      "/home/GodOfAgents/code/VAMS-testnet/scripts/remediation/build_f05_2a_proof_other_network_r1.py",
+      "--aiken",
+      "/home/GodOfAgents/vams-evidence/toolchains/aiken-1.1.21/aiken"
+    ],
+    "exit_code": 0
+  },
+  "negative_tx_sha256": "38bbf76af57957881095dc42a0004ab1caa8a4a43065228066dbd7407eaa37f3",
+  "next_cases_untouched": [],
+  "no_shared_status_or_registry_changed": true,
+  "positive_tx_sha256": "28818f0e4fa862fff96dfc935d0479fc81e623cdd84930b60138fd74a7829f68",
+  "registry_sha256": "98a05d24d476b1aee2754768322dc4b794e5afb5fabec28ade17a2888285467d",
+  "schema_version": "f05-2a-proof-domain-family-r3",
+  "scope": "synthetic test-only alternate applied policy; no original-policy, full-ledger-admission, Pre-Prod, or live-network credit",
+  "source_sha256": {
+    "cardano/lib/vams/f05_authority.ak": "657f30dfc0ecb40f50b2c0442b78f4818de1644f540fb68d76cfb2de72cccdd3",
+    "cardano/validators/f05_authority_policy.ak": "e9d3ac9cbb14b9e7693dc12430234694c82eb52e61d176e1e39992fb9cbeafa8"
+  },
+  "status": "candidate-awaiting-independent-byte-review; tx-sim-not-run; no credit"
+}

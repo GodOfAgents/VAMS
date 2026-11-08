@@ -1,0 +1,75 @@
+{
+  "schema_version": "f05-2a-tx-simulator-evidence-contract-r3",
+  "status": "runner contract only; no negative or mutation status is promoted",
+  "extends": {
+    "r1": {
+      "path": "docs/remediation/m3_f05_2a/tx_sim_evidence_contract_r1.json",
+      "sha256": "c06fa1e93ee8881fece804ecc4d23f26995d3035d488906736caeb516090ca9c"
+    },
+    "r2": {
+      "path": "docs/remediation/m3_f05_2a/tx_sim_evidence_contract_r2.json",
+      "sha256": "3510e127d369e9eab24a7ebe5a5dea10daaf55fd9589a297d78776bda940f6e9"
+    }
+  },
+  "accepted_registry": {
+    "path": "docs/remediation/m3_f05_2a/authority_bootstrap_public_fixtures.json",
+    "sha256": "98a05d24d476b1aee2754768322dc4b794e5afb5fabec28ade17a2888285467d",
+    "negative_cases": 55,
+    "compiled_mutations": 21,
+    "status_change": "none"
+  },
+  "snapshot_contract": {
+    "source_open": [
+      "lstat path without following symlinks",
+      "open with O_NOFOLLOW and O_NONBLOCK",
+      "require regular file and stable device/inode/size/mtime/ctime",
+      "read each source exactly once and enforce per-role and aggregate bounds"
+    ],
+    "private_snapshot": "Linux anonymous sealed memfd per transaction, raw-input vector, and raw-output vector; descriptors inherited only by the isolated simulator child",
+    "maximum_bytes": {
+      "transaction": 1048576,
+      "raw_inputs": 4194304,
+      "raw_outputs": 4194304,
+      "aggregate": 9437184
+    },
+    "submitted_binding": "SHA-256 and byte length are computed from the exact bytes copied into each sealed memfd; the bound hashes and sizes are returned with the child result",
+    "target_policy_binding": "the typed transaction's sole mint policy ID must equal the expected applied script hash derived from its Plutus V3 witness; both are returned as public identifiers",
+    "raw_data_handling": "transaction bytes, raw input/output bytes, stdout, stderr, witnesses, and source paths are never persisted or returned as evidence"
+  },
+  "process_contract": {
+    "invocation": "aiken tx simulate --cbor <sealed transaction fd> <sealed raw-input fd> <sealed raw-output fd>",
+    "argument_roles": ["transaction", "raw_inputs", "raw_outputs"],
+    "argument_binding_failure": "snapshot_binding_mismatch before child spawn; descriptor permutation is never delegated to simulator parsing",
+    "isolation": "new process session/process group",
+    "timeout_seconds": {
+      "minimum": 0.05,
+      "maximum": 90.0,
+      "termination": "SIGTERM, bounded grace, SIGKILL, bounded direct-child wait, and process-group-empty check"
+    },
+    "output_limit_bytes_per_stream": 262144,
+    "simulator_child_exit_field": "simulator_child_exit",
+    "wrapper_exit_field": "wrapper_exit_code",
+    "wrapper_exit": {
+      "0": "bounded result captured, exact R2 transcript classified as accepted or compiled-evaluation rejection, and cleanup succeeded",
+      "2": "input/snapshot error, timeout, output overflow, indeterminate transcript, or cleanup failure"
+    },
+    "classification": "reuse the exact R2 Aiken 1.1.21/1.1.23 transcript classifier; never infer child status from an outer shell or wrapper status"
+  },
+  "cleanup_contract": {
+    "always": [
+      "terminate an outstanding process group on timeout or runner error",
+      "reap the direct simulator child",
+      "verify the isolated process group is empty",
+      "close every inherited snapshot descriptor",
+      "make any cleanup failure force wrapper exit 2"
+    ],
+    "persistent_temporary_paths": 0
+  },
+  "case_status_policy": {
+    "inherit_from": "docs/remediation/m3_f05_2a/tx_sim_evidence_contract_r2.json",
+    "negative_cases": "all 55 original identifiers/assertions retain their existing R2 state; no automatic promotion",
+    "compiled_mutations": "all 21 original identifiers/assertions retain their existing R2 state; no automatic promotion",
+    "authority_value_minus_one": "remains PENDING until the R3 snapshot-bound dual-runtime result is independently approved",
+    "pending_is_not_pass": true
+  }
+}

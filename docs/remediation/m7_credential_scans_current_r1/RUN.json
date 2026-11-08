@@ -1,0 +1,46 @@
+{
+  "checkout": {
+    "branch": "testnet/remediation-20260907",
+    "dirty_tree": true,
+    "head": "829ab544571f12efe50ecb5740f129c8acb3e16f"
+  },
+  "date": "2026-10-03",
+  "independent_review": {
+    "caveat": "lexical current-working-tree scans only; no Git history or external secret-service validation. The default credential scan includes explicit allowlist paths.",
+    "findings": [
+      "both commands independently exited 0 with 0 findings",
+      "both output hashes matched RESULT.json",
+      "inventory excluding the evidence package was stable: 1686 files",
+      "runner stores summaries, counts, hashes, and exits only; matched credential/URI values are not emitted or retained"
+    ],
+    "outcome": "PASS",
+    "scope": "workflow commands, exact runner, sanitized outputs, current hashes/inventory, independent offline rerun"
+  },
+  "schema": "m7-current-credential-scans-record-v1",
+  "status": "PASS",
+  "toolchain": {
+    "python": "3.12.14"
+  },
+  "verification": {
+    "outer_command": "bwrap --unshare-net --ro-bind / / --tmpfs /tmp --dev-bind /dev /dev --proc /proc --bind docs/remediation/m7_credential_scans_current_r1 docs/remediation/m7_credential_scans_current_r1 --chdir /home/GodOfAgents/code/VAMS-testnet --clearenv --setenv PATH /home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin:/usr/bin:/bin --setenv PYTHONDONTWRITEBYTECODE 1 /home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python -B docs/remediation/m7_credential_scans_current_r1/run_verification.py",
+    "raw_candidate_values_retained": false,
+    "scan_results": {
+      "default_credential_scan": {
+        "exit_code": 0,
+        "finding_count": 0,
+        "summary": "Default credential scan passed."
+      },
+      "secret_history_prevention_scan": {
+        "exit_code": 0,
+        "finding_count": 0,
+        "summary": "Secret-history prevention scan passed."
+      }
+    },
+    "source_inventory": {
+      "count": 1686,
+      "evidence_package_excluded": true,
+      "sha256": "034a9e0ca83f05774a8bc4f08be3794436f991af926133d70b2a76a276864eec",
+      "unchanged": true
+    }
+  }
+}

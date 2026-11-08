@@ -1,13 +1,21 @@
-# Service Blocks Marketplace (`neuron/services/`)
+# Service Block catalogue (`neuron/services/`)
 
-This package represents the other half of Phase 3 (Intelligence).
+`ServiceBlockClient` currently reads hardcoded local declarations, not the on-chain
+ServiceBlockRegistry. Its optional `contract_client` is stored but unused; its
+presence does not qualify a read. Default-false construction denies catalogue,
+manifest, memory-policy and blueprint/macro resolution APIs. Explicit
+`simulation=True` requires a current `test`, `local` or `demo` runtime policy.
+Live modes and policy/mock drift reject before lookup. Gateway enables it only
+in demo, including the macro listing route.
 
-## Overview
-It implements a decentralized service layer where third-party builders can publish "Macro Blocks" (composable infra packages + setups), enabling them to earn revenue share alongside base compute providers when their blocks are utilized by agents.
+Declaration validation preserves memory-policy, permission and version checks.
+Locally computed JSON hashes and optional declared metadata are not authenticated
+registry evidence. Listed blocks carry simulation/non-authoritative markers and
+`registry_verified: false`; `verified_only` does not implement a chain filter.
+The macro module and blueprint module are static planning data only.
 
-## Components
-- `registry_client.py`: The `ServiceBlockClient`. Provides Python SDK bindings to interact with the on-chain `ServiceBlockRegistry`.
-- `macro_blocks.py`: Pre-defined composite blocks like `AI_AGENT_STARTER_PACK` (NodeJS + Ollama) and `PRIVACY_SHIELD_ENTERPRISE` (SGX + Proxy).
-
-## Relevant Contracts
-- `contracts/src/infrastructure/ServiceBlockRegistry.sol`: Contains logic for verifying builder signatures, tracking deployment metrics, and managing the builder-to-provider revenue split limits.
+An authenticated reader must still qualify current registration identities,
+builder/fee/manifest/status and chain/finality binding through real callers. The
+on-chain registry and typed settlement checks do not make this local catalogue a
+verified off-chain mirror. Provider execution/receipts and both-chain end-to-end
+qualification remain separate requirements.

@@ -1,0 +1,16 @@
+{
+  "checkout": {
+    "dirty_tree": true,
+    "head": "829ab544571f12efe50ecb5740f129c8acb3e16f"
+  },
+  "compiled_evaluation_rerun": false,
+  "independent_review": {
+    "outcome": "PASS",
+    "scope": "current source semantics, frozen-spec mismatch, eight hashes, package checksums, fixture policy identity and ledger replay caveat"
+  },
+  "readiness": "NOT READY",
+  "retained_compiled_result": "docs/remediation/m7_agent_nft_audit_r1/f04-current-results.json",
+  "schema": "m7-f04-authority-semantics-run-v1",
+  "source_hash_count": 8,
+  "source_hashes_match": true
+}

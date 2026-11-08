@@ -1,0 +1,19 @@
+{
+  "schema": "m7-inv3-expiry-boundary-result-r1",
+  "defect": "verify_session_scope previously rejected only when now > expires_at, so it returned true at equality.",
+  "repair": "Use >= so the exact expiry instant is outside the valid interval.",
+  "test_results": {
+    "red_regression_before_fix": "FAIL as expected, exit 1; failure output was not retained separately.",
+    "focused_module_after_fix": "PASS, 10 passed in 0.85s.",
+    "current_python_workflow": "PASS, main 1700/1700 and design 10/10, both exit 0."
+  },
+  "independent_review": "PASS on source/test behavior and r5 workflow capture; see REVIEW.md.",
+  "limitations": [
+    "Synthetic local SDK tests; no wallet provider, chain, or live key evidence.",
+    "INV-4 is preserved by inspection and existing test coverage, not newly revalidated as part of this change.",
+    "The r5 expected outer command is wrapper metadata rather than independent process telemetry.",
+    "Overall testnet readiness remains NOT READY."
+  ],
+  "accepted_f05_ledger": "45/55 negative cases and 18/21 mutations; unchanged.",
+  "final_record_consistency_review": "PASS; all 12 checksums and record/source/test/workflow-result relationships verified."
+}

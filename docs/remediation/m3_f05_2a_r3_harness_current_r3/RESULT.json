@@ -1,0 +1,38 @@
+{
+  "canaries": [
+    {
+      "cleanup": "clean",
+      "id": "valid",
+      "policy_id": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+      "result": "script_accepted",
+      "simulator_child_exit": 0,
+      "submitted_sha256": {
+        "raw_inputs": "4b20e2b2cf4bd58b1f6e385c90ffd098d583df69d95fbc7b1fcc2591da72b9fe",
+        "raw_outputs": "9cdf345a785f51763bdb43f1b1ba0c20b5545051f03051e6a7bf726ea128c56a",
+        "transaction": "765c717f16b543c746b88742e8b775cd3ecabca4fef6edd16702184683780a28"
+      },
+      "target_invoked": true,
+      "wrapper_exit": 0
+    },
+    {
+      "cleanup": "clean",
+      "id": "invalid_signature",
+      "policy_id": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+      "result": "compiled_evaluation",
+      "simulator_child_exit": 1,
+      "submitted_sha256": {
+        "raw_inputs": "4b20e2b2cf4bd58b1f6e385c90ffd098d583df69d95fbc7b1fcc2591da72b9fe",
+        "raw_outputs": "9cdf345a785f51763bdb43f1b1ba0c20b5545051f03051e6a7bf726ea128c56a",
+        "transaction": "594c1b9297bff3a55c1bd7b600ad8f5d2c049471b70e667bc064212100f3754c"
+      },
+      "target_invoked": true,
+      "wrapper_exit": 0
+    }
+  ],
+  "evidence_class": "synthetic_local_transaction_simulator",
+  "mode": "snapshot_bound_transaction_canaries_only",
+  "registry": "not_run",
+  "runtime": "aiken v1.1.21+42babe5",
+  "runtime_sha256": "07f3f927f1a8c71fc61273fdff850d9b98edb28dde207c8a32585991f2c88e79",
+  "status": "pass"
+}

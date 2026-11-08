@@ -1,0 +1,22 @@
+name = "GodOfAgents/vams-cardano"
+version = "0.1.0"
+compiler = "v1.1.21"
+plutus = "v3"
+description = "VAMS Brain Layer — Cardano governance, insurance, and agent identity validators"
+
+[repository]
+user = "GodOfAgents"
+project = "VAMS"
+platform = "github"
+
+[[dependencies]]
+name = "aiken-lang/stdlib"
+version = "33376da0c274e41f52e69e4769a0e7878a24efba"
+source = "github"
+
+[[dependencies]]
+name = "aiken-lang/fuzz"
+version = "06874926ec70747f3fc4e2b9364ee9e1393441cc"
+source = "github"
+
+[config]

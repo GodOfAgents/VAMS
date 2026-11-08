@@ -1,0 +1,41 @@
+{
+  "command": [
+    "/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/bandit",
+    "-r",
+    "neuron/",
+    "gateway/",
+    "-ll",
+    "-ii",
+    "-f",
+    "json",
+    "-o",
+    "/tmp/vams-bandit-rmnk_y4g/bandit-report.json"
+  ],
+  "error_count": 0,
+  "evidence_class": "local_static_source_scan",
+  "finding_count": 0,
+  "findings": [],
+  "limitations": "This is a local static-analysis result only; it does not establish full CI parity, runtime behavior, other scanners, or deployment readiness.",
+  "network": "disabled by outer bwrap",
+  "raw_report_retained": false,
+  "report_sha256": "68bd37145efae86b6b8083cfb016cd515a2ec4bc268cce9423cfd6366015dcfc",
+  "scanner": {
+    "path": "/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/bandit",
+    "sha256": "c14fb89c43dad91a351fb8f5da774f7b9f3b5a5e2a757dabb34fbb0f418b0e37",
+    "version": "bandit 1.9.4"
+  },
+  "scanner_exit_code": 0,
+  "schema_version": "m7-bandit-current-r1",
+  "scope": "Bandit 1.9.4, recursive Python source under neuron/ and gateway/, workflow severity/confidence thresholds -ll -ii.",
+  "source_code_snippets_retained": false,
+  "source_inventory": {
+    "path_sha256_manifest_sha256": "a84b810486e2939c19b8b7458553a0446721e52051f9431e9d8694fcee540d0d",
+    "python_file_count": 190
+  },
+  "source_inventory_after": {
+    "path_sha256_manifest_sha256": "a84b810486e2939c19b8b7458553a0446721e52051f9431e9d8694fcee540d0d",
+    "python_file_count": 190
+  },
+  "stderr_sha256": "cd287e5b39f7faa7d3199d698759086cee947e9a6a77f0a8046f4d36f4f14059",
+  "stdout_sha256": "1c7849f1bad1f48527caa28c8a6d5bd1df0906b512c1e44433548f936c0f5935"
+}

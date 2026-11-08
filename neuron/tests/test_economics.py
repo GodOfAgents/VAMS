@@ -1,11 +1,7 @@
 import unittest
-import sys
-import os
 import time
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-from economic.circuit_breaker import CircuitBreaker
+from neuron.economic.circuit_breaker import CircuitBreaker
 
 class TestCircuitBreaker(unittest.TestCase):
     

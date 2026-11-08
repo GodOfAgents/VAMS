@@ -1,0 +1,58 @@
+{
+  "schema": "m7-inv3-expiry-boundary-run-r1",
+  "date_utc": "2026-10-04",
+  "branch": "testnet/remediation-20260907",
+  "head": "829ab544571f12efe50ecb5740f129c8acb3e16f",
+  "invariant": "INV-3",
+  "design_rationale": "Session validity is a half-open interval: the key is invalid when current_time is equal to or later than expires_at. This fails closed at the expiration boundary and does not extend the existing 24-hour maximum.",
+  "source_hashes": {
+    "neuron/sdk/sequence_wallet.py": {
+      "before_fix_sha256": "eab8fe41dd31b109b2470c6d390700e0ec083c3640a0b15a571e56fa6fefcd2b",
+      "after_fix_sha256": "a8e7f7103fc7172307036767f385fce5abb197765a18ca2aee420125ce93ffad"
+    },
+    "neuron/tests/test_sequence_wallet.py": {
+      "before_regression_sha256": "8fd8e3f54be411c9377cb6ce8325e2a139cb8d042f3613134a7bfc94a4beea2b",
+      "after_regression_sha256": "5e9ab75099fd026a42563cb3af409b179115a226e979a7c97ddf0679de46ad87"
+    },
+    "docs/CHANGELOG.md": "453d945660a23f734b7ef6153acfaa90a4de553735276c99375ad27e465a0987"
+  },
+  "regression_before_fix": {
+    "exact_node": "neuron/tests/test_sequence_wallet.py::test_session_is_rejected_at_exact_expiry",
+    "command": "bwrap --unshare-net --ro-bind / / --tmpfs /tmp --dev-bind /dev /dev --proc /proc --chdir /home/GodOfAgents/code/VAMS-testnet --clearenv --setenv HOME /tmp --setenv TMPDIR /tmp --setenv PATH /home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin:/usr/bin:/bin --setenv LANG C.UTF-8 --setenv LC_ALL C.UTF-8 --setenv TZ UTC --setenv PYTHONDONTWRITEBYTECODE 1 --setenv PYTHONNOUSERSITE 1 /home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python -B -m pytest -q --tb=short -p no:cacheprovider neuron/tests/test_sequence_wallet.py::test_session_is_rejected_at_exact_expiry",
+    "exit_code": 1,
+    "observed": "1 failed; assertion expected False but verify_session_scope returned True when frozen now equaled expires_at.",
+    "raw_output_retained": false
+  },
+  "focused_after_fix": {
+    "command": "bwrap --unshare-net --ro-bind / / --tmpfs /tmp --dev-bind /dev /dev --proc /proc --chdir /home/GodOfAgents/code/VAMS-testnet --clearenv --setenv HOME /tmp --setenv TMPDIR /tmp --setenv PATH /home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin:/usr/bin:/bin --setenv LANG C.UTF-8 --setenv LC_ALL C.UTF-8 --setenv TZ UTC --setenv PYTHONDONTWRITEBYTECODE 1 --setenv PYTHONNOUSERSITE 1 /home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python -B -m pytest -q --tb=short -p no:cacheprovider neuron/tests/test_sequence_wallet.py",
+    "exit_code": 0,
+    "outcome": "10 passed in 0.85s"
+  },
+  "full_python_workflow": {
+    "evidence_directory": "docs/remediation/m7_pytest_tmp_overlay_r5/",
+    "outer_command": "bwrap --unshare-net --ro-bind / / --tmpfs /tmp --dev-bind /dev /dev --proc /proc --dir /tmp/vams-evidence --bind /home/GodOfAgents/code/VAMS-testnet/docs/remediation/m7_pytest_tmp_overlay_r5 /tmp/vams-evidence --overlay-src /home/GodOfAgents/code/VAMS-testnet --tmp-overlay /home/GodOfAgents/code/VAMS-testnet --chdir /home/GodOfAgents/code/VAMS-testnet /home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python -B /tmp/vams-evidence/run_pytest_snapshot.py",
+    "outer_command_attestation": "Expected command is wrapper-written metadata, not independent process telemetry.",
+    "python": "3.12.14",
+    "pytest": "9.1.1",
+    "main_suite": "1700/1700 passed, exit 0",
+    "design_suite": "10/10 passed, exit 0",
+    "gate_pass": true,
+    "source_inventory": {
+      "count": 389,
+      "sha256_before_after": "915fb218c379c91a401b7c1287a7a764225e99703b60e9ee8e6dd56ff4987c42"
+    },
+    "workflow_sha256_before_after": "baf53503673b70c5185f654f8f694f1feaf98af68ee56e29c83c01ee0cf0593c",
+    "git_head_before_after": "829ab544571f12efe50ecb5740f129c8acb3e16f",
+    "filtered_status_sha256_before_after": "7332bea494c018050961a4b2cbb3fa8e22b73e047066b608e54b8a74c037158c",
+    "runner_sha256": "c8c8dd422571ab30ccf37a28d78c6bdbed43e5016d25b4d3897ce3642dea4910",
+    "run_json_sha256": "752ebb330eb428495eb5ed2b072e91e3874be9ec916f7677eef0a10fdece5e29",
+    "result_json_sha256": "0bba6aca2514a67aa79ed454a501371326fc28f1b68d9c135dae927c226e5af9"
+  },
+  "invariant_impact": {
+    "INV_3": "affected; expires_at equality is now rejected",
+    "INV_4": "preserved; whitelist behavior and tests unchanged",
+    "other_invariants": "not touched"
+  },
+  "readiness_credit": "Local SDK and Python workflow evidence only; no CI-hosted, ledger, live-network, chain rehearsal, or deployment credit.",
+  "independent_review": "PASS on source/test behavior and r5 workflow capture; final record package review pending."
+}

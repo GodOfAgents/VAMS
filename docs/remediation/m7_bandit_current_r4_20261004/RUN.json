@@ -1,0 +1,66 @@
+{
+  "schema_version": 1,
+  "slice": "M7 current-source Bandit workflow gate",
+  "date": "2026-10-04",
+  "head": "829ab544571f12efe50ecb5740f129c8acb3e16f",
+  "workflow_sha256": "baf53503673b70c5185f654f8f694f1feaf98af68ee56e29c83c01ee0cf0593c",
+  "scanner": {
+    "name": "Bandit",
+    "version": "1.9.4",
+    "python": "3.12.14",
+    "path": "/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/bandit",
+    "sha256": "c14fb89c43dad91a351fb8f5da774f7b9f3b5a5e2a757dabb34fbb0f418b0e37"
+  },
+  "command": "bandit -r neuron/ gateway/ -ll -ii",
+  "issued_command": "/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/bandit -r neuron/ gateway/ -ll -ii",
+  "capture_dir": "/home/GodOfAgents/vams-evidence/m7-bandit-current-r4-20261004/",
+  "source_inventory": {
+    "path": "source-manifest.sha256",
+    "sha256": "a467b2c93b00f9d38f1f8dd37eb4195081f1ed47d8ed353188a1a5b5bc569032",
+    "before_sha256": "a467b2c93b00f9d38f1f8dd37eb4195081f1ed47d8ed353188a1a5b5bc569032",
+    "after_sha256": "a467b2c93b00f9d38f1f8dd37eb4195081f1ed47d8ed353188a1a5b5bc569032",
+    "files": 190,
+    "lines_of_code": 37142
+  },
+  "result": {
+    "exit_code": 0,
+    "stdout_summary": "No issues identified.",
+    "stderr_error": false,
+    "issues_by_severity": {
+      "low": 1488,
+      "medium": 1,
+      "high": 0
+    },
+    "issues_by_confidence": {
+      "low": 1,
+      "medium": 12,
+      "high": 1476
+    },
+    "gate_reported_findings": 0,
+    "excluded_candidate": {
+      "severity": "medium",
+      "confidence": "low",
+      "disposition": "below configured -ii confidence threshold; not adjudicated"
+    }
+  },
+  "execution_boundary": {
+    "network_isolated": true,
+    "source_checkout_read_only": true,
+    "wrapper_recorded": true,
+    "independent_process_telemetry": false
+  },
+  "review": {
+    "result": "PASS",
+    "reviewed_capture_hashes": true,
+    "caveat": "Wrapper and metadata are capture records, not independent process telemetry."
+  },
+  "evidence_class": "local static-analysis gate evidence; not invariant, ledger, testnet, or live-network evidence",
+  "readiness": "NOT READY",
+  "activations": {
+    "deployment": "disabled",
+    "Deposit": "disabled",
+    "Slash": "disabled",
+    "ExecuteIntent": "disabled"
+  },
+  "next_slice": "Run installed pip-audit 2.10.1 with workflow command pip-audit --local --vulnerability-service pypi; do not install dependencies."
+}

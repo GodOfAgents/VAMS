@@ -1,0 +1,32 @@
+{
+  "argv": [
+    "/usr/bin/bwrap",
+    "--unshare-net",
+    "--ro-bind",
+    "/",
+    "/",
+    "--bind",
+    "/tmp/vams-govpol-warnings-rqv96083/cardano",
+    "/tmp/vams-govpol-warnings-rqv96083/cardano",
+    "--chdir",
+    "/tmp/vams-govpol-warnings-rqv96083/cardano",
+    "--dev",
+    "/dev",
+    "--proc",
+    "/proc",
+    "--",
+    "/home/GodOfAgents/vams-evidence/toolchains/aiken-1.1.21/unpacked/aiken-x86_64-unknown-linux-musl/aiken",
+    "check",
+    "--deny",
+    "--skip-tests"
+  ],
+  "wrapper": [
+    "script",
+    "-q",
+    "-e",
+    "-c",
+    "/usr/bin/bwrap --unshare-net --ro-bind / / --bind /tmp/vams-govpol-warnings-rqv96083/cardano /tmp/vams-govpol-warnings-rqv96083/cardano --chdir /tmp/vams-govpol-warnings-rqv96083/cardano --dev /dev --proc /proc -- /home/GodOfAgents/vams-evidence/toolchains/aiken-1.1.21/unpacked/aiken-x86_64-unknown-linux-musl/aiken check --deny --skip-tests",
+    "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m7_governance_policies_warnings_r1/warnings.tty.txt"
+  ],
+  "exit_code": 1
+}

@@ -1,0 +1,540 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vams.invalid/schemas/m6-gca-envelope-v1.json",
+  "title": "VAMS M6 GCA compatibility envelope proposal",
+  "description": "Syntax-only, non-authoritative claims. Validity does not authorize an effect.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_id",
+    "envelope_id",
+    "actor_root",
+    "execution_context",
+    "host_chain_domain",
+    "authority_epoch",
+    "workflow_definition",
+    "logical_intent",
+    "operation_id",
+    "action",
+    "capabilities",
+    "budget",
+    "policy",
+    "anchor",
+    "decision",
+    "nonce",
+    "validity",
+    "effect",
+    "evidence",
+    "source_bindings"
+  ],
+  "properties": {
+    "schema_id": {
+      "const": "vams.m6.gca-envelope.v1"
+    },
+    "envelope_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "actor_root": {
+      "$ref": "#/$defs/claimRef"
+    },
+    "execution_context": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "provider",
+        "runtime",
+        "model",
+        "circuit"
+      ],
+      "properties": {
+        "provider": {
+          "$ref": "#/$defs/claimRef"
+        },
+        "runtime": {
+          "$ref": "#/$defs/claimRef"
+        },
+        "model": {
+          "$ref": "#/$defs/claimRef"
+        },
+        "circuit": {
+          "$ref": "#/$defs/claimRef"
+        }
+      }
+    },
+    "host_chain_domain": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "host",
+        "chain",
+        "domain"
+      ],
+      "properties": {
+        "host": {
+          "$ref": "#/$defs/claimRef"
+        },
+        "chain": {
+          "$ref": "#/$defs/claimRef"
+        },
+        "domain": {
+          "$ref": "#/$defs/claimRef"
+        }
+      }
+    },
+    "authority_epoch": {
+      "$ref": "#/$defs/counter"
+    },
+    "workflow_definition": {
+      "$ref": "#/$defs/claimRef"
+    },
+    "logical_intent": {
+      "$ref": "#/$defs/claimRef"
+    },
+    "operation_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Stable idempotency identity; distinct from logical_intent and nonce."
+    },
+    "action": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "target",
+        "operation",
+        "action_commitment",
+        "input_commitment",
+        "output_commitment"
+      ],
+      "properties": {
+        "target": {
+          "$ref": "#/$defs/claimRef"
+        },
+        "operation": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "action_commitment": {
+          "$ref": "#/$defs/digest"
+        },
+        "input_commitment": {
+          "$ref": "#/$defs/digest"
+        },
+        "output_commitment": {
+          "$ref": "#/$defs/digest"
+        }
+      }
+    },
+    "capabilities": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "permitted_refs",
+        "commitment"
+      ],
+      "properties": {
+        "permitted_refs": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/ref"
+          }
+        },
+        "commitment": {
+          "$ref": "#/$defs/digest"
+        }
+      }
+    },
+    "budget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "unit_ref",
+        "requested_units",
+        "maximum_units",
+        "commitment"
+      ],
+      "properties": {
+        "unit_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "requested_units": {
+          "$ref": "#/$defs/counter"
+        },
+        "maximum_units": {
+          "$ref": "#/$defs/counter"
+        },
+        "commitment": {
+          "$ref": "#/$defs/digest"
+        }
+      }
+    },
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "root",
+        "version"
+      ],
+      "properties": {
+        "root": {
+          "$ref": "#/$defs/claimRef"
+        },
+        "version": {
+          "$ref": "#/$defs/counter"
+        }
+      }
+    },
+    "anchor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ref",
+        "digest",
+        "observed_at",
+        "fresh_until",
+        "finality_claim",
+        "checkpoint_ref"
+      ],
+      "properties": {
+        "ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "observed_at": {
+          "$ref": "#/$defs/instant"
+        },
+        "fresh_until": {
+          "$ref": "#/$defs/instant"
+        },
+        "finality_claim": {
+          "enum": [
+            "UNKNOWN",
+            "PROVISIONAL",
+            "FINALIZED"
+          ]
+        },
+        "checkpoint_ref": {
+          "$ref": "#/$defs/ref"
+        }
+      }
+    },
+    "decision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "outcome",
+        "record_digest"
+      ],
+      "properties": {
+        "outcome": {
+          "enum": [
+            "ALLOW",
+            "DENY",
+            "UNKNOWN"
+          ]
+        },
+        "record_digest": {
+          "$ref": "#/$defs/digest"
+        }
+      }
+    },
+    "nonce": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$",
+      "description": "Explicit 256-bit replay nonce, separate from operation_id."
+    },
+    "validity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "issued_at",
+        "expires_at"
+      ],
+      "properties": {
+        "issued_at": {
+          "$ref": "#/$defs/instant"
+        },
+        "expires_at": {
+          "$ref": "#/$defs/instant"
+        }
+      }
+    },
+    "effect": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "effect_receipt",
+        "settlement_receipt",
+        "readback"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "NOT_STARTED",
+            "DENIED_BEFORE_EFFECT",
+            "RESERVED",
+            "DISPATCHED",
+            "COMMITTED_CLAIM",
+            "REJECTED",
+            "INDETERMINATE",
+            "READBACK_CLAIM"
+          ]
+        },
+        "effect_receipt": {
+          "$ref": "#/$defs/optionalClaimRef"
+        },
+        "settlement_receipt": {
+          "$ref": "#/$defs/optionalClaimRef"
+        },
+        "readback": {
+          "$ref": "#/$defs/optionalClaimRef"
+        }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "class",
+        "artifact",
+        "review_class"
+      ],
+      "properties": {
+        "class": {
+          "enum": [
+            "synthetic",
+            "local_test",
+            "simulator",
+            "ledger_admission",
+            "testnet",
+            "live_network"
+          ]
+        },
+        "artifact": {
+          "$ref": "#/$defs/claimRef"
+        },
+        "review_class": {
+          "enum": [
+            "not_reviewed",
+            "independently_reviewed",
+            "owner_accepted"
+          ]
+        }
+      }
+    },
+    "source_bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "actor_root",
+        "provider_identity",
+        "runtime_identity",
+        "model_identity",
+        "circuit_identity",
+        "host",
+        "chain",
+        "domain",
+        "authority_epoch",
+        "workflow_definition",
+        "logical_intent",
+        "action_commitment",
+        "input_commitment",
+        "permitted_capabilities",
+        "budget",
+        "policy_root",
+        "policy_version",
+        "anchor_freshness",
+        "anchor_finality",
+        "decision",
+        "replay_nonce",
+        "expiry",
+        "output_commitment",
+        "effect_receipt",
+        "settlement_receipt",
+        "operation_identity",
+        "anchor_record",
+        "evidence_class",
+        "evidence_artifact",
+        "evidence_review_class",
+        "effect_status",
+        "readback",
+        "issued_at"
+      ],
+      "properties": {
+        "actor_root": {
+          "$ref": "#/$defs/sourceBinding"
+        },
+        "provider_identity": {
+          "$ref": "#/$defs/sourceBinding"
+        },
+        "runtime_identity": {
+          "$ref": "#/$defs/sourceBinding"
+        },
+        "model_identity": {
+          "$ref": "#/$defs/sourceBinding"
+        },
+        "circuit_identity": {
+          "$ref": "#/$defs/sourceBinding"
+        },
+        "host": {
+          "$ref": "#/$defs/sourceBinding"
+        },
+        "chain": {
+          "$ref": "#/$defs/sourceBinding"
+        },
+        "domain": {
+          "$ref": "#/$defs/sourceBinding"
+        },
+        "authority_epoch": {
+          "$ref": "#/$defs/sourceBinding"
+        },
+        "workflow_definition": {
+          "$ref": "#/$defs/sourceBinding"
+        },
+        "logical_intent": {
+          "$ref": "#/$defs/sourceBinding"
+        },
+        "action_commitment": {
+          "$ref": "#/$defs/sourceBinding"
+        },
+        "input_commitment": {
+          "$ref": "#/$defs/sourceBinding"
+        },
+        "permitted_capabilities": {
+          "$ref": "#/$defs/sourceBinding"
+        },
+        "budget": {
+          "$ref": "#/$defs/sourceBinding"
+        },
+        "policy_root": {
+          "$ref": "#/$defs/sourceBinding"
+        },
+        "policy_version": {
+          "$ref": "#/$defs/sourceBinding"
+        },
+        "anchor_freshness": {
+          "$ref": "#/$defs/sourceBinding"
+        },
+        "anchor_finality": {
+          "$ref": "#/$defs/sourceBinding"
+        },
+        "decision": {
+          "$ref": "#/$defs/sourceBinding"
+        },
+        "replay_nonce": {
+          "$ref": "#/$defs/sourceBinding"
+        },
+        "expiry": {
+          "$ref": "#/$defs/sourceBinding"
+        },
+        "output_commitment": {
+          "$ref": "#/$defs/sourceBinding"
+        },
+        "effect_receipt": {
+          "$ref": "#/$defs/sourceBinding"
+        },
+        "settlement_receipt": {
+          "$ref": "#/$defs/sourceBinding"
+        },
+        "operation_identity": {
+          "$ref": "#/$defs/sourceBinding"
+        },
+        "anchor_record": {
+          "$ref": "#/$defs/sourceBinding"
+        },
+        "evidence_class": {
+          "$ref": "#/$defs/sourceBinding"
+        },
+        "evidence_artifact": {
+          "$ref": "#/$defs/sourceBinding"
+        },
+        "evidence_review_class": {
+          "$ref": "#/$defs/sourceBinding"
+        },
+        "effect_status": {
+          "$ref": "#/$defs/sourceBinding"
+        },
+        "readback": {
+          "$ref": "#/$defs/sourceBinding"
+        },
+        "issued_at": {
+          "$ref": "#/$defs/sourceBinding"
+        }
+      }
+    }
+  },
+  "$defs": {
+    "ref": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "pattern": "^[A-Za-z0-9._:/-]+$"
+    },
+    "digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "counter": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "instant": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "Z$"
+    },
+    "claimRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ref",
+        "digest"
+      ],
+      "properties": {
+        "ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "digest": {
+          "$ref": "#/$defs/digest"
+        }
+      }
+    },
+    "optionalClaimRef": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "$ref": "#/$defs/claimRef"
+        }
+      ]
+    },
+    "sourceBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_ref",
+        "source_digest",
+        "value_digest"
+      ],
+      "properties": {
+        "source_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "source_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "value_digest": {
+          "$ref": "#/$defs/digest"
+        }
+      }
+    }
+  }
+}

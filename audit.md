@@ -3,7 +3,8 @@
 
 **Document Version:** 3.0.0
 **Date:** May 19, 2026
-**Last verified:** 2026-07-12
+**Last verified:** 2026-07-12 (historical full-document metadata; semantic reverification pending)
+**Gate status refreshed:** 2026-10-03 (bounded update)
 **Scope:** Architecture Evolution (v0.3.0 → v0.8.0) + Security Audit Remediation (68 Findings) + Academic Foundations
 **Status:** Hardened Pre-Testnet Candidate; deployment gates remain required
 **Classification:** Web 4.0 Planetary Infrastructure — Not a typical DeFi/Web3 application
@@ -582,18 +583,20 @@ contracts/src/
 ## 12. CI-Bound Items
 
 > [!NOTE]
-> The following require the CI/staging environment and are **mandatory deployment blockers** for testnet until they pass on the exact deployment commit:
+> The July 2026 local pass totals previously listed here are historical snapshots, not current-tree or exact-commit acceptance. The authoritative remediation plan, status, handoff, and evidence packages under docs/remediation/ control gate disposition. No deployment or activation is authorized by this table.
 
-| Item | Tool | Status |
-|------|------|:------:|
-| Full Solidity compilation | `forge build --sizes` | ✅ Local pass; current-commit CI evidence pending |
-| Solidity unit tests | `forge test` | ✅ Local post-change pass: 643/643 across 32 suites; exact-commit CI evidence pending |
-| Aiken validator compilation | `aiken check --deny --seed 20260711 --max-success 250` | ✅ Local pass: 33 unit + 7 properties, 1,783 checks, 0 errors or warnings; CI evidence pending |
-| Python unit/integration tests | `pytest -q --tb=short -p no:cacheprovider` | ✅ Local post-change pass: 569/569; exact-commit CI evidence pending |
-| Bandit and Python SCA | `bandit -ll -ii`; `pip-audit` | ✅ Configured Bandit gate passed with 0 high findings; Gateway and Neuron dependency graphs have no known vulnerabilities; CI evidence pending |
-| Semgrep security audit | `semgrep scan --config auto --error` | ✅ Zero findings across 393 owned files and 517 rules; CI evidence pending |
-| Slither re-scan | `slither . --exclude-low --exclude-informational --fail-high` | ✅ 169 contracts analyzed with 0 high findings; 18 residual medium results match the adjudication; independent CI review pending |
-| Canonical deployment ceremony rehearsal | `DeployTestnet.s.sol` | ⏳ Implemented; Safe-backed Amoy rehearsal and role evidence pending |
+| Mandatory gate | Latest bounded evidence | Disposition |
+| --- | --- | --- |
+| Solidity build, tests, Slither | July records reported local passes, including 643/643 Foundry tests, 0 high Slither findings, and 18 medium results. A separate later July report cited 693/693. Forge is absent from the current local PATH. | Current exact-source build, tests, scanner review, and CI acceptance pending. |
+| Aiken validators | Current pinned strict check: 1,865 checks, 0 errors, 7 warnings, exit 1; docs/remediation/m7_aiken_check_current_r1/WARNING_RUN.json. | FAIL; F04 authority, dependency identity, warning cleanup, transaction properties, and Pre-Prod evidence remain open. |
+| Root Python tests | Current pinned full run: 1,605 collected, 1,604 passed, 1 failed, 441 subtests passed; docs/remediation/m7_pytest_current_r2/RESULT.json. | FAIL on offline floating Aiken dependency provenance; rerun after exact identity repair. |
+| Bandit and Python dependency audit | Post-fix current Bandit scan: zero medium/high findings across 190 Python sources; docs/remediation/m7_effect_canary_redirect_r1/RUN.json. July pip-audit result has not been promoted to this tree. | Bandit bounded local PASS; dependency audit and exact-commit acceptance pending. |
+| Semgrep and Slither | The 393-file/517-rule Semgrep and 169-contract/18-medium Slither figures were July local snapshots. | Current exact-source scans, finding adjudication, and independent acceptance pending. |
+| Secrets and supply chain | Current-tree Gitleaks diagnostic: 578 redacted findings (99 first-party, 479 pinned vendor); historical TruffleHog 20 unverified findings remain unresolved. Signed SBOM/Cosign and reproducible provenance remain open. | FAIL/pending owner disposition and complete history/release evidence. |
+| Frontend | Captured lockfile passes local all/production npm audits with zero vulnerabilities; docs/remediation/m7_npm_remediation_r1/. No package install was performed for that change. | npm ci, lint, build, bundle scan, browser checks, and exact-commit CI pending. |
+| Deployment ceremony | Source scaffolding and validators exist, but approved authorities, role evidence, chain prerequisites, and rehearsal artifacts are incomplete. | Polygon Amoy/Cardano Pre-Prod deployment, Deposit, Slash activation, and ExecuteIntent remain disabled. |
+
+The 2026-07-12 Last verified date remains historical metadata. This bounded gate refresh does not verify the rest of this audit document or establish ledger admission, live-network behavior, or testnet readiness.
 
 ---
 
@@ -610,7 +613,7 @@ contracts/src/
 ║   High:       21/21 RESOLVED                                         ║
 ║   Medium:     31/31 RESOLVED                                         ║
 ║   Low/QA:     12/12 RESOLVED                                         ║
-║   Current tests: generated by commit-bound CI evidence               ║
+║   Current tests: Python/Aiken gates fail; Forge pending               ║
 ║   Current audit: 36-track testnet assurance program open             ║
 ║   Academic Refs: 30 arXiv/peer-reviewed papers mapped to subsystems  ║
 ║                                                                      ║

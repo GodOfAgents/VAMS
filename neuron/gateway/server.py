@@ -1,14 +1,22 @@
 from fastapi import FastAPI, HTTPException, Request, Depends, status
+from fastapi.responses import JSONResponse
 import logging
 from typing import Dict, List, Optional
 import time
 import uvicorn
 from contextlib import asynccontextmanager
 
-from gateway.models import (
+from neuron.runtime_safety import (
+    LiveModeSafetyError,
+    RuntimeConfigurationError,
+    RuntimePolicy,
+    load_runtime_policy,
+)
+
+from .models import (
     RegisterRequest, HeartbeatRequest, Task, TaskResult, GenericResponse, AgentStatus
 )
-from gateway.rate_limiter import RateLimiter
+from .rate_limiter import RateLimiter
 
 # Configure Logging
 logging.basicConfig(level=logging.INFO)
@@ -24,15 +32,66 @@ limiter = RateLimiter(default_limit=100, window_sec=60)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    logger.info("🚀 VAMS Gateway Server Starting...")
+    observed_policy = load_runtime_policy()
+    supplied_policy = getattr(app.state, "startup_policy", None)
+    if supplied_policy is not None and supplied_policy != observed_policy:
+        raise RuntimeConfigurationError(
+            "Conflicting runtime policy for legacy neuron gateway; supplied "
+            "startup policy does not match effective VAMS_ENV or mock flags"
+        )
+    policy = supplied_policy or observed_policy
+    if policy.is_live:
+        raise LiveModeSafetyError(
+            "Legacy neuron gateway is unavailable in live modes until M2 request "
+            "authentication and replay protection are implemented"
+        )
+    app.state.runtime_policy = policy
+    logger.info(
+        "VAMS legacy gateway starting (mode=%s, classification=%s, evidence=%s)",
+        policy.mode.value,
+        policy.runtime_classification,
+        policy.evidence_classification,
+    )
     yield
-    logger.info("🛑 VAMS Gateway Server Stopping...")
+    logger.info("VAMS legacy gateway stopping")
 
 app = FastAPI(title="VAMS Gateway", version="1.0.0", lifespan=lifespan)
+
+
+def _require_request_runtime_policy() -> RuntimePolicy:
+    """Keep the legacy app non-live even without ASGI lifespan or middleware.
+
+    Startup checks alone do not protect the exported ASGI app or embedded direct
+    handlers. Revalidate effective mode and both possible startup bindings before
+    observing request data, limiter accounting, agent/task state, or request logs.
+    """
+    observed_policy = load_runtime_policy()
+    for binding in ("startup_policy", "runtime_policy"):
+        supplied_policy = getattr(app.state, binding, None)
+        if supplied_policy is not None and supplied_policy != observed_policy:
+            raise RuntimeConfigurationError(
+                "Conflicting runtime policy for legacy neuron gateway; effective "
+                "VAMS_ENV or mock flags changed"
+            )
+    if observed_policy.is_live:
+        raise LiveModeSafetyError(
+            "Legacy neuron gateway is unavailable in live modes until M2 request "
+            "authentication and replay protection are implemented"
+        )
+    return observed_policy
+
 
 # Middleware for Rate Limiting
 @app.middleware("http")
 async def rate_limit_middleware(request: Request, call_next):
+    try:
+        _require_request_runtime_policy()
+    except LiveModeSafetyError:
+        # Fixed response: do not reflect configuration or exception text.
+        return JSONResponse(
+            status_code=503,
+            content={"detail": "Legacy neuron gateway runtime is unavailable."},
+        )
     client_ip = request.client.host
     if not limiter.is_allowed(client_ip):
         return await call_next(request) # For now, just log warning in limiter, don't block fully for easy testing
@@ -41,10 +100,19 @@ async def rate_limit_middleware(request: Request, call_next):
 
 @app.get("/")
 def home():
-    return {"status": "online", "system": "VAMS Gateway", "agents_active": len(AGENTS)}
+    policy = _require_request_runtime_policy()
+    return {
+        "status": "online",
+        "system": "VAMS Gateway",
+        "agents_active": len(AGENTS),
+        "mode": policy.mode.value,
+        "runtime_classification": policy.runtime_classification,
+        "evidence_classification": policy.evidence_classification,
+    }
 
 @app.post("/agents/register", response_model=GenericResponse)
 def register_agent(req: RegisterRequest):
+    _require_request_runtime_policy()
     if req.node_id in AGENTS:
         # Update existing
         AGENTS[req.node_id].update({
@@ -69,6 +137,7 @@ def register_agent(req: RegisterRequest):
 
 @app.post("/heartbeat", response_model=GenericResponse)
 def heartbeat(req: HeartbeatRequest):
+    _require_request_runtime_policy()
     # Verify signature (Stub)
     # In real impl: verify_signature(req.payload, req.signature, stored_public_key)
     
@@ -94,6 +163,7 @@ def heartbeat(req: HeartbeatRequest):
 
 @app.get("/tasks/pending")
 def get_pending_tasks(node_id: str):
+    _require_request_runtime_policy()
     if node_id not in PENDING_TASKS:
         return {"tasks": []}
         
@@ -103,6 +173,7 @@ def get_pending_tasks(node_id: str):
 
 @app.post("/tasks/{task_id}/result", response_model=GenericResponse)
 def submit_result(task_id: str, res: TaskResult):
+    _require_request_runtime_policy()
     if task_id not in TASKS:
         raise HTTPException(status_code=404, detail="Task not found")
         
@@ -118,7 +189,25 @@ def submit_result(task_id: str, res: TaskResult):
     
     return GenericResponse(success=True, message="Result accepted")
 
-def start_server(host="127.0.0.1", port=8000):
+def start_server(
+    host="127.0.0.1",
+    port=8000,
+    *,
+    policy: Optional[RuntimePolicy] = None,
+):
+    observed_policy = load_runtime_policy()
+    if policy is not None and policy != observed_policy:
+        raise RuntimeConfigurationError(
+            "Conflicting runtime policy for legacy neuron gateway; supplied "
+            "startup policy does not match effective VAMS_ENV or mock flags"
+        )
+    effective_policy = policy or observed_policy
+    if effective_policy.is_live:
+        raise LiveModeSafetyError(
+            "Legacy neuron gateway is unavailable in live modes until M2 request "
+            "authentication and replay protection are implemented"
+        )
+    app.state.startup_policy = effective_policy
     uvicorn.run(app, host=host, port=port)
 
 if __name__ == "__main__":

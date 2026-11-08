@@ -1,0 +1,71 @@
+{
+  "captures": {
+    "COORDINATOR.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "COORDINATOR.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "COORDINATOR.stdout": "a3307a8bb81eff7378f71c91f43f473d9bc8c58a220da13e5f5d30b2a2132b37"
+  },
+  "commands": [
+    {
+      "command": "sha256sum -c SHA256SUMS (cwd docs/remediation/m3_f05_2a_r4_tx_families/seed_reference_and_datum_binding)",
+      "exit": 0,
+      "result": "18 listed family files verified"
+    },
+    {
+      "command": "/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python -B docs/remediation/m3_f05_2a_r4_family_freeze_r1/capture_freeze.py",
+      "exit": 0,
+      "result": "freeze_family.py reran checksum validation, verified all case artifact hashes and PENDING/no-execution gates, and emitted coordinator freeze"
+    }
+  ],
+  "date": "2026-10-03",
+  "family": {
+    "cases": [
+      {
+        "id": "seed_missing",
+        "status": "PENDING"
+      },
+      {
+        "id": "seed_datum_hash",
+        "status": "PENDING"
+      },
+      {
+        "id": "seed_datum_index",
+        "status": "PENDING"
+      }
+    ],
+    "executions": 0,
+    "family_id": "seed_reference_and_datum_binding",
+    "fixture_file_count": 18,
+    "manifest_sha256": "28f19203e16ed23fba6b5d9fb8d49b634dc9bc5835f099ed157a5a434f0e33cb",
+    "path": "docs/remediation/m3_f05_2a_r4_tx_families/seed_reference_and_datum_binding",
+    "sha256sums_sha256": "9b35cb6a9dfb21a971e41a8420574cfbfcee39114b7364288b596f3343acf57b"
+  },
+  "freeze": {
+    "path": "docs/remediation/m3_f05_2a_r4_family_freeze_r1/FREEZE.json",
+    "sha256": "df7d882ad8aa26b59692c65457bf888204cfbfdc3586ce2619a99f1749115c6b",
+    "status": "coordinator_frozen_pending_independent_family_approval"
+  },
+  "independent_review": {
+    "limitation": "pre-simulation fixture approval only; no case admission or ledger/live evidence",
+    "result": "PASS",
+    "review_path": "docs/remediation/m3_f05_2a_r4_family_freeze_r1/REVIEW.md",
+    "review_sha256": "00dbca9cff95dc5e2fb7a3786c58e6e23f4eb083bda9e5fd201c493c6ac50139",
+    "reviewed_freeze_path": "docs/remediation/m3_f05_2a_r4_family_freeze_r1/FREEZE.json",
+    "reviewed_freeze_sha256": "df7d882ad8aa26b59692c65457bf888204cfbfdc3586ce2619a99f1749115c6b",
+    "reviewer": "f05_uplc_backend_review",
+    "scope": "all 18 hashes; three CBOR deltas/body hashes; six funding signatures and credential bindings; conservation; statuses and no-execution gate",
+    "simulator_invoked_by_reviewer": false
+  },
+  "ledger_credit": "none",
+  "schema_version": "f05-2a-r4-family-freeze-r1",
+  "scope": "hash freeze and static status validation only; no Aiken or simulator invocation",
+  "simulation_gate": "MET for this exact frozen package after this recorded review; case execution remains the next separate slice",
+  "sources": {
+    "capture_freeze.py": "92f985e3b94e3d7a6080e717d22aa8e15afb1904d54e56444dd051247ab1b390",
+    "freeze_family.py": "b8960eb91bda9bd87605cc252f39e69fcb1687c00e47a623fdee09fea9d4645e"
+  },
+  "status": "coordinator_freeze_pass_independent_family_review_pass",
+  "toolchain": {
+    "network": "no network access requested or used",
+    "python": "/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python"
+  }
+}

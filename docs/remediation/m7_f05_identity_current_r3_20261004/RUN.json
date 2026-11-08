@@ -1,0 +1,66 @@
+{
+  "schema_version": "m7-f05-2a-current-source-identity-summary-v1",
+  "date": "2026-10-04",
+  "external_result": {
+    "path": "/home/GodOfAgents/vams-evidence/m3-f05-2a-identity-current-r1-20261004/run/RESULT.json",
+    "sha256": "36959e745b1ba3088fffea40cb603e1922aabdb9f891602c699c9c4fe8e68634",
+    "raw_result_imported": false
+  },
+  "finding": "identity-only synthetic fixture proof PASS",
+  "policy_id": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+  "compiled_code_sha256": "fc8726cff89172d4944e257a2eb2659d35363c8e5a4d423ed8a2112eb5af7e59",
+  "blueprint_sha256": "c4230410d0caac45f2c71d36e45a539c78087697128ce1533306d17e96a48008",
+  "protected_inputs": {
+    "matched": 21,
+    "total": 21,
+    "mismatches": 0,
+    "scope": "current checkout before and after plus both disposable copies"
+  },
+  "child_commands": {
+    "succeeded": 8,
+    "total": 8
+  },
+  "outer_command": "bwrap --unshare-net --ro-bind / / --tmpfs /tmp --dev-bind /dev /dev --proc /proc --bind /home/GodOfAgents/vams-evidence/m3-f05-2a-identity-current-r1-20261004 /home/GodOfAgents/vams-evidence/m3-f05-2a-identity-current-r1-20261004 --chdir /home/GodOfAgents/code/VAMS-testnet --clearenv --setenv HOME /tmp --setenv TMPDIR /tmp --setenv PATH /home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin:/usr/bin:/bin --setenv LANG C.UTF-8 --setenv LC_ALL C.UTF-8 --setenv TZ UTC --setenv PYTHONDONTWRITEBYTECODE 1 --setenv PYTHONNOUSERSITE 1 /home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python -B /home/GodOfAgents/vams-evidence/m3-f05-2a-identity-gate-20261002-r1/identity_probe.py --evidence /home/GodOfAgents/vams-evidence/m3-f05-2a-identity-current-r1-20261004/run",
+  "execution_boundary": "network disabled; source checkout read-only; external evidence directory separately writable",
+  "outer_bwrap_exit": {
+    "value": 0,
+    "source": "verifier-reported; not separately embedded in external RESULT"
+  },
+  "tools": {
+    "probe_sha256": "168e42f9b26ff549690bbba8c8b8ddd28a3d4effe6db650f3360ed0fe87d4bdb",
+    "aiken": {
+      "version": "1.1.21",
+      "sha256": "07f3f927f1a8c71fc61273fdff850d9b98edb28dde207c8a32585991f2c88e79"
+    },
+    "python": {
+      "version": "3.12.14",
+      "sha256": "aa01d96348989f33ed998b42c83e98593b41dba83914d9899730b90c36f2e5c9"
+    },
+    "bwrap": {
+      "version": "0.11.1",
+      "sha256": "0abea81db798ebf6b4742ac0664802d97521547a353c2a0dbdc21d76cbbfd2c0"
+    }
+  },
+  "not_run": [
+    "simulator",
+    "tests",
+    "negative cases",
+    "mutations"
+  ],
+  "no_credit": [
+    "negative-case ledger admission",
+    "mutation ledger admission",
+    "Cardano Pre-Prod",
+    "live network"
+  ],
+  "ledger_state": {
+    "negative_cases": "45/55",
+    "mutations": "18/21"
+  },
+  "supersedes_for_narrow_claim": "docs/remediation/m7_f05_identity_current_r2/",
+  "readiness": "NOT READY",
+  "deployment_enabled": false,
+  "deposit_enabled": false,
+  "slash_activation_enabled": false,
+  "execute_intent_enabled": false
+}

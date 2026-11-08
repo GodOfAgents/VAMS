@@ -1,0 +1,74 @@
+{
+  "schema": "m7-f05-uplc-text-alias-v1",
+  "date": "2026-10-03",
+  "head": "829ab544571f12efe50ecb5740f129c8acb3e16f",
+  "scope": "Harness-only fail-closed Aiken UPLC text builtin alias normalization and positive-control diagnostic.",
+  "source_hashes": {
+    "scripts/remediation/test_f05_2a_authority_bootstrap_public.py": "1d183f0a85a43911c11b0cbb93ceb23b0aa71c725463cb10341f97b5b3f18e12",
+    "scripts/remediation/test_f05_2a_uplc_alias.py": "3bafa9f29c817e2a415eb3c9ccf82ffc78de93f4a35a9628ca76c1fc88ae6284",
+    "docs/CHANGELOG.md": "4b681d86164fe2cadb6f55ecc0801ea60b22c723c292f01662a2c712d4fc3baf",
+    "cardano/plutus.json": "c4230410d0caac45f2c71d36e45a539c78087697128ce1533306d17e96a48008",
+    "docs/remediation/m3_f05_2a/tx_sim_r1/applied-policy.cbor": "fc8726cff89172d4944e257a2eb2659d35363c8e5a4d423ed8a2112eb5af7e59",
+    "docs/remediation/m3_f05_2a_evidence_classification_r1/CASE-STATUS.json": "8a571af3c92957ced0dc4d1c17c03776ac6a774d19a8ac20fce10c0fff1e5cc2"
+  },
+  "unit_tests": {
+    "alias": 21,
+    "existing_diagnostic": 3,
+    "total_passed": 24,
+    "exit_code": 0
+  },
+  "roundtrip": "normalized decoded UPLC re-encoded to byte-identical original compiled script before evaluation; mismatch raises",
+  "harness": {
+    "command": [
+      "bwrap",
+      "--unshare-net",
+      "--ro-bind",
+      "/",
+      "/",
+      "--tmpfs",
+      "/tmp",
+      "--dev-bind",
+      "/dev",
+      "/dev",
+      "--proc",
+      "/proc",
+      "--bind",
+      "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m7_f05_uplc_alias_r1",
+      "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m7_f05_uplc_alias_r1",
+      "--chdir",
+      "/home/GodOfAgents/code/VAMS-testnet",
+      "/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python",
+      "-B",
+      "/home/GodOfAgents/code/VAMS-testnet/scripts/remediation/test_f05_2a_authority_bootstrap_public.py",
+      "--aiken",
+      "/home/GodOfAgents/vams-evidence/toolchains/aiken-1.1.21/unpacked/aiken-x86_64-unknown-linux-musl/aiken",
+      "--output",
+      "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m7_f05_uplc_alias_r1/HARNESS_RESULT2.json"
+    ],
+    "exit_code": 1,
+    "positive_alias_count": 5,
+    "positive_observed": {
+      "accepted": false,
+      "exit": 1,
+      "cpu": null,
+      "mem": null,
+      "context_cbor_bytes": 1755,
+      "verify_signature_alias_count": 5,
+      "diagnostic": " | the validator crashed / exited prematurely |  |  | Costs | ----- | cpu: 50525002 | memory: 147521"
+    },
+    "negative_cases_executed": 0,
+    "mutations_executed": 0,
+    "result_created": false,
+    "protected_file_count": 22,
+    "protected_unchanged": true
+  },
+  "docs": {
+    "validator_exit": 0,
+    "focused_unittest_passed": 2,
+    "focused_unittest_exit": 0
+  },
+  "initial_capture": "HARNESS.exit is an invalid one-byte shell capture; superseded by HARNESS2_CAPTURE.json and HARNESS2.exit.",
+  "evidence_kind": "local direct UPLC evaluator diagnostic, not synthetic tx simulator, ledger or live evidence",
+  "f05_ledger": "45/55 negatives PASS, 18/21 mutations PASS; no count change",
+  "readiness": "NOT READY"
+}

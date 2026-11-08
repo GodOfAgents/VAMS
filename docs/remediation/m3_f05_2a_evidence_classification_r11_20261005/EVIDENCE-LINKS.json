@@ -1,0 +1,25 @@
+{
+  "links": [
+    {
+      "path": "docs/remediation/m3_f05_2a_duplicate_mutation_suite_r1_20261005/RUN.json",
+      "sha256": "9d2bf760e6789a4943e6c23fa367d363b50bf53a7ba0a38f465ae747e1ba3921"
+    },
+    {
+      "path": "docs/remediation/m3_f05_2a_duplicate_mutation_suite_r1_20261005/SHA256SUMS",
+      "sha256": "2ae66b1675fdd1aee6230646d83e6fd0d6fe40dbe0f6fe3dec9511f9d93b2347"
+    },
+    {
+      "path": "docs/remediation/m3_f05_2a_duplicate_mutation_suite_r1_20261005/SCRIPT.SHA256SUMS",
+      "sha256": "fb786814d1df9006a147520bdc5445a36b0016943717be8c5844bf19937b0e20"
+    },
+    {
+      "path": "docs/remediation/m3_f05_2a_duplicate_mutation_suite_review_r1_20261005/INDEPENDENT-REVIEW.md",
+      "sha256": "d36779cf38cf5979b9f0a3c3bdfd2d53b36b7ca7df2cfd15e6dcdf9abc3d0722"
+    },
+    {
+      "path": "docs/remediation/m3_f05_2a_duplicate_mutation_suite_review_r1_20261005/SHA256SUMS",
+      "sha256": "b524894775208c3168f8039f17ff29c5fbdee7685c9c1127fa3f1cc2c4c28dec"
+    }
+  ],
+  "schema_version": "f05-2a-evidence-links-r11"
+}

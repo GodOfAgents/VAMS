@@ -1,0 +1,56 @@
+{
+  "conservation": {
+    "fee_lovelace": 1000001,
+    "input_lovelace": 17000000,
+    "lovelace_conserved": true,
+    "minted_assets": {
+      "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731.56414d532d4630352d415554482d5633": 1
+    },
+    "minted_output_assets_match": true,
+    "output_assets": {
+      "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731.56414d532d4630352d415554482d5633": 1
+    },
+    "output_lovelace": 15999999
+  },
+  "delta": "authority output lovelace -1; fee +1; sponsor/change output, assets, inputs, datum, mint unchanged",
+  "expected_result": "reject at compiled target Mint[0]",
+  "family_id": "authority_lovelace",
+  "files": {
+    "raw_inputs": {
+      "path": "cases/fee_diversion/raw_inputs.cbor",
+      "sha256": "4b20e2b2cf4bd58b1f6e385c90ffd098d583df69d95fbc7b1fcc2591da72b9fe",
+      "size_bytes": 73
+    },
+    "raw_outputs": {
+      "path": "cases/fee_diversion/raw_outputs.cbor",
+      "sha256": "a0de9f558d6b5c6ade9ba8c5cd44bb7f0f0c752dc252e31648d7ccafa5224608",
+      "size_bytes": 79
+    },
+    "transaction": {
+      "path": "cases/fee_diversion/transaction.cbor",
+      "sha256": "bca34837bf358ae95c3682f0fc9e63aeff5a27f514dfdfba5fb13df71fcd1596",
+      "size_bytes": 5099
+    }
+  },
+  "funding_witnesses": {
+    "count": 2,
+    "private_material_persisted": false,
+    "verified_against_serialized_body": true
+  },
+  "id": "fee_diversion",
+  "original_registry_assertion": {
+    "path": "expected.every_negative_case",
+    "value": "reject"
+  },
+  "registry_assertion": "assets.lovelace_of(authority_output.value) == authority_initial_lovelace",
+  "schema_version": "f05-2a-r4-family-case-v1",
+  "script_invoked": false,
+  "simulator_result": "not run pending independent family review and coordinator freeze",
+  "status": "PENDING",
+  "target": {
+    "applied_script_hash": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+    "policy_id": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+    "purpose": "Mint[0]"
+  },
+  "transaction_body_hash_blake2b_256": "32ba724fe40b52fee750bae5068e0633ad9023af5189d070d958e66926143eca"
+}

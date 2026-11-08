@@ -1,0 +1,38 @@
+{
+  "audit_program_sha256": "9fd7e0ebfcf6caa6916524f98d4f926989b8906effdc071e992dd2493a595245",
+  "audit_track_matrix_sha256": "75dd1c14c2852ad964d4b70d9905980dcbf7b98f27e10d3cfa11668b085f1784",
+  "commands": [
+    {
+      "argv": [
+        "/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python",
+        "-B",
+        "scripts/audit/audit_program.py",
+        "validate"
+      ],
+      "exit": 0,
+      "id": "validate",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "ec646901f1967623f69f308999916c3e9c3ec8059564ac6f4e1b9f6f91218ae3"
+    },
+    {
+      "argv": [
+        "/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python",
+        "-B",
+        "scripts/audit/audit_program.py",
+        "readiness",
+        "--stage",
+        "canary"
+      ],
+      "exit": 1,
+      "id": "readiness_canary",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "688dbe5199f4b3c172841a596d1241c56b741f565fbe6eb5f33abc5453459179"
+    }
+  ],
+  "date": "2026-10-03",
+  "git_status_entry_count": 127,
+  "git_status_exit": 0,
+  "git_status_sha256": "e182d97980f75e4895b157f8c99213cd57b7a4c24ddac4aeeb0d6758d3dca0a2",
+  "python": "/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python",
+  "schema_version": "m7-readiness-reassessment-r2"
+}

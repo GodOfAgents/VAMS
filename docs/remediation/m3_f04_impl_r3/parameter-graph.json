@@ -1,0 +1,9 @@
+{
+  "status": "PASS_STATIC_PARTIAL",
+  "multipurpose_validator": "agent_registry(bootstrap_ref)",
+  "mint_handler": "agent_registry.agent_registry.mint",
+  "spend_handler": "agent_registry.agent_registry.spend",
+  "identity_policy_binding": "mint policy id is the validator script context; spend datum policy id must equal the own script hash",
+  "legacy_agent_nft": "agent_nft(bootstrap_ref) fail-closed; no alternate mint/burn path",
+  "compiled_public_rows": {"executed": 0, "pending": 49}
+}

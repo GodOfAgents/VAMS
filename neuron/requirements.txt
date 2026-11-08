@@ -1,7 +1,8 @@
 # VAMS Neuron Dependencies
 # Install with: pip install -r requirements.txt
 
-requests>=2.31.0      # HTTP client for Celestia/Arweave RPC
+requests>=2.33.0      # Avoid confirmed Requests advisories; compatible with urllib3<3
+urllib3>=2.8.0,<3     # Fixed requests transport dependency
 colorama>=0.4.6       # Terminal colors (cross-platform)
 web3>=6.0.0           # Ethereum interaction (Polygon CDK, x402)
 python-dotenv>=1.0.0

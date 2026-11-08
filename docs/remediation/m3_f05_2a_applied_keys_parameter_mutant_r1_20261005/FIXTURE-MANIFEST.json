@@ -1,0 +1,97 @@
+{
+  "artifacts": {
+    "MUTANT-SOURCE.patch": {
+      "bytes": 395,
+      "sha256": "51f7d679c7a39daa0dbf50b39e3e64db14c0d0324122b65a9cf775af25b3a624"
+    },
+    "R5-exact-negative-redeemer.cbor": {
+      "bytes": 350,
+      "sha256": "9394f5a909834a588d03b7298f3f258633f81565419c4e2d1e63733a7d713a61"
+    },
+    "one-guard-mutant-control.applied-policy.cbor": {
+      "bytes": 3455,
+      "sha256": "bfcbc1361e57d2a8869848737c00b8f4d4af405ec734faa1a4ee4904413c5c42"
+    },
+    "one-guard-mutant-control.raw_inputs.cbor": {
+      "bytes": 73,
+      "sha256": "4b20e2b2cf4bd58b1f6e385c90ffd098d583df69d95fbc7b1fcc2591da72b9fe"
+    },
+    "one-guard-mutant-control.raw_outputs.cbor": {
+      "bytes": 79,
+      "sha256": "37d8e797caf2b6daa8fdd3e436e426f7995777b7ec11c835985bc86d3fdefad9"
+    },
+    "one-guard-mutant-control.tx.cbor": {
+      "bytes": 5092,
+      "sha256": "ea258404d05a61f4d325f09e699c14bd205577757268590d1f879a131246557b"
+    }
+  },
+  "assertion": {
+    "id": "applied_keys_parameter",
+    "mutation": "compile_with_different_sorted_keys_keep_datum"
+  },
+  "case_id": "applied_keys_parameter",
+  "credit": {
+    "case": false,
+    "ledger_admission": false,
+    "live_network": false,
+    "mutation": false,
+    "original_policy": false
+  },
+  "entrypoint": "f05_authority_policy.f05_authority_policy.mint / Mint[0]",
+  "exact_r5_binding": {
+    "genesis_ref_sha256": "5e0115ddb460b0c9eab9bba6499740f9e32cbf5e41fa02eb7f0a99d91473f086",
+    "initial_keys_sha256": "eff6e11b5799dd63b02706204283cb77fe170dd08d07bfd4df5aca29ea001d3a",
+    "manifest": "docs/remediation/m3_f05_2a_applied_parameter_family_r5_20261005/applied_keys_parameter/FIXTURE-MANIFEST.json",
+    "manifest_sha256": "c9cfa8d645dcb99fa20fa9933b88190b02027f724fba3c67d081efd0c06dac24",
+    "negative_tx_sha256": "f57020cb1d5ac3a7eebf8885472c62e6c0c1c4f8f2c9f85f890beac25194413f",
+    "raw_inputs_sha256": "4b20e2b2cf4bd58b1f6e385c90ffd098d583df69d95fbc7b1fcc2591da72b9fe",
+    "raw_outputs_sha256": "c36f6ae6016bdf289d87758b37b6feab4daf13be58deadff57fdae12bf562645"
+  },
+  "mutant": {
+    "PoP_signatures_preserved_from_R5": true,
+    "R5_negative_redeemer_sha256": "9394f5a909834a588d03b7298f3f258633f81565419c4e2d1e63733a7d713a61",
+    "mutation": "remove_key_binding_guard",
+    "policy_id": "5fe25c314f2f1bea85b8bc03e078d0c98ac549d62e630382f488cf16",
+    "program_sha256": "bfcbc1361e57d2a8869848737c00b8f4d4af405ec734faa1a4ee4904413c5c42",
+    "status": "not executed",
+    "transaction_sha256": "ea258404d05a61f4d325f09e699c14bd205577757268590d1f879a131246557b",
+    "validation": {
+      "ada_conservation": true,
+      "body_hash": "ba732b0249ffda51d3d00477d30ef151caa166acb24bd771645eb8a1d4620b76",
+      "funding_signatures": 2,
+      "native_asset_conservation": true,
+      "private_keys_persisted": false,
+      "valid_body_bound_ephemeral_signatures": true
+    }
+  },
+  "normal_policy_recompile": {
+    "code_sha256": "76a66d88ecd09ccf78d32835dfaa976e6d0aab1aade7f550dd254c9a26806e39",
+    "exact_R5_code_and_ID_match": true,
+    "policy_id": "efec0d79e496e2df81f8e3e27734c9718655dc577070c7519645fa29"
+  },
+  "original_case_id_preserved": true,
+  "schema_version": "f05-2a-applied-keys-parameter-mutant-candidate-r1",
+  "scope": "synthetic alternate applied policy only; no original-policy, ledger-admission, or live-network credit",
+  "source_mutation": {
+    "changed_lines": [
+      "-    && state.ordered_keys == initial_keys",
+      "+    && True"
+    ],
+    "mutant_source_sha256": "940d1ef0e823ec28aa4669ea3d7c99fea62c2838079f7e3965ba58009fc646fa",
+    "name": "remove_key_binding_guard",
+    "original_source_sha256": "657f30dfc0ecb40f50b2c0442b78f4818de1644f540fb68d76cfb2de72cccdd3",
+    "patch_sha256": "51f7d679c7a39daa0dbf50b39e3e64db14c0d0324122b65a9cf775af25b3a624",
+    "predicate": "state.ordered_keys == initial_keys",
+    "replacement": "True",
+    "source_path": "cardano/lib/vams/f05_authority.ak"
+  },
+  "status": "candidate-awaiting-independent-byte-review; tx-sim-not-run; case-and-mutation-PENDING",
+  "toolchain": {
+    "aiken": "aiken v1.1.21+42babe5",
+    "aiken_sha256": "07f3f927f1a8c71fc61273fdff850d9b98edb28dde207c8a32585991f2c88e79",
+    "mutant_recompiled": true,
+    "normal_policy_recompiled": true,
+    "python": "3.12.14",
+    "simulation": "not run"
+  }
+}

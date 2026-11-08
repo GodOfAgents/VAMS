@@ -64,6 +64,9 @@ interface IRewardDistributor {
     error NoRewardsToClaim(address provider);
     error EpochAlreadyFinalized(uint256 epochId);
     error InvalidRewardData();
+    error FundingMismatch(uint256 expected, uint256 received);
+    error InsufficientBacking(uint256 balance, uint256 liabilities);
+    error InsufficientSurplus(uint256 requested, uint256 available);
 
     // ═══════════════════ Functions ═══════════════════
 
@@ -103,4 +106,7 @@ interface IRewardDistributor {
 
     /// @notice Get current epoch ID
     function currentEpoch() external view returns (uint256);
+
+    /// @notice Total credited rewards that have not yet been claimed.
+    function pendingLiabilities() external view returns (uint256);
 }

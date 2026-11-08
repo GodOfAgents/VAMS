@@ -1,0 +1,29 @@
+{
+  "outcome": "PASS",
+  "proof_signatures_verified": 15,
+  "body_bound_funding_verified": 6,
+  "results": {
+    "positive-control": {
+      "tx_sha256": "28818f0e4fa862fff96dfc935d0479fc81e623cdd84930b60138fd74a7829f68",
+      "policy_id": "704a7ed54317bfa9c9879a9be02d8ae8859e999ce1a04298697d69ad",
+      "body_hash": "ac303e367f9f7d0b91d88a71d28000beaa63bff5da7f3ef04b84ed1d25d3fa74",
+      "proofs": 5,
+      "funding": 2
+    },
+    "reviewed-negative": {
+      "tx_sha256": "38bbf76af57957881095dc42a0004ab1caa8a4a43065228066dbd7407eaa37f3",
+      "policy_id": "704a7ed54317bfa9c9879a9be02d8ae8859e999ce1a04298697d69ad",
+      "body_hash": "ac303e367f9f7d0b91d88a71d28000beaa63bff5da7f3ef04b84ed1d25d3fa74",
+      "proofs": 5,
+      "funding": 2
+    },
+    "mutant": {
+      "tx_sha256": "f7a0939c83c3e1f64e7d0954af5eebce5346382e5e60d09e37700c9249d84549",
+      "policy_id": "6f2cfb8a849311c6e6076b466daafe77ae5a95de9b50c62caecfafa4",
+      "body_hash": "1572dca3f4a05e6b74c039aa4e02fc381c164b3842c681e3c1be16fd9ddfe51d",
+      "proofs": 5,
+      "funding": 2
+    }
+  },
+  "package_checksums_sha256": "260b79f564d3a5d4c2552dccc39277c7f54b7eb58687f53c178bcdf2fd564d45"
+}

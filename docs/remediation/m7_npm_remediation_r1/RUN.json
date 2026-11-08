@@ -1,0 +1,95 @@
+{
+  "evidence_id": "m7_npm_remediation_r1",
+  "recorded_at_utc": "2026-10-03T04:57:00Z",
+  "checkout": {
+    "head": "829ab544571f12efe50ecb5740f129c8acb3e16f",
+    "dirty_tree": true
+  },
+  "change": {
+    "files": [
+      "frontend-vite/package.json",
+      "frontend-vite/package-lock.json",
+      "docs/CHANGELOG.md"
+    ],
+    "before": {
+      "package_json_sha256": "cdef18b00971b3592e588e80a47e78ca7d0e54c34b4d79efbea28c2d47cb4e8a",
+      "package_lock_sha256": "2be053cb5380b3c50c0cbe0b30638d204bbde1296c1594e5e67baa804570d2e1"
+    },
+    "after": {
+      "package_json_sha256": "12964d07140ccd21a3f922b9d73dc5fd1fda989c4ad34538be5b589e4d2321b8",
+      "package_lock_sha256": "fe11da7626e71ae4d7bb1a25da8ccf156abc621b67d30c0701204e75164acee8",
+      "changelog_sha256": "e1ff5cb21a67bed1ee3a49b2450c229a1c9fc726ffb819b6d4b937f747b8f39f"
+    },
+    "exact_overrides": {
+      "@humanfs/node": "0.16.8",
+      "baseline-browser-mapping": "2.11.0",
+      "brace-expansion": "1.1.21",
+      "browserslist": "4.28.7",
+      "js-yaml": "4.3.2"
+    },
+    "lock_update_command": "npm update --package-lock-only --ignore-scripts --no-audit --no-fund @humanfs/node baseline-browser-mapping brace-expansion browserslist js-yaml",
+    "lock_update_exit_code": 0,
+    "node_modules_present": false
+  },
+  "workflow": {
+    "path": ".github/workflows/security-gates.yml",
+    "sha256": "baf53503673b70c5185f654f8f694f1feaf98af68ee56e29c83c01ee0cf0593c",
+    "node_version": "22",
+    "frontend_steps": [
+      "npm ci",
+      "npm test",
+      "npm audit --audit-level=high",
+      "npm audit --omit=dev --audit-level=high",
+      "npm run lint",
+      "npm run build",
+      "npm run scan:bundle"
+    ]
+  },
+  "tool": {
+    "node": "v22.23.2",
+    "npm": "10.9.8",
+    "node_sha256": "3517c2df0b2f8cd7f422b4b8450ef81c6889f08eb03e281d6de9079b15e6a327",
+    "npm_sha256": "8e5f6f3429f8cdbe693cdc29904e9d5a7b127a494bd15c804bd54c7403bfcbe7"
+  },
+  "verification": {
+    "frontend_tests": {
+      "command": "npm test",
+      "exit_code": 0,
+      "passed": 4,
+      "failed": 0
+    },
+    "all_dependencies_audit": {
+      "command": "npm audit --package-lock-only --json --audit-level=high --ignore-scripts",
+      "exit_code": 0,
+      "parsed": true,
+      "dependency_count": 257,
+      "vulnerability_count": 0,
+      "raw_output_retained": false
+    },
+    "production_audit": {
+      "command": "npm audit --package-lock-only --json --audit-level=high --ignore-scripts --omit=dev",
+      "exit_code": 0,
+      "parsed": true,
+      "dependency_count": 257,
+      "vulnerability_count": 0,
+      "raw_output_retained": false
+    },
+    "sanitized_result": "RESULT.json",
+    "sanitized_result_sha256": "ef8ab2dc20ca20349f18405427ffecd9f7f72c4670ea4b110c373ebc7768f391",
+    "wrapper": "run_npm_audit.py",
+    "wrapper_sha256": "4895bdf0740438cea691423226650c7531c42469dae0ff0bd205f27ac780f166",
+    "unavailable_or_pending": [
+      "npm ci (not authorized; would install dependencies)",
+      "npm run lint (dependencies absent)",
+      "npm run build (dependencies absent)",
+      "npm run scan:bundle (requires production build)"
+    ]
+  },
+  "scope": "Only the transitive frontend dependency security finding was remediated. No credentials, provider/vendor code, app behavior, or chain behavior changed. Independent review PASS; see REVIEW.md.",
+  "review_note": "Initial independent review returned FAIL for a changelog sentence that still described completed audits as pending. The sentence and bound changelog hash were corrected before final review.",
+  "review": {
+    "status": "PASS",
+    "path": "REVIEW.md",
+    "initial_review_issue": "A changelog status sentence was corrected before final PASS."
+  }
+}

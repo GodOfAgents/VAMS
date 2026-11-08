@@ -1,0 +1,27 @@
+{
+  "aiken_sha256": "07f3f927f1a8c71fc61273fdff850d9b98edb28dde207c8a32585991f2c88e79",
+  "baseline_source_sha256": "d6d7c7b6f4da7256218e48cb280a6ee05b07a19aba86e3b4f764f66aaa91380e",
+  "builds": [
+    {
+      "blueprint_sha256": "c4230410d0caac45f2c71d36e45a539c78087697128ce1533306d17e96a48008",
+      "exit_code": 0,
+      "label": "baseline",
+      "source_sha256": "d6d7c7b6f4da7256218e48cb280a6ee05b07a19aba86e3b4f764f66aaa91380e",
+      "stderr_sha256": "2b5b63047ff49a97b5aad735ad50ff380d53fd7145025b7debca07cf49b7f8ec",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "blueprint_sha256": "c4230410d0caac45f2c71d36e45a539c78087697128ce1533306d17e96a48008",
+      "exit_code": 0,
+      "label": "candidate",
+      "source_sha256": "b288f800f70d5aae566a745a5853067a173dd5cc8ad3225e7ea8d4bb89d29e55",
+      "stderr_sha256": "8eec011d720d5cb333df6a512f0aa830b7bcbd74e59d6628e9afd2bb04c7c56e",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "candidate_source_sha256": "b288f800f70d5aae566a745a5853067a173dd5cc8ad3225e7ea8d4bb89d29e55",
+  "generated_plutus_json_equal": true,
+  "network": "disabled with bubblewrap --unshare-net",
+  "schema": "m7-governance-warning-build-comparison-v1",
+  "toolchain": "aiken v1.1.21+42babe5"
+}

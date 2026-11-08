@@ -1,0 +1,241 @@
+Script started on 2026-10-02 20:52:13+00:00 [COMMAND="/usr/bin/bwrap --unshare-net --ro-bind / / --bind /tmp/vams-governor-warnings-2g_1es10/cardano /tmp/vams-governor-warnings-2g_1es10/cardano --chdir /tmp/vams-governor-warnings-2g_1es10/cardano --dev /dev --proc /proc -- /home/GodOfAgents/vams-evidence/toolchains/aiken-1.1.21/unpacked/aiken-x86_64-unknown-linux-musl/aiken check --deny --skip-tests" <not executed on terminal>]
+[35m[1m    Compiling[0m[39m [1mGodOfAgents/vams-cardano[0m 0.1.0 ([94m.[39m)
+[35m[1m    Resolving[0m[39m [1mGodOfAgents/vams-cardano[0m
+[33m[1m        Using[0m[39m [33muncertain local version for aiken-lang/stdlib[39m
+        ↳ You're seeing this message because the package version is unpinned and the network is not accessible.
+[33m[1m        Using[0m[39m [33muncertain local version for aiken-lang/fuzz[39m
+        ↳ You're seeing this message because the package version is unpinned and the network is not accessible.
+[35m[1m      Fetched[0m[39m [1m2 packages in 10.06s[0m from cache
+[35m[1m    Compiling[0m[39m [1maiken-lang/stdlib[0m v2 ([94m./build/packages/aiken-lang-stdlib[39m)
+[35m[1m    Compiling[0m[39m [1maiken-lang/fuzz[0m v2 ([94m./build/packages/aiken-lang-fuzz[39m)
+
+  [33m⚠[0m [33mI came across an unused variable: [39mbootstrap_ref[39m[39m
+    ╭─[[36;1;4m./validators/agent_nft.ak:21:21[0m]
+ [2m20[0m │ 
+ [2m21[0m │ validator agent_nft(bootstrap_ref: OutputReference) {
+    · [35;1m                    ───────────────┬──────────────[0m
+    ·                                    [35;1m╰── [35;1munused identifier[0m[0m
+ [2m22[0m │   mint(_redeemer: AgentNftRedeemer, _policy_id: PolicyId, _tx: Transaction) { False }
+    ╰────
+[36m  help: [0mNo big deal, but you might want to remove it or use a discard
+        [33m_bootstrap_ref[39m to get rid of that warning.
+        
+        You should also know that, unlike in typical imperative languages,
+        unused let-bindings are [1mfully_ignored[0m in Aiken.
+        They will not produce any side-effect (such as error calls). Programs
+        with or without unused variables are semantically equivalent.
+        
+        If you do want to enforce some side-effects, use [33mexpect[39m with a discard
+        [33m_bootstrap_ref[39m instead of [33mlet[39m.
+        
+
+
+  [33m⚠[0m [33mI discovered an unused imported value: [39mMintIdentity[39m[39m
+    ╭─[[36;1;4m./validators/agent_nft.ak:13:49[0m]
+ [2m12[0m │ use cardano/transaction.{OutputReference, Transaction}
+ [2m13[0m │ use vams/types.{AgentNftRedeemer, BurnIdentity, MintIdentity}
+    · [35;1m                                                ──────┬─────[0m
+    ·                                                       [35;1m╰── [35;1munused import[0m[0m
+ [2m14[0m │ 
+    ╰────
+[36m  help: [0mNo big deal, but you might want to remove it to get rid of that
+        warning.
+
+
+  [33m⚠[0m [33mI discovered an unused imported value: [39mBurnIdentity[39m[39m
+    ╭─[[36;1;4m./validators/agent_nft.ak:13:35[0m]
+ [2m12[0m │ use cardano/transaction.{OutputReference, Transaction}
+ [2m13[0m │ use vams/types.{AgentNftRedeemer, BurnIdentity, MintIdentity}
+    · [35;1m                                  ──────┬─────[0m
+    ·                                         [35;1m╰── [35;1munused import[0m[0m
+ [2m14[0m │ 
+    ╰────
+[36m  help: [0mNo big deal, but you might want to remove it to get rid of that
+        warning.
+
+
+  [33m⚠[0m [33mI found an unused private function: [39mvalid_did[39m[39m
+    ╭─[[36;1;4m./validators/agent_nft.ak:54:1[0m]
+ [2m53[0m │ 
+ [2m54[0m │ fn valid_did(did: ByteArray) -> Bool {
+    · [35;1m──────────────────┬─────────────────[0m
+    ·                   [35;1m╰── [35;1munused (private) function[0m[0m
+ [2m55[0m │   bytearray.length(did) >= min_did_length && bytearray.length(did) <= max_did_length
+    ╰────
+[36m  help: [0mPerhaps your forgot to make it public using the [94mpub[39m keyword?
+        Otherwise, you might want to get rid of it altogether.
+
+
+  [33m⚠[0m [33mI discovered an unused imported value: [39mtokens[39m[39m
+    ╭─[[36;1;4m./validators/agent_nft.ak:11:31[0m]
+ [2m10[0m │ use aiken/primitive/bytearray
+ [2m11[0m │ use cardano/assets.{PolicyId, tokens}
+    · [35;1m                              ───┬──[0m
+    ·                                  [35;1m╰── [35;1munused import[0m[0m
+ [2m12[0m │ use cardano/transaction.{OutputReference, Transaction}
+    ╰────
+[36m  help: [0mNo big deal, but you might want to remove it to get rid of that
+        warning.
+
+
+  [33m⚠[0m [33mI discovered an unused imported module: [39mlist[39m[39m
+   ╭─[[36;1;4m./validators/agent_nft.ak:8:1[0m]
+ [2m7[0m │ use aiken/collection/dict
+ [2m8[0m │ use aiken/collection/list
+   · [35;1m────────────┬────────────[0m
+   ·             [35;1m╰── [35;1munused module[0m[0m
+ [2m9[0m │ use aiken/crypto.{blake2b_256}
+   ╰────
+[36m  help: [0mNo big deal, but you might want to remove it to get rid of that
+        warning.
+
+
+  [33m⚠[0m [33mI discovered an unused imported module: [39mdict[39m[39m
+   ╭─[[36;1;4m./validators/agent_nft.ak:7:1[0m]
+ [2m6[0m │ 
+ [2m7[0m │ use aiken/collection/dict
+   · [35;1m────────────┬────────────[0m
+   ·             [35;1m╰── [35;1munused module[0m[0m
+ [2m8[0m │ use aiken/collection/list
+   ╰────
+[36m  help: [0mNo big deal, but you might want to remove it to get rid of that
+        warning.
+
+
+  [33m⚠[0m [33mI came across an unused variable: [39moutput[39m[39m
+     ╭─[[36;1;4m./validators/governance_policies.ak:246:33[0m]
+ [2m245[0m │ fn find_proposal(tx: Transaction) -> Option<ProposalDatumV1> {
+ [2m246[0m │   when list.find(tx.outputs, fn(output) { True }) is {
+     · [35;1m                                ───┬──[0m
+     ·                                    [35;1m╰── [35;1munused identifier[0m[0m
+ [2m247[0m │     Some(output) ->
+     ╰────
+[36m  help: [0mNo big deal, but you might want to remove it or use a discard [33m_output[39m
+        to get rid of that warning.
+        
+        You should also know that, unlike in typical imperative languages,
+        unused let-bindings are [1mfully_ignored[0m in Aiken.
+        They will not produce any side-effect (such as error calls). Programs
+        with or without unused variables are semantically equivalent.
+        
+        If you do want to enforce some side-effects, use [33mexpect[39m with a discard
+        [33m_output[39m instead of [33mlet[39m.
+        
+
+
+  [33m⚠[0m [33mI came across an unused variable: [39moutput[39m[39m
+     ╭─[[36;1;4m./validators/governance_policies.ak:260:33[0m]
+ [2m259[0m │ fn find_intent(tx: Transaction) -> Option<IntentDatumV1> {
+ [2m260[0m │   when list.find(tx.outputs, fn(output) { True }) is {
+     · [35;1m                                ───┬──[0m
+     ·                                    [35;1m╰── [35;1munused identifier[0m[0m
+ [2m261[0m │     Some(output) ->
+     ╰────
+[36m  help: [0mNo big deal, but you might want to remove it or use a discard [33m_output[39m
+        to get rid of that warning.
+        
+        You should also know that, unlike in typical imperative languages,
+        unused let-bindings are [1mfully_ignored[0m in Aiken.
+        They will not produce any side-effect (such as error calls). Programs
+        with or without unused variables are semantically equivalent.
+        
+        If you do want to enforce some side-effects, use [33mexpect[39m with a discard
+        [33m_output[39m instead of [33mlet[39m.
+        
+
+
+  [33m⚠[0m [33mI found an unused private function: [39mfind_intent_or_false[39m[39m
+     ╭─[[36;1;4m./validators/governance_policies.ak:281:1[0m]
+ [2m280[0m │ 
+ [2m281[0m │ fn find_intent_or_false(tx: Transaction) -> Bool {
+     · [35;1m────────────────────────┬───────────────────────[0m
+     ·                         [35;1m╰── [35;1munused (private) function[0m[0m
+ [2m282[0m │   find_intent(tx) != None
+     ╰────
+[36m  help: [0mPerhaps your forgot to make it public using the [94mpub[39m keyword?
+        Otherwise, you might want to get rid of it altogether.
+
+
+  [33m⚠[0m [33mI discovered an unused imported value: [39munique_bytes[39m[39m
+    ╭─[[36;1;4m./validators/governance_policies.ak:9:63[0m]
+ [2m 8[0m │   authority_asset_name, bounded_tx, config_valid, finite_interval,
+ [2m 9[0m │   intent_asset_name, proposal_asset_name, receipt_asset_name, unique_bytes,
+    · [35;1m                                                              ──────┬─────[0m
+    ·                                                                     [35;1m╰── [35;1munused import[0m[0m
+ [2m10[0m │   valid_domain, valid_hash, valid_lock, valid_vkh,
+    ╰────
+[36m  help: [0mNo big deal, but you might want to remove it to get rid of that
+        warning.
+
+
+  [33m⚠[0m [33mI discovered an unused imported value: [39mvalid_lock[39m[39m
+    ╭─[[36;1;4m./validators/governance_policies.ak:10:29[0m]
+ [2m 9[0m │   intent_asset_name, proposal_asset_name, receipt_asset_name, unique_bytes,
+ [2m10[0m │   valid_domain, valid_hash, valid_lock, valid_vkh,
+    · [35;1m                            ─────┬────[0m
+    ·                                  [35;1m╰── [35;1munused import[0m[0m
+ [2m11[0m │ }
+    ╰────
+[36m  help: [0mNo big deal, but you might want to remove it to get rid of that
+        warning.
+
+
+  [33m⚠[0m [33mI discovered an unused imported value: [39mTimelockRedeemer[39m[39m
+    ╭─[[36;1;4m./validators/governance_policies.ak:15:27[0m]
+ [2m14[0m │   Genesis, GovernanceConfigV1, GovernorRedeemer, IntentDatumV1, ProposalDatumV1,
+ [2m15[0m │   ProposalPending, Queue, TimelockRedeemer, Vote, VoteLockRecordV1,
+    · [35;1m                          ────────┬───────[0m
+    ·                                   [35;1m╰── [35;1munused import[0m[0m
+ [2m16[0m │ }
+    ╰────
+[36m  help: [0mNo big deal, but you might want to remove it to get rid of that
+        warning.
+
+
+  [33m⚠[0m [33mI came across an unused variable: [39minput[39m[39m
+    ╭─[[36;1;4m./validators/timelock.ak:66:32[0m]
+ [2m65[0m │ fn find_authority_config(tx: Transaction) -> Option<GovernanceConfigV1> {
+ [2m66[0m │   when list.find(tx.inputs, fn(input) { True }) is {
+    · [35;1m                               ──┬──[0m
+    ·                                  [35;1m╰── [35;1munused identifier[0m[0m
+ [2m67[0m │     Some(input) ->
+    ╰────
+[36m  help: [0mNo big deal, but you might want to remove it or use a discard [33m_input[39m
+        to get rid of that warning.
+        
+        You should also know that, unlike in typical imperative languages,
+        unused let-bindings are [1mfully_ignored[0m in Aiken.
+        They will not produce any side-effect (such as error calls). Programs
+        with or without unused variables are semantically equivalent.
+        
+        If you do want to enforce some side-effects, use [33mexpect[39m with a discard
+        [33m_input[39m instead of [33mlet[39m.
+        
+
+
+  [33m⚠[0m [33mI discovered an unused imported value: [39mFinite[39m[39m
+   ╭─[[36;1;4m./validators/timelock.ak:2:21[0m]
+ [2m1[0m │ use aiken/collection/list
+ [2m2[0m │ use aiken/interval.{Finite}
+   · [35;1m                    ───┬──[0m
+   ·                        [35;1m╰── [35;1munused import[0m[0m
+ [2m3[0m │ use cardano/transaction.{InlineDatum, OutputReference, Transaction}
+   ╰────
+[36m  help: [0mNo big deal, but you might want to remove it to get rid of that
+        warning.
+
+
+  [33m⚠[0m [33mI discovered an unused imported value: [39mintent_immutable[39m[39m
+   ╭─[[36;1;4m./validators/timelock.ak:5:46[0m]
+ [2m4[0m │ use vams/governance.{
+ [2m5[0m │   bounded_tx, finite_after, finite_interval, intent_immutable,
+   · [35;1m                                             ────────┬───────[0m
+   ·                                                      [35;1m╰── [35;1munused import[0m[0m
+ [2m6[0m │   max_intent_lifetime_ms, normal_delay_ms, signer_threshold, valid_domain,
+   ╰────
+[36m  help: [0mNo big deal, but you might want to remove it to get rid of that
+        warning.
+
+      [1m[35mSummary[39m[0m [1m[32m[39m[0m0 [1m[31merrors[39m[0m, 16 [1m[33mwarnings[39m[0m
+
+Script done on 2026-10-02 20:52:27+00:00 [COMMAND_EXIT_CODE="1"]

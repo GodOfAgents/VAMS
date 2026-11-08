@@ -1,0 +1,105 @@
+{
+  "schema": "m7-root-pytest-current-run-v1",
+  "recorded_date": "2026-10-03",
+  "status": "FAIL",
+  "checkout": {
+    "head": "829ab544571f12efe50ecb5740f129c8acb3e16f",
+    "branch": "testnet/remediation-20260907",
+    "dirty_tree": true,
+    "source_inventory_unchanged": true,
+    "python_source_file_count": 352,
+    "python_source_inventory_sha256": "65577b94a7bf35384986fbce92669758e3ecdb9e8fdc2235d381322ad97e4618"
+  },
+  "runtime": {
+    "python": "3.12.14",
+    "pytest": "pytest 9.1.1",
+    "python_path": "/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python",
+    "aiken_version": "1.1.21+42babe5"
+  },
+  "sandbox": {
+    "network": "disabled (--unshare-net)",
+    "checkout": "temporary writable overlay; host tree unchanged by test writes",
+    "tmp": "tmpfs",
+    "environment": "cleared; PATH contains pinned Python, pinned Aiken directory, /usr/bin, /bin",
+    "raw_pytest_output_retained": false
+  },
+  "commands": {
+    "collection": {
+      "argv": [
+        "/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python",
+        "-B",
+        "-m",
+        "pytest",
+        "--collect-only",
+        "-q",
+        "-p",
+        "no:cacheprovider"
+      ],
+      "exit_code": 0,
+      "collected": 1605,
+      "stdout_sha256": "8a055cfce2c43389aa9fab10dcd15171684aef8e60e1bc91cc10d73f65a98cf7",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "full_suite": {
+      "argv": [
+        "/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python",
+        "-B",
+        "-m",
+        "pytest",
+        "-v",
+        "--tb=short",
+        "-p",
+        "no:cacheprovider"
+      ],
+      "exit_code": 1,
+      "summary": {
+        "passed": 1604,
+        "failed": 1,
+        "subtests_passed": 441,
+        "duration_seconds": 257.03
+      },
+      "stdout_sha256": "90d87d680565342d8ac4afe540f3e6e401c0a35bc5eb95dda745c5a4af9064ea",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "focused_failure_diagnostic": {
+      "argv": [
+        "python",
+        "-B",
+        "-m",
+        "pytest",
+        "-q",
+        "--tb=short",
+        "-p",
+        "no:cacheprovider",
+        "scripts/remediation/test_m3_1b_r9_provenance.py::R11BoundaryTests::test_authoritative_mutation_detected"
+      ],
+      "exit_code": 1,
+      "summary": "1 failed in 6.47s; expected source-changed error was preceded by offline Aiken check failure"
+    },
+    "underlying_aiken_diagnostic": {
+      "argv": [
+        "aiken",
+        "check"
+      ],
+      "mode": "verifier temporary copy; AIKEN_NO_NETWORK=1",
+      "exit_code": 1,
+      "sanitized_stderr": "Using uncertain local version for aiken-lang/stdlib; package version v2 is unpinned and network is unavailable"
+    }
+  },
+  "scope": {
+    "implementation_files_changed": false,
+    "test_gate_passed": false,
+    "ledger_or_live_evidence": false,
+    "readiness": "NOT_READY",
+    "activation_disabled": [
+      "deployment",
+      "Deposit",
+      "Slash",
+      "ExecuteIntent"
+    ]
+  },
+  "evidence_hashes": {
+    "run_pytest_snapshot.py": "90d103a7e70044b3af4d019c680002418c64e1a019e4a7c21b4e37d6f5b8c271",
+    "RESULT.json": "1af1d9a5418f0c39e7d9c6155866e7b89aeb691a23769b0eeeff4f0a5775bf93"
+  }
+}

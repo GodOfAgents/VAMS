@@ -8,6 +8,14 @@ and macro block expansion.
 import sys
 import os
 import pytest
+from unittest.mock import patch
+
+
+@pytest.fixture(autouse=True)
+def explicit_local_runtime():
+    with patch.dict("os.environ", {"VAMS_ENV": "test"}, clear=True):
+        yield
+
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
 
@@ -35,19 +43,19 @@ from neuron.composer.models import InstanceBlueprint
 class TestServiceBlockClient:
 
     def test_list_all_blocks(self):
-        client = ServiceBlockClient()
+        client = ServiceBlockClient(simulation=True)
         blocks = client.list_blocks()
         assert len(blocks) == len(_SERVICE_BLOCK_BLUEPRINTS)
 
     def test_list_blocks_by_category(self):
-        client = ServiceBlockClient()
+        client = ServiceBlockClient(simulation=True)
         ai_blocks = client.list_blocks(category="AI")
         assert len(ai_blocks) > 0
         for b in ai_blocks:
             assert b["category"] == "AI"
 
     def test_get_block_metadata(self):
-        client = ServiceBlockClient()
+        client = ServiceBlockClient(simulation=True)
         block = client.get_block("llama_inference")
         assert block is not None
         assert block["name"] == "llama_inference"
@@ -57,23 +65,23 @@ class TestServiceBlockClient:
         assert "blueprint" in block
 
     def test_get_unknown_block(self):
-        client = ServiceBlockClient()
+        client = ServiceBlockClient(simulation=True)
         assert client.get_block("nonexistent") is None
 
     def test_resolve_blueprint(self):
-        client = ServiceBlockClient()
+        client = ServiceBlockClient(simulation=True)
         bp = client.resolve_blueprint("llama_inference")
         assert isinstance(bp, InstanceBlueprint)
         assert bp.name == "llama_inference"
         assert bp.compute.gpu_count == 2
 
     def test_resolve_unknown_raises(self):
-        client = ServiceBlockClient()
+        client = ServiceBlockClient(simulation=True)
         with pytest.raises(KeyError, match="Unknown service block"):
             client.resolve_blueprint("nonexistent")
 
     def test_all_blocks_expose_memory_policy(self):
-        client = ServiceBlockClient()
+        client = ServiceBlockClient(simulation=True)
         blocks = client.list_blocks()
         valid_policies = {p.value for p in ServiceBlockMemoryPolicy}
 
@@ -83,7 +91,7 @@ class TestServiceBlockClient:
             assert "memory_policy_requires_review" in block
 
     def test_external_readonly_blocks_are_explicit(self):
-        client = ServiceBlockClient()
+        client = ServiceBlockClient(simulation=True)
 
         vector_block = client.get_block("vector_db")
         storage_block = client.get_block("storage_cluster_block")
@@ -92,7 +100,7 @@ class TestServiceBlockClient:
         assert storage_block["memory_policy"] == ServiceBlockMemoryPolicy.EXTERNAL_READONLY.value
 
     def test_unknown_memory_policy_fails_closed(self, monkeypatch):
-        client = ServiceBlockClient()
+        client = ServiceBlockClient(simulation=True)
         monkeypatch.setitem(
             _SERVICE_BLOCK_MEMORY_POLICIES,
             "llama_inference",
@@ -103,14 +111,14 @@ class TestServiceBlockClient:
             client.get_block("llama_inference")
 
     def test_missing_memory_policy_fails_closed(self, monkeypatch):
-        client = ServiceBlockClient()
+        client = ServiceBlockClient(simulation=True)
         monkeypatch.delitem(_SERVICE_BLOCK_MEMORY_POLICIES, "llama_inference")
 
         with pytest.raises(KeyError, match="Missing memory policy"):
             client.get_block("llama_inference")
 
     def test_all_blocks_expose_skillops_manifest(self):
-        client = ServiceBlockClient()
+        client = ServiceBlockClient(simulation=True)
         blocks = client.list_blocks()
 
         assert set(_SERVICE_BLOCK_PERMISSION_SCOPES) == set(_SERVICE_BLOCK_BLUEPRINTS)
@@ -122,7 +130,7 @@ class TestServiceBlockClient:
             assert manifest["permissions_bitmap"] > 0
 
     def test_unknown_permission_scope_fails_closed(self):
-        client = ServiceBlockClient()
+        client = ServiceBlockClient(simulation=True)
         manifest = ServiceBlockManifest(
             block_name="llama_inference",
             permission_scopes=["EXTERNAL_READ", "ROOT_WALLET"],
@@ -132,14 +140,14 @@ class TestServiceBlockClient:
             client.validate_skillops_manifest(manifest)
 
     def test_missing_skillops_manifest_fails_closed(self, monkeypatch):
-        client = ServiceBlockClient()
+        client = ServiceBlockClient(simulation=True)
         monkeypatch.delitem(_SERVICE_BLOCK_PERMISSION_SCOPES, "llama_inference")
 
         with pytest.raises(KeyError, match="Missing SkillOps manifest"):
             client.get_block("llama_inference")
 
     def test_persistent_mutation_requires_review_policy(self):
-        client = ServiceBlockClient()
+        client = ServiceBlockClient(simulation=True)
         manifest = ServiceBlockManifest(
             block_name="llama_inference",
             permission_scopes=[
@@ -196,7 +204,7 @@ class TestMacroBlocks:
 class TestMacroResolution:
 
     def test_resolve_ai_starter_pack(self):
-        client = ServiceBlockClient()
+        client = ServiceBlockClient(simulation=True)
         blueprints = client.resolve_macro("AI_AGENT_STARTER_PACK")
         assert len(blueprints) == 5
         names = [bp.name for bp in blueprints]
@@ -207,12 +215,12 @@ class TestMacroResolution:
         assert "x402_payments" in names
 
     def test_resolve_defi_suite(self):
-        client = ServiceBlockClient()
+        client = ServiceBlockClient(simulation=True)
         blueprints = client.resolve_macro("DEFI_ARBITRAGE_SUITE")
         assert len(blueprints) == 3
 
     def test_all_resolved_are_blueprints(self):
-        client = ServiceBlockClient()
+        client = ServiceBlockClient(simulation=True)
         for macro_name in MACRO_BLOCKS:
             blueprints = client.resolve_macro(macro_name)
             for bp in blueprints:
@@ -226,18 +234,18 @@ class TestMacroResolution:
 class TestCategoryInference:
 
     def test_ai_blocks_categorized(self):
-        client = ServiceBlockClient()
+        client = ServiceBlockClient(simulation=True)
         assert client._infer_category("llama_inference") == "AI"
         assert client._infer_category("vector_db") == "AI"
         assert client._infer_category("high_speed_compute") == "AI"
 
     def test_security_blocks_categorized(self):
-        client = ServiceBlockClient()
+        client = ServiceBlockClient(simulation=True)
         assert client._infer_category("tee_wrapper") == "SECURITY"
         assert client._infer_category("mev_protection") == "SECURITY"
 
     def test_network_blocks_categorized(self):
-        client = ServiceBlockClient()
+        client = ServiceBlockClient(simulation=True)
         assert client._infer_category("multi_chain_bridge") == "NETWORK"
         assert client._infer_category("x402_payments") == "NETWORK"
         assert client._infer_category("ServiceBlock_OMS_v1") == "NETWORK"
@@ -250,7 +258,7 @@ class TestCategoryInference:
 class TestOMSIntegrationPhase2:
 
     def test_oms_service_block_exists(self):
-        client = ServiceBlockClient()
+        client = ServiceBlockClient(simulation=True)
         block = client.get_block("ServiceBlock_OMS_v1")
         assert block is not None
         assert block["name"] == "ServiceBlock_OMS_v1"
@@ -279,7 +287,7 @@ class TestOMSIntegrationPhase2:
         from neuron.composer.composer import VAMSResourceComposer
         from neuron.composer.allocator import AllocationPlan
         
-        composer = VAMSResourceComposer()
+        composer = VAMSResourceComposer(simulation=True)
         
         # Create a mock allocation plan
         class MockNode:
@@ -298,21 +306,15 @@ class TestOMSIntegrationPhase2:
         nodes = [MockNode("n1", "0xPROVIDER", 100)]
         plan = MockAllocationPlan(nodes)
         
-        # Test with a regular blueprint
-        bp_regular = InstanceBlueprint(name="regular_bp")
-        params_regular = composer.get_escrow_params(plan, bp_regular)
-        assert params_regular["serviceBlockId"] == ""
-        
-        # Test with a service block blueprint
-        bp_service = InstanceBlueprint(name="ServiceBlock_OMS_v1")
-        params_service = composer.get_escrow_params(plan, bp_service)
-        assert params_service["serviceBlockId"] != ""
-        assert params_service["serviceBlockId"].startswith("0x")
-        
-        # Determinism check
-        import hashlib
-        expected_id = f"0x{hashlib.sha256(b'ServiceBlock_OMS_v1').hexdigest()}"
-        assert params_service["serviceBlockId"] == expected_id
+        # Local catalog names cannot fabricate an on-chain registration identity.
+        for name in ("regular_bp", "ServiceBlock_OMS_v1"):
+            bp = InstanceBlueprint(name=name)
+            quote = composer.get_payment_quote(plan, bp)
+            assert "serviceBlockId" not in quote
+            assert quote["transactionReady"] is False
+            with pytest.raises(Exception, match="Unbound escrow parameters retired"):
+                composer.get_escrow_params(plan, bp)
+
 
 
 

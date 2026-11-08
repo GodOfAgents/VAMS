@@ -152,7 +152,7 @@ def test_routing_hash():
 def test_encrypted_mempool():
     """Encrypted mempool hides tx content."""
     from mev_protection import EncryptedMempool
-    pool = EncryptedMempool()
+    pool = EncryptedMempool(mock_mode=True, environ={"VAMS_ENV": "test"})
     tx = pool.submit_transaction(b"swap BTC/USDT 10000", value_usd=10000)
     assert tx.status.value == "committed"
     assert len(tx.commitment_hash) == 64  # SHA-256
@@ -185,7 +185,7 @@ def test_batch_auction():
 def test_mev_slashing_report():
     """MEV extraction report triggers 25% slash."""
     from mev_protection import MEVProtection
-    mev = MEVProtection()
+    mev = MEVProtection(mock_mode=True, environ={"VAMS_ENV": "test"})
     report = mev.report_mev_extraction(
         tx_hash="0xabc", extractor_id="bad_validator",
         evidence="sandwich detected", estimated_profit=100.0,
@@ -264,8 +264,10 @@ def test_bridge_executor_solana_ism():
 
 def test_bridge_fallback():
     """Fallback handler cascades on failure."""
-    from bridge_executor import BridgeFallbackHandler, BridgeStatus
-    handler = BridgeFallbackHandler()
+    from bridge_executor import BridgeExecutor, BridgeFallbackHandler, BridgeStatus
+    handler = BridgeFallbackHandler(
+        executor=BridgeExecutor(mock_mode=True, environ={"VAMS_ENV": "test"})
+    )
     # Valid route should succeed on primary
     result = handler.bridge_with_fallback("Ethereum", b"test_eth")
     assert result.status == BridgeStatus.VERIFIED
@@ -303,7 +305,7 @@ def test_bridge_executor_trails_polygon():
     assert result.status == BridgeStatus.VERIFIED, f"Expected VERIFIED, got {result.status}"
     assert result.transport_used == BridgeTransport.TRAILS
     assert result.ism_verified == True  # Trails handles ISM natively
-    assert result.tx_hash.startswith("0x")
+    assert result.tx_hash.startswith("simulated:sha256:")
     print(f"  [PASS] Bridge->Polygon: {result.transport_used.value}, tx={result.tx_hash}")
 
 
@@ -311,11 +313,17 @@ def test_bridge_executor_trails_polygon():
 # 4. P3 OMS Institutional Compliance Gate (v0.6.0)
 # ─────────────────────────────────────────────────────────────────
 
+class _ComplianceVerifier:
+    def __init__(self, verified):
+        self.verified = verified
+
+    def is_compliance_verified(self, _address):
+        return self.verified
+
 def test_p3_verified_address_passes():
-    """P3: OMS-verified address (0x99...) routes successfully to Polygon KYC."""
+    """P3: a live-eligible OMS result routes successfully to Polygon KYC."""
     from clr_router import CLRouter, TransactionIntent, TrustTier, RoutingPriority
-    router = CLRouter()
-    # Address starting with 0x99 is treated as verified by OMSIdentityVerifier mock
+    router = CLRouter(identity_verifier=_ComplianceVerifier(True))
     verified_address = "0x99aabbccddeeff001122334455667788990011aa"
     intent = TransactionIntent(
         value_usd=5000, max_latency_ms=30000,
@@ -334,8 +342,7 @@ def test_p3_verified_address_passes():
 def test_p3_unverified_address_blocked():
     """P3 fail-closed: Unverified address raises PermissionError."""
     from clr_router import CLRouter, TransactionIntent, TrustTier
-    router = CLRouter()
-    # Non-0x99 address: treated as unverified
+    router = CLRouter(identity_verifier=_ComplianceVerifier(False))
     unverified_address = "0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef"
     intent = TransactionIntent(
         value_usd=5000, max_latency_ms=30000,
@@ -355,7 +362,7 @@ def test_p3_unverified_address_blocked():
 def test_p3_missing_address_blocked():
     """P3 fail-closed: Empty agent_address is rejected by the OMS identity gate."""
     from clr_router import CLRouter, TransactionIntent, TrustTier
-    router = CLRouter()
+    router = CLRouter(identity_verifier=_ComplianceVerifier(False))
     # Must use PLATINUM tier to pass CLR Rule 4 and reach the OMS gate.
     # TrustTier.GOLD would be rejected earlier by _check_permissions with a
     # different error: "Institutional compliance routing requires PLATINUM Tier."

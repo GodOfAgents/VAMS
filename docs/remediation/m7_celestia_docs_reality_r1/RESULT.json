@@ -1,0 +1,17 @@
+{
+  "changed_source_document": "docs/ARCHITECTURE.md",
+  "date": "2026-10-03",
+  "dirty_tree": true,
+  "head": "829ab544571f12efe50ecb5740f129c8acb3e16f",
+  "next_single_slice": "Correct audit.md July-era gate counts and scanner totals as historical against current evidence.",
+  "readiness": "NOT READY",
+  "schema": "m7-celestia-docs-reality-v1",
+  "scope": "DOC-02 correction of Celestia live-failure/mock receipt claim only.",
+  "source_hashes": {
+    "docs/ARCHITECTURE.md": "d1683bf6164085cd31f6e24000e37f84fd5cc00bc386d4a3088f567aab62e1f0",
+    "neuron/da/adapters/celestia_adapter.py": "0498c0c4fc3d69ab72bd989efae82577917e6f1c601efb43f59957f98fef1f3e",
+    "neuron/da/adapters/near_adapter.py": "6d797515bbce468c3e7e0579e38ef315002798ed766505a7cc7985db97ea338b",
+    "neuron/da/performance_audit.py": "79b1dde2a6e1162bb019f13100a78d5dcc939c5c1b9a64a7f06f748a206aa474",
+    "neuron/vdso/da.py": "84ada9c4cf724ab12f9542fef3f138929f0a751964849e99ad16b14c785882fb"
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "schema_version": "m7-t19-economic-adversarial-current-r1",
+  "date": "2026-10-05",
+  "canonical_head": "829ab544571f12efe50ecb5740f129c8acb3e16f",
+  "canonical_branch": "testnet/remediation-20260907",
+  "command": ["/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python", "-B", "scripts/audit/run_economic_adversarial.py", "--epochs", "100000", "--seed", "20260711", "--output", "/tmp/evidence/report.json"],
+  "pytest_command": ["/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python", "-B", "-m", "pytest", "-q", "-p", "no:cacheprovider", "scripts/audit/test_economic_adversarial.py"],
+  "campaign_exit": 0,
+  "pytest_exit": 0,
+  "campaign_report_sha256": "4f4ab6f96634fa1b568748a05eca519f267a50617ca1382e2be1ff18e8ec4597",
+  "campaign": {
+    "epochs": 100000,
+    "seed": 20260711,
+    "baseline_false_positives": 0,
+    "undetected": {},
+    "detections_per_attack_class": 20000,
+    "attack_classes": ["linked_reward_capture", "linked_capacity_capture", "regional_reward_capture", "thin_liquidity", "wash_return"],
+    "passed": true
+  },
+  "profile_sha256": "573a78c845546a0b8cecc2927c5365497a5017257fb5cc5491a728e161ce165a",
+  "runner_sha256": "5cfc85ef98a1ff297c6797d6b63216c3a8f93a7a40bf0e689ea8727306c063d6",
+  "economic_module_sha256": "00ef72ce66f1ae76e042ab1176f42164da8609cb637f33d7ac7720b9387a29e0",
+  "network": "bwrap --unshare-net",
+  "canonical_source_unchanged": true,
+  "evidence_scope": "synthetic economic adversarial campaign only",
+  "credit": {
+    "inv1_solidity_runtime": false,
+    "inv2_solidity_runtime": false,
+    "inv8_solidity_runtime": false,
+    "inv9_solidity_runtime": false,
+    "ledger_admission": false,
+    "live_network": false,
+    "deployment_readiness": false
+  },
+  "readiness": "NOT READY",
+  "deployment_enabled": false,
+  "deposit_enabled": false,
+  "slash_activation_enabled": false,
+  "execute_intent_enabled": false
+}

@@ -1,0 +1,3 @@
+# Independent integrated review
+
+Verdict: PASS for the narrow fail-closed import-anchor transformation; full F05 harness remains FAIL/blocked by mutant Aiken build exit 1. Reviewer checked harness SHA-256 `ffe54037` prefix, test SHA-256 `ef9a3585` prefix, 25 protected inputs unchanged, and independently ran the focused anchor tests offline: 7/7 PASS. The generated mutant's `OutputDatum` type is absent from pinned stdlib; `Datum` is present. Exact compiler diagnostic was not retained, so that cause remains source-based inference. No validator, blueprint, or fixture bytes changed; no F05 case/mutation credit and no ledger/live evidence.

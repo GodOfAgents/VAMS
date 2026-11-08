@@ -1,0 +1,99 @@
+{
+  "schema": "m7-root-pytest-collection-run-v2",
+  "recorded_at_utc": "2026-10-03T06:26:09Z",
+  "checkout": {
+    "head": "829ab544571f12efe50ecb5740f129c8acb3e16f",
+    "dirty_tree": true,
+    "source_changes_during_final_run": false
+  },
+  "implementation": {
+    "path": "pytest.ini",
+    "sha256": "f9b0e7bfcb7cbd175a6c8f2bc72064d46b41b0b112278446d7ebf50439fd72e8",
+    "only_implementation_file_changed_by_this_slice": true
+  },
+  "runner": {
+    "path": "docs/remediation/m7_pytest_collection_r1/run_pytest_snapshot.py",
+    "sha256": "829bcf45172c76e20dc17482fc2db71a4af81dd7251bf1c9b4ff966bffd8d67a"
+  },
+  "result": {
+    "path": "docs/remediation/m7_pytest_collection_r1/RESULT.json",
+    "sha256": "e5580dc843f7e35d16a6c3af92ce36bcfb082d77387146ce3bffc20aa3a05702"
+  },
+  "runtime": {
+    "python": "3.12.14",
+    "pytest": "9.1.1",
+    "pluggy": "1.6.0",
+    "python_path": "/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python",
+    "path_prefix": "/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin"
+  },
+  "final_verification": {
+    "schema": "m7-root-pytest-source-bound-v1",
+    "python": "3.12.14",
+    "pytest_version": "pytest 9.1.1",
+    "source_inventory": {
+      "file_count_before": 342,
+      "sha256_before": "0d31424ca11ea9873d7fff5ab43799a5c5c3e592f854fa1afb68abb6596806b0",
+      "file_count_after": 342,
+      "sha256_after": "0d31424ca11ea9873d7fff5ab43799a5c5c3e592f854fa1afb68abb6596806b0",
+      "unchanged_during_run": true,
+      "changed_paths": []
+    },
+    "collection": {
+      "command": [
+        "/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python",
+        "-B",
+        "-m",
+        "pytest",
+        "--collect-only",
+        "-q",
+        "-p",
+        "no:cacheprovider"
+      ],
+      "exit_code": 0,
+      "collected": 1596,
+      "summary": null,
+      "stdout_sha256": "96bf5dfb0563441336a81bda4b7b896bdf2459ad5527eb316bfb7fda9355f9ee",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "raw_output_retained": false
+    },
+    "full_suite": {
+      "command": [
+        "/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python",
+        "-B",
+        "-m",
+        "pytest",
+        "-v",
+        "--tb=short",
+        "-p",
+        "no:cacheprovider"
+      ],
+      "exit_code": 0,
+      "collected": null,
+      "summary": {
+        "passed": 1596,
+        "failed": 0,
+        "subtests_passed": 441,
+        "duration_seconds": 241.55
+      },
+      "stdout_sha256": "bdbf3505b1f9ca282b3a2fad246c014d2e281950fdfc268db91bd343fcbdeee0",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "raw_output_retained": false
+    }
+  },
+  "historical_attempts": [
+    {
+      "snapshot_result": "1585 collected; first full run 1584 passed, 1 failed, 441 subtests; failure was nested python missing from PATH. Targeted test passed after PATH correction, and full run passed 1585/441, but Python source inventory changed during that run; superseded by source-stable final run."
+    },
+    {
+      "independent_recheck": "1594 collected; a subsequent local recheck collected 1595; concurrent dirty-tree changes mean neither count is the final bound result."
+    }
+  ],
+  "scope": {
+    "frozen_evidence_modules_edited": false,
+    "f05_ledger_credit": false,
+    "simulator_ledger_live_network_credit": false,
+    "invariants_touched": [],
+    "install_or_fetch": false,
+    "review": "pending"
+  }
+}

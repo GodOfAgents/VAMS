@@ -1,0 +1,617 @@
+{
+  "blueprint": {
+    "path": "plutus.json",
+    "programs": [
+      {
+        "title": "agent_nft.agent_nft.else",
+        "sha256": "f706581ca7b5c2807bed395c6088d230fd0fc1e7e3a03709f18b5264dc67908c"
+      },
+      {
+        "title": "agent_nft.agent_nft.mint",
+        "sha256": "f706581ca7b5c2807bed395c6088d230fd0fc1e7e3a03709f18b5264dc67908c"
+      },
+      {
+        "title": "agent_registry.agent_registry.else",
+        "sha256": "c5d4ab792f530756283a8ffde9d389f6ff7ed2e87a82112d56480fe0127b4a8f"
+      },
+      {
+        "title": "agent_registry.agent_registry.mint",
+        "sha256": "c5d4ab792f530756283a8ffde9d389f6ff7ed2e87a82112d56480fe0127b4a8f"
+      },
+      {
+        "title": "agent_registry.agent_registry.spend",
+        "sha256": "c5d4ab792f530756283a8ffde9d389f6ff7ed2e87a82112d56480fe0127b4a8f"
+      },
+      {
+        "title": "f05_authority_policy.f05_authority_policy.else",
+        "sha256": "79fa7f79202336db7effb9743a65b9d8d7c012d59842b4143e0b21772c1b876e"
+      },
+      {
+        "title": "f05_authority_policy.f05_authority_policy.mint",
+        "sha256": "79fa7f79202336db7effb9743a65b9d8d7c012d59842b4143e0b21772c1b876e"
+      },
+      {
+        "title": "f05_authority_state.f05_authority_state.else",
+        "sha256": "10406445a9c22ce762602e46d9a1d97207dea421c120bbe781d8fd40f6988de7"
+      },
+      {
+        "title": "f05_authority_state.f05_authority_state.spend",
+        "sha256": "10406445a9c22ce762602e46d9a1d97207dea421c120bbe781d8fd40f6988de7"
+      },
+      {
+        "title": "governance_policies.authority_policy.else",
+        "sha256": "ca6e57bc34571514e55b5393e3248c31d0753751818b244592be9f4f648762ae"
+      },
+      {
+        "title": "governance_policies.authority_policy.mint",
+        "sha256": "ca6e57bc34571514e55b5393e3248c31d0753751818b244592be9f4f648762ae"
+      },
+      {
+        "title": "governance_policies.intent_policy.else",
+        "sha256": "03dc37b2465d47afecff2f288693760c38386dd3795542ae86d1943054f0b457"
+      },
+      {
+        "title": "governance_policies.intent_policy.mint",
+        "sha256": "03dc37b2465d47afecff2f288693760c38386dd3795542ae86d1943054f0b457"
+      },
+      {
+        "title": "governance_policies.proposal_policy.else",
+        "sha256": "2d8fd96b0066b54fcb25c4afed1cc20856b3c6d205f5e115f14d0886ae085a22"
+      },
+      {
+        "title": "governance_policies.proposal_policy.mint",
+        "sha256": "2d8fd96b0066b54fcb25c4afed1cc20856b3c6d205f5e115f14d0886ae085a22"
+      },
+      {
+        "title": "governance_policies.receipt_policy.else",
+        "sha256": "e63ebc389dcc34969d58d3e4f070caeb7f3d6624fd78e52e4a292e3b97af9008"
+      },
+      {
+        "title": "governance_policies.receipt_policy.mint",
+        "sha256": "e63ebc389dcc34969d58d3e4f070caeb7f3d6624fd78e52e4a292e3b97af9008"
+      },
+      {
+        "title": "governor.authority_validator.else",
+        "sha256": "736156859ea6c4491a9ccb4641c8d41be3e5e94a06fb54326283e8f879fa93e3"
+      },
+      {
+        "title": "governor.authority_validator.spend",
+        "sha256": "736156859ea6c4491a9ccb4641c8d41be3e5e94a06fb54326283e8f879fa93e3"
+      },
+      {
+        "title": "governor.governor_validator.else",
+        "sha256": "19c66458d3fd1f389688fb572c0a580e13c7fb4047d693d2c67ccb887a57a224"
+      },
+      {
+        "title": "governor.governor_validator.spend",
+        "sha256": "19c66458d3fd1f389688fb572c0a580e13c7fb4047d693d2c67ccb887a57a224"
+      },
+      {
+        "title": "insurance_fund.insurance_fund.else",
+        "sha256": "4bdefcf0731c54e39b1cf97d29c06d465cd7e503a6f524f4d486dcd5309f0e38"
+      },
+      {
+        "title": "insurance_fund.insurance_fund.mint",
+        "sha256": "4bdefcf0731c54e39b1cf97d29c06d465cd7e503a6f524f4d486dcd5309f0e38"
+      },
+      {
+        "title": "insurance_fund.insurance_fund.spend",
+        "sha256": "4bdefcf0731c54e39b1cf97d29c06d465cd7e503a6f524f4d486dcd5309f0e38"
+      },
+      {
+        "title": "timelock.timelock_validator.else",
+        "sha256": "f4c00027e1c8f461b9e34d378090a665647ddbe637031f9f811bec8429428553"
+      },
+      {
+        "title": "timelock.timelock_validator.spend",
+        "sha256": "f4c00027e1c8f461b9e34d378090a665647ddbe637031f9f811bec8429428553"
+      }
+    ],
+    "sha256": "c4230410d0caac45f2c71d36e45a539c78087697128ce1533306d17e96a48008"
+  },
+  "compilation_sources": [
+    {
+      "path": "lib/vams/f05_authority.ak",
+      "size": 10612,
+      "sha256": "657f30dfc0ecb40f50b2c0442b78f4818de1644f540fb68d76cfb2de72cccdd3"
+    },
+    {
+      "path": "lib/vams/governance.ak",
+      "size": 9132,
+      "sha256": "b288f800f70d5aae566a745a5853067a173dd5cc8ad3225e7ea8d4bb89d29e55"
+    },
+    {
+      "path": "lib/vams/icb.ak",
+      "size": 3674,
+      "sha256": "6df86d4549e9289734b80d2193cc77fffedcb856b46fe41e29d3d8134a8b7917"
+    },
+    {
+      "path": "lib/vams/types.ak",
+      "size": 7489,
+      "sha256": "c420d7481f6104b16c69ec6cddde2a81b19e91ec13d97968ae072d17ace8853e"
+    },
+    {
+      "path": "lib/vams/utils.ak",
+      "size": 3819,
+      "sha256": "67ed2476a33225453942221b2dc621a2687ffd9112f7bbbbe52b43f004f2a939"
+    },
+    {
+      "path": "lib/vams/vdso.ak",
+      "size": 8353,
+      "sha256": "4ba68b11378d968df6e37f4a787c040aba1dbe05dc88368ca01ee5e0ecefcea3"
+    },
+    {
+      "path": "validators/agent_nft.ak",
+      "size": 1997,
+      "sha256": "7653cd2a9db99a69424f79164c123ce35d274db75f25f74e0a9f4c4c9b9d36bd"
+    },
+    {
+      "path": "validators/agent_registry.ak",
+      "size": 27368,
+      "sha256": "7655acb5d48cb0abcfe85dadfe9aa9c80046bff3aeeaf0720cb706084adbb5cd"
+    },
+    {
+      "path": "validators/f05_authority_policy.ak",
+      "size": 3487,
+      "sha256": "e9d3ac9cbb14b9e7693dc12430234694c82eb52e61d176e1e39992fb9cbeafa8"
+    },
+    {
+      "path": "validators/f05_authority_policy.test.ak",
+      "size": 4922,
+      "sha256": "a3bc9ccafa26ae4219207a620940ca7da3296608d576725c325a4558b958336d"
+    },
+    {
+      "path": "validators/f05_authority_state.ak",
+      "size": 545,
+      "sha256": "ad15a7416d2069127138d8817b41a920223bbd3d875fdb7b0c9fc3bb60944774"
+    },
+    {
+      "path": "validators/governance_policies.ak",
+      "size": 7771,
+      "sha256": "da0df0fc78e55182dea92921970bb8f127e71b83eaf171b1e18a8a5022bbf73c"
+    },
+    {
+      "path": "validators/governor.ak",
+      "size": 8242,
+      "sha256": "f9383fce703a59a38bece4c78b107e636554e6c427671a83ac0aa6b4b96ace6e"
+    },
+    {
+      "path": "validators/insurance_fund.ak",
+      "size": 58382,
+      "sha256": "184d5c19c65037ee37999af0988166dca2d28a2e2772e268e1c1738a382ecf5f"
+    },
+    {
+      "path": "validators/timelock.ak",
+      "size": 2222,
+      "sha256": "7a2a07f6ef576901fd7fceea059ccfe7cbafde424249a9c5a7d19bba60d4dae3"
+    }
+  ],
+  "compiler": {
+    "binary_sha256": "07f3f927f1a8c71fc61273fdff850d9b98edb28dde207c8a32585991f2c88e79",
+    "version": "v1.1.21"
+  },
+  "dependencies": [
+    {
+      "files": [
+        {
+          "path": ".editorconfig",
+          "sha256": "8289b755c9b4804f8fd04a0de683cb31faa55cded3a3d0be541495342e506e59",
+          "size": 150,
+          "type": "regular"
+        },
+        {
+          "path": ".envrc",
+          "sha256": "25d7f00b0521cf6e6fba75579bdea0913df8e8606aef9ab68e61de1c90de04fa",
+          "size": 294,
+          "type": "regular"
+        },
+        {
+          "path": ".gitattributes",
+          "sha256": "bbaac0aab1eebdabcfdfbc5c66642646f384b83566bbc38e614497ccbdca5c9d",
+          "size": 132,
+          "type": "regular"
+        },
+        {
+          "path": ".github/workflows/continuous-integration.yml",
+          "sha256": "799568675d52b89be2c51c413b3116bd1724a1c8396a4e0b99f6005ca5a1592c",
+          "size": 994,
+          "type": "regular"
+        },
+        {
+          "path": ".gitignore",
+          "sha256": "a270422eb28f97afad6da1561fb02788dfac76169dc5703e760883782b59aa12",
+          "size": 184,
+          "type": "regular"
+        },
+        {
+          "path": "CHANGELOG.md",
+          "sha256": "3e0f7bd316e1c0b3fced18db865cec5a1294d532271ecdecc197aceca9027304",
+          "size": 3363,
+          "type": "regular"
+        },
+        {
+          "path": "LICENSE",
+          "sha256": "b83ebfd79be23a0d476f64522eb1c79ff19a4c6fb74e982bfb6eae92669dd7c2",
+          "size": 11340,
+          "type": "regular"
+        },
+        {
+          "path": "README.md",
+          "sha256": "9c545d3f50e43fcbbc502681e62a858dc1aa37a344b6ae79cb7d3db9b2155478",
+          "size": 2834,
+          "type": "regular"
+        },
+        {
+          "path": "aiken.toml",
+          "sha256": "5dea3a11799daab11f9f339994a7f899c2012148c63466407bcf5217519a70c2",
+          "size": 318,
+          "type": "regular"
+        },
+        {
+          "path": "flake.lock",
+          "sha256": "e2f3d218dbb652c9933a7ff4a67f3d2ce2eb18d1e526c2217fa31149119130ce",
+          "size": 7379,
+          "type": "regular"
+        },
+        {
+          "path": "flake.nix",
+          "sha256": "588878fbbfbc9d4f767243ffd4de28ddb8d1f22ca4309706a57e3b0a62afad9d",
+          "size": 1412,
+          "type": "regular"
+        },
+        {
+          "path": "lib/aiken/fuzz.ak",
+          "sha256": "82c035286d03fb2824b200d5b20f367df3cf3d734f7c6e335c3aff857d54e3ad",
+          "size": 39526,
+          "type": "regular"
+        },
+        {
+          "path": "lib/aiken/fuzz.test.ak",
+          "sha256": "5d26a6f03cf4f210c82227ea47023d58243a798dab562f6d0a5fa9a38dfc56cb",
+          "size": 13657,
+          "type": "regular"
+        },
+        {
+          "path": "lib/aiken/fuzz/scenario.ak",
+          "sha256": "56148af35370b2f6734121fbfea604ea31b484d104528364e8b663d41668ce5a",
+          "size": 23472,
+          "type": "regular"
+        },
+        {
+          "path": "lib/cardano/fuzz.ak",
+          "sha256": "ae8f60e7483b165477abca217342614f9a0da7940a6f539977a888d691f80b0c",
+          "size": 22698,
+          "type": "regular"
+        },
+        {
+          "path": "lib/cardano/fuzz.test.ak",
+          "sha256": "3c620206c53a49e1f3798fc8825a4128af18af7094e2f8c8bb6fbcf13018df0d",
+          "size": 4200,
+          "type": "regular"
+        }
+      ],
+      "integrity": "9843473958e51725a9274b487d2d4aac0395ec1a2e30f090724fa737226bc127",
+      "name": "aiken-lang/fuzz",
+      "package_dir": "aiken-lang-fuzz",
+      "package_file_count": 16,
+      "package_tree_sha256": "665295bf2c1f7a8a894056b070374700b4bdf7a788b8bff0be06b832a952eafe",
+      "repository": "https://github.com/aiken-lang/fuzz",
+      "requirement": [],
+      "revision": "v2",
+      "revision_kind": "tag",
+      "source": "github",
+      "version": "v2"
+    },
+    {
+      "files": [
+        {
+          "path": ".editorconfig",
+          "sha256": "04e175656a58d484b7d02d1e852fb26753ac83e27a5092fb08faf5a181129050",
+          "size": 150,
+          "type": "regular"
+        },
+        {
+          "path": ".gitattributes",
+          "sha256": "654303d974c0e7f6bcf3b76f61d7a3740f08bdd89d3c473376c71004f2934aff",
+          "size": 83,
+          "type": "regular"
+        },
+        {
+          "path": ".github/workflows/continuous-integration.yml",
+          "sha256": "2c08481b55ee4ab498a2600d6e143535d24c3c523b664f2003123909ab21eca8",
+          "size": 1287,
+          "type": "regular"
+        },
+        {
+          "path": ".gitignore",
+          "sha256": "e7c7291b158d8dd199f677ff61996301a0628d4d9a3ce02fcb6283f1fbbe0fb6",
+          "size": 22,
+          "type": "regular"
+        },
+        {
+          "path": "CHANGELOG.md",
+          "sha256": "8d42cc7564ba2c9822e772940831b3aa87d1071ae5350f9cbbb7e5c8b175576e",
+          "size": 52555,
+          "type": "regular"
+        },
+        {
+          "path": "LICENSE",
+          "sha256": "59416b183f899a371f368f356dbe6539e87972f4f5b0c28ab868f51c9424ad0d",
+          "size": 11340,
+          "type": "regular"
+        },
+        {
+          "path": "README.md",
+          "sha256": "330d235632f07b07e9a2aa29699e3a27e86bccad198ea4ffb3ae4051cc5bb3ce",
+          "size": 2517,
+          "type": "regular"
+        },
+        {
+          "path": "aiken.lock",
+          "sha256": "f7083ef8a14d03ff9292586d91c3c54d0d2954e5ffd44d5c7c4222de60a5f61a",
+          "size": 414,
+          "type": "regular"
+        },
+        {
+          "path": "aiken.toml",
+          "sha256": "1dfe88e390b703fbad6ce1c41cf9770d6be0841b82a700a010d058e410b1bc5c",
+          "size": 271,
+          "type": "regular"
+        },
+        {
+          "path": "lib/aiken/cbor.ak",
+          "sha256": "797f22813156330d728c0ebacebd356a2c43f63e56862cff10be465054422df6",
+          "size": 8432,
+          "type": "regular"
+        },
+        {
+          "path": "lib/aiken/cbor.test.ak",
+          "sha256": "9aa8309cbcf9a7c1553cd53420149a99cca482f0d9ae1f3756640182f495a037",
+          "size": 8233,
+          "type": "regular"
+        },
+        {
+          "path": "lib/aiken/collection.ak",
+          "sha256": "6b86e4876d0806610406b68268352c9012bfee069b1c72d9f2a7497f879e4dc8",
+          "size": 116,
+          "type": "regular"
+        },
+        {
+          "path": "lib/aiken/collection/dict.ak",
+          "sha256": "0add468ecf7421ef1ea625de5f73489b32706926be1471248e149622c87d719c",
+          "size": 26104,
+          "type": "regular"
+        },
+        {
+          "path": "lib/aiken/collection/list.ak",
+          "sha256": "b6c858dc9e5d85ac17aaaef018269128b79317520e14a12db2a53b4399d8b07a",
+          "size": 28412,
+          "type": "regular"
+        },
+        {
+          "path": "lib/aiken/collection/pairs.ak",
+          "sha256": "36f996a26de54b5755f38b8b4843a1e9918349f51a8ad9069b64846a11c34b23",
+          "size": 21161,
+          "type": "regular"
+        },
+        {
+          "path": "lib/aiken/crypto.ak",
+          "sha256": "fe7fc92b6fd5a66e7bd71c23224b1d0c1b4a63bc693806549db6396ba382b70d",
+          "size": 3546,
+          "type": "regular"
+        },
+        {
+          "path": "lib/aiken/crypto/bls12_381/g1.ak",
+          "sha256": "76f2d81538ef1bb1699f7193465183d6bf297156a71844ce2550c24d22fe5403",
+          "size": 5907,
+          "type": "regular"
+        },
+        {
+          "path": "lib/aiken/crypto/bls12_381/g2.ak",
+          "sha256": "c4fe7d17f4d8389f8beb7f8a00bf706da56ca49c9d27b2a58743796557d802e7",
+          "size": 7186,
+          "type": "regular"
+        },
+        {
+          "path": "lib/aiken/crypto/bls12_381/scalar.ak",
+          "sha256": "b711bc1fc9ebec7b5951ee0b79287a4f1c349cd1eecc90839101b71ae940d3ec",
+          "size": 7704,
+          "type": "regular"
+        },
+        {
+          "path": "lib/aiken/interval.ak",
+          "sha256": "d0801ebeee248b26388fbc6c239ed0180aa8779b89d1a1968ee94b05355d9383",
+          "size": 17334,
+          "type": "regular"
+        },
+        {
+          "path": "lib/aiken/math.ak",
+          "sha256": "f5dea1f33ef57902029f9e6038ebb8c7db68995d2bdb428b4018507efa96bb20",
+          "size": 7453,
+          "type": "regular"
+        },
+        {
+          "path": "lib/aiken/math/rational.ak",
+          "sha256": "3083f6a84daf47f16db5e4e3d0672041812e9fb03a2fce069835c748a493562b",
+          "size": 21175,
+          "type": "regular"
+        },
+        {
+          "path": "lib/aiken/math/rational.tests.ak",
+          "sha256": "228b59bf5d737e985a704a6f8171b81198ee558ff26fbd7161e4fc171d78bd11",
+          "size": 1815,
+          "type": "regular"
+        },
+        {
+          "path": "lib/aiken/option.ak",
+          "sha256": "189199322e4b6ab64043bc551ab847aa6a7f61755fd0a5218553cd9030432a72",
+          "size": 6295,
+          "type": "regular"
+        },
+        {
+          "path": "lib/aiken/primitive/bytearray.ak",
+          "sha256": "04d6a4979713b3abe26cf22dc3f18ca391b309471813c23f3c434844e88b75e5",
+          "size": 15571,
+          "type": "regular"
+        },
+        {
+          "path": "lib/aiken/primitive/int.ak",
+          "sha256": "0b50c8492392b1d0d736744edf0e773f6c0559ada3b47a772bc43ad0382e7346",
+          "size": 3463,
+          "type": "regular"
+        },
+        {
+          "path": "lib/aiken/primitive/string.ak",
+          "sha256": "aa313ee5ba0ca6889eea774002590dd93bf8661ab1c858ba031e7dc5dc284b15",
+          "size": 2794,
+          "type": "regular"
+        },
+        {
+          "path": "lib/cardano/address.ak",
+          "sha256": "500f08ea61aa91a8852a978e55b5ceb6b64ef039a1791586f40128f59925a3c8",
+          "size": 3559,
+          "type": "regular"
+        },
+        {
+          "path": "lib/cardano/address/credential.ak",
+          "sha256": "015e01e5af770674bd79cec8ccc73533164078cbef5c77fea5206b2d653c48a6",
+          "size": 977,
+          "type": "regular"
+        },
+        {
+          "path": "lib/cardano/assets.ak",
+          "sha256": "fdd056338a1727d82d3786ced110ba062c9821dc3b04ea91f7a53aa2dfb66d75",
+          "size": 21696,
+          "type": "regular"
+        },
+        {
+          "path": "lib/cardano/certificate.ak",
+          "sha256": "ac5a29844e30203b434f506b735ac9ef429b535de2de25a9a9d204a37740f357",
+          "size": 3808,
+          "type": "regular"
+        },
+        {
+          "path": "lib/cardano/governance.ak",
+          "sha256": "75ca34a4a12bf2988003e84f07124fbcd05d734e9b288b25eccfcb05d42c60e8",
+          "size": 3670,
+          "type": "regular"
+        },
+        {
+          "path": "lib/cardano/governance/protocol_parameters.ak",
+          "sha256": "d8fa47c6f270703f7a94889768c996bbee552c61e95ed263809f9d210e313c1f",
+          "size": 12483,
+          "type": "regular"
+        },
+        {
+          "path": "lib/cardano/governance/voter.ak",
+          "sha256": "1760b278251ce76a9b7b55a45d858fbaf173585305c98629a8d2aca97ce4d079",
+          "size": 1879,
+          "type": "regular"
+        },
+        {
+          "path": "lib/cardano/script_context.ak",
+          "sha256": "51a6913a3062f2c93dfeb061ec49556fba5e21b49ed4e931124328eafa038c69",
+          "size": 2718,
+          "type": "regular"
+        },
+        {
+          "path": "lib/cardano/transaction.ak",
+          "sha256": "3d579be63806c418b1f2442dee21caf0975b320bbf99cda56173fe436540e4db",
+          "size": 7796,
+          "type": "regular"
+        },
+        {
+          "path": "lib/cardano/transaction/output_reference.ak",
+          "sha256": "7318476ce804b26f9eb08c03a3918c2883667bae1f9d03b12a9317333af21f66",
+          "size": 997,
+          "type": "regular"
+        },
+        {
+          "path": "lib/cardano/transaction/script_purpose.ak",
+          "sha256": "a28a72cf15669701ad8df64c2f72125c2012969750b0833d8cc6b35ccfbc80a2",
+          "size": 4115,
+          "type": "regular"
+        }
+      ],
+      "integrity": "6928535a4098118e5f2a30478caf80defeec5e128b4768da88c97399bb563b6d",
+      "name": "aiken-lang/stdlib",
+      "package_dir": "aiken-lang-stdlib",
+      "package_file_count": 38,
+      "package_tree_sha256": "575c264e524946034aae098e8724e42b2de6d592c94c72ae850b1ec54c9e4c97",
+      "repository": "https://github.com/aiken-lang/stdlib",
+      "requirement": [],
+      "revision": "v2",
+      "revision_kind": "tag",
+      "source": "github",
+      "version": "v2"
+    }
+  ],
+  "forward_provenance": {
+    "allowed_volatile_fields": [
+      "etags.*[0].secs_since_epoch",
+      "etags.*[0].nanos_since_epoch"
+    ],
+    "baseline": "m3-f04-option-b-r1",
+    "current_canonical_raw_lock_sha256": "acffff4aee9569e1ee1de468839077af467b5e403fd96450290cd367b339c651",
+    "historical_r1_raw_lock_sha256": "8fc8bf1ccf3cf0c91acc94232646ebabb23469eb7c2d4acb1f4f0b0b67f8213b",
+    "isolated_build_policy": "two isolated pinned Aiken 1.1.21 builds must begin from this exact raw lock and produce byte-identical normalized provenance, blueprint bytes, and program hashes; canonical inputs are read-only",
+    "network": "disabled",
+    "raw_lock_continuity": "historically unresolved; R1 bytes unavailable"
+  },
+  "manifest_version": 7,
+  "package_cache": {
+    "directories": [
+      "aiken-lang-fuzz",
+      "aiken-lang-stdlib"
+    ],
+    "index": {
+      "packages": [
+        {
+          "name": "aiken-lang/fuzz",
+          "source": "github",
+          "version": "v2"
+        },
+        {
+          "name": "aiken-lang/stdlib",
+          "source": "github",
+          "version": "v2"
+        }
+      ],
+      "path": "build/packages/packages.toml",
+      "sha256": "6343ba3b788a2e43f6ac7043aa53c427dcd7190088ea83c14054f2a5dd0417af"
+    },
+    "root": "build/packages"
+  },
+  "project": {
+    "aiken_toml_path": "aiken.toml",
+    "aiken_toml_sha256": "55984b24927897c47dbf45933911b804047d0200bdf9a47942efded8b6ed4683",
+    "lock_normalized_sha256": "f90d45886ca23d8661ae9973940ec03d9496ffc4e8caa9abe32fea69e938835a",
+    "lock_path": "aiken.lock",
+    "lock_sha256": "acffff4aee9569e1ee1de468839077af467b5e403fd96450290cd367b339c651"
+  },
+  "project_inputs": [
+    {
+      "path": "aiken.toml",
+      "sha256": "55984b24927897c47dbf45933911b804047d0200bdf9a47942efded8b6ed4683",
+      "size": 421,
+      "type": "regular"
+    },
+    {
+      "path": "aiken.lock",
+      "sha256": "acffff4aee9569e1ee1de468839077af467b5e403fd96450290cd367b339c651",
+      "size": 744,
+      "type": "regular"
+    },
+    {
+      "path": "build/packages/packages.toml",
+      "sha256": "6343ba3b788a2e43f6ac7043aa53c427dcd7190088ea83c14054f2a5dd0417af",
+      "size": 145,
+      "type": "regular"
+    }
+  ],
+  "schema_version": "m7-f05-current-forward-v1",
+  "volatile_lock_fields": [
+    "etags.*[0].secs_since_epoch",
+    "etags.*[0].nanos_since_epoch"
+  ]
+}

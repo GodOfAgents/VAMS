@@ -31,8 +31,8 @@ from dbos import DBOS, SetWorkflowID
 logger = logging.getLogger("vams.workflows")
 
 try:
-    from sdk.semantic_mmu import SemanticMMU, MemoryTier
-    from intelligence.world_model import ProPlayWorldModel
+    from .sdk.semantic_mmu import SemanticMMU, MemoryTier
+    from .intelligence.world_model import ProPlayWorldModel
 except ImportError:
     try:
         from neuron.sdk.semantic_mmu import SemanticMMU, MemoryTier

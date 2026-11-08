@@ -3,12 +3,8 @@ VAMS Resource Composer — Top-Level Orchestrator
 =================================================
 The main entry point for the Resource Composition Engine.
 
-Orchestrates the full lifecycle:
-    1. Blueprint → Candidate Discovery (HardwareRegistry)
-    2. Scoring (CandidateScorer)
-    3. Allocation (ResourceAllocator)
-    4. Escrow Locking (x402 integration point)
-    5. Instance Management (provision / deprovision / list)
+Scores and allocates local simulations only. Provider execution, authenticated
+registry reads and execution receipts are not implemented by this orchestrator.
 
 Architecture Reference:
     - ICN Gap #3: Resource Composition Engine
@@ -19,8 +15,14 @@ from __future__ import annotations
 
 import hashlib
 import logging
+import os
 import time
 from typing import Dict, List, Optional
+
+from neuron.runtime_safety import (
+    ImmutableRuntimeConfiguration, LiveModeSafetyError, RuntimeConfigurationError,
+    RuntimePolicy, load_runtime_policy,
+)
 
 from neuron.composer.allocator import AllocationError, ResourceAllocator
 from neuron.composer.blueprints import BLUEPRINT_REGISTRY, get_blueprint, list_blueprints
@@ -43,15 +45,15 @@ class ComposerError(Exception):
     pass
 
 
-class VAMSResourceComposer:
+class VAMSResourceComposer(ImmutableRuntimeConfiguration):
     """
     Top-level Resource Composition Engine.
 
-    Connects the CandidateScorer and ResourceAllocator with the live
-    HardwareRegistry to provide blueprint-driven infrastructure provisioning.
+    Explicit non-live simulation connecting scoring and allocation. Returned
+    plans create no provider resource, execution receipt, escrow or payment.
 
     Usage:
-        composer = VAMSResourceComposer()
+        composer = VAMSResourceComposer(simulation=True)  # VAMS_ENV=test/local/demo
 
         # Option 1: Provision a pre-defined blueprint
         instance = composer.provision_blueprint("AI_INFERENCE_STANDARD")
@@ -61,9 +63,11 @@ class VAMSResourceComposer:
         instance = composer.provision(bp)
 
         # Manage
-        composer.list_active_instances()
+        composer.list_instances()
         composer.deprovision(instance.instance_id)
     """
+
+    _immutable_runtime_fields = frozenset({"simulation", "runtime_policy", "_runtime_environ", "_service_client"})
 
     def __init__(
         self,
@@ -71,11 +75,34 @@ class VAMSResourceComposer:
         allocator: Optional[ResourceAllocator] = None,
         registry_client=None,  # Optional HardwareRegistryClient
         service_client: Optional[ServiceBlockClient] = None,
+        *,
+        simulation: bool = False,
+        policy: Optional[RuntimePolicy] = None,
     ):
+        if type(simulation) is not bool:
+            raise RuntimeConfigurationError("Composer simulation must be a boolean")
+        if policy is not None and type(policy) is not RuntimePolicy:
+            raise RuntimeConfigurationError("Composer requires a RuntimePolicy")
+        self._runtime_environ = os.environ
+        self.runtime_policy = None
+        if simulation or policy is not None:
+            observed = load_runtime_policy(self._runtime_environ)
+            if policy is not None and policy != observed:
+                raise RuntimeConfigurationError("Conflicting Composer runtime policy")
+            observed.authorize_component_mock("Composer simulation", simulation)
+            self.runtime_policy = observed
+        self.simulation = simulation
+        if service_client is not None:
+            if (not isinstance(service_client, ServiceBlockClient)
+                    or service_client.simulation != simulation
+                    or service_client.runtime_policy != self.runtime_policy):
+                raise RuntimeConfigurationError("Composer and ServiceBlockClient configuration differs")
+        self._service_client = service_client if service_client is not None else ServiceBlockClient(
+            simulation=simulation, policy=policy,
+        )
         self.scorer = scorer or CandidateScorer()
         self.allocator = allocator or ResourceAllocator()
         self._registry_client = registry_client
-        self._service_client = service_client or ServiceBlockClient()
 
         # Active instance tracking
         self._instances: Dict[str, ProvisionedInstance] = {}
@@ -86,7 +113,21 @@ class VAMSResourceComposer:
             "total_deprovisions": 0,
             "failed_provisions": 0,
             "active_instances": 0,
+            "total_simulations": 0,
+            "failed_simulations": 0,
+            "simulated_instances": 0,
+            "removed_simulations": 0,
         }
+        self._freeze_runtime_configuration()
+
+    def assert_simulation_available(self) -> None:
+        if not self.simulation or self.runtime_policy is None:
+            raise LiveModeSafetyError("Authenticated Composer provider execution unavailable")
+        observed = load_runtime_policy(self._runtime_environ)
+        if observed != self.runtime_policy:
+            raise RuntimeConfigurationError("Composer runtime policy changed")
+        observed.authorize_component_mock("Composer simulation", True)
+        self._service_client.assert_simulation_available()
 
     # ──────────────────────────────────────────────────
     # Public API — Provisioning
@@ -98,7 +139,7 @@ class VAMSResourceComposer:
         node_data: Optional[List[RawNodeData]] = None,
     ) -> ProvisionedInstance:
         """
-        Provision resources for a blueprint.
+        Simulate a local allocation; creates no external resource or receipt.
 
         Args:
             blueprint: The resource requirements
@@ -111,7 +152,8 @@ class VAMSResourceComposer:
         Raises:
             ComposerError: If provisioning fails
         """
-        logger.info(f"Provisioning blueprint: {blueprint.name}")
+        self.assert_simulation_available()
+        logger.info(f"Simulating blueprint: {blueprint.name}")
 
         try:
             # Step 1: Get candidate nodes
@@ -124,7 +166,10 @@ class VAMSResourceComposer:
                 )
 
             # Step 2: Score candidates
-            scored = self.scorer.score(blueprint, node_data)
+            try:
+                scored = self.scorer.score(blueprint, node_data)
+            except ValueError as exc:
+                raise ComposerError("Invalid scoring input or configuration") from exc
             if not scored:
                 raise ComposerError(
                     f"No candidates passed quality filters for '{blueprint.name}'"
@@ -133,31 +178,34 @@ class VAMSResourceComposer:
             # Step 3: Allocate
             plan = self.allocator.allocate(blueprint, scored)
 
+            # Collaborator callbacks must not publish a result after policy drift.
+            self.assert_simulation_available()
+
             # Step 4: Create provisioned instance
             instance_id = self._generate_instance_id(blueprint)
             instance = ProvisionedInstance(
                 instance_id=instance_id,
                 blueprint=blueprint,
                 allocation=plan,
-                status=AllocationStatus.ACTIVE,
+                status=AllocationStatus.SIMULATED,
                 expires_at=time.time() + blueprint.max_duration_seconds,
             )
 
             # Step 5: Track instance
             self._instances[instance_id] = instance
-            self._stats["total_provisions"] += 1
-            self._stats["active_instances"] = len(self._instances)
+            self._stats["total_simulations"] += 1
+            self._stats["simulated_instances"] += 1
 
             logger.info(
-                f"Provisioned instance {instance_id}: "
+                f"Simulated allocation {instance_id}: "
                 f"{plan.total_nodes} nodes, "
                 f"${plan.total_hourly_cost:.2f}/hr"
             )
             return instance
 
         except (AllocationError, ComposerError) as e:
-            self._stats["failed_provisions"] += 1
-            logger.error(f"Provisioning failed for '{blueprint.name}': {e}")
+            self._stats["failed_simulations"] += 1
+            logger.error(f"Simulation failed for '{blueprint.name}': {e}")
             raise ComposerError(str(e)) from e
 
     def provision_blueprint(
@@ -166,6 +214,7 @@ class VAMSResourceComposer:
         node_data: Optional[List[RawNodeData]] = None,
     ) -> ProvisionedInstance:
         """Provision a pre-defined blueprint by name."""
+        self.assert_simulation_available()
         bp = get_blueprint(blueprint_name)
         return self.provision(bp, node_data)
 
@@ -174,7 +223,8 @@ class VAMSResourceComposer:
         block_name: str,
         node_data: Optional[List[RawNodeData]] = None,
     ) -> ProvisionedInstance:
-        """Provision a registered Service Block."""
+        """Simulate a Service Block declaration; not a registry read."""
+        self.assert_simulation_available()
         bp = self._service_client.resolve_blueprint(block_name)
         return self.provision(bp, node_data)
 
@@ -183,7 +233,8 @@ class VAMSResourceComposer:
         macro_name: str,
         node_data: Optional[List[RawNodeData]] = None,
     ) -> List[ProvisionedInstance]:
-        """Provision a composite Macro Service Block."""
+        """Simulate a composite Macro Service Block."""
+        self.assert_simulation_available()
         blueprints = self._service_client.resolve_macro(macro_name)
         instances = []
         for bp in blueprints:
@@ -196,21 +247,23 @@ class VAMSResourceComposer:
 
     def deprovision(self, instance_id: str) -> bool:
         """
-        Deprovision an active instance.
-        Releases resources and settles payments.
+        Remove a simulated local record, even after runtime drift.
+        No provider resource is released and no payment is made or earned.
         """
         instance = self._instances.get(instance_id)
         if not instance:
             logger.warning(f"Instance {instance_id} not found")
             return False
 
-        instance.status = AllocationStatus.TERMINATED
+        if instance.status is not AllocationStatus.SIMULATED:
+            raise LiveModeSafetyError("Authenticated provider deprovisioning unavailable")
+        instance.status = AllocationStatus.SIMULATION_REMOVED
         del self._instances[instance_id]
 
-        self._stats["total_deprovisions"] += 1
-        self._stats["active_instances"] = len(self._instances)
+        self._stats["removed_simulations"] += 1
+        self._stats["simulated_instances"] -= 1
 
-        logger.info(f"Deprovisioned instance {instance_id}")
+        logger.info(f"Removed local simulation {instance_id}")
         return True
 
     def get_instance(self, instance_id: str) -> Optional[ProvisionedInstance]:
@@ -219,6 +272,10 @@ class VAMSResourceComposer:
 
     def list_active_instances(self) -> List[ProvisionedInstance]:
         """List all active provisioned instances."""
+        return [i for i in self._instances.values() if i.status is AllocationStatus.ACTIVE]
+
+    def list_instances(self) -> List[ProvisionedInstance]:
+        """Inspect local records without issuing new authority, including after drift."""
         return list(self._instances.values())
 
     def get_stats(self) -> dict:
@@ -247,10 +304,15 @@ class VAMSResourceComposer:
         Returns:
             List of dicts: [{provider, node_id, amount, share_pct}, ...]
         """
-        if not plan.nodes or plan.total_nodes == 0:
+        # The allocator produces assignments/allocated_units. The older nodes
+        # shape remains quote-only compatibility and never creates calldata.
+        nodes = ([(n, n.allocated_units) for n in plan.assignments]
+                 if isinstance(plan, AllocationPlan)
+                 else [(n, n.capacity_units) for n in plan.nodes])
+        if not nodes or plan.total_nodes == 0:
             return []
 
-        total_capacity = sum(n.capacity_units for n in plan.nodes)
+        total_capacity = sum(capacity for _, capacity in nodes)
         if total_capacity == 0:
             return []
 
@@ -261,8 +323,8 @@ class VAMSResourceComposer:
         splits = []
         calculator = GasAbstractionPremiumCalculator()
 
-        for node in plan.nodes:
-            share = node.capacity_units / total_capacity
+        for node, capacity in nodes:
+            share = capacity / total_capacity
             amount = max_hourly * share
 
             required_blocks = getattr(blueprint, "required_service_blocks", [])
@@ -277,49 +339,33 @@ class VAMSResourceComposer:
                 "premium_surcharge": round(premium_surcharge, 6),
                 "total_cost": round(total_cost, 6),
                 "share_pct": round(share * 100, 2),
-                "capacity_units": node.capacity_units,
+                "capacity_units": capacity,
             })
 
         return splits
 
-    def get_escrow_params(
+    def get_escrow_params(self, *args, **kwargs):
+        raise ComposerError("Unbound escrow parameters retired; use build_escrow_request with integer token units")
+
+    def build_escrow_request(self, transaction_builder, **request):
+        from neuron.composer.settlement import SettlementTransactionBuilder
+        if type(transaction_builder) is not SettlementTransactionBuilder:
+            raise ComposerError("Typed bound settlement builder required")
+        return transaction_builder.build(**request)
+
+    def get_payment_quote(
         self,
         plan: AllocationPlan,
         blueprint: InstanceBlueprint,
         duration_seconds: int = 3600,
-        builder_rev_share_bps: int = 0,
-        builder_address: str = "",
     ) -> Dict:
-        """
-        Produce the parameters needed for a ComposedSettlement.createComposedEscrow() call.
-
-        Args:
-            plan: The allocation plan.
-            blueprint: The originating blueprint.
-            duration_seconds: Escrow validity window.
-            builder_rev_share_bps: Builder revenue share (BPS).
-            builder_address: Builder's address.
-
-        Returns:
-            Dict with providers, amounts, validForSeconds, blueprintHash, etc.
-        """
+        """Return a non-authoritative price quote; never transaction calldata."""
         splits = self.calculate_payment_splits(plan, blueprint)
         if not splits:
             raise ComposerError("No payment splits available for plan")
 
         providers = [s["provider"] for s in splits]
         amounts = [s["amount"] for s in splits]
-
-        blueprint_hash = hashlib.sha256(
-            f"{blueprint.name}:{blueprint.compute.gpu_type.value}".encode()
-        ).hexdigest()
-
-        service_block_id = ""
-        # Check if the blueprint name corresponds to a registered service block
-        from neuron.services.registry_client import _SERVICE_BLOCK_BLUEPRINTS
-        if blueprint.name in _SERVICE_BLOCK_BLUEPRINTS:
-            # Generate deterministic block ID using name
-            service_block_id = f"0x{hashlib.sha256(blueprint.name.encode()).hexdigest()}"
 
         calculator = GasAbstractionPremiumCalculator()
         required_blocks = getattr(blueprint, "required_service_blocks", [])
@@ -333,12 +379,11 @@ class VAMSResourceComposer:
 
         return {
             "providers": providers,
-            "amounts": amounts,
-            "validForSeconds": duration_seconds,
-            "blueprintHash": f"0x{blueprint_hash}",
-            "serviceBlockId": service_block_id,
-            "builderRevShareBps": builder_rev_share_bps,
-            "builderAddress": builder_address,
+            "quotedAmounts": amounts,
+            "durationSeconds": duration_seconds,
+            "blueprintName": blueprint.name,
+            "authoritative": False,
+            "transactionReady": False,
             "splits": splits,
             "gasPremiumBps": gas_premium_bps,
             "totalCostWithPremium": round(total_cost_with_premium, 6),
@@ -393,4 +438,5 @@ class VAMSResourceComposer:
         """Generate a unique instance identifier."""
         payload = f"{blueprint.name}:{time.time()}:{id(blueprint)}"
         return f"vams-{hashlib.sha256(payload.encode()).hexdigest()[:12]}"
+
 

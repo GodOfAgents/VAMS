@@ -1,6 +1,8 @@
 # Multi-DA Performance Audit (`neuron/da/`)
 
-This package implements the Phase 0 (Foundation) satellite DA namespace logic.
+This package contains DA report/receipt models, one Celestia API adapter with
+live submission/retrieval code paths, non-live simulations, and structured
+stubs. It is not a deployed or release-qualified multi-provider DA service.
 
 ## Overview
 It prepares sanitized performance reports (SLA checks and node benchmarks) for
@@ -12,10 +14,12 @@ retrieval artifacts bound by the audit evidence manifest.
 - `performance_audit.py`: The `PerformanceAuditLog` orchestrator. Mock receipts
   are explicitly unverified, and live publication succeeds only after exact
   retrieval.
-- `adapters/`: Contains the actual implementations for various DA networks.
-  - `celestia_adapter.py`: Operational Celestia Mocha adapter. RPC failures fail
-    closed and never mint fallback receipts; the adapter is not independently
-    eligible as release evidence.
+- `adapters/`: Contains provider code paths at different implementation
+  stages.
+  - `celestia_adapter.py`: Celestia Mocha submission and exact-retrieval code
+    paths. RPC failures fail closed and never mint fallback receipts. The
+    adapter does not establish DAS or inclusion/finality and is not eligible
+    as independent release evidence.
   - `near_adapter.py`: Local simulation only until signed submission and exact
     retrieval are implemented.
   - `avail_adapter.py` / `eigenda_adapter.py`: Local structured stubs only.

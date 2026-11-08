@@ -4,6 +4,8 @@
 //! bounded byte strings. It rejects maps, tags, floats, text, indefinite
 //! lengths, non-minimal integers, unknown versions, and trailing bytes.
 
+pub mod action_context;
+
 use std::fmt;
 use std::num::NonZeroU64;
 

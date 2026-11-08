@@ -1,0 +1,31 @@
+{
+  "expected_result": "accept control",
+  "family_id": "seed_reference_and_datum_binding",
+  "files": {
+    "raw_inputs": {
+      "path": "positive_control/raw_inputs.cbor",
+      "sha256": "4b20e2b2cf4bd58b1f6e385c90ffd098d583df69d95fbc7b1fcc2591da72b9fe",
+      "size_bytes": 73
+    },
+    "raw_outputs": {
+      "path": "positive_control/raw_outputs.cbor",
+      "sha256": "9cdf345a785f51763bdb43f1b1ba0c20b5545051f03051e6a7bf726ea128c56a",
+      "size_bytes": 79
+    },
+    "transaction": {
+      "path": "positive_control/transaction.cbor",
+      "sha256": "765c717f16b543c746b88742e8b775cd3ecabca4fef6edd16702184683780a28",
+      "size_bytes": 5099
+    }
+  },
+  "funding_witnesses": "previously accepted base-witness set; byte-identical copy",
+  "id": "valid_positive_control",
+  "schema_version": "f05-2a-r4-family-positive-control-v1",
+  "source": "accepted typed positive control, copied byte-for-byte",
+  "status": "control-only; no new simulator execution",
+  "target": {
+    "applied_script_hash": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+    "policy_id": "9d669aafdc912fde12f7b6e47cd0010dfa48ea9766e60af220608731",
+    "purpose": "Mint[0]"
+  }
+}

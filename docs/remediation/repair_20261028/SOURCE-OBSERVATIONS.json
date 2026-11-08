@@ -1,0 +1,139 @@
+{
+  "schema": "vams.governance-source-observations.v1",
+  "date": "2026-10-28",
+  "official_findings_status_changed": false,
+  "native_executions": 0,
+  "records": [
+    {
+      "id": "AUTHENTICATED_SOURCE",
+      "status": "SOURCE_CONFIRMED_NATIVE_NOT_RUN",
+      "source": {
+        "path": "cardano/validators/timelock.ak",
+        "sha256": "7a2a07f6ef576901fd7fceea059ccfe7cbafde424249a9c5a7d19bba60d4dae3",
+        "line": 65,
+        "anchor": "list.find(tx.inputs, fn(_input) { True })"
+      },
+      "observation": "Cancel authenticates members from the first arbitrary datum rather than a pinned authority token/script."
+    },
+    {
+      "id": "IMMUTABLE_CONTINUATION",
+      "status": "SOURCE_CONFIRMED_NATIVE_NOT_RUN",
+      "source": {
+        "path": "cardano/validators/governor.ak",
+        "sha256": "f9383fce703a59a38bece4c78b107e636554e6c427671a83ac0aa6b4b96ace6e",
+        "line": 59,
+        "anchor": "datum.config.members == before.config.members"
+      },
+      "observation": "Authority continuation checks only selected fields and does not bind the exact mint/action/value transaction."
+    },
+    {
+      "id": "VOTER_CONTINUITY",
+      "status": "SOURCE_CONFIRMED_NATIVE_NOT_RUN",
+      "source": {
+        "path": "cardano/validators/governor.ak",
+        "sha256": "f9383fce703a59a38bece4c78b107e636554e6c427671a83ac0aa6b4b96ace6e",
+        "line": 200,
+        "anchor": "proposal_immutable(before, after) && after.status == ProposalPending"
+      },
+      "observation": "Length plus existence of one new voter does not preserve previous voter records or actual custody."
+    },
+    {
+      "id": "QUEUE_BINDING",
+      "status": "SOURCE_CONFIRMED_NATIVE_NOT_RUN",
+      "source": {
+        "path": "cardano/validators/governor.ak",
+        "sha256": "f9383fce703a59a38bece4c78b107e636554e6c427671a83ac0aa6b4b96ace6e",
+        "line": 156,
+        "anchor": "list.length(tx.inputs) >= 2"
+      },
+      "observation": "Queue does not bind the exact passed proposal/action, authority nonce, mint/burn, intent or refunds."
+    },
+    {
+      "id": "POLICY_SCRIPT_SEPARATION",
+      "status": "SOURCE_CONFIRMED_NATIVE_NOT_RUN",
+      "source": {
+        "path": "cardano/validators/governance_policies.ak",
+        "sha256": "b831118b2052cd23ebe2974dfc0000d6851303091d9d8b4f1c7c1432d34a9559",
+        "line": 90,
+        "anchor": "find_input_script_policy(tx)"
+      },
+      "observation": "A payment script hash is inferred as a token policy ID; separate role identities need authenticated binding."
+    },
+    {
+      "id": "NORMAL_DELAY",
+      "status": "SPEC_SOURCE_DISCREPANCY",
+      "source": {
+        "path": "docs/remediation/m3_2a_r7/GOVERNANCE_SPEC.json",
+        "sha256": "973fa224f3ac46017be18c378027c8cf5067d103b8c118a86ae2e0e4ce0d2302",
+        "line": 153,
+        "anchor": "\"normal_delay_ms\": 86400000"
+      },
+      "observation": "Historical frozen24h remains distinct from active48h amendment. v2 explicitly fixes48h without rewriting history."
+    },
+    {
+      "id": "VOTING_FUNDING",
+      "status": "SPEC_VALUE_CONTRADICTION",
+      "source": {
+        "path": "docs/remediation/m3_2a_r7/GOVERNANCE_SPEC.json",
+        "sha256": "973fa224f3ac46017be18c378027c8cf5067d103b8c118a86ae2e0e4ce0d2302",
+        "line": 82,
+        "anchor": "\"auxiliary_funding\":"
+      },
+      "observation": "An ADA-only auxiliary input cannot supply the newly locked VAMS. v2 voter input explicitly carries real VAMS."
+    },
+    {
+      "id": "RECEIPT_WIDTH_FALSE_POSITIVE",
+      "status": "WITHDRAWN",
+      "source": {
+        "path": "cardano/lib/vams/governance.ak",
+        "sha256": "83143073f50a45ee0d45d80c0218a57a278951e2c6de6a9c8b6e41394b8cb077",
+        "line": 171,
+        "anchor": "pub fn receipt_asset_name("
+      },
+      "counterevidence": {
+        "path": "aiken/primitive/bytearray.ak",
+        "sha256": "04d6a4979713b3abe26cf22dc3f18ca391b309471813c23f3c434844e88b75e5",
+        "line": 324,
+        "anchor": "builtin.slice_bytearray(start, end - start + 1, self)"
+      },
+      "observation": "Pinned slice indexes are inclusive:0..31 returns32bytes. No legacy truncation defect or repair is claimed."
+    }
+  ],
+  "voter_counterexample": {
+    "scope": "Exact mathematical predicate counterexample only; no native/signed/ledger exploit claim",
+    "before": {
+      "locks": [
+        "Alice:100:true:weight10"
+      ],
+      "yes_weight": 10,
+      "no_weight": 0
+    },
+    "requested_vote": {
+      "voter": "Bob",
+      "locked": 900,
+      "support": true,
+      "weight": 30
+    },
+    "after": {
+      "locks": [
+        "Carol:100:true:weight10",
+        "Bob:900:true:weight30"
+      ],
+      "yes_weight": 40,
+      "no_weight": 0
+    },
+    "legacy_conditions": {
+      "immutable_proposal_fields_equal": true,
+      "length_increased_by_one": true,
+      "new_voter_absent_before": true,
+      "contains_requested_new_vote": true,
+      "tally_delta_matches_new_vote": true
+    },
+    "violated_requirement": "Alice record disappeared. The v2 exact constructed continuation does not accept this replacement."
+  },
+  "limits": [
+    "Source logic and arithmetic do not establish an authenticated on-chain exploit.",
+    "Existing F02/F03 stay open until native/ledger/caller/budget/independent acceptance.",
+    "The38 prepared cases do not discharge81 retained historical acceptance obligations."
+  ]
+}

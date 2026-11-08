@@ -22,10 +22,12 @@ has been evidenced in the repository; see `contracts/CONTRACTS.md`.
 
 ## Live-Route Boundary
 
-Celestia and Near remain candidate DA integrations, but neither current adapter
-qualifies as VDSO live evidence: Near does not submit/retrieve the blob, and
-Celestia can silently return a mock receipt. VDSO blocks both until a reviewed
-signed-submission and exact-retrieval proof path exists. Avail, EigenDA, OMS
+Celestia has live submission and exact-retrieval code paths, but live RPC
+failures raise an error and mock receipts require explicit mock mode. Near live
+submission is disabled, verification returns false, and retrieval is not
+implemented. Neither current adapter qualifies as VDSO release evidence:
+independent receipt observation, retrieval and payload matching, and reviewed
+provenance are still required. Avail, EigenDA, OMS
 identity, Trails, Coinme, TEE, bridge, interrupt, and storage integrations must
 also fail closed when configured as mocks in testnet or production environments.
 Live deployment also requires Caddy TLS, loopback Uvicorn, DID administration,

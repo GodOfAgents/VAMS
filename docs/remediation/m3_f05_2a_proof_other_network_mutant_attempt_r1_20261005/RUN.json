@@ -1,0 +1,85 @@
+{
+  "schema_version": "f05-2a-proof-domain-mutant-sim-attempt-r1",
+  "case_id": "r2_signature_for_other_network",
+  "decision": "R4.1 proof-domain B",
+  "attempt": {
+    "label": "r2_signature_for_other_network same-negative one-guard network-magic mutant through immutable R3 runner",
+    "argv": [
+      "/home/GodOfAgents/vams-evidence/toolchains/python/bin/python3.12",
+      "/home/GodOfAgents/code/VAMS-testnet/scripts/remediation/f05_2a_tx_sim_runner_r3.py",
+      "--aiken",
+      "/home/GodOfAgents/vams-evidence/toolchains/aiken-1.1.21/aiken",
+      "--tx",
+      "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m3_f05_2a_proof_other_network_mutant_r1_20261005/r2_signature_for_other_network/mutant.tx.cbor",
+      "--raw-inputs",
+      "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m3_f05_2a_proof_other_network_mutant_r1_20261005/r2_signature_for_other_network/mutant.raw_inputs.cbor",
+      "--raw-outputs",
+      "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m3_f05_2a_proof_other_network_mutant_r1_20261005/r2_signature_for_other_network/mutant.raw_outputs.cbor",
+      "--policy-id",
+      "1283ba4e5c442925fb9d6d26c3376f3fdb756d091c744fdd9ccd10e7"
+    ],
+    "cwd": "/home/GodOfAgents/code/VAMS-testnet",
+    "python_version": "Python 3.12.14",
+    "aiken_version": "aiken v1.1.21+42babe5",
+    "aiken_sha256": "07f3f927f1a8c71fc61273fdff850d9b98edb28dde207c8a32585991f2c88e79",
+    "runner_sha256": "3088ade0a316f6af59c04fe3e1675733100b58be826fa22af3c25e40a086ea5c",
+    "wrapper_exit_code": 0,
+    "runner_result": {
+      "schema_version": "f05-2a-tx-sim-run-result-r3",
+      "simulator_child_exit": 0,
+      "simulator_result": {
+        "stage": "script_accepted",
+        "target_script_invoked": true
+      },
+      "cleanup": {
+        "child_reaped": true,
+        "process_group_empty": true,
+        "snapshot_descriptors_closed": true,
+        "status": "clean"
+      },
+      "submitted_sha256": {
+        "transaction": "01dfefa7f51d227cd1cedecd9811244c3a27bd50675868450a75d320647d1c9f",
+        "raw_inputs": "5e935c48cc9d4e82e6dbedce94b2fbd3fb427f5e187bbe67ed376671ba5e4fec",
+        "raw_outputs": "20845aab7a64a2c6d05bc3ef297ba7693ea314f90b0a5f85f207d85b7ccb9f19"
+      },
+      "submitted_size_bytes": {
+        "transaction": 5104,
+        "raw_inputs": 73,
+        "raw_outputs": 79
+      },
+      "target_mint_binding": {
+        "expected_policy_id": "1283ba4e5c442925fb9d6d26c3376f3fdb756d091c744fdd9ccd10e7",
+        "compiled_script_hash": "1283ba4e5c442925fb9d6d26c3376f3fdb756d091c744fdd9ccd10e7",
+        "policy_ids": [
+          "1283ba4e5c442925fb9d6d26c3376f3fdb756d091c744fdd9ccd10e7"
+        ]
+      }
+    },
+    "capture_note": "Exact structured runner result returned by scoped execution and transcribed locally; raw simulator stdout/stderr and external attestation are not retained."
+  },
+  "fixture": {
+    "path": "docs/remediation/m3_f05_2a_proof_other_network_mutant_r1_20261005/r2_signature_for_other_network",
+    "original_case_id_preserved": true,
+    "original_assertion": "sign_tuple_with_another_network_magic",
+    "applied_policy_id": "1283ba4e5c442925fb9d6d26c3376f3fdb756d091c744fdd9ccd10e7",
+    "applied_script_sha256": "04510ae61ebef381e23dab53913142678d33b1145c9c7594a37c1d3ecf7cbc00",
+    "transaction_sha256": "01dfefa7f51d227cd1cedecd9811244c3a27bd50675868450a75d320647d1c9f",
+    "proof_message_sha256": "87b2d24f30ca078e33b98f6d34616d91be975e32643655f7a34466afd0731c7f",
+    "preexecution_review_sha256": "1d92f77fcd16b90c19ebb1330f46aa7175eea84b74e635f89120b7a0cf07b6f7",
+    "normal_negative_run_sha256": "e31385db7d8c0e0b7ebc4610298813ed66373a59a736109d354db4addc9ec179",
+    "normal_negative_review_sha256": "ffa6066975cb41f950a0d6d601e2fe18384c37055ba212ba179243717d97d0fe",
+    "private_keys_persisted": false,
+    "valid_body_bound_ephemeral_funding_signatures": true,
+    "value_conservation": true
+  },
+  "credit": {
+    "positive_control": "accepted synthetic control",
+    "negative_case": null,
+    "mutation_suite": false,
+    "original_policy": false,
+    "ledger_admission": false,
+    "live_network": false
+  },
+  "scope": "synthetic test-only alternate applied-policy mutant attribution control; R19 does not add mutation-suite or negative-case credit until independent integrated review; no original-policy, full-ledger-admission, Pre-Prod, or live-network credit",
+  "case_status": "PENDING awaiting independent integrated triad review"
+}

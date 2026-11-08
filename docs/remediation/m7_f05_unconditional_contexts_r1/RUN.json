@@ -1,0 +1,67 @@
+{
+  "schema": "f05-unconditional-contexts-slice-v1",
+  "source_sha256": "1db507fe0559216a28d3768deaf12e1d56ecb76f51ef8cad1c5cec1f4449550b",
+  "test_sha256": "a8b5ae20ed7cdb49900c23ada6fb6c79a484f8e8cb782d6cbf6d35b063e46662",
+  "focused_tests": {
+    "command": "bwrap --unshare-net --ro-bind / / --tmpfs /tmp --dev-bind /dev /dev --proc /proc --chdir /home/GodOfAgents/code/VAMS-testnet -- /home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python -B -m pytest -q -p no:cacheprovider scripts/remediation/test_f05_2a_unconditional_contexts.py scripts/remediation/test_f05_2a_inline_datum_mutant_anchor.py scripts/remediation/test_f05_2a_rebind_policy_order.py scripts/remediation/test_f05_2a_address_encoding.py scripts/remediation/test_f05_2a_uplc_alias.py scripts/remediation/test_f05_2a_harness_diagnostics.py",
+    "exit_code": 0,
+    "passed": 99
+  },
+  "full_harness": {
+    "command": [
+      "bwrap",
+      "--unshare-net",
+      "--ro-bind",
+      "/",
+      "/",
+      "--tmpfs",
+      "/tmp",
+      "--dev-bind",
+      "/dev",
+      "/dev",
+      "--proc",
+      "/proc",
+      "--bind",
+      "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m7_f05_unconditional_contexts_r1",
+      "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m7_f05_unconditional_contexts_r1",
+      "--chdir",
+      "/home/GodOfAgents/code/VAMS-testnet",
+      "/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python",
+      "-B",
+      "/home/GodOfAgents/code/VAMS-testnet/scripts/remediation/test_f05_2a_authority_bootstrap_public.py",
+      "--aiken",
+      "/home/GodOfAgents/vams-evidence/toolchains/aiken-1.1.21/unpacked/aiken-x86_64-unknown-linux-musl/aiken",
+      "--output",
+      "/home/GodOfAgents/code/VAMS-testnet/docs/remediation/m7_f05_unconditional_contexts_r1/HARNESS_RESULT.json"
+    ],
+    "exit_code": 0,
+    "protected_file_count": 26,
+    "protected_unchanged": true,
+    "result_created": true,
+    "result_sha256": "c9d6eed4d607f49ed4ac0a4fe448e2833f7a0064f8ea5981b34b78536f5e87a8",
+    "status": "pass",
+    "case_rows": 57,
+    "mutation_rows": 21,
+    "unconditional_subcases": 55,
+    "unique_subcase_ids": 55,
+    "subcases_accepted": 55,
+    "subcase_exit_codes": {
+      "0": 55
+    },
+    "distinct_unconditional_policy_ids": 7,
+    "applied_variant_ids": {
+      "applied_genesis_parameter": "534a017ad44b53851ef6d2659bf44768a67316d99979ff097b2a7f62",
+      "applied_keys_parameter": "17fb76001b9b9a1ce58c7da27ed34b3a5f018fbd1d65e99fd592b666",
+      "applied_keys_bad_count": "6406612b3279c8f9e90bc83ebcd49eb46b1f54c62378fba35113cab8",
+      "applied_keys_bad_length": "1ce2a5344f914f67578be86c2147d56670d318250bf304e401c719c1",
+      "applied_keys_duplicate": "eaf23cc82d3632ca79fe98af46b86f9d94e14f4e8ad059787e8795af",
+      "applied_keys_unsorted": "b9915d37cd2ea767ac47aee2193ef34515153facdd54f4a9c090e1c6"
+    }
+  },
+  "ledger": "unchanged pending review: 45/55 negatives PASS; 18/21 mutations PASS",
+  "limitations": [
+    "owner classification for six applied-parameter and four proof-domain cases",
+    "individual mutant script CBOR/policy derivation not separately preserved",
+    "synthetic UPLC evaluation is not ledger admission or live-network evidence"
+  ]
+}

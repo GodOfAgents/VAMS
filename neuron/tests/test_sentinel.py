@@ -3,19 +3,15 @@ Tests for the VAMS Sentinel monitoring network.
 """
 import pytest
 import asyncio
-import os
-import sys
 from unittest.mock import AsyncMock, patch, MagicMock
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-from sentinel.challenges.cpu_benchmark import CPUBenchmark
-from sentinel.challenges.gpu_benchmark import GPUBenchmark
-from sentinel.challenges.storage_iops import StorageBenchmark
-from sentinel.challenges.memory_bandwidth import MemoryBenchmark
-from sentinel.challenges.latency_probe import LatencyBenchmark
-from sentinel.da_publisher import DAPublisher
-from sentinel.sentinel_node import VAMSSentinelNode
+from neuron.sentinel.challenges.cpu_benchmark import CPUBenchmark
+from neuron.sentinel.challenges.gpu_benchmark import GPUBenchmark
+from neuron.sentinel.challenges.storage_iops import StorageBenchmark
+from neuron.sentinel.challenges.memory_bandwidth import MemoryBenchmark
+from neuron.sentinel.challenges.latency_probe import LatencyBenchmark
+from neuron.sentinel.da_publisher import DAPublisher
+from neuron.sentinel.sentinel_node import VAMSSentinelNode
 import time
 
 @pytest.mark.asyncio
@@ -68,7 +64,7 @@ class TestSentinelChallenges:
         
     # ═══════════════════ Latency Probe Tests ═══════════════════
     @patch(
-        "sentinel.challenges.latency_probe.time.perf_counter",
+        "neuron.sentinel.challenges.latency_probe.time.perf_counter",
         side_effect=[
             0.000,
             0.002,
@@ -83,7 +79,7 @@ class TestSentinelChallenges:
         ],
     )
     @patch(
-        "sentinel.challenges.latency_probe.asyncio.sleep",
+        "neuron.sentinel.challenges.latency_probe.asyncio.sleep",
         new_callable=AsyncMock,
     )
     async def test_latency_probe_success(self, mock_sleep, _mock_clock):
@@ -132,22 +128,30 @@ class TestSentinelNode:
 
         assert node._scheduler_delay(5) == 0.0
     
-    @patch("sentinel.da_publisher.DAPublisher.publish_report")
-    @patch("sentinel.challenges.latency_probe.LatencyBenchmark.run")
+    @patch("neuron.sentinel.sentinel_node.PerformanceAuditLog.publish_sentinel_report")
+    @patch("neuron.sentinel.challenges.latency_probe.LatencyBenchmark.run")
     async def test_audit_node_success(self, mock_run, mock_publish):
-        from sentinel.challenges.base_challenge import ChallengeResult
+        from neuron.sentinel.challenges.base_challenge import ChallengeResult
+        from neuron.da.models import DAProtocol
         mock_run.return_value = ChallengeResult(
             success=True, score=10000, kpis={"avg_rtt": 2.0}, passed=True
         )
         # Needs async mock since python 3.8 AsyncMock
-        mock_publish.return_value = {"success": True, "daHeight": 1000, "daCommitment": "abc"}
+        mock_publish.return_value = {
+            "success": True,
+            "protocol": "near",
+            "daHeight": 1000,
+            "daCommitment": "abc",
+        }
         
         node = VAMSSentinelNode()
         res = await node.audit_node(b"1234"*8, "http://test", "latency", b"NETWORK_10G")
         assert res is True
+        mock_publish.assert_awaited_once()
+        assert mock_publish.await_args.kwargs["da_target"] is DAProtocol.NEAR_DA
 
     async def test_continual_learning_negative_gain_is_telemetry_only(self):
-        from sentinel.challenges.base_challenge import ChallengeResult
+        from neuron.sentinel.challenges.base_challenge import ChallengeResult
 
         class MockGainChallenge:
             async def run(self, endpoint):
@@ -179,7 +183,7 @@ class TestSentinelNode:
         assert gain["regionalBonusImpact"] == "none"
 
     async def test_world_state_fidelity_is_telemetry_only(self):
-        from sentinel.challenges.base_challenge import ChallengeResult
+        from neuron.sentinel.challenges.base_challenge import ChallengeResult
 
         class MockWorldStateChallenge:
             async def run(self, endpoint):

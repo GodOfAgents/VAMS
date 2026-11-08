@@ -1,27 +1,22 @@
 """
 VAMS Neuron - Trust Aggregator Client (v2 — Plugin Architecture)
 ================================================================
-Client-side aggregator for the pluggable proof system.
-Discovers available plugins, collects proofs, and submits them to
-the VAMSTrustAggregator contract.
-
-Changes from v1:
-- Replaced hardcoded VAMSProofType IntEnum with bytes32 plugin identifiers
-- Auto-discovers plugins from neuron/trust_plugins/
-- Queries on-chain registry for active plugins
-- Uses submitPluginProof() ABI for new plugin proofs
-- Preserves submitProof() fallback for legacy Decagon proofs
+Collection interface for locally discovered proof plugins. Provider evidence
+requires its own authentic verification; collection does not submit a transaction
+or query an on-chain plugin registry. Both unbound submission methods are
+unavailable pending an authenticated action/root-bound backend and finality receipt.
+Legacy research/TEE/identity fixtures are restricted to non-live runtimes.
 """
 
-import time
-import os
 from typing import Dict, List, Any, Optional
 from enum import IntEnum
 from web3 import Web3
 
 # Import plugin system
 from ..trust_plugins import discover_plugins
-from ..trust_plugins.tee_plugin import BaseProofPlugin, ProofResult
+from ..trust_plugins.tee_plugin import BaseProofPlugin, ProofResult, TEEProofPlugin
+from ..trust_plugins.zkml_plugin import ZKMLProofPlugin
+from ..runtime_safety import LiveModeSafetyError, load_runtime_policy
 
 # Legacy imports preserved for backward compatibility
 from .phala_tee import PhalaTEE
@@ -52,9 +47,9 @@ class VAMSProofType(IntEnum):
 
 class TrustAggregatorClient:
     """
-    Client for interacting with VAMSTrustAggregator (v2 — Plugin Architecture).
-    
-    Supports both legacy Decagon proofs and new pluggable proofs.
+    Collect from proof plugins and expose non-live legacy fixtures.
+
+    Submission is unavailable. Construction does not load an ambient VAMS signer.
     """
     
     def __init__(self, rpc_url: str, contract_address: str):
@@ -63,14 +58,11 @@ class TrustAggregatorClient:
         
         # OFC08: Standard Web3 Initialization
         self.w3 = Web3(Web3.HTTPProvider(self.rpc_url))
-        self.private_key = os.getenv("VAMS_PRIVATE_KEY")
-        
-        try:
-            from .signer import SignerFactory
-            self.signer = SignerFactory.create({"private_key": self.private_key}) if self.private_key else None
-        except ImportError:
-            self.signer = None
-            self.account = self.w3.eth.account.from_key(self.private_key) if self.private_key else None
+        # Collection needs no signing material. Unbound submission is unavailable;
+        # a future action-authorized signer must use a separate explicit boundary.
+        self.private_key = None
+        self.signer = None
+        self.account = None
         
         # Legacy providers
         self.phala = PhalaTEE()
@@ -128,47 +120,47 @@ class TrustAggregatorClient:
                           f"(weight: {result.trust_weight} bps)")
                 else:
                     print(f"  [-] {plugin.name()}: Invalid proof generated")
-            except Exception as e:
-                print(f"  [-] {plugin.name()}: Failed ({e})")
+            except Exception:
+                # Provider exceptions and callbacks can contain private data.
+                # Failure reporting must not invoke another plugin callback.
+                print("  [-] Proof plugin failed")
 
         return proofs
 
     def submit_plugin_bundle(self, proofs: Dict[bytes, ProofResult]):
         """
-        Submit collected plugin proofs to the VAMSTrustAggregator contract.
-        
-        Uses submitPluginProof(bytes32, bytes32, bytes32, bytes) ABI.
+        Reject plugin submission until a verified transaction backend exists.
         """
-        print(f"\n[TrustAggregator v2] Submitting {len(proofs)} plugin proofs...")
-        
-        for proof_type_id, result in proofs.items():
-            plugin = self.plugins.get(proof_type_id)
-            plugin_name = plugin.name() if plugin else proof_type_id.hex()[:16]
-            
-            print(f"  -> Submitting {plugin_name} (weight: {result.trust_weight} bps)...")
-            try:
-                # OFC08: Standard Web3 Submission Pattern
-                signer_to_use = getattr(self, "signer", None) or getattr(self, "account", None)
-                if signer_to_use and self.w3.is_connected():
-                    # tx = contract.functions.submitPluginProof(
-                    #     proof_type_id, service_hash, delivery_hash, result.proof_data
-                    # ).build_transaction({
-                    #     'from': signer_to_use.address,
-                    #     'nonce': self.w3.eth.get_transaction_count(signer_to_use.address),
-                    #     'gasPrice': self.w3.eth.gas_price
-                    # })
-                    # if hasattr(signer_to_use, 'sign_transaction'):
-                    #     signed_tx = signer_to_use.sign_transaction(tx)
-                    # else:
-                    #     signed_tx = signer_to_use.signTransaction(tx)
-                    # tx_hash = self.w3.eth.send_raw_transaction(signed_tx.rawTransaction)
-                    # receipt = self.w3.eth.wait_for_transaction_receipt(tx_hash)
-                    pass
-                time.sleep(0.2)
-            except Exception as e:
-                print(f"  [-] Failed to submit {plugin_name}: {e}")
-        
-        print("[TrustAggregator v2] Plugin proof submission complete.")
+        if type(proofs) is not dict:
+            raise LiveModeSafetyError(
+                "TrustAggregatorClient plugin submission is unavailable; no transaction was submitted"
+            )
+
+        if ZKMLProofPlugin.PROOF_TYPE_ID in proofs:
+            raise LiveModeSafetyError(
+                "TrustAggregatorClient rejects ZKML proofs until an approved verifier is integrated"
+            )
+
+        tee_result = proofs.get(TEEProofPlugin.PROOF_TYPE_ID)
+        if tee_result is not None:
+            if type(tee_result) is not ProofResult:
+                raise LiveModeSafetyError(
+                    "TrustAggregatorClient rejects malformed TEE evidence"
+                )
+            metadata = tee_result.metadata
+            classification = (
+                metadata.get("evidence_classification")
+                if type(metadata) is dict
+                else None
+            )
+            if type(classification) is not str or classification != "live-provider":
+                raise LiveModeSafetyError(
+                    "TrustAggregatorClient rejects non-authoritative TEE evidence"
+                )
+
+        raise LiveModeSafetyError(
+            "TrustAggregatorClient plugin submission is unavailable; no transaction was submitted"
+        )
 
     # =============================================================
     #   LEGACY — Preserved for backward compatibility
@@ -176,45 +168,44 @@ class TrustAggregatorClient:
         
     def collect_available_proofs(self) -> Dict[int, bytes]:
         """
-        LEGACY: Scans for Decagon proofs.
-        Use collect_plugin_proofs() for the new plugin system.
+        LEGACY: Return local-only fixtures; never use as authoritative evidence.
+        Use collect_plugin_proofs() for the separate plugin interface.
         """
+        load_runtime_policy().authorize_component_mock(
+            "TrustAggregatorClient legacy proof fixtures", True
+        )
+
         proofs = {}
         
-        print("[TrustAggregator] Collecting legacy proofs...")
+        print("[TrustAggregator] Collecting non-authoritative local legacy fixtures...")
         
         try:
             results = self.parallel.search("VAMS heartbeat check")
             proof = self.parallel.generate_proof_of_research(results)
             proofs[VAMSProofType.PARALLEL_RESEARCH] = proof
-            print(f"  [+] Parallel Research: Found")
+            print("  [+] Local research fixture collected")
         except Exception as e:
             print(f"  [-] Parallel Research: Failed ({e})")
 
         try:
             quote = b"mock_sgx_quote" 
             proofs[VAMSProofType.PHALA_EXECUTION] = quote
-            print(f"  [+] Phala Execution: Found")
+            print("  [+] Local SGX placeholder collected")
         except Exception as e:
             print(f"  [-] Phala Execution: Failed ({e})")
             
         proofs[VAMSProofType.ERC8004_IDENTITY] = b"mock_erc721_ownership"
-        print(f"  [+] ERC-8004 Identity: Found")
+        print("  [+] Local identity placeholder collected")
         
         return proofs
     
     def submit_bundle(self, proofs: Dict[int, bytes]):
         """
-        LEGACY: Submit Decagon proofs.
-        Use submit_plugin_bundle() for the new plugin system.
+        Reject legacy submission until a verified transaction backend exists.
         """
-        print(f"\n[TrustAggregator] Submitting {len(proofs)} legacy proofs...")
-        
-        for proof_type, proof_data in proofs.items():
-            print(f"  -> Submitting Legacy Proof Type {proof_type}...")
-            time.sleep(0.2)
-            
-        print("[TrustAggregator] Legacy submission complete.")
+        raise LiveModeSafetyError(
+            "TrustAggregatorClient legacy submission is unavailable; no transaction was submitted"
+        )
 
 
 if __name__ == "__main__":

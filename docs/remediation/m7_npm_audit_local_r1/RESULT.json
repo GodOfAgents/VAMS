@@ -1,0 +1,239 @@
+{
+  "schema": "m7-npm-audit-sanitized-v1",
+  "results": [
+    {
+      "scope": "all",
+      "command": [
+        "npm",
+        "audit",
+        "--package-lock-only",
+        "--json",
+        "--audit-level=high",
+        "--ignore-scripts"
+      ],
+      "exit_code": 1,
+      "report_parse_ok": true,
+      "raw_output_sha256": "607426d62756df0ecfa60b63193c2ad99f3f8a564575361ad7524bbd159020bb",
+      "raw_output_retained": false,
+      "stderr_sha256": "6645281a8b8fdcc235befefb4f549c9f103612aac23c3447122ffffd756534ce",
+      "vulnerability_count": 5,
+      "vulnerabilities": [
+        {
+          "name": "@humanfs/node",
+          "severity": "moderate",
+          "is_direct": false,
+          "range": "<0.16.8",
+          "nodes": [
+            "node_modules/@humanfs/node"
+          ],
+          "fix_available": true,
+          "via": [
+            {
+              "source": 1158499,
+              "name": "@humanfs/node",
+              "title": "humanfs: Recursive copy follows symlinked files and copies data from outside the source tree",
+              "severity": "moderate",
+              "range": "<0.16.8",
+              "url": "https://github.com/advisories/GHSA-p498-v437-472g"
+            }
+          ],
+          "effects": []
+        },
+        {
+          "name": "baseline-browser-mapping",
+          "severity": "moderate",
+          "is_direct": false,
+          "range": ">=2.0.0 <2.11.0",
+          "nodes": [
+            "node_modules/baseline-browser-mapping"
+          ],
+          "fix_available": true,
+          "via": [
+            {
+              "source": 1193686,
+              "name": "baseline-browser-mapping",
+              "title": "baseline-browser-mapping process termination on invalid input causes denial of service",
+              "severity": "moderate",
+              "range": ">=2.0.0 <2.11.0",
+              "url": "https://github.com/advisories/GHSA-w5vr-8v7q-w6rv"
+            }
+          ],
+          "effects": []
+        },
+        {
+          "name": "brace-expansion",
+          "severity": "high",
+          "is_direct": false,
+          "range": "<=1.1.20",
+          "nodes": [
+            "node_modules/brace-expansion"
+          ],
+          "fix_available": true,
+          "via": [
+            {
+              "source": 1240100,
+              "name": "brace-expansion",
+              "title": "brace-expansion: Quadratic-time expansion of the `{a},b}` rewrite causes CPU denial of service",
+              "severity": "moderate",
+              "range": "<1.1.21",
+              "url": "https://github.com/advisories/GHSA-q2hr-2g5m-vwhr"
+            },
+            {
+              "source": 1240104,
+              "name": "brace-expansion",
+              "title": "brace-expansion: DoS via uncontrolled recursion on nested brace groups causing stack exhaustion",
+              "severity": "high",
+              "range": "<1.1.20",
+              "url": "https://github.com/advisories/GHSA-qhr7-859c-m2p7"
+            },
+            {
+              "source": 1240108,
+              "name": "brace-expansion",
+              "title": "brace-expansion: DoS via uncontrolled recursion in parseCommaParts causing stack exhaustion",
+              "severity": "high",
+              "range": "<1.1.19",
+              "url": "https://github.com/advisories/GHSA-6j4f-fj2g-mc7p"
+            }
+          ],
+          "effects": []
+        },
+        {
+          "name": "browserslist",
+          "severity": "high",
+          "is_direct": false,
+          "range": "<=4.28.6",
+          "nodes": [
+            "node_modules/browserslist"
+          ],
+          "fix_available": true,
+          "via": [
+            {
+              "source": 1153171,
+              "name": "browserslist",
+              "title": "Browserslist: Unbounded memory growth (no cache eviction) via distinct query results, leading to eventual OOM",
+              "severity": "high",
+              "range": "<=4.28.6",
+              "url": "https://github.com/advisories/GHSA-c83g-rgw3-j3cx"
+            },
+            {
+              "source": 1153172,
+              "name": "browserslist",
+              "title": "Browserslist: Uncaught crash / prototype write via untrusted browserslist-stats.json custom stats (normalizeStats)",
+              "severity": "high",
+              "range": "<=4.28.6",
+              "url": "https://github.com/advisories/GHSA-73wf-gq98-2v4g"
+            }
+          ],
+          "effects": []
+        },
+        {
+          "name": "js-yaml",
+          "severity": "high",
+          "is_direct": false,
+          "range": "4.0.0 - 4.3.1",
+          "nodes": [
+            "node_modules/js-yaml"
+          ],
+          "fix_available": true,
+          "via": [
+            {
+              "source": 1193727,
+              "name": "js-yaml",
+              "title": "js-yaml: maxTotalMergeKeys does not limit CPU use for empty merge sources",
+              "severity": "high",
+              "range": ">=4.0.0 <4.3.2",
+              "url": "https://github.com/advisories/GHSA-2883-xcg3-v3hh"
+            }
+          ],
+          "effects": []
+        }
+      ],
+      "dependency_counts": {
+        "prod": 25,
+        "dev": 232,
+        "optional": 81,
+        "peer": 0,
+        "peerOptional": 0,
+        "total": 256
+      }
+    },
+    {
+      "scope": "production",
+      "command": [
+        "npm",
+        "audit",
+        "--package-lock-only",
+        "--json",
+        "--audit-level=high",
+        "--ignore-scripts",
+        "--omit=dev"
+      ],
+      "exit_code": 1,
+      "report_parse_ok": true,
+      "raw_output_sha256": "9b53d3e606cfb3ebf55ddb84eac2b2fda0e7ef769b8c70619aec8abc171e4662",
+      "raw_output_retained": false,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "vulnerability_count": 2,
+      "vulnerabilities": [
+        {
+          "name": "baseline-browser-mapping",
+          "severity": "moderate",
+          "is_direct": false,
+          "range": ">=2.0.0 <2.11.0",
+          "nodes": [
+            "node_modules/baseline-browser-mapping"
+          ],
+          "fix_available": true,
+          "via": [
+            {
+              "source": 1193686,
+              "name": "baseline-browser-mapping",
+              "title": "baseline-browser-mapping process termination on invalid input causes denial of service",
+              "severity": "moderate",
+              "range": ">=2.0.0 <2.11.0",
+              "url": "https://github.com/advisories/GHSA-w5vr-8v7q-w6rv"
+            }
+          ],
+          "effects": []
+        },
+        {
+          "name": "browserslist",
+          "severity": "high",
+          "is_direct": false,
+          "range": "<=4.28.6",
+          "nodes": [
+            "node_modules/browserslist"
+          ],
+          "fix_available": true,
+          "via": [
+            {
+              "source": 1153171,
+              "name": "browserslist",
+              "title": "Browserslist: Unbounded memory growth (no cache eviction) via distinct query results, leading to eventual OOM",
+              "severity": "high",
+              "range": "<=4.28.6",
+              "url": "https://github.com/advisories/GHSA-c83g-rgw3-j3cx"
+            },
+            {
+              "source": 1153172,
+              "name": "browserslist",
+              "title": "Browserslist: Uncaught crash / prototype write via untrusted browserslist-stats.json custom stats (normalizeStats)",
+              "severity": "high",
+              "range": "<=4.28.6",
+              "url": "https://github.com/advisories/GHSA-73wf-gq98-2v4g"
+            }
+          ],
+          "effects": []
+        }
+      ],
+      "dependency_counts": {
+        "prod": 25,
+        "dev": 232,
+        "optional": 81,
+        "peer": 0,
+        "peerOptional": 0,
+        "total": 256
+      }
+    }
+  ]
+}

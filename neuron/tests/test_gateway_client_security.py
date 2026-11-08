@@ -2,6 +2,7 @@ import pytest
 from urllib.parse import urlunsplit
 
 from neuron.gateway.client import GatewayClient
+from neuron.runtime_safety import LiveModeSafetyError
 
 
 def _credentialed_gateway_url() -> str:
@@ -24,13 +25,12 @@ def test_local_gateway_rejects_plaintext_remote_host(monkeypatch):
         GatewayClient("http://gateway.example")
 
 
-def test_live_gateway_requires_https(monkeypatch):
+def test_legacy_gateway_refuses_live_use_until_m2_client_is_implemented(monkeypatch):
     monkeypatch.setenv("VAMS_ENV", "testnet")
 
-    with pytest.raises(ValueError, match="must use HTTPS"):
-        GatewayClient("http://127.0.0.1:8000")
-
-    assert GatewayClient("https://gateway.example/").base_url == "https://gateway.example"
+    for url in ("http://127.0.0.1:8000", "https://gateway.example/"):
+        with pytest.raises(LiveModeSafetyError, match="Legacy GatewayClient"):
+            GatewayClient(url)
 
 
 @pytest.mark.parametrize(

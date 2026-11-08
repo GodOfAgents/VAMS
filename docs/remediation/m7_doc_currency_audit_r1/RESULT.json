@@ -1,0 +1,238 @@
+{
+  "date": "2026-10-03",
+  "documents_reviewed_without_confirmed_mismatch": [
+    "docs/README.md",
+    "docs/VERSIONING.md",
+    "docs/API_REFERENCE.md",
+    "docs/GATEWAY_HARDENING_BLUEPRINTS.md",
+    "contracts/CONTRACTS.md"
+  ],
+  "evidence_hashes": {
+    "README.md": "ae69a004b8321fcbd566d532d7b661454e910d59805d2cea9f0d9c3de74e8d09",
+    "REPO_STATUS_REPORT.md": "68c7f31069e4b4f8d7dac283a9ad4c25745ba2b7d4c8634a8b21d08b8cc703da",
+    "audit.md": "c6fbe8e3ce94850b23f99ff2c1f9eaece8d3626cb11433c40df30ef117b72513",
+    "contracts/CONTRACTS.md": "8734c28c2df6f5250918fe01922a46d45e868ce0ac22a9845abb803c58e23a53",
+    "contracts/src/economic/ComposedSettlement.sol": "fb092c4a5c0f77441649ec455ed0c7ccb56ab538054ede046e64d08832cf9d54",
+    "contracts/src/registry/ServiceBlockRegistry.sol": "c868b7aa15a7df6c3742216dca8b2c2312ae758d8730c8b6b61460590bf558e1",
+    "contracts/src/token/VAMSToken.sol": "df9e5d7bd893a617359c68638766858fa2eb6883fe7458820d0c9d079f4ddc17",
+    "docs/API_REFERENCE.md": "b13671bc886933bccc7767c49f7cd7ddcfbba7a346eb03839c8efb90081a6d43",
+    "docs/ARCHITECTURE.md": "dd73e32627db141ccc183030a67c8f713be6f306c423652e9a030fe130e688e6",
+    "docs/DEVELOPER_GUIDE.md": "a6ee0b5a427b0fe2c285299e85bb2848fcc55b1c2e4404eb07959c54fa00bb67",
+    "docs/GATEWAY_HARDENING_BLUEPRINTS.md": "4c839136360cf3ac2ef69f0bdb09a9fe7e99783bb51c1bb7d1d436e2bf053fac",
+    "docs/L3_CHAIN_AND_DA.md": "2347ec3b20922a9ada8ea07c675c88e9699492c13b718d536a5915e208e17b16",
+    "docs/NODE_OPERATORS.md": "367e91e66d8b5811845a8b1f2f4236a4528410f49f04d240cc5657488f321801",
+    "docs/README.md": "44c11273175b79a280687763f5aa5625237174950dd0c96a75865529b84b4dab",
+    "docs/VERSIONING.md": "102fad83cde7d576a53ffffd991ad996f82f452e300a706feb41b04f87192cb4",
+    "docs/documentation-manifest.json": "2d503ac5d725df857df863d0e2bbf7f5ea2580c50354800d933058c9078352f6",
+    "docs/remediation/PLAN.md": "33c2e5d1891bb572774998c5026f0b33b9a315d5832e1dad35874a5c0901bfbc",
+    "docs/remediation/SESSION_HANDOFF.md": "41bbb7cab9b88c27cea7792da043efe1c27714d9df1d0c966de0627ab5ad9684",
+    "docs/remediation/STATUS.md": "932d18ad8db451efb8cec528c77c46ca67ad82e99787bc60f4301d9bb2611b85",
+    "docs/remediation/m7_aiken_check_current_r1/WARNING_RUN.json": "83c1b6e466fddf46c93da0652c7bacdbc1b06ad2126f9ad389f9e17970202ad3",
+    "docs/remediation/m7_pytest_current_r2/RESULT.json": "1af1d9a5418f0c39e7d9c6155866e7b89aeb691a23769b0eeeff4f0a5775bf93",
+    "docs/role-management-keys.md": "2f311615711760060f74b9727e668d503b2c64ca0b6608f7e5f9c39bbbc8f125",
+    "docs/team/ARCHITECTURE_v0-8-0.md": "b17d11c33592d0346fef8b1818e808f911e0d4cc5cee22456733f4f58e366e5d",
+    "frontend-vite/src/App.jsx": "56c98fa96fa976d96809d4ee42aeb1c38fd665cd026405b137c430ae46e75ca4",
+    "frontend-vite/src/nodeTelemetry.js": "eece4118340df62461d4d4021a8fe6ddb3e36ef837fbec9fec15585692f7c0d4",
+    "gateway/server.py": "ace02242ab38aa9fa5afa4371be21a1a7d2329d5b9241dec30c7d503ff393c7e",
+    "neuron/da/adapters/celestia_adapter.py": "0498c0c4fc3d69ab72bd989efae82577917e6f1c601efb43f59957f98fef1f3e",
+    "neuron/da/adapters/near_adapter.py": "6d797515bbce468c3e7e0579e38ef315002798ed766505a7cc7985db97ea338b",
+    "neuron/da/performance_audit.py": "79b1dde2a6e1162bb019f13100a78d5dcc939c5c1b9a64a7f06f748a206aa474",
+    "neuron/gateway/client.py": "fbbfe1fe2f40f4ff88fbb5bcad8fa47b911599568e6d51bdd9c859cae6402688",
+    "neuron/sdk/sequence_wallet.py": "eab8fe41dd31b109b2470c6d390700e0ec083c3640a0b15a571e56fa6fefcd2b",
+    "neuron/sentinel/sentinel_node.py": "885fccc06a0d6a764fd07218c18794bc239e4568ec045beae155483c2d73caa5"
+  },
+  "evidence_limitations": [
+    "Priority triage of 14 manifest-current documents; not a full semantic audit.",
+    "Historical gate runs are cited as retained evidence, not rerun by this slice.",
+    "Current tool probe is availability/version/hash evidence only, not a contract or validator build.",
+    "The SESSION_HANDOFF.md and STATUS.md hashes bind the pre-acceptance snapshots; acceptance entries appended later are outside those snapshot hashes."
+  ],
+  "finding_count": 11,
+  "findings": [
+    {
+      "claim": "Near is presented as a live-capable/current live audit path.",
+      "current_evidence": [
+        "neuron/da/adapters/near_adapter.py:46-68 rejects live submission, verify_blob returns false, and retrieval returns None.",
+        "neuron/da/performance_audit.py:51,143,156-159 enables only Celestia for non-mock live routing."
+      ],
+      "disposition": "Correct the DA boundary wording; distinguish candidate/mock paths from currently enabled live routing.",
+      "documents": [
+        "README.md:48",
+        "docs/L3_CHAIN_AND_DA.md:48-50"
+      ],
+      "id": "DOC-01",
+      "severity": "high"
+    },
+    {
+      "claim": "Celestia can silently return a mock receipt on a live path.",
+      "current_evidence": [
+        "neuron/da/adapters/celestia_adapter.py:35-36 says mock requires explicit mode and live failures do not fall back.",
+        "neuron/da/adapters/celestia_adapter.py:56-60 gates mock submission and raises on live failure; lines 102-108 produce verified=false receipts; lines 41-44 keep it release-evidence-ineligible."
+      ],
+      "disposition": "Correct the failure-mode explanation while preserving the release-evidence limitation.",
+      "documents": [
+        "docs/ARCHITECTURE.md:25-27"
+      ],
+      "id": "DOC-02",
+      "severity": "high"
+    },
+    {
+      "claim": "The current source's aggregate gates are described as passing 684/684 Python and 693/693 Solidity tests, with broad local security/toolchain passes.",
+      "current_evidence": [
+        "docs/remediation/m7_pytest_current_r2/RESULT.json: full suite collected 1605, passed 1604, failed 1, passed 441 subtests; the failure is the offline floating Aiken dependency provenance case recorded in docs/remediation/STATUS.md.",
+        "docs/remediation/m7_aiken_check_current_r1/WARNING_RUN.json: strict check exit 1, 1865 checks, 0 errors, 7 warnings, plus unpinned dependency resolver notices.",
+        "Current tool probe on 2026-10-03: Python 3.12.14; Aiken v1.1.21+42babe5; forge unavailable."
+      ],
+      "disposition": "Replace present-tense current totals with the current evidence and explicitly label unreproduced July results historical; retain exact-commit/full-gate limitations.",
+      "documents": [
+        "REPO_STATUS_REPORT.md:39-48",
+        "REPO_STATUS_REPORT.md:92-101",
+        "REPO_STATUS_REPORT.md:132-145"
+      ],
+      "id": "DOC-03",
+      "severity": "high"
+    },
+    {
+      "claim": "July 2026 launch window and execution schedule are still presented as current roadmap targets.",
+      "current_evidence": [
+        "Current date is 2026-10-03; the authoritative docs/remediation/PLAN.md uses gate-driven milestones without a calendar target.",
+        "docs/remediation/STATUS.md and SESSION_HANDOFF.md retain NOT READY and deployment/activation disabled."
+      ],
+      "disposition": "Label elapsed schedule as historical and present the active gate-driven roadmap.",
+      "documents": [
+        "REPO_STATUS_REPORT.md:3-4",
+        "REPO_STATUS_REPORT.md:199-228"
+      ],
+      "id": "DOC-04",
+      "severity": "medium"
+    },
+    {
+      "claim": "July-era test and scanner totals are presented in a current audit gate table/verdict.",
+      "current_evidence": [
+        "Current Python and Aiken evidence is recorded in DOC-03; forge is unavailable in the current local environment.",
+        "docs/remediation/STATUS.md keeps all release readiness NOT READY."
+      ],
+      "disposition": "Date and scope the old table as historical baseline, and point current status to current evidence records.",
+      "documents": [
+        "audit.md:589-595",
+        "audit.md:616-617"
+      ],
+      "id": "DOC-05",
+      "severity": "high"
+    },
+    {
+      "claim": "The current frontend implements an active registry with an interactive 10-axis CHC radar dashboard.",
+      "current_evidence": [
+        "frontend-vite/src/App.jsx and frontend-vite/src/nodeTelemetry.js contain no CHC/radar/profile/registry-dashboard implementation; App.jsx describes an immersive Three.js site."
+      ],
+      "disposition": "Reframe as proposed/historical UI architecture or document the actual current frontend.",
+      "documents": [
+        "audit.md:379",
+        "docs/team/ARCHITECTURE_v0-8-0.md:12,20,132-141"
+      ],
+      "id": "DOC-06",
+      "severity": "medium"
+    },
+    {
+      "claim": "Heartbeat is POST /api/v1/heartbeat and transmits full NodeInfo.",
+      "current_evidence": [
+        "gateway/server.py:85-87 request schema requires only payload and signature; :722-724 route is POST /heartbeat; :766-804 extracts selected values; :790 sets network to mocha-4."
+      ],
+      "disposition": "Correct route, schema, and field coverage; distinguish in-memory synthetic defaults from verified node telemetry.",
+      "documents": [
+        "docs/team/ARCHITECTURE_v0-8-0.md:111-128"
+      ],
+      "id": "DOC-07",
+      "severity": "high"
+    },
+    {
+      "claim": "Escrow refund automatically follows provider offline, funding makes the agent live, and selection automatically routes a fixed 5% builder share.",
+      "current_evidence": [
+        "contracts/CONTRACTS.md:32-75 records target deployments and addresses/roles/transactions as pending.",
+        "contracts/src/economic/ComposedSettlement.sol:277-289 permits agent-requested refund only after expiry; no provider-offline automatic refund is shown.",
+        "contracts/src/registry/ServiceBlockRegistry.sol:89-149 stores each registered builder-selected BPS; :254-259 calculates a share.",
+        "contracts/src/economic/ComposedSettlement.sol:226-273 pays the configured share only during provider claim after proof and sender checks."
+      ],
+      "disposition": "Replace the actionable live flow with a clearly labeled local/example flow and state exact settlement/refund conditions.",
+      "documents": [
+        "docs/DEVELOPER_GUIDE.md:52-65,103"
+      ],
+      "id": "DOC-08",
+      "severity": "high"
+    },
+    {
+      "claim": "Audit anomaly reports are sent to SLAEnforcer/slashing and webhooks; skill profiles auto-update and a listed API/publisher/dashboard are operational.",
+      "current_evidence": [
+        "neuron/sentinel/sentinel_node.py:229-244 leaves ABI/transaction/signing/broadcast code commented and logs success without a transaction.",
+        "gateway/server.py has POST /heartbeat and no skill-profile or /api/v1 route; neuron/services/telemetry_publisher.py is absent.",
+        "frontend source has no CHC radar/profile/registry dashboard."
+      ],
+      "disposition": "Remove unsupported operational steps or label them planned; document only the implemented heartbeat API and evidence limits.",
+      "documents": [
+        "docs/NODE_OPERATORS.md:230-233,248-254,645-652"
+      ],
+      "id": "DOC-09",
+      "severity": "high"
+    },
+    {
+      "claim": "Core contracts generally use VAMSUpgradeableBase/AccessControlUpgradeable; an initial Developer Operations upgrade key is part of policy; Sequence EntryPoint enforces SDK session expiry and registry revocation immediately invalidates operations.",
+      "current_evidence": [
+        "contracts/src/registry/ServiceBlockRegistry.sol:4,24,80-84; contracts/src/economic/ComposedSettlement.sol:4,27-32; contracts/src/token/VAMSToken.sol:37 use constructor-based non-upgradeable AccessControl patterns.",
+        "contracts/CONTRACTS.md:39-75 keeps deployment and role owners pending; current testnet policy cannot establish an actual holder.",
+        "neuron/sdk/sequence_wallet.py:13-18,20-67 keeps sessions in memory; :101-136 creates simulated wallets and UserOperations."
+      ],
+      "disposition": "Rewrite around per-contract verified roles and clearly simulated session enforcement; do not describe unverified holder identities.",
+      "documents": [
+        "docs/role-management-keys.md:8-20,106-112"
+      ],
+      "id": "DOC-10",
+      "severity": "high"
+    },
+    {
+      "claim": "The manifest claims the current documentation set was verified 2026-07-12 although 14 current entries include later source changes and October evidence; several individual current docs also retain July dates.",
+      "current_evidence": [
+        "docs/documentation-manifest.json enumerates 14 lifecycle=current documents and last_verified=2026-07-12.",
+        "REPO_STATUS_REPORT.md itself says last verified 2026-07-25; docs/API_REFERENCE.md and docs/GATEWAY_HARDENING_BLUEPRINTS.md say 2026-09-24; authoritative remediation records are dated 2026-10-03."
+      ],
+      "disposition": "Do not bump the date globally until content remediation/revalidation is complete; update each document's date only when its claims are verified.",
+      "documents": [
+        "docs/documentation-manifest.json:3",
+        "current document Last verified metadata"
+      ],
+      "id": "DOC-11",
+      "severity": "medium"
+    }
+  ],
+  "git_head": "829ab544571f12efe50ecb5740f129c8acb3e16f",
+  "last_verified": "2026-07-12",
+  "next_single_slice": "Update REPO_STATUS_REPORT.md current-state test/gate evidence and elapsed July roadmap labels; preserve older counts only as dated historical evidence.",
+  "readiness": {
+    "deployment_enabled": false,
+    "deposit_enabled": false,
+    "execute_intent_enabled": false,
+    "slash_activation_enabled": false,
+    "status": "NOT READY"
+  },
+  "schema": "m7-doc-currency-audit-v1",
+  "scope": {
+    "audit_type": "priority factual currency triage against current source and authoritative current evidence",
+    "manifest_current_count": 14,
+    "manifest_current_documents": [
+      "README.md",
+      "REPO_STATUS_REPORT.md",
+      "audit.md",
+      "docs/README.md",
+      "docs/ARCHITECTURE.md",
+      "docs/VERSIONING.md",
+      "docs/API_REFERENCE.md",
+      "docs/DEVELOPER_GUIDE.md",
+      "docs/NODE_OPERATORS.md",
+      "docs/role-management-keys.md",
+      "docs/L3_CHAIN_AND_DA.md",
+      "docs/GATEWAY_HARDENING_BLUEPRINTS.md",
+      "contracts/CONTRACTS.md",
+      "docs/team/ARCHITECTURE_v0-8-0.md"
+    ],
+    "not_full_line_by_line_semantic_audit": true
+  }
+}

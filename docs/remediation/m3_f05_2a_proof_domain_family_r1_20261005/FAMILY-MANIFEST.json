@@ -1,0 +1,18 @@
+{
+  "R4_1_sha256": "238b3da9296a6c60699dbc7201759c7e499c63defd932491023b80ec7916a171",
+  "case_ids_in_scope": [
+    "r2_signature_for_other_seed"
+  ],
+  "case_package": "docs/remediation/m3_f05_2a_proof_domain_family_r1_20261005/r2_signature_for_other_seed",
+  "decision": "R4.1 proof-domain B",
+  "next_cases_untouched": [
+    "r2_signature_for_other_network",
+    "r2_signature_for_other_validator_hash",
+    "r2_signature_for_other_epoch"
+  ],
+  "no_shared_status_or_registry_changed": true,
+  "registry_sha256": "98a05d24d476b1aee2754768322dc4b794e5afb5fabec28ade17a2888285467d",
+  "schema_version": "f05-2a-proof-domain-family-r1",
+  "scope": "synthetic test-only alternate applied policy; no original-policy, full-ledger-admission, Pre-Prod, or live-network credit",
+  "status": "candidate-awaiting-independent-byte-review; tx-sim-not-run; no credit"
+}

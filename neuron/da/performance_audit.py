@@ -18,7 +18,8 @@ import hashlib
 import json
 import logging
 import os
-from typing import Dict, Any, List, Optional
+from types import MappingProxyType
+from typing import Dict, Any, List, Mapping, Optional
 
 from neuron.da.models import DAProtocol, DAReceipt, AuditReport
 from neuron.da.adapters.base import DAAdapter
@@ -26,7 +27,12 @@ from neuron.da.adapters.celestia_adapter import CelestiaDAAdapter
 from neuron.da.adapters.near_adapter import NearDAAdapter
 from neuron.da.adapters.eigenda_adapter import EigenDAAdapter
 from neuron.da.adapters.avail_adapter import AvailDAAdapter
-from neuron.runtime_safety import require_not_live_mock
+from neuron.runtime_safety import (
+    ImmutableRuntimeConfiguration,
+    RuntimePolicy,
+    load_runtime_policy,
+    require_not_live_mock,
+)
 
 logger = logging.getLogger("VAMS-PerformanceAuditLog")
 
@@ -55,7 +61,7 @@ class DAConfigurationError(RuntimeError):
     """Raised when a requested DA route is disabled or unsupported."""
 
 
-class PerformanceAuditLog:
+class PerformanceAuditLog(ImmutableRuntimeConfiguration):
     """
     Multi-DA orchestrator for Sentinel performance audit reports.
 
@@ -63,10 +69,38 @@ class PerformanceAuditLog:
     layer based on challenge type, criticality, or explicit target.
     """
 
-    def __init__(self, mock_mode: bool = False, config: Optional[Dict] = None):
-        require_not_live_mock("PerformanceAuditLog", mock_mode)
+    _immutable_runtime_fields = frozenset(
+        {
+            "runtime_policy",
+            "mock_mode",
+            "_config",
+            "_configured_protocols",
+        }
+    )
+
+    def __init__(
+        self,
+        mock_mode: bool = False,
+        config: Optional[Dict] = None,
+        *,
+        runtime_policy: Optional[RuntimePolicy] = None,
+        environ: Optional[Mapping[str, str]] = None,
+    ):
+        source = os.environ if environ is None else environ
+        self.runtime_policy = runtime_policy or load_runtime_policy(source)
+        require_not_live_mock(
+            "PerformanceAuditLog", mock_mode, policy=self.runtime_policy
+        )
         self.mock_mode = mock_mode
-        self._config = config or {}
+        self._config = MappingProxyType(dict(config or {}))
+        configured_protocols = self._config.get(
+            "enabled_protocols", source.get("VAMS_DA_ENABLED_PROTOCOLS")
+        )
+        self._configured_protocols = (
+            tuple(configured_protocols)
+            if isinstance(configured_protocols, (list, tuple, set))
+            else configured_protocols
+        )
 
         enabled_protocols = self._enabled_protocols()
         self.adapters: Dict[DAProtocol, DAAdapter] = {}
@@ -84,11 +118,15 @@ class PerformanceAuditLog:
             self.adapters[DAProtocol.EIGEN_DA] = EigenDAAdapter(
                 rpc_url=self._config.get("eigenda_rpc", "https://holesky.drpc.org"),
                 mock_mode=True,
+                runtime_policy=self.runtime_policy,
+                environ=source,
             )
         if DAProtocol.AVAIL in enabled_protocols:
             self.adapters[DAProtocol.AVAIL] = AvailDAAdapter(
                 rpc_url=self._config.get("avail_rpc", "https://avail-turing.api.onfinality.io/public"),
                 mock_mode=True,
+                runtime_policy=self.runtime_policy,
+                environ=source,
             )
 
         if DAProtocol.CELESTIA not in self.adapters:
@@ -96,11 +134,10 @@ class PerformanceAuditLog:
 
         # Audit history for observability
         self.audit_history: List[Dict[str, Any]] = []
+        self._freeze_runtime_configuration()
 
     def _enabled_protocols(self) -> set[DAProtocol]:
-        configured = self._config.get("enabled_protocols")
-        if configured is None:
-            configured = os.getenv("VAMS_DA_ENABLED_PROTOCOLS")
+        configured = self._configured_protocols
 
         if configured is None:
             return set(ALL_CONFIGURED_PROTOCOLS if self.mock_mode else LIVE_CAPABLE_PROTOCOLS)
@@ -119,7 +156,11 @@ class PerformanceAuditLog:
         unsupported_live = enabled - LIVE_CAPABLE_PROTOCOLS
         if not self.mock_mode and unsupported_live:
             for protocol in sorted(unsupported_live, key=lambda item: item.value):
-                require_not_live_mock(f"{protocol.value} DA adapter", True)
+                require_not_live_mock(
+                    f"{protocol.value} DA adapter",
+                    True,
+                    policy=self.runtime_policy,
+                )
             names = ", ".join(sorted(protocol.value for protocol in unsupported_live))
             raise DAConfigurationError(
                 f"DA protocols are not live-capable and remain disabled: {names}"
@@ -177,12 +218,20 @@ class PerformanceAuditLog:
             target = self._select_da_target(provisional_report, da_target)
             audit_report = AuditReport.from_sentinel_report(report, da_target=target)
             final_target = self._select_da_target(audit_report, da_target)
-        except (DAConfigurationError, KeyError, TypeError, ValueError) as exc:
-            logger.error(str(exc))
+        except (DAConfigurationError, KeyError, TypeError, ValueError):
+            protocol_label = "unknown"
+            if isinstance(da_target, DAProtocol):
+                protocol_label = da_target.value
+            elif isinstance(da_target, str):
+                try:
+                    protocol_label = DAProtocol(str.strip(da_target).lower()).value
+                except ValueError:
+                    pass
+            logger.error("Sentinel report rejected before DA submission")
             return {
                 "success": False,
-                "protocol": da_target.value if isinstance(da_target, DAProtocol) else str(da_target or "unknown"),
-                "error": str(exc),
+                "protocol": protocol_label,
+                "error": "Invalid Sentinel report or DA target",
             }
 
         # Serialize and submit
@@ -193,6 +242,10 @@ class PerformanceAuditLog:
 
         try:
             receipt = await adapter.submit_blob(blob_data)
+            if not self.mock_mode and receipt.simulated:
+                raise DAConfigurationError(
+                    f"DA protocol {final_target.value} returned simulated output in live operation"
+                )
             retrieval_verified = False
             if not self.mock_mode:
                 retrieval_verified = await adapter.verify_blob(receipt)
@@ -214,6 +267,15 @@ class PerformanceAuditLog:
                 "mock_mode": self.mock_mode,
                 # This publisher cannot establish independent release evidence.
                 "release_evidence_eligible": False,
+                "simulated": self.mock_mode or receipt.simulated,
+                "runtime_classification": (
+                    self.runtime_policy.runtime_classification
+                ),
+                "evidence_classification": (
+                    "non-authoritative"
+                    if self.mock_mode
+                    else receipt.evidence_classification
+                ),
             }
 
             # Track for observability
@@ -235,12 +297,12 @@ class PerformanceAuditLog:
 
             return result
 
-        except Exception as e:
-            logger.error(f"DA submission failed on {final_target.value}: {e}")
+        except Exception:
+            logger.error("DA submission failed on %s", final_target.value)
             return {
                 "success": False,
                 "protocol": final_target.value,
-                "error": str(e),
+                "error": f"DA submission failed on {final_target.value}",
             }
 
     async def verify_report(self, receipt_data: Dict[str, Any]) -> bool:
@@ -277,4 +339,8 @@ class PerformanceAuditLog:
 
     def get_audit_history(self, limit: int = 50) -> List[Dict[str, Any]]:
         """Return the most recent audit submissions."""
+        if isinstance(limit, bool) or not isinstance(limit, int):
+            raise TypeError("limit must be a positive integer")
+        if limit <= 0:
+            raise ValueError("limit must be a positive integer")
         return self.audit_history[-limit:]

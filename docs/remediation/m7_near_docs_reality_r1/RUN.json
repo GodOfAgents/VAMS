@@ -1,0 +1,44 @@
+{
+  "independent_review": {
+    "caveat": "Doc validator is heuristic; Near claim confirmed by direct source comparison.",
+    "outcome": "PASS",
+    "scope": "exact docs diff against Near, Celestia and audit-routing source; independent doc validator and 2 focused tests"
+  },
+  "schema": "m7-near-docs-reality-run-v1",
+  "verification": [
+    {
+      "argv": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python",
+        "-B",
+        "scripts/docs/validate_docs.py"
+      ],
+      "exit_code": 0,
+      "output": "Documentation validation passed."
+    },
+    {
+      "argv": [
+        "/home/GodOfAgents/vams-evidence/toolchains/vams-py312/bin/python",
+        "-B",
+        "-m",
+        "unittest",
+        "scripts/docs/test_validate_docs.py"
+      ],
+      "exit_code": 0,
+      "output": "OK",
+      "tests_run": 2
+    },
+    {
+      "exit_code": 0,
+      "method": "read-only source assertion",
+      "output": "Near claim/source assertions passed"
+    }
+  ]
+}

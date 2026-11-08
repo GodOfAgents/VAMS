@@ -314,8 +314,23 @@ contract VAMSInsuranceFund is
         if (claim.status != ClaimStatus.APPROVED) revert ClaimAlreadyResolved(claimId);
         
         uint256 amount = claim.amount;
-        if (amount > totalFundBalance()) {
-            revert InsufficientFunds(amount, totalFundBalance());
+        uint256 fundBalance = totalFundBalance();
+        if (amount > fundBalance) {
+            revert InsufficientFunds(amount, fundBalance);
+        }
+
+        uint256 liquidBalance = vamsToken.balanceOf(address(this));
+        if (amount > liquidBalance) {
+            revert InsufficientFunds(amount, liquidBalance);
+        }
+
+        uint256 remainingFundBalance = fundBalance - amount;
+        uint256 balanceQuotient = remainingFundBalance / BPS_DENOMINATOR;
+        uint256 balanceRemainder = remainingFundBalance % BPS_DENOMINATOR;
+        uint256 maxDeployedAfterPayout =
+            (balanceQuotient * 3000) + ((balanceRemainder * 3000) / BPS_DENOMINATOR);
+        if (totalDeployedBalance > maxDeployedAfterPayout) {
+            revert("VAMSInsuranceFund: Post-payout yield allocation exceeded");
         }
         
         claim.status = ClaimStatus.PAID;

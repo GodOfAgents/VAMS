@@ -1,0 +1,17 @@
+Traceback (most recent call last):
+  File "/home/GodOfAgents/code/VAMS-testnet/scripts/remediation/test_f05_2a_authority_bootstrap_public.py", line 1103, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/home/GodOfAgents/code/VAMS-testnet/scripts/remediation/test_f05_2a_authority_bootstrap_public.py", line 1094, in main
+    result = _run_suite(args.aiken.resolve())
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/GodOfAgents/code/VAMS-testnet/scripts/remediation/test_f05_2a_authority_bootstrap_public.py", line 1019, in _run_suite
+    mutant = _compile(CARDANO, aiken, workroot / f"mutant-{index}", mutant_parameters, mutation)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/GodOfAgents/code/VAMS-testnet/scripts/remediation/test_f05_2a_authority_bootstrap_public.py", line 810, in _compile
+    _mutant_source(cardano, mutation)
+  File "/home/GodOfAgents/code/VAMS-testnet/scripts/remediation/test_f05_2a_authority_bootstrap_public.py", line 760, in _mutant_source
+    _replace_once(policy, "InlineDatum, Input, OutputReference, Transaction", "InlineDatum, Input, OutputDatum, OutputReference, Transaction")
+  File "/home/GodOfAgents/code/VAMS-testnet/scripts/remediation/test_f05_2a_authority_bootstrap_public.py", line 701, in _replace_once
+    raise RuntimeError(f"mutation guard anchor must occur exactly once: {old[:80]!r}")
+RuntimeError: mutation guard anchor must occur exactly once: 'InlineDatum, Input, OutputReference, Transaction'
