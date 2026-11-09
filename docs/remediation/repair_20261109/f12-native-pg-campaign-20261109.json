@@ -1,0 +1,556 @@
+{
+  "schema": "vams.f12_native_pg_campaign/1",
+  "mode": "kill_and_recover",
+  "status": "PASS",
+  "evidence_class": "NATIVE_POSTGRESQL_LOCAL_PROCESS_KILL",
+  "server": {
+    "server_version": "18.6 (Debian 18.6-1.pgdg13+2)",
+    "ssl": true,
+    "tls_version": "TLSv1.3",
+    "psycopg2": "2.9.13 (dt dec pq3 ext lo64)"
+  },
+  "kill_points": [
+    "before_reserve_commit",
+    "after_reserve",
+    "after_claim",
+    "provider_precommit",
+    "after_provider_commit",
+    "accept_precommit",
+    "after_accept"
+  ],
+  "failures": [],
+  "results": [
+    {
+      "kill_point": "before_reserve_commit",
+      "databases": [
+        "vams_f12_before_reserve_commit_authority",
+        "vams_f12_before_reserve_commit_provider"
+      ],
+      "expected": {
+        "provider_effects": 1,
+        "authority_status": "committed",
+        "recovery_path": "execute"
+      },
+      "worker_one": {
+        "exit": 137,
+        "seconds": 0.14,
+        "last_line": ""
+      },
+      "state_after_kill": {
+        "provider_effects_total": 0,
+        "provider_effects_for_operation": 0,
+        "authority_status": null,
+        "cost_units": null,
+        "scopes": [
+          {
+            "status": "active",
+            "limit": 10,
+            "reserved": 0,
+            "spent": 0
+          }
+        ],
+        "authority_operations_total": 0
+      },
+      "worker_two": {
+        "exit": 0,
+        "seconds": 0.37,
+        "report": {
+          "worker": 2,
+          "found_status": null,
+          "path": "execute",
+          "repeat_execute": "refused:ReconciliationRequiredV3",
+          "final_status": "committed",
+          "admitted_authority_epoch": 3,
+          "admitted_policy_version": 7,
+          "proposal_authority_epoch": 3,
+          "proposal_policy_version": 7
+        }
+      },
+      "state_after_recovery": {
+        "provider_effects_total": 1,
+        "provider_effects_for_operation": 1,
+        "authority_status": "committed",
+        "cost_units": 3,
+        "scopes": [
+          {
+            "status": "active",
+            "limit": 10,
+            "reserved": 0,
+            "spent": 3
+          }
+        ],
+        "authority_operations_total": 1
+      },
+      "checks": {
+        "worker_one_killed": true,
+        "worker_two_exit_zero": true,
+        "recovery_path": true,
+        "provider_effects_exact": true,
+        "authority_status": true,
+        "single_operation_row": true,
+        "budget_arithmetic": true,
+        "repeat_execute_refused": true,
+        "policy_epoch_preserved": true
+      },
+      "pass": true
+    },
+    {
+      "kill_point": "after_reserve",
+      "databases": [
+        "vams_f12_after_reserve_authority",
+        "vams_f12_after_reserve_provider"
+      ],
+      "expected": {
+        "provider_effects": 1,
+        "authority_status": "committed",
+        "recovery_path": "execute"
+      },
+      "worker_one": {
+        "exit": 137,
+        "seconds": 0.15,
+        "last_line": ""
+      },
+      "state_after_kill": {
+        "provider_effects_total": 0,
+        "provider_effects_for_operation": 0,
+        "authority_status": "reserved",
+        "cost_units": 3,
+        "scopes": [
+          {
+            "status": "active",
+            "limit": 10,
+            "reserved": 3,
+            "spent": 0
+          }
+        ],
+        "authority_operations_total": 1
+      },
+      "worker_two": {
+        "exit": 0,
+        "seconds": 0.37,
+        "report": {
+          "worker": 2,
+          "found_status": "reserved",
+          "path": "execute",
+          "repeat_execute": "refused:ReconciliationRequiredV3",
+          "final_status": "committed",
+          "admitted_authority_epoch": 3,
+          "admitted_policy_version": 7,
+          "proposal_authority_epoch": 3,
+          "proposal_policy_version": 7
+        }
+      },
+      "state_after_recovery": {
+        "provider_effects_total": 1,
+        "provider_effects_for_operation": 1,
+        "authority_status": "committed",
+        "cost_units": 3,
+        "scopes": [
+          {
+            "status": "active",
+            "limit": 10,
+            "reserved": 0,
+            "spent": 3
+          }
+        ],
+        "authority_operations_total": 1
+      },
+      "checks": {
+        "worker_one_killed": true,
+        "worker_two_exit_zero": true,
+        "recovery_path": true,
+        "provider_effects_exact": true,
+        "authority_status": true,
+        "single_operation_row": true,
+        "budget_arithmetic": true,
+        "repeat_execute_refused": true,
+        "policy_epoch_preserved": true
+      },
+      "pass": true
+    },
+    {
+      "kill_point": "after_claim",
+      "databases": [
+        "vams_f12_after_claim_authority",
+        "vams_f12_after_claim_provider"
+      ],
+      "expected": {
+        "provider_effects": 0,
+        "authority_status": "rejected",
+        "recovery_path": "compensate"
+      },
+      "worker_one": {
+        "exit": 137,
+        "seconds": 0.18,
+        "last_line": ""
+      },
+      "state_after_kill": {
+        "provider_effects_total": 0,
+        "provider_effects_for_operation": 0,
+        "authority_status": "dispatched",
+        "cost_units": 3,
+        "scopes": [
+          {
+            "status": "active",
+            "limit": 10,
+            "reserved": 3,
+            "spent": 0
+          }
+        ],
+        "authority_operations_total": 1
+      },
+      "worker_two": {
+        "exit": 0,
+        "seconds": 0.57,
+        "report": {
+          "worker": 2,
+          "found_status": "dispatched",
+          "path": "compensate",
+          "late_commit_refused": true,
+          "late_commit_error": "EffectV3Error",
+          "repeat_execute": "refused:EffectV3Error",
+          "final_status": "rejected",
+          "admitted_authority_epoch": 3,
+          "admitted_policy_version": 7,
+          "proposal_authority_epoch": 3,
+          "proposal_policy_version": 7
+        }
+      },
+      "state_after_recovery": {
+        "provider_effects_total": 0,
+        "provider_effects_for_operation": 0,
+        "authority_status": "rejected",
+        "cost_units": 3,
+        "scopes": [
+          {
+            "status": "draining",
+            "limit": 10,
+            "reserved": 0,
+            "spent": 0
+          }
+        ],
+        "authority_operations_total": 1
+      },
+      "checks": {
+        "worker_one_killed": true,
+        "worker_two_exit_zero": true,
+        "recovery_path": true,
+        "provider_effects_exact": true,
+        "authority_status": true,
+        "single_operation_row": true,
+        "budget_arithmetic": true,
+        "repeat_execute_refused": true,
+        "policy_epoch_preserved": true,
+        "late_commit_refused": true
+      },
+      "pass": true
+    },
+    {
+      "kill_point": "provider_precommit",
+      "databases": [
+        "vams_f12_provider_precommit_authority",
+        "vams_f12_provider_precommit_provider"
+      ],
+      "expected": {
+        "provider_effects": 0,
+        "authority_status": "rejected",
+        "recovery_path": "compensate"
+      },
+      "worker_one": {
+        "exit": 137,
+        "seconds": 0.22,
+        "last_line": ""
+      },
+      "state_after_kill": {
+        "provider_effects_total": 0,
+        "provider_effects_for_operation": 0,
+        "authority_status": "dispatched",
+        "cost_units": 3,
+        "scopes": [
+          {
+            "status": "active",
+            "limit": 10,
+            "reserved": 3,
+            "spent": 0
+          }
+        ],
+        "authority_operations_total": 1
+      },
+      "worker_two": {
+        "exit": 0,
+        "seconds": 0.57,
+        "report": {
+          "worker": 2,
+          "found_status": "dispatched",
+          "path": "compensate",
+          "late_commit_refused": true,
+          "late_commit_error": "EffectV3Error",
+          "repeat_execute": "refused:EffectV3Error",
+          "final_status": "rejected",
+          "admitted_authority_epoch": 3,
+          "admitted_policy_version": 7,
+          "proposal_authority_epoch": 3,
+          "proposal_policy_version": 7
+        }
+      },
+      "state_after_recovery": {
+        "provider_effects_total": 0,
+        "provider_effects_for_operation": 0,
+        "authority_status": "rejected",
+        "cost_units": 3,
+        "scopes": [
+          {
+            "status": "draining",
+            "limit": 10,
+            "reserved": 0,
+            "spent": 0
+          }
+        ],
+        "authority_operations_total": 1
+      },
+      "checks": {
+        "worker_one_killed": true,
+        "worker_two_exit_zero": true,
+        "recovery_path": true,
+        "provider_effects_exact": true,
+        "authority_status": true,
+        "single_operation_row": true,
+        "budget_arithmetic": true,
+        "repeat_execute_refused": true,
+        "policy_epoch_preserved": true,
+        "late_commit_refused": true
+      },
+      "pass": true
+    },
+    {
+      "kill_point": "after_provider_commit",
+      "databases": [
+        "vams_f12_after_provider_commit_authority",
+        "vams_f12_after_provider_commit_provider"
+      ],
+      "expected": {
+        "provider_effects": 1,
+        "authority_status": "committed",
+        "recovery_path": "reconcile"
+      },
+      "worker_one": {
+        "exit": 137,
+        "seconds": 0.22,
+        "last_line": ""
+      },
+      "state_after_kill": {
+        "provider_effects_total": 1,
+        "provider_effects_for_operation": 1,
+        "authority_status": "dispatched",
+        "cost_units": 3,
+        "scopes": [
+          {
+            "status": "active",
+            "limit": 10,
+            "reserved": 3,
+            "spent": 0
+          }
+        ],
+        "authority_operations_total": 1
+      },
+      "worker_two": {
+        "exit": 0,
+        "seconds": 0.32,
+        "report": {
+          "worker": 2,
+          "found_status": "dispatched",
+          "path": "reconcile",
+          "repeat_execute": "refused:ReconciliationRequiredV3",
+          "final_status": "committed",
+          "admitted_authority_epoch": 3,
+          "admitted_policy_version": 7,
+          "proposal_authority_epoch": 3,
+          "proposal_policy_version": 7
+        }
+      },
+      "state_after_recovery": {
+        "provider_effects_total": 1,
+        "provider_effects_for_operation": 1,
+        "authority_status": "committed",
+        "cost_units": 3,
+        "scopes": [
+          {
+            "status": "active",
+            "limit": 10,
+            "reserved": 0,
+            "spent": 3
+          }
+        ],
+        "authority_operations_total": 1
+      },
+      "checks": {
+        "worker_one_killed": true,
+        "worker_two_exit_zero": true,
+        "recovery_path": true,
+        "provider_effects_exact": true,
+        "authority_status": true,
+        "single_operation_row": true,
+        "budget_arithmetic": true,
+        "repeat_execute_refused": true,
+        "policy_epoch_preserved": true
+      },
+      "pass": true
+    },
+    {
+      "kill_point": "accept_precommit",
+      "databases": [
+        "vams_f12_accept_precommit_authority",
+        "vams_f12_accept_precommit_provider"
+      ],
+      "expected": {
+        "provider_effects": 1,
+        "authority_status": "committed",
+        "recovery_path": "reconcile"
+      },
+      "worker_one": {
+        "exit": 137,
+        "seconds": 0.26,
+        "last_line": ""
+      },
+      "state_after_kill": {
+        "provider_effects_total": 1,
+        "provider_effects_for_operation": 1,
+        "authority_status": "dispatched",
+        "cost_units": 3,
+        "scopes": [
+          {
+            "status": "active",
+            "limit": 10,
+            "reserved": 3,
+            "spent": 0
+          }
+        ],
+        "authority_operations_total": 1
+      },
+      "worker_two": {
+        "exit": 0,
+        "seconds": 0.33,
+        "report": {
+          "worker": 2,
+          "found_status": "dispatched",
+          "path": "reconcile",
+          "repeat_execute": "refused:ReconciliationRequiredV3",
+          "final_status": "committed",
+          "admitted_authority_epoch": 3,
+          "admitted_policy_version": 7,
+          "proposal_authority_epoch": 3,
+          "proposal_policy_version": 7
+        }
+      },
+      "state_after_recovery": {
+        "provider_effects_total": 1,
+        "provider_effects_for_operation": 1,
+        "authority_status": "committed",
+        "cost_units": 3,
+        "scopes": [
+          {
+            "status": "active",
+            "limit": 10,
+            "reserved": 0,
+            "spent": 3
+          }
+        ],
+        "authority_operations_total": 1
+      },
+      "checks": {
+        "worker_one_killed": true,
+        "worker_two_exit_zero": true,
+        "recovery_path": true,
+        "provider_effects_exact": true,
+        "authority_status": true,
+        "single_operation_row": true,
+        "budget_arithmetic": true,
+        "repeat_execute_refused": true,
+        "policy_epoch_preserved": true
+      },
+      "pass": true
+    },
+    {
+      "kill_point": "after_accept",
+      "databases": [
+        "vams_f12_after_accept_authority",
+        "vams_f12_after_accept_provider"
+      ],
+      "expected": {
+        "provider_effects": 1,
+        "authority_status": "committed",
+        "recovery_path": "reconcile"
+      },
+      "worker_one": {
+        "exit": 137,
+        "seconds": 0.25,
+        "last_line": ""
+      },
+      "state_after_kill": {
+        "provider_effects_total": 1,
+        "provider_effects_for_operation": 1,
+        "authority_status": "committed",
+        "cost_units": 3,
+        "scopes": [
+          {
+            "status": "active",
+            "limit": 10,
+            "reserved": 0,
+            "spent": 3
+          }
+        ],
+        "authority_operations_total": 1
+      },
+      "worker_two": {
+        "exit": 0,
+        "seconds": 0.28,
+        "report": {
+          "worker": 2,
+          "found_status": "committed",
+          "path": "reconcile",
+          "repeat_execute": "refused:ReconciliationRequiredV3",
+          "final_status": "committed",
+          "admitted_authority_epoch": 3,
+          "admitted_policy_version": 7,
+          "proposal_authority_epoch": 3,
+          "proposal_policy_version": 7
+        }
+      },
+      "state_after_recovery": {
+        "provider_effects_total": 1,
+        "provider_effects_for_operation": 1,
+        "authority_status": "committed",
+        "cost_units": 3,
+        "scopes": [
+          {
+            "status": "active",
+            "limit": 10,
+            "reserved": 0,
+            "spent": 3
+          }
+        ],
+        "authority_operations_total": 1
+      },
+      "checks": {
+        "worker_one_killed": true,
+        "worker_two_exit_zero": true,
+        "recovery_path": true,
+        "provider_effects_exact": true,
+        "authority_status": true,
+        "single_operation_row": true,
+        "budget_arithmetic": true,
+        "repeat_execute_refused": true,
+        "policy_epoch_preserved": true
+      },
+      "pass": true
+    }
+  ],
+  "limits": [
+    "V3 object-effect Python path only; runs in VAMS_ENV=test because V3 candidates refuse live modes.",
+    "Single local PostgreSQL 18.6 (Debian 18.6-1.pgdg13+2) container; no network partition, failover or replica behaviour.",
+    "Workers die by os._exit(137) at instrumented boundaries; not power loss or kernel crash.",
+    "Fixed LOCAL-ONLY keys and fixture policies; no real provider host, signer custody or chain payment.",
+    "Token payment settlement (Solidity ComposedSettlement) is outside this run.",
+    "Not independent review or operational qualification evidence."
+  ]
+}

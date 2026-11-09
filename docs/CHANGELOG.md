@@ -1,3 +1,12 @@
+## 2026-11-09: F12 crash/restart campaign passes on native PostgreSQL 18.6
+
+- `scripts/remediation/effect_v3_native_pg_campaign.py` ran against PostgreSQL 18.6 (official image pinned by digest, loopback only, TLS 1.3 verify-full). All seven kill points recovered to exactly one provider effect or a full refund, with correct budget arithmetic, refused repeat execution and refused late commits.
+- A new `--negative-control` mode skips recovery; the state checks then fail at all six kill points that left work unfinished, so the PASS is not vacuous. The default port is now 55433, and the limits text reports the measured server version.
+- Findings for review: compensation drains the whole scope until an operator provisions a new one, and the effect stores require PostgreSQL 18 or later (`pg_constraint.conenforced`).
+- Evidence: `docs/remediation/repair_20261109/f12-native-pg-campaign-20261109.json` and `f12-native-pg-negative-control-20261109.json`; write-up in `F12-NATIVE-PG-CAMPAIGN.md`.
+
+F12 stays open: V4/V5 paths, partition and failover, power loss, M5.1 qualification and independent review remain. Status unchanged: 13 open, 0 of 36 verified, NOT READY.
+
 ## 2026-11-09: anomaly detector fails closed; gateway stops inventing node claims (F14, F15)
 
 - **Anomaly detector (F14).** `neuron/intelligence/anomaly_detector.py` used to classify a NaN or infinite activation as "not adversarial", because `NaN > threshold` is false. Every entry point now rejects nonfinite or empty input and nonfinite thresholds with `ValueError` instead of producing a classification.

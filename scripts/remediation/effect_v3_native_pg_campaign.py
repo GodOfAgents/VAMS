@@ -68,6 +68,8 @@ NOW = 1050
 
 # ---- deterministic components (identical in every process) -------------------
 
+STATE_CHECKS = ("provider_effects_exact", "authority_status", "budget_arithmetic")
+
 def _components(authority_dsn: str, provider_dsn: str):
     from cryptography.hazmat.primitives.asymmetric import ec
     from neuron.effect_authority_v3 import ObjectAuthorityScopeV3, PostgresEffectAuthorityV3
@@ -300,12 +302,19 @@ def campaign(args) -> dict:
         operation_id = parts["proposal"].operation_id
         code1, out1, t1 = _run_worker("worker-one", point, dsns, env)
         between = _state(databases, env, operation_id)
-        code2, out2, t2 = _run_worker("worker-two", point, dsns, env)
-        after = _state(databases, env, operation_id)
-        try:
-            report = json.loads(out2.split(" | stderr:")[0])
-        except ValueError:
-            report = {"raw": out2}
+        if args.negative_control:
+            # Oracle sanity check: no recovery worker runs, so the state checks
+            # must catch every kill point that left work unfinished.
+            code2, out2, t2 = None, "", 0.0
+            after = between
+            report = {}
+        else:
+            code2, out2, t2 = _run_worker("worker-two", point, dsns, env)
+            after = _state(databases, env, operation_id)
+            try:
+                report = json.loads(out2.split(" | stderr:")[0])
+            except ValueError:
+                report = {"raw": out2}
         effects, status, path = EXPECTED[point]
         scope = after["scopes"][0] if after["scopes"] else {}
         checks = {
@@ -323,7 +332,12 @@ def campaign(args) -> dict:
         }
         if path == "compensate":
             checks["late_commit_refused"] = report.get("late_commit_refused") is True
-        ok = all(checks.values())
+        if args.negative_control:
+            state_ok = all(checks[k] for k in STATE_CHECKS)
+            # Only after_accept finished everything before the kill.
+            ok = state_ok == (point == "after_accept")
+        else:
+            ok = all(checks.values())
         if not ok:
             failures.append(point)
         results.append({"kill_point": point, "databases": list(databases), "expected": {
@@ -331,9 +345,14 @@ def campaign(args) -> dict:
             "worker_one": {"exit": code1, "seconds": t1, "last_line": out1},
             "state_after_kill": between, "worker_two": {"exit": code2, "seconds": t2, "report": report},
             "state_after_recovery": after, "checks": checks, "pass": ok})
+    if args.negative_control:
+        status = "NEGATIVE_CONTROL_DETECTED" if not failures else "NEGATIVE_CONTROL_MISSED"
+    else:
+        status = "PASS" if not failures else "FAIL"
     return {
         "schema": "vams.f12_native_pg_campaign/1",
-        "status": "PASS" if not failures else "FAIL",
+        "mode": "negative_control_no_recovery" if args.negative_control else "kill_and_recover",
+        "status": status,
         "evidence_class": "NATIVE_POSTGRESQL_LOCAL_PROCESS_KILL",
         "server": server,
         "kill_points": list(KILL_POINTS),
@@ -341,7 +360,7 @@ def campaign(args) -> dict:
         "results": results,
         "limits": [
             "V3 object-effect Python path only; runs in VAMS_ENV=test because V3 candidates refuse live modes.",
-            "Single local PostgreSQL 17 container; no network partition, failover or replica behaviour.",
+            f"Single local PostgreSQL {server['server_version']} container; no network partition, failover or replica behaviour.",
             "Workers die by os._exit(137) at instrumented boundaries; not power loss or kernel crash.",
             "Fixed LOCAL-ONLY keys and fixture policies; no real provider host, signer custody or chain payment.",
             "Token payment settlement (Solidity ComposedSettlement) is outside this run.",
@@ -362,7 +381,9 @@ def main() -> int:
     parser.add_argument("--password-file", default="~/.vams-tools/pg/admin.password")
     parser.add_argument("--ca", default="~/.vams-tools/pg/ca.crt")
     parser.add_argument("--user", default="vams_admin")
-    parser.add_argument("--port", type=int, default=55432)
+    parser.add_argument("--port", type=int, default=55433)
+    parser.add_argument("--negative-control", action="store_true",
+                        help="skip recovery; state checks must fail wherever work was left unfinished")
     args = parser.parse_args()
     if args.cmd == "worker-one":
         return worker_one(args)
@@ -373,8 +394,8 @@ def main() -> int:
     record = campaign(args)
     args.out.write_text(json.dumps(record, indent=2, default=str) + "\n")
     print(f"{record['status']}: {len(record['results']) - len(record['failures'])}/{len(record['results'])} "
-          f"kill points recovered as expected; failures={record['failures']}")
-    return 0 if record["status"] == "PASS" else 1
+          f"kill points behaved as expected; failures={record['failures']}")
+    return 0 if record["status"] in ("PASS", "NEGATIVE_CONTROL_DETECTED") else 1
 
 
 if __name__ == "__main__":
