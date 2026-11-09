@@ -230,6 +230,24 @@
         "main-gateway-route-startup",
         "main-gateway-startup"
       ]
+    },
+    {
+      "topic": "anchor_rebinding_20261109_gateway_ingress",
+      "status": "source_observed_current_20261109",
+      "finding": "gateway/server.py and gateway/route_security.py digests refreshed after the live-ingress repair. Uvicorn now runs with proxy-header processing disabled, so the transport peer stays the loopback Envoy connection; route security names a proxy-header rewrite explicitly; the rate limiter now runs before authentication and keys buckets by the client IP Envoy asserts (previously the same client IP reached it through Uvicorn's header rewrite), with a 10,000-bucket cap. The client IP is the same data the limiter already held; no new field, recipient, persistence or flow was added. Affected line ranges were re-mapped to the same code. Source re-binding on the owner-operated runner, not privacy approval; T33 remains BLOCKED.",
+      "source_refs": [
+        "gateway-runtime-log",
+        "gateway-service-instances",
+        "main-gateway-bind",
+        "main-gateway-compose",
+        "main-gateway-economics-da",
+        "main-gateway-heartbeat",
+        "main-gateway-middleware",
+        "main-gateway-route-startup",
+        "main-gateway-startup",
+        "route-ingress",
+        "route-security"
+      ]
     }
   ],
   "source_files": {
@@ -286,7 +304,7 @@
     "gateway/server.py": {
       "artifact": "gateway/server.py",
       "algorithm": "sha256",
-      "digest": "c133be00163a581407d29e87fea924d7d4dc28fda5b7841dc652f01789795a10"
+      "digest": "87a5025c101430656fc039c9da13c24539c6b023615d4b5e33f064a2046d446c"
     },
     "gateway/route_policy.py": {
       "artifact": "gateway/route_policy.py",
@@ -296,7 +314,7 @@
     "gateway/route_security.py": {
       "artifact": "gateway/route_security.py",
       "algorithm": "sha256",
-      "digest": "c1b56ada6d3640ba9c6bf6e5bafc01ea0eab0494805835e280aadaba47a336b0"
+      "digest": "8a4fa3967736b3d97e6670190ce5dd052cc187b15687ae22ad1d0e5b58addfc2"
     },
     "gateway/request_auth.py": {
       "artifact": "gateway/request_auth.py",
@@ -703,56 +721,56 @@
     "main-gateway-bind": {
       "path": "gateway/server.py",
       "lines": [
-        69,
-        69
+        70,
+        70
       ],
       "anchor": "LIVE_BIND_HOST = \"127.0.0.1\""
     },
     "main-gateway-startup": {
       "path": "gateway/server.py",
       "lines": [
-        148,
-        240
+        149,
+        241
       ],
       "anchor": "async def lifespan"
     },
     "main-gateway-middleware": {
       "path": "gateway/server.py",
       "lines": [
-        261,
-        317
+        262,
+        339
       ],
       "anchor": "class RateLimitMiddleware"
     },
     "main-gateway-heartbeat": {
       "path": "gateway/server.py",
       "lines": [
-        755,
-        855
+        782,
+        882
       ],
       "anchor": "@app.post(\"/heartbeat\")"
     },
     "main-gateway-compose": {
       "path": "gateway/server.py",
       "lines": [
-        883,
-        1037
+        910,
+        1064
       ],
       "anchor": "class ComposeRequest(BaseModel):"
     },
     "main-gateway-economics-da": {
       "path": "gateway/server.py",
       "lines": [
-        1044,
-        1134
+        1071,
+        1161
       ],
       "anchor": "@app.get(\"/economics/status\")"
     },
     "main-gateway-route-startup": {
       "path": "gateway/server.py",
       "lines": [
-        1138,
-        1152
+        1165,
+        1179
       ],
       "anchor": "def main():"
     },
@@ -767,16 +785,16 @@
     "route-security": {
       "path": "gateway/route_security.py",
       "lines": [
-        30,
-        120
+        31,
+        121
       ],
       "anchor": "class GatewayRouteSecurityMiddleware"
     },
     "route-ingress": {
       "path": "gateway/route_security.py",
       "lines": [
-        140,
-        181
+        151,
+        223
       ],
       "anchor": "def _validate_trusted_ingress"
     },
@@ -1191,16 +1209,16 @@
     "gateway-runtime-log": {
       "path": "gateway/server.py",
       "lines": [
-        202,
-        210
+        203,
+        211
       ],
       "anchor": "\"gateway runtime mode=%s classification=%s evidence=%s gateway_mock=%s \""
     },
     "gateway-service-instances": {
       "path": "gateway/server.py",
       "lines": [
-        485,
-        522
+        514,
+        549
       ],
       "anchor": "composer = VAMSResourceComposer()"
     },
@@ -1967,7 +1985,7 @@
           "channel": "GET / and GET /nodes"
         }
       ],
-      "local_storage": "nodes is an in-process Python map; no disk persistence for these fields is shown. Main app also keeps rate-limit buckets in memory.",
+      "local_storage": "nodes is an in-process Python map; no disk persistence for these fields is shown. Main app also keeps rate-limit buckets in memory, keyed by the client IP address that the reviewed Envoy ingress asserts in X-Forwarded-For (trusted only from the loopback peer with the ingress marker), otherwise by the transport peer address; at most 10,000 buckets.",
       "provider_storage": "No DA provider receives heartbeat fields from this handler. Host/proxy access logs are not established by this source inventory.",
       "access_boundary": "POST /heartbeat is a privileged state change; GET / and GET /nodes are authenticated reads; GET /health is public. Main gateway binds to loopback in source. In live mode trusted ingress is required and heartbeat additionally checks mTLS headers; deployed proxy and authorization clients remain UNKNOWN.",
       "retention_deletion": "A background cleanup removes nodes offline for more than one hour; the map is also bounded by MAX_NODES=5000 with old offline-node eviction when needed. Process restart clears map state. No field-level delete endpoint is defined.",

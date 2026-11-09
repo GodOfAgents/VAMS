@@ -55,6 +55,7 @@ from gateway.route_policy import validate_route_policy
 from gateway.route_security import (
     GatewayRouteSecurityMiddleware,
     TRUSTED_INGRESS_VALUE,
+    trusted_ingress_client,
 )
 
 
@@ -269,6 +270,18 @@ from starlette.responses import JSONResponse
 from starlette.requests import Request
 
 class RateLimitMiddleware(BaseHTTPMiddleware):
+    """Per-client token bucket, applied before authentication.
+
+    It sits outside GatewayRouteSecurityMiddleware so requests that fail
+    authentication, framing or routing are counted too. Behind Envoy the
+    transport peer is always the loopback proxy, so the client key is the
+    address Envoy asserts (see trusted_ingress_client); otherwise it is the
+    transport peer.
+    """
+
+    MAX_BUCKETS = 10_000
+    OVERFLOW_KEY = "overflow"
+
     def __init__(self, app, limit: int = 100, window_sec: int = 60):
         super().__init__(app)
         self.limit = limit
@@ -276,24 +289,33 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         self.buckets = {}
         self.lock = threading.Lock()
 
+    @staticmethod
+    def client_key(request: Request) -> str:
+        asserted = trusted_ingress_client(request.scope)
+        if asserted is not None:
+            return "client:" + asserted
+        return "peer:" + (request.client.host if request.client else "unknown")
+
     async def dispatch(self, request: Request, call_next):
-        client_ip = request.client.host if request.client else "unknown"
+        client_ip = self.client_key(request)
         now = time.time()
-        
+
         with self.lock:
+            if len(self.buckets) > 1000:
+                keys_to_remove = [k for k, v in self.buckets.items() if now - v["last_refill"] > self.window_sec * 2]
+                for k in keys_to_remove:
+                    del self.buckets[k]
+            if client_ip not in self.buckets and len(self.buckets) >= self.MAX_BUCKETS:
+                # Bound memory under address spraying: new clients share one bucket.
+                client_ip = self.OVERFLOW_KEY
             if client_ip not in self.buckets:
                 self.buckets[client_ip] = {"tokens": float(self.limit), "last_refill": now}
-            
+
             bucket = self.buckets[client_ip]
             elapsed = now - bucket["last_refill"]
             refill_amount = elapsed * (self.limit / self.window_sec)
             bucket["tokens"] = min(float(self.limit), bucket["tokens"] + refill_amount)
             bucket["last_refill"] = now
-            
-            if len(self.buckets) > 1000:
-                keys_to_remove = [k for k, v in self.buckets.items() if now - v["last_refill"] > self.window_sec * 2]
-                for k in keys_to_remove:
-                    del self.buckets[k]
 
             if bucket["tokens"] >= 1.0:
                 bucket["tokens"] -= 1.0
@@ -476,17 +498,22 @@ try:
     else:
         limit_val = int(rate_limit_env)
         window_val = 60
+    if limit_val < 1 or window_val < 1:
+        raise ValueError("rate limit and window must be positive")
 except ValueError:
     limit_val = 100
     window_val = 60
 
+# Starlette runs the last-added middleware first. Order on the way in:
+# runtime classification -> rate limit -> size limit -> route security
+# (ingress, framing, authentication) -> CORS -> routes.
+app.add_middleware(GatewayRouteSecurityMiddleware)
+app.add_middleware(RequestSizeLimitMiddleware, max_bytes=1_048_576)
 app.add_middleware(
     RateLimitMiddleware,
     limit=limit_val,
     window_sec=window_val
 )
-app.add_middleware(GatewayRouteSecurityMiddleware)
-app.add_middleware(RequestSizeLimitMiddleware, max_bytes=1_048_576)
 app.add_middleware(RuntimeClassificationMiddleware)
 
 # In-memory node registry
@@ -1156,7 +1183,9 @@ def main():
     print(f"   Evidence: {policy.evidence_classification}")
     print()
 
-    uvicorn.run(app, host=bind_host, port=8000)
+    # proxy_headers=False keeps the transport peer as the loopback Envoy
+    # connection; route security and the rate limiter read Envoy's headers.
+    uvicorn.run(app, host=bind_host, port=8000, proxy_headers=False)
 
 
 if __name__ == "__main__":

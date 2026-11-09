@@ -53,8 +53,16 @@ GATEWAY_AUTH_AUDIENCE=<fixed-audience> \
 GATEWAY_AUTH_REPLAY_DB=/var/lib/vams/gateway-replay.sqlite3 \
 GATEWAY_ALLOWED_ORIGINS=https://gateway.example \
 GATEWAY_HEARTBEAT_CERT_FINGERPRINTS=<allowed-client-cert-fingerprint> \
-uvicorn gateway.server:app --host 127.0.0.1 --port 8000
+uvicorn gateway.server:app --host 127.0.0.1 --port 8000 --no-proxy-headers
 ```
+
+`--no-proxy-headers` is required. Uvicorn otherwise trusts
+`X-Forwarded-For` from 127.0.0.1 and replaces the transport peer with the
+remote client address Envoy writes there; the live ingress check then refuses
+every remote client (`ingress_peer_rewritten_by_proxy_headers`). The gateway
+reads Envoy's client address itself, for per-client rate limiting only after
+confirming the loopback peer and ingress marker. `python -m gateway.server`
+applies the same setting.
 
 Validate the exact template and rendered certificate paths before any launch:
 

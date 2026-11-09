@@ -184,6 +184,7 @@ def _start_uvicorn(port: int, environment: dict[str, str]) -> subprocess.Popen:
             "--port",
             str(port),
             "--no-access-log",
+            "--no-proxy-headers",
             "--log-level",
             "warning",
         ),

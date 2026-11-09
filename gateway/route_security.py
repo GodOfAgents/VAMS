@@ -24,6 +24,7 @@ from neuron.runtime_safety import RuntimePolicy, load_runtime_policy
 AUTHENTICATED_REQUEST_STATE = "vams_authenticated_gateway_request"
 TRUSTED_INGRESS_HEADER = b"x-vams-ingress-version"
 TRUSTED_INGRESS_VALUE = b"envoy-1.39.1-v1"
+FORWARDED_FOR_HEADER = b"x-forwarded-for"
 _HTTP_METHODS_WITH_JSON_BODY = frozenset({"POST", "PUT", "PATCH"})
 
 
@@ -137,21 +138,62 @@ def _runtime_policy(scope) -> RuntimePolicy:
     return policy if isinstance(policy, RuntimePolicy) else load_runtime_policy()
 
 
-def _validate_trusted_ingress(scope) -> str | None:
-    """Require the reviewed Envoy transport boundary for every live request."""
-    if not _runtime_policy(scope).is_live:
-        return None
+def _loopback_peer(scope) -> bool:
     client = scope.get("client")
     if not isinstance(client, (tuple, list)) or not client:
-        return "untrusted_ingress_peer"
+        return False
     try:
-        if not ipaddress.ip_address(str(client[0])).is_loopback:
-            return "untrusted_ingress_peer"
+        return ipaddress.ip_address(str(client[0])).is_loopback
     except ValueError:
+        return False
+
+
+def _validate_trusted_ingress(scope) -> str | None:
+    """Require the reviewed Envoy transport boundary for every live request.
+
+    The peer must be the loopback Envoy connection itself. Uvicorn must run
+    with proxy-header processing disabled; otherwise it replaces the peer with
+    the client address Envoy writes into X-Forwarded-For, and every remote
+    client is refused here.
+    """
+    if not _runtime_policy(scope).is_live:
+        return None
+    if not _loopback_peer(scope):
+        client = scope.get("client")
+        forwarded = _header_values(scope, FORWARDED_FOR_HEADER)
+        if (
+            isinstance(client, (tuple, list))
+            and client
+            and forwarded == [str(client[0]).encode("latin-1")]
+            and _header_values(scope, TRUSTED_INGRESS_HEADER) == [TRUSTED_INGRESS_VALUE]
+        ):
+            # Name the misconfiguration instead of a generic peer refusal.
+            return "ingress_peer_rewritten_by_proxy_headers"
         return "untrusted_ingress_peer"
     if _header_values(scope, TRUSTED_INGRESS_HEADER) != [TRUSTED_INGRESS_VALUE]:
         return "untrusted_ingress_marker"
     return None
+
+
+def trusted_ingress_client(scope) -> str | None:
+    """Return the client address asserted by the reviewed Envoy ingress.
+
+    Only a loopback peer carrying the exact ingress marker and exactly one
+    X-Forwarded-For value qualifies. Envoy removes client-supplied forwarding
+    headers and writes that value from the downstream TCP address. Anything
+    else returns None, and callers must fall back to the transport peer.
+    """
+    if not _loopback_peer(scope):
+        return None
+    if _header_values(scope, TRUSTED_INGRESS_HEADER) != [TRUSTED_INGRESS_VALUE]:
+        return None
+    forwarded = _header_values(scope, FORWARDED_FOR_HEADER)
+    if len(forwarded) != 1:
+        return None
+    try:
+        return str(ipaddress.ip_address(forwarded[0].decode("ascii").strip()))
+    except (UnicodeDecodeError, ValueError):
+        return None
 
 
 def _validate_protected_headers(scope) -> str | None:

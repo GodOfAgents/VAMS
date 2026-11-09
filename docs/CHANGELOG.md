@@ -1,3 +1,12 @@
+## 2026-11-09: gateway serves remote clients through Envoy; rate limit counts rejected requests (T31, T35)
+
+- **Remote clients were refused.** Uvicorn's default proxy-header handling replaced the loopback Envoy peer with the client address from `X-Forwarded-For`, so the live ingress check refused every remote client with 403. `python -m gateway.server` now passes `proxy_headers=False`, the documented launch adds `--no-proxy-headers`, and a rewritten peer is refused with the named code `ingress_peer_rewritten_by_proxy_headers`.
+- **Rate limiting.** The limiter now runs before route security, so failed authentication, framing and routing attempts count. Buckets are keyed by the client address Envoy asserts, trusted only from the loopback peer with the ingress marker and a single parseable value. Bucket count is capped at 10,000, and a non-positive rate or window falls back to the defaults.
+- **Tests.** New live suite `neuron/tests/test_gateway_live_ingress_abuse.py` (28 tests): remote client, per-client limit, spoofed forwarding header, counted auth failures, and 11 Envoy abuse limits (mTLS refusals, TLS 1.1, 413, 431, 400, 405, 426, 408).
+- **Privacy inventory.** Re-bound with no new field. T33 stays BLOCKED.
+
+Details: `docs/remediation/repair_20261109/GATEWAY-LIVE-INGRESS.md`. T31 and T35 stay partial; status unchanged: 13 open, 0 of 36 verified, NOT READY.
+
 ## 2026-11-09: F12 crash/restart campaign passes on native PostgreSQL 18.6
 
 - `scripts/remediation/effect_v3_native_pg_campaign.py` ran against PostgreSQL 18.6 (official image pinned by digest, loopback only, TLS 1.3 verify-full). All seven kill points recovered to exactly one provider effect or a full refund, with correct budget arithmetic, refused repeat execution and refused late commits.
