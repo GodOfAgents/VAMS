@@ -1,53 +1,152 @@
 schema_version: 1
 tool: slither
 tool_version: 0.11.5
-scope: incident-preparation-pr
+scope: remediation-phase1-20261109
 release_evidence: false
+source_commit_base: c0d422c
+report_sha256: c78da6b7e2e9d213c29a4d0bb5a41db895303caf524da76d138f4b10587ae7b2
+flags: --exclude-dependencies --exclude-informational --exclude-low
 summary:
   high: 0
-  medium: 18
-  optimization: 1
+  medium: 62
+  optimization: 16
+defects_found: 0
+reviewer: author (Claude); non-author review pending
 adjudications:
-  - detector: incorrect-equality
-    impact: Medium
-    count: 15
-    status: reviewed_expected_guard
-    locations:
-      - src/base/VAMSTimelockedAdmin.sol:40
-      - src/economic/HardwareCommitment.sol:184
-      - src/economic/TransactionCompensation.sol:389
-      - src/economic/VAMSFeeCollector.sol:205
-      - src/registry/VAMSHardwareRegistry.sol:321
-      - src/slashing/StateCheckpointRegistryV2.sol:50
-      - src/staking/VAMSStaking.sol:608
-      - src/staking/VAMSStaking.sol:535
-      - src/staking/VAMSStaking.sol:590
-      - src/staking/VAMSStaking.sol:313
-      - src/staking/VAMSStaking.sol:329
-      - src/vdso/VAMSAdapterRegistry.sol:197
-      - src/vesting/VAMSVesting.sol:237
-      - src/vesting/VAMSVesting.sol:194
-      - src/vesting/VAMSVesting.sol:259
-    rationale: Exact zero, enum, bytes32, and evidence-mode comparisons are intentional existence, empty-value, state, or policy guards; none compares manipulable token balances or timestamps for equality.
-  - detector: reentrancy-no-eth
-    impact: Medium
-    count: 2
-    status: reviewed_protected
-    locations:
-      - src/economic/TwoPhaseCommitManager.sol:176
-      - src/sentinel/SLAEnforcer.sol:169
-    rationale: Both entry points are protected by nonReentrant. Workflow identity and metadata are established before escrow calls, and a reverted iteration rolls back the transaction. Retry state is set before the slash call and reset only in the handled revert path.
-  - detector: unused-return
-    impact: Medium
-    count: 1
-    status: reviewed_false_positive
-    locations:
-      - src/infrastructure/VAMSERC8004Adapter.sol:54
-    rationale: Tuple destructuring intentionally selects and validates the returned owner while discarding unrelated registry fields; the external return is not ignored.
-  - detector: immutable-states
-    impact: Optimization
-    count: 1
-    status: reviewed_not_applicable
-    locations:
-      - src/token/VAMSToken.sol:88
-    rationale: The contract is upgradeable and initializes antiWhaleEndTimestamp through its initializer, so Solidity immutable storage is not applicable.
+- detector: divide-before-multiply
+  impact: Medium
+  count: 1
+  status: reviewed_exact_arithmetic
+  locations:
+  - src/economic/VAMSInsuranceFund.sol:310
+  rationale: VAMSInsuranceFund.executePayout computes the INV-2 30% cap as q*3000 + floor(r*3000/10000)
+    with B = q*10000 + r, which equals floor(B*3000/10000) exactly; the split avoids overflow and loses
+    no precision.
+- detector: incorrect-equality
+  impact: Medium
+  count: 15
+  status: reviewed_expected_guard
+  locations:
+  - src/base/VAMSTimelockedAdmin.sol:38
+  - src/economic/HardwareCommitment.sol:182
+  - src/economic/TransactionCompensation.sol:386
+  - src/economic/VAMSFeeCollector.sol:203
+  - src/registry/VAMSHardwareRegistry.sol:320
+  - src/slashing/StateCheckpointRegistryV2.sol:49
+  - src/staking/VAMSStaking.sol:293
+  - src/staking/VAMSStaking.sol:309
+  - src/staking/VAMSStaking.sol:516
+  - src/staking/VAMSStaking.sol:573
+  - src/staking/VAMSStaking.sol:591
+  - src/vdso/VAMSAdapterRegistry.sol:181
+  - src/vesting/VAMSVesting.sol:187
+  - src/vesting/VAMSVesting.sol:224
+  - src/vesting/VAMSVesting.sol:250
+  rationale: 'Re-verified 2026-11-09 at current lines: every site is an exact zero, bytes32(0), enum or
+    evidence-mode guard (nothing-to-release, not-found, already-exists, empty pool, pending status). None
+    compares a manipulable balance or timestamp for equality.'
+- detector: reentrancy-no-eth
+  impact: Medium
+  count: 5
+  status: reviewed_protected
+  locations:
+  - src/economic/ComposedSettlement.sol:205
+  - src/economic/ComposedSettlement.sol:442
+  - src/economic/TwoPhaseCommitManager.sol:176
+  - src/sentinel/SLAEnforcer.sol:169
+  - src/trust/HeartbeatAtomicConsentRegistryV2.sol:120
+  rationale: Re-verified 2026-11-09. TwoPhaseCommitManager.initiateWorkflow, SLAEnforcer.retryPendingSlash
+    and ComposedSettlement.createComposedEscrowV2/refundExpiredComposed are nonReentrant; refundExpiredComposed
+    marks each row refunded before its bond-registry call. HeartbeatAtomicConsentRegistryV2.relayConsent
+    has an explicit _relayEntered/_frame.active guard and requires the frame to be consumed by the exact
+    timelock operation. Remaining cross-function reads are views.
+- detector: uninitialized-local
+  impact: Medium
+  count: 20
+  status: reviewed_intended_default
+  locations:
+  - src/economic/ComposedSettlement.sol:208
+  - src/economic/ComposedSettlement.sol:366
+  - src/governance/OperationAwareVAMSTimelockControllerV3.sol:170
+  - src/governance/OperationAwareVAMSTimelockControllerV3.sol:176
+  - src/trust/AutomataSgxActionVerifierV1.sol:86
+  - src/trust/GovernedObjectGrantV1.sol:51
+  - src/trust/HeartbeatAtomicConsentRegistryV2.sol:130
+  - src/trust/HeartbeatAuthorityTypesV3.sol:176
+  - src/trust/HeartbeatAuthorityTypesV3.sol:206
+  - src/trust/HeartbeatConsentPolicyV3.sol:120
+  - src/trust/HeartbeatConsentV2.sol:152
+  - src/trust/HeartbeatConsentV2.sol:187
+  - src/trust/HeartbeatPrincipalV1.sol:103
+  - src/trust/HeartbeatPrincipalV1.sol:114
+  - src/trust/HeartbeatPrincipalV1.sol:84
+  - src/trust/HeartbeatPrincipalV1.sol:94
+  - src/trust/ObjectEffectV3.sol:182
+  - src/trust/ObjectEffectV3.sol:197
+  - src/trust/ObjectEffectV3.sol:210
+  - src/trust/RawSecp256k1V1.sol:187
+  rationale: 'Re-verified 2026-11-09. Each local relies on Solidity zero/empty initialization by design:
+    decoder structs returned empty on failure (callers check the ok flag), counters and sort indices starting
+    at zero, a previous-value sentinel of zero, Expected/Receipt structs filled field by field before
+    use, and try/catch results assigned before use with zero rejected: the accepted replay value in ComposedSettlement
+    and the computed digest in HeartbeatConsentPolicyV3. ComposedSettlement block_ stays empty only when
+    no service block is requested, and the terms hash then must be zero.'
+- detector: unused-return
+  impact: Medium
+  count: 21
+  status: reviewed_false_positive
+  locations:
+  - src/infrastructure/VAMSERC8004Adapter.sol:52
+  - src/trust/ActionDeliveryVerifierV1.sol:130
+  - src/trust/ActionDeliveryVerifierV1.sol:81
+  - src/trust/ActionDeliveryVerifierV1.sol:81
+  - src/trust/GovernedObjectGrantV1.sol:97
+  - src/trust/HeartbeatAtomicConsentRegistryV2.sol:379
+  - src/trust/ObjectEffectV3.sol:112
+  - src/trust/ObjectEffectV3.sol:112
+  - src/trust/ObjectEffectV3.sol:121
+  - src/trust/ObjectEffectV3.sol:134
+  - src/trust/ObjectEffectV3.sol:134
+  - src/trust/ObjectEffectV3.sol:177
+  - src/trust/ObjectEffectV3.sol:177
+  - src/trust/ObjectEffectV3.sol:177
+  - src/trust/ObjectEffectV3.sol:191
+  - src/trust/ObjectEffectV3.sol:191
+  - src/trust/ObjectEffectV3.sol:205
+  - src/trust/ObjectEffectV3.sol:205
+  - src/trust/ObjectEffectV3.sol:205
+  - src/trust/RootSignatureV1.sol:7
+  - src/trust/RootSignatureV1.sol:7
+  rationale: 'Re-verified 2026-11-09. EffectReceiptV3.verify does not revert, so each site was checked:
+    ObjectEffectV3.providerReceipt, terminalAbsence and verifyFenceUpdate return verify''s (ok, digest)
+    to callers that check ok (absence() rejects each failure; acknowledgement stores valid). ActionDeliveryVerifierV1.verifyObjectAbsenceV3
+    returns absence()''s result. Where issuer()''s validity flag is discarded the issuer id is bytes32(0),
+    which EffectReceiptV3._validExpected rejects, and verify re-derives and checks the key. ECDSA.tryRecover
+    discards only the error argument while the RecoverError is checked. decodePrincipal and getAgent discard
+    unrelated tuple fields after checking ok/owner.'
+- detector: immutable-states
+  impact: Optimization
+  count: 16
+  status: reviewed_not_applied
+  locations:
+  - src/governance/OperationAwareVAMSTimelockControllerV3.sol:33
+  - src/governance/OperationAwareVAMSTimelockControllerV3.sol:35
+  - src/staking/VAMSStaking.sol:108
+  - src/staking/VAMSStaking.sol:120
+  - src/token/VAMSToken.sol:88
+  - src/trust/HeartbeatAuthoritySourceV3.sol:26
+  - src/trust/HeartbeatAuthoritySourceV3.sol:27
+  - src/trust/HeartbeatAuthoritySourceV3.sol:28
+  - src/trust/HeartbeatAuthoritySourceV3.sol:29
+  - src/trust/HeartbeatAuthoritySourceV3.sol:30
+  - src/trust/HeartbeatAuthoritySourceV3.sol:31
+  - src/trust/HeartbeatConsentPolicyV2.sol:15
+  - src/trust/HeartbeatConsentPolicyV2.sol:16
+  - src/trust/HeartbeatConsentPolicyV3.sol:23
+  - src/trust/HeartbeatConsentPolicyV3.sol:24
+  - src/trust/HeartbeatConsentPolicyV3.sol:25
+  rationale: Gas-only. VAMSToken is upgradeable (set in initializer). VAMSStaking setters are reachable
+    in the base contract; the suggestion comes from VAMSRestrictedStaking, which deploys rate 0 and budget
+    0 and overrides both setters to accept only zero. Heartbeat/Timelock V3 values are constructor-bound
+    configuration and code-hash pins; converting them changes runtime bytecode and is left to a separate
+    reviewed change.

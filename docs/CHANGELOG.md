@@ -1,3 +1,10 @@
+## 2026-11-09: all 62 Slither mediums adjudicated; policy reader parked
+
+- **Slither.** All 62 medium findings (Slither 0.11.5, CI flags) were reviewed against current source: 21 unused-return, 20 uninitialized-local, 15 incorrect-equality, 5 reentrancy-no-eth, 1 divide-before-multiply. No defects were found. `contracts/slither-adjudications.yml` now lists every location with its disposition, plus the 16 gas-only immutable suggestions, which are not applied. See `docs/remediation/repair_20261109/SLITHER-MEDIUM-ADJUDICATION.md`.
+- **Stage D policy reader parked.** The existing acceptance text rejects a raw RPC Boolean as policy authority. A qualifying reader needs a deployed policy contract, an Amoy finality trust anchor, reviewed RPC and observer identities, signers and privacy acceptance, all currently UNKNOWN. See `docs/remediation/repair_20261109/POLICY-READER-PARKED.md`.
+
+No source change. Author review only. Status unchanged: 13 open, 0 of 36 verified, NOT READY.
+
 ## 2026-11-09: gateway serves remote clients through Envoy; rate limit counts rejected requests (T31, T35)
 
 - **Remote clients were refused.** Uvicorn's default proxy-header handling replaced the loopback Envoy peer with the client address from `X-Forwarded-For`, so the live ingress check refused every remote client with 403. `python -m gateway.server` now passes `proxy_headers=False`, the documented launch adds `--no-proxy-headers`, and a rewritten peer is refused with the named code `ingress_peer_rewritten_by_proxy_headers`.
