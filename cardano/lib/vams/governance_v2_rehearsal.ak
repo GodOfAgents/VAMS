@@ -423,9 +423,9 @@ fn queue_n_tx(d: Deployment) -> Transaction {
 
 // ---- Cases -----------------------------------------------------------------
 
-/// Number of cases served by case_at (indices 0 to 41).
+/// Number of cases served by case_at (indices 0 to 45).
 pub fn case_total() -> Int {
-  42
+  46
 }
 
 fn p0(d: Deployment) -> ProposalDatumV2 {
@@ -486,7 +486,8 @@ pub fn case_at(d: Deployment, index: Int) -> RehearsalCase {
     // Adversarial cases: each must be rejected by the applied validator.
     23 -> spending("reject/execute_intent_disabled", 2, False, intent_tx(d, ExecuteIntentV2, [proposer], expiry_time()), intent_input(d), request(ExecuteIntentV2))
     24 -> spending("reject/two_member_intent_cancel", 2, False, intent_tx(d, CancelIntentV2, [alice, proposer], queued_at() + 100_000), intent_input(d), request(CancelIntentV2))
-    25 -> spending("reject/queue_with_24h_delay", 1, False, queue_tx(d, 86_400_000), proposal_input(d, passed(d)), request(QueueV2))
+    // Queue is enforced by the authority spend; the governor delegates to it.
+    25 -> spending("reject/queue_with_24h_delay", 0, False, queue_tx(d, 86_400_000), c1_input(d), request(QueueV2))
     26 -> spending("reject/vote_replaces_prior_voter", 1, False, vote2(d, with_vote(d, p0(d), bob, 900, True)), proposal_input(d, p1(d, True)), vote_request(bob, 900, 2))
     27 -> spending("reject/rejected_refund_redirected", 1, False, terminal_tx(d, False, bob), proposal_input(d, p1(d, False)), request(FinalizeRejectedV2))
     28 -> spending("reject/forged_authority_reference", 1, False, vote1(d, authority_input(config(Deployment { ..d, authority: forged_policy }, 1, 0)), 2), proposal_input(d, p0(d)), vote_request(alice, 100, 2))
@@ -503,7 +504,23 @@ pub fn case_at(d: Deployment, index: Int) -> RehearsalCase {
     38 -> spending("max_queue8/governor_spend", 1, True, queue_n_tx(d), proposal_input(d, passed_n(d)), request(QueueV2))
     39 -> minting("max_queue8/proposal_burn", 3, True, queue_n_tx(d), d.proposal, request(QueueV2))
     40 -> minting("max_queue8/receipt_burn", 4, True, queue_n_tx(d), d.receipt, request(QueueV2))
-    _ -> minting("max_queue8/intent_mint", 5, True, queue_n_tx(d), d.intent, request(QueueV2))
+    41 -> minting("max_queue8/intent_mint", 5, True, queue_n_tx(d), d.intent, request(QueueV2))
+    // Delegation attacks: a delegating script without its governing spend.
+    42 -> minting("reject/receipt_mint_without_governor_spend", 4, False,
+      Transaction { ..vote1(d, c1_input(d), 2), redeemers: [Pair(Mint(d.receipt), vote_request(alice, 100, 2))] },
+      d.receipt, vote_request(alice, 100, 2))
+    43 -> minting("reject/proposal_mint_under_authority_queue_redeemer", 3, False,
+      Transaction { ..create_tx(d, d.governor),
+        redeemers: [Pair(Mint(d.proposal), request(CreateV2)), Pair(Spend(gov_ref(0)), request(QueueV2))] },
+      d.proposal, request(CreateV2))
+    44 -> minting("reject/intent_burn_without_timelock_spend", 5, False,
+      Transaction { ..intent_tx(d, CancelIntentV2, [alice, bob, proposer], queued_at() + 100_000),
+        redeemers: [Pair(Mint(d.intent), request(CancelIntentV2))] },
+      d.intent, request(CancelIntentV2))
+    _ -> spending("reject/governor_queue_without_authority_spend", 1, False,
+      Transaction { ..queue_tx(d, governance_v2.delay_ms),
+        redeemers: [Pair(Spend(gov_ref(1)), request(QueueV2))] },
+      proposal_input(d, passed(d)), request(QueueV2))
   }
 }
 

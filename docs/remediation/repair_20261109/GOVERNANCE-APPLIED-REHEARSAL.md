@@ -1,5 +1,9 @@
 # Governance v2 applied-identity rehearsal (2026-11-09)
 
+> Superseded by `GOVERNANCE-DELEGATION.md`. The budget finding below was
+> repaired the same day, and the rehearsal now passes 46/46 within the
+> limits. This record describes the pre-repair source.
+
 Status: **FAIL: blocking finding.** All 42 cases behave as specified on the
 real compiled, applied validators, but five transaction shapes exceed the
 reference per-transaction execution-memory limit. Readiness is unchanged:

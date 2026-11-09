@@ -6,12 +6,12 @@ use aiken/primitive/bytearray
 use aiken/interval
 use cardano/address.{Address, Script, VerificationKey}
 use cardano/assets
-use cardano/transaction.{InlineDatum, Input, NoDatum, Output, OutputReference, Transaction, ValidityRange}
+use cardano/transaction.{InlineDatum, Input, NoDatum, Output, OutputReference, Spend, Transaction, ValidityRange}
 use vams/governance_v2
 use vams/governance_v2_transitions
 use vams/governance_v2_types.{
   AuthorityDatumV2, CancelIntentV2, CancelProposalV2, CreateV2, ExecuteIntentV2,
-  ExpireIntentV2, FinalizePassedV2, FinalizeRejectedV2, GovernanceAnchorV2, GovernanceBootstrapV2,
+  ExpireIntentV2, FinalizePassedV2, FinalizeRejectedV2, GovernanceActionV2, GovernanceAnchorV2, GovernanceBootstrapV2,
   GovernanceConfigV2, GovernanceRequestV2, IntentDatumV2, PassedV2, PendingV2,
   ProposalDatumV2, QueueV2, VoteLockV2, VoteV2,
 }
@@ -133,6 +133,48 @@ fn proposal_input(p: ProposalDatumV2) -> Input {
 fn funding(vkh: ByteArray, lovelace: Int, vams: Int) -> Input {
   Input { output_reference: ref(2), output: pay(key(vkh), assets.from_lovelace(lovelace)
     |> assets.add(vams_policy, #"56414d53", vams)) }
+}
+
+/// Delegation (2026-11-09): minting policies, and the governor spend during
+/// Queue, only check that the governing input is spent under the same request.
+/// These helpers add that governing spend redeemer, as the ledger would, and
+/// evaluate the delegating check together with the governing validator's full
+/// transition check, so each expected rejection is attributed to the validator
+/// that enforces it on chain. Direct delegation tests follow the campaign.
+fn governing_ref(value: Transaction, action: GovernanceActionV2) -> Option<OutputReference> {
+  let found = when action is {
+    CreateV2 | QueueV2 -> list.find(value.inputs, fn(input) {
+      assets.quantity_of(input.output.value, authority_policy, governance_v2_vectors.authority_name) != 0 })
+    CancelIntentV2 | ExpireIntentV2 | ExecuteIntentV2 ->
+      list.find(value.inputs, fn(input) { input.output.address == script(timelock_hash) })
+    _ -> list.find(value.inputs, fn(input) { input.output.address == script(governor_hash) })
+  }
+  when found is {
+    Some(input) -> Some(input.output_reference)
+    None -> None
+  }
+}
+
+fn with_governing_redeemer(value: Transaction, action: GovernanceActionV2) -> Transaction {
+  when governing_ref(value, action) is {
+    Some(reference) -> {
+      let request: Data = GovernanceRequestV2 { version: 2, action }
+      Transaction { ..value, redeemers: list.concat(value.redeemers, [Pair(Spend(reference), request)]) }
+    }
+    None -> value
+  }
+}
+
+fn policy_tx(a: GovernanceAnchorV2, kind: Int, policy_id: ByteArray, action: GovernanceActionV2, value: Transaction) -> Bool {
+  let full = with_governing_redeemer(value, action)
+  governance_v2_transitions.policy_mint(a, kind, policy_id, action, full)
+    && governance_v2_transitions.authoritative(a, action, full)
+}
+
+fn governor_queue_tx(a: GovernanceAnchorV2, before: ProposalDatumV2, own: OutputReference, value: Transaction) -> Bool {
+  let full = with_governing_redeemer(value, QueueV2)
+  governance_v2_transitions.governor_spend(a, before, QueueV2, own, full)
+    && governance_v2_transitions.authoritative(a, QueueV2, full)
 }
 
 fn half_open(lower: Int, upper: Int) -> ValidityRange {
@@ -297,7 +339,7 @@ test create_advances_exact_nonce_and_mints_bound_proposal() {
   let value = create_tx()
   and {
     governance_v2_transitions.authority_spend(bootstrap(), before, CreateV2, ref(0), value),
-    governance_v2_transitions.policy_mint(anchor(), 1, proposal_policy, CreateV2, value),
+    policy_tx(anchor(), 1, proposal_policy, CreateV2, value),
   }
 }
 
@@ -330,7 +372,7 @@ test vote_with_real_custody_and_one_receipt() {
   let action = VoteV2 { voter_vkh: alice, support: True, locked_vams: 100 }
   and {
     governance_v2_transitions.governor_spend(anchor(), initial(), action, ref(1), vote_tx(False)),
-    governance_v2_transitions.policy_mint(anchor(), 2, receipt_policy, action, vote_tx(False)),
+    policy_tx(anchor(), 2, receipt_policy, action, vote_tx(False)),
   }
 }
 
@@ -388,7 +430,7 @@ test duplicated_authority_reference_rejects() fail {
 
 
 test receipt_policy_substitution_rejects() fail {
-  expect governance_v2_transitions.policy_mint(anchor(), 2, proposal_policy,
+  expect policy_tx(anchor(), 2, proposal_policy,
     VoteV2 { voter_vkh: alice, support: True, locked_vams: 100 }, vote_tx(False))
   True
 }
@@ -483,10 +525,10 @@ test queue_binds_passed_proposal_payload_epoch_nonce_and_refunds() {
   let value = queue_tx()
   and {
     governance_v2_transitions.authority_spend(bootstrap(), AuthorityDatumV2 { config: cfg() }, QueueV2, ref(0), value),
-    governance_v2_transitions.governor_spend(anchor(), passed(), QueueV2, ref(1), value),
-    governance_v2_transitions.policy_mint(anchor(), 1, proposal_policy, QueueV2, value),
-    governance_v2_transitions.policy_mint(anchor(), 2, receipt_policy, QueueV2, value),
-    governance_v2_transitions.policy_mint(anchor(), 3, intent_policy, QueueV2, value),
+    governor_queue_tx(anchor(), passed(), ref(1), value),
+    policy_tx(anchor(), 1, proposal_policy, QueueV2, value),
+    policy_tx(anchor(), 2, receipt_policy, QueueV2, value),
+    policy_tx(anchor(), 3, intent_policy, QueueV2, value),
   }
 }
 
@@ -539,7 +581,7 @@ test valid_three_member_intent_cancel_refunds() {
   let value = intent_tx(True)
   and {
     governance_v2_transitions.timelock_spend(anchor(), intent(), CancelIntentV2, ref(3), value),
-    governance_v2_transitions.policy_mint(anchor(), 3, intent_policy, CancelIntentV2, value),
+    policy_tx(anchor(), 3, intent_policy, CancelIntentV2, value),
   }
 }
 
@@ -561,7 +603,7 @@ test expired_intent_is_burned_and_refunded_without_member_threshold() {
   let value = intent_tx(False)
   and {
     governance_v2_transitions.timelock_spend(anchor(), intent(), ExpireIntentV2, ref(3), value),
-    governance_v2_transitions.policy_mint(anchor(), 3, intent_policy, ExpireIntentV2, value),
+    policy_tx(anchor(), 3, intent_policy, ExpireIntentV2, value),
   }
 }
 
@@ -862,7 +904,7 @@ test width_regular_txid31_governor_rejects() fail {
 test width_regular_txid31_receipt_policy_rejects() fail {
   let bad_reference = OutputReference { transaction_id: #"11111111111111111111111111111111111111111111111111111111111111", output_index: 1 }
   let value = reference_width_vote(bad_reference, False)
-  expect governance_v2_transitions.policy_mint(anchor(), 2, receipt_policy, VoteV2 { voter_vkh: alice, support: True, locked_vams: 100 }, value)
+  expect policy_tx(anchor(), 2, receipt_policy, VoteV2 { voter_vkh: alice, support: True, locked_vams: 100 }, value)
   True
 }
 
@@ -883,7 +925,7 @@ test width_regular_txid33_governor_rejects() fail {
 test width_regular_txid33_receipt_policy_rejects() fail {
   let bad_reference = OutputReference { transaction_id: #"111111111111111111111111111111111111111111111111111111111111111111", output_index: 1 }
   let value = reference_width_vote(bad_reference, False)
-  expect governance_v2_transitions.policy_mint(anchor(), 2, receipt_policy, VoteV2 { voter_vkh: alice, support: True, locked_vams: 100 }, value)
+  expect policy_tx(anchor(), 2, receipt_policy, VoteV2 { voter_vkh: alice, support: True, locked_vams: 100 }, value)
   True
 }
 
@@ -904,7 +946,7 @@ test width_regular_index_negative_governor_rejects() fail {
 test width_regular_index_negative_receipt_policy_rejects() fail {
   let bad_reference = OutputReference { transaction_id: #"1111111111111111111111111111111111111111111111111111111111111111", output_index: -1 }
   let value = reference_width_vote(bad_reference, False)
-  expect governance_v2_transitions.policy_mint(anchor(), 2, receipt_policy, VoteV2 { voter_vkh: alice, support: True, locked_vams: 100 }, value)
+  expect policy_tx(anchor(), 2, receipt_policy, VoteV2 { voter_vkh: alice, support: True, locked_vams: 100 }, value)
   True
 }
 
@@ -925,7 +967,7 @@ test width_regular_index_overflow_governor_rejects() fail {
 test width_regular_index_overflow_receipt_policy_rejects() fail {
   let bad_reference = OutputReference { transaction_id: #"1111111111111111111111111111111111111111111111111111111111111111", output_index: 4294967296 }
   let value = reference_width_vote(bad_reference, False)
-  expect governance_v2_transitions.policy_mint(anchor(), 2, receipt_policy, VoteV2 { voter_vkh: alice, support: True, locked_vams: 100 }, value)
+  expect policy_tx(anchor(), 2, receipt_policy, VoteV2 { voter_vkh: alice, support: True, locked_vams: 100 }, value)
   True
 }
 
@@ -946,7 +988,7 @@ test width_reference_txid31_governor_rejects() fail {
 test width_reference_txid31_receipt_policy_rejects() fail {
   let bad_reference = OutputReference { transaction_id: #"11111111111111111111111111111111111111111111111111111111111111", output_index: 1 }
   let value = reference_width_vote(bad_reference, True)
-  expect governance_v2_transitions.policy_mint(anchor(), 2, receipt_policy, VoteV2 { voter_vkh: alice, support: True, locked_vams: 100 }, value)
+  expect policy_tx(anchor(), 2, receipt_policy, VoteV2 { voter_vkh: alice, support: True, locked_vams: 100 }, value)
   True
 }
 
@@ -967,7 +1009,7 @@ test width_reference_txid33_governor_rejects() fail {
 test width_reference_txid33_receipt_policy_rejects() fail {
   let bad_reference = OutputReference { transaction_id: #"111111111111111111111111111111111111111111111111111111111111111111", output_index: 1 }
   let value = reference_width_vote(bad_reference, True)
-  expect governance_v2_transitions.policy_mint(anchor(), 2, receipt_policy, VoteV2 { voter_vkh: alice, support: True, locked_vams: 100 }, value)
+  expect policy_tx(anchor(), 2, receipt_policy, VoteV2 { voter_vkh: alice, support: True, locked_vams: 100 }, value)
   True
 }
 
@@ -988,7 +1030,7 @@ test width_reference_index_negative_governor_rejects() fail {
 test width_reference_index_negative_receipt_policy_rejects() fail {
   let bad_reference = OutputReference { transaction_id: #"1111111111111111111111111111111111111111111111111111111111111111", output_index: -1 }
   let value = reference_width_vote(bad_reference, True)
-  expect governance_v2_transitions.policy_mint(anchor(), 2, receipt_policy, VoteV2 { voter_vkh: alice, support: True, locked_vams: 100 }, value)
+  expect policy_tx(anchor(), 2, receipt_policy, VoteV2 { voter_vkh: alice, support: True, locked_vams: 100 }, value)
   True
 }
 
@@ -1009,7 +1051,7 @@ test width_reference_index_overflow_governor_rejects() fail {
 test width_reference_index_overflow_receipt_policy_rejects() fail {
   let bad_reference = OutputReference { transaction_id: #"1111111111111111111111111111111111111111111111111111111111111111", output_index: 4294967296 }
   let value = reference_width_vote(bad_reference, True)
-  expect governance_v2_transitions.policy_mint(anchor(), 2, receipt_policy, VoteV2 { voter_vkh: alice, support: True, locked_vams: 100 }, value)
+  expect policy_tx(anchor(), 2, receipt_policy, VoteV2 { voter_vkh: alice, support: True, locked_vams: 100 }, value)
   True
 }
 
@@ -1025,7 +1067,7 @@ test width_u32max_unique_references_governor_accepts() {
 
 test width_u32max_unique_references_receipt_policy_accepts() {
   let value = reference_width_max_vote()
-  governance_v2_transitions.policy_mint(anchor(), 2, receipt_policy, VoteV2 { voter_vkh: alice, support: True, locked_vams: 100 }, value)
+  policy_tx(anchor(), 2, receipt_policy, VoteV2 { voter_vkh: alice, support: True, locked_vams: 100 }, value)
 }
 
 
@@ -1092,73 +1134,73 @@ test timing_queue_overflow_authority_rejects() fail {
 
 test timing_upper_anchor_governor_accepts() {
   let value = queue_tx()
-  governance_v2_transitions.governor_spend(anchor(), passed(), QueueV2, ref(1), value)
+  governor_queue_tx(anchor(), passed(), ref(1), value)
 }
 
 test timing_backdated_lower_anchor_governor_rejects() fail {
   let value = queue_with_intent(queue_tx(), historical_intent_fixture())
-  expect governance_v2_transitions.governor_spend(anchor(), passed(), QueueV2, ref(1), value)
+  expect governor_queue_tx(anchor(), passed(), ref(1), value)
   True
 }
 
 test timing_queue_overflow_governor_rejects() fail {
   let upper = governance_v2.u64_max - 172_800_000 - 604_800_000 + 1
   let value = queue_window(upper - 100, upper)
-  expect governance_v2_transitions.governor_spend(anchor(), passed(), QueueV2, ref(1), value)
+  expect governor_queue_tx(anchor(), passed(), ref(1), value)
   True
 }
 
 test timing_upper_anchor_proposal_policy_accepts() {
   let value = queue_tx()
-  governance_v2_transitions.policy_mint(anchor(), 1, proposal_policy, QueueV2, value)
+  policy_tx(anchor(), 1, proposal_policy, QueueV2, value)
 }
 
 test timing_backdated_lower_anchor_proposal_policy_rejects() fail {
   let value = queue_with_intent(queue_tx(), historical_intent_fixture())
-  expect governance_v2_transitions.policy_mint(anchor(), 1, proposal_policy, QueueV2, value)
+  expect policy_tx(anchor(), 1, proposal_policy, QueueV2, value)
   True
 }
 
 test timing_queue_overflow_proposal_policy_rejects() fail {
   let upper = governance_v2.u64_max - 172_800_000 - 604_800_000 + 1
   let value = queue_window(upper - 100, upper)
-  expect governance_v2_transitions.policy_mint(anchor(), 1, proposal_policy, QueueV2, value)
+  expect policy_tx(anchor(), 1, proposal_policy, QueueV2, value)
   True
 }
 
 test timing_upper_anchor_receipt_policy_accepts() {
   let value = queue_tx()
-  governance_v2_transitions.policy_mint(anchor(), 2, receipt_policy, QueueV2, value)
+  policy_tx(anchor(), 2, receipt_policy, QueueV2, value)
 }
 
 test timing_backdated_lower_anchor_receipt_policy_rejects() fail {
   let value = queue_with_intent(queue_tx(), historical_intent_fixture())
-  expect governance_v2_transitions.policy_mint(anchor(), 2, receipt_policy, QueueV2, value)
+  expect policy_tx(anchor(), 2, receipt_policy, QueueV2, value)
   True
 }
 
 test timing_queue_overflow_receipt_policy_rejects() fail {
   let upper = governance_v2.u64_max - 172_800_000 - 604_800_000 + 1
   let value = queue_window(upper - 100, upper)
-  expect governance_v2_transitions.policy_mint(anchor(), 2, receipt_policy, QueueV2, value)
+  expect policy_tx(anchor(), 2, receipt_policy, QueueV2, value)
   True
 }
 
 test timing_upper_anchor_intent_policy_accepts() {
   let value = queue_tx()
-  governance_v2_transitions.policy_mint(anchor(), 3, intent_policy, QueueV2, value)
+  policy_tx(anchor(), 3, intent_policy, QueueV2, value)
 }
 
 test timing_backdated_lower_anchor_intent_policy_rejects() fail {
   let value = queue_with_intent(queue_tx(), historical_intent_fixture())
-  expect governance_v2_transitions.policy_mint(anchor(), 3, intent_policy, QueueV2, value)
+  expect policy_tx(anchor(), 3, intent_policy, QueueV2, value)
   True
 }
 
 test timing_queue_overflow_intent_policy_rejects() fail {
   let upper = governance_v2.u64_max - 172_800_000 - 604_800_000 + 1
   let value = queue_window(upper - 100, upper)
-  expect governance_v2_transitions.policy_mint(anchor(), 3, intent_policy, QueueV2, value)
+  expect policy_tx(anchor(), 3, intent_policy, QueueV2, value)
   True
 }
 
@@ -1179,7 +1221,7 @@ test timing_closed_vote_governor_rejects() fail {
 test timing_closed_vote_receipt_policy_rejects() fail {
   let base = vote_tx(False)
   let value = Transaction { ..base, validity_range: interval.between(1000, 1100) }
-  expect governance_v2_transitions.policy_mint(anchor(), 2, receipt_policy, VoteV2 { voter_vkh: alice, support: True, locked_vams: 100 }, value)
+  expect policy_tx(anchor(), 2, receipt_policy, VoteV2 { voter_vkh: alice, support: True, locked_vams: 100 }, value)
   True
 }
 
@@ -1200,7 +1242,7 @@ test timing_open_lower_vote_governor_rejects() fail {
 test timing_open_lower_vote_receipt_policy_rejects() fail {
   let base = vote_tx(False)
   let value = Transaction { ..base, validity_range: interval.entirely_between(1000, 1100) }
-  expect governance_v2_transitions.policy_mint(anchor(), 2, receipt_policy, VoteV2 { voter_vkh: alice, support: True, locked_vams: 100 }, value)
+  expect policy_tx(anchor(), 2, receipt_policy, VoteV2 { voter_vkh: alice, support: True, locked_vams: 100 }, value)
   True
 }
 
@@ -1221,7 +1263,7 @@ test timing_empty_vote_governor_rejects() fail {
 test timing_empty_vote_receipt_policy_rejects() fail {
   let base = vote_tx(False)
   let value = Transaction { ..base, validity_range: half_open(1000, 1000) }
-  expect governance_v2_transitions.policy_mint(anchor(), 2, receipt_policy, VoteV2 { voter_vkh: alice, support: True, locked_vams: 100 }, value)
+  expect policy_tx(anchor(), 2, receipt_policy, VoteV2 { voter_vkh: alice, support: True, locked_vams: 100 }, value)
   True
 }
 
@@ -1242,7 +1284,7 @@ test timing_inverted_vote_governor_rejects() fail {
 test timing_inverted_vote_receipt_policy_rejects() fail {
   let base = vote_tx(False)
   let value = Transaction { ..base, validity_range: half_open(1100, 1000) }
-  expect governance_v2_transitions.policy_mint(anchor(), 2, receipt_policy, VoteV2 { voter_vkh: alice, support: True, locked_vams: 100 }, value)
+  expect policy_tx(anchor(), 2, receipt_policy, VoteV2 { voter_vkh: alice, support: True, locked_vams: 100 }, value)
   True
 }
 
@@ -1263,7 +1305,7 @@ test timing_too_wide_vote_governor_rejects() fail {
 test timing_too_wide_vote_receipt_policy_rejects() fail {
   let base = vote_tx(False)
   let value = Transaction { ..base, validity_range: half_open(0, 300_001) }
-  expect governance_v2_transitions.policy_mint(anchor(), 2, receipt_policy, VoteV2 { voter_vkh: alice, support: True, locked_vams: 100 }, value)
+  expect policy_tx(anchor(), 2, receipt_policy, VoteV2 { voter_vkh: alice, support: True, locked_vams: 100 }, value)
   True
 }
 
@@ -1284,7 +1326,7 @@ test timing_negative_vote_governor_rejects() fail {
 test timing_negative_vote_receipt_policy_rejects() fail {
   let base = vote_tx(False)
   let value = Transaction { ..base, validity_range: half_open(-1, 1000) }
-  expect governance_v2_transitions.policy_mint(anchor(), 2, receipt_policy, VoteV2 { voter_vkh: alice, support: True, locked_vams: 100 }, value)
+  expect policy_tx(anchor(), 2, receipt_policy, VoteV2 { voter_vkh: alice, support: True, locked_vams: 100 }, value)
   True
 }
 
@@ -1305,7 +1347,7 @@ test timing_upper_overflow_vote_governor_rejects() fail {
 test timing_upper_overflow_vote_receipt_policy_rejects() fail {
   let base = vote_tx(False)
   let value = Transaction { ..base, validity_range: half_open(governance_v2.u64_max - 100, governance_v2.u64_max + 1) }
-  expect governance_v2_transitions.policy_mint(anchor(), 2, receipt_policy, VoteV2 { voter_vkh: alice, support: True, locked_vams: 100 }, value)
+  expect policy_tx(anchor(), 2, receipt_policy, VoteV2 { voter_vkh: alice, support: True, locked_vams: 100 }, value)
   True
 }
 
@@ -1326,7 +1368,7 @@ test timing_deadline_straddle_vote_governor_rejects() fail {
 test timing_deadline_straddle_vote_receipt_policy_rejects() fail {
   let base = vote_tx(False)
   let value = Transaction { ..base, validity_range: half_open(1999, 2001) }
-  expect governance_v2_transitions.policy_mint(anchor(), 2, receipt_policy, VoteV2 { voter_vkh: alice, support: True, locked_vams: 100 }, value)
+  expect policy_tx(anchor(), 2, receipt_policy, VoteV2 { voter_vkh: alice, support: True, locked_vams: 100 }, value)
   True
 }
 
@@ -1345,7 +1387,7 @@ test timing_vote_until_exclusive_deadline_governor_accepts() {
 test timing_vote_until_exclusive_deadline_receipt_policy_accepts() {
   let base = vote_tx(False)
   let value = Transaction { ..base, validity_range: half_open(1999, 2000) }
-  governance_v2_transitions.policy_mint(anchor(), 2, receipt_policy, VoteV2 { voter_vkh: alice, support: True, locked_vams: 100 }, value)
+  policy_tx(anchor(), 2, receipt_policy, VoteV2 { voter_vkh: alice, support: True, locked_vams: 100 }, value)
 }
 
 test timing_queue_one_ms_accepts() {
@@ -1378,13 +1420,13 @@ test timing_expiry_exact_lower_timelock_accepts() {
 test timing_expiry_straddle_intent_policy_rejects() fail {
   let base = intent_tx(False)
   let value = Transaction { ..base, validity_range: half_open(777_602_099, 777_602_101) }
-  expect governance_v2_transitions.policy_mint(anchor(), 3, intent_policy, ExpireIntentV2, value)
+  expect policy_tx(anchor(), 3, intent_policy, ExpireIntentV2, value)
   True
 }
 
 test timing_expiry_exact_lower_intent_policy_accepts() {
   let value = intent_tx(False)
-  governance_v2_transitions.policy_mint(anchor(), 3, intent_policy, ExpireIntentV2, value)
+  policy_tx(anchor(), 3, intent_policy, ExpireIntentV2, value)
 }
 
 
@@ -1453,10 +1495,10 @@ fn asset_boundary_queue_call(value: Transaction, caller: Int) -> Bool {
   when caller is {
     0 -> governance_v2_transitions.queue(anchor(), value)
     1 -> governance_v2_transitions.authority_spend(bootstrap(), AuthorityDatumV2 { config: cfg() }, QueueV2, ref(0), value)
-    2 -> governance_v2_transitions.governor_spend(anchor(), passed(), QueueV2, ref(1), value)
-    3 -> governance_v2_transitions.policy_mint(anchor(), 1, proposal_policy, QueueV2, value)
-    4 -> governance_v2_transitions.policy_mint(anchor(), 2, receipt_policy, QueueV2, value)
-    5 -> governance_v2_transitions.policy_mint(anchor(), 3, intent_policy, QueueV2, value)
+    2 -> governor_queue_tx(anchor(), passed(), ref(1), value)
+    3 -> policy_tx(anchor(), 1, proposal_policy, QueueV2, value)
+    4 -> policy_tx(anchor(), 2, receipt_policy, QueueV2, value)
+    5 -> policy_tx(anchor(), 3, intent_policy, QueueV2, value)
     _ -> False
   }
 }
@@ -1466,7 +1508,7 @@ fn asset_boundary_vote_call(value: Transaction, caller: Int) -> Bool {
   when caller is {
     0 -> governance_v2_transitions.vote(anchor(), value, alice, True, 100)
     1 -> governance_v2_transitions.governor_spend(anchor(), initial(), action, ref(1), value)
-    2 -> governance_v2_transitions.policy_mint(anchor(), 2, receipt_policy, action, value)
+    2 -> policy_tx(anchor(), 2, receipt_policy, action, value)
     _ -> False
   }
 }
@@ -2358,7 +2400,7 @@ fn remainder_call(action: Int, value: Transaction, caller: Int) -> Bool {
       0 -> governance_v2_transitions.create(anchor(), value)
       1 -> governance_v2_transitions.authority_spend(bootstrap(), AuthorityDatumV2 {
         config: GovernanceConfigV2 { ..cfg(), next_proposal_nonce: 0 } }, CreateV2, ref(0), value)
-      2 -> governance_v2_transitions.policy_mint(anchor(), 1, proposal_policy, CreateV2, value)
+      2 -> policy_tx(anchor(), 1, proposal_policy, CreateV2, value)
       _ -> False
     }
     1 -> asset_boundary_vote_call(value, caller)
@@ -2373,8 +2415,8 @@ fn remainder_call(action: Int, value: Transaction, caller: Int) -> Bool {
       when caller is {
         0 -> governance_v2_transitions.terminal_proposal(anchor(), value, cancel)
         1 -> governance_v2_transitions.governor_spend(anchor(), remainder_before(value, 0), request, ref(1), value)
-        2 -> governance_v2_transitions.policy_mint(anchor(), 1, proposal_policy, request, value)
-        3 -> governance_v2_transitions.policy_mint(anchor(), 2, receipt_policy, request, value)
+        2 -> policy_tx(anchor(), 1, proposal_policy, request, value)
+        3 -> policy_tx(anchor(), 2, receipt_policy, request, value)
         _ -> False
       }
     }
@@ -2385,13 +2427,13 @@ fn remainder_call(action: Int, value: Transaction, caller: Int) -> Bool {
       when caller is {
         0 -> governance_v2_transitions.terminal_intent(anchor(), value, cancel)
         1 -> governance_v2_transitions.timelock_spend(anchor(), remainder_intent_before(value), request, ref(3), value)
-        2 -> governance_v2_transitions.policy_mint(anchor(), 3, intent_policy, request, value)
+        2 -> policy_tx(anchor(), 3, intent_policy, request, value)
         _ -> False
       }
     }
     8 -> when caller is {
       0 -> governance_v2_transitions.timelock_spend(anchor(), remainder_intent_before(value), ExecuteIntentV2, ref(3), value)
-      1 -> governance_v2_transitions.policy_mint(anchor(), 3, intent_policy, ExecuteIntentV2, value)
+      1 -> policy_tx(anchor(), 3, intent_policy, ExecuteIntentV2, value)
       _ -> False
     }
     9 -> {
@@ -2400,7 +2442,7 @@ fn remainder_call(action: Int, value: Transaction, caller: Int) -> Bool {
       when caller is {
         0 -> governance_v2_transitions.vote(anchor(), value, last.voter_vkh, True, 100)
         1 -> governance_v2_transitions.governor_spend(anchor(), remainder_before(value, 0), request, ref(1), value)
-        2 -> governance_v2_transitions.policy_mint(anchor(), 2, receipt_policy, request, value)
+        2 -> policy_tx(anchor(), 2, receipt_policy, request, value)
         _ -> False
       }
     }
@@ -4960,4 +5002,127 @@ test remainder26_executeintent_timing_boundary_executeintent_before_execute_inte
   let value = remainder_mutant(8, 14, False)
   expect remainder_call(8, value, 1)
   True
+}
+
+// ---- Delegation (2026-11-09): direct checks of the delegating callers ------
+
+fn vote_action() -> GovernanceActionV2 {
+  VoteV2 { voter_vkh: alice, support: True, locked_vams: 100 }
+}
+
+test delegation_receipt_accepts_with_governor_vote_redeemer() {
+  governance_v2_transitions.policy_mint(anchor(), 2, receipt_policy, vote_action(),
+    with_governing_redeemer(vote_tx(False), vote_action()))
+}
+
+test delegation_receipt_without_governor_redeemer_rejects() fail {
+  governance_v2_transitions.policy_mint(anchor(), 2, receipt_policy, vote_action(), vote_tx(False))
+}
+
+test delegation_receipt_with_different_governor_redeemer_rejects() fail {
+  let other = VoteV2 { voter_vkh: alice, support: False, locked_vams: 100 }
+  governance_v2_transitions.policy_mint(anchor(), 2, receipt_policy, vote_action(),
+    with_governing_redeemer(vote_tx(False), other))
+}
+
+test delegation_receipt_with_finalize_redeemer_rejects() fail {
+  governance_v2_transitions.policy_mint(anchor(), 2, receipt_policy, vote_action(),
+    with_governing_redeemer(vote_tx(False), FinalizePassedV2))
+}
+
+test delegation_receipt_with_substituted_governing_script_rejects() fail {
+  let value = with_governing_redeemer(vote_tx(False), vote_action())
+  let moved = list.map(value.inputs, fn(input) {
+    if input.output.address == script(governor_hash) {
+      Input { ..input, output: Output { ..input.output, address: script(timelock_hash) } }
+    } else { input }
+  })
+  governance_v2_transitions.policy_mint(anchor(), 2, receipt_policy, vote_action(),
+    Transaction { ..value, inputs: moved })
+}
+
+test delegation_receipt_with_forged_authority_reference_rejects() fail {
+  let value = with_governing_redeemer(vote_tx(False), vote_action())
+  let forged = Input { ..authority(cfg()),
+    output: Output { ..authority(cfg()).output, address: script(proposal_policy) } }
+  governance_v2_transitions.policy_mint(anchor(), 2, receipt_policy, vote_action(),
+    Transaction { ..value, reference_inputs: [forged] })
+}
+
+test delegation_receipt_with_wrong_own_policy_rejects() fail {
+  governance_v2_transitions.policy_mint(anchor(), 2, proposal_policy, vote_action(),
+    with_governing_redeemer(vote_tx(False), vote_action()))
+}
+
+test delegation_proposal_create_accepts_with_authority_create_redeemer() {
+  governance_v2_transitions.policy_mint(anchor(), 1, proposal_policy, CreateV2,
+    with_governing_redeemer(create_tx(), CreateV2))
+}
+
+test delegation_proposal_create_without_authority_redeemer_rejects() fail {
+  governance_v2_transitions.policy_mint(anchor(), 1, proposal_policy, CreateV2, create_tx())
+}
+
+test delegation_proposal_create_under_authority_queue_redeemer_rejects() fail {
+  governance_v2_transitions.policy_mint(anchor(), 1, proposal_policy, CreateV2,
+    with_governing_redeemer(create_tx(), QueueV2))
+}
+
+test delegation_receipt_policy_cannot_serve_create() {
+  !governance_v2_transitions.policy_mint(anchor(), 2, receipt_policy, CreateV2,
+    with_governing_redeemer(create_tx(), CreateV2))
+}
+
+test delegation_create_rejects_authority_token_at_other_address() fail {
+  let value = with_governing_redeemer(create_tx(), CreateV2)
+  let moved = list.map(value.inputs, fn(input) {
+    if input.output_reference == ref(0) {
+      Input { ..input, output: Output { ..input.output, address: script(governor_hash) } }
+    } else { input }
+  })
+  governance_v2_transitions.policy_mint(anchor(), 1, proposal_policy, CreateV2,
+    Transaction { ..value, inputs: moved })
+}
+
+test delegation_governor_queue_accepts_with_authority_queue_redeemer() {
+  governance_v2_transitions.governor_spend(anchor(), passed(), QueueV2, ref(1),
+    with_governing_redeemer(queue_tx(), QueueV2))
+}
+
+test delegation_governor_queue_without_authority_redeemer_rejects() fail {
+  governance_v2_transitions.governor_spend(anchor(), passed(), QueueV2, ref(1), queue_tx())
+}
+
+test delegation_intent_queue_under_authority_create_redeemer_rejects() fail {
+  governance_v2_transitions.policy_mint(anchor(), 3, intent_policy, QueueV2,
+    with_governing_redeemer(queue_tx(), CreateV2))
+}
+
+test delegation_intent_cancel_accepts_with_timelock_redeemer() {
+  governance_v2_transitions.policy_mint(anchor(), 3, intent_policy, CancelIntentV2,
+    with_governing_redeemer(intent_tx(True), CancelIntentV2))
+}
+
+test delegation_intent_cancel_under_timelock_expire_redeemer_rejects() fail {
+  governance_v2_transitions.policy_mint(anchor(), 3, intent_policy, CancelIntentV2,
+    with_governing_redeemer(intent_tx(True), ExpireIntentV2))
+}
+
+test delegation_intent_execute_stays_disabled() {
+  !governance_v2_transitions.policy_mint(anchor(), 3, intent_policy, ExecuteIntentV2,
+    with_governing_redeemer(intent_tx(False), ExecuteIntentV2))
+}
+
+test delegation_terminal_proposal_burn_accepts_with_governor_redeemer() {
+  and {
+    governance_v2_transitions.policy_mint(anchor(), 1, proposal_policy, CancelProposalV2,
+      with_governing_redeemer(terminal_tx(True), CancelProposalV2)),
+    governance_v2_transitions.policy_mint(anchor(), 2, receipt_policy, CancelProposalV2,
+      with_governing_redeemer(terminal_tx(True), CancelProposalV2)),
+  }
+}
+
+test delegation_terminal_burn_under_mismatched_governor_redeemer_rejects() fail {
+  governance_v2_transitions.policy_mint(anchor(), 1, proposal_policy, CancelProposalV2,
+    with_governing_redeemer(terminal_tx(True), FinalizeRejectedV2))
 }

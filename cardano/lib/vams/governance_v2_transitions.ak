@@ -1,9 +1,10 @@
 //// Complete transaction predicates shared by all v2 spend/mint callers.
 //// Compilation, ledger/budget checks and independent review are NOT yet run.
 use aiken/collection/list
+use aiken/collection/pairs
 use cardano/address.{Script}
 use cardano/assets
-use cardano/transaction.{InlineDatum, Input, OutputReference, Transaction}
+use cardano/transaction.{InlineDatum, Input, OutputReference, Spend, Transaction}
 use vams/governance.{isqrt}
 use vams/governance_v2.{
   authority_name, authority_value, before_ms, bootstrap_valid, config_valid,
@@ -202,18 +203,22 @@ pub fn authority_spend(b: GovernanceBootstrapV2, before: AuthorityDatumV2, actio
 }
 
 pub fn governor_spend(anchor: GovernanceAnchorV2, before: ProposalDatumV2, action: GovernanceActionV2, own_ref: OutputReference, tx: Transaction) -> Bool {
-  expect envelope(tx)
-  let consumed = action == QueueV2
-  let (_, c) = read_authority(anchor, tx, consumed)
-  let (input, p) = read_proposal(c, tx)
-  expect input.output_reference == own_ref && p == before
   when action is {
-    VoteV2 { voter_vkh, support, locked_vams } -> vote(anchor, tx, voter_vkh, support, locked_vams)
-    FinalizePassedV2 -> finalize_passed(anchor, tx)
-    FinalizeRejectedV2 -> terminal_proposal(anchor, tx, False)
-    CancelProposalV2 -> terminal_proposal(anchor, tx, True)
-    QueueV2 -> queue(anchor, tx)
-    _ -> False
+    // Queue is checked in full by the authority spend in the same transaction.
+    QueueV2 -> delegated_to_authority(anchor, tx, action)
+    _ -> {
+      expect envelope(tx)
+      let (_, c) = read_authority(anchor, tx, False)
+      let (input, p) = read_proposal(c, tx)
+      expect input.output_reference == own_ref && p == before
+      when action is {
+        VoteV2 { voter_vkh, support, locked_vams } -> vote(anchor, tx, voter_vkh, support, locked_vams)
+        FinalizePassedV2 -> finalize_passed(anchor, tx)
+        FinalizeRejectedV2 -> terminal_proposal(anchor, tx, False)
+        CancelProposalV2 -> terminal_proposal(anchor, tx, True)
+        _ -> False
+      }
+    }
   }
 }
 
@@ -238,41 +243,94 @@ pub fn timelock_spend(anchor: GovernanceAnchorV2, before: IntentDatumV2, action:
   }
 }
 
+// ---- One authoritative check per transaction ------------------------------
+//
+// Each action has exactly one governing validator that runs the complete
+// transition check (envelope, authority, state, exact mint, outputs, values,
+// signers):
+//   Create, Queue                      -> authority spend
+//   Vote, FinalizePassed/Rejected,
+//   CancelProposal                     -> governor spend
+//   CancelIntent, ExpireIntent         -> timelock spend
+// Every other script in the same transaction (the three minting policies,
+// and the governor spend during Queue) only checks that the authenticated
+// governing input is spent in this transaction under the same v2 request.
+// The ledger then runs the governing validator with that redeemer, so every
+// rule still runs, once. See docs/remediation/repair_20261109/GOVERNANCE-DELEGATION.md.
+
+/// The complete transition check, as run by the governing validator.
+pub fn authoritative(anchor: GovernanceAnchorV2, action: GovernanceActionV2, tx: Transaction) -> Bool {
+  when action is {
+    CreateV2 -> create(anchor, tx)
+    VoteV2 { voter_vkh, support, locked_vams } -> vote(anchor, tx, voter_vkh, support, locked_vams)
+    FinalizePassedV2 -> finalize_passed(anchor, tx)
+    FinalizeRejectedV2 -> terminal_proposal(anchor, tx, False)
+    CancelProposalV2 -> terminal_proposal(anchor, tx, True)
+    QueueV2 -> queue(anchor, tx)
+    CancelIntentV2 -> terminal_intent(anchor, tx, True)
+    ExpireIntentV2 -> terminal_intent(anchor, tx, False)
+    _ -> False
+  }
+}
+
+/// The spend redeemer for `reference` is exactly this v2 request.
+fn same_request(tx: Transaction, reference: OutputReference, action: GovernanceActionV2) -> Bool {
+  let expected: Data = GovernanceRequestV2 { version: 2, action }
+  pairs.get_first(tx.redeemers, Spend(reference)) == Some(expected)
+}
+
+/// Create and Queue: the singleton authority input is spent under this request.
+fn delegated_to_authority(anchor: GovernanceAnchorV2, tx: Transaction, action: GovernanceActionV2) -> Bool {
+  expect [input] = list.filter(tx.inputs, fn(input) {
+    assets.quantity_of(input.output.value, anchor.policy_id, anchor.asset_name) != 0
+  })
+  expect input.output.address == script_address(anchor.policy_id)
+  same_request(tx, input.output_reference, action)
+}
+
+/// Light read of the referenced authority config, used only to locate the
+/// governing script. The governing validator runs read_authority in full on
+/// the same (sole) reference input.
+fn referenced_config(anchor: GovernanceAnchorV2, tx: Transaction) -> GovernanceConfigV2 {
+  expect [input] = tx.reference_inputs
+  expect assets.quantity_of(input.output.value, anchor.policy_id, anchor.asset_name) == 1
+  expect input.output.address == script_address(anchor.policy_id)
+  expect InlineDatum(raw) = input.output.datum
+  expect authority: AuthorityDatumV2 = raw
+  authority.config
+}
+
+/// The sole input at the governing script is spent under this request.
+fn delegated_to_script(tx: Transaction, hash: ByteArray, action: GovernanceActionV2) -> Bool {
+  expect [input] = list.filter(tx.inputs, fn(input) { input.output.address == script_address(hash) })
+  same_request(tx, input.output_reference, action)
+}
+
 /// kind1 proposal, kind2 receipts, kind3 intents. No caller chooses a different
-/// policy: each validator wrapper supplies a literal and authenticates own ID.
+/// policy: each validator wrapper supplies a literal. On authority-governed
+/// actions the authority's exact tx.mint equality pins which policy IDs may
+/// mint; otherwise the policy also checks its own ID against the config.
 pub fn policy_mint(anchor: GovernanceAnchorV2, kind: Int, policy_id: ByteArray, action: GovernanceActionV2, tx: Transaction) -> Bool {
-  expect envelope(tx)
-  let consumed = action == CreateV2 || action == QueueV2
-  let (_, c) = read_authority(anchor, tx, consumed)
-  when kind is {
-    1 -> {
-      expect policy_id == c.proposal_policy_id
-      when action is {
-        CreateV2 -> create(anchor, tx)
-        FinalizeRejectedV2 -> terminal_proposal(anchor, tx, False)
-        CancelProposalV2 -> terminal_proposal(anchor, tx, True)
-        QueueV2 -> queue(anchor, tx)
-        _ -> False
-      }
-    }
-    2 -> {
+  when action is {
+    CreateV2 -> kind == 1 && delegated_to_authority(anchor, tx, action)
+    QueueV2 -> (kind == 1 || kind == 2 || kind == 3) && delegated_to_authority(anchor, tx, action)
+    VoteV2 { .. } -> {
+      expect kind == 2
+      let c = referenced_config(anchor, tx)
       expect policy_id == c.receipt_policy_id
-      when action is {
-        VoteV2 { voter_vkh, support, locked_vams } -> vote(anchor, tx, voter_vkh, support, locked_vams)
-        FinalizeRejectedV2 -> terminal_proposal(anchor, tx, False)
-        CancelProposalV2 -> terminal_proposal(anchor, tx, True)
-        QueueV2 -> queue(anchor, tx)
-        _ -> False
-      }
+      delegated_to_script(tx, c.governor_script_hash, action)
     }
-    3 -> {
+    FinalizeRejectedV2 | CancelProposalV2 -> {
+      expect kind == 1 || kind == 2
+      let c = referenced_config(anchor, tx)
+      expect policy_id == if kind == 1 { c.proposal_policy_id } else { c.receipt_policy_id }
+      delegated_to_script(tx, c.governor_script_hash, action)
+    }
+    CancelIntentV2 | ExpireIntentV2 -> {
+      expect kind == 3
+      let c = referenced_config(anchor, tx)
       expect policy_id == c.intent_policy_id
-      when action is {
-        QueueV2 -> queue(anchor, tx)
-        CancelIntentV2 -> terminal_intent(anchor, tx, True)
-        ExpireIntentV2 -> terminal_intent(anchor, tx, False)
-        _ -> False
-      }
+      delegated_to_script(tx, c.timelock_script_hash, action)
     }
     _ -> False
   }
