@@ -99,13 +99,20 @@ class NodeInfo:
     heartbeat_count: int = 0
     first_seen: float = field(default_factory=time.time)
 
-    # CHC Phase 7: Add agent profile & cognitive properties
-    region: str = "us-east-1"
-    cost_per_hour: float = 0.15
-    credit_score: int = 750
-    passports: str = "ERC-8004 Phala TEE"
+    # CHC Phase 7: agent profile & cognitive properties. Every one of these is
+    # SELF-DECLARED by the node's signed heartbeat and verified by nothing here
+    # (F15). Defaults are neutral: no invented region, price, score, attestation,
+    # skill or cognitive profile is ever shown for a node that did not declare one.
+    region: str = "unknown"
+    cost_per_hour: float = 0.0
+    credit_score: int = 0
+    passports: str = ""
     skills: List[str] = field(default_factory=list)
     cognitive_profile: Dict[str, float] = field(default_factory=dict)
+    # Not a dataclass field (no annotation). A valid heartbeat signature
+    # authenticates who sent these values, not that they are true.
+    _SELF_DECLARED_FIELDS = ("region", "cost_per_hour", "credit_score", "passports",
+                             "skills", "cognitive_profile")
 
     @property
     def is_online(self) -> bool:
@@ -128,6 +135,9 @@ class NodeInfo:
     def to_dict(self) -> dict:
         return {
             **asdict(self),
+            # F15: reachability and declared profile are not execution evidence.
+            "verification": "unverified-self-declared",
+            "self_declared_fields": list(self._SELF_DECLARED_FIELDS),
             "is_online": self.is_online,
             "uptime": self.uptime,
             "last_seen_formatted": self.last_seen_formatted
@@ -793,15 +803,13 @@ async def receive_heartbeat(heartbeat: HeartbeatRequest, http_request: Request):
                 else:
                     raise HTTPException(status_code=429, detail="Max capacity reached")
 
-            # CHC Phase 7: Extract fields from payload or use defaults
-            region = payload.get("region", "us-east-1")
-            cost_per_hour = payload.get("cost_per_hour", 0.15)
-            credit_score = payload.get("credit_score", 750)
-            passports = payload.get("passports", "ERC-8004 Phala TEE")
-            skills = payload.get("skills", ["token-swap", "arbitrage-analysis"])
-            cognitive_profile = payload.get("cognitive_profile", {
-                "K": 0.85, "RW": 0.90, "M": 0.95, "R": 0.80, "WM": 0.75, "MS": 0.85, "MR": 0.90, "V": 0.40, "A": 0.30, "S": 0.95
-            })
+            # CHC Phase 7: self-declared fields; neutral defaults (F15).
+            region = payload.get("region", "unknown")
+            cost_per_hour = payload.get("cost_per_hour", 0.0)
+            credit_score = payload.get("credit_score", 0)
+            passports = payload.get("passports", "")
+            skills = payload.get("skills", [])
+            cognitive_profile = payload.get("cognitive_profile", {})
 
             nodes[node_id] = NodeInfo(
                 node_id=node_id,
@@ -817,7 +825,8 @@ async def receive_heartbeat(heartbeat: HeartbeatRequest, http_request: Request):
         node.last_block = block_height
         node.last_seen = time.time()
         node.heartbeat_count += 1
-        node.network = "mocha-4"  # From Celestia
+        # Network is not assumed (previously hardcoded "mocha-4") and not copied
+        # from the payload, which would add an unreviewed captured field (T33).
 
         # Update fields if in payload
         if "region" in payload:

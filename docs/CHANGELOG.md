@@ -1,3 +1,13 @@
+## 2026-11-09: anomaly detector fails closed; gateway stops inventing node claims (F14, F15)
+
+- **Anomaly detector (F14).** `neuron/intelligence/anomaly_detector.py` used to classify a NaN or infinite activation as "not adversarial", because `NaN > threshold` is false. Every entry point now rejects nonfinite or empty input and nonfinite thresholds with `ValueError` instead of producing a classification.
+- **Gateway node defaults (F15).** `gateway/server.py` no longer invents profile values for a node whose signed heartbeat omits them. Previously it recorded passport "ERC-8004 Phala TEE", credit score 750, two skills, a high cognitive profile, region us-east-1, price 0.15 and network mocha-4. Undeclared fields now get neutral defaults. Node views include `"verification": "unverified-self-declared"` and the list of self-declared fields.
+- **Privacy inventory.** Re-bound with a dated revalidation entry. No new field was added; T33 remains BLOCKED.
+- **Containment map.** `docs/remediation/repair_20261109/F11-F14-F15-ADVISORY-CONTAINMENT.md` shows that none of these signals authorizes an action or payment on the restricted profile.
+- **F12.** The native PostgreSQL crash/restart campaign, `scripts/remediation/effect_v3_native_pg_campaign.py`, covers seven kill points with two worker processes. It is written but not yet run. The effect stores require PostgreSQL 18 (`pg_constraint.conenforced`); on 17 they fail closed. See `docs/remediation/repair_20261109/F12-NATIVE-PG-CAMPAIGN.md`.
+
+F11, F12, F14 and F15 stay open. Status unchanged: 13 open, 0 of 36 verified, NOT READY.
+
 ## 2026-11-09: composed settlement dispute window (F13, owner decision 10)
 
 Earned composed-settlement payments are now held for 72 hours, during which the allocation's agent can dispute a delivery by posting a bond of 5% of the row amount, rounded up. The resolver, the governance timelock, either upholds the dispute or rejects it. Uphold refunds the full row and returns the bond, and the row can never be paid. Reject releases normal payment with the recorded fees and pays the bond to the provider. If the resolver has not decided within 14 days, anyone can finalize: the provider is paid and the bond goes back to the agent. There is no slashing, and outcomes are binary.

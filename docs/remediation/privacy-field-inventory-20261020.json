@@ -1,7 +1,7 @@
 {
   "artifact": "VAMS privacy field source inventory",
   "artifact_version": "1.12-draft",
-  "updated_at": "2026-11-08",
+  "updated_at": "2026-11-09",
   "review_status": "UNAPPROVED_SOURCE_BACKED_DRAFT",
   "candidate_binding": {
     "lane": "/home/GodOfAgents/code/VAMS-fleet-20261020-01/integration-r18",
@@ -215,6 +215,21 @@
         "neuron-sign",
         "sentinel-sla-stub"
       ]
+    },
+    {
+      "topic": "anchor_rebinding_20261109",
+      "status": "source_observed_current_20261109",
+      "finding": "gateway/server.py digest refreshed after the F15 node-default change. NodeInfo and the heartbeat handler no longer invent profile values for a new node (previously passports 'ERC-8004 Phala TEE', credit_score 750, two skills, a high cognitive profile, region us-east-1, cost 0.15) and no longer hardcode network mocha-4; undeclared fields get neutral defaults and node views carry verification=unverified-self-declared plus the list of self-declared fields. The same heartbeat payload fields are read; no new field, recipient or flow was added (network is deliberately not copied from the payload). Affected line ranges were re-mapped to the same code. Source re-binding on the owner-operated runner, not privacy approval; T33 remains BLOCKED.",
+      "source_refs": [
+        "gateway-runtime-log",
+        "gateway-service-instances",
+        "main-gateway-compose",
+        "main-gateway-economics-da",
+        "main-gateway-heartbeat",
+        "main-gateway-middleware",
+        "main-gateway-route-startup",
+        "main-gateway-startup"
+      ]
     }
   ],
   "source_files": {
@@ -271,7 +286,7 @@
     "gateway/server.py": {
       "artifact": "gateway/server.py",
       "algorithm": "sha256",
-      "digest": "60d296c81a8af05eb25a1986abe34d92cf04aa445f37f7d1bb51b35812fd1e43"
+      "digest": "c133be00163a581407d29e87fea924d7d4dc28fda5b7841dc652f01789795a10"
     },
     "gateway/route_policy.py": {
       "artifact": "gateway/route_policy.py",
@@ -696,48 +711,48 @@
     "main-gateway-startup": {
       "path": "gateway/server.py",
       "lines": [
-        138,
-        230
+        148,
+        240
       ],
       "anchor": "async def lifespan"
     },
     "main-gateway-middleware": {
       "path": "gateway/server.py",
       "lines": [
-        251,
-        307
+        261,
+        317
       ],
       "anchor": "class RateLimitMiddleware"
     },
     "main-gateway-heartbeat": {
       "path": "gateway/server.py",
       "lines": [
-        745,
-        846
+        755,
+        855
       ],
       "anchor": "@app.post(\"/heartbeat\")"
     },
     "main-gateway-compose": {
       "path": "gateway/server.py",
       "lines": [
-        874,
-        1028
+        883,
+        1037
       ],
       "anchor": "class ComposeRequest(BaseModel):"
     },
     "main-gateway-economics-da": {
       "path": "gateway/server.py",
       "lines": [
-        1035,
-        1125
+        1044,
+        1134
       ],
       "anchor": "@app.get(\"/economics/status\")"
     },
     "main-gateway-route-startup": {
       "path": "gateway/server.py",
       "lines": [
-        1129,
-        1143
+        1138,
+        1152
       ],
       "anchor": "def main():"
     },
@@ -1176,16 +1191,16 @@
     "gateway-runtime-log": {
       "path": "gateway/server.py",
       "lines": [
-        192,
-        200
+        202,
+        210
       ],
       "anchor": "\"gateway runtime mode=%s classification=%s evidence=%s gateway_mock=%s \""
     },
     "gateway-service-instances": {
       "path": "gateway/server.py",
       "lines": [
-        475,
-        512
+        485,
+        522
       ],
       "anchor": "composer = VAMSResourceComposer()"
     },
@@ -1875,7 +1890,7 @@
             "payload.skills",
             "payload.cognitive_profile"
           ],
-          "detail": "The latter profile fields are optional and have code defaults when a new NodeInfo is created; cognitive_profile and skills are capability/profile data, not a privacy-approved category.",
+          "detail": "The latter profile fields are optional; since 2026-11-09 an undeclared field gets a neutral default (region unknown, cost 0, score 0, empty passports/skills/cognitive_profile) instead of invented values; cognitive_profile and skills are capability/profile data, not a privacy-approved category.",
           "source_refs": [
             "main-gateway-heartbeat"
           ]
@@ -1938,7 +1953,7 @@
       "transforms": [
         "Payload JSON is parsed; node identity and block height are read; optional profile fields update NodeInfo.",
         "Live heartbeat source requires the forwarded mTLS verified marker and fingerprint to match the configured allowlist, in addition to trusted-ingress checks; effective proxy configuration is UNKNOWN.",
-        "network is set by the handler to mocha-4 rather than copied from request.",
+        "network is no longer hardcoded (previously mocha-4) and is not copied from the request; it stays empty.",
         "Signature input is the exact payload string bytes; server response does not echo payload or signature.",
         "Application heartbeat log is fixed text; handler errors return fixed text except parse status."
       ],

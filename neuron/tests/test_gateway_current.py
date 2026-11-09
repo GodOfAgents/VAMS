@@ -81,6 +81,45 @@ class TestGatewayCurrent(unittest.TestCase):
         self.assertEqual(nodes[node_id].last_block, 100)
         self.assertEqual(nodes[node_id].public_key, public_key_hex)
 
+    def _signed_heartbeat(self, sk, payload):
+        payload_str = json.dumps(payload)
+        body = compact_json({"payload": payload_str, "signature": sign_message(sk, payload_str.encode()).hex()})
+        return self.client.post("/heartbeat", content=body, headers=signed_headers("POST", "/heartbeat", body=body))
+
+    def test_undeclared_profile_fields_get_neutral_defaults_not_invented_claims(self):
+        """F15: a node that declares nothing is never shown a TEE passport, score,
+        skills, cognitive profile, price, region or network it did not state."""
+        sk = generate_private_key()
+        node_id = "0x" + "0a" * 32
+        response = self._signed_heartbeat(sk, {"node_id": node_id, "block_height": 7,
+                                               "public_key": public_key_bytes(sk).hex()})
+        self.assertEqual(response.status_code, 200)
+        node = nodes[node_id]
+        self.assertEqual(node.passports, "")
+        self.assertEqual(node.credit_score, 0)
+        self.assertEqual(node.skills, [])
+        self.assertEqual(node.cognitive_profile, {})
+        self.assertEqual(node.cost_per_hour, 0.0)
+        self.assertEqual(node.region, "unknown")
+        self.assertEqual(node.network, "")
+        view = node.to_dict()
+        self.assertEqual(view["verification"], "unverified-self-declared")
+        self.assertIn("passports", view["self_declared_fields"])
+        self.assertIn("cognitive_profile", view["self_declared_fields"])
+
+    def test_declared_passport_is_kept_but_reported_as_unverified(self):
+        """A valid signature authenticates the sender, not the claim."""
+        sk = generate_private_key()
+        node_id = "0x" + "0b" * 32
+        response = self._signed_heartbeat(sk, {"node_id": node_id, "block_height": 8,
+                                               "public_key": public_key_bytes(sk).hex(),
+                                               "passports": "ERC-8004 Phala TEE", "network": "mocha-4"})
+        self.assertEqual(response.status_code, 200)
+        view = nodes[node_id].to_dict()
+        self.assertEqual(view["passports"], "ERC-8004 Phala TEE")
+        self.assertEqual(view["network"], "")  # neither assumed nor captured
+        self.assertEqual(view["verification"], "unverified-self-declared")
+
     def test_heartbeat_invalid_signature(self):
         """Test sending heartbeat with invalid signature returns 403."""
         sk = generate_private_key()

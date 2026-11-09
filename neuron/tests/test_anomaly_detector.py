@@ -229,3 +229,51 @@ class TestAnomalyReport:
         report = detector.get_anomaly_report(anomalous[0])
         assert report.is_adversarial
         assert report.anomaly_score > 0.5
+
+
+# ─────────────────────────────────────────────────────
+# F14 (2026-11-09): malformed input never reads as "normal"
+# ─────────────────────────────────────────────────────
+
+class TestNonFiniteInputFailsClosed:
+    """Before the fix, a NaN activation scored NaN and ``NaN > threshold`` was
+    False, so malformed input was classified as not adversarial (fail-open)."""
+
+    @pytest.mark.parametrize("bad", [np.nan, np.inf, -np.inf])
+    def test_nonfinite_activation_raises_instead_of_classifying(self, detector, synthetic_data, bad):
+        normal, _ = synthetic_data
+        activation = normal[0].copy()
+        activation[3] = bad
+        with pytest.raises(ValueError):
+            detector.score_anomaly(activation)
+        with pytest.raises(ValueError):
+            detector.is_adversarial(activation)
+        with pytest.raises(ValueError):
+            detector.get_anomaly_report(activation)
+
+    def test_nonfinite_batch_raises(self, detector, synthetic_data):
+        normal, _ = synthetic_data
+        batch = normal[:4].copy()
+        batch[2, 0] = np.nan
+        with pytest.raises(ValueError):
+            detector.score_anomaly_batch(batch)
+
+    def test_empty_activation_raises(self, detector):
+        with pytest.raises(ValueError):
+            detector.score_anomaly(np.array([], dtype=np.float32))
+
+    @pytest.mark.parametrize("bad", [np.nan, np.inf, -1.0, 0.0, True, "3"])
+    def test_nonfinite_or_invalid_threshold_rejected_everywhere(self, fitted_skill_model, detector, synthetic_data, bad):
+        normal, _ = synthetic_data
+        with pytest.raises(ValueError):
+            ActivationAnomalyDetector(fitted_skill_model, default_threshold=bad)
+        with pytest.raises(ValueError):
+            detector.default_threshold = bad
+        with pytest.raises(ValueError):
+            detector.is_adversarial(normal[0], threshold=bad)
+        with pytest.raises(ValueError):
+            detector.get_anomaly_report(normal[0], threshold=bad)
+
+    def test_far_outlier_still_flagged_after_validation(self, detector, synthetic_data):
+        _, anomalous = synthetic_data
+        assert detector.is_adversarial(anomalous[0]) is True

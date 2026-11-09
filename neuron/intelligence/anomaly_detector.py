@@ -45,6 +45,36 @@ from .skill_discovery import SkillDiscovery
 logger = logging.getLogger("VAMS-AnomalyDetector")
 
 
+# F14 (2026-11-09): this detector is an uncalibrated statistical WARNING signal.
+# It never authorizes anything, and malformed input must never read as "normal":
+# NaN/inf activations or thresholds previously produced NaN distances, and
+# ``NaN > threshold`` is False, so a malformed input was classified as not
+# adversarial (fail-open). Every entry point now rejects nonfinite input.
+
+def _finite_array(values: Any, *, ndim: int) -> np.ndarray:
+    array = np.asarray(values, dtype=np.float32)
+    if array.ndim != ndim:
+        raise ValueError(f"Expected {ndim}-D activation input, got shape {array.shape}")
+    if array.size == 0 or not np.all(np.isfinite(array)):
+        raise ValueError("Activation input must be non-empty and finite")
+    return array
+
+
+def _finite_distance(mahal_sq: float) -> float:
+    if not np.isfinite(mahal_sq):
+        raise ValueError("Anomaly score is not finite; no classification is produced")
+    return float(np.sqrt(max(mahal_sq, 0.0)))
+
+
+def _finite_positive_threshold(value: Any) -> float:
+    if isinstance(value, bool) or not isinstance(value, (int, float, np.floating, np.integer)):
+        raise ValueError("Threshold must be a finite positive number")
+    value = float(value)
+    if not np.isfinite(value) or value <= 0:
+        raise ValueError(f"Threshold must be a finite positive number, got {value}")
+    return value
+
+
 @dataclass
 class AnomalyReport:
     """Detailed anomaly analysis for a single activation."""
@@ -102,7 +132,7 @@ class ActivationAnomalyDetector:
             )
 
         self._skill_model = skill_model
-        self._default_threshold = default_threshold
+        self._default_threshold = _finite_positive_threshold(default_threshold)
 
         # Baseline statistics (set by fit_baseline)
         self._baseline_centroid: Optional[np.ndarray] = None
@@ -213,12 +243,7 @@ class ActivationAnomalyDetector:
             Mahalanobis distance (higher = more anomalous).
         """
         self._check_baseline()
-        activation = np.asarray(activation, dtype=np.float32)
-
-        if activation.ndim != 1:
-            raise ValueError(
-                f"Expected 1-D activation, got shape {activation.shape}"
-            )
+        activation = _finite_array(activation, ndim=1)
 
         # Project into PCA space
         projected = self._skill_model.transform(activation)
@@ -226,10 +251,7 @@ class ActivationAnomalyDetector:
         # Compute Mahalanobis distance
         diff = projected - self._baseline_centroid
         mahal_sq = float(diff @ self._baseline_cov_inv @ diff.T)
-
-        # Handle numerical issues
-        mahal_sq = max(mahal_sq, 0.0)
-        return float(np.sqrt(mahal_sq))
+        return _finite_distance(mahal_sq)
 
     def score_anomaly_batch(
         self,
@@ -245,7 +267,7 @@ class ActivationAnomalyDetector:
             1-D array of Mahalanobis distances.
         """
         self._check_baseline()
-        activations = np.asarray(activations, dtype=np.float32)
+        activations = _finite_array(activations, ndim=2)
 
         projected = self._skill_model.transform(activations)
         diff = projected - self._baseline_centroid
@@ -254,6 +276,8 @@ class ActivationAnomalyDetector:
         mahal_sq = np.sum(
             (diff @ self._baseline_cov_inv) * diff, axis=1
         )
+        if not np.all(np.isfinite(mahal_sq)):
+            raise ValueError("Anomaly score is not finite; no classification is produced")
         mahal_sq = np.maximum(mahal_sq, 0.0)
         return np.sqrt(mahal_sq)
 
@@ -272,8 +296,7 @@ class ActivationAnomalyDetector:
         Returns:
             True if the activation exceeds the threshold.
         """
-        if threshold is None:
-            threshold = self._default_threshold
+        threshold = self._default_threshold if threshold is None else _finite_positive_threshold(threshold)
 
         distance = self.score_anomaly(activation)
         return distance > threshold
@@ -295,19 +318,16 @@ class ActivationAnomalyDetector:
         """
         self._check_baseline()
 
-        if threshold is None:
-            threshold = self._default_threshold
+        threshold = self._default_threshold if threshold is None else _finite_positive_threshold(threshold)
 
-        activation = np.asarray(activation, dtype=np.float32)
+        activation = _finite_array(activation, ndim=1)
 
         # Project and compute distance
         projected = self._skill_model.transform(activation)
         diff = projected - self._baseline_centroid
 
         # Mahalanobis distance
-        mahal_sq = float(diff @ self._baseline_cov_inv @ diff.T)
-        mahal_sq = max(mahal_sq, 0.0)
-        mahal_dist = float(np.sqrt(mahal_sq))
+        mahal_dist = _finite_distance(float(diff @ self._baseline_cov_inv @ diff.T))
 
         # Normalized anomaly score [0, 1] using sigmoid-like mapping
         anomaly_score = float(1.0 / (1.0 + np.exp(-0.5 * (mahal_dist - threshold))))
@@ -349,9 +369,7 @@ class ActivationAnomalyDetector:
 
     @default_threshold.setter
     def default_threshold(self, value: float) -> None:
-        if value <= 0:
-            raise ValueError(f"Threshold must be positive, got {value}")
-        self._default_threshold = value
+        self._default_threshold = _finite_positive_threshold(value)
 
     # ──────────────────────────────────────────────────
     # Internal
