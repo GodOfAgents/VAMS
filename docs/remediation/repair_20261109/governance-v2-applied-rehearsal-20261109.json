@@ -1,0 +1,577 @@
+{
+  "schema": "vams.governance_v2_applied_rehearsal/1",
+  "status": "FAIL",
+  "evidence_class": "SOURCE_BOUND_SYNTHETIC_APPLIED_UPLC",
+  "aiken_version": "aiken v1.1.21+42babe5",
+  "sources_sha256": {
+    "cardano/aiken.toml": "0520b42b48f051b1850f8143cdb9d2a7e7532d88ebac3c1b2ae7073332bac23a",
+    "cardano/aiken.lock": "7c69f0a484d3b42862dc0ab0773cf6b3edf72709c921b2ad3648a0753af8cafc",
+    "cardano/plutus.json": "f1e3c8d4df8666c57813ef80799a85c112ab535be390e365e15172dbbb159b32",
+    "cardano/validators/governance_v2.ak": "f995ab62badfe799310ac8a025bedc00ab39294b546993ac529ebb8082922a8d",
+    "cardano/lib/vams/governance.ak": "83143073f50a45ee0d45d80c0218a57a278951e2c6de6a9c8b6e41394b8cb077",
+    "cardano/lib/vams/governance_v2.ak": "7ba73663b8ecc6ff9732d7c92a32514005e35e340471d7760ff6c31361a781ac",
+    "cardano/lib/vams/governance_v2_types.ak": "a90a2356c65dd3998738e7ad8bdae91a29765b8aa7670154965ba9233340e7cf",
+    "cardano/lib/vams/governance_v2_transitions.ak": "fc89b9ba54be65475142de660fa57dbd8f9322029df040c7f1dc8a7041f8d1ea",
+    "cardano/lib/vams/governance_v2_rehearsal.ak": "ff4fad2248e1c87db62af9c7f0f2ec75f8c29073e6f3441fd98376a5d44876dd",
+    "scripts/cardano/governance_v2_applied_rehearsal.py": "590e1d6d79d6ff0c6669d003c3d7ebd86cba828f6f3cf3aa5f57aaf33968c6d4"
+  },
+  "blueprint_sha256": "f1e3c8d4df8666c57813ef80799a85c112ab535be390e365e15172dbbb159b32",
+  "parameters": {
+    "bootstrap_cbor": "d8799fd8799f5820aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa00ff00019f581c01010101010101010101010101010101010101010101010101010101581c02020202020202020202020202020202020202020202020202020202581c03030303030303030303030303030303030303030303030303030303581c04040404040404040404040404040404040404040404040404040404581c05050505050505050505050505050505050505050505050505050505ffff",
+    "anchor_cbor": "d8799f581c454e87316a9efbf6dc94954c7f21fea2c52b8c964d5d74907a92187a5820f0459fb34010e41c8200a63daec306abb3544dadd91cc33d85fb207fc632bb8bff"
+  },
+  "applied_hashes": {
+    "authority": "454e87316a9efbf6dc94954c7f21fea2c52b8c964d5d74907a92187a",
+    "governor": "b7953836da201c7b09079212f2714333a5edffcf55a3b38e6df3179f",
+    "timelock": "d9be4844dc64b390c7b9d7c9c965103074fdaee1e6777b6fc6f3d292",
+    "proposal": "65f43811b1f26e015bb8bba569d0de83d5b77c5b1da775252f053ded",
+    "receipt": "dee9108bd5aebd6e0ba3f69b4e0ef59288e8e8050ce75fecb57a2531",
+    "intent": "65ff18ab3ef5b526e81d8f930f6b3ff943efcfe82439894eabad3395"
+  },
+  "applied_script_bytes": {
+    "authority": 11611,
+    "governor": 11543,
+    "timelock": 7587,
+    "proposal": 13184,
+    "receipt": 13184,
+    "intent": 13184
+  },
+  "reference_limits": {
+    "max_tx_execution_memory": 14000000,
+    "max_tx_execution_steps": 10000000000,
+    "max_tx_size_bytes": 16384,
+    "max_reference_script_bytes_per_tx": 204800,
+    "status": "REFERENCE_VALUES_NOT_CONFIRMED_AGAINST_LIVE_PREPROD"
+  },
+  "checks": {
+    "blueprint_rebuild_matches_committed": true,
+    "applied_hashes_distinct": true,
+    "all_cases_match_expectation": true,
+    "every_tx_within_reference_execution_limits": false,
+    "each_script_fits_one_reference_script_tx": true,
+    "queue_reference_scripts_within_per_tx_limit": true
+  },
+  "failures": [],
+  "transactions": {
+    "genesis": {
+      "scripts": 1,
+      "cpu": 609290838,
+      "mem": 1509652,
+      "mem_share_of_reference_limit": 0.1078,
+      "cpu_share_of_reference_limit": 0.0609
+    },
+    "create": {
+      "scripts": 2,
+      "cpu": 3026318733,
+      "mem": 7228179,
+      "mem_share_of_reference_limit": 0.5163,
+      "cpu_share_of_reference_limit": 0.3026
+    },
+    "vote1": {
+      "scripts": 2,
+      "cpu": 3161089834,
+      "mem": 7815074,
+      "mem_share_of_reference_limit": 0.5582,
+      "cpu_share_of_reference_limit": 0.3161
+    },
+    "vote2": {
+      "scripts": 2,
+      "cpu": 3586090561,
+      "mem": 8930257,
+      "mem_share_of_reference_limit": 0.6379,
+      "cpu_share_of_reference_limit": 0.3586
+    },
+    "finalize_passed": {
+      "scripts": 1,
+      "cpu": 1554333552,
+      "mem": 3768727,
+      "mem_share_of_reference_limit": 0.2692,
+      "cpu_share_of_reference_limit": 0.1554
+    },
+    "finalize_rejected": {
+      "scripts": 3,
+      "cpu": 4100206858,
+      "mem": 10487799,
+      "mem_share_of_reference_limit": 0.7491,
+      "cpu_share_of_reference_limit": 0.41
+    },
+    "cancel_proposal": {
+      "scripts": 3,
+      "cpu": 4092715492,
+      "mem": 10480950,
+      "mem_share_of_reference_limit": 0.7486,
+      "cpu_share_of_reference_limit": 0.4093
+    },
+    "queue": {
+      "scripts": 5,
+      "cpu": 9092134932,
+      "mem": 22081321,
+      "mem_share_of_reference_limit": 1.5772,
+      "cpu_share_of_reference_limit": 0.9092
+    },
+    "cancel_intent": {
+      "scripts": 2,
+      "cpu": 2352090839,
+      "mem": 5994068,
+      "mem_share_of_reference_limit": 0.4281,
+      "cpu_share_of_reference_limit": 0.2352
+    },
+    "expire_intent": {
+      "scripts": 2,
+      "cpu": 2255379731,
+      "mem": 5653446,
+      "mem_share_of_reference_limit": 0.4038,
+      "cpu_share_of_reference_limit": 0.2255
+    },
+    "max_vote8": {
+      "scripts": 2,
+      "cpu": 6446099050,
+      "mem": 16828905,
+      "mem_share_of_reference_limit": 1.2021,
+      "cpu_share_of_reference_limit": 0.6446
+    },
+    "max_rejected8": {
+      "scripts": 3,
+      "cpu": 8190509046,
+      "mem": 22419544,
+      "mem_share_of_reference_limit": 1.6014,
+      "cpu_share_of_reference_limit": 0.8191
+    },
+    "max_queue8": {
+      "scripts": 5,
+      "cpu": 15864667543,
+      "mem": 41652006,
+      "mem_share_of_reference_limit": 2.9751,
+      "cpu_share_of_reference_limit": 1.5865
+    }
+  },
+  "cases": [
+    {
+      "label": "genesis/authority_mint",
+      "script": "authority",
+      "handler": "mint",
+      "expected": "accept",
+      "observed": "accept",
+      "cpu": 609290838,
+      "mem": 1509652,
+      "context_text_sha256": "a1f3bd964bd47da74a029414103210ee1b7d545d8e61f63dade7f30447961a37"
+    },
+    {
+      "label": "create/authority_spend",
+      "script": "authority",
+      "handler": "spend",
+      "expected": "accept",
+      "observed": "accept",
+      "cpu": 1642544122,
+      "mem": 3989827,
+      "context_text_sha256": "280b29212b8d5398e170eb8afdbb87eb3e746c633621584fbe5ce331d41b21c9"
+    },
+    {
+      "label": "create/proposal_mint",
+      "script": "proposal",
+      "handler": "mint",
+      "expected": "accept",
+      "observed": "accept",
+      "cpu": 1383774611,
+      "mem": 3238352,
+      "context_text_sha256": "5df3a57af2c9a67d6a28877b0c00ff935dce970846d56cecef2c6b3136e5edbd"
+    },
+    {
+      "label": "vote1/governor_spend",
+      "script": "governor",
+      "handler": "spend",
+      "expected": "accept",
+      "observed": "accept",
+      "cpu": 1682755713,
+      "mem": 4142856,
+      "context_text_sha256": "e1d3622af0cf26fe98eacc5b6af455240d7afff423d06b4e3f9889a09a52dab6"
+    },
+    {
+      "label": "vote1/receipt_mint",
+      "script": "receipt",
+      "handler": "mint",
+      "expected": "accept",
+      "observed": "accept",
+      "cpu": 1478334121,
+      "mem": 3672218,
+      "context_text_sha256": "977a569f5edcc06f348b9d916b59df6135467309b37a954112218a030877f2d6"
+    },
+    {
+      "label": "vote2/governor_spend",
+      "script": "governor",
+      "handler": "spend",
+      "expected": "accept",
+      "observed": "accept",
+      "cpu": 1934949130,
+      "mem": 4806477,
+      "context_text_sha256": "723599b10c1147605f206ca00fe724a6025a3de751539a9733d014ee791d3ed7"
+    },
+    {
+      "label": "vote2/receipt_mint",
+      "script": "receipt",
+      "handler": "mint",
+      "expected": "accept",
+      "observed": "accept",
+      "cpu": 1651141431,
+      "mem": 4123780,
+      "context_text_sha256": "5f4ee63de1638378abb5ae3c5fb64410379c5a39a41af95ff7316e9361849e7c"
+    },
+    {
+      "label": "finalize_passed/governor_spend",
+      "script": "governor",
+      "handler": "spend",
+      "expected": "accept",
+      "observed": "accept",
+      "cpu": 1554333552,
+      "mem": 3768727,
+      "context_text_sha256": "2677527b6c320d331b1e9d415da25faed629e1847431ead2865f34c24574518d"
+    },
+    {
+      "label": "finalize_rejected/governor_spend",
+      "script": "governor",
+      "handler": "spend",
+      "expected": "accept",
+      "observed": "accept",
+      "cpu": 1556244244,
+      "mem": 3952110,
+      "context_text_sha256": "8e582614f52cdb909c932845af17c140cc30536568b0004bfba189e988f01562"
+    },
+    {
+      "label": "finalize_rejected/proposal_burn",
+      "script": "proposal",
+      "handler": "mint",
+      "expected": "accept",
+      "observed": "accept",
+      "cpu": 1271830451,
+      "mem": 3267378,
+      "context_text_sha256": "87d6704c9ef476c75b98cda963e2544fca27c528f98ad0300acabce0844e5e4d"
+    },
+    {
+      "label": "finalize_rejected/receipt_burn",
+      "script": "receipt",
+      "handler": "mint",
+      "expected": "accept",
+      "observed": "accept",
+      "cpu": 1272132163,
+      "mem": 3268311,
+      "context_text_sha256": "d115b16ad763484642076a8cabd26ba43fe0e0044113305d407e2dc1d4389c16"
+    },
+    {
+      "label": "cancel_proposal/governor_spend",
+      "script": "governor",
+      "handler": "spend",
+      "expected": "accept",
+      "observed": "accept",
+      "cpu": 1553747122,
+      "mem": 3949827,
+      "context_text_sha256": "c8ed738b9f500c25591df69313970874e39991a51b77393e1e9606af344bb0d1"
+    },
+    {
+      "label": "cancel_proposal/proposal_burn",
+      "script": "proposal",
+      "handler": "mint",
+      "expected": "accept",
+      "observed": "accept",
+      "cpu": 1269333329,
+      "mem": 3265095,
+      "context_text_sha256": "151c9991f9384b5397fffcb4d6d88c8136d2fc088278bea8af3fc50651b70fce"
+    },
+    {
+      "label": "cancel_proposal/receipt_burn",
+      "script": "receipt",
+      "handler": "mint",
+      "expected": "accept",
+      "observed": "accept",
+      "cpu": 1269635041,
+      "mem": 3266028,
+      "context_text_sha256": "8a4eb988b0bbb3c610dc0c73e3fdb2c809d17c991af35326050a05edefe8e6dd"
+    },
+    {
+      "label": "queue/authority_spend",
+      "script": "authority",
+      "handler": "spend",
+      "expected": "accept",
+      "observed": "accept",
+      "cpu": 1963744020,
+      "mem": 4868839,
+      "context_text_sha256": "a5c8cc3eae36d25272de72333be5a07576e35a9ce004ea5130cd2932f5a36c39"
+    },
+    {
+      "label": "queue/governor_spend",
+      "script": "governor",
+      "handler": "spend",
+      "expected": "accept",
+      "observed": "accept",
+      "cpu": 2006375361,
+      "mem": 4840998,
+      "context_text_sha256": "2a8083b29f6303cac927ee1a58ac36fbd2dd0d147de1148bf08f047684c539cf"
+    },
+    {
+      "label": "queue/proposal_burn",
+      "script": "proposal",
+      "handler": "mint",
+      "expected": "accept",
+      "observed": "accept",
+      "cpu": 1707309187,
+      "mem": 4123797,
+      "context_text_sha256": "d10a81ecac9a2d44c30dba13db8f077825c9769b653c653bb3b5530001aab7d4"
+    },
+    {
+      "label": "queue/receipt_burn",
+      "script": "receipt",
+      "handler": "mint",
+      "expected": "accept",
+      "observed": "accept",
+      "cpu": 1707610899,
+      "mem": 4124730,
+      "context_text_sha256": "18324e54279b57ddcb1ec9a441dfdce9743c37003417801efba9d028b329a659"
+    },
+    {
+      "label": "queue/intent_mint",
+      "script": "intent",
+      "handler": "mint",
+      "expected": "accept",
+      "observed": "accept",
+      "cpu": 1707095465,
+      "mem": 4122957,
+      "context_text_sha256": "dc10c3191e3413fc489c498d37c49b6788ad3f185ba15a4caae1317fd8383d7c"
+    },
+    {
+      "label": "cancel_intent/timelock_spend",
+      "script": "timelock",
+      "handler": "spend",
+      "expected": "accept",
+      "observed": "accept",
+      "cpu": 1237116382,
+      "mem": 3122927,
+      "context_text_sha256": "57dbac1fabbf8347f640e9afec036b7f7abfd9782a8d8498950f50af9326e5c1"
+    },
+    {
+      "label": "cancel_intent/intent_burn",
+      "script": "intent",
+      "handler": "mint",
+      "expected": "accept",
+      "observed": "accept",
+      "cpu": 1114974457,
+      "mem": 2871141,
+      "context_text_sha256": "277002ac334723f15d801d7a817865370254b9db2a36d4c3bdd97262384eb8c0"
+    },
+    {
+      "label": "expire_intent/timelock_spend",
+      "script": "timelock",
+      "handler": "spend",
+      "expected": "accept",
+      "observed": "accept",
+      "cpu": 1188784828,
+      "mem": 2952766,
+      "context_text_sha256": "7194bb644aaacba47516edc3075d8fc180bbe004e4f9102607660c27edafbc48"
+    },
+    {
+      "label": "expire_intent/intent_burn",
+      "script": "intent",
+      "handler": "mint",
+      "expected": "accept",
+      "observed": "accept",
+      "cpu": 1066594903,
+      "mem": 2700680,
+      "context_text_sha256": "3c475577acb57dc789e53948424da359edc4a85d00d62bfeacb495ac7a95df2d"
+    },
+    {
+      "label": "reject/execute_intent_disabled",
+      "script": "timelock",
+      "handler": "spend",
+      "expected": "reject",
+      "observed": "reject",
+      "cpu": 12029308,
+      "mem": 41539,
+      "context_text_sha256": "5f6577e59aa9cd8f8240872b5c0f25371ea9cd44de287fe7bf68b77e5f731735"
+    },
+    {
+      "label": "reject/two_member_intent_cancel",
+      "script": "timelock",
+      "handler": "spend",
+      "expected": "reject",
+      "observed": "reject",
+      "cpu": 1106813849,
+      "mem": 2758266,
+      "context_text_sha256": "649597cb1684596bdb3ce48c162d5c422a41c1e6f84218a83c3832eb211ac54c"
+    },
+    {
+      "label": "reject/queue_with_24h_delay",
+      "script": "governor",
+      "handler": "spend",
+      "expected": "reject",
+      "observed": "reject",
+      "cpu": 2003959361,
+      "mem": 4825898,
+      "context_text_sha256": "15fc868a084ac54637da53a44b109eff265d0719bee0b385d3359e8a78983982"
+    },
+    {
+      "label": "reject/vote_replaces_prior_voter",
+      "script": "governor",
+      "handler": "spend",
+      "expected": "reject",
+      "observed": "reject",
+      "cpu": 1760887088,
+      "mem": 4356860,
+      "context_text_sha256": "bb3265b0e4782b00768bcb149dedef598fa287db235c12f8ba039224bd18cf6b"
+    },
+    {
+      "label": "reject/rejected_refund_redirected",
+      "script": "governor",
+      "handler": "spend",
+      "expected": "reject",
+      "observed": "reject",
+      "cpu": 1555860244,
+      "mem": 3949710,
+      "context_text_sha256": "bec4375650f3ff9bacee70b970a0cf707292ad562603308bfdf074c52cc42be6"
+    },
+    {
+      "label": "reject/forged_authority_reference",
+      "script": "governor",
+      "handler": "spend",
+      "expected": "reject",
+      "observed": "reject",
+      "cpu": 163351529,
+      "mem": 382269,
+      "context_text_sha256": "5544e832cb56e9a0015dce1a9fa72f8d55c5da3096a4a94d92c03bb114162571"
+    },
+    {
+      "label": "reject/version_1_request",
+      "script": "governor",
+      "handler": "spend",
+      "expected": "reject",
+      "observed": "reject",
+      "cpu": 8519235,
+      "mem": 21749,
+      "context_text_sha256": "49b5980510cb1a07af84fde8d8ef1c5cfda0209f753243a1a770ae10a9e7b7ee"
+    },
+    {
+      "label": "reject/genesis_wrong_seed",
+      "script": "authority",
+      "handler": "spend",
+      "expected": "reject",
+      "observed": "reject",
+      "cpu": 209624325,
+      "mem": 486400,
+      "context_text_sha256": "d5165d18179bb51c5e32083c18060c7a1830af646231575cb50d73bf4197d7db"
+    },
+    {
+      "label": "reject/create_wrong_governor_destination",
+      "script": "authority",
+      "handler": "spend",
+      "expected": "reject",
+      "observed": "reject",
+      "cpu": 1642080122,
+      "mem": 3986927,
+      "context_text_sha256": "dfb15858866d51fb93b409a7efde6fbb3ce78f6ffa4a45e8afda47fa1d473d34"
+    },
+    {
+      "label": "max_vote8/governor_spend",
+      "script": "governor",
+      "handler": "spend",
+      "expected": "accept",
+      "observed": "accept",
+      "cpu": 3636248667,
+      "mem": 9521173,
+      "context_text_sha256": "b6fc2326da9fc65892fc31ffe12bb4f7e8199394bf570634e9d029dfae399e06"
+    },
+    {
+      "label": "max_vote8/receipt_mint",
+      "script": "receipt",
+      "handler": "mint",
+      "expected": "accept",
+      "observed": "accept",
+      "cpu": 2809850383,
+      "mem": 7307732,
+      "context_text_sha256": "31af7bf5bd92b0d37b5659f10fcda495e3a6bf1523e93e81d648ab9d1f9cf0f6"
+    },
+    {
+      "label": "max_rejected8/governor_spend",
+      "script": "governor",
+      "handler": "spend",
+      "expected": "accept",
+      "observed": "accept",
+      "cpu": 3357376992,
+      "mem": 9177329,
+      "context_text_sha256": "f2a678287f1b345221213e41b10a3230edcd563816ba3fa46c5c89979c871826"
+    },
+    {
+      "label": "max_rejected8/proposal_burn",
+      "script": "proposal",
+      "handler": "mint",
+      "expected": "accept",
+      "observed": "accept",
+      "cpu": 2416415171,
+      "mem": 6620641,
+      "context_text_sha256": "53035c0f322d194f5163791f4f87e0f78aadc6b99df037a4ceacc19b5ec40a4c"
+    },
+    {
+      "label": "max_rejected8/receipt_burn",
+      "script": "receipt",
+      "handler": "mint",
+      "expected": "accept",
+      "observed": "accept",
+      "cpu": 2416716883,
+      "mem": 6621574,
+      "context_text_sha256": "f0f42b69b8d2f3e7fe9c4d6e6f99bb60cbdfeaa55d8704e81d218779a3c17f99"
+    },
+    {
+      "label": "max_queue8/authority_spend",
+      "script": "authority",
+      "handler": "spend",
+      "expected": "accept",
+      "observed": "accept",
+      "cpu": 3186131921,
+      "mem": 8401274,
+      "context_text_sha256": "cfc938bc31f4b91551f9761378579ef98254a0602c2987c071e8436489eea717"
+    },
+    {
+      "label": "max_queue8/governor_spend",
+      "script": "governor",
+      "handler": "spend",
+      "expected": "accept",
+      "observed": "accept",
+      "cpu": 3880984718,
+      "mem": 10235155,
+      "context_text_sha256": "ad12dfa545ecec305cd1fd87b4929ac0cf84586374656757683b3e8b844aa575"
+    },
+    {
+      "label": "max_queue8/proposal_burn",
+      "script": "proposal",
+      "handler": "mint",
+      "expected": "accept",
+      "observed": "accept",
+      "cpu": 2932487638,
+      "mem": 7671828,
+      "context_text_sha256": "8314aab623258306eb5011af5634538c4af7874d6d60f473f92d10936134835d"
+    },
+    {
+      "label": "max_queue8/receipt_burn",
+      "script": "receipt",
+      "handler": "mint",
+      "expected": "accept",
+      "observed": "accept",
+      "cpu": 2932789350,
+      "mem": 7672761,
+      "context_text_sha256": "45d45ba5b99d556972b8feb096e00d922ba9e3db67c0a12a056ffb5d8780c044"
+    },
+    {
+      "label": "max_queue8/intent_mint",
+      "script": "intent",
+      "handler": "mint",
+      "expected": "accept",
+      "observed": "accept",
+      "cpu": 2932273916,
+      "mem": 7670988,
+      "context_text_sha256": "a6889b2c2420477af06de0c3c865dc7a23672b86b43650fe7686aef12e37a163"
+    }
+  ],
+  "limits": [
+    "Custodian key hashes, seed UTxO, VAMS policy and amounts are synthetic fixtures.",
+    "Contexts are ledger-shaped but not ledger-validated: no fee, min-UTxO, collateral, balance or signature check.",
+    "Costs use the evaluator's built-in cost model, not live Pre-Prod cost-model parameters.",
+    "Reference limits are not confirmed against live Pre-Prod protocol parameters.",
+    "Not independent review, custody, or deployment evidence."
+  ]
+}
