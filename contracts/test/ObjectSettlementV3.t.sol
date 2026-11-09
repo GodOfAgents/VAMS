@@ -1,5 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
+// Dispute window (owner decision 10): earned payments are held 72 hours. Tests
+// advance the clock across the window for each claim and restore it afterwards,
+// so every original timeline and expectation is unchanged.
 import {Test} from "forge-std/Test.sol";
 import {ComposedSettlement} from "../src/economic/ComposedSettlement.sol";
 import {IComposedSettlement} from "../src/economic/IComposedSettlement.sol";
@@ -63,7 +66,7 @@ contract ObjectSettlementV3Test is Test {
         ActionDeliveryVerifierV1 router=new ActionDeliveryVerifierV1(address(policy),address(policy).codehash,
             address(backend),address(backend).codehash,address(backend),address(backend).codehash);
         settlement=new ComposedSettlement(address(this),address(token),address(bonds),address(0xFEE),
-            address(new SettlementRegistryFixture()),address(router));
+            address(new SettlementRegistryFixture()),address(router),address(this));
         bonds.grantRole(bonds.ESCROW_ROLE(),address(settlement));
         token.mint(agent,10_000 ether);token.mint(provider,10_000 ether);
         vm.prank(provider);bonds.registerProvider(10_000 ether,1_000 ether);
@@ -157,8 +160,8 @@ contract ObjectSettlementV3Test is Test {
         settlement.setTreasury(address(0xBAD));
         vm.prank(vm.addr(99));settlement.resolveObjectCompletionV3(id,0,resolution(),receipt);
         assertTrue(settlement.getEarnedDeliveryV3(id,0).accepted);
-        vm.prank(vm.addr(99));vm.expectRevert();settlement.claimEarnedProviderShareV3(id,0);
-        vm.prank(provider);settlement.claimEarnedProviderShareV3(id,0);
+        vm.prank(vm.addr(99));vm.expectRevert();vm.warp(block.timestamp + 72 hours); settlement.claimEarnedProviderShareV3(id,0); vm.warp(block.timestamp - 72 hours);
+        vm.prank(provider);vm.warp(block.timestamp + 72 hours); settlement.claimEarnedProviderShareV3(id,0); vm.warp(block.timestamp - 72 hours);
         assertEq(token.balanceOf(provider),99.95 ether);assertEq(token.balanceOf(address(0xFEE)),0.05 ether);
         assertEq(token.balanceOf(address(0xBAD)),0);assertEq(settlement.totalEscrowed(),0);
         assertFalse(settlement.verifiedProviderProofs(id,0));
@@ -185,8 +188,8 @@ contract ObjectSettlementV3Test is Test {
         assertEq(settlement.totalEscrowed(),AMOUNT);
         vm.expectRevert();refundAbsent(id);
         settlement.resolveObjectCompletionV3(id,0,resolution(),receipt);
-        vm.prank(provider);vm.expectRevert();settlement.claimEarnedProviderShareV3(id,0);
-        settlement.unpause();vm.prank(provider);settlement.claimEarnedProviderShareV3(id,0);
+        vm.prank(provider);vm.expectRevert();vm.warp(block.timestamp + 72 hours); settlement.claimEarnedProviderShareV3(id,0); vm.warp(block.timestamp - 72 hours);
+        settlement.unpause();vm.prank(provider);vm.warp(block.timestamp + 72 hours); settlement.claimEarnedProviderShareV3(id,0); vm.warp(block.timestamp - 72 hours);
         assertEq(settlement.totalEscrowed(),0);
     }
     function test_actorRevocationInvalidatesPendingAdmissionButRetainsCompletedLiability() public {
@@ -194,7 +197,7 @@ contract ObjectSettlementV3Test is Test {
         vm.prank(vm.addr(3));policy.revokeObjectGrantV1(witness.grant);
         vm.expectRevert();admit(id,1);vm.warp(block.timestamp+301);
         refundExpired(id);settlement.resolveObjectCompletionV3(id,0,resolution(),receipt);
-        vm.prank(provider);settlement.claimEarnedProviderShareV3(id,0);assertEq(settlement.totalEscrowed(),0);
+        vm.prank(provider);vm.warp(block.timestamp + 72 hours); settlement.claimEarnedProviderShareV3(id,0); vm.warp(block.timestamp - 72 hours);assertEq(settlement.totalEscrowed(),0);
     }
     function test_sameOperationCannotReserveTwoRowsOrUseLegacyProofRoute() public {
         bytes32 id=create(2);admit(id,0);vm.expectRevert();admit(id,1);
@@ -346,7 +349,7 @@ contract ObjectSettlementV3Test is Test {
         vm.expectRevert();admit(id,1);
         vm.warp(block.timestamp+301);refundExpired(id);
         settlement.resolveObjectCompletionV3(id,0,resolution(),receipt);
-        vm.prank(provider);settlement.claimEarnedProviderShareV3(id,0);assertEq(settlement.totalEscrowed(),0);
+        vm.prank(provider);vm.warp(block.timestamp + 72 hours); settlement.claimEarnedProviderShareV3(id,0); vm.warp(block.timestamp - 72 hours);assertEq(settlement.totalEscrowed(),0);
     }
     function test_terminalAbsenceCannotLaterBecomeCompletionOrPayment() public {
         bytes32 id=create(1);admit(id,0);bytes memory receipt=completion(block.timestamp+1);
@@ -354,7 +357,7 @@ contract ObjectSettlementV3Test is Test {
         settlement.resolveObjectAbsenceV3(id,0,resolution(),O.AbsenceEvidence(f,u,a,x));
         vm.warp(block.timestamp+2);
         vm.expectRevert();settlement.resolveObjectCompletionV3(id,0,resolution(),receipt);
-        vm.prank(provider);vm.expectRevert();settlement.claimEarnedProviderShareV3(id,0);
+        vm.prank(provider);vm.expectRevert();vm.warp(block.timestamp + 72 hours); settlement.claimEarnedProviderShareV3(id,0); vm.warp(block.timestamp - 72 hours);
         refundAbsent(id);assertEq(settlement.totalEscrowed(),0);
     }
     function test_signedAbsenceCannotRegressOrRebindPolicyGeneration() public {

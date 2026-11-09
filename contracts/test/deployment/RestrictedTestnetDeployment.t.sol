@@ -79,6 +79,10 @@ contract RestrictedTestnetDeploymentTest is Test {
         assertEq(address(settlement.bondRegistry()), d.bondRegistry);
         assertEq(address(settlement.serviceBlockRegistry()), d.serviceRegistry);
         assertEq(address(settlement.deliveryVerifier()), d.deliveryVerifier);
+        // Owner decision 10: disputes are bound to this settlement and resolved by the timelock.
+        assertEq(settlement.disputes().settlement(), d.settlement);
+        assertEq(settlement.disputes().resolver(), d.timelock);
+        assertEq(address(settlement.disputes().bondToken()), d.token);
         assertEq(settlement.treasury(), address(treasury));
         assertEq(address(ServiceBlockRegistry(d.serviceRegistry).vamsToken()), d.token);
         assertEq(address(ProviderBondRegistry(d.bondRegistry).vamsToken()), d.token);

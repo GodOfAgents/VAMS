@@ -120,6 +120,9 @@ interface IComposedSettlement {
     error InvalidDeliveryProof();
     error DeliveryAlreadyEarned(bytes32 allocationId, uint256 index);
     error DeliveryNotEarned(bytes32 allocationId, uint256 index);
+    /// @notice Earned payment is held by the dispute window or an open/upheld dispute.
+    error DeliveryHeld(bytes32 allocationId, uint256 index);
+    error NotDisputeContract();
 
     // ═══════════════════ Functions ═══════════════════
 
@@ -163,6 +166,10 @@ interface IComposedSettlement {
 
     function getEarnedDeliveryV3(bytes32 allocationId, uint256 providerIndex)
         external view returns (EarnedDeliveryV3 memory);
+
+    /// @notice Refund an earned row after the dispute contract upholds a dispute.
+    /// @dev Callable only by the dispute contract this settlement deployed.
+    function refundUpheldDispute(bytes32 allocationId, uint256 providerIndex) external;
 
     /// @notice Funded native admission; must finalize before provider dispatch.
     function admitObjectV3(bytes32 allocationId, uint256 providerIndex, O.Admission calldata request) external;

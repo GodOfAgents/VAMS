@@ -1,5 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
+// Dispute window (owner decision 10): earned payments are held 72 hours. Tests
+// advance the clock across the window for each claim and restore it afterwards,
+// so every original timeline and expectation is unchanged.
 
 import {Test} from "forge-std/Test.sol";
 import {ComposedSettlement} from "../../src/economic/ComposedSettlement.sol";
@@ -28,7 +31,7 @@ contract ComposedBondReservationRegressionTest is Test {
         services = new SettlementRegistryFixture();
         verifier = new SettlementVerifierFixture();
         settlement = new ComposedSettlement(address(this), address(token), address(bonds),
-            address(0xFEE), address(services), address(verifier));
+            address(0xFEE), address(services), address(verifier), address(this));
         bonds.grantRole(bonds.ESCROW_ROLE(), address(settlement));
         token.mint(agent, 100_000 ether);
         _register(provider);
@@ -118,7 +121,9 @@ contract ComposedBondReservationRegressionTest is Test {
         vm.prank(who);
         settlement.issueDeliveryChallenge(id, index);
         vm.prank(who);
-        settlement.claimProviderShareV2(id, index, keccak256("output"), hex"01");
+        settlement.recordEarnedDeliveryV3(id, index, keccak256("output"), hex"01");
+        vm.prank(who);
+        vm.warp(block.timestamp + 72 hours); settlement.claimEarnedProviderShareV3(id, index); vm.warp(block.timestamp - 72 hours);
     }
 
     function testClaimReleasesReservationAndCountsGrossDeliveredValueOnce() public {
@@ -131,7 +136,7 @@ contract ComposedBondReservationRegressionTest is Test {
         assertEq(token.balanceOf(address(0xFEE)), 0.5 ether);
         vm.prank(provider);
         vm.expectRevert();
-        settlement.claimProviderShareV2(id, 0, keccak256("output"), hex"01");
+        settlement.recordEarnedDeliveryV3(id, 0, keccak256("output"), hex"01");
         assertEq(bonds.getBond(provider).totalEarned, 1_000 ether);
     }
 
@@ -250,7 +255,7 @@ contract ComposedBondReservationRegressionTest is Test {
 
     function testSameAllocationHashAcrossInstancesHasDistinctReservationIdentities() public {
         ComposedSettlement other = new ComposedSettlement(address(this), address(token), address(bonds),
-            address(0xFEE), address(services), address(verifier));
+            address(0xFEE), address(services), address(verifier), address(this));
         bonds.grantRole(bonds.ESCROW_ROLE(), address(other));
         bytes32 first = _create(1);
         bytes32 second = _createAt(other, 1);

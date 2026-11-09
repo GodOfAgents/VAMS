@@ -59,7 +59,7 @@ contract LateReservationRegressionTest is Test {
         ActionDeliveryVerifierV1 router=new ActionDeliveryVerifierV1(address(policy),address(policy).codehash,
             address(backend),address(backend).codehash,address(backend),address(backend).codehash);
         settlement=new ComposedSettlement(address(this),address(token),address(bonds),address(0xFEE),
-            address(new SettlementRegistryFixture()),address(router));
+            address(new SettlementRegistryFixture()),address(router),address(this));
         bonds.grantRole(bonds.ESCROW_ROLE(),address(settlement));
         token.mint(agent,10_000 ether);token.mint(provider,10_000 ether);
         vm.prank(provider);bonds.registerProvider(10_000 ether,1_000 ether);

@@ -1,5 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
+// Dispute window (owner decision 10): earned payments are held 72 hours. Tests
+// advance the clock across the window for each claim and restore it afterwards,
+// so every original timeline and expectation is unchanged.
 import {Test} from "forge-std/Test.sol";
 import {VAMSToken} from "../src/token/VAMSToken.sol";
 import {ComposedSettlement} from "../src/economic/ComposedSettlement.sol";
@@ -61,7 +64,7 @@ contract EarnedDeliveryPolicyTest is Test {
         ActionDeliveryVerifierV1 router=new ActionDeliveryVerifierV1(address(policy),address(policy).codehash,
             address(backend),address(backend).codehash,address(backend),address(backend).codehash);
         settlement=new ComposedSettlement(address(this),address(token),address(new EarnedBondFixture()),
-            address(0xFEE),address(new EarnedUnusedRegistryFixture()),address(router));
+            address(0xFEE),address(new EarnedUnusedRegistryFixture()),address(router),address(this));
         token.approve(address(settlement),type(uint256).max);
         template.actorRoot=bytes32(uint256(uint160(provider))); template.providerId=template.actorRoot;
         template.runtimeId=keccak256("runtime"); template.modelId=keccak256("model");
@@ -97,7 +100,11 @@ contract EarnedDeliveryPolicyTest is Test {
 
     function claim(bytes32 id, ActionContextV1.Context memory c) internal {
         vm.prank(provider);
-        settlement.claimProviderShareV2(id,0,keccak256("output"),proof(c));
+        settlement.recordEarnedDeliveryV3(id, 0, keccak256("output"), proof(c));
+        if (settlement.getEarnedDeliveryV3(id, 0).accepted && !settlement.getProviderAlloc(id, 0).claimed) {
+            vm.prank(provider);
+            vm.warp(block.timestamp + 72 hours); settlement.claimEarnedProviderShareV3(id, 0); vm.warp(block.timestamp - 72 hours);
+        }
     }
 
     function test_earnedDeliverySurvivesRevocationAndExpiry() public {
@@ -109,7 +116,7 @@ contract EarnedDeliveryPolicyTest is Test {
         govern(abi.encodeCall(policy.setEligibility, (workload, template.providerId, template.target, false)));
         assertGt(block.timestamp, settlement.getComposedAllocation(id).expiresAt);
         vm.prank(provider);
-        IEarnedSettlementV3Fixture(address(settlement)).claimEarnedProviderShareV3(id, 0);
+        vm.warp(block.timestamp + 72 hours); IEarnedSettlementV3Fixture(address(settlement)).claimEarnedProviderShareV3(id, 0); vm.warp(block.timestamp - 72 hours);
         assertEq(token.balanceOf(provider), 99.95 ether);
         assertEq(token.balanceOf(address(0xFEE)), 0.05 ether);
         assertEq(settlement.totalEscrowed(), 0);
@@ -122,7 +129,7 @@ contract EarnedDeliveryPolicyTest is Test {
 
     function earnedClaim(bytes32 id) internal {
         vm.prank(provider);
-        settlement.claimEarnedProviderShareV3(id, 0);
+        vm.warp(block.timestamp + 72 hours); settlement.claimEarnedProviderShareV3(id, 0); vm.warp(block.timestamp - 72 hours);
     }
 
     function test_pendingEvidenceStillRejectsCurrentPolicyChange() public {
@@ -165,7 +172,7 @@ contract EarnedDeliveryPolicyTest is Test {
         record(id, challenge(id));
         vm.prank(address(0xBAD));
         vm.expectRevert(abi.encodeWithSelector(IComposedSettlement.ProviderMismatch.selector, provider, address(0xBAD)));
-        settlement.claimEarnedProviderShareV3(id, 0);
+        vm.warp(block.timestamp + 72 hours); settlement.claimEarnedProviderShareV3(id, 0); vm.warp(block.timestamp - 72 hours);
         assertEq(token.balanceOf(address(0xBAD)), 0);
         earnedClaim(id);
     }

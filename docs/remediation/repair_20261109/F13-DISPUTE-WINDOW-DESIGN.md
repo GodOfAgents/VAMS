@@ -1,7 +1,7 @@
 # F13 dispute window: design proposal (2026-11-09)
 
-Status: **DESIGN ONLY: awaiting owner approval of the parameters in §3.**
-No source has changed. This is a high-risk economic change (settlement
+Status: **APPROVED (owner decision 10, 2026-11-09) and IMPLEMENTED.** See
+`F13-DISPUTE-WINDOW-IMPLEMENTATION.md`. Non-author review is pending. This is a high-risk economic change (settlement
 timing, refunds, INV-9-adjacent backing), so it is implemented only after
 approval, with targeted tests and non-author review.
 

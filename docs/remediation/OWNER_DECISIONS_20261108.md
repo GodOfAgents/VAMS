@@ -97,3 +97,21 @@ hash, rule, lines and stable finding identity to a concrete public-source or
 non-credential proof. No blanket allowlist, hidden exclusion, raw-secret
 disclosure or history rewrite follows from this decision. Independent review
 of the dispositions remains required before release.
+
+## 10. F13 composed-settlement dispute window (2026-11-09)
+
+The owner reviewed `repair_20261109/F13-DISPUTE-WINDOW-DESIGN.md` and approved
+all six recommended parameters:
+
+| # | Approved value |
+|---|---|
+| P1 | 72-hour hold after a delivery is earned |
+| P2 | Resolver is the governance timelock (3-of-5 Safe + 48 h), set at deployment |
+| P3 | Agent dispute bond of 5% of the row amount |
+| P4 | 14-day resolution deadline |
+| P5 | On deadline: provider paid, bond returned to the agent |
+| P6 | Binary outcomes only: uphold (full refund) or reject (normal payment) |
+
+Slashing stays disabled (tokenomics R1). The resolver's actual signers remain
+UNKNOWN until the Phase 3 custody inputs arrive. Implementation still
+requires targeted tests, size checks and non-author review before acceptance.

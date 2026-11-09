@@ -1,5 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
+// Dispute window (owner decision 10): earned payments are held 72 hours. Tests
+// advance the clock across the window for each claim and restore it afterwards,
+// so every original timeline and expectation is unchanged.
 import {Test} from "forge-std/Test.sol";
 import {ComposedSettlement} from "../../src/economic/ComposedSettlement.sol";
 import {IComposedSettlement} from "../../src/economic/IComposedSettlement.sol";
@@ -26,7 +29,7 @@ contract EarnedDeliveryAccountingTest is Test {
         services = new SettlementRegistryFixture();
         verifier = new SettlementVerifierFixture();
         settlement = new ComposedSettlement(address(this), address(token), address(bonds),
-            address(0xFEE), address(services), address(verifier));
+            address(0xFEE), address(services), address(verifier), address(this));
         bonds.grantRole(bonds.ESCROW_ROLE(), address(settlement));
         token.mint(agent, 100_000 ether);
         token.mint(provider, 10_000 ether);
@@ -54,7 +57,7 @@ contract EarnedDeliveryAccountingTest is Test {
     }
 
     function pay(bytes32 id, uint256 index) internal {
-        vm.prank(provider); settlement.claimEarnedProviderShareV3(id, index);
+        vm.prank(provider); vm.warp(block.timestamp + 72 hours); settlement.claimEarnedProviderShareV3(id, index); vm.warp(block.timestamp - 72 hours);
     }
 
     function refund(bytes32 id) internal {
@@ -90,7 +93,7 @@ contract EarnedDeliveryAccountingTest is Test {
         assertEq(settlement.totalEscrowed(), 0);
         assertEq(token.balanceOf(provider), 1_999 ether);
         vm.prank(agent); vm.expectRevert(); settlement.refundExpiredComposed(id);
-        vm.prank(provider); vm.expectRevert(); settlement.claimEarnedProviderShareV3(id, 2);
+        vm.prank(provider); vm.expectRevert(); vm.warp(block.timestamp + 72 hours); settlement.claimEarnedProviderShareV3(id, 2); vm.warp(block.timestamp - 72 hours);
         assertEq(token.balanceOf(agent), 98_000 ether);
     }
 

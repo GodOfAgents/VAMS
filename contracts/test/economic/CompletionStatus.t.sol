@@ -1,5 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
+// Dispute window (owner decision 10): earned payments are held 72 hours. Tests
+// advance the clock across the window for each claim and restore it afterwards,
+// so every original timeline and expectation is unchanged.
 import {Test} from "forge-std/Test.sol";
 import {ComposedSettlement} from "../../src/economic/ComposedSettlement.sol";
 import {IComposedSettlement} from "../../src/economic/IComposedSettlement.sol";
@@ -19,7 +22,7 @@ contract CompletionStatusTest is Test {
         bonds = new MockBondRegistry();
         verifier = new SettlementVerifierFixture();
         settlement = new ComposedSettlement(address(this), address(token), address(bonds),
-            address(0xFEE), address(new SettlementRegistryFixture()), address(verifier));
+            address(0xFEE), address(new SettlementRegistryFixture()), address(verifier), address(this));
         token.mint(agent, 1_000_000 ether);
     }
 
@@ -48,7 +51,7 @@ contract CompletionStatusTest is Test {
     }
 
     function pay(bytes32 id, uint256 index) internal {
-        vm.prank(provider(index)); settlement.claimEarnedProviderShareV3(id, index);
+        vm.prank(provider(index)); vm.warp(block.timestamp + 72 hours); settlement.claimEarnedProviderShareV3(id, index); vm.warp(block.timestamp - 72 hours);
     }
 
     function refund(bytes32 id) internal {

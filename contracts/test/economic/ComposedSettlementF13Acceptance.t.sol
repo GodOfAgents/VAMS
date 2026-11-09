@@ -1,5 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
+// Dispute window (owner decision 10): earned payments are held 72 hours. Tests
+// advance the clock across the window for each claim and restore it afterwards,
+// so every original timeline and expectation is unchanged.
 import {Test} from "forge-std/Test.sol";
 import {VAMSToken} from "../../src/token/VAMSToken.sol";
 import {ComposedSettlement} from "../../src/economic/ComposedSettlement.sol";
@@ -58,9 +61,9 @@ contract ComposedSettlementF13AcceptanceTest is Test {
         router = new ActionDeliveryVerifierV1(address(policy), address(policy).codehash,
             address(backend), address(backend).codehash, address(backend), address(backend).codehash);
         settlement = new ComposedSettlement(address(this), address(token), address(new F13BondFixture()),
-            address(0xFEE), address(new F13UnusedRegistryFixture()), address(router));
+            address(0xFEE), address(new F13UnusedRegistryFixture()), address(router), address(this));
         otherSettlement = new ComposedSettlement(address(this), address(token), address(new F13BondFixture()),
-            address(0xFEE), address(new F13UnusedRegistryFixture()), address(router));
+            address(0xFEE), address(new F13UnusedRegistryFixture()), address(router), address(this));
         token.approve(address(settlement), type(uint256).max);
         token.approve(address(otherSettlement), type(uint256).max);
         template.actorRoot = bytes32(uint256(uint160(provider))); template.providerId = template.actorRoot;
@@ -100,7 +103,11 @@ contract ComposedSettlementF13AcceptanceTest is Test {
 
     function claimOn(ComposedSettlement target, bytes32 id, ActionContextV1.Context memory c) internal {
         vm.prank(provider);
-        target.claimProviderShareV2(id, 0, keccak256("output"), proof(c));
+        target.recordEarnedDeliveryV3(id, 0, keccak256("output"), proof(c));
+        if (target.getEarnedDeliveryV3(id, 0).accepted && !target.getProviderAlloc(id, 0).claimed) {
+            vm.prank(provider);
+            vm.warp(block.timestamp + 72 hours); target.claimEarnedProviderShareV3(id, 0); vm.warp(block.timestamp - 72 hours);
+        }
     }
 
     /// Wrong domain: a context declaring another chain is rejected by policy.
@@ -176,7 +183,7 @@ contract ComposedSettlementF13AcceptanceTest is Test {
         vm.stopPrank();
         vm.prank(provider);
         vm.expectRevert(abi.encodeWithSelector(IComposedSettlement.DeliveryNotEarned.selector, id, 0));
-        settlement.claimEarnedProviderShareV3(id, 0);
+        vm.warp(block.timestamp + 72 hours); settlement.claimEarnedProviderShareV3(id, 0); vm.warp(block.timestamp - 72 hours);
         assertEq(token.balanceOf(provider), 0);
         assertEq(token.balanceOf(stranger), 0);
     }

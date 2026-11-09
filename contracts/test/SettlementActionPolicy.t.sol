@@ -1,5 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
+// Dispute window (owner decision 10): earned payments are held 72 hours. Tests
+// advance the clock across the window for each claim and restore it afterwards,
+// so every original timeline and expectation is unchanged.
 import {Test} from "forge-std/Test.sol";
 import {VAMSToken} from "../src/token/VAMSToken.sol";
 import {ComposedSettlement} from "../src/economic/ComposedSettlement.sol";
@@ -56,7 +59,7 @@ contract SettlementActionPolicyTest is Test {
         ActionDeliveryVerifierV1 router=new ActionDeliveryVerifierV1(address(policy),address(policy).codehash,
             address(backend),address(backend).codehash,address(backend),address(backend).codehash);
         settlement=new ComposedSettlement(address(this),address(token),address(new BondAdmissionFixture()),
-            address(0xFEE),address(new UnusedRawBlueprintRegistryFixture()),address(router));
+            address(0xFEE),address(new UnusedRawBlueprintRegistryFixture()),address(router),address(this));
         token.approve(address(settlement),type(uint256).max);
         template.actorRoot=bytes32(uint256(uint160(provider))); template.providerId=template.actorRoot;
         template.runtimeId=keccak256("runtime"); template.modelId=keccak256("model");
@@ -92,7 +95,11 @@ contract SettlementActionPolicyTest is Test {
 
     function claim(bytes32 id, ActionContextV1.Context memory c) internal {
         vm.prank(provider);
-        settlement.claimProviderShareV2(id,0,keccak256("output"),proof(c));
+        settlement.recordEarnedDeliveryV3(id, 0, keccak256("output"), proof(c));
+        if (settlement.getEarnedDeliveryV3(id, 0).accepted && !settlement.getProviderAlloc(id, 0).claimed) {
+            vm.prank(provider);
+            vm.warp(block.timestamp + 72 hours); settlement.claimEarnedProviderShareV3(id, 0); vm.warp(block.timestamp - 72 hours);
+        }
     }
 
     function test_applicationPolicyPipelineWithFixtureBackend() public {
@@ -120,7 +127,7 @@ contract SettlementActionPolicyTest is Test {
         bytes memory altered=bytes.concat(proof(c),hex"00");
         vm.prank(provider);
         vm.expectRevert(IComposedSettlement.InvalidDeliveryProof.selector);
-        settlement.claimProviderShareV2(id,0,keccak256("output"),altered);
+        settlement.recordEarnedDeliveryV3(id,0,keccak256("output"),altered);
         assertEq(token.balanceOf(provider),0);
     }
 

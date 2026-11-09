@@ -1,3 +1,17 @@
+## 2026-11-09: composed settlement dispute window (F13, owner decision 10)
+
+Earned composed-settlement payments are now held for 72 hours, during which the allocation's agent can dispute a delivery by posting a bond of 5% of the row amount, rounded up. The resolver, the governance timelock, either upholds the dispute or rejects it. Uphold refunds the full row and returns the bond, and the row can never be paid. Reject releases normal payment with the recorded fees and pays the bond to the provider. If the resolver has not decided within 14 days, anyone can finalize: the provider is paid and the bond goes back to the agent. There is no slashing, and outcomes are binary.
+
+The dispute state machine lives in the new `contracts/src/economic/DeliveryDisputeV1.sol`, which `ComposedSettlement` deploys in its constructor so the two are permanently bound. `ComposedSettlement` gains a seventh constructor argument (the resolver), a hold check before every earned payment, including object-V3 completions, and `refundUpheldDispute`, which only the dispute contract can call. The atomic `claimProviderShareV2` now reverts with `LegacyInterfaceDisabled`, because instant payment cannot coexist with the hold. Providers record with `recordEarnedDeliveryV3` and claim with `claimEarnedProviderShareV3` after the window. `DeployRestrictedTestnet.s.sol` passes the timelock as resolver.
+
+Results:
+
+- Foundry: 1167/1167. That is the previous 1150 plus 17 new dispute acceptance tests, including a conservation fuzz test. 52 existing tests were adapted to record, wait out the window and claim, with their expectations unchanged.
+- Slither (CI flags): 0 High, 62 Medium, none in the new code.
+- `ComposedSettlement` runtime size is 24,401 B, leaving 175 B of EIP-170 margin.
+
+Design: `docs/remediation/repair_20261109/F13-DISPUTE-WINDOW-DESIGN.md`. Implementation record: `docs/remediation/repair_20261109/F13-DISPUTE-WINDOW-IMPLEMENTATION.md`. Non-author review is pending. F13 stays open, and status is unchanged: 13 open, 0 of 36 verified, NOT READY.
+
 ## 2026-11-08: current-tree secret gate passes
 
 Owner decision 9 accepted all 638 first-party current-tree Gitleaks findings as non-credential (validator hashes, file digests, ephemeral test-committee Ed25519 public keys and lists, derived digests, asset names, policy IDs, identifier strings; see `docs/remediation/repair_20261108/SECRET-SCAN-DISPOSITIONS.md`). Their exact fingerprints are in `.gitleaksignore`, and the new CI step runs `scripts/security/gitleaks_ignore_reproof.py`, which fails unless every entry maps to an accepted manifest record in `docs/remediation/repair_20261108/secret-scan-dispositions.json` whose file is unchanged, inside `docs/remediation/` or `scripts/remediation/`, under `generic-api-key`. No rule, path or regex allowlist was widened. `m0_4_vendor_baseline_gate.py` now passes (first-party 0, vendor 479, unknown 0). Complete-history Gitleaks and TruffleHog still fail pending the separately authorized history rewrite. Status unchanged: 13 open, 0 of 36 verified, NOT READY.

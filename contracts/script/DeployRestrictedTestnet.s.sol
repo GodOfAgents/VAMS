@@ -140,7 +140,7 @@ contract DeployRestrictedTestnet is DeployTestnet {
         policy = new RestrictedTestnetPolicyV1(address(timelock), configuration.hostDomain, configuration.budgetUnit);
         _deployVerifiers(configuration);
         settlement = new ComposedSettlement(address(timelock), address(token), address(bondRegistry),
-            treasurySafe, address(serviceRegistry), address(delivery));
+            treasurySafe, address(serviceRegistry), address(delivery), address(timelock));
         _handoffRegistry();
         _configureRoles();
         Deployment memory result;

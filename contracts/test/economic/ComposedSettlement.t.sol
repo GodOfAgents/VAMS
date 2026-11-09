@@ -1,5 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
+// Dispute window (owner decision 10): earned payments are held 72 hours. Tests
+// advance the clock across the window for each claim and restore it afterwards,
+// so every original timeline and expectation is unchanged.
 
 import {Test, console2} from "forge-std/Test.sol";
 import {ComposedSettlement} from "../../src/economic/ComposedSettlement.sol";
@@ -115,7 +118,8 @@ contract ComposedSettlementTest is Test {
             address(bondRegistry),
             treasuryAddr,
             address(registry),
-            address(verifier)
+            address(verifier),
+            admin
         );
 
         vm.startPrank(admin);
@@ -148,6 +152,14 @@ contract ComposedSettlementTest is Test {
     function _expectedTerms(bytes32 id, address expectedBuilder, uint256 bps) internal view returns (bytes32) {
         return keccak256(abi.encode(block.chainid, address(registry), id, expectedBuilder, bps,
             keccak256("manifest"), uint256(1), bytes32(0), bytes32(0), uint256(0), expectedBuilder));
+    }
+
+    /// Record a verified delivery, wait out the dispute window, then claim.
+    function _earnAndClaim(address who, bytes32 id, uint256 index) internal {
+        vm.prank(who);
+        settlement.recordEarnedDeliveryV3(id, index, keccak256("output"), hex"01");
+        vm.prank(who);
+        vm.warp(block.timestamp + 72 hours); settlement.claimEarnedProviderShareV3(id, index); vm.warp(block.timestamp - 72 hours);
     }
 
     function _acceptProof(bytes32 id, uint256 index) internal {
@@ -266,8 +278,7 @@ contract ComposedSettlementTest is Test {
         _acceptProof(allocId, 0);
 
         // Provider 1 claims
-        vm.prank(provider1);
-        settlement.claimProviderShareV2(allocId, 0, keccak256("output"), hex"01");
+        _earnAndClaim(provider1, allocId, 0);
 
         IComposedSettlement.ProviderAlloc memory pAlloc = settlement.getProviderAlloc(allocId, 0);
         assertTrue(pAlloc.claimed);
@@ -289,13 +300,11 @@ contract ComposedSettlementTest is Test {
 
         vm.prank(admin);
         _acceptProof(allocId, 0);
-        vm.prank(provider1);
-        settlement.claimProviderShareV2(allocId, 0, keccak256("output"), hex"01");
+        _earnAndClaim(provider1, allocId, 0);
 
         vm.prank(admin);
         _acceptProof(allocId, 1);
-        vm.prank(provider2);
-        settlement.claimProviderShareV2(allocId, 1, keccak256("output"), hex"01");
+        _earnAndClaim(provider2, allocId, 1);
 
         IComposedSettlement.ComposedAllocation memory alloc = settlement.getComposedAllocation(allocId);
         assertEq(uint8(alloc.status), uint8(IComposedSettlement.AllocationStatus.FULLY_CLAIMED));
@@ -308,8 +317,7 @@ contract ComposedSettlementTest is Test {
         vm.prank(admin);
         _acceptProof(allocId, 1);
         // Provider 2 claims first (order doesn't matter)
-        vm.prank(provider2);
-        settlement.claimProviderShareV2(allocId, 1, keccak256("output"), hex"01");
+        _earnAndClaim(provider2, allocId, 1);
 
         IComposedSettlement.ProviderAlloc memory p2Alloc = settlement.getProviderAlloc(allocId, 1);
         assertTrue(p2Alloc.claimed);
@@ -328,7 +336,7 @@ contract ComposedSettlementTest is Test {
         vm.expectRevert(
             abi.encodeWithSelector(IComposedSettlement.ProviderMismatch.selector, provider1, provider2)
         );
-        settlement.claimProviderShareV2(allocId, 0, keccak256("output"), hex"01");
+        settlement.recordEarnedDeliveryV3(allocId, 0, keccak256("output"), hex"01");
     }
 
     function test_claimProviderShare_reverts_alreadyClaimed() public {
@@ -336,14 +344,13 @@ contract ComposedSettlementTest is Test {
 
         vm.prank(admin);
         _acceptProof(allocId, 0);
-        vm.prank(provider1);
-        settlement.claimProviderShareV2(allocId, 0, keccak256("output"), hex"01");
+        _earnAndClaim(provider1, allocId, 0);
 
         vm.prank(provider1);
         vm.expectRevert(
             abi.encodeWithSelector(IComposedSettlement.ProviderAlreadyClaimed.selector, allocId, 0)
         );
-        settlement.claimProviderShareV2(allocId, 0, keccak256("output"), hex"01");
+        settlement.recordEarnedDeliveryV3(allocId, 0, keccak256("output"), hex"01");
     }
 
     // ═══════════════════ Builder Revenue Tests ═══════════════════
@@ -353,8 +360,7 @@ contract ComposedSettlementTest is Test {
 
         vm.prank(admin);
         _acceptProof(allocId, 0);
-        vm.prank(provider1);
-        settlement.claimProviderShareV2(allocId, 0, keccak256("output"), hex"01");
+        _earnAndClaim(provider1, allocId, 0);
 
         // 500 ether × 5% builder = 25 ether
         // 500 ether × 0.05% fee = 0.025 ether
@@ -394,8 +400,7 @@ contract ComposedSettlementTest is Test {
         vm.prank(admin);
         _acceptProof(allocId, 0);
         // Provider 1 claims before expiry
-        vm.prank(provider1);
-        settlement.claimProviderShareV2(allocId, 0, keccak256("output"), hex"01");
+        _earnAndClaim(provider1, allocId, 0);
 
         // Advance past expiry
         vm.warp(block.timestamp + 2 hours);
@@ -477,8 +482,7 @@ contract ComposedSettlementTest is Test {
         bytes32 frozen = settlement.allocationTermsHash(id);
         registry.setTerms(keccak256("service-block-1"), address(0xBAD), 5000);
         _acceptProof(id, 0);
-        vm.prank(provider1);
-        settlement.claimProviderShareV2(id, 0, keccak256("output"), hex"01");
+        _earnAndClaim(provider1, id, 0);
         assertEq(token.balanceOf(builder), 25 ether);
         assertEq(token.balanceOf(address(0xBAD)), 0);
         assertEq(settlement.allocationTermsHash(id), frozen);
@@ -489,7 +493,7 @@ contract ComposedSettlementTest is Test {
         _acceptProof(id, 0);
         vm.prank(provider1);
         vm.expectRevert(IComposedSettlement.InvalidDeliveryProof.selector);
-        settlement.claimProviderShareV2(id, 0, keccak256("another-output"), hex"01");
+        settlement.recordEarnedDeliveryV3(id, 0, keccak256("another-output"), hex"01");
         assertEq(token.balanceOf(provider1), 0);
         assertFalse(settlement.getProviderAlloc(id, 0).claimed);
     }
@@ -504,8 +508,7 @@ contract ComposedSettlementTest is Test {
         bytes32 id = _createBound(providers, amounts, 1 hours, keccak256("fuzz"),
             keccak256("service-block-1"), 5000, builder);
         _acceptProof(id, 0);
-        vm.prank(provider1);
-        settlement.claimProviderShareV2(id, 0, keccak256("output"), hex"01");
+        _earnAndClaim(provider1, id, 0);
         assertEq(token.balanceOf(provider1) + token.balanceOf(builder) + token.balanceOf(treasuryAddr), amount);
         assertEq(token.balanceOf(address(settlement)), 0);
     }

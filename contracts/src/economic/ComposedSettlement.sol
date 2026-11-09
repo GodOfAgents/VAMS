@@ -16,6 +16,7 @@ import {ActionContextV1} from "../trust/ActionContextV1.sol";
 import {GovernedObjectGrantV1 as G} from "../trust/GovernedObjectGrantV1.sol";
 import {EffectReceiptV3 as R} from "../trust/EffectReceiptV3.sol";
 import {ObjectEffectV3 as O} from "../trust/ObjectEffectV3.sol";
+import {DeliveryDisputeV1} from "./DeliveryDisputeV1.sol";
 
 /**
  * @title ComposedSettlement
@@ -68,6 +69,8 @@ contract ComposedSettlement is
     IERC20 public immutable vamsToken;
     IServiceBlockRegistry public immutable serviceBlockRegistry;
     IComposedDeliveryVerifier public immutable deliveryVerifier;
+    /// @notice Dispute window for earned deliveries (owner decision 10), deployed and bound here.
+    DeliveryDisputeV1 public immutable disputes;
     mapping(bytes32 => bytes32) public allocationTermsHash;
     mapping(bytes32 => bytes32) public allocationManifestHash;
     mapping(bytes32 => uint256) public allocationManifestVersion;
@@ -166,7 +169,8 @@ contract ComposedSettlement is
         address _bondRegistry,
         address _treasury,
         address _serviceBlockRegistry,
-        address _deliveryVerifier
+        address _deliveryVerifier,
+        address _disputeResolver
     ) {
         require(admin != address(0), "Zero admin");
         require(_vamsToken != address(0), "Zero token");
@@ -177,6 +181,8 @@ contract ComposedSettlement is
         require(_deliveryVerifier.code.length > 0, "Invalid delivery verifier");
         serviceBlockRegistry = IServiceBlockRegistry(_serviceBlockRegistry);
         deliveryVerifier = IComposedDeliveryVerifier(_deliveryVerifier);
+        // The resolver must be the governance timelock in deployment (decision 10).
+        disputes = new DeliveryDisputeV1(address(this), _disputeResolver, _vamsToken);
 
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
         _grantRole(ADMIN_ROLE, admin);
@@ -299,10 +305,9 @@ contract ComposedSettlement is
         revert LegacyInterfaceDisabled();
     }
 
-    function claimProviderShareV2(bytes32 allocationId, uint256 providerIndex,
-        bytes32 outputHash, bytes calldata proof) external override nonReentrant whenNotPaused {
-        _recordEarnedDelivery(allocationId, providerIndex, outputHash, proof);
-        _payEarnedDelivery(allocationId, providerIndex);
+    /// @dev Atomic verify-and-pay cannot coexist with the dispute window.
+    function claimProviderShareV2(bytes32, uint256, bytes32, bytes calldata) external pure override {
+        revert LegacyInterfaceDisabled();
     }
 
     /// @inheritdoc IComposedSettlement
@@ -386,6 +391,10 @@ contract ComposedSettlement is
         if (pAlloc.claimed) revert ProviderAlreadyClaimed(allocationId, providerIndex);
         EarnedDeliveryV3 storage earned = _earnedDeliveries[allocationId][providerIndex];
         if (!earned.accepted) revert DeliveryNotEarned(allocationId, providerIndex);
+        if (refundedProviderShareV3[allocationId][providerIndex] ||
+            !disputes.releasable(allocationId, providerIndex, earned.recordedAt)) {
+            revert DeliveryHeld(allocationId, providerIndex);
+        }
 
         // Calculate fees with full precision, preserving floor rounding.
         uint256 protocolFee = Math.mulDiv(pAlloc.amount, SETTLEMENT_FEE_BPS, BPS_DENOMINATOR);
@@ -475,6 +484,19 @@ contract ComposedSettlement is
         }
 
         emit ComposedEscrowRefunded(allocationId, alloc.agent, refundAmount);
+    }
+
+    /// @inheritdoc IComposedSettlement
+    function refundUpheldDispute(bytes32 allocationId, uint256 index) external override nonReentrant {
+        if (msg.sender != address(disputes)) revert NotDisputeContract();
+        ProviderAlloc storage p = _providerAllocs[allocationId][index];
+        if (!_earnedDeliveries[allocationId][index].accepted || p.claimed ||
+            refundedProviderShareV3[allocationId][index]) revert DeliveryHeld(allocationId, index);
+        refundedProviderShareV3[allocationId][index] = true;
+        address agent = _allocations[allocationId].agent;
+        totalEscrowed -= p.amount;
+        vamsToken.safeTransfer(agent, p.amount);
+        emit ComposedEscrowRefunded(allocationId, agent, p.amount);
     }
 
     /// @notice Reserve a funded row before dispatch. Expiry cannot release this obligation.
