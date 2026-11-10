@@ -73,7 +73,8 @@ def _bound_runtime(mock_mode: Optional[bool]) -> Tuple[RuntimePolicy, bool, Opti
         policy=policy,
         environ=os.environ,
     )
-    return policy, effective_mock, os.environ.get(NEURON_MOCK_VARIABLE)
+    # Raw value kept only to detect later drift; the mode itself came from the resolver.
+    return policy, effective_mock, os.environ.get(NEURON_MOCK_VARIABLE)  # nosemgrep: vams-direct-mock-flag-read
 
 
 def _check_bound_runtime(policy: RuntimePolicy, mock_mode: bool, mock_flag: Optional[str]) -> None:
@@ -81,7 +82,8 @@ def _check_bound_runtime(policy: RuntimePolicy, mock_mode: bool, mock_flag: Opti
 
     try:
         current = load_runtime_policy(os.environ)
-        if current != policy or os.environ.get(NEURON_MOCK_VARIABLE) != mock_flag:
+        # Drift check against the raw value captured at startup; never selects a mode.
+        if current != policy or os.environ.get(NEURON_MOCK_VARIABLE) != mock_flag:  # nosemgrep: vams-direct-mock-flag-read
             raise _TrustRuntimeDriftError(_RUNTIME_DRIFT_MESSAGE)
         current_mock = resolve_component_mock_mode(
             TRUST_RUNTIME_COMPONENT,

@@ -20,3 +20,150 @@ rules:
       - pattern-either:
           - pattern: child_process.exec(...)
           - pattern: child_process.execSync(...)
+
+  # --- VAMS-specific rules (2026-11-10). Each guards a defect class found in
+  # this repository; tests live in .semgrep/tests/ and run with `semgrep --test`.
+
+  - id: vams-uvicorn-proxy-headers-enabled
+    message: >-
+      uvicorn.run without proxy_headers=False. Behind Envoy, Uvicorn otherwise
+      replaces the loopback peer with X-Forwarded-For and the live ingress check
+      refuses every remote client (fixed 2026-11-09, GATEWAY-LIVE-INGRESS.md).
+    severity: ERROR
+    languages: [python]
+    patterns:
+      - pattern: uvicorn.run(...)
+      - pattern-not: uvicorn.run(..., proxy_headers=False, ...)
+
+  - id: vams-uvicorn-cli-proxy-headers-enabled
+    message: >-
+      Documented or scripted `uvicorn` launch of a VAMS gateway without
+      --no-proxy-headers; see vams-uvicorn-proxy-headers-enabled.
+    severity: ERROR
+    languages: [generic]
+    paths:
+      include: ["*.md", "*.sh", "*.service", "Dockerfile*", "*.yml", "*.yaml", "*.toml"]
+      exclude: ["docs/remediation/**", ".semgrep/vams-security.yml"]
+    patterns:
+      - pattern-regex: uvicorn\s+(neuron\.)?gateway\.server:app(?![^\n]*--no-proxy-headers)
+
+  - id: vams-bind-all-interfaces
+    message: >-
+      Server bound to 0.0.0.0. Live VAMS services bind loopback behind the
+      reviewed Envoy ingress (AGENTS.md section 2).
+    severity: ERROR
+    languages: [python]
+    pattern-either:
+      - pattern: uvicorn.run(..., host="0.0.0.0", ...)
+      - pattern: $APP.run(..., host="0.0.0.0", ...)
+      - pattern: $SOCK.bind(("0.0.0.0", $PORT))
+
+  - id: vams-default-credential
+    message: >-
+      The default password "vams2026" must never be an accepted credential,
+      fallback or default. Only an equality check that rejects it is allowed.
+    severity: ERROR
+    languages: [python]
+    options:
+      constant_propagation: false
+    patterns:
+      - pattern: '"vams2026"'
+      - pattern-not-inside: $X == "vams2026"
+
+  - id: vams-default-credential-js
+    message: >-
+      The default password "vams2026" must never be an accepted credential,
+      fallback or default. Only an equality check that rejects it is allowed.
+    severity: ERROR
+    languages: [javascript, typescript]
+    options:
+      constant_propagation: false
+    patterns:
+      - pattern: '"vams2026"'
+      - pattern-not-inside: $X === "vams2026"
+      - pattern-not-inside: $X == "vams2026"
+
+  - id: vams-direct-mock-flag-read
+    message: >-
+      Mock-mode flag read directly from the environment. Use
+      resolve_component_mock_mode / load_runtime_policy, which refuse mock
+      behaviour in staging, testnet and production.
+    severity: ERROR
+    languages: [python]
+    paths:
+      exclude: ["neuron/runtime_safety.py", "*/tests/*", "test_*.py"]
+    patterns:
+      - pattern-either:
+          - pattern: os.getenv($V, ...)
+          - pattern: os.environ.get($V, ...)
+          - pattern: os.environ[$V]
+          - pattern: $SRC.get($V, ...)
+      - metavariable-regex:
+          metavariable: $V
+          # Upper-case environment-variable names only (OMS_MOCK_MODE,
+          # NEURON_MOCK_VARIABLE); lower-case manifest keys are not flags.
+          regex: ^["']?[A-Z0-9_]*MOCK[A-Z0-9_]*["']?$
+
+  - id: vams-ignored-signature-verification
+    message: >-
+      Result of a Boolean signature check is discarded. verify_message and
+      verify_digest return False on failure instead of raising, so the
+      result must be tested.
+    severity: ERROR
+    languages: [python]
+    patterns:
+      - pattern: $VERIFY(...)
+      - metavariable-regex:
+          metavariable: $VERIFY
+          regex: ^(.+\.)?verify_(message|digest)$
+      # The result counts as used when the call sits inside an assignment,
+      # return, assertion, condition, argument, operator or comprehension.
+      # What remains is a bare expression statement.
+      - pattern-not-inside: $V = <... $VERIFY(...) ...>
+      - pattern-not-inside: "$V: $T = <... $VERIFY(...) ...>"
+      - pattern-not-inside: return <... $VERIFY(...) ...>
+      - pattern-not-inside: assert <... $VERIFY(...) ...>
+      - pattern-not-inside: assert <... $VERIFY(...) ...>, $MSG
+      - pattern-not-inside: |
+          if <... $VERIFY(...) ...>:
+              ...
+      - pattern-not-inside: |
+          while <... $VERIFY(...) ...>:
+              ...
+      - pattern-not-inside: $A if <... $VERIFY(...) ...> else $B
+      - pattern-not-inside: not $VERIFY(...)
+      - pattern-not-inside: $X and <... $VERIFY(...) ...>
+      - pattern-not-inside: <... $VERIFY(...) ...> and $X
+      - pattern-not-inside: $X or <... $VERIFY(...) ...>
+      - pattern-not-inside: <... $VERIFY(...) ...> or $X
+      - pattern-not-inside: $F(..., <... $VERIFY(...) ...>, ...)
+      - pattern-not-inside: $F(..., $K=<... $VERIFY(...) ...>, ...)
+      - pattern-not-inside: yield <... $VERIFY(...) ...>
+
+  - id: vams-secret-in-log
+    message: >-
+      A credential-named value is written to a log or stdout. Never log
+      passwords, API keys, private keys, mnemonics or bearer tokens.
+    severity: ERROR
+    languages: [python]
+    patterns:
+      - pattern-either:
+          - patterns:
+              - pattern: $LOG.$M(..., <... $V ...>, ...)
+              - metavariable-regex:
+                  metavariable: $M
+                  regex: ^(debug|info|warning|warn|error|exception|critical|log)$
+          - pattern: print(..., <... $V ...>, ...)
+      - metavariable-regex:
+          metavariable: $V
+          regex: (?i)^(\w*_)?(password|passwd|api_key|secret_key|client_secret|private_key|mnemonic|seed_phrase|bearer_token|access_token|auth_token|refresh_token)$
+
+  - id: vams-cors-wildcard-with-credentials
+    message: >-
+      CORS allows every origin together with credentials. Live gateways must
+      list explicit origins (gateway/server.py refuses wildcards in live modes).
+    severity: ERROR
+    languages: [python]
+    pattern-either:
+      - pattern: $APP.add_middleware(CORSMiddleware, ..., allow_origins=["*"], ..., allow_credentials=True, ...)
+      - pattern: $APP.add_middleware(CORSMiddleware, ..., allow_credentials=True, ..., allow_origins=["*"], ...)

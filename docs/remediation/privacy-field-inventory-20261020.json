@@ -1,7 +1,7 @@
 {
   "artifact": "VAMS privacy field source inventory",
   "artifact_version": "1.12-draft",
-  "updated_at": "2026-11-09",
+  "updated_at": "2026-11-10",
   "review_status": "UNAPPROVED_SOURCE_BACKED_DRAFT",
   "candidate_binding": {
     "lane": "/home/GodOfAgents/code/VAMS-fleet-20261020-01/integration-r18",
@@ -248,6 +248,16 @@
         "route-ingress",
         "route-security"
       ]
+    },
+    {
+      "topic": "anchor_rebinding_20261110_legacy_gateway_uvicorn",
+      "status": "source_observed_current_20261110",
+      "finding": "neuron/gateway/server.py digest refreshed: the legacy gateway's uvicorn.run now passes proxy_headers=False (new Semgrep rule vams-uvicorn-proxy-headers-enabled). The server still refuses live modes. Line count unchanged and every anchor still matches its range. No field, recipient, persistence or flow changed. Source re-binding on the owner-operated runner, not privacy approval; T33 remains BLOCKED.",
+      "source_refs": [
+        "legacy-gateway-mode",
+        "legacy-gateway-routes",
+        "legacy-rate-middleware"
+      ]
     }
   ],
   "source_files": {
@@ -284,7 +294,7 @@
     "neuron/gateway/server.py": {
       "artifact": "neuron/gateway/server.py",
       "algorithm": "sha256",
-      "digest": "ba61a26ac3ee3b7ad2a1569c6838ee1699554881e9312a2b8a2fd9aa066c22b6"
+      "digest": "a648f97c92b9cede31ac10924959a63a9e53665ee19c598f982861c02a5d797a"
     },
     "neuron/gateway/models.py": {
       "artifact": "neuron/gateway/models.py",

@@ -1,3 +1,13 @@
+## 2026-11-10: VAMS-specific Semgrep rules in the blocking gate
+
+- **Nine new rules** in `.semgrep/vams-security.yml`: gateway launches that let Uvicorn rewrite the Envoy peer (code and documented commands), binding `0.0.0.0`, the `vams2026` default credential (Python and JS/TS), direct mock-flag environment reads that bypass the runtime resolver, discarded `verify_message`/`verify_digest` results, credentials in logs, and wildcard CORS with credentials.
+- **Tests.** Annotated fixtures in `.semgrep/tests/` cover all 12 rules (12/12 pass via `scripts/security/semgrep_rule_tests.sh`, which CI now runs before the gate). Replayed against pre-fix commit `d472b49`, the rules flag the old gateway launch in code and docs.
+- **Offline.** The Semgrep job sets `SEMGREP_ENABLE_VERSION_CHECK=0`; the gate and discovery scans exclude the deliberately unsafe fixtures.
+- **Repository clean.** The legacy gateway now passes `proxy_headers=False` (privacy inventory digest re-bound; it still refuses live modes). `neuron/trust.py`'s two drift-check reads carry reasoned `nosemgrep` comments.
+- The discovery scan still uses `--metrics on` pending owner decision D5-B.
+
+Details: `docs/remediation/repair_20261110/SEMGREP-VAMS-RULES.md`. Status unchanged: 13 open, 0 of 36 verified, NOT READY.
+
 ## 2026-11-09: all 62 Slither mediums adjudicated; policy reader parked
 
 - **Slither.** All 62 medium findings (Slither 0.11.5, CI flags) were reviewed against current source: 21 unused-return, 20 uninitialized-local, 15 incorrect-equality, 5 reentrancy-no-eth, 1 divide-before-multiply. No defects were found. `contracts/slither-adjudications.yml` now lists every location with its disposition, plus the 16 gas-only immutable suggestions, which are not applied. See `docs/remediation/repair_20261109/SLITHER-MEDIUM-ADJUDICATION.md`.

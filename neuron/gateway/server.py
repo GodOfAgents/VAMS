@@ -208,7 +208,7 @@ def start_server(
             "authentication and replay protection are implemented"
         )
     app.state.startup_policy = effective_policy
-    uvicorn.run(app, host=host, port=port)
+    uvicorn.run(app, host=host, port=port, proxy_headers=False)
 
 if __name__ == "__main__":
     start_server()
