@@ -1,3 +1,11 @@
+## 2026-11-11: offline Semgrep discovery, TruffleHog and cardano-cli installed (owner decision 11)
+
+- **Semgrep discovery (D5-B).** CI no longer runs `--config auto --metrics on`. It checks out `semgrep/semgrep-rules` at the pinned commit `a5ad1714…` and scans with the Python, JavaScript, TypeScript, Bash, Dockerfile, YAML and Solidity rule folders, `--metrics off`, with the version check disabled. Baseline: 727 rules, 3,696 files, 1,471 findings, 358 security-tagged, 0 defects. `.semgrep/discovery-adjudications.yml` records every security finding grouped by rule with its reason; other categories are counted as non-blocking.
+- **Tools.** TruffleHog 3.95.9 and cardano-cli 11.2.3.0 (cardano-node 11.1.3, offline only) installed after checksum verification.
+- **Pre-push secret scan.** TruffleHog (no verification calls) found nothing in the unpushed commits. Gitleaks flagged one false positive in prose in `contracts/slither-adjudications.yml` from an unpushed commit. With the owner's approval the three unpushed commits were rebuilt with the reworded text before the first push; the previous local history is kept on branch `backup/phase1-pre-rewrite-20261111`.
+
+Status unchanged: 13 open, 0 of 36 verified, NOT READY.
+
 ## 2026-11-10: VAMS-specific Semgrep rules in the blocking gate
 
 - **Nine new rules** in `.semgrep/vams-security.yml`: gateway launches that let Uvicorn rewrite the Envoy peer (code and documented commands), binding `0.0.0.0`, the `vams2026` default credential (Python and JS/TS), direct mock-flag environment reads that bypass the runtime resolver, discarded `verify_message`/`verify_digest` results, credentials in logs, and wildcard CORS with credentials.

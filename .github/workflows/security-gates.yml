@@ -538,9 +538,24 @@ jobs:
             --exclude .git \
             --exclude .semgrep/tests
 
+      # Owner decision 11 (D5-B): offline discovery with rules pinned to an exact
+      # semgrep-rules commit; no metrics, no registry fetch. Non-blocking;
+      # adjudications live in .semgrep/discovery-adjudications.yml.
+      - name: Checkout Pinned Semgrep Rules
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: semgrep/semgrep-rules
+          ref: a5ad1714f00c9f7fde980cab0ea1d6dc6d414fd2
+          path: .semgrep-rules-pinned
+          persist-credentials: false
+
       - name: Run Semgrep Discovery Scan
         run: |
-          semgrep scan --metrics on --config auto \
+          R=.semgrep-rules-pinned
+          test "$(git -C "$R" rev-parse HEAD)" = a5ad1714f00c9f7fde980cab0ea1d6dc6d414fd2
+          semgrep scan --metrics off \
+            --config "$R/python" --config "$R/javascript" --config "$R/typescript" \
+            --config "$R/bash" --config "$R/dockerfile" --config "$R/yaml" --config "$R/solidity" \
             --json --output semgrep-discovery.json \
             --exclude contracts/lib \
             --exclude node_modules \
@@ -549,7 +564,8 @@ jobs:
             --exclude frontend-vite/.vite \
             --exclude contracts/out \
             --exclude .git \
-            --exclude .semgrep/tests
+            --exclude .semgrep/tests \
+            --exclude .semgrep-rules-pinned
 
       - name: Upload Semgrep Evidence
         if: always()

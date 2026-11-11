@@ -115,3 +115,18 @@ all six recommended parameters:
 Slashing stays disabled (tokenomics R1). The resolver's actual signers remain
 UNKNOWN until the Phase 3 custody inputs arrive. Implementation still
 requires targeted tests, size checks and non-author review before acceptance.
+
+## 11. Tools, Semgrep discovery and first push (2026-11-11)
+
+Recorded from the owner's checklist ticks, then confirmed item by item in chat:
+
+| Item | Decision |
+|---|---|
+| TruffleHog | Download `trufflehog_3.95.9_linux_amd64.tar.gz` (33.6 MB) and its checksums file from the official github.com/trufflesecurity/trufflehog v3.95.9 release; verify; install in `~/.vams-tools`; scan locally |
+| Cardano tool | Download `cardano-node-11.1.3-linux-amd64.tar.gz` (233.7 MB, includes `cardano-cli`) from github.com/IntersectMBO/cardano-node; **offline use only**. Live Pre-Prod queries need a separate grant |
+| D5-B Semgrep discovery | Semgrep CE plus the VAMS rules stay the authoritative gate. Discovery moves to `--metrics off` with the `semgrep/semgrep-rules` repository pinned at a fixed commit (one ~11 MB fetch). Semgrep Pro may later be advisory only; it needs an owner-created account and an external-service/privacy decision, and is not adopted now |
+| Push | Push the local `remediation/phase1` branch to github.com/GodOfAgents/VAMS as a new branch, normal push (no force, no PR, nothing merged), only after a Gitleaks scan of exactly the pushed commits passes |
+| Locked folders | The owner ran the admin command; the three folders are verified absent |
+
+None of these grants deployment, signing, funding, role changes, history
+rewriting, live network queries, or R28/Slot 08 work.

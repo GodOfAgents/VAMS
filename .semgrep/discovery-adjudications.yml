@@ -1,40 +1,286 @@
-schema_version: 1
+schema_version: 2
 tool: semgrep
 tool_version: 1.169.0
 runtime_floor: python-3.12
+decision: 'owner decision 11 (D5-B), 2026-11-11: offline discovery, --metrics off, pinned rules'
+ruleset:
+  repository: https://github.com/semgrep/semgrep-rules
+  commit: a5ad1714f00c9f7fde980cab0ea1d6dc6d414fd2
+  license: Semgrep Rules License v1.0 (fetched at scan time, not redistributed here)
+  directories:
+  - python
+  - javascript
+  - typescript
+  - bash
+  - dockerfile
+  - yaml
+  - solidity
+baseline:
+  date: '2026-11-11'
+  source_commit_base: 62622a1
+  rules: 727
+  files: 3696
+  findings: 1471
+  security_findings: 358
+  report_sha256: 630d9f07b0f88acc432af03ea958bac7bbba58dfcb548e7eb1392e2e29c6696a
+  defects_found: 0
+  reviewer: author (Claude); non-author review pending
+non_security_findings_not_adjudicated:
+  performance: 823
+  maintainability: 115
+  portability: 86
+  best-practice: 67
+  correctness: 20
+  compatibility: 2
 adjudications:
-  - rule_id: python.lang.compatibility.python36.python36-compatibility-Popen1
-    path: scripts/security/trufflehog_gate.py
-    status: not_applicable
-    reason: VAMS pins Python 3.12; Python 3.6 subprocess compatibility is not supported.
-  - rule_id: python.lang.compatibility.python36.python36-compatibility-Popen2
-    path: scripts/security/trufflehog_gate.py
-    status: not_applicable
-    reason: VAMS pins Python 3.12; Python 3.6 subprocess compatibility is not supported.
+- rule_id: home.GodOfAgents..vams-tools.dl.semgrep-rules.python.lang.security.audit.dangerous-subprocess-use-audit
+  severity: ERROR
+  count: 203
+  status: reviewed_list_argv
+  paths:
+  - docs/remediation/m0_3b_r1/tools/m0_3b_adjudicator.py
+  - docs/remediation/m0_3b_r1/tools/m0_3b_evidence.py
+  - docs/remediation/m0_3b_r1/tools/m0_3b_prepare.py
+  - docs/remediation/m0_3b_r1/tools/m0_3b_reconcile.py
+  - docs/remediation/m0_3b_r1/tools/test_m0_3b_adjudicator.py
+  - docs/remediation/m0_3c_r1/tools/m0_3c_adjudicator.py
+  - docs/remediation/m0_3c_r1/tools/m0_3c_evidence.py
+  - docs/remediation/m0_3c_r1/tools/m0_3c_prepare.py
+  - docs/remediation/m0_3c_r1/tools/m0_3c_r5_evidence.py
+  - docs/remediation/m0_3c_r1/tools/m0_3c_r5_validator_matrix.py
+  - docs/remediation/m0_3c_r1/tools/m0_3c_r7_evidence.py
+  - docs/remediation/m0_3c_r1/tools/m0_3c_reconcile.py
+  - docs/remediation/m0_3c_r1/tools/m0_3c_semantic_oracle.py
+  - docs/remediation/m0_3c_r1/tools/pre_fix_reproduce.py
+  - docs/remediation/m0_3c_r1/tools/test_m0_3c_adjudicator.py
+  - docs/remediation/m0_3c_r1/tools/test_m0_3c_validator.py
+  - docs/remediation/m3_2a_r19/test_r19_oracle.py
+  - docs/remediation/m3_2b_r4/test_mutation_harness.py
+  - docs/remediation/m3_2b_r6/test_binding_guard.py
+  - docs/remediation/m3_2b_r8/test_classification.py
+  - docs/remediation/m3_2b_r9/test_candidate_loading.py
+  - docs/remediation/m3_f04_design_r1/test_design.py
+  - docs/remediation/m3_f04_design_r5/test_r5_contract.py
+  - docs/remediation/m3_f04_impl_r4/test_supplemental_entrypoints.py
+  - docs/remediation/m3_f05_2a_harness_diagnostic_fix_r1/run_harness_capture.py
+  - docs/remediation/m3_f05_2a_r3_harness_current_r3/run_capture.py
+  - docs/remediation/m3_f05_2a_r4_family_freeze_r1/capture_freeze.py
+  - docs/remediation/m3_f05_2a_r4_family_freeze_r1/capture_simulator.py
+  - docs/remediation/m3_f05_2a_r4_family_freeze_r1/run_family.py
+  - docs/remediation/m3_f05_2a_signature_other_seed_r1/run_case.py
+  - docs/remediation/m3_f05_2a_verify_signature_r3_current_r1/run_capture.py
+  - docs/remediation/m3_f05_2a_verify_signature_r3_current_r2/run_capture.py
+  - docs/remediation/m3_f05_2a_verify_signature_r3_current_r3/run_capture.py
+  - docs/remediation/m3_f05_design_r2/test_mutation_runner.py
+  - docs/remediation/m7_aiken_check_current_r1/capture_warnings.py
+  - docs/remediation/m7_aiken_check_current_r1/run_aiken_check.py
+  - docs/remediation/m7_aiken_commit_pin_r1/capture_warnings.py
+  - docs/remediation/m7_aiken_commit_pin_r1/run_pytest_snapshot.py
+  - docs/remediation/m7_aiken_warning_cleanup_r1/capture_warnings.py
+  - docs/remediation/m7_bandit_current_r1/run_capture.py
+  - docs/remediation/m7_bandit_current_r2/run_bandit_current.py
+  - docs/remediation/m7_bandit_current_r3_20261004/run_capture.py
+  - docs/remediation/m7_bandit_local_r1/run_bandit.py
+  - docs/remediation/m7_credential_scans_current_r1/run_verification.py
+  - docs/remediation/m7_credential_secret_history_scan_current_r1/run_capture.py
+  - docs/remediation/m7_credential_secret_history_scan_remediated_r1/run_capture.py
+  - docs/remediation/m7_docs_reality_current_r1/run_verification.py
+  - docs/remediation/m7_effect_canary_redirect_r1/run_verification.py
+  - docs/remediation/m7_f05_address_option_r1/capture_harness.py
+  - docs/remediation/m7_f05_inline_anchor_r1/capture_build.py
+  - docs/remediation/m7_f05_inline_anchor_r1/capture_harness.py
+  - docs/remediation/m7_f05_inline_datum_type_r1/capture_harness.py
+  - docs/remediation/m7_f05_mutation_provenance_r1/capture.py
+  - docs/remediation/m7_f05_rebind_order_r1/capture_harness.py
+  - docs/remediation/m7_f05_unconditional_contexts_r1/capture_harness.py
+  - docs/remediation/m7_f05_uplc_alias_r1/capture_harness.py
+  - docs/remediation/m7_gitleaks_current_r4_20261004/diagnose.py
+  - docs/remediation/m7_gitleaks_current_r5_20261004/diagnose.py
+  - docs/remediation/m7_gitleaks_local_r1/diagnose.py
+  - docs/remediation/m7_mock_mode_promotion_current_r1/run_verification.py
+  - docs/remediation/m7_npm_audit_local_r1/run_npm_audit.py
+  - docs/remediation/m7_npm_remediation_r1/run_npm_audit.py
+  - docs/remediation/m7_pip_audit_local_r1/run_pip_audit.py
+  - docs/remediation/m7_public_content_policy_current_r1/run_verification.py
+  - docs/remediation/m7_pytest_collection_r1/run_pytest_snapshot.py
+  - docs/remediation/m7_pytest_current_r1/run_pytest_snapshot.py
+  - docs/remediation/m7_pytest_current_r2/run_pytest_snapshot.py
+  - docs/remediation/m7_pytest_failure_ids_r1/capture_failure_ids.py
+  - docs/remediation/m7_pytest_tmp_overlay_r1/run_pytest_snapshot.py
+  - docs/remediation/m7_pytest_tmp_overlay_r2/run_pytest_snapshot.py
+  - docs/remediation/m7_pytest_tmp_overlay_r3/run_pytest_snapshot.py
+  - docs/remediation/m7_pytest_tmp_overlay_r4/run_pytest_snapshot.py
+  - docs/remediation/m7_pytest_tmp_overlay_r5/run_pytest_snapshot.py
+  - docs/remediation/m7_t06_local_history_89_r1/run_capture.py
+  - docs/remediation/m7_testnet_readiness_source_current_r1/run_capture.py
+  - neuron/sdk/akash_orchestrator.py
+  - scripts/audit/test_history_rewrite_input_validator.py
+  - scripts/audit/test_history_rewrite_script.py
+  - scripts/cardano/governance_v2_applied_rehearsal.py
+  - scripts/remediation/build_f05_2a_applied_genesis_mutant_r1.py
+  - scripts/remediation/build_f05_2a_applied_genesis_mutant_r2.py
+  - scripts/remediation/build_f05_2a_applied_keys_parameter_mutant_r1.py
+  - scripts/remediation/build_f05_2a_applied_parameter_tx_family.py
+  - scripts/remediation/build_f05_2a_proof_other_network_mutant_r1.py
+  - scripts/remediation/build_f05_2a_proof_other_network_r1.py
+  - scripts/remediation/build_f05_2a_proof_other_seed_mutant_r1.py
+  - scripts/remediation/build_f05_2a_proof_other_seed_r1.py
+  - scripts/remediation/build_f05_2a_proof_other_validator_hash_mutant_r1.py
+  - scripts/remediation/build_f05_2a_proof_other_validator_hash_r1.py
+  - scripts/remediation/capture_f05_2a_duplicate_mutation_suite_r1.py
+  - scripts/remediation/capture_f05_2a_unsorted_mutation_suite_r1.py
+  - scripts/remediation/effect_v3_native_pg_campaign.py
+  - scripts/remediation/f04_anchor_foundation_r1/build_offline.py
+  - scripts/remediation/f05_2a_tx_sim_evidence_contract.py
+  - scripts/remediation/f05_2a_tx_sim_registry.py
+  - scripts/remediation/f05_2a_tx_sim_runner_r3.py
+  - scripts/remediation/run_logged.py
+  - scripts/remediation/test_f04_public_validator.py
+  - scripts/remediation/test_f05_2a_authority_bootstrap_public.py
+  - scripts/remediation/test_m3_1b_public_validator.py
+  - scripts/remediation/test_m3_1b_r5_mutations.py
+  - scripts/remediation/test_m3_1b_r9_provenance.py
+  - scripts/remediation/test_m3_2b_compiled_mutations.py
+  - scripts/remediation/test_m3_2b_compiled_rows.py
+  - scripts/remediation/test_m3_2b_mutations.py
+  - scripts/remediation/test_m3_2b_public_validator.py
+  - scripts/remediation/verify_m3_1b_r9.py
+  - scripts/security/gitleaks_allowlist_regression.py
+  - scripts/security/gitleaks_working_tree_inventory.py
+  - scripts/security/m0_3a_adjudicator.py
+  - scripts/security/m0_4_vendor_baseline_gate.py
+  - scripts/security/trufflehog_gate.py
+  reason: Audit rule that flags every subprocess call. The blocking rule vams-python-subprocess-shell-true
+    reports 0 shell=True uses repo-wide; these calls pass argument lists to fixed tools (git, forge, aiken,
+    envoy, uvicorn, python).
+- rule_id: home.GodOfAgents..vams-tools.dl.semgrep-rules.python.sqlalchemy.security.sqlalchemy-execute-raw-query
+  severity: ERROR
+  count: 97
+  status: reviewed_fixed_identifiers
+  paths:
+  - gateway/replay_store.py
+  - neuron/effect_attempt_journal_v5.py
+  - neuron/effect_authority_store_v3.py
+  - neuron/effect_authority_store_v4.py
+  - neuron/effect_authority_store_v5.py
+  - neuron/effect_authority_v3.py
+  - neuron/effect_authority_v4.py
+  - neuron/effect_initial_authority_v5.py
+  - neuron/effect_postgres_v3.py
+  - neuron/effect_provider_v3.py
+  - neuron/effect_scope_authority_v5.py
+  - scripts/remediation/effect_v3_native_pg_campaign.py
+  reason: psycopg/sqlite, not SQLAlchemy. f-strings interpolate only module-constant table names; every
+    value is a %s/? parameter. Fixed identifiers are enforced by neuron/tests/test_effect_sql_identifier_guard.py.
+    replay_store interpolates a constant schema version and fixed table names; the campaign script fixed
+    database names.
+- rule_id: home.GodOfAgents..vams-tools.dl.semgrep-rules.python.lang.security.audit.formatted-sql-query
+  severity: WARNING
+  count: 17
+  status: reviewed_fixed_identifiers
+  paths:
+  - gateway/replay_store.py
+  - neuron/effect_authority_store_v3.py
+  - neuron/effect_authority_store_v4.py
+  - neuron/effect_authority_store_v5.py
+  - neuron/effect_postgres_v3.py
+  - scripts/remediation/effect_v3_native_pg_campaign.py
+  reason: Same sites and reasoning as sqlalchemy-execute-raw-query.
+- rule_id: home.GodOfAgents..vams-tools.dl.semgrep-rules.python.lang.security.audit.dangerous-subprocess-use-tainted-env-args
+  severity: ERROR
+  count: 14
+  status: reviewed_operator_binary
+  paths:
+  - docs/remediation/m0_3c_r1/tools/pre_fix_reproduce.py
+  - docs/remediation/m3_f05_2a_signature_other_seed_r1/run_case.py
+  - neuron/sdk/akash_orchestrator.py
+  - scripts/remediation/build_f05_2a_applied_genesis_mutant_r1.py
+  - scripts/remediation/build_f05_2a_applied_genesis_mutant_r2.py
+  - scripts/remediation/build_f05_2a_applied_keys_parameter_mutant_r1.py
+  - scripts/remediation/build_f05_2a_applied_parameter_tx_family.py
+  - scripts/remediation/build_f05_2a_proof_other_network_mutant_r1.py
+  - scripts/remediation/build_f05_2a_proof_other_network_r1.py
+  - scripts/remediation/build_f05_2a_proof_other_seed_mutant_r1.py
+  - scripts/remediation/build_f05_2a_proof_other_seed_r1.py
+  - scripts/remediation/build_f05_2a_proof_other_validator_hash_mutant_r1.py
+  - scripts/remediation/build_f05_2a_proof_other_validator_hash_r1.py
+  - scripts/remediation/run_logged.py
+  reason: Argument lists whose executable is an operator-supplied tool path (aiken, akash CLI) invoked
+    for version checks or fixed commands; no shell, no request-derived input. The akash path is mock-guarded
+    runtime code.
+- rule_id: home.GodOfAgents..vams-tools.dl.semgrep-rules.python.lang.security.audit.insecure-file-permissions
+  severity: WARNING
+  count: 6
+  status: reviewed_restrictive
+  paths:
+  - docs/remediation/m0_3b_r1/tools/m0_3b_adjudicator.py
+  - docs/remediation/m0_3b_r1/tools/m0_3b_reconcile.py
+  - docs/remediation/m0_3c_r1/tools/m0_3c_adjudicator.py
+  - docs/remediation/m0_3c_r1/tools/m0_3c_reconcile.py
+  - docs/remediation/m0_3c_r1/tools/m0_3c_semantic_oracle.py
+  - scripts/security/m0_3a_adjudicator.py
+  reason: 'os.chmod(..., 0o700): owner-only permissions on temporary directories, the restrictive direction.'
+- rule_id: home.GodOfAgents..vams-tools.dl.semgrep-rules.python.lang.security.use-defused-xml
+  severity: ERROR
+  count: 6
+  status: reviewed_local_trusted_input
+  paths:
+  - docs/remediation/m7_pytest_failure_ids_r1/capture_failure_ids.py
+  - docs/remediation/m7_pytest_tmp_overlay_r1/run_pytest_snapshot.py
+  - docs/remediation/m7_pytest_tmp_overlay_r2/run_pytest_snapshot.py
+  - docs/remediation/m7_pytest_tmp_overlay_r3/run_pytest_snapshot.py
+  - docs/remediation/m7_pytest_tmp_overlay_r4/run_pytest_snapshot.py
+  - docs/remediation/m7_pytest_tmp_overlay_r5/run_pytest_snapshot.py
+  reason: Historical evidence tools parse pytest JUnit XML they generated locally; no untrusted XML source.
+- rule_id: home.GodOfAgents..vams-tools.dl.semgrep-rules.python.lang.security.audit.regex_dos
+  severity: WARNING
+  count: 6
+  status: reviewed_linear
+  paths:
+  - docs/remediation/m7_pytest_failure_ids_r1/capture_failure_ids.py
+  - docs/remediation/m7_pytest_tmp_overlay_r1/run_pytest_snapshot.py
+  - docs/remediation/m7_pytest_tmp_overlay_r2/run_pytest_snapshot.py
+  - docs/remediation/m7_pytest_tmp_overlay_r3/run_pytest_snapshot.py
+  - docs/remediation/m7_pytest_tmp_overlay_r4/run_pytest_snapshot.py
+  - docs/remediation/m7_pytest_tmp_overlay_r5/run_pytest_snapshot.py
+  reason: Anchored identifier pattern ^[A-Za-z_]\w*(\.[A-Za-z_]\w*)*$; the literal dot separator makes
+    repetitions unambiguous, so matching is linear.
+- rule_id: home.GodOfAgents..vams-tools.dl.semgrep-rules.python.lang.security.audit.subprocess-list-passed-as-string
+  severity: WARNING
+  count: 4
+  status: reviewed_false_positive
+  paths:
+  - docs/remediation/m7_aiken_check_current_r1/capture_warnings.py
+  - docs/remediation/m7_aiken_check_current_r1/run_aiken_check.py
+  - docs/remediation/m7_aiken_commit_pin_r1/capture_warnings.py
+  - docs/remediation/m7_aiken_warning_cleanup_r1/capture_warnings.py
+  reason: command is a list built from fixed argv elements; no shell.
+- rule_id: home.GodOfAgents..vams-tools.dl.semgrep-rules.python.lang.security.insecure-hash-algorithm-sha1
+  severity: WARNING
+  count: 2
+  status: reviewed_protocol_required
+  paths:
+  - docs/remediation/m0_3c_r1/tools/m0_3c_semantic_oracle.py
+  reason: SHA-1 computes git blob object IDs to compare with git's own object IDs; not used for security.
+- rule_id: home.GodOfAgents..vams-tools.dl.semgrep-rules.javascript.lang.security.html-in-template-string
+  severity: WARNING
+  count: 2
+  status: reviewed_build_time
+  paths:
+  - frontend-vite/vite.config.js
+  reason: vite.config.js builds a RegExp from an escaped bundle file name at build time; no HTML is rendered
+    from user input.
+- rule_id: home.GodOfAgents..vams-tools.dl.semgrep-rules.python.lang.security.use-defusedcsv
+  severity: INFO
+  count: 1
+  status: reviewed_not_applicable
+  paths:
+  - docs/papers/simulation/clr_routing_sim.py
+  reason: Research simulation writes its own numeric results to CSV; no spreadsheet-formula input from
+    users.
 scan_warnings:
-  - type: PartialParsing
-    status: tool_limitation
-    paths:
-      - contracts/src/economic/VAMSInsuranceFund.sol
-      - contracts/src/economic/VAMSPaymentHandler.sol
-      - contracts/src/governance/GovernorExecutor.sol
-      - contracts/src/sentinel/VAMSSentinel.sol
-      - contracts/src/staking/VAMSStaking.sol
-      - contracts/src/token/VAMSToken.sol
-      - contracts/src/vdso/VAMSExecutionKernel.sol
-      - contracts/src/vdso/VAMSObjectStore.sol
-      - contracts/src/vdso/VAMSProgramRegistry.sol
-      - contracts/src/vdso/VAMSReservationManager.sol
-      - contracts/src/vesting/VAMSVesting.sol
-    reason: >-
-      Semgrep 1.169.0's community Solidity parser partially parses supported
-      custom-error and tuple syntax in these files. Solc 0.8.24, Forge 1.7.1,
-      and Slither 0.11.5 remain the blocking Solidity coverage.
-  - type: PartialParsing
-    status: tool_limitation
-    paths:
-      - scripts/audit/history_rewrite.sh
-    reason: >-
-      Semgrep 1.169.0's community Bash parser partially parses the parameter
-      expansion literal%%==>* expression. Bash syntax execution tests remain
-      blocking for this incident-only script.
+- type: PartialParsing/Timeout/Lexical
+  status: tool_limitation
+  count: 26
+  reason: Community Solidity parser partially parses some contracts and two rule/file pairs time out;
+    Slither and Forge remain the Solidity gates.
