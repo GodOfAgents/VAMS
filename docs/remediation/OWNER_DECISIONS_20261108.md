@@ -130,3 +130,37 @@ Recorded from the owner's checklist ticks, then confirmed item by item in chat:
 
 None of these grants deployment, signing, funding, role changes, history
 rewriting, live network queries, or R28/Slot 08 work.
+
+## 12. Testnet signer model: team-controlled bootstrap (2026-11-13)
+
+Asked in chat whether the testnet Safes should use named independent signers
+or the PR #4 team bootstrap, the owner chose **"Team bootstrap (PR #4)"**.
+
+What this decides, for the restricted testnet only:
+
+- Four people hold routine seats: `ARCHITECT` (the owner) and `SIGNER_A`,
+  `SIGNER_B`, `SIGNER_C`. Two offline recovery seats, `GOVERNANCE_RECOVERY`
+  and `TREASURY_RECOVERY`, are each held in 2-of-3 split custody by
+  `SIGNER_A`–`SIGNER_C` and are never used for routine approvals.
+- Polygon Amoy: governance 3-of-5 (four routine seats plus governance
+  recovery), treasury 3-of-5 (four routine seats plus treasury recovery),
+  emergency 2-of-3 pause only (`ARCHITECT`, `SIGNER_A`, `SIGNER_B`). These
+  match the thresholds `DeployTestnet._validateAuthorityIdentities` enforces.
+- Cardano Pre-Prod: governance v2 requires exactly five unique member key
+  hashes with threshold 3, so the same five governance seats are applied
+  with separate Cardano keys.
+- Seats overlap. Evidence and public wording must say so and must not call
+  the authorities separated, decentralized or independently reviewed.
+
+Not decided here, and still UNKNOWN or open:
+
+- the people in seats A–C, and every public address and key hash
+  (qualification checklist D2 still needs them named);
+- the insurance-fund guardian set and threshold;
+- the VDSO guardian and recovery councils (deferred with the VDSO slice);
+- the `VAMSVesting` `FOUNDER` → `ARCHITECT` rename (separate owner decision);
+- architect self-review: it does not replace the independent review domains
+  required for public promotion.
+
+This grants no Safe creation, signing, funding, deployment or role change.
+Each Safe or timelock creation still needs transaction-specific approval.

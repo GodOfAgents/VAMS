@@ -1,3 +1,12 @@
+## 2026-11-13: team-controlled bootstrap signer model (owner decision 12)
+
+- **Decision.** The owner chose the PR #4 team bootstrap for the restricted testnet: `ARCHITECT` plus `SIGNER_A`–`SIGNER_C` in routine seats, and two offline recovery seats held in 2-of-3 split custody. Amoy governance and treasury are 3-of-5, emergency is 2-of-3 pause only; Cardano governance v2 uses the same five governance seats (exactly five members, threshold 3). Recorded in `docs/remediation/OWNER_DECISIONS_20261108.md` section 12. Seat holders A–C, every address and key hash, the insurance guardians, the VDSO councils and the `FOUNDER` → `ARCHITECT` rename remain open.
+- **Runbook.** Added `docs/runbooks/TEAM_SIGNER_GOVERNANCE.md`, ported from PR #4 with Cardano seats added and the VDSO councils removed until that slice. The Amoy and Pre-Prod runbooks now point to it.
+- **Checker.** Added `scripts/audit/team_signer_governance.py` (stdlib) and schema 2.0.0 `docs/audit/schemas/team-signer-governance.schema.json`. The checker enforces exact seats, per-authority membership and thresholds, distinct keys, recovery-seat rules, consents, nine rehearsals, in-bundle evidence paths, an overlap disclosure and `false` decentralization/independent-review/audit claims. Without a file it confirms the thresholds still match `DeployTestnet.s.sol` and `governance_v2.ak`; CI runs that check and the 17 regression tests.
+- The architect self-review schema stays on the PR #4 branch: the team signer model does not replace independent review.
+
+No contract, validator, runtime or gateway code changed. Readiness remains NOT READY; 13 findings open, 0/36 tracks verified. No Safe, key, signing or deployment action was taken.
+
 ## 2026-11-13: runbooks and research-method doc ported from PR #4 and PR #5
 
 - **PR #5.** Added `docs/team/BAGEERA_RESEARCH_SCIENTIST_ROLE.md` unchanged apart from a header: a `Last verified` line and a precedence note saying `AGENTS.md` governs every operational, safety, evidence and authority rule. Mission wording, section 4 and the personal identity lines remain owner choices.

@@ -46,7 +46,7 @@ local environment or a secret manager, never chat or a committed file.
 
 | Input | Status on 2026-11-13 |
 |---|---|
-| `VAMS_GOVERNANCE_SAFE`, `VAMS_TREASURY_SAFE` (3-of-5) | UNKNOWN: signers not named (qualification checklist D2) |
+| `VAMS_GOVERNANCE_SAFE`, `VAMS_TREASURY_SAFE` (3-of-5) | UNKNOWN: Safes not created; seat holders A–C not named |
 | `VAMS_EMERGENCY_COUNCIL` (2-of-3, pause only) | UNKNOWN: same |
 | `VAMS_SAFE_PROXY_RUNTIME_CODE_HASH`, `VAMS_SAFE_SINGLETON`, `VAMS_SAFE_SINGLETON_RUNTIME_CODE_HASH` | UNKNOWN: approved Safe release not chosen |
 | `ServiceConfiguration`: host domain, budget unit, insurance recipient and code hash | UNKNOWN |
@@ -54,10 +54,10 @@ local environment or a secret manager, never chat or a committed file.
 | `ServiceConfiguration.ezkl`: backend, code hash, model hash, circuit manifest hash | UNKNOWN (D3) |
 | `PRIVATE_KEY` (faucet-only deployer) | Secret. Read only after the public preflight passes; never needed for local rehearsal |
 
-The signer model is an open owner decision. PR #4 proposed a team-controlled
-bootstrap (four people with overlapping seats); the D2 checklist asks for
-named independent signers and custodians. Until the owner decides, no Safe is
-created and this runbook does not assume either model.
+Signer model: team-controlled bootstrap (owner decision 12). Seats, Safe
+membership, consent, rehearsals and the overlap disclosure are in
+[TEAM_SIGNER_GOVERNANCE.md](TEAM_SIGNER_GOVERNANCE.md). No Safe is created
+until its seat holders are named, have consented and have rehearsed.
 
 ## Step 1: local rehearsal (no network, no key)
 

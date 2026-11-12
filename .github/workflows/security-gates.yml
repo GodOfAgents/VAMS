@@ -98,6 +98,8 @@ jobs:
         run: |
           python scripts/audit/deployment_readiness.py
           python scripts/audit/test_deployment_readiness.py
+          python scripts/audit/team_signer_governance.py
+          python scripts/audit/test_team_signer_governance.py
           VAMS_ENV=testnet python scripts/security/runtime_mode_preflight.py --require-live --expected-mode testnet
           python -m pytest -q scripts/security/test_runtime_mode_preflight.py
 

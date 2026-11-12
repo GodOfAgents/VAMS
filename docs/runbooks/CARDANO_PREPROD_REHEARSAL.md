@@ -91,7 +91,9 @@ protocol parameters may differ.
 
 UNKNOWN on 2026-11-13: the governance bootstrap (seed UTxO, custodian keys,
 thresholds), insurance guardians and threshold, agent-registry trust anchors,
-and who holds the signing keys (qualification checklist D2). Real seed UTxOs
+and the Cardano key hashes of the five governance seats (layout in
+[TEAM_SIGNER_GOVERNANCE.md](TEAM_SIGNER_GOVERNANCE.md), owner decision 12;
+holders A–C not yet named). Real seed UTxOs
 need a funded faucet address and a live query, which needs a grant. Apply the
 real parameters into a new empty directory twice and require identical
 output; record every applied hash.
