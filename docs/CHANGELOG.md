@@ -1,3 +1,10 @@
+## 2026-11-13: frontend token distribution matches the 12% Architect allocation
+
+- The frontend "Token Distribution" list showed an old split (Community 34%, Treasury 21%, Founders 16%, Investors 14%, Team 10%, Liquidity 5%). It now shows the canonical allocation from `docs/team/TOKENOMICS.md`: Community & Ecosystem 50%, Team & Advisors 13%, Investors 13%, Architect 12%, DAO Treasury 12% (total 100%). The contract, deploy script, test, tokenomics, whitepaper and pitch documents already said 12%; this was the only conflicting copy outside dated remediation records.
+- The frontend build and lint were not run: the canonical checkout has no installed dependencies.
+
+No contract or economic parameter changed. Readiness remains NOT READY; 13 findings open, 0/36 tracks verified.
+
 ## 2026-11-13: vesting schedule FOUNDER renamed to ARCHITECT (owner decision 13)
 
 - **Contracts.** `IVAMSVesting.ScheduleType.FOUNDER` → `ARCHITECT`, and `CLIFF_FOUNDER`/`VEST_FOUNDER` → `CLIFF_ARCHITECT`/`VEST_ARCHITECT` in `VAMSVesting.sol`. The member stays at ordinal 0, so on-chain encoding is unchanged; source and ABI-JSON consumers must use the new name. The enum comment wrongly said "25% cliff unlock"; the code has always returned no cliff unlock, and the comment now says 0%. `DeployV2.s.sol` (legacy, unsafe-deployment guarded) and `DistributionTest.t.sol` follow; the test now pins ordinal 0.
