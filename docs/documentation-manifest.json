@@ -21,6 +21,10 @@
     {"path":"docs/team/ARCHITECTURE_v0-5-0.md","lifecycle":"historical","authority":"architecture-history"},
     {"path":"docs/team/ARCHITECTURE_v0-6-0.md","lifecycle":"historical","authority":"architecture-history"},
     {"path":"docs/team/ARCHITECTURE_v0-7-0.md","lifecycle":"historical","authority":"architecture-history"},
-    {"path":"docs/team/ARCHITECTURE_v0-8-0.md","lifecycle":"current","authority":"architecture-history"}
+    {"path":"docs/team/ARCHITECTURE_v0-8-0.md","lifecycle":"current","authority":"architecture-history"},
+    {"path":"docs/team/BAGEERA_RESEARCH_SCIENTIST_ROLE.md","lifecycle":"current","authority":"research-method"},
+    {"path":"docs/runbooks/README.md","lifecycle":"current","authority":"operator-runbook"},
+    {"path":"docs/runbooks/POLYGON_AMOY_REHEARSAL.md","lifecycle":"current","authority":"operator-runbook"},
+    {"path":"docs/runbooks/CARDANO_PREPROD_REHEARSAL.md","lifecycle":"current","authority":"operator-runbook"}
   ]
 }

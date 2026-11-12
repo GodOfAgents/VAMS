@@ -1,3 +1,11 @@
+## 2026-11-13: runbooks and research-method doc ported from PR #4 and PR #5
+
+- **PR #5.** Added `docs/team/BAGEERA_RESEARCH_SCIENTIST_ROLE.md` unchanged apart from a header: a `Last verified` line and a precedence note saying `AGENTS.md` governs every operational, safety, evidence and authority rule. Mission wording, section 4 and the personal identity lines remain owner choices.
+- **PR #4.** Added `docs/runbooks/` with the Polygon Amoy and Cardano Pre-Prod rehearsal runbooks, rewritten against the current source: `DeployRestrictedTestnet` (eleven contracts, 3-of-5/3-of-5/2-of-3 Safes, 48-hour timelock, zero rewards) and the eight-artifact Cardano set (governance v2, insurance fund, agent registry) in deployment-manifest schema 2.0.0. The July drafts targeted the superseded `DeployTestnet`+VDSO canary, legacy governor/timelock validators and manifest v4. Every live input is marked UNKNOWN; neither runbook supplies a placeholder launch command.
+- **Held back** on the PR #4 branch: the team-signer runbook and schemas (owner decision on the signer model), the architect self-review schema (does not meet the independent-review domains), the VDSO shadow runbook and schema (own slice), and the Cardano parameter schema (names superseded validators). `docs/runbooks/README.md` lists each blocker.
+- Registered the four documents as current in `docs/documentation-manifest.json`. Docs validator passed; `scripts/audit` + `scripts/docs` tests: 225 passed, 480 subtests passed.
+
+No contract, validator, runtime or gateway code changed. Readiness remains NOT READY; 13 findings open, 0/36 tracks verified. No deployment, signing or live query was performed.
 ## 2026-11-11: offline Semgrep discovery, TruffleHog and cardano-cli installed (owner decision 11)
 
 - **Semgrep discovery (D5-B).** CI no longer runs `--config auto --metrics on`. It checks out `semgrep/semgrep-rules` at the pinned commit `a5ad1714…` and scans with the Python, JavaScript, TypeScript, Bash, Dockerfile, YAML and Solidity rule folders, `--metrics off`, with the version check disabled. Baseline: 727 rules, 3,696 files, 1,471 findings, 358 security-tagged, 0 defects. `.semgrep/discovery-adjudications.yml` records every security finding grouped by rule with its reason; other categories are counted as non-blocking.
