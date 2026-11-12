@@ -34,10 +34,11 @@ contract DistributionTest is Test {
         IVAMSVesting.VestingSchedule memory commSchedule = vesting.getSchedule(commId);
         assertEq(commSchedule.totalAmount, 400_000_000 * 1e18, "Community should be 400M");
 
-        // Founder: 120M (12%)
-        bytes32 founderId = vesting.createVestingSchedule(deployer, 120_000_000 * 1e18, IVAMSVesting.ScheduleType.FOUNDER, true);
-        IVAMSVesting.VestingSchedule memory founderSchedule = vesting.getSchedule(founderId);
-        assertEq(founderSchedule.totalAmount, 120_000_000 * 1e18, "Founder should be 120M");
+        // Architect: 120M (12%). Renamed from FOUNDER (owner decision 13); ordinal 0 keeps ABI encoding.
+        assertEq(uint8(IVAMSVesting.ScheduleType.ARCHITECT), 0, "Architect ordinal must stay 0");
+        bytes32 architectId = vesting.createVestingSchedule(deployer, 120_000_000 * 1e18, IVAMSVesting.ScheduleType.ARCHITECT, true);
+        IVAMSVesting.VestingSchedule memory architectSchedule = vesting.getSchedule(architectId);
+        assertEq(architectSchedule.totalAmount, 120_000_000 * 1e18, "Architect should be 120M");
 
         // Future Team: 130M (13%)
         bytes32 teamId = vesting.createVestingSchedule(deployer, 130_000_000 * 1e18, IVAMSVesting.ScheduleType.TEAM, true);

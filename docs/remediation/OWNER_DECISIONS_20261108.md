@@ -164,3 +164,23 @@ Not decided here, and still UNKNOWN or open:
 
 This grants no Safe creation, signing, funding, deployment or role change.
 Each Safe or timelock creation still needs transaction-specific approval.
+
+## 13. Vesting schedule rename FOUNDER → ARCHITECT (2026-11-13)
+
+Asked in chat, the owner chose **"Rename to ARCHITECT"** for the 12%
+(120,000,000 VAMS) schedule in `VAMSVesting`.
+
+- `IVAMSVesting.ScheduleType.FOUNDER` becomes `ARCHITECT`. It stays the first
+  enum member (ordinal 0), so calldata, storage and event encoding are
+  unchanged. Source code and ABI-JSON consumers that use the name must
+  update; none exist in this repository outside the files changed.
+- Schedule terms are unchanged: 12-month cliff, 48-month linear vesting,
+  no cliff unlock. Vesting stays unactivated (owner decision 4).
+- Allocation tables in the tokenomics, whitepaper and pitch documents and
+  the frontend vesting label use "Architect". Personal titles ("Founder &
+  Architect", author lines), the historical architecture v0.3.0 document,
+  dated remediation records and the unrelated Cardano F04 `founder` key
+  are left as they are.
+
+This changes names only. It grants no deployment, vesting activation or
+role change.

@@ -104,7 +104,7 @@ We have optimized the distribution for maximum community ownership and decentral
 | **Community & Ecosystem** | **50%** | 500,000,000 | See sub-allocations |
 | ↳ *Liquidity & Airdrop* | *(10%)* | *(100,000,000)* | ***100% Unlocked at TGE*** |
 | ↳ *Ecosystem Grants & Mining* | *(40%)* | *(400,000,000)* | *0-month cliff, 60-month linear (~6.67M/month)* |
-| **Founder** | **12%** | 120,000,000 | 12-month cliff, 48-month linear vesting (~2.50M/month) |
+| **Architect** | **12%** | 120,000,000 | 12-month cliff, 48-month linear vesting (~2.50M/month) |
 | **Future Team & Advisors** | **13%** | 130,000,000 | 12-month cliff, 36-month linear (50% Time / 50% GMV-Gated) |
 | **Investors** | **13%** | 130,000,000 | See sub-allocations |
 | ↳ *Early Investors* | *(5%)* | *(50,000,000)* | *6-month cliff, 18-month linear (~2.78M/month)* |
@@ -115,7 +115,7 @@ We have optimized the distribution for maximum community ownership and decentral
 - **Community & Ecosystem (50%)**: Maintains the "50% community-owned" headline. Internally split into two sub-buckets:
   - *Liquidity & Airdrop (10%)*: Fully liquid at TGE. Bootstraps DEX liquidity and seeds the initial user base.
   - *Ecosystem Grants & Mining (40%)*: Developer grants, validator incentives, and mining rewards. Linearly vested over 60 months to ensure sustained network growth.
-- **Founder (12%)**: Separate cap-table line. **12-month cliff** enforces long-term alignment before unlocks begin.
+- **Architect (12%)**: Separate cap-table line. **12-month cliff** enforces long-term alignment before unlocks begin.
 - **Future Team & Advisors (13%)**: Covers future hires and strategic advisors. Features **Performance-Gated Unlocks** (50% releases monthly, 50% only releases when GMV milestones are hit).
 - **Investors (13%)**: Split into two tranches to reflect different risk/reward profiles:
   - *Early Investors (5%)*: Seed/angel backers who took the most risk. Shorter cliff (6M) and faster vest (18M).
@@ -134,7 +134,7 @@ We have optimized the distribution for maximum community ownership and decentral
 | :--- | :--- | :--- | :--- |
 | **Airdrop / Liquidity (10%)** | None | TGE | 100M at TGE |
 | **Ecosystem Grants & Mining (40%)** | 0 months | 60 months | ~6.67M / month |
-| **Founder (12%)** | **12 months** | **48 months** | ~2.50M / month |
+| **Architect (12%)** | **12 months** | **48 months** | ~2.50M / month |
 | **Future Team & Advisors (13%)** | 12 months | 36 months | ~3.61M / month (50% GMV-Gated) |
 | **Early Investors (5%)** | 6 months | 18 months | ~2.78M / month |
 | **Regular Investors (8%)** | 12 months | 30 months | ~2.67M / month |
@@ -226,9 +226,9 @@ DePIN compute nodes do not receive flat yields. To incentivize the deployment of
 
 ## Appendix A: Token Unlock Schedule (v2.1 — Restructured)
 
-> **Key:** All figures are cumulative totals at that snapshot. Monthly rates: Eco Grants 6.67M, Founder 2.50M, Team 3.61M, Early Inv (6M cliff) 2.78M, Reg Inv (12M cliff) 2.67M, Treasury (6M cliff) 2.50M.
+> **Key:** All figures are cumulative totals at that snapshot. Monthly rates: Eco Grants 6.67M, Architect 2.50M, Team 3.61M, Early Inv (6M cliff) 2.78M, Reg Inv (12M cliff) 2.67M, Treasury (6M cliff) 2.50M.
 
-| Month | Airdrop/Liq | Eco Grants | Treasury | Founder | Team | Early Inv | Reg Inv | **Total Circulating** |
+| Month | Airdrop/Liq | Eco Grants | Treasury | Architect | Team | Early Inv | Reg Inv | **Total Circulating** |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | **TGE** | 100M | 0M | 0M | 0M | 0M | 0M | 0M | **100M (10.0%)** |
 | **M6** | 100M | 40M | 0M *(cliff ends)* | 0M | 0M | 0M *(cliff ends)* | 0M | **140M (14.0%)** |

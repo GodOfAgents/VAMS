@@ -1,3 +1,11 @@
+## 2026-11-13: vesting schedule FOUNDER renamed to ARCHITECT (owner decision 13)
+
+- **Contracts.** `IVAMSVesting.ScheduleType.FOUNDER` → `ARCHITECT`, and `CLIFF_FOUNDER`/`VEST_FOUNDER` → `CLIFF_ARCHITECT`/`VEST_ARCHITECT` in `VAMSVesting.sol`. The member stays at ordinal 0, so on-chain encoding is unchanged; source and ABI-JSON consumers must use the new name. The enum comment wrongly said "25% cliff unlock"; the code has always returned no cliff unlock, and the comment now says 0%. `DeployV2.s.sol` (legacy, unsafe-deployment guarded) and `DistributionTest.t.sol` follow; the test now pins ordinal 0.
+- **Docs and frontend.** Allocation rows in `TOKENOMICS.md`, `WHITEPAPER.md`, `PITCH_DECK.md` and the frontend "Architect Vesting" label. Personal titles, historical documents and dated remediation records are unchanged.
+- **Verification.** Forge 1.7.1 `forge build --sizes` succeeded (VAMSVesting 8,555 runtime bytes); `forge test`: 1,199 passed, 0 failed, 0 skipped in 77 suites. That run used the working tree, which also contains another agent's uncommitted V3 consent contract and tests. The frontend build and lint were not run: the canonical checkout has no installed dependencies.
+
+Readiness remains NOT READY; 13 findings open, 0/36 tracks verified. Vesting stays unactivated.
+
 ## 2026-11-13: team-controlled bootstrap signer model (owner decision 12)
 
 - **Decision.** The owner chose the PR #4 team bootstrap for the restricted testnet: `ARCHITECT` plus `SIGNER_A`–`SIGNER_C` in routine seats, and two offline recovery seats held in 2-of-3 split custody. Amoy governance and treasury are 3-of-5, emergency is 2-of-3 pause only; Cardano governance v2 uses the same five governance seats (exactly five members, threshold 3). Recorded in `docs/remediation/OWNER_DECISIONS_20261108.md` section 12. Seat holders A–C, every address and key hash, the insurance guardians, the VDSO councils and the `FOUNDER` → `ARCHITECT` rename remain open.

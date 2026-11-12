@@ -1033,7 +1033,7 @@ export default function VAMS_Web3_Guild() {
             </div>
             <div className={`bg-white/10 backdrop-blur-[2px] p-10 border ${borderLight} text-center ${borderHover} transition-all duration-300 group`}>
               <div className="font-serif text-5xl mb-4 group-hover:scale-110 transition-transform duration-300">4 Year</div>
-              <div className={`font-mono text-[10px] uppercase tracking-[0.2em] ${textSub}`}>Founder Vesting</div>
+              <div className={`font-mono text-[10px] uppercase tracking-[0.2em] ${textSub}`}>Architect Vesting</div>
             </div>
           </div>
 
