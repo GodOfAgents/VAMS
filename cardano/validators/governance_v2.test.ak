@@ -2654,27 +2654,27 @@ test remainder26_cancel_receipt_policy_baseline_accepts() {
 }
 
 test remainder26_queue_transition_baseline_accepts() {
-  remainder_call(5, remainder_base(5), 0)
+  asset_boundary_queue_call(queue_tx(), 0)
 }
 
 test remainder26_queue_authority_spend_baseline_accepts() {
-  remainder_call(5, remainder_base(5), 1)
+  asset_boundary_queue_call(queue_tx(), 1)
 }
 
 test remainder26_queue_governor_spend_baseline_accepts() {
-  remainder_call(5, remainder_base(5), 2)
+  asset_boundary_queue_call(queue_tx(), 2)
 }
 
 test remainder26_queue_proposal_policy_baseline_accepts() {
-  remainder_call(5, remainder_base(5), 3)
+  asset_boundary_queue_call(queue_tx(), 3)
 }
 
 test remainder26_queue_receipt_policy_baseline_accepts() {
-  remainder_call(5, remainder_base(5), 4)
+  asset_boundary_queue_call(queue_tx(), 4)
 }
 
 test remainder26_queue_intent_policy_baseline_accepts() {
-  remainder_call(5, remainder_base(5), 5)
+  asset_boundary_queue_call(queue_tx(), 5)
 }
 
 test remainder26_cancelintent_transition_baseline_accepts() {
@@ -4063,37 +4063,37 @@ test remainder26_queue_topology_one_over_queue_inputs_exact_construction() {
 
 test remainder26_queue_topology_one_over_queue_inputs_exact_transition_rejects() fail {
   let value = remainder_mutant(5, 0, False)
-  expect remainder_call(5, value, 0)
+  expect asset_boundary_queue_call(value, 0)
   True
 }
 
 test remainder26_queue_topology_one_over_queue_inputs_exact_authority_spend_rejects() fail {
   let value = remainder_mutant(5, 0, False)
-  expect remainder_call(5, value, 1)
+  expect asset_boundary_queue_call(value, 1)
   True
 }
 
 test remainder26_queue_topology_one_over_queue_inputs_exact_governor_spend_rejects() fail {
   let value = remainder_mutant(5, 0, False)
-  expect remainder_call(5, value, 2)
+  expect asset_boundary_queue_call(value, 2)
   True
 }
 
 test remainder26_queue_topology_one_over_queue_inputs_exact_proposal_policy_rejects() fail {
   let value = remainder_mutant(5, 0, False)
-  expect remainder_call(5, value, 3)
+  expect asset_boundary_queue_call(value, 3)
   True
 }
 
 test remainder26_queue_topology_one_over_queue_inputs_exact_receipt_policy_rejects() fail {
   let value = remainder_mutant(5, 0, False)
-  expect remainder_call(5, value, 4)
+  expect asset_boundary_queue_call(value, 4)
   True
 }
 
 test remainder26_queue_topology_one_over_queue_inputs_exact_intent_policy_rejects() fail {
   let value = remainder_mutant(5, 0, False)
-  expect remainder_call(5, value, 5)
+  expect asset_boundary_queue_call(value, 5)
   True
 }
 
@@ -4104,37 +4104,37 @@ test remainder26_queue_topology_one_over_queue_inputs_global_construction() {
 
 test remainder26_queue_topology_one_over_queue_inputs_global_transition_rejects() fail {
   let value = remainder_mutant(5, 1, False)
-  expect remainder_call(5, value, 0)
+  expect asset_boundary_queue_call(value, 0)
   True
 }
 
 test remainder26_queue_topology_one_over_queue_inputs_global_authority_spend_rejects() fail {
   let value = remainder_mutant(5, 1, False)
-  expect remainder_call(5, value, 1)
+  expect asset_boundary_queue_call(value, 1)
   True
 }
 
 test remainder26_queue_topology_one_over_queue_inputs_global_governor_spend_rejects() fail {
   let value = remainder_mutant(5, 1, False)
-  expect remainder_call(5, value, 2)
+  expect asset_boundary_queue_call(value, 2)
   True
 }
 
 test remainder26_queue_topology_one_over_queue_inputs_global_proposal_policy_rejects() fail {
   let value = remainder_mutant(5, 1, False)
-  expect remainder_call(5, value, 3)
+  expect asset_boundary_queue_call(value, 3)
   True
 }
 
 test remainder26_queue_topology_one_over_queue_inputs_global_receipt_policy_rejects() fail {
   let value = remainder_mutant(5, 1, False)
-  expect remainder_call(5, value, 4)
+  expect asset_boundary_queue_call(value, 4)
   True
 }
 
 test remainder26_queue_topology_one_over_queue_inputs_global_intent_policy_rejects() fail {
   let value = remainder_mutant(5, 1, False)
-  expect remainder_call(5, value, 5)
+  expect asset_boundary_queue_call(value, 5)
   True
 }
 
@@ -4150,37 +4150,37 @@ test remainder26_queue_topology_one_over_queue_outputs_exact_construction() {
 
 test remainder26_queue_topology_one_over_queue_outputs_exact_transition_rejects() fail {
   let value = remainder_mutant(5, 2, False)
-  expect remainder_call(5, value, 0)
+  expect asset_boundary_queue_call(value, 0)
   True
 }
 
 test remainder26_queue_topology_one_over_queue_outputs_exact_authority_spend_rejects() fail {
   let value = remainder_mutant(5, 2, False)
-  expect remainder_call(5, value, 1)
+  expect asset_boundary_queue_call(value, 1)
   True
 }
 
 test remainder26_queue_topology_one_over_queue_outputs_exact_governor_spend_rejects() fail {
   let value = remainder_mutant(5, 2, False)
-  expect remainder_call(5, value, 2)
+  expect asset_boundary_queue_call(value, 2)
   True
 }
 
 test remainder26_queue_topology_one_over_queue_outputs_exact_proposal_policy_rejects() fail {
   let value = remainder_mutant(5, 2, False)
-  expect remainder_call(5, value, 3)
+  expect asset_boundary_queue_call(value, 3)
   True
 }
 
 test remainder26_queue_topology_one_over_queue_outputs_exact_receipt_policy_rejects() fail {
   let value = remainder_mutant(5, 2, False)
-  expect remainder_call(5, value, 4)
+  expect asset_boundary_queue_call(value, 4)
   True
 }
 
 test remainder26_queue_topology_one_over_queue_outputs_exact_intent_policy_rejects() fail {
   let value = remainder_mutant(5, 2, False)
-  expect remainder_call(5, value, 5)
+  expect asset_boundary_queue_call(value, 5)
   True
 }
 
@@ -4191,37 +4191,37 @@ test remainder26_queue_topology_one_over_queue_outputs_global_construction() {
 
 test remainder26_queue_topology_one_over_queue_outputs_global_transition_rejects() fail {
   let value = remainder_mutant(5, 3, False)
-  expect remainder_call(5, value, 0)
+  expect asset_boundary_queue_call(value, 0)
   True
 }
 
 test remainder26_queue_topology_one_over_queue_outputs_global_authority_spend_rejects() fail {
   let value = remainder_mutant(5, 3, False)
-  expect remainder_call(5, value, 1)
+  expect asset_boundary_queue_call(value, 1)
   True
 }
 
 test remainder26_queue_topology_one_over_queue_outputs_global_governor_spend_rejects() fail {
   let value = remainder_mutant(5, 3, False)
-  expect remainder_call(5, value, 2)
+  expect asset_boundary_queue_call(value, 2)
   True
 }
 
 test remainder26_queue_topology_one_over_queue_outputs_global_proposal_policy_rejects() fail {
   let value = remainder_mutant(5, 3, False)
-  expect remainder_call(5, value, 3)
+  expect asset_boundary_queue_call(value, 3)
   True
 }
 
 test remainder26_queue_topology_one_over_queue_outputs_global_receipt_policy_rejects() fail {
   let value = remainder_mutant(5, 3, False)
-  expect remainder_call(5, value, 4)
+  expect asset_boundary_queue_call(value, 4)
   True
 }
 
 test remainder26_queue_topology_one_over_queue_outputs_global_intent_policy_rejects() fail {
   let value = remainder_mutant(5, 3, False)
-  expect remainder_call(5, value, 5)
+  expect asset_boundary_queue_call(value, 5)
   True
 }
 
@@ -4237,37 +4237,37 @@ test remainder26_queue_topology_one_over_queue_assets_construction() {
 
 test remainder26_queue_topology_one_over_queue_assets_transition_rejects() fail {
   let value = remainder_mutant(5, 4, False)
-  expect remainder_call(5, value, 0)
+  expect asset_boundary_queue_call(value, 0)
   True
 }
 
 test remainder26_queue_topology_one_over_queue_assets_authority_spend_rejects() fail {
   let value = remainder_mutant(5, 4, False)
-  expect remainder_call(5, value, 1)
+  expect asset_boundary_queue_call(value, 1)
   True
 }
 
 test remainder26_queue_topology_one_over_queue_assets_governor_spend_rejects() fail {
   let value = remainder_mutant(5, 4, False)
-  expect remainder_call(5, value, 2)
+  expect asset_boundary_queue_call(value, 2)
   True
 }
 
 test remainder26_queue_topology_one_over_queue_assets_proposal_policy_rejects() fail {
   let value = remainder_mutant(5, 4, False)
-  expect remainder_call(5, value, 3)
+  expect asset_boundary_queue_call(value, 3)
   True
 }
 
 test remainder26_queue_topology_one_over_queue_assets_receipt_policy_rejects() fail {
   let value = remainder_mutant(5, 4, False)
-  expect remainder_call(5, value, 4)
+  expect asset_boundary_queue_call(value, 4)
   True
 }
 
 test remainder26_queue_topology_one_over_queue_assets_intent_policy_rejects() fail {
   let value = remainder_mutant(5, 4, False)
-  expect remainder_call(5, value, 5)
+  expect asset_boundary_queue_call(value, 5)
   True
 }
 
@@ -4283,37 +4283,37 @@ test remainder26_queue_topology_one_over_queue_datum_bytes_construction() {
 
 test remainder26_queue_topology_one_over_queue_datum_bytes_transition_rejects() fail {
   let value = remainder_mutant(5, 5, False)
-  expect remainder_call(5, value, 0)
+  expect asset_boundary_queue_call(value, 0)
   True
 }
 
 test remainder26_queue_topology_one_over_queue_datum_bytes_authority_spend_rejects() fail {
   let value = remainder_mutant(5, 5, False)
-  expect remainder_call(5, value, 1)
+  expect asset_boundary_queue_call(value, 1)
   True
 }
 
 test remainder26_queue_topology_one_over_queue_datum_bytes_governor_spend_rejects() fail {
   let value = remainder_mutant(5, 5, False)
-  expect remainder_call(5, value, 2)
+  expect asset_boundary_queue_call(value, 2)
   True
 }
 
 test remainder26_queue_topology_one_over_queue_datum_bytes_proposal_policy_rejects() fail {
   let value = remainder_mutant(5, 5, False)
-  expect remainder_call(5, value, 3)
+  expect asset_boundary_queue_call(value, 3)
   True
 }
 
 test remainder26_queue_topology_one_over_queue_datum_bytes_receipt_policy_rejects() fail {
   let value = remainder_mutant(5, 5, False)
-  expect remainder_call(5, value, 4)
+  expect asset_boundary_queue_call(value, 4)
   True
 }
 
 test remainder26_queue_topology_one_over_queue_datum_bytes_intent_policy_rejects() fail {
   let value = remainder_mutant(5, 5, False)
-  expect remainder_call(5, value, 5)
+  expect asset_boundary_queue_call(value, 5)
   True
 }
 
@@ -4329,37 +4329,37 @@ test remainder26_queue_topology_one_over_queue_signers_construction() {
 
 test remainder26_queue_topology_one_over_queue_signers_transition_rejects() fail {
   let value = remainder_mutant(5, 6, False)
-  expect remainder_call(5, value, 0)
+  expect asset_boundary_queue_call(value, 0)
   True
 }
 
 test remainder26_queue_topology_one_over_queue_signers_authority_spend_rejects() fail {
   let value = remainder_mutant(5, 6, False)
-  expect remainder_call(5, value, 1)
+  expect asset_boundary_queue_call(value, 1)
   True
 }
 
 test remainder26_queue_topology_one_over_queue_signers_governor_spend_rejects() fail {
   let value = remainder_mutant(5, 6, False)
-  expect remainder_call(5, value, 2)
+  expect asset_boundary_queue_call(value, 2)
   True
 }
 
 test remainder26_queue_topology_one_over_queue_signers_proposal_policy_rejects() fail {
   let value = remainder_mutant(5, 6, False)
-  expect remainder_call(5, value, 3)
+  expect asset_boundary_queue_call(value, 3)
   True
 }
 
 test remainder26_queue_topology_one_over_queue_signers_receipt_policy_rejects() fail {
   let value = remainder_mutant(5, 6, False)
-  expect remainder_call(5, value, 4)
+  expect asset_boundary_queue_call(value, 4)
   True
 }
 
 test remainder26_queue_topology_one_over_queue_signers_intent_policy_rejects() fail {
   let value = remainder_mutant(5, 6, False)
-  expect remainder_call(5, value, 5)
+  expect asset_boundary_queue_call(value, 5)
   True
 }
 

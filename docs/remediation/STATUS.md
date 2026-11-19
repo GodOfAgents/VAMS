@@ -1,3 +1,38 @@
+## 2026-11-20: Cardano Queue test fixtures and offline verification
+
+The Queue test fixture change specializes 48 calls and six fixture calls in
+`cardano/validators/governance_v2.test.ak`. All declarations and expected
+outcomes are preserved. The focused comparison passed the same ten tests on
+both inputs and reproduced the selected blueprint byte for byte across all 43
+validator titles. Test-program generation in that comparison went from 64.30
+to 24.88 seconds. The patch touches no production validator or INV-1–INV-10
+enforcement point.
+
+On 19 November, `CARDANO-FULL-CI-QUEUE-6077461-01` ran the unfiltered
+`aiken check --deny --seed 20260711 --max-success 250` using pinned Aiken
+1.1.21. All 904 expected test identities passed across 10 modules, including
+897 unit tests and 7 property tests. The check exited 0 in 3,511.15 seconds
+with zero retries. Its source was parent `60774613ce46ccbcd1563b4dcac72ff0acb934e2`
+plus the exact Queue fixture whose SHA-256 is
+`f372d21fcbc4eb78307048c2f42cc1abae3a5a3fbef9eb9ec9a7a7591f82585b`.
+The run mapped 4,212 source files with SHA-256
+`ce49cdf5ea017bd92917624775653d3b8f0c805958fdcfe93c3639d1d83c2654`.
+The checkpoint adds this record and the changelog entry above the tested
+source. Neither documentation file enters the Cardano compiler.
+
+| Retained run file | SHA-256 |
+| --- | --- |
+| Windows receipt | `b7beadc0458ccd078a6fcadf88939463a685c5d570c36dc1915a73c33f5e377f` |
+| WSL receipt | `6b5166a74178915cd3064c3efe31b674427520f6ae7ed9347b20de01360cb173` |
+| Native JSON report | `59687e80bf9f13252c61702433525ba3a5d06e5fa8a4cd560a71291970c0de29` |
+
+The files are retained locally in
+`VAMS-payment-native-20261115-02/cardano-ci-6077461/queue-integrated/`
+under the run label above. Previous baseline passes and timeouts retain
+their original evidence. Hosted CI, ledger-equivalent checks and testnet
+qualification remain open. Readiness remains NOT READY for both chains,
+with 13 open findings and 0 of 36 formally verified tracks.
+
 ## 2026-11-16: payment native SQL successor
 
 The exact combined repair passed 195 local methods/474 subtests with no failure

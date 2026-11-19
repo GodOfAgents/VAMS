@@ -1,3 +1,7 @@
+## 2026-11-20: Cardano Queue test fixtures and offline verification
+
+Queue tests now call the existing Queue-specific fixture and validator helpers directly. The unfiltered Aiken 1.1.21 workflow command passed all 904 tests offline. See [the source-bound evidence record](remediation/STATUS.md#2026-11-20-cardano-queue-test-fixtures-and-offline-verification). Hosted CI remains pending.
+
 ## 2026-11-19: live read-only Cardano Pre-Prod node (owner decision 14)
 
 - The owner approved live Pre-Prod reads through an own node rather than a public API. `cardano-node` 11.1.3 from the verified release download now syncs Pre-Prod (magic 1) with the official configuration plus `DiffusionMode: InitiatorOnly` and `PeerSharing: false`: outbound connections only, no inbound listener, metrics on `127.0.0.1`. Data lives in `~/vams-preprod/`, outside the repository. No new download.
