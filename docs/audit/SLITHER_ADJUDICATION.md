@@ -1,89 +1,73 @@
-# Slither Finding Adjudication
+# Slither and callback/lifecycle review
 
-**Scan date:** 2026-07-13
+Updated 2026-11-14. The final local candidate reports **0 High, 60 Medium and
+28 Optimization** findings with unchanged detector configuration/exclusions.
+All 60 current Medium identities and their implicated source hashes match the
+previous non-author-reviewed source. The prior checkpoint equality warning is
+no longer reported; no new Medium identity appeared. Per-ID records remain in
+[`contracts/slither-adjudications.yml`](../../contracts/slither-adjudications.yml).
+Optimization findings are counted, not adjudicated in this slice.
 
-**Scope:** `contracts/src/`, excluding vendored dependencies
+## Reproduced checkpoint defects and repair
 
-**Command:** `slither . --exclude-dependencies --exclude-informational --exclude-low --fail-high`
+New lifecycle tests exposed two gaps that the earlier source-only review did
+not establish: a challenger-win arbitration could pay the same bond pool again
+using other roots' balances; deposit token callbacks could take duplicate bonds
+for one submitted root or challenge slot. These are manual lifecycle findings,
+not defects inferred merely from an equality warning.
 
-The high-impact gate passes. The medium/high-only scan reports 19 results after
-remediation. This document records why the residual results do
-not represent unresolved exploitable paths. Any material code or trust-boundary
-change invalidates this adjudication and requires a fresh scan.
+`StateCheckpointRegistryV2` now records dispute consumption separately from root
+validity before payout. Invalid roots stay `finalized == false`; successful
+operator resolutions remain finalized. Both payouts are exact-once, and failed
+token transfers roll state back for retry. All four mutating entrypoints share
+`nonReentrant`; submission/challenge state is reserved before token calls.
+Bond amounts, deadlines, arbitrator permissions and the six-field checkpoint
+getter tuple are unchanged. A new `disputeResolved(root)` getter is additive.
+The configured token remains immutable. Unsupported fee-on-transfer/malicious
+token deployments are not qualified by these tests.
 
-## Remediated Findings
+The legacy ERC-8004 entrypoint remains retired and unconditionally rejects
+unqualified attestation registration. No previously deployed immutable instance
+is patched by editing this source. Restricted deployment scripts do not select
+the checkpoint prototype; no live role, route, slashing or payout is activated.
 
-- `WorldIDPlugin` no longer accepts structurally valid placeholder proofs. It
-  calls the configured verifier and binds the proof to the VAMS action and the
-  service/delivery signal.
-- `ServiceBlockRegistry.registerServiceBlock`, `SLAEnforcer.retryPendingSlash`,
-  and `SecurityBudgetEnforcer.updateSecurityStatus` now use `nonReentrant`.
-- Batch claims, x402 claims, staking compounding, hardware commitments, Service
-  Block registration, Sentinel TVL updates, and security-level transitions now
-  apply state effects before external interactions.
-- Voting-power multipliers use one `Math.mulDiv` operation, avoiding
-  divide-before-multiply precision loss.
-- Constructor-only state was made immutable where deployment semantics permit.
-- The SLA node lookup, provider rejection reason, and storage-array length
-  findings were resolved directly.
-- `VAMSReservationManager.abortRecovery` now initializes its fail-closed verifier
-  result explicitly, and `VAMSExecutionKernel` consumes and checks the proof
-  router's success result.
+## Executed regressions and reviews
 
-## Residual Findings
+- 25 new methods: checkpoint lifecycle/token callbacks (13), composed settlement
+  callbacks (6), two-phase workflow callbacks/lifecycle (4), nested V3 relay (2).
+- Four focused suites: 38 passed, 0 failed/skipped. Full suite: 1,267 passed in
+  86 suites, 0 failed/skipped. Counts overlap and must not be summed.
+- Final checkpoint tests on old source: 8 passed, 5 failed for replay/deposit
+  and payout callback behavior. On repaired source, all 13 pass.
+- Both new Heartbeat tests fail when the relay guard is removed only in a private
+  offline mutant. The recovery oracle distinguishes the exact reentry denial from
+  later signature/read-only failures.
+- Size gate passes with warnings retained. StateCheckpoint runtime: 4,224 bytes;
+  unchanged ComposedSettlement: 24,401 bytes, only 175 bytes EIP-170 headroom.
 
-### Incorrect Equality: 15 Results, False Positive
+Non-author AI source review covers the final checkpoint implementation and the
+workflow tests; non-author test review covers the unchanged composed/Heartbeat
+tests and strengthened recovery oracle. The checkpoint reviewer authored its
+test file and excluded it from review; the primary separately inspected the
+test oracles and executed all suites. Two other workers exhausted credits before
+their final closeout and were not retried or substituted. These are explicit
+authorship/execution limits, not whole-patch independent or human assurance.
 
-These checks intentionally require exact equality. None compares a market
-price, ratio, timestamp target, or other continuously varying value.
+The workflow tests characterize authorized callback abort as permitted: every
+escrow remains registered and refundable after its expiry, just as for abort
+immediately after initiation. A source-only concern about stranded value was
+not reproduced. Tests also cover callback-induced preparation followed by a
+later escrow failure, full rollback and successful retry. The escrow boundary is
+synthetic; actual X402 custody/refund integration remains separate.
 
-- Zero-value existence sentinels: pending timelock, active hardware commitment,
-  hardware registration timestamp, checkpoint existence, fee total, stake
-  total, reward amount, and releasable vesting amount.
-- Exact enum membership: pending compensation claims.
-- Exact evidence-mode identifier: VDSO adapter admission requires the canonical
-  `LIVE_EVIDENCE_MODE` constant and rejects every other self-report.
-- Exact zero guards: reward claim, compound, mint, and budget validation.
+Exact commands, failures, streams, source/tool hashes and review records:
+[callback/lifecycle repair evidence](../remediation/repair_20261113/CALLBACK-LIFECYCLE-REGRESSIONS.md).
+The earlier [source-only review](../remediation/repair_20261113/NONAUTHOR-SLITHER-REVIEW.md)
+retains its historical findings and is superseded for these requested gaps.
 
-Changing these checks to inequalities would weaken existence and state-machine
-invariants. Existing Forge tests cover duplicate registration/checkpoint paths,
-empty rewards, staking pool updates, and vesting release behavior.
-
-### Reentrancy Without ETH: 2 Results, Guarded and Accepted
-
-1. `TwoPhaseCommitManager.initiateWorkflow` is `nonReentrant`. The external
-   escrow manager must return each generated escrow ID before that ID can be
-   appended to `_workflowEscrows`. A callback can only observe the already
-   initialized workflow through view functions; it cannot enter a mutating
-   workflow path. Any failed escrow call reverts the complete transaction.
-2. `SLAEnforcer.retryPendingSlash` is `nonReentrant` and sets `retried = true`
-   before calling the slasher. It resets the flag only when the slash fails so
-   governance can retry. A callback can transiently observe the flag but cannot
-   mutate the pending-slash queue or obtain value from that observation.
-
-These are read-only intermediate-state observations, not unguarded economic
-reentrancy. Reassess if a future contract consumes either view during a callback
-to authorize value transfer.
-
-### Unused Return: 1 Result, False Positive
-
-`VAMSERC8004Adapter.verifyAndRegister` intentionally reads only the owner from
-`getAgent`. The remaining tuple fields are not authorization inputs for this
-adapter. TEE attestation validity comes from the configured ERC-8004 verifier,
-and ownership is independently enforced against `msg.sender`.
-
-### Immutable State: 1 Result, Not Applicable
-
-`VAMSToken.antiWhaleEndTimestamp` is assigned in the proxy initializer. Solidity
-immutables are embedded in implementation bytecode and cannot hold per-proxy
-initializer state, so converting this field would break upgradeable deployment
-semantics.
-
-## Gate Decision
-
-- High-impact findings: **0 unresolved**.
-- Medium scan results: **19 adjudicated**.
-- Low/informational/optimization findings remain visible in the complete report
-  and are not promoted to security closure without manual review.
-- This adjudication does not replace external review, invariant fuzzing, or the
-  exact-commit CI evidence manifest required for testnet.
+INV-6 containment and other core invariant enforcement remain unchanged. The
+checkpoint repair protects exact-once bond liabilities without changing economic
+policy. Zero rewards/emissions, no staking minter, inactive vesting/buyback/
+distributions/delegation/slashing/token governor, and frozen-unset DEC parameters
+remain approved. Both chains and authentic provider/custody/DCAP, human assurance,
+full release gates and actual observation requirements remain. **NOT READY**.

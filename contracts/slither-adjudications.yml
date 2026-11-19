@@ -1,152 +1,1791 @@
-schema_version: 1
-tool: slither
-tool_version: 0.11.5
-scope: remediation-phase1-20261109
-release_evidence: false
-source_commit_base: c0d422c
-report_sha256: c78da6b7e2e9d213c29a4d0bb5a41db895303caf524da76d138f4b10587ae7b2
-flags: --exclude-dependencies --exclude-informational --exclude-low
-summary:
-  high: 0
-  medium: 62
-  optimization: 16
-defects_found: 0
-reviewer: author (Claude); non-author review pending
-adjudications:
-- detector: divide-before-multiply
-  impact: Medium
-  count: 1
-  status: reviewed_exact_arithmetic
-  locations:
-  - src/economic/VAMSInsuranceFund.sol:310
-  rationale: VAMSInsuranceFund.executePayout computes the INV-2 30% cap as q*3000 + floor(r*3000/10000)
-    with B = q*10000 + r, which equals floor(B*3000/10000) exactly; the split avoids overflow and loses
-    no precision.
-- detector: incorrect-equality
-  impact: Medium
-  count: 15
-  status: reviewed_expected_guard
-  locations:
-  - src/base/VAMSTimelockedAdmin.sol:38
-  - src/economic/HardwareCommitment.sol:182
-  - src/economic/TransactionCompensation.sol:386
-  - src/economic/VAMSFeeCollector.sol:203
-  - src/registry/VAMSHardwareRegistry.sol:320
-  - src/slashing/StateCheckpointRegistryV2.sol:49
-  - src/staking/VAMSStaking.sol:293
-  - src/staking/VAMSStaking.sol:309
-  - src/staking/VAMSStaking.sol:516
-  - src/staking/VAMSStaking.sol:573
-  - src/staking/VAMSStaking.sol:591
-  - src/vdso/VAMSAdapterRegistry.sol:181
-  - src/vesting/VAMSVesting.sol:187
-  - src/vesting/VAMSVesting.sol:224
-  - src/vesting/VAMSVesting.sol:250
-  rationale: 'Re-verified 2026-11-09 at current lines: every site is an exact zero, bytes32(0), enum or
-    evidence-mode guard (nothing-to-release, not-found, already-exists, empty pool, pending status). None
-    compares a manipulable balance or timestamp for equality.'
-- detector: reentrancy-no-eth
-  impact: Medium
-  count: 5
-  status: reviewed_protected
-  locations:
-  - src/economic/ComposedSettlement.sol:205
-  - src/economic/ComposedSettlement.sol:442
-  - src/economic/TwoPhaseCommitManager.sol:176
-  - src/sentinel/SLAEnforcer.sol:169
-  - src/trust/HeartbeatAtomicConsentRegistryV2.sol:120
-  rationale: Re-verified 2026-11-09. TwoPhaseCommitManager.initiateWorkflow, SLAEnforcer.retryPendingSlash
-    and ComposedSettlement.createComposedEscrowV2/refundExpiredComposed are nonReentrant; refundExpiredComposed
-    marks each row refunded before its bond-registry call. HeartbeatAtomicConsentRegistryV2.relayConsent
-    has an explicit _relayEntered/_frame.active guard and requires the frame to be consumed by the exact
-    timelock operation. Remaining cross-function reads are views.
-- detector: uninitialized-local
-  impact: Medium
-  count: 20
-  status: reviewed_intended_default
-  locations:
-  - src/economic/ComposedSettlement.sol:208
-  - src/economic/ComposedSettlement.sol:366
-  - src/governance/OperationAwareVAMSTimelockControllerV3.sol:170
-  - src/governance/OperationAwareVAMSTimelockControllerV3.sol:176
-  - src/trust/AutomataSgxActionVerifierV1.sol:86
-  - src/trust/GovernedObjectGrantV1.sol:51
-  - src/trust/HeartbeatAtomicConsentRegistryV2.sol:130
-  - src/trust/HeartbeatAuthorityTypesV3.sol:176
-  - src/trust/HeartbeatAuthorityTypesV3.sol:206
-  - src/trust/HeartbeatConsentPolicyV3.sol:120
-  - src/trust/HeartbeatConsentV2.sol:152
-  - src/trust/HeartbeatConsentV2.sol:187
-  - src/trust/HeartbeatPrincipalV1.sol:103
-  - src/trust/HeartbeatPrincipalV1.sol:114
-  - src/trust/HeartbeatPrincipalV1.sol:84
-  - src/trust/HeartbeatPrincipalV1.sol:94
-  - src/trust/ObjectEffectV3.sol:182
-  - src/trust/ObjectEffectV3.sol:197
-  - src/trust/ObjectEffectV3.sol:210
-  - src/trust/RawSecp256k1V1.sol:187
-  rationale: 'Re-verified 2026-11-09. Each local relies on Solidity zero/empty initialization by design:
-    decoder structs returned empty on failure (callers check the ok flag), counters and sort indices starting
-    at zero, a previous-value sentinel of zero, Expected/Receipt structs filled field by field before
-    use, and try/catch results assigned before use with zero rejected: the accepted replay value in ComposedSettlement
-    and the computed digest in HeartbeatConsentPolicyV3. ComposedSettlement block_ stays empty only when
-    no service block is requested, and the terms hash then must be zero.'
-- detector: unused-return
-  impact: Medium
-  count: 21
-  status: reviewed_false_positive
-  locations:
-  - src/infrastructure/VAMSERC8004Adapter.sol:52
-  - src/trust/ActionDeliveryVerifierV1.sol:130
-  - src/trust/ActionDeliveryVerifierV1.sol:81
-  - src/trust/ActionDeliveryVerifierV1.sol:81
-  - src/trust/GovernedObjectGrantV1.sol:97
-  - src/trust/HeartbeatAtomicConsentRegistryV2.sol:379
-  - src/trust/ObjectEffectV3.sol:112
-  - src/trust/ObjectEffectV3.sol:112
-  - src/trust/ObjectEffectV3.sol:121
-  - src/trust/ObjectEffectV3.sol:134
-  - src/trust/ObjectEffectV3.sol:134
-  - src/trust/ObjectEffectV3.sol:177
-  - src/trust/ObjectEffectV3.sol:177
-  - src/trust/ObjectEffectV3.sol:177
-  - src/trust/ObjectEffectV3.sol:191
-  - src/trust/ObjectEffectV3.sol:191
-  - src/trust/ObjectEffectV3.sol:205
-  - src/trust/ObjectEffectV3.sol:205
-  - src/trust/ObjectEffectV3.sol:205
-  - src/trust/RootSignatureV1.sol:7
-  - src/trust/RootSignatureV1.sol:7
-  rationale: 'Re-verified 2026-11-09. EffectReceiptV3.verify does not revert, so each site was checked:
-    ObjectEffectV3.providerReceipt, terminalAbsence and verifyFenceUpdate return verify''s (ok, digest)
-    to callers that check ok (absence() rejects each failure; acknowledgement stores valid). ActionDeliveryVerifierV1.verifyObjectAbsenceV3
-    returns absence()''s result. Where issuer()''s validity flag is discarded the issuer id is bytes32(0),
-    which EffectReceiptV3._validExpected rejects, and verify re-derives and checks the key. ECDSA.tryRecover
-    discards only the error argument while the RecoverError is checked. decodePrincipal and getAgent discard
-    unrelated tuple fields after checking ok/owner.'
-- detector: immutable-states
-  impact: Optimization
-  count: 16
-  status: reviewed_not_applied
-  locations:
-  - src/governance/OperationAwareVAMSTimelockControllerV3.sol:33
-  - src/governance/OperationAwareVAMSTimelockControllerV3.sol:35
-  - src/staking/VAMSStaking.sol:108
-  - src/staking/VAMSStaking.sol:120
-  - src/token/VAMSToken.sol:88
-  - src/trust/HeartbeatAuthoritySourceV3.sol:26
-  - src/trust/HeartbeatAuthoritySourceV3.sol:27
-  - src/trust/HeartbeatAuthoritySourceV3.sol:28
-  - src/trust/HeartbeatAuthoritySourceV3.sol:29
-  - src/trust/HeartbeatAuthoritySourceV3.sol:30
-  - src/trust/HeartbeatAuthoritySourceV3.sol:31
-  - src/trust/HeartbeatConsentPolicyV2.sol:15
-  - src/trust/HeartbeatConsentPolicyV2.sol:16
-  - src/trust/HeartbeatConsentPolicyV3.sol:23
-  - src/trust/HeartbeatConsentPolicyV3.sol:24
-  - src/trust/HeartbeatConsentPolicyV3.sol:25
-  rationale: Gas-only. VAMSToken is upgradeable (set in initializer). VAMSStaking setters are reachable
-    in the base contract; the suggestion comes from VAMSRestrictedStaking, which deploys rate 0 and budget
-    0 and overrides both setters to accept only zero. Heartbeat/Timelock V3 values are constructor-bound
-    configuration and code-hash pins; converting them changes runtime bytecode and is left to a separate
-    reviewed change.
+"schema_version": 3
+"tool": "slither"
+"tool_version": "0.11.5"
+"date": "2026-11-14"
+"scope": "Final callback/lifecycle candidate; not release acceptance"
+"release_evidence": false
+"readiness": "NOT_READY"
+"source_commit_base": "4f0f7887efb384e883b9de4d7c56387479e471a5"
+"source_tree": "dirty selected242-file candidate"
+"source_manifest_sha256": "a9f7ece14346246a25ed36af50b8043bf3dfbf4c504638b5544bfe85fdd81416"
+"scanner_manifest_sha256": "c2d7fc8758d75fe2703ccad287e1dea9bee3a30b78fd60e733e8b91f708f4202"
+"report_sha256": "5b87d719566c1bda9764bca2a987715d48cc761701372c7f8b01293ecaa5ada5"
+"previous_report_sha256": "cfef7904096846ea43ef4c6830d36737501829010ce8cedf8601c315d9779233"
+"flags": "slither . --config-file slither.config.json --exclude-dependencies --exclude-informational --exclude-low --fail-high --json /tmp/slither-report.json --compile-force-framework foundry"
+"detector_config_sha256": "2a33fb7cec59128a10d1967b9e5c5fb9ae0c090a5fff4d828d088cc8fa2473c4"
+"new_suppressions": false
+"summary":
+  "high": 0
+  "medium": 60
+  "optimization": 28
+"current_medium_by_detector":
+  "divide-before-multiply": 4
+  "incorrect-equality": 9
+  "reentrancy-no-eth": 6
+  "uninitialized-local": 20
+  "unused-return": 21
+"review_continuity": "All60 current IDs and implicated source hashes exactly match prior non-author reviewed source. One old checkpoint equality warning is no longer reported; it is not reclassified as the two lifecycle defects."
+"prior_non_author_coverage_sha256": "afa20690187e96433f39509cb0fe66a180b6c9a6701db561f4667b8416e9a6c2"
+"new_review_evidence_sha256":
+  "final-source.json": "15a6dbfe43140a712a26d9aee5c1ed1194c0e9ed17406f7ebda0f1336e35112b"
+  "settlement-heartbeat-followup.json": "3901b894dab3d3bc59646ad144428071ffd320d22022f4b927df821567d0e26a"
+"new_review_scope_limits": "Non-author review of final CP production and TPCM tests; prior non-author review of unchanged Composed/HB tests. CP reviewer authored CP tests and excluded them; primary separately inspected/executed those tests. Not whole-patch independent assurance."
+"manual_lifecycle_repairs":
+  -
+    "id": "CL-01"
+    "defect": "A challenger-win dispute payout was replayable against other checkpoint bonds."
+    "repair": "Separate per-root disputeResolved consumption before payout; invalid roots remain finalized=false."
+    "evidence": "CALLBACK-BEFORE-03 replay and payout-callback failures; all13 corrected lifecycle methods pass AFTER."
+    "status": "FIXED_LOCAL_SOURCE_AND_TESTS; restricted deployment inactive"
+  -
+    "id": "CL-02"
+    "defect": "External token deposit callbacks could submit/challenge a root twice before slot state was written."
+    "repair": "Shared nonReentrant guard on all4 mutation entrypoints and effects before submit/challenge token calls."
+    "evidence": "CALLBACK-BEFORE-03 real-ERC20 callback failures; focused AFTER exactly one bond/pair with rollback/retry."
+    "status": "FIXED_LOCAL_SOURCE_AND_TESTS; configured-token assumptions remain"
+"historical_checkpoint_warning":
+  "id": "d7352b7a0796cf8743fbb284977d58bc5a14ad93cc7dd5088b6815675a864abb"
+  "check": "incorrect-equality"
+  "description": "StateCheckpointRegistryV2.submitCheckpoint(bytes32) (src/slashing/StateCheckpointRegistryV2.sol#49-65) uses a dangerous strict equality:\n\t- require(bool,string)(checkpoints[_stateRoot].submittedAt == 0,Checkpoint already exists) (src/slashing/StateCheckpointRegistryV2.sol#50)\n"
+  "path": "contracts/src/slashing/StateCheckpointRegistryV2.sol"
+  "lines":
+    - 49
+    - 50
+    - 51
+    - 52
+    - 53
+    - 54
+    - 55
+    - 56
+    - 57
+    - 58
+    - 59
+    - 60
+    - 61
+    - 62
+    - 63
+    - 64
+    - 65
+  "source_sha256": "5eeeccf789af16fd5e5608f22314e7fb507ffb5255ff8e195967c719b72f190f"
+  "status": "reviewed_intended_behavior"
+  "rationale": "submittedAt==0 is the duplicate-checkpoint existence guard. Only a previously absent root may be recorded; this is not equality with a desired timestamp."
+  "regression_sources": []
+  "independent_acceptance": false
+"historical_legacy_warning":
+  "id": "e23cc5ab05194f1562da8e6bbb92e12345e59f0423384bf455492e26eb9ae16a"
+  "check": "unused-return"
+  "description": "VAMSERC8004Adapter.verifyAndRegister(bytes32,bytes) (src/infrastructure/VAMSERC8004Adapter.sol#52-69) ignores return value by (owner,None,None,None,None,None,None) = registry.getAgent(agentId) (src/infrastructure/VAMSERC8004Adapter.sol#54)\n"
+  "path": "contracts/src/infrastructure/VAMSERC8004Adapter.sol"
+  "lines":
+    - 52
+    - 53
+    - 54
+    - 55
+    - 56
+    - 57
+    - 58
+    - 59
+    - 60
+    - 61
+    - 62
+    - 63
+    - 64
+    - 65
+    - 66
+    - 67
+    - 68
+    - 69
+  "source_sha256": "382500c69434ba1e7f48487d800bd31b0e2375cfd32070bb38f008f2432bdb0b"
+  "status": "underlying_trust_issue_fixed_by_retirement"
+  "rationale": "The tuple warning alone is intentional owner-only selection. Reviewing its consumer exposed a separate genuine INV-6 trust flaw: verifier success plus registry ownership could register a quote whose report data belonged to another root, with no qualified action/agent/freshness binding. The legacy entrypoint now always reverts LegacyAttestationDisabled before registry/verifier calls. SetVerifier cannot reactivate it; the separately qualified action-bound DCAP verifier is untouched. Existing deployed immutable adapters are not patched by this source change."
+  "regression_sources":
+    - "contracts/test/SlitherMediumLegacyAdapter.t.sol"
+  "independent_acceptance": false
+"verification":
+  "full": "1267 passed;0 failed/skipped;86suites"
+  "focused": "38 passed;0 failed/skipped;4suites"
+  "negative_checkpoint": "8 passed/5 failed expected oldsource"
+  "negative_heartbeat": "0 passed/2 failed expected private mutant"
+  "sizes": "exit0; warnings retained"
+"economic_features": "Restricted disablements unchanged; synthetic test activity only"
+"adjudications":
+  -
+    "id": "58e0accc2b5c6bb2711c2725ead284f5dfb3a37af6f25fded3d1298f6e4a1c29"
+    "check": "divide-before-multiply"
+    "description": "VAMSStaking._mintRewards_internal(address,uint256) (src/staking/VAMSStaking.sol#593-609) performs a multiplication on the result of a division:\n\t- elapsedYears = (block.timestamp - currentMintYearStart) / SECONDS_PER_YEAR (src/staking/VAMSStaking.sol#598)\n\t- currentMintYearStart += elapsedYears * SECONDS_PER_YEAR (src/staking/VAMSStaking.sol#599)\n"
+    "path": "contracts/src/staking/VAMSStaking.sol"
+    "lines":
+      - 593
+      - 594
+      - 595
+      - 596
+      - 597
+      - 598
+      - 599
+      - 600
+      - 601
+      - 602
+      - 603
+      - 604
+      - 605
+      - 606
+      - 607
+      - 608
+      - 609
+    "source_sha256": "12709860d4b8343a1f9cc314e77acfcd6b77afde83b2efe6e4dc7bd557d0d35c"
+    "status": "reviewed_intended_behavior"
+    "rationale": "Whole elapsed years are intentionally floored before advancing the mint-year anchor; the residual partial year is retained, not discarded. Annual cap and restricted zero-budget behavior remain enforced."
+    "regression_sources":
+      - "contracts/test/staking/StakingAuditRegression.t.sol"
+    "independent_acceptance": false
+    "present_in_current_scan": true
+    "source_unchanged_from_prior_non_author_review": true
+    "verification": "CALLBACK-FULL-01: 1267 passed; 0 failed/skipped; source remains byte-identical for this finding"
+  -
+    "id": "5a6a740da35032d0afedf60de9d5bbb5ab68f0aed8896abf11638dc34bab28c1"
+    "check": "divide-before-multiply"
+    "description": "VAMSToken.mint(address,uint256) (src/token/VAMSToken.sol#150-172) performs a multiplication on the result of a division:\n\t- elapsedYears = (block.timestamp - currentMintYearStart) / SECONDS_PER_YEAR (src/token/VAMSToken.sol#160)\n\t- currentMintYearStart += elapsedYears * SECONDS_PER_YEAR (src/token/VAMSToken.sol#161)\n"
+    "path": "contracts/src/token/VAMSToken.sol"
+    "lines":
+      - 150
+      - 151
+      - 152
+      - 153
+      - 154
+      - 155
+      - 156
+      - 157
+      - 158
+      - 159
+      - 160
+      - 161
+      - 162
+      - 163
+      - 164
+      - 165
+      - 166
+      - 167
+      - 168
+      - 169
+      - 170
+      - 171
+      - 172
+    "source_sha256": "bb5193bb5c0ac282f5fb74c5b6644285f39868a4dbbea8eed93559fe6d3544ed"
+    "status": "reviewed_intended_behavior"
+    "rationale": "Whole elapsed years intentionally advance the annual anchor by an integer number of periods. Partial-year time remains attached to the new window; delayed calls cannot accumulate extra annual allowances."
+    "regression_sources":
+      - "contracts/test/token/MintWindowAuditRegression.t.sol"
+    "independent_acceptance": false
+    "present_in_current_scan": true
+    "source_unchanged_from_prior_non_author_review": true
+    "verification": "CALLBACK-FULL-01: 1267 passed; 0 failed/skipped; source remains byte-identical for this finding"
+  -
+    "id": "7f320614b9a149dd7f2d0b56c405c1b0139f80b9f72c19dff98a0b030deca92d"
+    "check": "divide-before-multiply"
+    "description": "VAMSInsuranceFund.executePayout(bytes32) (src/economic/VAMSInsuranceFund.sol#310-341) performs a multiplication on the result of a division:\n\t- balanceQuotient = remainingFundBalance / BPS_DENOMINATOR (src/economic/VAMSInsuranceFund.sol#328)\n\t- maxDeployedAfterPayout = (balanceQuotient * 3000) + ((balanceRemainder * 3000) / BPS_DENOMINATOR) (src/economic/VAMSInsuranceFund.sol#330-331)\n"
+    "path": "contracts/src/economic/VAMSInsuranceFund.sol"
+    "lines":
+      - 310
+      - 311
+      - 312
+      - 313
+      - 314
+      - 315
+      - 316
+      - 317
+      - 318
+      - 319
+      - 320
+      - 321
+      - 322
+      - 323
+      - 324
+      - 325
+      - 326
+      - 327
+      - 328
+      - 329
+      - 330
+      - 331
+      - 332
+      - 333
+      - 334
+      - 335
+      - 336
+      - 337
+      - 338
+      - 339
+      - 340
+      - 341
+    "source_sha256": "f9e8466b6a56816af565f4a6add2348b581007fe727dc7e6fbe9d1dc1e8f775d"
+    "status": "reviewed_intended_behavior"
+    "rationale": "For B=10000*q+r the cap is 3000*q+floor(3000*r/10000)=floor(0.30*B). The quotient/remainder split avoids overflow and is exact, so no premature division precision is lost. This does not activate insurance yield."
+    "regression_sources":
+      - "contracts/test/economic/VAMSInsuranceFund_Yield.t.sol"
+    "independent_acceptance": false
+    "present_in_current_scan": true
+    "source_unchanged_from_prior_non_author_review": true
+    "verification": "CALLBACK-FULL-01: 1267 passed; 0 failed/skipped; source remains byte-identical for this finding"
+  -
+    "id": "a89855bfe6a71ea28ffc33b6f9a68934654ea73cb1d79e49c531159990024749"
+    "check": "divide-before-multiply"
+    "description": "VAMSStaking._validateBudget(uint256) (src/staking/VAMSStaking.sol#573-588) performs a multiplication on the result of a division:\n\t- elapsedYears = (block.timestamp - currentMintYearStart_) / SECONDS_PER_YEAR (src/staking/VAMSStaking.sol#580)\n\t- currentMintYearStart_ += elapsedYears * SECONDS_PER_YEAR (src/staking/VAMSStaking.sol#581)\n"
+    "path": "contracts/src/staking/VAMSStaking.sol"
+    "lines":
+      - 573
+      - 574
+      - 575
+      - 576
+      - 577
+      - 578
+      - 579
+      - 580
+      - 581
+      - 582
+      - 583
+      - 584
+      - 585
+      - 586
+      - 587
+      - 588
+    "source_sha256": "12709860d4b8343a1f9cc314e77acfcd6b77afde83b2efe6e4dc7bd557d0d35c"
+    "status": "reviewed_intended_behavior"
+    "rationale": "The projected window start uses the same integer whole-year advance as minting, so budget validation and minting agree even after multiple idle years. The remainder preserves the partial year."
+    "regression_sources":
+      - "contracts/test/staking/StakingAuditRegression.t.sol"
+    "independent_acceptance": false
+    "present_in_current_scan": true
+    "source_unchanged_from_prior_non_author_review": true
+    "verification": "CALLBACK-FULL-01: 1267 passed; 0 failed/skipped; source remains byte-identical for this finding"
+  -
+    "id": "53d4d46fd420b9e8ac5383d92804bebcc3993494afc804211beb92d518c53d0d"
+    "check": "incorrect-equality"
+    "description": "VAMSFeeCollector._distributeTokenFees(address) (src/economic/VAMSFeeCollector.sol#203-230) uses a dangerous strict equality:\n\t- total == 0 (src/economic/VAMSFeeCollector.sol#205)\n"
+    "path": "contracts/src/economic/VAMSFeeCollector.sol"
+    "lines":
+      - 203
+      - 204
+      - 205
+      - 206
+      - 207
+      - 208
+      - 209
+      - 210
+      - 211
+      - 212
+      - 213
+      - 214
+      - 215
+      - 216
+      - 217
+      - 218
+      - 219
+      - 220
+      - 221
+      - 222
+      - 223
+      - 224
+      - 225
+      - 226
+      - 227
+      - 228
+      - 229
+      - 230
+    "source_sha256": "ae4945013dc97bb5e9e20d1738850b9fea887859bc4b9e33a108639d84be043f"
+    "status": "reviewed_intended_behavior"
+    "rationale": "total==0 rejects an empty accounted fee pool before proportional arithmetic; it is an exact accounting sentinel, not a market-price or target-time comparison."
+    "regression_sources":
+      - "contracts/test/economic/FeeCollectorAuditRegression.t.sol"
+    "independent_acceptance": false
+    "present_in_current_scan": true
+    "source_unchanged_from_prior_non_author_review": true
+    "verification": "CALLBACK-FULL-01: 1267 passed; 0 failed/skipped; source remains byte-identical for this finding"
+  -
+    "id": "53df016d078ba455f6f088b93dde498ac46066b2814189adabc23ff3db9b13b8"
+    "check": "incorrect-equality"
+    "description": "VAMSHardwareRegistry.getNode(bytes32) (src/registry/VAMSHardwareRegistry.sol#320-323) uses a dangerous strict equality:\n\t- _nodes[nodeId].registeredAt == 0 (src/registry/VAMSHardwareRegistry.sol#321)\n"
+    "path": "contracts/src/registry/VAMSHardwareRegistry.sol"
+    "lines":
+      - 320
+      - 321
+      - 322
+      - 323
+    "source_sha256": "76ad78d01a9daf75edc78a775f7dbb6c564657e12239a5ad944e5206a2aca821"
+    "status": "reviewed_intended_behavior"
+    "rationale": "registeredAt==0 is the existing absent-node sentinel. The comparison is exact existence validation; replacing it by tolerance would accept absent nodes."
+    "regression_sources": []
+    "independent_acceptance": false
+    "present_in_current_scan": true
+    "source_unchanged_from_prior_non_author_review": true
+    "verification": "CALLBACK-FULL-01: 1267 passed; 0 failed/skipped; source remains byte-identical for this finding"
+  -
+    "id": "55bede6ccfc506a51bf7940a73c5e21d1fa598c3dcd0ec8d42a44c98d1123e06"
+    "check": "incorrect-equality"
+    "description": "VAMSTimelockedAdmin._enforceTimelock(bytes32) (src/base/VAMSTimelockedAdmin.sol#38-45) uses a dangerous strict equality:\n\t- executionTime == 0 (src/base/VAMSTimelockedAdmin.sol#40)\n"
+    "path": "contracts/src/base/VAMSTimelockedAdmin.sol"
+    "lines":
+      - 38
+      - 39
+      - 40
+      - 41
+      - 42
+      - 43
+      - 44
+      - 45
+    "source_sha256": "1691e00f68a3f39852317ede1852b2eae03389c06fa7af60c1ebc5343a82d180"
+    "status": "reviewed_intended_behavior"
+    "rationale": "executionTime==0 rejects a timelock operation that has not been scheduled. Nonzero schedules separately enforce block.timestamp >= executionTime."
+    "regression_sources": []
+    "independent_acceptance": false
+    "present_in_current_scan": true
+    "source_unchanged_from_prior_non_author_review": true
+    "verification": "CALLBACK-FULL-01: 1267 passed; 0 failed/skipped; source remains byte-identical for this finding"
+  -
+    "id": "94a663762211748bbfb21dd6a59233dd8f454064be71050c9dfda4d429abe63e"
+    "check": "incorrect-equality"
+    "description": "VAMSAdapterRegistry._selfReportMatches(address,VDSOTypes.Host,uint256) (src/vdso/VAMSAdapterRegistry.sol#181-201) uses a dangerous strict equality:\n\t- reportedEvidenceMode == LIVE_EVIDENCE_MODE (src/vdso/VAMSAdapterRegistry.sol#197)\n"
+    "path": "contracts/src/vdso/VAMSAdapterRegistry.sol"
+    "lines":
+      - 181
+      - 182
+      - 183
+      - 184
+      - 185
+      - 186
+      - 187
+      - 188
+      - 189
+      - 190
+      - 191
+      - 192
+      - 193
+      - 194
+      - 195
+      - 196
+      - 197
+      - 198
+      - 199
+      - 200
+      - 201
+    "source_sha256": "23d83596c63bad5bd442d1e2d9804fdee289214485cf1daf22d2920dd8b8bf8c"
+    "status": "reviewed_intended_behavior"
+    "rationale": "The evidence mode is a canonical bytes32 protocol identifier and must equal LIVE_EVIDENCE_MODE exactly. It is one self-report check, not proof of live qualification by itself."
+    "regression_sources": []
+    "independent_acceptance": false
+    "present_in_current_scan": true
+    "source_unchanged_from_prior_non_author_review": true
+    "verification": "CALLBACK-FULL-01: 1267 passed; 0 failed/skipped; source remains byte-identical for this finding"
+  -
+    "id": "97c4f24732f854e85cab5f326da7232db53c8abc1649b7d792bccd2ef1f221cc"
+    "check": "incorrect-equality"
+    "description": "VAMSVesting.batchRelease(bytes32[]) (src/vesting/VAMSVesting.sol#213-238) uses a dangerous strict equality:\n\t- released == 0 (src/vesting/VAMSVesting.sol#226)\n"
+    "path": "contracts/src/vesting/VAMSVesting.sol"
+    "lines":
+      - 213
+      - 214
+      - 215
+      - 216
+      - 217
+      - 218
+      - 219
+      - 220
+      - 221
+      - 222
+      - 223
+      - 224
+      - 225
+      - 226
+      - 227
+      - 228
+      - 229
+      - 230
+      - 231
+      - 232
+      - 233
+      - 234
+      - 235
+      - 236
+      - 237
+      - 238
+    "source_sha256": "cc1da14493e29ac47cc9ce2a3452fe9126a7149e9444dc6dd2cedb2cddfdd8cf"
+    "status": "reviewed_intended_behavior"
+    "rationale": "released==0 skips only schedules with no payable amount; positive release amounts proceed through the normal checks and transfers. Vesting remains inactive in the restricted deployment."
+    "regression_sources":
+      - "contracts/test/tokenomics/VestingAuditRegression.t.sol"
+    "independent_acceptance": false
+    "present_in_current_scan": true
+    "source_unchanged_from_prior_non_author_review": true
+    "verification": "CALLBACK-FULL-01: 1267 passed; 0 failed/skipped; source remains byte-identical for this finding"
+  -
+    "id": "a0c76759354662c5ebbb6d1f2a5c6899078cabc2e922ead98fb94aabfe4382d1"
+    "check": "incorrect-equality"
+    "description": "VAMSVesting.releaseAll() (src/vesting/VAMSVesting.sol#241-264) uses a dangerous strict equality:\n\t- released == 0 (src/vesting/VAMSVesting.sol#250)\n"
+    "path": "contracts/src/vesting/VAMSVesting.sol"
+    "lines":
+      - 241
+      - 242
+      - 243
+      - 244
+      - 245
+      - 246
+      - 247
+      - 248
+      - 249
+      - 250
+      - 251
+      - 252
+      - 253
+      - 254
+      - 255
+      - 256
+      - 257
+      - 258
+      - 259
+      - 260
+      - 261
+      - 262
+      - 263
+      - 264
+    "source_sha256": "cc1da14493e29ac47cc9ce2a3452fe9126a7149e9444dc6dd2cedb2cddfdd8cf"
+    "status": "reviewed_intended_behavior"
+    "rationale": "released==0 skips only a zero payable amount in releaseAll. It does not compare prices or exact target timestamps. Restricted vesting remains inactive."
+    "regression_sources":
+      - "contracts/test/tokenomics/VestingAuditRegression.t.sol"
+    "independent_acceptance": false
+    "present_in_current_scan": true
+    "source_unchanged_from_prior_non_author_review": true
+    "verification": "CALLBACK-FULL-01: 1267 passed; 0 failed/skipped; source remains byte-identical for this finding"
+  -
+    "id": "a3610392351eb96a2fcdef6c5cbacec61653df8a86dc662f0cd7a2a7dec318a8"
+    "check": "incorrect-equality"
+    "description": "HardwareCommitment.isNodeCommitted(bytes32) (src/economic/HardwareCommitment.sol#182-190) uses a dangerous strict equality:\n\t- cid == bytes32(0) (src/economic/HardwareCommitment.sol#184)\n"
+    "path": "contracts/src/economic/HardwareCommitment.sol"
+    "lines":
+      - 182
+      - 183
+      - 184
+      - 185
+      - 186
+      - 187
+      - 188
+      - 189
+      - 190
+    "source_sha256": "bf5da79040c64365743bac8cdfafdd72afe5db0d07a2933dadc6e5499a997473"
+    "status": "reviewed_intended_behavior"
+    "rationale": "cid==bytes32(0) denotes that no hardware commitment ID exists. Exact sentinel comparison is required before dereferencing a commitment."
+    "regression_sources": []
+    "independent_acceptance": false
+    "present_in_current_scan": true
+    "source_unchanged_from_prior_non_author_review": true
+    "verification": "CALLBACK-FULL-01: 1267 passed; 0 failed/skipped; source remains byte-identical for this finding"
+  -
+    "id": "abbf4116ce74d1e806c9ce62e7ed61994f10df2db183af6ef06b77b0f8bfc9fb"
+    "check": "incorrect-equality"
+    "description": "VAMSVesting.release(bytes32) (src/vesting/VAMSVesting.sol#193-210) uses a dangerous strict equality:\n\t- released == 0 (src/vesting/VAMSVesting.sol#200)\n"
+    "path": "contracts/src/vesting/VAMSVesting.sol"
+    "lines":
+      - 193
+      - 194
+      - 195
+      - 196
+      - 197
+      - 198
+      - 199
+      - 200
+      - 201
+      - 202
+      - 203
+      - 204
+      - 205
+      - 206
+      - 207
+      - 208
+      - 209
+      - 210
+    "source_sha256": "cc1da14493e29ac47cc9ce2a3452fe9126a7149e9444dc6dd2cedb2cddfdd8cf"
+    "status": "reviewed_intended_behavior"
+    "rationale": "released==0 rejects an empty release; positive payable amounts use the checked release path. Restricted vesting remains inactive."
+    "regression_sources":
+      - "contracts/test/tokenomics/VestingAuditRegression.t.sol"
+    "independent_acceptance": false
+    "present_in_current_scan": true
+    "source_unchanged_from_prior_non_author_review": true
+    "verification": "CALLBACK-FULL-01: 1267 passed; 0 failed/skipped; source remains byte-identical for this finding"
+  -
+    "id": "dddb237f769cf967038ebe0f43c5f08d6c45373a14b4fe6e744876b3e7c53b10"
+    "check": "incorrect-equality"
+    "description": "TransactionCompensation.getPendingClaimsCount() (src/economic/TransactionCompensation.sol#386-393) uses a dangerous strict equality:\n\t- claims[pendingClaimIds[i]].status == ClaimStatus.PENDING (src/economic/TransactionCompensation.sol#389)\n"
+    "path": "contracts/src/economic/TransactionCompensation.sol"
+    "lines":
+      - 386
+      - 387
+      - 388
+      - 389
+      - 390
+      - 391
+      - 392
+      - 393
+    "source_sha256": "1858709672cbdbd0db991eecd371b2292e18f053b83bd35ef76dfb7f118a4807"
+    "status": "reviewed_intended_behavior"
+    "rationale": "ClaimStatus.PENDING is a discrete enum member, so exact equality counts the intended state. This view cannot settle or pay a claim."
+    "regression_sources": []
+    "independent_acceptance": false
+    "present_in_current_scan": true
+    "source_unchanged_from_prior_non_author_review": true
+    "verification": "CALLBACK-FULL-01: 1267 passed; 0 failed/skipped; source remains byte-identical for this finding"
+  -
+    "id": "017d1c5b892d3d56444f3b19c3261125e01fd05b7e8e3ee4b9233e772f22b8fb"
+    "check": "reentrancy-no-eth"
+    "description": "Reentrancy in TwoPhaseCommitManager.initiateWorkflow(bytes32,ITwoPhaseCommitManager.ServiceRequest[],bytes32,uint256) (src/economic/TwoPhaseCommitManager.sol#176-259):\n\tExternal calls:\n\t- escrowId = escrowManager.lockEscrow(svc.provider,svc.amount,nonce,svc.timeout,commitSecretHash,svc.serviceType) (src/economic/TwoPhaseCommitManager.sol#225-232)\n\t- escrowId = escrowManager.lockEscrow(svc.provider,svc.amount,nonce,actualPrepareWindow + DEFAULT_COMMIT_WINDOW,commitSecretHash,svc.serviceType) (src/economic/TwoPhaseCommitManager.sol#225-232)\n\tState variables written after the call(s):\n\t- _workflowEscrows[workflowId].push(escrowId) (src/economic/TwoPhaseCommitManager.sol#235)\n\tTwoPhaseCommitManager._workflowEscrows (src/economic/TwoPhaseCommitManager.sol#66) can be used in cross function reentrancies:\n\t- TwoPhaseCommitManager.getWorkflowEscrows(bytes32) (src/economic/TwoPhaseCommitManager.sol#125-132)\n"
+    "path": "contracts/src/economic/TwoPhaseCommitManager.sol"
+    "lines":
+      - 176
+      - 177
+      - 178
+      - 179
+      - 180
+      - 181
+      - 182
+      - 183
+      - 184
+      - 185
+      - 186
+      - 187
+      - 188
+      - 189
+      - 190
+      - 191
+      - 192
+      - 193
+      - 194
+      - 195
+      - 196
+      - 197
+      - 198
+      - 199
+      - 200
+      - 201
+      - 202
+      - 203
+      - 204
+      - 205
+      - 206
+      - 207
+      - 208
+      - 209
+      - 210
+      - 211
+      - 212
+      - 213
+      - 214
+      - 215
+      - 216
+      - 217
+      - 218
+      - 219
+      - 220
+      - 221
+      - 222
+      - 223
+      - 224
+      - 225
+      - 226
+      - 227
+      - 228
+      - 229
+      - 230
+      - 231
+      - 232
+      - 233
+      - 234
+      - 235
+      - 236
+      - 237
+      - 238
+      - 239
+      - 240
+      - 241
+      - 242
+      - 243
+      - 244
+      - 245
+      - 246
+      - 247
+      - 248
+      - 249
+      - 250
+      - 251
+      - 252
+      - 253
+      - 254
+      - 255
+      - 256
+      - 257
+      - 258
+      - 259
+    "source_sha256": "eb31f5180ead78c8eeabe3bbf027a5b29f90e1c3f28a16a639507c11a0f15ffc"
+    "status": "reviewed_intended_behavior"
+    "rationale": "initiateWorkflow is nonReentrant and initializes the agent/serviceCount before escrow calls; each returned escrow is registered before the next iteration. Cross-function paths are not all locked: commit/abort require the workflow agent, and markPrepared requires an already registered service provider. A callback cannot prepare an unregistered final service or make all services prepared early. No unauthorized transition or value gain was identified under the configured escrow-manager trust boundary. The old claim that callbacks can only call views was incorrect; an authorized agent/provider can still perform its own permitted transition. Escrow replacement or additional callback consumers require renewed review."
+    "regression_sources": []
+    "independent_acceptance": false
+    "present_in_current_scan": true
+    "source_unchanged_from_prior_non_author_review": true
+    "verification": "CALLBACK-FULL-01: 1267 passed; 0 failed/skipped; source remains byte-identical for this finding"
+  -
+    "id": "22c709009310680c5db1019c0853350ab27b1a5a9e25c2cc9748880c1104ec2c"
+    "check": "reentrancy-no-eth"
+    "description": "Reentrancy in SLAEnforcer.retryPendingSlash(uint256) (src/sentinel/SLAEnforcer.sol#169-181):\n\tExternal calls:\n\t- res = slasher.slashSLA(ps.provider,ps.offense,0) (src/sentinel/SLAEnforcer.sol#175-180)\n\tState variables written after the call(s):\n\t- ps.retried = false (src/sentinel/SLAEnforcer.sol#179)\n\tSLAEnforcer.pendingSlashes (src/sentinel/SLAEnforcer.sol#51) can be used in cross function reentrancies:\n\t- SLAEnforcer.pendingSlashCount() (src/sentinel/SLAEnforcer.sol#184-186)\n\t- SLAEnforcer.pendingSlashes (src/sentinel/SLAEnforcer.sol#51)\n"
+    "path": "contracts/src/sentinel/SLAEnforcer.sol"
+    "lines":
+      - 169
+      - 170
+      - 171
+      - 172
+      - 173
+      - 174
+      - 175
+      - 176
+      - 177
+      - 178
+      - 179
+      - 180
+      - 181
+    "source_sha256": "6a2c68bd649d0450411829ecb0db1bc56a8aa35970574bb8242b0732c8d9476d"
+    "status": "reviewed_intended_behavior"
+    "rationale": "Both report submission and retry share nonReentrant. retried=true is written before calling the slasher; caught Error(string) resets it for another attempt. Custom/empty reverts and malformed successful ABI results propagate and roll back the entire transaction. Tests grant the callback ADMIN_ROLE and attempt another queue index, proving the guard rather than an access-only rejection."
+    "regression_sources":
+      - "contracts/test/sentinel/SlitherMediumReentrancy.t.sol"
+    "independent_acceptance": false
+    "present_in_current_scan": true
+    "source_unchanged_from_prior_non_author_review": true
+    "verification": "CALLBACK-FULL-01: 1267 passed; 0 failed/skipped; source remains byte-identical for this finding"
+  -
+    "id": "2b71bc1f3b0143f888b7fee617f013f23b57740e95a191f98a3fafe47a15a34e"
+    "check": "reentrancy-no-eth"
+    "description": "Reentrancy in HeartbeatAtomicConsentRegistryV2.relayConsent(bytes,bytes,bytes,bytes,bytes,bytes) (src/trust/HeartbeatAtomicConsentRegistryV2.sol#120-140):\n\tExternal calls:\n\t- _relayRequest(request) (src/trust/HeartbeatAtomicConsentRegistryV2.sol#137)\n\t\t- lock.execute(address(this),0,context.callData,context.base.timelockPredecessor,context.base.timelockSalt) (src/trust/HeartbeatAtomicConsentRegistryV2.sol#160)\n\tState variables written after the call(s):\n\t- delete _frame (src/trust/HeartbeatAtomicConsentRegistryV2.sol#138)\n\tHeartbeatAtomicConsentRegistryV2._frame (src/trust/HeartbeatAtomicConsentRegistryV2.sol#91) can be used in cross function reentrancies:\n\t- HeartbeatAtomicConsentRegistryV2._relayRequest(HeartbeatAtomicConsentRegistryV2.RelayRequest) (src/trust/HeartbeatAtomicConsentRegistryV2.sol#142-162)\n\t- HeartbeatAtomicConsentRegistryV2.applyConsent(bytes,bytes) (src/trust/HeartbeatAtomicConsentRegistryV2.sol#227-236)\n\t- HeartbeatAtomicConsentRegistryV2.relayConsent(bytes,bytes,bytes,bytes,bytes,bytes) (src/trust/HeartbeatAtomicConsentRegistryV2.sol#120-140)\n\t- _relayEntered = false (src/trust/HeartbeatAtomicConsentRegistryV2.sol#139)\n\tHeartbeatAtomicConsentRegistryV2._relayEntered (src/trust/HeartbeatAtomicConsentRegistryV2.sol#92) can be used in cross function reentrancies:\n\t- HeartbeatAtomicConsentRegistryV2.relayConsent(bytes,bytes,bytes,bytes,bytes,bytes) (src/trust/HeartbeatAtomicConsentRegistryV2.sol#120-140)\n"
+    "path": "contracts/src/trust/HeartbeatAtomicConsentRegistryV2.sol"
+    "lines":
+      - 120
+      - 121
+      - 122
+      - 123
+      - 124
+      - 125
+      - 126
+      - 127
+      - 128
+      - 129
+      - 130
+      - 131
+      - 132
+      - 133
+      - 134
+      - 135
+      - 136
+      - 137
+      - 138
+      - 139
+      - 140
+    "source_sha256": "c0984e760df1964a7c369398ced7bc390b3cfc56e00fb43968470eed90fa1936"
+    "status": "reviewed_intended_behavior"
+    "rationale": "_relayEntered is set before dependency calls and combined with _frame.active to reject another relay. The intended applyConsent callback is restricted to the exact timelock operation/frame and consumes that frame before effects. Post-call delete/reset releases the frame and mutex; any failure rolls back both."
+    "regression_sources":
+      - "contracts/test/HeartbeatAtomicConsentRegistryV2Integration.t.sol"
+    "independent_acceptance": false
+    "present_in_current_scan": true
+    "source_unchanged_from_prior_non_author_review": true
+    "verification": "CALLBACK-FULL-01: 1267 passed; 0 failed/skipped; source remains byte-identical for this finding"
+  -
+    "id": "94d95c0590a975b0520e6bffecedb983677f3d6c6c928e62f154cd354cd4e945"
+    "check": "reentrancy-no-eth"
+    "description": "Reentrancy in ComposedSettlement.createComposedEscrowV2(IComposedSettlement.EscrowRequestV2) (src/economic/ComposedSettlement.sol#205-301):\n\tExternal calls:\n\t- selectedBondRegistry.acceptRequest(request.providers[i_scope_1],requestId,request.amounts[i_scope_1]) (src/economic/ComposedSettlement.sol#283)\n\tState variables written after the call(s):\n\t- allocationCount ++ (src/economic/ComposedSettlement.sol#295)\n\tComposedSettlement.allocationCount (src/economic/ComposedSettlement.sol#96) can be used in cross function reentrancies:\n\t- ComposedSettlement.allocationCount (src/economic/ComposedSettlement.sol#96)\n"
+    "path": "contracts/src/economic/ComposedSettlement.sol"
+    "lines":
+      - 205
+      - 206
+      - 207
+      - 208
+      - 209
+      - 210
+      - 211
+      - 212
+      - 213
+      - 214
+      - 215
+      - 216
+      - 217
+      - 218
+      - 219
+      - 220
+      - 221
+      - 222
+      - 223
+      - 224
+      - 225
+      - 226
+      - 227
+      - 228
+      - 229
+      - 230
+      - 231
+      - 232
+      - 233
+      - 234
+      - 235
+      - 236
+      - 237
+      - 238
+      - 239
+      - 240
+      - 241
+      - 242
+      - 243
+      - 244
+      - 245
+      - 246
+      - 247
+      - 248
+      - 249
+      - 250
+      - 251
+      - 252
+      - 253
+      - 254
+      - 255
+      - 256
+      - 257
+      - 258
+      - 259
+      - 260
+      - 261
+      - 262
+      - 263
+      - 264
+      - 265
+      - 266
+      - 267
+      - 268
+      - 269
+      - 270
+      - 271
+      - 272
+      - 273
+      - 274
+      - 275
+      - 276
+      - 277
+      - 278
+      - 279
+      - 280
+      - 281
+      - 282
+      - 283
+      - 284
+      - 285
+      - 286
+      - 287
+      - 288
+      - 289
+      - 290
+      - 291
+      - 292
+      - 293
+      - 294
+      - 295
+      - 296
+      - 297
+      - 298
+      - 299
+      - 300
+      - 301
+    "source_sha256": "a5219b7c257c6d4fb44e01d5a6878c92687a5f53344b0aee759f92bc4279c17d"
+    "status": "reviewed_intended_behavior"
+    "rationale": "Escrow creation and value-moving settlement methods are nonReentrant. The exact incoming token balance delta is checked and the chosen bond registry is snapshotted. Writes after token/bond calls are atomic on failure; a callback cannot create or consume a partial allocation. This relies on the configured token/bond/verifier boundaries and is not approval of arbitrary replacements."
+    "regression_sources":
+      - "contracts/test/ObjectSettlementV3.t.sol"
+    "independent_acceptance": false
+    "present_in_current_scan": true
+    "source_unchanged_from_prior_non_author_review": true
+    "verification": "CALLBACK-FULL-01: 1267 passed; 0 failed/skipped; source remains byte-identical for this finding"
+  -
+    "id": "9f6309b8812818f30e757f4a102add39e53bb8a551e8925a4d192fc81c881dcb"
+    "check": "reentrancy-no-eth"
+    "description": "Reentrancy in ComposedSettlement.refundExpiredComposed(bytes32) (src/economic/ComposedSettlement.sol#442-487):\n\tExternal calls:\n\t- _cancelBondReservation(allocationId,i) (src/economic/ComposedSettlement.sol#471)\n\t\t- allocationBondRegistry[allocationId].cancelRequest(_providerAllocs[allocationId][index].provider,bondRequestIds[allocationId][index]) (src/economic/ComposedSettlement.sol#629-630)\n\tState variables written after the call(s):\n\t- alloc.status = AllocationStatus.EXPIRED (src/economic/ComposedSettlement.sol#478)\n\tComposedSettlement._allocations (src/economic/ComposedSettlement.sol#108) can be used in cross function reentrancies:\n\t- ComposedSettlement.getComposedAllocation(bytes32) (src/economic/ComposedSettlement.sol#636-643)\n\t- ComposedSettlement.getDeliveryContext(bytes32,uint256) (src/economic/ComposedSettlement.sol#721-732)\n\t- ComposedSettlement.getProviderAlloc(bytes32,uint256) (src/economic/ComposedSettlement.sol#646-654)\n\t- ComposedSettlement.isFullyClaimed(bytes32) (src/economic/ComposedSettlement.sol#657-660)\n\t- refundedProviderShareV3[allocationId][i] = true (src/economic/ComposedSettlement.sol#469)\n\tComposedSettlement.refundedProviderShareV3 (src/economic/ComposedSettlement.sol#153) can be used in cross function reentrancies:\n\t- ComposedSettlement.refundedProviderShareV3 (src/economic/ComposedSettlement.sol#153)\n"
+    "path": "contracts/src/economic/ComposedSettlement.sol"
+    "lines":
+      - 442
+      - 443
+      - 444
+      - 445
+      - 446
+      - 447
+      - 448
+      - 449
+      - 450
+      - 451
+      - 452
+      - 453
+      - 454
+      - 455
+      - 456
+      - 457
+      - 458
+      - 459
+      - 460
+      - 461
+      - 462
+      - 463
+      - 464
+      - 465
+      - 466
+      - 467
+      - 468
+      - 469
+      - 470
+      - 471
+      - 472
+      - 473
+      - 474
+      - 475
+      - 476
+      - 477
+      - 478
+      - 479
+      - 480
+      - 481
+      - 482
+      - 483
+      - 484
+      - 485
+      - 486
+      - 487
+    "source_sha256": "a5219b7c257c6d4fb44e01d5a6878c92687a5f53344b0aee759f92bc4279c17d"
+    "status": "reviewed_intended_behavior"
+    "rationale": "refundExpiredComposed is nonReentrant and marks each refundedProviderShare before the bond cancellation callback. Aggregate balance/status updates and token refund finish atomically; failed interactions roll back the flags and totals."
+    "regression_sources":
+      - "contracts/test/ObjectSettlementV3.t.sol"
+    "independent_acceptance": false
+    "present_in_current_scan": true
+    "source_unchanged_from_prior_non_author_review": true
+    "verification": "CALLBACK-FULL-01: 1267 passed; 0 failed/skipped; source remains byte-identical for this finding"
+  -
+    "id": "af7438f1d1ff72bf2984057cf2ae451deee9efd21a1599253b1fa7c832b54d5d"
+    "check": "reentrancy-no-eth"
+    "description": "Reentrancy in HeartbeatAtomicConsentRegistryV3.relayConsent(bytes,bytes,bytes,bytes,bytes,bytes) (src/trust/HeartbeatAtomicConsentRegistryV3.sol#192-214):\n\tExternal calls:\n\t- OperationAwareVAMSTimelockControllerV3(address(timelock)).execute(address(this),0,c.callData,c.base.timelockPredecessor,c.base.timelockSalt) (src/trust/HeartbeatAtomicConsentRegistryV3.sol#209-210)\n\tState variables written after the call(s):\n\t- _entered = false (src/trust/HeartbeatAtomicConsentRegistryV3.sol#213)\n\tHeartbeatAtomicConsentRegistryV3._entered (src/trust/HeartbeatAtomicConsentRegistryV3.sol#126) can be used in cross function reentrancies:\n\t- HeartbeatAtomicConsentRegistryV3.relayConsent(bytes,bytes,bytes,bytes,bytes,bytes) (src/trust/HeartbeatAtomicConsentRegistryV3.sol#192-214)\n\t- delete _frame (src/trust/HeartbeatAtomicConsentRegistryV3.sol#212)\n\tHeartbeatAtomicConsentRegistryV3._frame (src/trust/HeartbeatAtomicConsentRegistryV3.sol#125) can be used in cross function reentrancies:\n\t- HeartbeatAtomicConsentRegistryV3._installFrame(HeartbeatAtomicConsentRegistryV3.Request,HeartbeatAtomicConsentRegistryV3.Context) (src/trust/HeartbeatAtomicConsentRegistryV3.sol#388-407)\n\t- HeartbeatAtomicConsentRegistryV3.applyConsent(bytes,bytes) (src/trust/HeartbeatAtomicConsentRegistryV3.sol#296-324)\n\t- HeartbeatAtomicConsentRegistryV3.relayConsent(bytes,bytes,bytes,bytes,bytes,bytes) (src/trust/HeartbeatAtomicConsentRegistryV3.sol#192-214)\n"
+    "path": "contracts/src/trust/HeartbeatAtomicConsentRegistryV3.sol"
+    "lines":
+      - 192
+      - 193
+      - 194
+      - 195
+      - 196
+      - 197
+      - 198
+      - 199
+      - 200
+      - 201
+      - 202
+      - 203
+      - 204
+      - 205
+      - 206
+      - 207
+      - 208
+      - 209
+      - 210
+      - 211
+      - 212
+      - 213
+      - 214
+    "source_sha256": "c929682ece51b7126c83dea7972ea1ae0c81b2548e5a367d5dc510312299b3d3"
+    "status": "reviewed_intended_behavior"
+    "rationale": "_entered is acquired before dependency calls and checked with _frame.active. applyConsent intentionally enters from the exact timelock operation, validates/consumes its frame, and revalidates current authority before effects. Clearing _frame/_entered after a consumed callback is mutex cleanup, not an unguarded economic effect."
+    "regression_sources":
+      - "contracts/test/HeartbeatAtomicConsentRegistryV3Integration.t.sol"
+    "independent_acceptance": false
+    "present_in_current_scan": true
+    "source_unchanged_from_prior_non_author_review": true
+    "verification": "CALLBACK-FULL-01: 1267 passed; 0 failed/skipped; source remains byte-identical for this finding"
+  -
+    "id": "0d6f4d24176218e51febed13b587e526a9367de6ab6fff52e7fd5cf4fe1da8eb"
+    "check": "uninitialized-local"
+    "description": "HeartbeatPrincipalV1.tryDecode(bytes).fields (src/trust/HeartbeatPrincipalV1.sol#103) is a local variable never initialized\n"
+    "path": "contracts/src/trust/HeartbeatPrincipalV1.sol"
+    "lines":
+      - 103
+    "source_sha256": "0083a6398398f1a36e196e1e3ca9b95073b5d42ef1f5d9bdd22f06a5b6ff4da4"
+    "status": "reviewed_intended_behavior"
+    "rationale": "All 18 dynamic byte slots are assigned in the validated bounded field loop before conversion. Malformed/truncated input returns the separate zero record before any unfilled slot is read."
+    "regression_sources":
+      - "contracts/test/HeartbeatPrincipalV1.t.sol"
+    "independent_acceptance": false
+    "present_in_current_scan": true
+    "source_unchanged_from_prior_non_author_review": true
+    "verification": "CALLBACK-FULL-01: 1267 passed; 0 failed/skipped; source remains byte-identical for this finding"
+  -
+    "id": "173bd80ae189004c3602e46712297f70a7dfe64866fb6dfa23c6d205ea68b598"
+    "check": "uninitialized-local"
+    "description": "HeartbeatConsentV2.tryDecodeBase(bytes).value (src/trust/HeartbeatConsentV2.sol#152) is a local variable never initialized\n"
+    "path": "contracts/src/trust/HeartbeatConsentV2.sol"
+    "lines":
+      - 152
+    "source_sha256": "a8ce27d956ebdfe38f9034a1ce92c86ecc7748a2c0e0be4ee2d9e7ea80a84633"
+    "status": "reviewed_intended_behavior"
+    "rationale": "Every BaseIntent member is assigned from width-validated fields before validBase and return. A parse/validation failure returns the explicit empty base."
+    "regression_sources":
+      - "contracts/test/HeartbeatConsentV2.t.sol"
+    "independent_acceptance": false
+    "present_in_current_scan": true
+    "source_unchanged_from_prior_non_author_review": true
+    "verification": "CALLBACK-FULL-01: 1267 passed; 0 failed/skipped; source remains byte-identical for this finding"
+  -
+    "id": "2a7ab611b2e4f4bfc6df9a59e73ff95941a46769ec268d9d8a98e2ac2dacef1a"
+    "check": "uninitialized-local"
+    "description": "ObjectEffectV3.terminalAbsence(GovernedObjectGrantV1.Proposal,bytes,ObjectEffectV3.AbsenceEvidence,bytes32,uint256,uint256).e (src/trust/ObjectEffectV3.sol#182) is a local variable never initialized\n"
+    "path": "contracts/src/trust/ObjectEffectV3.sol"
+    "lines":
+      - 182
+    "source_sha256": "83fe5d2f127744bd6e13e1fd3cc793b338cc317613c3e6061cf97e92448c612a"
+    "status": "reviewed_intended_behavior"
+    "rationale": "All seven Expected members (issuer, subject, provider, purpose, epoch, policy version, fence) are assigned before R.verify. Failure is returned to absence and the settlement rejects it before ledger effects."
+    "regression_sources":
+      - "contracts/test/EffectReceiptV3.t.sol"
+      - "contracts/test/ObjectSettlementV3.t.sol"
+    "independent_acceptance": false
+    "present_in_current_scan": true
+    "source_unchanged_from_prior_non_author_review": true
+    "verification": "CALLBACK-FULL-01: 1267 passed; 0 failed/skipped; source remains byte-identical for this finding"
+  -
+    "id": "310c0bf8d819902bc025f60cc10f99a25e3789b85bc7bb651b52ce538cfb857d"
+    "check": "uninitialized-local"
+    "description": "HeartbeatAuthorityTypesV3.profileProjectionDigest(HeartbeatAuthorityTypesV3.Profile).projection (src/trust/HeartbeatAuthorityTypesV3.sol#176) is a local variable never initialized\n"
+    "path": "contracts/src/trust/HeartbeatAuthorityTypesV3.sol"
+    "lines":
+      - 176
+    "source_sha256": "0bf780342c3a71c664a7ef78576cb33196cc84a4ccb52b950f4f8abc15c67732"
+    "status": "reviewed_intended_behavior"
+    "rationale": "Every ProfileProjection member is copied before hashing. The recursive authorityConfigDigest field is intentionally excluded from this projection and is not a missing initialization."
+    "regression_sources":
+      - "contracts/test/HeartbeatAuthoritySourceV3.t.sol"
+    "independent_acceptance": false
+    "present_in_current_scan": true
+    "source_unchanged_from_prior_non_author_review": true
+    "verification": "CALLBACK-FULL-01: 1267 passed; 0 failed/skipped; source remains byte-identical for this finding"
+  -
+    "id": "3835ae38a6a5c20596fbc6f85df01b866a0e8ad7fb2cc624b0c1b656bba7ad8d"
+    "check": "uninitialized-local"
+    "description": "HeartbeatConsentV2.tryDecodeWitness(bytes).value (src/trust/HeartbeatConsentV2.sol#187) is a local variable never initialized\n"
+    "path": "contracts/src/trust/HeartbeatConsentV2.sol"
+    "lines":
+      - 187
+    "source_sha256": "a8ce27d956ebdfe38f9034a1ce92c86ecc7748a2c0e0be4ee2d9e7ea80a84633"
+    "status": "reviewed_intended_behavior"
+    "rationale": "All eight Witness members are populated from bounded, fixed-width parsed fields and validated before success. Invalid input returns the explicit empty witness."
+    "regression_sources":
+      - "contracts/test/HeartbeatConsentV2.t.sol"
+    "independent_acceptance": false
+    "present_in_current_scan": true
+    "source_unchanged_from_prior_non_author_review": true
+    "verification": "CALLBACK-FULL-01: 1267 passed; 0 failed/skipped; source remains byte-identical for this finding"
+  -
+    "id": "4b15a9f7a26a953c59f1f2662d3ff345de6cb909a72830bd9181cc910147bde1"
+    "check": "uninitialized-local"
+    "description": "ObjectEffectV3.acknowledgement(bytes,ObjectEffectV3.AbsenceEvidence,uint256,bytes32).e (src/trust/ObjectEffectV3.sol#197) is a local variable never initialized\n"
+    "path": "contracts/src/trust/ObjectEffectV3.sol"
+    "lines":
+      - 197
+    "source_sha256": "83fe5d2f127744bd6e13e1fd3cc793b338cc317613c3e6061cf97e92448c612a"
+    "status": "reviewed_intended_behavior"
+    "rationale": "All Expected members are assigned before signature verification. Acknowledgement.valid defaults false on early failure and absence checks it before using the digest/time."
+    "regression_sources":
+      - "contracts/test/EffectReceiptV3.t.sol"
+      - "contracts/test/ObjectSettlementV3.t.sol"
+    "independent_acceptance": false
+    "present_in_current_scan": true
+    "source_unchanged_from_prior_non_author_review": true
+    "verification": "CALLBACK-FULL-01: 1267 passed; 0 failed/skipped; source remains byte-identical for this finding"
+  -
+    "id": "4e118990f33188baba8f935dc243110c6688d77aa92f094cc6c69d7a6d2db4af"
+    "check": "uninitialized-local"
+    "description": "OperationAwareVAMSTimelockControllerV3._sortAndUnique(address[]).uniqueCount (src/governance/OperationAwareVAMSTimelockControllerV3.sol#170) is a local variable never initialized\n"
+    "path": "contracts/src/governance/OperationAwareVAMSTimelockControllerV3.sol"
+    "lines":
+      - 170
+    "source_sha256": "a61aa4fed7317f2142101f30f721036e767cc597f21c53c6fd1fd902bf852aea"
+    "status": "reviewed_intended_behavior"
+    "rationale": "uniqueCount intentionally starts at Solidity uint256 zero, counts sorted distinct elements, and determines the exact output allocation. Empty input correctly allocates an empty array."
+    "regression_sources":
+      - "contracts/test/OperationAwareVAMSTimelockControllerV3.t.sol"
+    "independent_acceptance": false
+    "present_in_current_scan": true
+    "source_unchanged_from_prior_non_author_review": true
+    "verification": "CALLBACK-FULL-01: 1267 passed; 0 failed/skipped; source remains byte-identical for this finding"
+  -
+    "id": "50fbd75e1f41170c869778cd943bb31356b176f8b4c1c0a09c4bf0e9ce02465d"
+    "check": "uninitialized-local"
+    "description": "GovernedObjectGrantV1.sortedResources(bytes32[]).previous (src/trust/GovernedObjectGrantV1.sol#51) is a local variable never initialized\n"
+    "path": "contracts/src/trust/GovernedObjectGrantV1.sol"
+    "lines":
+      - 51
+    "source_sha256": "2443b2e537672b0fb3dc4ae7afc14b62ef75138e0c42c38a0b5fb0b625d409a9"
+    "status": "reviewed_intended_behavior"
+    "rationale": "previous intentionally starts at bytes32 zero. The <= comparison rejects zero resources and nonincreasing/duplicate resources before setting previous to each accepted resource."
+    "regression_sources":
+      - "contracts/test/ObjectGrantPolicy.t.sol"
+    "independent_acceptance": false
+    "present_in_current_scan": true
+    "source_unchanged_from_prior_non_author_review": true
+    "verification": "CALLBACK-FULL-01: 1267 passed; 0 failed/skipped; source remains byte-identical for this finding"
+  -
+    "id": "67810ea5a6f07bbc928f6da200f893ec20ff851f6e86a5462b0467a3f71b2ddd"
+    "check": "uninitialized-local"
+    "description": "HeartbeatAuthorityTypesV3.authorityConfigDigest(HeartbeatAuthorityTypesV3.ProducerState).projection (src/trust/HeartbeatAuthorityTypesV3.sol#206) is a local variable never initialized\n"
+    "path": "contracts/src/trust/HeartbeatAuthorityTypesV3.sol"
+    "lines":
+      - 206
+    "source_sha256": "0bf780342c3a71c664a7ef78576cb33196cc84a4ccb52b950f4f8abc15c67732"
+    "status": "reviewed_intended_behavior"
+    "rationale": "Every AuthorityConfigProjection member is assigned from ProducerState before the domain-separated hash. Static ABI golden tests bind the exact projection order."
+    "regression_sources":
+      - "contracts/test/HeartbeatAuthoritySourceV3.t.sol"
+    "independent_acceptance": false
+    "present_in_current_scan": true
+    "source_unchanged_from_prior_non_author_review": true
+    "verification": "CALLBACK-FULL-01: 1267 passed; 0 failed/skipped; source remains byte-identical for this finding"
+  -
+    "id": "68624bd37938e8c5b9fa4a78c03823b4f89e7c7623ecb4640bf624b79bee2c16"
+    "check": "uninitialized-local"
+    "description": "RawSecp256k1V1._jMultShamir(RawSecp256k1V1.JPoint[16],uint256,uint256).z (src/trust/RawSecp256k1V1.sol#187) is a local variable never initialized\n"
+    "path": "contracts/src/trust/RawSecp256k1V1.sol"
+    "lines":
+      - 187
+    "source_sha256": "e28617acd711e85e18eb1e6f1c718cb387647dce369c32590b89435bc7f4a6cf"
+    "status": "reviewed_intended_behavior"
+    "rationale": "Jacobian z=0 is the point-at-infinity accumulator. The first nonzero point assigns x,y,z; further rounds double/add. Final affine conversion checks nonzero z and the caller rejects nonfinite results; zero is mathematically intentional."
+    "regression_sources":
+      - "contracts/test/RawSecp256k1V1.t.sol"
+    "independent_acceptance": false
+    "present_in_current_scan": true
+    "source_unchanged_from_prior_non_author_review": true
+    "verification": "CALLBACK-FULL-01: 1267 passed; 0 failed/skipped; source remains byte-identical for this finding"
+  -
+    "id": "69c68afc4b4d2fe9eb1f6b2663e0b1d78371b2e6d2cca42fa023bf906ed59f2f"
+    "check": "uninitialized-local"
+    "description": "HeartbeatPrincipalV1.tryDecodeCalldata(bytes).empty (src/trust/HeartbeatPrincipalV1.sol#84) is a local variable never initialized\n"
+    "path": "contracts/src/trust/HeartbeatPrincipalV1.sol"
+    "lines":
+      - 84
+    "source_sha256": "0083a6398398f1a36e196e1e3ca9b95073b5d42ef1f5d9bdd22f06a5b6ff4da4"
+    "status": "reviewed_intended_behavior"
+    "rationale": "The default Record is deliberately the zero/failure return for oversized calldata. Boolean false accompanies it, and callers reject false before using a record."
+    "regression_sources":
+      - "contracts/test/HeartbeatPrincipalV1.t.sol"
+    "independent_acceptance": false
+    "present_in_current_scan": true
+    "source_unchanged_from_prior_non_author_review": true
+    "verification": "CALLBACK-FULL-01: 1267 passed; 0 failed/skipped; source remains byte-identical for this finding"
+  -
+    "id": "6bc0682c703b29bffbdfd670b07ed4856b526fe8721959c9ab6ba0bba5c7545d"
+    "check": "uninitialized-local"
+    "description": "ComposedSettlement._recordEarnedDelivery(bytes32,uint256,bytes32,bytes).acceptedReplayKey (src/economic/ComposedSettlement.sol#366) is a local variable never initialized\n"
+    "path": "contracts/src/economic/ComposedSettlement.sol"
+    "lines":
+      - 366
+    "source_sha256": "a5219b7c257c6d4fb44e01d5a6878c92687a5f53344b0aee759f92bc4279c17d"
+    "status": "reviewed_intended_behavior"
+    "rationale": "acceptedReplayKey is assigned only after verifier success, nonzero key and replay checks. Every failed call/result reverts, so no path can store the initial zero as an earned delivery."
+    "regression_sources":
+      - "contracts/test/ObjectSettlementV3.t.sol"
+    "independent_acceptance": false
+    "present_in_current_scan": true
+    "source_unchanged_from_prior_non_author_review": true
+    "verification": "CALLBACK-FULL-01: 1267 passed; 0 failed/skipped; source remains byte-identical for this finding"
+  -
+    "id": "726c3f8a6b3d0f7b440ce38e6dc3fbcd4f560577e99dec9c220f3ef5c709a248"
+    "check": "uninitialized-local"
+    "description": "AutomataSgxActionVerifierV1._verifyQuote(ActionContextV1.Context,bytes32,bytes,bytes).h (src/trust/AutomataSgxActionVerifierV1.sol#86) is a local variable never initialized\n"
+    "path": "contracts/src/trust/AutomataSgxActionVerifierV1.sol"
+    "lines":
+      - 86
+    "source_sha256": "05b95bb8bb2e24b81b293d195711d8a3b09e2080df61df8aa32192016f83998b"
+    "status": "reviewed_intended_behavior"
+    "rationale": "All DCAP header members are read from a length-validated quote before verification. Upstream success, exact output length/type, TCB, debug flag, measurements, SVN, action/root report-data binding and root control signature are checked. This is source-only validation, not authentic DCAP/collateral acceptance."
+    "regression_sources": []
+    "independent_acceptance": false
+    "present_in_current_scan": true
+    "source_unchanged_from_prior_non_author_review": true
+    "verification": "CALLBACK-FULL-01: 1267 passed; 0 failed/skipped; source remains byte-identical for this finding"
+  -
+    "id": "84878c78ac15b249e29c59985fbb1c32ffc2e81034661139d899432e96bc3595"
+    "check": "uninitialized-local"
+    "description": "ComposedSettlement.createComposedEscrowV2(IComposedSettlement.EscrowRequestV2).block_ (src/economic/ComposedSettlement.sol#208) is a local variable never initialized\n"
+    "path": "contracts/src/economic/ComposedSettlement.sol"
+    "lines":
+      - 208
+    "source_sha256": "a5219b7c257c6d4fb44e01d5a6878c92687a5f53344b0aee759f92bc4279c17d"
+    "status": "reviewed_intended_behavior"
+    "rationale": "serviceBlockId zero intentionally uses a default ServiceBlock (zero manifest/version/builder/share) and bypasses _termsHash; nonzero IDs load a qualified block. Default zero fields implement the no-Service-Block mode."
+    "regression_sources":
+      - "contracts/test/ObjectSettlementV3.t.sol"
+    "independent_acceptance": false
+    "present_in_current_scan": true
+    "source_unchanged_from_prior_non_author_review": true
+    "verification": "CALLBACK-FULL-01: 1267 passed; 0 failed/skipped; source remains byte-identical for this finding"
+  -
+    "id": "a9c702bf4a66a2ca721c9a90fdbdb6054b22c85659ed58e56ed6d6cec0196cfa"
+    "check": "uninitialized-local"
+    "description": "ObjectEffectV3.verifyFenceUpdate(ObjectEffectV3.Fence,bytes,bytes).e (src/trust/ObjectEffectV3.sol#210) is a local variable never initialized\n"
+    "path": "contracts/src/trust/ObjectEffectV3.sol"
+    "lines":
+      - 210
+    "source_sha256": "83fe5d2f127744bd6e13e1fd3cc793b338cc317613c3e6061cf97e92448c612a"
+    "status": "reviewed_intended_behavior"
+    "rationale": "Every Expected member is assigned before R.verify. Decoding, exact fence time and authority-key signature checks all precede successful return."
+    "regression_sources":
+      - "contracts/test/EffectReceiptV3.t.sol"
+      - "contracts/test/ObjectSettlementV3.t.sol"
+    "independent_acceptance": false
+    "present_in_current_scan": true
+    "source_unchanged_from_prior_non_author_review": true
+    "verification": "CALLBACK-FULL-01: 1267 passed; 0 failed/skipped; source remains byte-identical for this finding"
+  -
+    "id": "df4398e0a3f5a0a3a26a48e8463c2fbf156c0fd06e18aae8b80eea392c093f01"
+    "check": "uninitialized-local"
+    "description": "HeartbeatPrincipalV1.tryDecode(bytes).r (src/trust/HeartbeatPrincipalV1.sol#114) is a local variable never initialized\n"
+    "path": "contracts/src/trust/HeartbeatPrincipalV1.sol"
+    "lines":
+      - 114
+    "source_sha256": "0083a6398398f1a36e196e1e3ca9b95073b5d42ef1f5d9bdd22f06a5b6ff4da4"
+    "status": "reviewed_intended_behavior"
+    "rationale": "All 18 Record members are populated from the validated complete field set, then valid(r) is checked. Invalid records return the separate empty value."
+    "regression_sources":
+      - "contracts/test/HeartbeatPrincipalV1.t.sol"
+    "independent_acceptance": false
+    "present_in_current_scan": true
+    "source_unchanged_from_prior_non_author_review": true
+    "verification": "CALLBACK-FULL-01: 1267 passed; 0 failed/skipped; source remains byte-identical for this finding"
+  -
+    "id": "e3a436b8f48564f8e28dff2256b7bc9592a0b65fd7fffaa747cd0cc27166ba30"
+    "check": "uninitialized-local"
+    "description": "OperationAwareVAMSTimelockControllerV3._sortAndUnique(address[]).outputIndex (src/governance/OperationAwareVAMSTimelockControllerV3.sol#176) is a local variable never initialized\n"
+    "path": "contracts/src/governance/OperationAwareVAMSTimelockControllerV3.sol"
+    "lines":
+      - 176
+    "source_sha256": "a61aa4fed7317f2142101f30f721036e767cc597f21c53c6fd1fd902bf852aea"
+    "status": "reviewed_intended_behavior"
+    "rationale": "outputIndex deliberately starts at zero and advances once per unique sorted value. The preceding uniqueCount loop allocates exactly that many slots."
+    "regression_sources":
+      - "contracts/test/OperationAwareVAMSTimelockControllerV3.t.sol"
+    "independent_acceptance": false
+    "present_in_current_scan": true
+    "source_unchanged_from_prior_non_author_review": true
+    "verification": "CALLBACK-FULL-01: 1267 passed; 0 failed/skipped; source remains byte-identical for this finding"
+  -
+    "id": "ee4b24521fefabf004798941c64b8199f19323600290e954d84e6bdd9dc95708"
+    "check": "uninitialized-local"
+    "description": "HeartbeatPrincipalV1.tryDecode(bytes).empty (src/trust/HeartbeatPrincipalV1.sol#94) is a local variable never initialized\n"
+    "path": "contracts/src/trust/HeartbeatPrincipalV1.sol"
+    "lines":
+      - 94
+    "source_sha256": "0083a6398398f1a36e196e1e3ca9b95073b5d42ef1f5d9bdd22f06a5b6ff4da4"
+    "status": "reviewed_intended_behavior"
+    "rationale": "empty intentionally remains the all-zero Record returned with false on every decoder failure; it is not an authorization input on successful decoding."
+    "regression_sources":
+      - "contracts/test/HeartbeatPrincipalV1.t.sol"
+    "independent_acceptance": false
+    "present_in_current_scan": true
+    "source_unchanged_from_prior_non_author_review": true
+    "verification": "CALLBACK-FULL-01: 1267 passed; 0 failed/skipped; source remains byte-identical for this finding"
+  -
+    "id": "f955f2a9c411def6904018b449581a1fef7ae348e45c190b24198ef75858b262"
+    "check": "uninitialized-local"
+    "description": "HeartbeatAtomicConsentRegistryV2.relayConsent(bytes,bytes,bytes,bytes,bytes,bytes).request (src/trust/HeartbeatAtomicConsentRegistryV2.sol#130) is a local variable never initialized\n"
+    "path": "contracts/src/trust/HeartbeatAtomicConsentRegistryV2.sol"
+    "lines":
+      - 130
+    "source_sha256": "c0984e760df1964a7c369398ced7bc390b3cfc56e00fb43968470eed90fa1936"
+    "status": "reviewed_intended_behavior"
+    "rationale": "All six RelayRequest byte members are assigned from bounded calldata before _relayRequest. No member is read unassigned."
+    "regression_sources":
+      - "contracts/test/HeartbeatAtomicConsentRegistryV2Integration.t.sol"
+    "independent_acceptance": false
+    "present_in_current_scan": true
+    "source_unchanged_from_prior_non_author_review": true
+    "verification": "CALLBACK-FULL-01: 1267 passed; 0 failed/skipped; source remains byte-identical for this finding"
+  -
+    "id": "fb1c30d61ae5c5a13d795c33307b8d1268d004c352d6a139873cdb88022af094"
+    "check": "uninitialized-local"
+    "description": "HeartbeatConsentPolicyV3.configure(HeartbeatAuthorityTypesV3.ProfileConfig).computed (src/trust/HeartbeatConsentPolicyV3.sol#120) is a local variable never initialized\n"
+    "path": "contracts/src/trust/HeartbeatConsentPolicyV3.sol"
+    "lines":
+      - 120
+    "source_sha256": "5c8199294d0f96e8b25fcdd5c1ad1d5b99c7bbea4acdc8525e33704ef4a046ab"
+    "status": "reviewed_intended_behavior"
+    "rationale": "computed is assigned by the authority-source try return; catch always reverts, and zero digest is rejected. Failure rolls back staged profile state."
+    "regression_sources":
+      - "contracts/test/HeartbeatAuthoritySourceV3.t.sol"
+    "independent_acceptance": false
+    "present_in_current_scan": true
+    "source_unchanged_from_prior_non_author_review": true
+    "verification": "CALLBACK-FULL-01: 1267 passed; 0 failed/skipped; source remains byte-identical for this finding"
+  -
+    "id": "060f48dbdd39bc2f8563a696a6c38285a8201ae9121d25b2e6f085ea885a07f4"
+    "check": "unused-return"
+    "description": "HeartbeatAtomicConsentRegistryV3._bodyKey(bytes) (src/trust/HeartbeatAtomicConsentRegistryV3.sol#582-587) ignores return value by (ok,p,None) = HeartbeatConsentVerificationRouterV2(verifier).decodePrincipal(raw) (src/trust/HeartbeatAtomicConsentRegistryV3.sol#583-584)\n"
+    "path": "contracts/src/trust/HeartbeatAtomicConsentRegistryV3.sol"
+    "lines":
+      - 582
+      - 583
+      - 584
+      - 585
+      - 586
+      - 587
+    "source_sha256": "c929682ece51b7126c83dea7972ea1ae0c81b2548e5a367d5dc510312299b3d3"
+    "status": "reviewed_intended_behavior"
+    "rationale": "decodePrincipal success is checked, and _bodyKey needs only the decoded key. The omitted digest is metadata; the enclosing rotation verifies expected record digests and signed consent separately."
+    "regression_sources":
+      - "contracts/test/HeartbeatAtomicConsentRegistryV3Integration.t.sol"
+    "independent_acceptance": false
+    "present_in_current_scan": true
+    "source_unchanged_from_prior_non_author_review": true
+    "verification": "CALLBACK-FULL-01: 1267 passed; 0 failed/skipped; source remains byte-identical for this finding"
+  -
+    "id": "0f2469fef2ecedc1ae3f85b40191bc25ed8a2de7e24ccd72a09b5ac3251771ac"
+    "check": "unused-return"
+    "description": "ObjectEffectV3.providerReceipt(GovernedObjectGrantV1.Proposal,bytes,bytes,bytes32,uint256) (src/trust/ObjectEffectV3.sol#134-140) ignores return value by EffectReceiptV3.verify(envelope,key,e,now_,true) (src/trust/ObjectEffectV3.sol#139)\n"
+    "path": "contracts/src/trust/ObjectEffectV3.sol"
+    "lines":
+      - 134
+      - 135
+      - 136
+      - 137
+      - 138
+      - 139
+      - 140
+    "source_sha256": "83fe5d2f127744bd6e13e1fd3cc793b338cc317613c3e6061cf97e92448c612a"
+    "status": "reviewed_intended_behavior"
+    "rationale": "This is a direct return R.verify(...), not a discarded result. Both Boolean and digest propagate through completion and the public delivery verifier into settlement, which rejects false before effects."
+    "regression_sources":
+      - "contracts/test/EffectReceiptV3.t.sol"
+      - "contracts/test/ObjectSettlementV3.t.sol"
+    "independent_acceptance": false
+    "present_in_current_scan": true
+    "source_unchanged_from_prior_non_author_review": true
+    "verification": "CALLBACK-FULL-01: 1267 passed; 0 failed/skipped; source remains byte-identical for this finding"
+  -
+    "id": "0f337680c6ce919f007dd62e0e79cad769a90dce17b85ed71902dc068566d784"
+    "check": "unused-return"
+    "description": "RootSignatureV1.valid(address,bytes32,bytes) (src/trust/RootSignatureV1.sol#7-14) ignores return value by (signer,error,None) = ECDSA.tryRecover(digest,27,r,s) (src/trust/RootSignatureV1.sol#10)\n"
+    "path": "contracts/src/trust/RootSignatureV1.sol"
+    "lines":
+      - 7
+      - 8
+      - 9
+      - 10
+      - 11
+      - 12
+      - 13
+      - 14
+    "source_sha256": "98e7dc020d422460b1277da8d7a79561d58787d5fe2b0a26349b7e9024ef27d6"
+    "status": "reviewed_intended_behavior"
+    "rationale": "The omitted ECDSA third return is diagnostic error data. The code checks RecoverError.NoError and the expected nonzero signer; recovery ID 28 is tried if 27 does not match."
+    "regression_sources":
+      - "contracts/test/ObjectGrantPolicy.t.sol"
+    "independent_acceptance": false
+    "present_in_current_scan": true
+    "source_unchanged_from_prior_non_author_review": true
+    "verification": "CALLBACK-FULL-01: 1267 passed; 0 failed/skipped; source remains byte-identical for this finding"
+  -
+    "id": "12dd3d4925551a4df9593acaeb89cd8240bc6a95adb6e444fa6cad314b40fbac"
+    "check": "unused-return"
+    "description": "ObjectEffectV3.terminalAbsence(GovernedObjectGrantV1.Proposal,bytes,ObjectEffectV3.AbsenceEvidence,bytes32,uint256,uint256) (src/trust/ObjectEffectV3.sol#177-189) ignores return value by EffectReceiptV3.verify(evidence.absent,providerKey,e,now_,true) (src/trust/ObjectEffectV3.sol#188)\n"
+    "path": "contracts/src/trust/ObjectEffectV3.sol"
+    "lines":
+      - 177
+      - 178
+      - 179
+      - 180
+      - 181
+      - 182
+      - 183
+      - 184
+      - 185
+      - 186
+      - 187
+      - 188
+      - 189
+    "source_sha256": "83fe5d2f127744bd6e13e1fd3cc793b338cc317613c3e6061cf97e92448c612a"
+    "status": "reviewed_intended_behavior"
+    "rationale": "Both values of R.verify are directly returned, propagated through absence and the router, and checked by settlement before resolution/refund accounting. A wrong terminal signer is rejected."
+    "regression_sources":
+      - "contracts/test/EffectReceiptV3.t.sol"
+      - "contracts/test/ObjectSettlementV3.t.sol"
+    "independent_acceptance": false
+    "present_in_current_scan": true
+    "source_unchanged_from_prior_non_author_review": true
+    "verification": "CALLBACK-FULL-01: 1267 passed; 0 failed/skipped; source remains byte-identical for this finding"
+  -
+    "id": "2091a666e6cf4c65b7945229a6d6a3b37d01b34191f1cb6cbdc6a86716d7118c"
+    "check": "unused-return"
+    "description": "ActionDeliveryVerifierV1._verifyObjectAdmission(ObjectEffectV3.Admission,ObjectEffectV3.ExpectedRow) (src/trust/ActionDeliveryVerifierV1.sol#81-102) ignores return value by (providerOK,None,provider) = EffectReceiptV3.issuer(request.providerKey) (src/trust/ActionDeliveryVerifierV1.sol#88)\n"
+    "path": "contracts/src/trust/ActionDeliveryVerifierV1.sol"
+    "lines":
+      - 81
+      - 82
+      - 83
+      - 84
+      - 85
+      - 86
+      - 87
+      - 88
+      - 89
+      - 90
+      - 91
+      - 92
+      - 93
+      - 94
+      - 95
+      - 96
+      - 97
+      - 98
+      - 99
+      - 100
+      - 101
+      - 102
+    "source_sha256": "48f5858e5ee2e49d31eaeba2a1362eb08f898e74e6c058075cffdbee7c70c406"
+    "status": "reviewed_intended_behavior"
+    "rationale": "issuer returns key validity, recovered address and domain-derived issuer. The code checks providerOK and uses provider issuer; the unused address is not the actor-authorization result. Receipt verification rechecks the exact public key."
+    "regression_sources":
+      - "contracts/test/ObjectGrantPolicy.t.sol"
+      - "contracts/test/ObjectSettlementV3.t.sol"
+    "independent_acceptance": false
+    "present_in_current_scan": true
+    "source_unchanged_from_prior_non_author_review": true
+    "verification": "CALLBACK-FULL-01: 1267 passed; 0 failed/skipped; source remains byte-identical for this finding"
+  -
+    "id": "2ee9df9d6f798309e5b5121fc5d76f07f8d60c5a6086f1ae9adba2967a4a0fb2"
+    "check": "unused-return"
+    "description": "ActionDeliveryVerifierV1._verifyObjectAdmission(ObjectEffectV3.Admission,ObjectEffectV3.ExpectedRow) (src/trust/ActionDeliveryVerifierV1.sol#81-102) ignores return value by (authorityOK,None,authority) = EffectReceiptV3.issuer(request.authorityKey) (src/trust/ActionDeliveryVerifierV1.sol#87)\n"
+    "path": "contracts/src/trust/ActionDeliveryVerifierV1.sol"
+    "lines":
+      - 81
+      - 82
+      - 83
+      - 84
+      - 85
+      - 86
+      - 87
+      - 88
+      - 89
+      - 90
+      - 91
+      - 92
+      - 93
+      - 94
+      - 95
+      - 96
+      - 97
+      - 98
+      - 99
+      - 100
+      - 101
+      - 102
+    "source_sha256": "48f5858e5ee2e49d31eaeba2a1362eb08f898e74e6c058075cffdbee7c70c406"
+    "status": "reviewed_intended_behavior"
+    "rationale": "authorityOK is explicitly checked; the derived authority issuer is checked against the governed grant and receipts. The omitted EOA address is redundant for this issuer-ID comparison."
+    "regression_sources":
+      - "contracts/test/ObjectGrantPolicy.t.sol"
+      - "contracts/test/ObjectSettlementV3.t.sol"
+    "independent_acceptance": false
+    "present_in_current_scan": true
+    "source_unchanged_from_prior_non_author_review": true
+    "verification": "CALLBACK-FULL-01: 1267 passed; 0 failed/skipped; source remains byte-identical for this finding"
+  -
+    "id": "2fe709814041e904ecc36358f953657d89fe4a81aaf7a1c1e20cea63fcd6430c"
+    "check": "unused-return"
+    "description": "ObjectEffectV3.terminalAbsence(GovernedObjectGrantV1.Proposal,bytes,ObjectEffectV3.AbsenceEvidence,bytes32,uint256,uint256) (src/trust/ObjectEffectV3.sol#177-189) ignores return value by (decoded,u,None) = EffectReceiptV3.tryDecode(evidence.absent) (src/trust/ObjectEffectV3.sol#179)\n"
+    "path": "contracts/src/trust/ObjectEffectV3.sol"
+    "lines":
+      - 177
+      - 178
+      - 179
+      - 180
+      - 181
+      - 182
+      - 183
+      - 184
+      - 185
+      - 186
+      - 187
+      - 188
+      - 189
+    "source_sha256": "83fe5d2f127744bd6e13e1fd3cc793b338cc317613c3e6061cf97e92448c612a"
+    "status": "reviewed_intended_behavior"
+    "rationale": "The decoder Boolean and receipt time are checked here. The omitted signature bytes are not assumed valid: R.verify redecodes the original envelope and authenticates its signature before success."
+    "regression_sources":
+      - "contracts/test/EffectReceiptV3.t.sol"
+      - "contracts/test/ObjectSettlementV3.t.sol"
+    "independent_acceptance": false
+    "present_in_current_scan": true
+    "source_unchanged_from_prior_non_author_review": true
+    "verification": "CALLBACK-FULL-01: 1267 passed; 0 failed/skipped; source remains byte-identical for this finding"
+  -
+    "id": "4e696814bf1a0d3e72583fc4ab82d3a0561dffdf642da2ca1c87a12669be4b88"
+    "check": "unused-return"
+    "description": "ObjectEffectV3.terminalAbsence(GovernedObjectGrantV1.Proposal,bytes,ObjectEffectV3.AbsenceEvidence,bytes32,uint256,uint256) (src/trust/ObjectEffectV3.sol#177-189) ignores return value by (None,None,provider) = EffectReceiptV3.issuer(providerKey) (src/trust/ObjectEffectV3.sol#181)\n"
+    "path": "contracts/src/trust/ObjectEffectV3.sol"
+    "lines":
+      - 177
+      - 178
+      - 179
+      - 180
+      - 181
+      - 182
+      - 183
+      - 184
+      - 185
+      - 186
+      - 187
+      - 188
+      - 189
+    "source_sha256": "83fe5d2f127744bd6e13e1fd3cc793b338cc317613c3e6061cf97e92448c612a"
+    "status": "reviewed_intended_behavior"
+    "rationale": "Invalid provider keys derive issuer zero, which _validExpected rejects, and R.verify independently validates the same public key and issuer. Omitting the intermediate validity/address cannot produce acceptance."
+    "regression_sources":
+      - "contracts/test/EffectReceiptV3.t.sol"
+      - "contracts/test/ObjectSettlementV3.t.sol"
+    "independent_acceptance": false
+    "present_in_current_scan": true
+    "source_unchanged_from_prior_non_author_review": true
+    "verification": "CALLBACK-FULL-01: 1267 passed; 0 failed/skipped; source remains byte-identical for this finding"
+  -
+    "id": "523121269bac4d098acf1080a2426cde00d4e1a7dff0c153c9d3961a87cd0ad5"
+    "check": "unused-return"
+    "description": "ObjectEffectV3.admission(GovernedObjectGrantV1.Proposal,bytes,bytes,uint256) (src/trust/ObjectEffectV3.sol#112-119) ignores return value by (decoded,r,None) = EffectReceiptV3.tryDecode(envelope) (src/trust/ObjectEffectV3.sol#114)\n"
+    "path": "contracts/src/trust/ObjectEffectV3.sol"
+    "lines":
+      - 112
+      - 113
+      - 114
+      - 115
+      - 116
+      - 117
+      - 118
+      - 119
+    "source_sha256": "83fe5d2f127744bd6e13e1fd3cc793b338cc317613c3e6061cf97e92448c612a"
+    "status": "reviewed_intended_behavior"
+    "rationale": "The decoder Boolean and bounded receipt/context times are checked, then the original envelope is passed to R.verify for signature validation. The omitted decoded signature is not a skipped proof."
+    "regression_sources":
+      - "contracts/test/EffectReceiptV3.t.sol"
+      - "contracts/test/ObjectSettlementV3.t.sol"
+    "independent_acceptance": false
+    "present_in_current_scan": true
+    "source_unchanged_from_prior_non_author_review": true
+    "verification": "CALLBACK-FULL-01: 1267 passed; 0 failed/skipped; source remains byte-identical for this finding"
+  -
+    "id": "57a8bde10f7637f2a43afa5c42c4527115c0e25c6e72a3b2ae6f987efdcdc324"
+    "check": "unused-return"
+    "description": "ObjectEffectV3.verifyFenceUpdate(ObjectEffectV3.Fence,bytes,bytes) (src/trust/ObjectEffectV3.sol#205-216) ignores return value by EffectReceiptV3.verify(update,authorityKey,e,f.issuedAt,false) (src/trust/ObjectEffectV3.sol#215)\n"
+    "path": "contracts/src/trust/ObjectEffectV3.sol"
+    "lines":
+      - 205
+      - 206
+      - 207
+      - 208
+      - 209
+      - 210
+      - 211
+      - 212
+      - 213
+      - 214
+      - 215
+      - 216
+    "source_sha256": "83fe5d2f127744bd6e13e1fd3cc793b338cc317613c3e6061cf97e92448c612a"
+    "status": "reviewed_intended_behavior"
+    "rationale": "Both signature-verification outputs are directly returned to absence. updateOK is checked before using updateHash to authenticate acknowledgement, so failed verification cannot authorize terminal absence."
+    "regression_sources":
+      - "contracts/test/EffectReceiptV3.t.sol"
+      - "contracts/test/ObjectSettlementV3.t.sol"
+    "independent_acceptance": false
+    "present_in_current_scan": true
+    "source_unchanged_from_prior_non_author_review": true
+    "verification": "CALLBACK-FULL-01: 1267 passed; 0 failed/skipped; source remains byte-identical for this finding"
+  -
+    "id": "5931dc26b63bdfa9a6c228d8588d197e8958ece6476de0855cd42d423fd7f818"
+    "check": "unused-return"
+    "description": "HeartbeatAtomicConsentRegistryV2._bodyKey(bytes) (src/trust/HeartbeatAtomicConsentRegistryV2.sol#379-384) ignores return value by (ok,record,None) = HeartbeatConsentVerificationRouterV2(verifier).decodePrincipal(raw) (src/trust/HeartbeatAtomicConsentRegistryV2.sol#380-381)\n"
+    "path": "contracts/src/trust/HeartbeatAtomicConsentRegistryV2.sol"
+    "lines":
+      - 379
+      - 380
+      - 381
+      - 382
+      - 383
+      - 384
+    "source_sha256": "c0984e760df1964a7c369398ced7bc390b3cfc56e00fb43968470eed90fa1936"
+    "status": "reviewed_intended_behavior"
+    "rationale": "decodePrincipal success is checked and only the body key is needed in this helper. The omitted digest is independently validated in the enclosing current record/consent path."
+    "regression_sources":
+      - "contracts/test/HeartbeatAtomicConsentRegistryV2Integration.t.sol"
+    "independent_acceptance": false
+    "present_in_current_scan": true
+    "source_unchanged_from_prior_non_author_review": true
+    "verification": "CALLBACK-FULL-01: 1267 passed; 0 failed/skipped; source remains byte-identical for this finding"
+  -
+    "id": "65c3f4ef9e10e0538caaa5c015bcead2d4bcebe602f4b1b6b281d15ac2e9e721"
+    "check": "unused-return"
+    "description": "ObjectEffectV3.admission(GovernedObjectGrantV1.Proposal,bytes,bytes,uint256) (src/trust/ObjectEffectV3.sol#112-119) ignores return value by (ok,None) = EffectReceiptV3.verify(envelope,key,expected(p,r.issuerId,digest(p),1),now_,false) (src/trust/ObjectEffectV3.sol#117)\n"
+    "path": "contracts/src/trust/ObjectEffectV3.sol"
+    "lines":
+      - 112
+      - 113
+      - 114
+      - 115
+      - 116
+      - 117
+      - 118
+      - 119
+    "source_sha256": "83fe5d2f127744bd6e13e1fd3cc793b338cc317613c3e6061cf97e92448c612a"
+    "status": "reviewed_intended_behavior"
+    "rationale": "The Boolean from R.verify is assigned to ok and returned. Only the duplicate receipt digest is omitted here; callers require ok before using the returned receipt."
+    "regression_sources":
+      - "contracts/test/EffectReceiptV3.t.sol"
+      - "contracts/test/ObjectSettlementV3.t.sol"
+    "independent_acceptance": false
+    "present_in_current_scan": true
+    "source_unchanged_from_prior_non_author_review": true
+    "verification": "CALLBACK-FULL-01: 1267 passed; 0 failed/skipped; source remains byte-identical for this finding"
+  -
+    "id": "6661c0a11e0cc826c70b69c1e1f26591055e3403ae4ec987b28b65e922f159f2"
+    "check": "unused-return"
+    "description": "ObjectEffectV3.verifyFenceUpdate(ObjectEffectV3.Fence,bytes,bytes) (src/trust/ObjectEffectV3.sol#205-216) ignores return value by (None,None,authority) = EffectReceiptV3.issuer(authorityKey) (src/trust/ObjectEffectV3.sol#209)\n"
+    "path": "contracts/src/trust/ObjectEffectV3.sol"
+    "lines":
+      - 205
+      - 206
+      - 207
+      - 208
+      - 209
+      - 210
+      - 211
+      - 212
+      - 213
+      - 214
+      - 215
+      - 216
+    "source_sha256": "83fe5d2f127744bd6e13e1fd3cc793b338cc317613c3e6061cf97e92448c612a"
+    "status": "reviewed_intended_behavior"
+    "rationale": "Invalid authority keys yield zero issuer and cannot pass _validExpected or the repeated public-key check in R.verify. The address component is not needed for issuer-ID verification."
+    "regression_sources":
+      - "contracts/test/EffectReceiptV3.t.sol"
+      - "contracts/test/ObjectSettlementV3.t.sol"
+    "independent_acceptance": false
+    "present_in_current_scan": true
+    "source_unchanged_from_prior_non_author_review": true
+    "verification": "CALLBACK-FULL-01: 1267 passed; 0 failed/skipped; source remains byte-identical for this finding"
+  -
+    "id": "75cd0b9949a4d030c35f2060d8d49f98c3e875a694f410c8a874bce5f090755e"
+    "check": "unused-return"
+    "description": "ObjectEffectV3.completion(GovernedObjectGrantV1.Proposal,EffectReceiptV3.Receipt,bytes,bytes,uint256,uint256) (src/trust/ObjectEffectV3.sol#121-132) ignores return value by (decoded,r,None) = EffectReceiptV3.tryDecode(envelope) (src/trust/ObjectEffectV3.sol#125)\n"
+    "path": "contracts/src/trust/ObjectEffectV3.sol"
+    "lines":
+      - 121
+      - 122
+      - 123
+      - 124
+      - 125
+      - 126
+      - 127
+      - 128
+      - 129
+      - 130
+      - 131
+      - 132
+    "source_sha256": "83fe5d2f127744bd6e13e1fd3cc793b338cc317613c3e6061cf97e92448c612a"
+    "status": "reviewed_intended_behavior"
+    "rationale": "Decoded receipt/time checks precede providerReceipt, which verifies the original envelope and signature. The ignored decoder signature is neither trusted nor used to bypass verification."
+    "regression_sources":
+      - "contracts/test/EffectReceiptV3.t.sol"
+      - "contracts/test/ObjectSettlementV3.t.sol"
+    "independent_acceptance": false
+    "present_in_current_scan": true
+    "source_unchanged_from_prior_non_author_review": true
+    "verification": "CALLBACK-FULL-01: 1267 passed; 0 failed/skipped; source remains byte-identical for this finding"
+  -
+    "id": "7e36ce39d904a16c1cc70382b9d2c4a8ce5b6d22619262341fd7ca6d4f115654"
+    "check": "unused-return"
+    "description": "ObjectEffectV3.providerReceipt(GovernedObjectGrantV1.Proposal,bytes,bytes,bytes32,uint256) (src/trust/ObjectEffectV3.sol#134-140) ignores return value by (validKey,None,issuer) = EffectReceiptV3.issuer(key) (src/trust/ObjectEffectV3.sol#136)\n"
+    "path": "contracts/src/trust/ObjectEffectV3.sol"
+    "lines":
+      - 134
+      - 135
+      - 136
+      - 137
+      - 138
+      - 139
+      - 140
+    "source_sha256": "83fe5d2f127744bd6e13e1fd3cc793b338cc317613c3e6061cf97e92448c612a"
+    "status": "reviewed_intended_behavior"
+    "rationale": "validKey is checked and the derived issuer is used to construct exact Expected. R.verify validates the same key again. The EOA address component is redundant."
+    "regression_sources":
+      - "contracts/test/EffectReceiptV3.t.sol"
+      - "contracts/test/ObjectSettlementV3.t.sol"
+    "independent_acceptance": false
+    "present_in_current_scan": true
+    "source_unchanged_from_prior_non_author_review": true
+    "verification": "CALLBACK-FULL-01: 1267 passed; 0 failed/skipped; source remains byte-identical for this finding"
+  -
+    "id": "92036dfbfc2038c393f26a1f848546342248474f0cc850e36a637603687f3883"
+    "check": "unused-return"
+    "description": "RootSignatureV1.valid(address,bytes32,bytes) (src/trust/RootSignatureV1.sol#7-14) ignores return value by (signer,error,None) = ECDSA.tryRecover(digest,28,r,s) (src/trust/RootSignatureV1.sol#12)\n"
+    "path": "contracts/src/trust/RootSignatureV1.sol"
+    "lines":
+      - 7
+      - 8
+      - 9
+      - 10
+      - 11
+      - 12
+      - 13
+      - 14
+    "source_sha256": "98e7dc020d422460b1277da8d7a79561d58787d5fe2b0a26349b7e9024ef27d6"
+    "status": "reviewed_intended_behavior"
+    "rationale": "The third tryRecover return is diagnostic data, not the Boolean/error status. Both recovery error and expected signer are checked; any unmatched or invalid recovery returns false."
+    "regression_sources":
+      - "contracts/test/ObjectGrantPolicy.t.sol"
+    "independent_acceptance": false
+    "present_in_current_scan": true
+    "source_unchanged_from_prior_non_author_review": true
+    "verification": "CALLBACK-FULL-01: 1267 passed; 0 failed/skipped; source remains byte-identical for this finding"
+  -
+    "id": "a36bd3cc4c3ec75ea496172603fc9567c9d02ccf7fb34e4c9b6b637e94496f92"
+    "check": "unused-return"
+    "description": "ObjectEffectV3.acknowledgement(bytes,ObjectEffectV3.AbsenceEvidence,uint256,bytes32) (src/trust/ObjectEffectV3.sol#191-203) ignores return value by (None,None,provider) = EffectReceiptV3.issuer(providerKey) (src/trust/ObjectEffectV3.sol#196)\n"
+    "path": "contracts/src/trust/ObjectEffectV3.sol"
+    "lines":
+      - 191
+      - 192
+      - 193
+      - 194
+      - 195
+      - 196
+      - 197
+      - 198
+      - 199
+      - 200
+      - 201
+      - 202
+      - 203
+    "source_sha256": "83fe5d2f127744bd6e13e1fd3cc793b338cc317613c3e6061cf97e92448c612a"
+    "status": "reviewed_intended_behavior"
+    "rationale": "An invalid provider key yields issuer zero; Expected validation and R.verify key validation reject it. result.valid is checked by absence before the digest and time have any effect."
+    "regression_sources":
+      - "contracts/test/EffectReceiptV3.t.sol"
+      - "contracts/test/ObjectSettlementV3.t.sol"
+    "independent_acceptance": false
+    "present_in_current_scan": true
+    "source_unchanged_from_prior_non_author_review": true
+    "verification": "CALLBACK-FULL-01: 1267 passed; 0 failed/skipped; source remains byte-identical for this finding"
+  -
+    "id": "ab5f233c1436bb73be7ff774bce4864074e5cd19d9ed1a54ce0a4866b63a64db"
+    "check": "unused-return"
+    "description": "ActionDeliveryVerifierV1.verifyObjectAbsenceV3(bytes,ObjectEffectV3.ExpectedTerminal) (src/trust/ActionDeliveryVerifierV1.sol#130-140) ignores return value by ObjectEffectV3.absence(c.proposal,c.authorityKey,c.providerKey,evidence,block.timestamp) (src/trust/ActionDeliveryVerifierV1.sol#139)\n"
+    "path": "contracts/src/trust/ActionDeliveryVerifierV1.sol"
+    "lines":
+      - 130
+      - 131
+      - 132
+      - 133
+      - 134
+      - 135
+      - 136
+      - 137
+      - 138
+      - 139
+      - 140
+    "source_sha256": "48f5858e5ee2e49d31eaeba2a1362eb08f898e74e6c058075cffdbee7c70c406"
+    "status": "reviewed_intended_behavior"
+    "rationale": "The code directly returns O.absence Boolean/digest after canonical encoding and retained-context checks. resolveObjectAbsenceV3 checks valid before changing resolution, grant usage or bonds."
+    "regression_sources":
+      - "contracts/test/ObjectSettlementV3.t.sol"
+    "independent_acceptance": false
+    "present_in_current_scan": true
+    "source_unchanged_from_prior_non_author_review": true
+    "verification": "CALLBACK-FULL-01: 1267 passed; 0 failed/skipped; source remains byte-identical for this finding"
+  -
+    "id": "b84cde43b26a659bbaf0fc3bf7461a7b73f6f15dc7df116c5e8ae8c86bda921b"
+    "check": "unused-return"
+    "description": "GovernedObjectGrantV1.consented(GovernedObjectGrantV1.Grant,bytes32,bytes) (src/trust/GovernedObjectGrantV1.sol#97-101) ignores return value by (actor,error,None) = ECDSA.tryRecover(grantDigest,signature) (src/trust/GovernedObjectGrantV1.sol#98)\n"
+    "path": "contracts/src/trust/GovernedObjectGrantV1.sol"
+    "lines":
+      - 97
+      - 98
+      - 99
+      - 100
+      - 101
+    "source_sha256": "2443b2e537672b0fb3dc4ae7afc14b62ef75138e0c42c38a0b5fb0b625d409a9"
+    "status": "reviewed_intended_behavior"
+    "rationale": "ECDSA error status, recovered actor root and nonzero address are checked. The omitted third return is error diagnostic metadata; it is not a consent verification result."
+    "regression_sources":
+      - "contracts/test/ObjectGrantPolicy.t.sol"
+    "independent_acceptance": false
+    "present_in_current_scan": true
+    "source_unchanged_from_prior_non_author_review": true
+    "verification": "CALLBACK-FULL-01: 1267 passed; 0 failed/skipped; source remains byte-identical for this finding"
+  -
+    "id": "ce080bd6e086f1950f7cbcbcdbad0bd86013e0c100a3c6b5d8f5360df0079211"
+    "check": "unused-return"
+    "description": "ObjectEffectV3.verifyFenceUpdate(ObjectEffectV3.Fence,bytes,bytes) (src/trust/ObjectEffectV3.sol#205-216) ignores return value by (decoded,u,None) = EffectReceiptV3.tryDecode(update) (src/trust/ObjectEffectV3.sol#207)\n"
+    "path": "contracts/src/trust/ObjectEffectV3.sol"
+    "lines":
+      - 205
+      - 206
+      - 207
+      - 208
+      - 209
+      - 210
+      - 211
+      - 212
+      - 213
+      - 214
+      - 215
+      - 216
+    "source_sha256": "83fe5d2f127744bd6e13e1fd3cc793b338cc317613c3e6061cf97e92448c612a"
+    "status": "reviewed_intended_behavior"
+    "rationale": "Decoded/fence-time checks are followed by R.verify on the original signed envelope. Omitting the decoder signature does not omit signature verification."
+    "regression_sources":
+      - "contracts/test/EffectReceiptV3.t.sol"
+      - "contracts/test/ObjectSettlementV3.t.sol"
+    "independent_acceptance": false
+    "present_in_current_scan": true
+    "source_unchanged_from_prior_non_author_review": true
+    "verification": "CALLBACK-FULL-01: 1267 passed; 0 failed/skipped; source remains byte-identical for this finding"
+  -
+    "id": "d224257d7d022636b6ad9035b8d00e10d6e922d8d5b0818f863005a5692fafd2"
+    "check": "unused-return"
+    "description": "ObjectEffectV3.acknowledgement(bytes,ObjectEffectV3.AbsenceEvidence,uint256,bytes32) (src/trust/ObjectEffectV3.sol#191-203) ignores return value by (decoded,u,None) = EffectReceiptV3.tryDecode(evidence.ack) (src/trust/ObjectEffectV3.sol#194)\n"
+    "path": "contracts/src/trust/ObjectEffectV3.sol"
+    "lines":
+      - 191
+      - 192
+      - 193
+      - 194
+      - 195
+      - 196
+      - 197
+      - 198
+      - 199
+      - 200
+      - 201
+      - 202
+      - 203
+    "source_sha256": "83fe5d2f127744bd6e13e1fd3cc793b338cc317613c3e6061cf97e92448c612a"
+    "status": "reviewed_intended_behavior"
+    "rationale": "Decoded/fence-time checks precede R.verify on the original acknowledgement. The returned valid flag is checked by absence before terminal verification or ledger effects."
+    "regression_sources":
+      - "contracts/test/EffectReceiptV3.t.sol"
+      - "contracts/test/ObjectSettlementV3.t.sol"
+    "independent_acceptance": false
+    "present_in_current_scan": true
+    "source_unchanged_from_prior_non_author_review": true
+    "verification": "CALLBACK-FULL-01: 1267 passed; 0 failed/skipped; source remains byte-identical for this finding"
