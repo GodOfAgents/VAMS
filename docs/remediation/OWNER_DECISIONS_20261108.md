@@ -1,6 +1,6 @@
 # Owner decisions — 2026-11-08
 
-Approved in chat by the project owner (Aseem Chishti) on 2026-11-08, answering
+Approved in chat by the project owner (GodOfAgents) on 2026-11-08, answering
 the five Phase 0 decisions of the testnet-readiness plan. These are recorded
 decisions and scoped authorizations. They do not promote any finding, track or
 readiness status: 13 findings open, 0 of 36 tracks verified, NOT READY.
