@@ -118,7 +118,7 @@ VAMS organizes decentralized infrastructure into five logical layers, each addre
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
 │  LAYER 5: ECONOMIC                                                       │
-│  $VAMS Token • DEC (Emission Config) • x402/AP2 Payments            │
+│  $VAMS Token • DEC (future; unset) • x402/AP2 Payments              │
 ├─────────────────────────────────────────────────────────────────────────┤
 │  LAYER 4: TRUST                                                          │
 │  Phala TEE • Marlin Oyster • Automata Attestation • ZKML                │
@@ -199,18 +199,26 @@ The economic layer aligns incentives and enables machine-to-machine payments:
 
 **$VAMS Token**: Single payment gateway for the entire DePIN stack, abstracting AKT, IO, TAO, TIA, and other protocol tokens.
 
-**Universal Top-Up Model**:
+**Future top-up proposal**: users may be able to fund VAMS services with assets
+such as USDC or ETH and have the protocol handle conversion. The restricted
+faucet profile does not enable fiat on-ramps or this conversion model.
 
-Users top-up with any token (USDC, ETH, credit card). Protocol auto-converts to $VAMS.
+The rates below are historical design proposals, not active or approved live
+rates. The current restricted profile does not activate fee distributions,
+buybacks, staking rewards, or burns.
 
-| Fee Type | Range | Description |
-|----------|-------|-------------|
-| **Protocol Fee** | 0.1% - 1.0% | Dynamic based on network load |
-| **Gas Abstraction** | 2% - 7% | Cross-chain gas conversion |
-| **Infrastructure Markup** | 1% - 5% | Commission on managed L1 resources |
-| **Micropayments** | $0.005 - $0.02 fixed OR 0.5% - 1.0% | Competitive fixed fee floor |
+| Fee Type | Historical proposal | Status |
+|----------|---------------------|--------|
+| **Protocol Fee** | 0.1%–1.0%, variable | Not active |
+| **Gas Abstraction** | 2%–7% markup | Not active |
+| **Infrastructure Markup** | 1%–5% | Not active |
+| **Micropayments** | Fixed or percentage fee proposals | Not active |
+| **Composed settlement accounting** | 5 basis points (0.05%) in source | Sent to the earned delivery's pinned treasury in source/rehearsal; not live revenue or buyback funding |
 
-All fees → 100% Buyback & Burn. No discounts, no cashback — pure utility.
+The 5-basis-point settlement accounting is distinct from a buyback or reward
+distribution. See the current profile and source/evidence boundary in
+[`TOKENOMICS.md`](./TOKENOMICS.md) and
+[`OWNER_DECISIONS_20261108.md`](../remediation/OWNER_DECISIONS_20261108.md).
 
 **Developer Console**: AWS-style dashboard showing USD balance, usage breakdown, active services, and multi-token top-up options.
 
@@ -266,10 +274,17 @@ VAMS maintains connectivity across multiple settlement layers:
 
 > **Implementation Status (v0.6.0)**: The CLR v3.1 decision tree, MEV protection (encrypted mempool + batch auctions), and cross-chain bridge executor (ICB Python SDK + Multi-ISM verification + timeout fallback cascade) are implemented in the Neuron client. See `neuron/clr_router.py`, `neuron/mev_protection.py`, and `neuron/bridge_executor.py`. 12 chain oracles (including SEI and Hydra) provide live routing metrics.
 
-**Dual-Host Architecture (Implemented)**: VAMS operates a novel dual-chain governance model:
-- **Polygon ("The Hands")**: Fast EVM execution — token, staking, fee collection, autonomous Sentinel guardian
-- **Cardano ("The Brain")**: eUTXO governance — quadratic voting, timelock intents, agent DID registry, insurance custody
-- **ICB Bridge**: Mithril-verified cross-chain intent relay between Cardano proposals and Polygon execution
+**Dual-Host Architecture (Intended roles; deployment and authority evidence remain separate)**:
+- **Polygon ("The Hands")**: Intended execution and settlement roles.
+- **Cardano ("The Brain")**: Retains intended governance, identity, insurance, and native-validator domains.
+- **Cross-chain paths**: Require their own qualified proof, authority, and deployment evidence; this whitepaper does not claim a live or authorized bridge route.
+
+For the restricted testnet, ordinary Polygon token governance is inactive and
+restricted operations use the approved multisig/timelock model. Cardano
+quadratic-voting source paths do not establish that a validator is selected or
+deployed, identity independence, or voting parity between chains. See
+[`TOKENOMICS.md`](./TOKENOMICS.md) and the owner decision record for current
+profile precedence.
 
 > **Note**: Comprehensive failure recovery procedures for all settlement layers, including Cardano and Polygon halt scenarios, are specified in [ARCHITECTURE_v0-3-0.md §21](./ARCHITECTURE_v0-3-0.md). This includes locked fund recovery, queue processing priority, and compensation mechanisms.
 
@@ -351,70 +366,54 @@ Rather than relying on flat, single-vector skill filters or keyword search, comp
 
 ## 4. Tokenomics & Incentive Structure
 
-### 4.1 $VAMS Token Overview
+### 4.1 Approved restricted profile
 
-| Parameter | Value |
-|-----------|-------|
-| **Initial Supply** | 1,000,000,000 $VAMS (with max 2.5% annual inflation for staking rewards) |
-| **Initial Circulating** | 100,000,000 $VAMS (10%) |
-| **Token Standard** | ERC-20 (Polygon MVP -> Multi-chain) |
+The approved Polygon Amoy and Cardano Pre-Prod profile is faucet-only. VAMS
+has a fixed maximum supply of $1 \times 10^9$; emissions and staking rewards
+are zero, and no staking minter is configured. Principal exits retain the
+14-day normal and up-to-30-day crisis unbonding periods, with no emergency
+bypass. Vesting is unactivated and unfunded. Fee buyback, token burning,
+reward distribution, delegation, slashing, and ordinary Polygon token voting
+are inactive. DEC floors, decay, and terminal rate remain frozen-unset.
 
-#### TGE Circulating Supply Breakdown (100M / 10%)
+The Polygon deployment source mints the initial supply to the treasury Safe.
+This treasury-held balance is not circulating supply and does not establish a
+TGE, airdrop, liquidity provision, sale, or community distribution.
 
-| Source | Tokens | % | Notes |
-|--------|--------|---|-------|
-| Liquidity & Airdrop | 100,000,000 | 10% | 100% Unlocked at TGE for DEX liquidity and community |
+### 4.2 Future allocation plan (unactivated)
 
-### 4.2 Allocation Breakdown (Decentralized Model)
+These shares and terms are a future plan, not current balances, beneficiary
+schedules, or authorization to transfer or release tokens:
 
-| Category | Allocation | Amount | Vesting |
-|----------|-----------|---------|---------|
-| **Community & Ecosystem** | **50%** | 500,000,000 | Liquidity/Airdrop (10%) + Grants/Mining (40%, 60m vest) |
-| **Architect** | **12%** | 120,000,000 | 12-month cliff, 48-month linear vesting |
-| **Future Team & Advisors**| **13%** | 130,000,000 | 12-month cliff, 36-month linear (50% GMV-Gated) |
-| **Investors (Early/Reg)** | **13%** | 130,000,000 | 6-12 month cliff, 18-30 month vests |
-| **DAO Treasury** | **12%** | 120,000,000 | 6-month cliff, 48-month linear (50% GMV-Gated) |
+| Category | Share | Intended future terms |
+|----------|-------|-----------------------|
+| Community and ecosystem | 50% | 10% intended TGE airdrop; 40% grants over 60 months |
+| Architect | 12% | 12-month cliff, then 48-month linear vesting |
+| Future team and advisors | 13% | 12-month cliff, 36-month time schedule; intended 50% time and 50% GMV gating, unresolved |
+| Early investors | 5% | 6-month cliff, then 18-month linear vesting |
+| Regular investors | 8% | 12-month cliff, then 30-month linear vesting |
+| Treasury | 12% | 6-month cliff, 48-month schedule; intended 50% time and 50% GMV gating, unresolved |
 
-### 4.3 Emission Schedule (Inflationary Security)
+All vesting remains unactivated. No TGE or allocation distribution is
+established. Read [TOKENOMICS.md](./TOKENOMICS.md) as the current source/profile
+record for economics; it supersedes historical economic targets in this
+whitepaper. Owner decisions are recorded in
+[OWNER_DECISIONS_20261108.md](../remediation/OWNER_DECISIONS_20261108.md).
 
-To ensure perpetual network security, VAMS uses a **low-inflation model** strictly for staking rewards.
+### 4.3 Fees, emissions, and deferred mechanisms
 
-```
-Max Annual Inflation: 2.5% (25M tokens/year initially)
-Phase 1 (Bootstrap): 100% of Protocol Fees go to Buyback & Burn
-Phase 2 (Mature): Continued deflationary pressure + Staking/Treasury yield
-Terminal Rate: 500,000 $VAMS/year
-```
+Buyback, burning, fee-funded rewards, APY, inflation, and unconditional
+deflation are not active or guaranteed. Historical fee rates and distribution
+splits are proposals only. The composed-settlement source calculates a 5-basis-
+point settlement fee to the earned delivery's pinned treasury; this is
+faucet-only settlement accounting, not live revenue, a buyback, or a reward
+distribution. A transfer to a dead address would not by itself prove that
+VAMS total supply decreased.
 
-**Net Deflation Target:** At 2.5% inflation and an average $0.20 token price, the network becomes unconditionally deflationary at **$5,000,000 in annual fee revenue**.
-
-### 4.4 Value Accrual Mechanisms
-
-| Mechanism | Rate | Distribution |
-|-----------|------|--------------|
-| Protocol Fees | 0.1-0.5% | 100% Buyback & burn (Phase 1) → Phase 2 split below |
-| Gas Abstraction Premium | 2-7% markup | Treasury revenue |
-| Staking Rewards | 8-12% target APY | L3 Sequencer & CLR validators |
-| x402 Settlement Fees | 0.05% | LP rewards |
-| Bridge Fees | 0.25% | Insurance fund + LP |
-
-**Phase 2 Fee Distribution (Post Month 60):** When emissions reach terminal rate (500K $VAMS/yr), protocol fee revenue shifts to a sustainable yield model:
-- **40% Buyback & Burn** — Continued deflationary pressure
-- **30% Staking Rewards** — Yield for L3 Sequencer and CLR validators
-- **20% DAO Treasury** — Ongoing decentralized operations funding
-- **10% Insurance Fund** — Capitalizing bridge/execution failure coverage
-
-### 4.5 Dynamic Emission Controller (DEC)
-
-VAMS employs reinforcement learning for economic parameter adjustment:
-
-- **Bounded Adjustments**: Emission rates constrained between 0.1% and 2.5% annual (hard cap enforced on-chain)
-- **Fee Adjustment Limits**: Maximum 10% fee change per epoch
-- **Circuit Breakers**: Automatic override if parameters approach dangerous bounds
-
-This creates a self-adjusting economic system that responds to network demand while preventing runaway inflation or deflation.
-
-> **Note**: The RL model undergoes rigorous validation including adversarial testing, regime change detection, and formal bounds verification. A multi-model ensemble with automatic rollback ensures safety. See [ARCHITECTURE_v0-3-0.md §3.5](./ARCHITECTURE_v0-3-0.md) for the complete RL Model Validation Framework.
+DEC floors, decay, and terminal rate remain unset in the approved profile.
+Dynamic emissions and economic parameter adjustment require a future approved
+design and evidence; they are not current behavior. The 50/50 time/GMV vesting
+milestones also remain unresolved and unactivated.
 
 ---
 
@@ -441,7 +440,7 @@ VAMS implements eight defense layers:
 3. **Authorization**: RBAC + Capability-based + Polygon ID
 4. **Transport**: TLS 1.3 + Message signing + Replay protection
 5. **Execution**: TEE isolation + WASM sandboxing
-6. **Economic**: Staking + Slashing + Insurance fund
+6. **Economic (future design)**: Staking, slashing, and insurance mechanisms; not activated in the restricted profile
 7. **Automated**: VAMSSentinel (autonomous on-chain anomaly detection — L1 invariant checks, L2 keeper consensus, L3 price circuit breaker)
 8. **Recovery**: Circuit breakers + Emergency governance + L1 fallbacks
 
@@ -453,11 +452,12 @@ To eliminate single-vendor TEE dependency, critical operations require 2/3 conse
 - AMD SEV (Marlin)
 - AWS Nitro (Marlin)
 
-If outputs diverge, the transaction is delayed 24 hours and escalated to DAO governance.
+The proposed response to divergent outputs is a 24-hour delay and escalation
+to future governance; it is not an active restricted-profile control.
 
 ### 5.4 Economic Circuit Breakers
 
-Automatic protections against token price collapse:
+Historical proposed protections against token price collapse (not active):
 
 | Alert Level | Token Drop | Response |
 |-------------|-----------|----------|
@@ -467,12 +467,14 @@ Automatic protections against token price collapse:
 
 ### 5.5 Insurance Fund
 
-The protocol maintains an insurance fund targeting 5% of TVL (minimum 1M $VAMS), funded by:
+Historical insurance-fund targets and funding proposals (not active in the restricted profile):
 - 10% of protocol fees
 - 100% of slashed stakes
 - DAO-allocated treasury contributions
 
-Claims require DAO approval and cover bridge exploits, TEE compromises, provider insolvency, and oracle manipulation.
+The proposed claim model used DAO approval and contemplated bridge exploits,
+TEE compromises, provider insolvency, and oracle manipulation. This does not
+establish an active insurance fund or coverage.
 
 
 ### 5.6 VAMS x ERC-8004: The Superset Model
@@ -491,34 +493,35 @@ VAMS agents utilize ERC-8004 proofs as their **Identity Base Layer**, but VAMS a
 
 ## 6. Governance Framework
 
-### 6.1 Governance Architecture (Active)
+### 6.1 Governance status and intended authority domains
 
-VAMS implements a **Day 1 Sovereign Governance** model using standard OpenZeppelin contracts:
+Ordinary Polygon token governance is inactive in the approved restricted
+profile. Restricted Polygon operations use the approved multisig/timelock
+model; this is not token-holder voting. Cardano retains its intended
+governance, identity, insurance, and native-validator domains. Cardano
+quadratic-voting source does not prove an active or selected validator, live
+deployment, independent identity, or voting parity with Polygon. Neither
+chain's authority configuration should be inferred from the other.
 
-| Component | Implementation | Role |
-|-----------|----------------|------|
-| **VAMSGovernor** | Time-Locked Voting | 4% Quorum, Quadratic Voting Logic |
-| **VAMSTimelock** | System Owner | Holds all admin keys and Treasury funds |
-| **Security Committee** | 3/5 Multisig | Emergency Pause power only (cannot upgrade contracts) |
+See [TOKENOMICS.md](./TOKENOMICS.md) and
+[OWNER_DECISIONS_20261108.md](../remediation/OWNER_DECISIONS_20261108.md) for
+the current restricted-profile and owner-decision record. Historical
+decentralization phases below describe proposals, not activated controls.
 
-**Decentralization Schedule:**
+### 6.2 Proposed enforcement mechanisms (not activated)
 
-| Phase | Timeline | Governance Model |
-|-------|----------|------------------|
-| **Phase 1: Guarded** | Day 0 - Month 6 | DAO votes; Team constrained by ZK-Bounded Veto Bond (AKEV mitigated) |
-| **Phase 2: Maturation** | Month 6 - Month 24 | Team Veto revoked; Timelock delay increased to 3 days |
-| **Phase 3: Sovereign** | Month 24+ | Full on-chain control; Guardian keys rotated to elected community members |
+The following are historical governance proposals, not current restricted-
+profile controls or guarantees:
 
-### 6.2 Enforcement Mechanisms
-
-- **Smart Contract Enforcement**: Decentralization milestones enforced via time-locked contracts
-- **Public Accountability**: Monthly governance reports published on-chain
-- **Community Veto**: DAO can accelerate decentralization (>66% quorum)
-- **Sunset Clause**: Core team admin keys programmatically disabled 24 months post-mainnet
+- Time-locked enforcement of future decentralization milestones
+- Monthly on-chain governance reports
+- Community veto above a 66% quorum
+- Programmatic sunset of core-team admin keys 24 months after mainnet
 
 ### 6.3 CLR Decentralization Path
 
-CLR transitions from centralized operators to fully on-chain rules:
+The following CLR governance transition is a future proposal, not current
+restricted-profile token governance:
 
 1. **Phase 1**: Multisig operators (5/7) with public routing logs
 2. **Phase 2**: Threshold Network MPC (67% consensus)
@@ -573,7 +576,7 @@ VAMS positions itself as the "Sovereign Brain" for the agentic web—a meta-laye
 ## References
 
 ### Companion Documents
-- [VAMS Tokenomics Specification](./TOKENOMICS.md) — Complete $VAMS token economics
+- [VAMS Tokenomics Specification](./TOKENOMICS.md) — Current restricted-profile economic record; supersedes historical targets in this whitepaper
 - [VAMS Architecture Reference v0.3.0](./ARCHITECTURE_v0-3-0.md) — Detailed technical specification
 
 ### External References

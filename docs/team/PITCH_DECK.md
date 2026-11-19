@@ -110,7 +110,7 @@ We don't just aggregate; we vertically integrate the essential primitives.
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
 │  LAYER 5: ECONOMIC (Universal Settlement)                               │
-│  $VAMS Token • x402 Micropayments • Dynamic Emission Controller (DEC)   │
+│  $VAMS Token • x402 Micropayments • DEC (future; unset)                │
 ├─────────────────────────────────────────────────────────────────────────┤
 │  LAYER 4: TRUST (Verification)                                          │
 │  Multi-TEE Witness (Intel/AMD) • ZK-Proofs • Bridge Security (ICB-SDK)  │
@@ -192,12 +192,19 @@ We generate sustainable, recurring revenue from protocol utility—not speculati
 │         │                │                │                 │              │
 │         └────────────────┴────────────────┴─────────────────┘              │
 │                                    │                                       │
-│                              ▼ 100% Buyback & Burn                         │
+│                 ▼ Proposed fee routing (NOT ACTIVE)                       │
 │                                                                            │
 └────────────────────────────────────────────────────────────────────────────┘
 ```
 
-### Revenue Stream Breakdown
+The rates and revenue projections below are historical planning scenarios,
+not current revenues, approved fees, or forecasts. The approved restricted
+testnet profile is faucet-only and does not activate buybacks, burns, or fee-
+funded rewards. Source-level composed settlement calculates 5 basis points
+to the earned delivery's pinned treasury; this is rehearsal accounting, not
+live revenue or a buyback.
+
+### Historical revenue scenarios (not current economics)
 
 | Stream                     | Rate                   | Y3 Projection | Y5 Projection |
 | :------------------------- | :--------------------- | :------------ | :------------ |
@@ -209,11 +216,12 @@ We generate sustainable, recurring revenue from protocol utility—not speculati
 
 ---
 
-# Slide 9: Unit Economics
+# Slide 9: Historical Unit-Economics Scenario
 
-## **Path to Profitability**
+## **Historical scenario economics (not a forecast)**
 
-Every transaction on VAMS generates protocol value.
+The figures below are illustrative historical assumptions, not observed
+volume, current fees, or a guarantee of profitability or token value.
 
 ### Per-Transaction Economics
 
@@ -222,79 +230,33 @@ Every transaction on VAMS generates protocol value.
 | **Avg. Job Size**          | $50       | Compute + Storage + DA  |
 | **Protocol Take Rate**     | 0.3%      | $0.15 per job           |
 | **Gas Abstraction**        | 5%        | $2.50 per job           |
-| **Revenue Per Job**        | **$2.65** | Goes to buyback & burn  |
+| **Revenue Per Job**        | **$2.65** | Historical scenario assumption only |
 | **COGS (Infra)**           | ~$0.10    | Node hosting, RPC calls |
-| **Gross Margin**           | **96%**   | Pure protocol margin    |
+| **Illustrative Gross Margin** | **96%** | Before omitted operating and payment costs |
 
-### Volume-to-Revenue Model
-
-```
-  Monthly Volume ($)    Active Agents    Monthly Revenue    Tokens Burned*
-  ─────────────────    ──────────────    ──────────────    ──────────────
-  $500K                100               $15K              150K VAMS
-  $5M                  1,000             $150K             1.5M VAMS
-  $50M                 10,000            $1.5M             7.5M VAMS
-  $250M                50,000            $7.5M             25M VAMS
-  $1B                  200,000           $30M              60M VAMS
-  
-  * At $0.10/VAMS. Burn rate decreases as price appreciates.
-```
+The transaction and volume figures above are historical scenario assumptions,
+not observed fee revenue, active token burns, or a profitability guarantee.
+The scenario does not establish payment-processing, conversion/slippage,
+liquidity, customer-acquisition, insurance-loss or complete operating costs.
 
 ---
 
-# Slide 10: Token Appreciation Mechanics
+# Slide 10: Deferred Token-Value Proposals
 
-## **Why $VAMS Appreciates**
+## **No appreciation or deflation guarantee**
 
-Multiple mechanisms create sustained buy pressure and supply reduction.
+Buybacks, fee burns, staking yield, operator bond demand, and token governance
+are not active in the approved restricted testnet profile. No token-price,
+buy-pressure, or supply-reduction outcome is promised.
 
-### The Value Flywheel
+### Deferred mechanisms
 
-```
-          ┌─────────────────────────────────────────────────────────┐
-          │                                                         │
-          ▼                                                         │
-   ┌─────────────┐      ┌─────────────┐      ┌─────────────┐        │
-   │   USAGE     │ ───► │   REVENUE   │ ───► │   BUYBACK   │        │
-   │   GROWS     │      │   GROWS     │      │   & BURN    │        │
-   └─────────────┘      └─────────────┘      └─────────────┘        │
-                                                    │               │
-                                                    ▼               │
-                                             ┌─────────────┐        │
-                                             │   SUPPLY    │        │
-                                             │  SHRINKS    │        │
-                                             └─────────────┘        │
-                                                    │               │
-                                                    ▼               │
-   ┌─────────────┐      ┌─────────────┐      ┌─────────────┐        │
-   │    MORE     │ ◄─── │   DEMAND    │ ◄─── │   PRICE     │        │
-   │   AGENTS    │      │  INCREASES  │      │   RISES     │ ───────┘
-   └─────────────┘      └─────────────┘      └─────────────┘
-```
-
-### Five Price Appreciation Drivers
-
-| Driver                    | Mechanism                          | Impact                     |
-| :------------------------ | :--------------------------------  | :------------------------- |
-| **1. 100% Fee Burn**      | All protocol fees buy & burn $VAMS | Direct supply reduction    |
-| **2. Staking Lock**       | 40%+ of supply locked for rewards  | Reduced circulating supply |
-| **3. CLR Operator Bonds** | 100K+ VAMS locked per operator     | Infrastructure demand      |
-| **4. Gas Payment**        | All users need $VAMS for gas       | Constant buy pressure      |
-| **5. Governance Utility** | Proposals require 100K+ stake      | Holder incentive           |
-
-### Supply Reduction Projections
-
-| Year | Tokens Emitted | Tokens Burned* | Net Supply Change         |
-| :--- | :------------- | :------------- | :------------------------ |
-| Y1   | 25M (2.5%)     | 1.8M           | +23.2M (inflationary)     |
-| Y2   | 20M            | 7.5M           | +12.5M (inflationary)     |
-| Y3   | 15M            | 18M            | **-3M (deflationary)**    |
-| Y4   | 10M            | 37.5M          | **-27.5M (deflationary)** |
-| Y5   | 5M             | 72M            | **-67M (deflationary)**   |
-
-*Burn projections based on revenue targets at $0.10/VAMS.
-
-> **Key Insight:** Once annual revenue exceeds ~$2.5M (at $0.10/VAMS), the protocol becomes **net deflationary**.
+| Mechanism | Status |
+|-----------|--------|
+| Fee buyback, burn, and reward distribution | Not active |
+| Staking emissions or APY | Zero rewards; no minter |
+| Token-holder governance on Polygon | Inactive in restricted profile |
+| DEC floors, decay, and terminal rate | Frozen-unset |
 
 ---
 
@@ -302,23 +264,28 @@ Multiple mechanisms create sustained buy pressure and supply reduction.
 
 ## **The Economic Engine**
 
-Designed for maximum value accrual and deflationary pressure.
+This is an unactivated future allocation plan. The approved profile has no
+emissions, staking rewards, fee buyback, or reward distribution.
 
 | Category                  | Allocation | Tokens | Notes                                      |
 | :------------------------ | :--------- | :----- | :----------------------------------------  |
-| **Community & Ecosystem** | 50%        | 500M   | Airdrop (10% at TGE), Grants & Mining (40%) |
-| **Team & Advisors**       | 13%        | 130M   | Future hires & strategic advisors (GMV-Gated) |
-| **Architect**             | 12%        | 120M   | Dedicated Architect allocation (M12 cliff) |
-| **Investors**             | 13%        | 130M   | Early (5%) and Regular (8%) backers        |
-| **DAO Treasury**          | 12%        | 120M   | Protocol runway (GMV-Gated)                |
-| **Total**                 | 100%       | **1B** | **2.5% Max Annual Inflation** (Staking)    |
+| **Community & Ecosystem** | 50%        | 500M   | 10% intended TGE airdrop; 40% grants over 60 months |
+| **Architect**             | 12%        | 120M   | 12-month cliff + 48-month linear vesting, planned |
+| **Team & Advisors**       | 13%        | 130M   | 12-month cliff + 36-month time schedule; intended 50/50 GMV split unresolved |
+| **Investors**             | 13%        | 130M   | Early 5% (6+18 months); regular 8% (12+30 months) |
+| **Treasury**              | 12%        | 120M   | 6-month cliff + 48-month schedule; intended 50/50 GMV split unresolved |
+| **Total**                 | 100%       | **1B** | Future plan only; unactivated and unfunded |
 
-### Value Accrual
-*   **Hyper-Deflationary (Target):** 80% of Protocol Fees are **BURNED**.
-*   **Staking Requirement:** CLR operators must stake 100K+ $VAMS.
-*   **Governance:** Quadratic Voting powered by staked $VAMS.
+### Restricted-profile status
+*   Maximum supply is fixed at $1 \times 10^9$ VAMS; emissions and staking rewards are zero.
+*   Vesting and all allocations remain unactivated; the source-minted treasury balance is not circulating supply or a TGE.
+*   Fee buyback, burn, fee-funded rewards, and Polygon token voting are inactive.
+*   Ordinary exits retain 14-day unbonding, up to 30 days in crisis, with no bypass.
 
-*Full vesting schedules in `TOKENOMICS.md`*
+See [`TOKENOMICS.md`](./TOKENOMICS.md) for the current source/profile record and
+[`OWNER_DECISIONS_20261108.md`](../remediation/OWNER_DECISIONS_20261108.md)
+for the owner decisions. These records supersede historical economic targets
+in this deck.
 
 ---
 
@@ -359,18 +326,18 @@ We are the only protocol with a **Black Swan Recovery Matrix** (defined in Archi
 
 # Slide 14: Traction & Status
 
-## **V2 Contracts Ready. Deployment Imminent.**
+## **Restricted testnet profile; deployment evidence pending**
 
 We have upgraded our entire stack to V2 Architecture.
 
 *   ✅ **Architecture Specification:** 100% Complete (`v0.3.0` Spec + Dual-Host Model)
-*   ✅ **Token Economic Model:** 100% Complete (V2.0.0 Tokenomics)
-*   ✅ **Solidity Contracts (Polygon):** 100% Complete — **469 Tests Passing**
-    *   `VAMSTimelock`, `VAMSGovernorExecutor` (Day 1 DAO)
+*   **Restricted token profile:** Faucet-only; emissions/rewards zero; vesting and fee economics inactive (see `TOKENOMICS.md`)
+*   **Solidity source:** token governance is inactive in the restricted profile
+    *   Token, vesting, fee, and governance source does not establish deployed or activated economics
     *   `VAMSFeeCollector`, `VAMSInsuranceFund`, `VAMSStaking` (V2)
     *   `VAMSSentinel` (Autonomous on-chain guardian — replaces multisig)
-*   ✅ **Aiken Contracts (Cardano Brain):** 100% Complete — **37 Tests Passing**
-    *   `governor.ak` (Quadratic Voting), `timelock.ak` (48h/24h delay)
+*   **Cardano authority:** intended governance/identity/insurance/native-validator domains remain distinct
+    *   Governance and timelock validator source exists; deployed/selected governance is not established here
     *   `insurance_fund.ak` (Capital custody), `agent_registry.ak` (Agent DID + NFT)
     *   `plutus.json` blueprint generated
 *   🚀 **Testnet Deployment:** Pending (Polygon Amoy + Cardano Pre-Prod)
@@ -392,9 +359,8 @@ We have a detailed 8-Phase Execution Plan: **24-week MVP** followed by **post-MV
 
 ### **MVP Phase (24 Weeks)**
 
-*   **Phase 1 (Weeks 1-8): Economic Foundation** *("The Blood")* — ✅ **COMPLETE**
-    *   Deployed $VAMS Token, Staking, Vesting, FeeCollector, VAMSSentinel.
-    *   469 Solidity tests passing. Slither clean.
+*   **Phase 1 (Weeks 1-8): Economic Foundation** — source/design work; economic activation remains inactive in the restricted profile
+    *   Economic activation is not established by this roadmap; vesting, emissions, buybacks, and rewards remain inactive in the restricted profile.
 *   **Phase 1.5 (Weeks 8-9): Cardano Brain Layer** — ✅ **COMPLETE**
     *   4 Aiken validators: Governor, Timelock, InsuranceFund, AgentRegistry.
     *   37 Aiken tests passing. `plutus.json` generated.
@@ -415,7 +381,7 @@ We have a detailed 8-Phase Execution Plan: **24-week MVP** followed by **post-MV
 ### **Post-MVP (Weeks 25-52)**
 
 *   **Phase 5-6 (Weeks 25-40):** Full DePIN Stack + TEE Security (io.net, Phala, Audits)
-*   **Phase 7-8 (Weeks 36-52+):** Dynamic Emission Controller, x402 Channels, ZKML, Mainnet Launch
+*   **Phase 7-8 (Weeks 36-52+):** Deferred DEC design, x402 Channels, ZKML, and later release gates
 
 ---
 
@@ -450,9 +416,9 @@ We are seeking strategic partners and grants to accelerate the VAMS vision.
 4.  **Security Audits:** Third-party audits for core protocol contracts.
 
 ### What Strategic Partners Get
-*   **5% Token Allocation** (from Strategic Investor pool).
+*   **Potential future allocation:** subject to the unactivated 13% investor allocation plan; no partner allocation or distribution is established.
 *   Early access to protocol integrations.
-*   Governance influence on roadmap direction.
+*   Potential future roadmap input; no active Polygon token-voting right is established.
 
 ---
 
@@ -464,10 +430,10 @@ Strategic partners gain access to a high-growth protocol at the ground floor.
 
 | Partner Benefit       | Value                                      |
 |-----------------------|--------------------------------------------|
-| **Token Allocation**  | 5% of 1B supply (50M $VAMS)                |
+| **Token Allocation**  | No partner allocation or distribution established; future allocations remain unactivated |
 | **Early Integration** | First-mover advantage on DePIN aggregation |
-| **Governance Rights** | Shape protocol direction from Day 1        |
-| **Revenue Share**     | Fee revenue from protocol usage            |
+| **Governance Rights** | Future participation subject to activation and chain-specific authority |
+| **Revenue Share**     | No active token-holder fee or revenue share in the restricted profile |
 
 **Our Promise:** Radical transparency in development. Every decision documented publicly.
 
