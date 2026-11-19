@@ -11,8 +11,10 @@ interface IVAMSAgentRegistry {
 
 /**
  * @title VAMSERC8004Adapter
- * @notice Bridges ERC-8004 Remote Attestations to VAMS Identity
- * @dev Verifies TEE proofs and updates the AgentRegistry with the verified MRENCLAVE
+ * @notice Retired compatibility adapter; generic attestation acceptance is disabled.
+ * @dev This legacy interface has no qualified root/action/agent binding or freshness
+ *      profile. A verifier's success flag alone must not establish agent trust.
+ *      Qualified action-bound DCAP evidence uses its separate versioned verifier.
  */
 contract VAMSERC8004Adapter is AccessControl {
     
@@ -33,6 +35,7 @@ contract VAMSERC8004Adapter is AccessControl {
     error InvalidProof();
     error NotAgentOwner();
     error RegistryNotSet();
+    error LegacyAttestationDisabled();
     
     // ============ Constructor ============
 
@@ -45,27 +48,13 @@ contract VAMSERC8004Adapter is AccessControl {
     // ============ Main Functions ============
 
     /**
-     * @notice Submit an ERC-8004 Proof to verify an agent
-     * @param agentId The VAMS Agent ID
-     * @param proof The raw TEE Remote Attestation quote
+     * @notice Reject the unqualified legacy attestation path before external calls.
+     * @dev Retains the selector for compatibility. Changing the configured verifier
+     *      cannot enable acceptance; a future binding scheme requires a reviewed
+     *      versioned implementation. No registry or verifier result is consumed.
      */
-    function verifyAndRegister(bytes32 agentId, bytes calldata proof) external {
-        // 1. Check ownership
-        (address owner,,,,,,) = registry.getAgent(agentId);
-        if (owner != msg.sender) revert NotAgentOwner();
-        
-        // 2. Verify Proof via Automata/Phala verifier
-        (bool success, IERC8004Verifier.EnclaveReport memory report) = verifier.verifyAttestation(proof);
-        if (!success) revert InvalidProof();
-        
-        // 3. Store Verification locally
-        verifiedEnclaves[agentId] = report.mrenclave;
-        
-        // 4. Update Registry (Optional: if Registry allows external updaters)
-        // For now, we trust this Adapter as the source of truth for "Verified MRENCLAVE"
-        // registry.updateTEEAttestation(agentId, report.mrenclave); 
-        
-        emit AgentVerified(agentId, report.mrenclave, report.timestamp);
+    function verifyAndRegister(bytes32, bytes calldata) external pure {
+        revert LegacyAttestationDisabled();
     }
     
     // ============ Admin ============

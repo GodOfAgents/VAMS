@@ -371,4 +371,51 @@ contract ObjectSettlementV3Test is Test {
         assertEq(uint256(settlement.getObjectObligationV3(id,0).resolution),
             uint256(ComposedSettlement.ObjectResolutionV3.RESERVED));
     }
+
+    // A correctly encoded body with a wrong signature must fail all the way
+    // through the public verifier and settlement, before any ledger effects.
+    function testFuzz_wrongSignerForAnyAbsenceFactLeavesReservationIntact(uint8 fact) public {
+        fact=uint8(bound(fact,0,2));
+        bytes32 id=create(1);admit(id,0);
+        (O.Fence memory f,bytes memory u,bytes memory a,bytes memory x)=absence();
+        bytes memory badU=u;bytes memory badA=a;bytes memory badX=x;
+        if(fact==0) badU=resign(u,2);
+        else if(fact==1) badA=resign(a,1);
+        else badX=resign(x,1);
+        bytes32 before_=keccak256(abi.encode(settlement.getObjectObligationV3(id,0)));
+        vm.expectRevert(IComposedSettlement.InvalidDeliveryProof.selector);
+        settlement.resolveObjectAbsenceV3(id,0,resolution(),O.AbsenceEvidence(f,badU,badA,badX));
+        assertEq(keccak256(abi.encode(settlement.getObjectObligationV3(id,0))),before_);
+        assertEq(settlement.totalEscrowed(),AMOUNT);
+        assertEq(token.balanceOf(address(settlement)),AMOUNT);
+        assertEq(bonds.getBond(provider).pendingSettlements,AMOUNT);
+        assertEq(settlement.objectGrantUsedV3(policy.objectGrantDigestV1(witness.grant)),6);
+        settlement.resolveObjectAbsenceV3(id,0,resolution(),O.AbsenceEvidence(f,u,a,x));
+        refundAbsent(id);
+        assertEq(settlement.totalEscrowed(),0);
+        assertEq(bonds.getBond(provider).pendingSettlements,0);
+        assertEq(token.balanceOf(agent),10_000 ether);
+    }
+
+    function test_wrongSignerCompletionCannotCreateEarnedPayment() public {
+        bytes32 id=create(1);admit(id,0);
+        bytes memory receipt=completion(block.timestamp);
+        bytes memory badReceipt=resign(receipt,1);
+        bytes32 before_=keccak256(abi.encode(settlement.getObjectObligationV3(id,0)));
+        vm.expectRevert(IComposedSettlement.InvalidDeliveryProof.selector);
+        settlement.resolveObjectCompletionV3(id,0,resolution(),badReceipt);
+        assertFalse(settlement.getEarnedDeliveryV3(id,0).accepted);
+        assertEq(keccak256(abi.encode(settlement.getObjectObligationV3(id,0))),before_);
+        assertEq(settlement.totalEscrowed(),AMOUNT);
+        assertEq(bonds.getBond(provider).pendingSettlements,AMOUNT);
+        settlement.resolveObjectCompletionV3(id,0,resolution(),receipt);
+        assertTrue(settlement.getEarnedDeliveryV3(id,0).accepted);
+        assertEq(settlement.totalEscrowed(),AMOUNT);
+    }
+
+    function resign(bytes memory receipt,uint256 signer) internal pure returns(bytes memory) {
+        (bool decoded,R.Receipt memory body,)=R.tryDecode(receipt);
+        require(decoded,"Fixture must remain well formed");
+        return sign(body,signer);
+    }
 }
