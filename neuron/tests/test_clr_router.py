@@ -3,10 +3,10 @@ from unittest.mock import MagicMock, patch
 import sys
 import os
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
-from clr_router import CLRouter, TransactionIntent, TrustTier, RoutingDecision
-from chain_oracle import ChainMetrics
+from neuron.clr_router import CLRouter, TransactionIntent, TrustTier, RoutingDecision
+from neuron.chain_oracle import ChainMetrics
 
 class TestCLRouter(unittest.TestCase):
     

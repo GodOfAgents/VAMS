@@ -15,7 +15,7 @@ import logging
 
 logging.basicConfig(level=logging.WARNING)
 
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 
 # ─────────────────────────────────────────────────────────────────
@@ -24,7 +24,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."
 
 def test_p0_compliance_privacy():
     """P0: Compliance Privacy -> Midnight."""
-    from clr_router import CLRouter, TransactionIntent, TrustTier, RoutingPriority
+    from neuron.clr_router import CLRouter, TransactionIntent, TrustTier, RoutingPriority
     router = CLRouter()
     intent = TransactionIntent(
         value_usd=5000, max_latency_ms=60000,
@@ -38,7 +38,7 @@ def test_p0_compliance_privacy():
 
 def test_p1_confidential_compute():
     """P1: Confidential Compute -> Phala."""
-    from clr_router import CLRouter, TransactionIntent, TrustTier, RoutingPriority
+    from neuron.clr_router import CLRouter, TransactionIntent, TrustTier, RoutingPriority
     router = CLRouter()
     intent = TransactionIntent(
         value_usd=200, max_latency_ms=10000,
@@ -52,7 +52,7 @@ def test_p1_confidential_compute():
 
 def test_p2_high_value_security():
     """P2: High value (>$10K) -> Ethereum."""
-    from clr_router import CLRouter, TransactionIntent, TrustTier, RoutingPriority
+    from neuron.clr_router import CLRouter, TransactionIntent, TrustTier, RoutingPriority
     router = CLRouter()
     intent = TransactionIntent(
         value_usd=50000, max_latency_ms=30000, requires_privacy=False,
@@ -65,7 +65,7 @@ def test_p2_high_value_security():
 
 def test_p4_formal_verification():
     """P4: Formal Verification -> Cardano."""
-    from clr_router import CLRouter, TransactionIntent, TrustTier, RoutingPriority
+    from neuron.clr_router import CLRouter, TransactionIntent, TrustTier, RoutingPriority
     router = CLRouter()
     intent = TransactionIntent(
         value_usd=2000, max_latency_ms=60000,
@@ -79,7 +79,7 @@ def test_p4_formal_verification():
 
 def test_p5_velocity_hydra():
     """P5a: Sub-second settlement -> Hydra."""
-    from clr_router import CLRouter, TransactionIntent, TrustTier, RoutingPriority
+    from neuron.clr_router import CLRouter, TransactionIntent, TrustTier, RoutingPriority
     router = CLRouter()
     intent = TransactionIntent(
         value_usd=100, max_latency_ms=500,
@@ -94,7 +94,7 @@ def test_p5_velocity_hydra():
 
 def test_p5_velocity_sei():
     """P5b: EVM fast lane -> SEI."""
-    from clr_router import CLRouter, TransactionIntent, TrustTier, RoutingPriority
+    from neuron.clr_router import CLRouter, TransactionIntent, TrustTier, RoutingPriority
     router = CLRouter()
     intent = TransactionIntent(
         value_usd=50, max_latency_ms=800,
@@ -108,7 +108,7 @@ def test_p5_velocity_sei():
 
 def test_p6_default_routing():
     """P6: Default -> optimal chain via utility scoring."""
-    from clr_router import CLRouter, TransactionIntent, TrustTier, RoutingPriority
+    from neuron.clr_router import CLRouter, TransactionIntent, TrustTier, RoutingPriority
     router = CLRouter()
     intent = TransactionIntent(
         value_usd=10, max_latency_ms=30000, requires_privacy=False,
@@ -121,7 +121,7 @@ def test_p6_default_routing():
 
 def test_access_control_denied():
     """Trust tier enforcement: UNVERIFIED cannot exceed $1K."""
-    from clr_router import CLRouter, TransactionIntent, TrustTier
+    from neuron.clr_router import CLRouter, TransactionIntent, TrustTier
     router = CLRouter()
     intent = TransactionIntent(
         value_usd=5000, max_latency_ms=30000, requires_privacy=False,
@@ -135,7 +135,7 @@ def test_access_control_denied():
 
 def test_routing_hash():
     """Routing decisions include hash for ZK proofs."""
-    from clr_router import CLRouter, TransactionIntent, TrustTier
+    from neuron.clr_router import CLRouter, TransactionIntent, TrustTier
     router = CLRouter()
     intent = TransactionIntent(
         value_usd=10, max_latency_ms=30000, requires_privacy=False,
@@ -151,7 +151,7 @@ def test_routing_hash():
 
 def test_encrypted_mempool():
     """Encrypted mempool hides tx content."""
-    from mev_protection import EncryptedMempool
+    from neuron.mev_protection import EncryptedMempool
     pool = EncryptedMempool(mock_mode=True, environ={"VAMS_ENV": "test"})
     tx = pool.submit_transaction(b"swap BTC/USDT 10000", value_usd=10000)
     assert tx.status.value == "committed"
@@ -165,7 +165,7 @@ def test_encrypted_mempool():
 
 def test_batch_auction():
     """Batch auction settles at uniform clearing price."""
-    from mev_protection import BatchAuctionSettler, BatchPayment
+    from neuron.mev_protection import BatchAuctionSettler, BatchPayment
     import time
     settler = BatchAuctionSettler()
     payments = [
@@ -184,7 +184,7 @@ def test_batch_auction():
 
 def test_mev_slashing_report():
     """MEV extraction report triggers 25% slash."""
-    from mev_protection import MEVProtection
+    from neuron.mev_protection import MEVProtection
     mev = MEVProtection(mock_mode=True, environ={"VAMS_ENV": "test"})
     report = mev.report_mev_extraction(
         tx_hash="0xabc", extractor_id="bad_validator",
@@ -201,7 +201,7 @@ def test_mev_slashing_report():
 
 def test_icb_build_message():
     """ICB client builds valid bridge messages."""
-    from bridge_executor import ICBClient
+    from neuron.bridge_executor import ICBClient
     icb = ICBClient()
     msg = icb.build_bridge_message("polygon", "cardano", b"test_payload")
     assert msg.source_chain == "polygon"
@@ -216,7 +216,7 @@ def test_icb_build_message():
 
 def test_icb_verify_proof():
     """ICB proof verification mirrors Aiken contract."""
-    from bridge_executor import ICBClient
+    from neuron.bridge_executor import ICBClient
     icb = ICBClient()
     # Valid proof: >= 64 bytes
     assert icb.verify_bridge_proof(b'\x00' * 64, "abc123") == True
@@ -229,7 +229,7 @@ def test_icb_verify_proof():
 
 def test_icb_nonce_replay():
     """ICB blocks nonce replay attacks."""
-    from bridge_executor import ICBClient
+    from neuron.bridge_executor import ICBClient
     icb = ICBClient()
     icb.build_bridge_message("polygon", "cardano", b"msg1")
     # Nonce 1 was used, so nonce 1 should be rejected
@@ -242,7 +242,7 @@ def test_icb_nonce_replay():
 
 def test_bridge_executor_cardano():
     """Bridge to Cardano uses ICB verification."""
-    from bridge_executor import BridgeExecutor, BridgeStatus
+    from neuron.bridge_executor import BridgeExecutor, BridgeStatus
     executor = BridgeExecutor(mock_mode=True)
     result = executor.execute("Cardano", b"test_cardano_tx")
     assert result.status == BridgeStatus.VERIFIED
@@ -253,7 +253,7 @@ def test_bridge_executor_cardano():
 
 def test_bridge_executor_solana_ism():
     """Bridge to Solana uses Multi-ISM verification."""
-    from bridge_executor import BridgeExecutor, BridgeStatus
+    from neuron.bridge_executor import BridgeExecutor, BridgeStatus
     executor = BridgeExecutor(mock_mode=True)
     result = executor.execute("Solana", b"test_solana_tx")
     assert result.status == BridgeStatus.VERIFIED
@@ -264,7 +264,7 @@ def test_bridge_executor_solana_ism():
 
 def test_bridge_fallback():
     """Fallback handler cascades on failure."""
-    from bridge_executor import BridgeExecutor, BridgeFallbackHandler, BridgeStatus
+    from neuron.bridge_executor import BridgeExecutor, BridgeFallbackHandler, BridgeStatus
     handler = BridgeFallbackHandler(
         executor=BridgeExecutor(mock_mode=True, environ={"VAMS_ENV": "test"})
     )
@@ -278,7 +278,7 @@ def test_bridge_fallback():
 
 def test_multi_ism_threshold():
     """Multi-ISM requires 2/3 verification."""
-    from bridge_executor import MultiISMVerifier
+    from neuron.bridge_executor import MultiISMVerifier
     verifier = MultiISMVerifier(mock_mode=True)
     passed, results = verifier.verify("test_hash_abc")
     assert passed == True
@@ -289,7 +289,7 @@ def test_multi_ism_threshold():
 
 def test_bridge_executor_trails_polygon():
     """Polygon route uses Trails as primary transport (v0.6.0)."""
-    from bridge_executor import BridgeExecutor, BridgeStatus, BridgeTransport, TRANSPORT_MATRIX
+    from neuron.bridge_executor import BridgeExecutor, BridgeStatus, BridgeTransport, TRANSPORT_MATRIX
     # Verify the route configuration first
     route = TRANSPORT_MATRIX.get("VAMS_L3->Polygon")
     assert route is not None, "VAMS_L3->Polygon route must exist"
@@ -322,7 +322,7 @@ class _ComplianceVerifier:
 
 def test_p3_verified_address_passes():
     """P3: a live-eligible OMS result routes successfully to Polygon KYC."""
-    from clr_router import CLRouter, TransactionIntent, TrustTier, RoutingPriority
+    from neuron.clr_router import CLRouter, TransactionIntent, TrustTier, RoutingPriority
     router = CLRouter(identity_verifier=_ComplianceVerifier(True))
     verified_address = "0x99aabbccddeeff001122334455667788990011aa"
     intent = TransactionIntent(
@@ -341,7 +341,7 @@ def test_p3_verified_address_passes():
 
 def test_p3_unverified_address_blocked():
     """P3 fail-closed: Unverified address raises PermissionError."""
-    from clr_router import CLRouter, TransactionIntent, TrustTier
+    from neuron.clr_router import CLRouter, TransactionIntent, TrustTier
     router = CLRouter(identity_verifier=_ComplianceVerifier(False))
     unverified_address = "0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef"
     intent = TransactionIntent(
@@ -361,7 +361,7 @@ def test_p3_unverified_address_blocked():
 
 def test_p3_missing_address_blocked():
     """P3 fail-closed: Empty agent_address is rejected by the OMS identity gate."""
-    from clr_router import CLRouter, TransactionIntent, TrustTier
+    from neuron.clr_router import CLRouter, TransactionIntent, TrustTier
     router = CLRouter(identity_verifier=_ComplianceVerifier(False))
     # Must use PLATINUM tier to pass CLR Rule 4 and reach the OMS gate.
     # TrustTier.GOLD would be rejected earlier by _check_permissions with a
@@ -383,7 +383,7 @@ def test_p3_missing_address_blocked():
 
 def test_p3_stats_incremented_on_denial():
     """P3 denial increments the 'denied' routing stat."""
-    from clr_router import CLRouter, TransactionIntent, TrustTier
+    from neuron.clr_router import CLRouter, TransactionIntent, TrustTier
     router = CLRouter()
     intent = TransactionIntent(
         value_usd=1000, max_latency_ms=30000,

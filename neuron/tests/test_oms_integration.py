@@ -12,17 +12,12 @@ import json
 import os
 import sys
 
-# Ensure neuron directory is in path
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
+# Ensure the repository root is in path for standalone execution.
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
-try:
-    from sdk.oms_identity import OMSIdentityVerifier
-    from payments.coinme_client import CoinmeClient
-    from sdk.trails_client import TrailsClient, TrailsReceipt, TrailsStatus
-except ImportError:
-    from neuron.sdk.oms_identity import OMSIdentityVerifier
-    from neuron.payments.coinme_client import CoinmeClient
-    from neuron.sdk.trails_client import TrailsClient, TrailsReceipt, TrailsStatus
+from neuron.sdk.oms_identity import OMSIdentityVerifier
+from neuron.payments.coinme_client import CoinmeClient
+from neuron.sdk.trails_client import TrailsClient, TrailsReceipt, TrailsStatus
 
 
 class TestOMSIdentityVerifier(unittest.TestCase):

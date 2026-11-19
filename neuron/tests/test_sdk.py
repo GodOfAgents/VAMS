@@ -10,12 +10,12 @@ import pytest
 from unittest.mock import patch, MagicMock
 import time
 
-# Add parent directory to path for imports
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# Add the repository root for canonical package imports.
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
-from sdk.celestia import CelestiaDA, CelestiaBlock, BlobSubmission, CelestiaNetwork
-from sdk.bittensor_subnet import BittensorSubnet, SubnetInfo, MinerInfo, SUBNET_NAMES
-from sdk.phala_tee import PhalaTEE, MarlinOyster, AutomataMultiProver, TEEProvider, AttestationReport
+from neuron.sdk.celestia import CelestiaDA, CelestiaBlock, BlobSubmission, CelestiaNetwork
+from neuron.sdk.bittensor_subnet import BittensorSubnet, SubnetInfo, MinerInfo, SUBNET_NAMES
+from neuron.sdk.phala_tee import PhalaTEE, MarlinOyster, AutomataMultiProver, TEEProvider, AttestationReport
 
 
 # ============================================================================
@@ -204,7 +204,7 @@ class TestPhalaTEE:
         session.get.return_value.status_code = 200
         session.get.return_value.json.return_value = {}
         session.post.side_effect = AssertionError("Unexpected transport in local TEE test")
-        monkeypatch.setattr("sdk.phala_tee.requests.Session", lambda: session)
+        monkeypatch.setattr("neuron.sdk.phala_tee.requests.Session", lambda: session)
     
     def test_init_default(self):
         """Test default initialization."""
@@ -295,7 +295,7 @@ class TestMarlinOyster:
         session.headers = {}
         session.get.return_value = response
         session.post.return_value = response
-        monkeypatch.setattr("sdk.phala_tee.requests.Session", lambda: session)
+        monkeypatch.setattr("neuron.sdk.phala_tee.requests.Session", lambda: session)
 
     def test_init_default(self):
         """Test default initialization."""
@@ -327,7 +327,7 @@ class TestAutomataMultiProver:
         session.headers = {}
         session.get.return_value = response
         session.post.return_value = response
-        monkeypatch.setattr("sdk.phala_tee.requests.Session", lambda: session)
+        monkeypatch.setattr("neuron.sdk.phala_tee.requests.Session", lambda: session)
 
     def test_init(self):
         """Test initialization."""
@@ -353,9 +353,9 @@ class TestSDKIntegration:
     
     def test_all_sdks_importable(self):
         """Test all SDK modules can be imported."""
-        from sdk.celestia import CelestiaDA
-        from sdk.bittensor_subnet import BittensorSubnet
-        from sdk.phala_tee import PhalaTEE
+        from neuron.sdk.celestia import CelestiaDA
+        from neuron.sdk.bittensor_subnet import BittensorSubnet
+        from neuron.sdk.phala_tee import PhalaTEE
         
         assert CelestiaDA is not None
         assert BittensorSubnet is not None
@@ -363,9 +363,9 @@ class TestSDKIntegration:
     
     def test_all_health_functions_exist(self):
         """Test convenience health check functions."""
-        from sdk.celestia import check_celestia_health
-        from sdk.bittensor_subnet import check_bittensor_health
-        from sdk.phala_tee import check_all_tee_health
+        from neuron.sdk.celestia import check_celestia_health
+        from neuron.sdk.bittensor_subnet import check_bittensor_health
+        from neuron.sdk.phala_tee import check_all_tee_health
         
         assert callable(check_celestia_health)
         assert callable(check_bittensor_health)
@@ -379,7 +379,7 @@ class TestSigner:
     """Tests for Signer abstraction."""
     
     def test_eoa_signer_init(self):
-        from sdk.signer import EOASigner
+        from neuron.sdk.signer import EOASigner
         # 64 char hex string
         pk = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
         signer = EOASigner(pk)
@@ -387,7 +387,7 @@ class TestSigner:
         assert signer.address.startswith("0x")
 
     def test_signer_factory(self):
-        from sdk.signer import SignerFactory, EOASigner, SessionKeySigner
+        from neuron.sdk.signer import SignerFactory, EOASigner, SessionKeySigner
         pk = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
         signer = SignerFactory.create({"private_key": pk})
         assert isinstance(signer, EOASigner)
@@ -413,8 +413,7 @@ class TestTrustPlugins:
     def test_tee_attestation_root_binding(self):
         import sys
         import os
-        sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-        from trust_plugins.tee_plugin import TEEProofPlugin
+        from neuron.trust_plugins.tee_plugin import TEEProofPlugin
         
         plugin = TEEProofPlugin(mock_mode=True)
         root_addr = b"\x01" * 20

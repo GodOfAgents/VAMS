@@ -11,8 +11,8 @@ import pytest
 import shutil
 from typing import Generator
 
-# Add parent directory to path for imports
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# Add the repository root for canonical package imports.
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 from neuron.sdk.nonce_manager import NonceManager
 from neuron.sdk.x402_recovery import (
@@ -753,7 +753,7 @@ class TestX402EscrowLifecycleIntegration:
         assert recovery_handler.recovery_attempts == 1
 
     def test_full_lifecycle_with_proplay_guidance(self, recovery_handler):
-        from intelligence.world_model import ProPlayWorldModel
+        from neuron.intelligence.world_model import ProPlayWorldModel
         
         wm = ProPlayWorldModel(filepath=".data/memory/test_lifecycle_graph.json")
         wm.add_procedure("lock_escrow", "Lock VAMS escrow")

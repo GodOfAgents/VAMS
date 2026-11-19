@@ -1,9 +1,9 @@
 import os
 import sys
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
-from sentinel.world_state_fidelity import WorldStateFidelitySentinel
+from neuron.sentinel.world_state_fidelity import WorldStateFidelitySentinel
 
 
 def _build_trace(

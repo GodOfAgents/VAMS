@@ -9,10 +9,10 @@ import os
 import pytest
 from unittest.mock import patch, MagicMock
 
-# Add parent directory to path for imports
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# Add the repository root for canonical package imports.
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
-from compute import (
+from neuron.compute import (
     BittensorProvider, 
     ComputeManager, 
     ComputeStatus, 
@@ -21,7 +21,7 @@ from compute import (
     AkashProvider,
     RenderProvider
 )
-from trust import (
+from neuron.trust import (
     TrustManager, 
     TrustStatus, 
     TrustInfo,

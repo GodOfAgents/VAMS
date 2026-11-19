@@ -3,11 +3,17 @@ from unittest.mock import patch, mock_open
 import sys
 import os
 import json
+import pytest
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
-from agent_comms import AgentCommunicator, SignedMessage
-from secp256k1 import generate_private_key, public_key_bytes
+from neuron.agent_comms import AgentCommunicator, SignedMessage
+from neuron.secp256k1 import generate_private_key, public_key_bytes
+
+@pytest.fixture(autouse=True)
+def isolated_audit_directory(tmp_path, monkeypatch):
+    """Keep real audit writes private before unittest setUp runs."""
+    monkeypatch.chdir(tmp_path)
 
 class TestAgentComms(unittest.TestCase):
     

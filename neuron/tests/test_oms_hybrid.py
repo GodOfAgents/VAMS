@@ -10,13 +10,13 @@ from unittest.mock import patch, MagicMock
 import os
 import sys
 
-# Ensure neuron directory is in path
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
+# Ensure the repository root is in path for standalone execution.
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
-from clr_router import CLRouter, TransactionIntent, TrustTier, RoutingPriority
-from sdk.signer import SignerFactory, OMSSigner, EOASigner
-from economics.gas_premium import GasAbstractionPremiumCalculator
-from sdk.oms_identity import OMSIdentityVerifier
+from neuron.clr_router import CLRouter, TransactionIntent, TrustTier, RoutingPriority
+from neuron.sdk.signer import SignerFactory, OMSSigner, EOASigner
+from neuron.economics.gas_premium import GasAbstractionPremiumCalculator
+from neuron.sdk.oms_identity import OMSIdentityVerifier
 
 
 class TestOMSRoutingEnforcement(unittest.TestCase):
@@ -56,7 +56,7 @@ class TestOMSRoutingEnforcement(unittest.TestCase):
 
 
 class TestOMSSigner(unittest.TestCase):
-    @patch("sdk.oms_identity.OMSIdentityVerifier.is_compliance_verified")
+    @patch("neuron.sdk.oms_identity.OMSIdentityVerifier.is_compliance_verified")
     def test_oms_signer_compliance_checks(self, mock_is_verified):
         # Setup signer
         private_key = "0x" + "11" * 32

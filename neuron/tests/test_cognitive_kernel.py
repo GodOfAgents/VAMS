@@ -11,12 +11,12 @@ import shutil
 import json
 from typing import Dict, Any
 
-# Add parent directory to path for imports
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# Add the repository root for canonical package imports.
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
-from sdk.semantic_mmu import SemanticMMU, MemoryTier, MemoryPage
-from sdk.sira_engine import SiraEngine
-from intelligence.world_model import ProPlayWorldModel, SimpleTextEmbedding
+from neuron.sdk.semantic_mmu import SemanticMMU, MemoryTier, MemoryPage
+from neuron.sdk.sira_engine import SiraEngine
+from neuron.intelligence.world_model import ProPlayWorldModel, SimpleTextEmbedding
 
 
 @pytest.fixture(autouse=True)

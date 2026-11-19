@@ -41,19 +41,13 @@ except ImportError:
     RICH_AVAILABLE = False
     console = None
 
-# Import local modules
-try:
-    from anchoring import L1StateAnchor, AnchorReceipt, get_anchor
-except ImportError:
-    # Fallback if running from different directory
-    import os
-    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-    from anchoring import L1StateAnchor, AnchorReceipt, get_anchor
+if not __package__:  # PEP 366 bootstrap for direct script execution.
+    _neuron_dir = os.path.dirname(os.path.abspath(__file__))
+    sys.path.insert(0, os.path.dirname(_neuron_dir))
+    __package__ = "neuron"
 
-try:
-    from neuron.runtime_safety import LiveModeSafetyError, RuntimePolicy, load_runtime_policy
-except ModuleNotFoundError:
-    from runtime_safety import LiveModeSafetyError, RuntimePolicy, load_runtime_policy
+from .anchoring import L1StateAnchor, AnchorReceipt, get_anchor
+from .runtime_safety import LiveModeSafetyError, RuntimePolicy, load_runtime_policy
 
 
 # ============================================================================

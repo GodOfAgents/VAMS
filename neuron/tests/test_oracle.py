@@ -5,9 +5,9 @@ import sys
 import os
 
 # Add parent directory to path
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
-from chain_oracle import ChainMetrics, OracleManager, EthereumOracle, SolanaOracle
+from neuron.chain_oracle import ChainMetrics, OracleManager, EthereumOracle, SolanaOracle
 
 class TestChainOracle(unittest.TestCase):
     
@@ -45,7 +45,7 @@ class TestChainOracle(unittest.TestCase):
         
         self.assertEqual(metrics.chain, "Solana")
 
-    @patch('chain_oracle.EthereumOracle.fetch_metrics')
+    @patch('neuron.chain_oracle.EthereumOracle.fetch_metrics')
     def test_oracle_manager_caching(self, mock_fetch):
         # Setup mock return
         mock_metrics = ChainMetrics(

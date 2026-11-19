@@ -3,9 +3,9 @@ import sys
 
 import pytest
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
-from sentinel.world_state_fidelity import (
+from neuron.sentinel.world_state_fidelity import (
     WorldStateFidelitySentinel,
     stable_state_hash,
 )
