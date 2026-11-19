@@ -26,6 +26,8 @@ from neuron.effect_postgres_v3 import PostgresEffectDatabaseV3, EffectPersistenc
 from neuron.runtime_safety import RuntimeConfigurationError
 from neuron.signed_receipts import ReceiptSignerV3
 
+REAL_VERIFY_SCHEMA = L.PaymentLedgerV1._verify_schema
+
 
 def synthetic_manifest():
     constraints = tuple(sorted((table, kind, 'SYNTHETIC-NOT-PG-COMPILED ' + str(n))
@@ -58,7 +60,13 @@ class PaymentCursor(F.JournalCursor):
         elif 'SELECT amount' in query:
             self.result = [(row['amount'],) for row in self.rows.payments.values() if row['budget_id'] == params[0]][:257]
         elif 'SELECT event_seq,state' in query:
-            self.result = list(self.rows.payment_events.get(params[0], []))[:33]
+            rows = list(self.rows.payment_events.get(params[0], []))
+            if 'AND event_seq=%s' in query:
+                assert len(params) == 2
+                self.result = [row for row in rows if row[0] == params[1]]
+            else:
+                assert len(params) == 1 and 'ORDER BY event_seq LIMIT 33' in query
+                self.result = rows[:33]
         elif query.lstrip().startswith('INSERT INTO public.vams_payment_budgets_v1'):
             assert params[0] not in self.rows.payment_budgets
             self.rows.payment_budgets[params[0]] = (params[1], Decimal(0), 0); self.rowcount = 1
@@ -94,6 +102,57 @@ class PaymentCursor(F.JournalCursor):
             raise AssertionError('unexpected payment SQL shape: ' + query)
 
 
+class CatalogCursor:
+    """Explicit synthetic catalog rows; exercises guard code, not native PG."""
+    def __init__(self, ledger, *, rule_table=None):
+        self.ledger = ledger; self.rule_table = rule_table
+        self.result = None; self.queries = []; self.locked = False
+
+    def execute(self, query, params=()):
+        self.queries.append((query, params)); self.result = []
+        if query.lstrip().startswith('LOCK TABLE '):
+            assert 'IN SHARE UPDATE EXCLUSIVE MODE' in query
+            assert all(table in query for table in S.TABLES)
+            self.locked = True
+            return
+        assert self.locked, 'catalog/data read before relation lock'
+        if 'FROM pg_catalog.pg_rewrite' in query:
+            assert params == (list(S.TABLES),)
+            self.result = [] if self.rule_table is None else [(1,)]
+        elif "current_setting('server_version_num')" in query:
+            self.result = [(self.ledger.schema_manifest.server_version_num,)]
+        elif 'FROM public.vams_payment_meta_v1' in query:
+            self.result = [(1, 1, S.MIGRATION_HASH, self.ledger.configuration_hash)]
+        elif 'FROM pg_catalog.pg_attribute a' in query and 'a.attgenerated' in query:
+            for table, columns in S.COLUMNS.items():
+                for item in columns.split():
+                    name, type_ = item.split(':')
+                    self.result.append((table, name, type_.rstrip('?'), not type_.endswith('?'), '', ''))
+        elif 'FROM pg_catalog.pg_constraint k' in query:
+            self.result = [(table, kind, definition, False, False, True)
+                           for table, kind, definition in self.ledger.schema_manifest.constraints]
+        elif 'SELECT c.relowner' in query:
+            self.result = [(self.ledger.database.migration_role, 'r', 'p', False, False, False)] * 4
+        elif 'FROM pg_catalog.pg_trigger' in query or 'FROM pg_catalog.pg_inherits' in query:
+            self.result = []
+        elif 'pg_catalog.aclexplode(a.attacl)' in query:
+            self.result = [(table, column, self.ledger.database.runtime_role, 'UPDATE', False)
+                for table, column in ((S.TABLES[1], 'reserved'), (S.TABLES[1], 'revision'),
+                    (S.TABLES[2], 'state'), (S.TABLES[2], 'credential_digest'), (S.TABLES[2], 'revision'))]
+        elif 'pg_catalog.aclexplode(COALESCE(c.relacl' in query:
+            self.result = [(table, self.ledger.database.runtime_role, privilege, False)
+                for table in S.TABLES for privilege in
+                (('SELECT', 'MAINTAIN') if table == S.TABLES[0] else ('SELECT', 'INSERT', 'MAINTAIN'))]
+        else:
+            raise AssertionError('unexpected catalog fixture query: ' + query)
+
+    def fetchone(self):
+        return self.result[0] if self.result else None
+
+    def fetchall(self):
+        return self.result
+
+
 class PaymentLedgerV1Tests(unittest.TestCase):
     def setUp(self):
         self.p = P.PaymentIntentV1Tests('runTest'); self.p.setUp(); self.addCleanup(self.p.doCleanups)
@@ -112,6 +171,15 @@ class PaymentLedgerV1Tests(unittest.TestCase):
         self.f.now = self.f.proposal.context.issued_at + 1
         self.p.attempt = self.f.attempt; self.p.intent = self.p.make_intent(); self.p.now = self.f.now
         self.schema = synthetic_manifest(); self.schema.validate()
+        # Explicit configured extension, never inferred from fixture catalog rows.
+        config = F.S.authority_configuration_v5(self.f.identity, self.f.native_config_hash,
+            'fixture_runtime', 'fixture_owner', self.f.check_manifest, payment_manifest=self.schema)
+        self.f.database = F.S.PostgresAuthorityDatabaseV5('postgresql://fixture.invalid/vams', config,
+            runtime_role='fixture_runtime', migration_role='fixture_owner', check_manifest=self.f.check_manifest,
+            payment_manifest=self.schema, payment_stage='present')
+        self.f.journal = F.J.PostgresAttemptJournalV5(self.f.database, self.f.identity,
+            native_config_hash=self.f.native_config_hash, runtime_role='fixture_runtime',
+            migration_role='fixture_owner', check_manifest=self.f.check_manifest, clock=lambda: self.f.now)
         self.schema_calls = 0
         owner = self
         @contextmanager
@@ -369,6 +437,76 @@ class PaymentLedgerV1Tests(unittest.TestCase):
         self.assertNotIn("'paid'", ddl); self.assertNotIn("'released'", ddl)
         for name in ('pay', 'fund', 'release', 'confirm_payment', 'sign'):
             self.assertFalse(hasattr(self.ledger, name))
+
+    def test_event_insert_suppression_or_false_readback_rolls_back_reservation(self):
+        original = PaymentCursor.execute
+        for mode in ('zero', 'lying-missing', 'wrong-event', 'rowcount-two'):
+            before = deepcopy(vars(self.rows))
+            def faulty(cursor, query, params=()):
+                if query.lstrip().startswith('INSERT INTO public.vams_payment_events_v1'):
+                    if mode in ('zero', 'lying-missing'):
+                        cursor.result = None; cursor.rowcount = 0 if mode == 'zero' else 1
+                        return
+                    original(cursor, query, params)
+                    if mode == 'rowcount-two': cursor.rowcount = 2
+                    else:
+                        rows = cursor.rows.payment_events[params[0]]
+                        seq, state, evidence, digest = rows[-1]
+                        rows[-1] = (seq, state, P.h(b'SYNTHETIC wrong inserted evidence'), digest)
+                    return
+                return original(cursor, query, params)
+            with self.subTest(mode=mode), patch.object(PaymentCursor, 'execute', faulty), self.assertRaises(ValueError):
+                self.reserve()
+            self.assertEqual(vars(self.rows), before)
+            self.assert_no_payment()
+
+    def test_event_insert_failure_rolls_back_exposure_and_preserves_both_heads(self):
+        self.reserve(); original = PaymentCursor.execute
+        for mode in ('zero', 'lying-missing', 'wrong-event', 'rowcount-two'):
+            before = deepcopy(vars(self.rows))
+            def faulty(cursor, query, params=()):
+                if query.lstrip().startswith('INSERT INTO public.vams_payment_events_v1'):
+                    if mode in ('zero', 'lying-missing'):
+                        cursor.result = None; cursor.rowcount = 0 if mode == 'zero' else 1
+                        return
+                    original(cursor, query, params)
+                    if mode == 'rowcount-two': cursor.rowcount = 2
+                    else:
+                        rows = cursor.rows.payment_events[params[0]]
+                        seq, state, evidence, digest = rows[-1]
+                        rows[-1] = (seq, state, evidence, P.h(b'SYNTHETIC wrong inserted digest'))
+                    return
+                return original(cursor, query, params)
+            with self.subTest(mode=mode), patch.object(PaymentCursor, 'execute', faulty), self.assertRaises(ValueError):
+                self.ledger.mark_potentially_released(self.key, self.p.intent, self.p.attempt,
+                    self.p.approval(), P.h(b'potential credential'))
+            self.assertEqual(vars(self.rows), before)
+            self.assertEqual(self.ledger.lookup(self.key).state, 'reserved')
+
+    def test_exact_event_readback_uses_sequence_and_keeps_original_event(self):
+        self.reserve(); first = deepcopy(self.rows.payment_events[self.p.intent.digest][0])
+        record = self.ledger.mark_potentially_released(self.key, self.p.intent, self.p.attempt,
+            self.p.approval(), P.h(b'potential credential'))
+        self.assertEqual(record.revision, 2)
+        self.assertEqual(self.rows.payment_events[self.p.intent.digest][0], first)
+        reads = [(query, params) for query, params in self.queries
+                 if 'SELECT event_seq,state' in query and 'AND event_seq=%s' in query]
+        self.assertEqual([params for _, params in reads], [(self.p.intent.digest, 1), (self.p.intent.digest, 2)])
+        self.assertEqual(self.ledger.lookup(self.key), record)
+
+    def test_catalog_rewrite_rule_is_rejected_under_lock_before_data(self):
+        for table in S.TABLES:
+            cursor = CatalogCursor(self.ledger, rule_table=table)
+            with self.subTest(table=table), self.assertRaisesRegex(ValueError, 'rewrite'):
+                REAL_VERIFY_SCHEMA(self.ledger, cursor)
+            self.assertTrue(cursor.locked)
+            self.assertFalse(any('SELECT singleton,version' in q for q, _ in cursor.queries))
+
+    def test_catalog_no_rule_fixture_completes_existing_identity_checks(self):
+        cursor = CatalogCursor(self.ledger)
+        REAL_VERIFY_SCHEMA(self.ledger, cursor)
+        self.assertTrue(cursor.locked)
+        self.assertTrue(any('FROM pg_catalog.pg_rewrite' in q for q, _ in cursor.queries))
 
 
 if __name__ == '__main__':

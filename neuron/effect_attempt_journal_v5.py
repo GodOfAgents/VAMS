@@ -109,6 +109,11 @@ class _AttemptFactsV5:
 
 
 def _stored_bytes(value, length=None, label='stored bytes'):
+    if type(value) is memoryview:
+        try:
+            value = value.tobytes()
+        except (ValueError, BufferError):
+            raise EffectV3Error(label + ' has invalid encoding') from None
     if type(value) is not bytes or (length is not None and len(value) != length):
         raise EffectV3Error(label + ' has invalid encoding')
     return value
@@ -153,6 +158,7 @@ class PostgresAttemptJournalV5(ImmutableRuntimeConfiguration):
             raise EffectV3Error('journal and database role/check configuration differ')
         expected = authority_configuration_v5(
             identity, native_config_hash, runtime_role, migration_role, check_manifest,
+            payment_manifest=database.payment_manifest,
         )
         if database.configuration_hash != expected:
             raise EffectV3Error('authority storage5 belongs to another identity/configuration')

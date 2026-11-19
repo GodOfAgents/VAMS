@@ -104,6 +104,9 @@ class PaymentLedgerV1(ImmutableRuntimeConfiguration):
         require(type(policy) is PaymentPolicyBindingV1 and type(schema_manifest) is PaymentSchemaManifestV1,
                 'explicit payment policy and compiled schema manifest required')
         schema_manifest.validate()
+        require(database.payment_manifest is not None and
+                database.payment_manifest.digest == schema_manifest.digest,
+                'payment ledger requires matching explicitly configured V5 extension manifest')
         require(schema_manifest.server_version_num == database.check_manifest.server_version_num,
                 'payment and V5 PostgreSQL compiler versions differ')
         require(policy.authority == journal.identity.authority,
@@ -127,6 +130,9 @@ class PaymentLedgerV1(ImmutableRuntimeConfiguration):
         # Fixed relation names only; relation locks precede catalog inspection.
         cursor.execute('''LOCK TABLE public.vams_payment_meta_v1, public.vams_payment_budgets_v1,
             public.vams_payment_intents_v1, public.vams_payment_events_v1 IN SHARE UPDATE EXCLUSIVE MODE''')
+        cursor.execute('''SELECT 1 FROM pg_catalog.pg_rewrite
+            WHERE ev_class=ANY(%s::regclass[]) LIMIT 1''', (list(TABLES),))
+        require(cursor.fetchone() is None, 'payment table rewrite rules are unsupported')
         cursor.execute("SELECT pg_catalog.current_setting('server_version_num')::int")
         require(cursor.fetchone() == (self.schema_manifest.server_version_num,), 'payment PostgreSQL version drift')
         cursor.execute('''SELECT singleton,version,migration_hash,configuration_hash
@@ -213,6 +219,7 @@ class PaymentLedgerV1(ImmutableRuntimeConfiguration):
         provisioning and a reviewed compiled PG18 manifest are prior inputs.
         """
         self._now()
+        require(self.database.payment_stage == 'absent', 'payment migration requires explicit absent installation stage')
         connection = self.database._connect_migration(migration_dsn)
         failure = None
         stage = 'SESSION'
@@ -238,6 +245,9 @@ class PaymentLedgerV1(ImmutableRuntimeConfiguration):
                 cursor.execute(sql.SQL('GRANT UPDATE (reserved,revision) ON public.vams_payment_budgets_v1 TO {}').format(runtime))
                 cursor.execute(sql.SQL('GRANT UPDATE (state,credential_digest,revision) ON public.vams_payment_intents_v1 TO {}').format(runtime))
                 self._verify_schema(cursor)
+                # Validate the newly created complete graph before COMMIT; never
+                # mutate this absent-stage instance into a runtime adopter.
+                self.database._verify_payment_extension_present(cursor)
             stage = 'COMMIT'
             connection.commit()
             stage = 'CLOSE'
@@ -339,6 +349,18 @@ class PaymentLedgerV1(ImmutableRuntimeConfiguration):
         cursor.execute('''INSERT INTO public.vams_payment_events_v1
             (intent_id,event_seq,state,evidence_digest,event_digest) VALUES (%s,%s,%s,%s,%s)''',
             (record.intent.digest, sequence, state, evidence, digest))
+        require(cursor.rowcount == 1, 'payment event insert did not affect exactly one row')
+        cursor.execute('''SELECT event_seq,state,evidence_digest,event_digest
+            FROM public.vams_payment_events_v1 WHERE intent_id=%s AND event_seq=%s''',
+            (record.intent.digest, sequence))
+        rows = cursor.fetchall()
+        require(type(rows) in (tuple, list) and len(rows) == 1 and
+                type(rows[0]) in (tuple, list) and len(rows[0]) == 4,
+                'inserted payment event is missing or duplicated')
+        observed = rows[0]
+        require(type(observed[0]) is int and type(observed[1]) is str and
+                (observed[0], observed[1], _bytes(observed[2], 32), _bytes(observed[3], 32)) ==
+                (sequence, state, evidence, digest), 'inserted payment event differs from exact commitment')
         return sequence
 
     def lookup(self, key):

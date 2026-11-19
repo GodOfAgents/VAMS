@@ -263,7 +263,8 @@ def _role_name(value, label):
     return value
 
 
-def authority_configuration_v5(identity, native_config_hash, runtime_role, migration_role, check_manifest):
+def authority_configuration_v5(identity, native_config_hash, runtime_role, migration_role, check_manifest,
+        *, payment_manifest=None):
     """Bind store identity to the explicitly selected issuer/native/role config."""
     digest = getattr(identity, 'digest', None)
     if type(digest) is not bytes or len(digest) != 32:
@@ -276,8 +277,13 @@ def authority_configuration_v5(identity, native_config_hash, runtime_role, migra
     role_binding = runtime_role.encode('ascii') + b'\0' + migration_role.encode('ascii')
     if type(check_manifest) is not ExpectedChecksV5:
         raise EffectV3Error('explicit frozen CHECK manifest required')
-    return commitment(b'VAMS:AUTHORITY-STORE:v5\0', digest, native_config_hash, role_binding,
+    base = commitment(b'VAMS:AUTHORITY-STORE:v5\0', digest, native_config_hash, role_binding,
         MIGRATION5,check_manifest.digest)
+    if payment_manifest is None:
+        return base
+    from neuron.payments.v5_extension_v1 import validate_profile
+    validate_profile(payment_manifest, 'absent', check_manifest.server_version_num)
+    return commitment(b'VAMS:AUTHORITY-STORE-PAYMENT:v1\0', base, payment_manifest.digest)
 
 
 class PostgresAuthorityDatabaseV5(PostgresEffectDatabaseV3):
@@ -330,9 +336,11 @@ class PostgresAuthorityDatabaseV5(PostgresEffectDatabaseV3):
     _immutable_runtime_fields = frozenset({
         'runtime_policy', 'configuration_hash', 'dsn', '_uniqueness_keys', '_foreign_keys',
         'runtime_role', 'migration_role', 'check_manifest',
+        'payment_manifest', 'payment_stage',
     })
 
-    def __init__(self, dsn, configuration_hash, *, runtime_role, migration_role, check_manifest):
+    def __init__(self, dsn, configuration_hash, *, runtime_role, migration_role, check_manifest,
+            payment_manifest=None, payment_stage=None):
         self.runtime_policy = load_runtime_policy()
         if self.runtime_policy.is_live:
             raise RuntimeConfigurationError('Unqualified authority storage5 cannot run in live mode')
@@ -343,6 +351,9 @@ class PostgresAuthorityDatabaseV5(PostgresEffectDatabaseV3):
         if type(check_manifest) is not ExpectedChecksV5:
             raise EffectV3Error('explicit frozen CHECK manifest required before database use')
         check_manifest.validate()
+        from neuron.payments.v5_extension_v1 import validate_profile
+        validate_profile(payment_manifest, payment_stage, check_manifest.server_version_num)
+        self.payment_manifest, self.payment_stage = payment_manifest, payment_stage
         self.runtime_role = runtime_role
         self.migration_role = migration_role
         self.check_manifest = check_manifest
@@ -360,6 +371,26 @@ class PostgresAuthorityDatabaseV5(PostgresEffectDatabaseV3):
             if table not in _TABLES5:
                 raise EffectV3Error('unsupported storage5 catalog table')
             cursor.execute(f'LOCK TABLE ONLY {table} IN SHARE UPDATE EXCLUSIVE MODE')
+        if self.payment_stage == 'present':
+            from neuron.payments.v5_extension_v1 import lock_payment_tables
+            lock_payment_tables(cursor)
+
+    def _verify_foreign_keys_and_triggers(self, cursor, tables):
+        if self.payment_manifest is None:
+            return super()._verify_foreign_keys_and_triggers(cursor, tables)
+        from neuron.payments.v5_extension_v1 import verify_absent
+        if self.payment_stage == 'absent':
+            verify_absent(cursor)
+            return super()._verify_foreign_keys_and_triggers(cursor, tables)
+        self._verify_payment_extension_present(cursor)
+
+    def _verify_payment_extension_present(self, cursor):
+        if self.payment_manifest is None:
+            raise EffectV3Error('payment extension was not explicitly configured')
+        from neuron.payments.v5_extension_v1 import lock_payment_tables, verify_present
+        lock_payment_tables(cursor)
+        verify_present(cursor, self.payment_manifest, self.migration_role,
+            list(dict.fromkeys(key[0] for key in self._uniqueness_keys)), self._foreign_keys)
 
     def _verify_schema(self, cursor, *, migration=False):
         expected_role=self.migration_role if migration else self.runtime_role
@@ -374,6 +405,8 @@ class PostgresAuthorityDatabaseV5(PostgresEffectDatabaseV3):
         version=cursor.fetchone()
         if version is None or tuple(version)!=(self.check_manifest.server_version_num,):
             raise EffectV3Error('V5 PostgreSQL compiler/version manifest mismatch')
+        # All catalog/relationship interception checks precede protected V5 data.
+        self._verify_unique_keys(cursor)
         cursor.execute(
             f'SELECT version,migration_hash,configuration_hash FROM {META5} WHERE singleton=1'  # nosec B608 # fixed SQL identifier; enforced by test_effect_sql_identifier_guard
         )
@@ -381,7 +414,6 @@ class PostgresAuthorityDatabaseV5(PostgresEffectDatabaseV3):
         if (row is None or row[0] != 5 or bytes(row[1]) != MIGRATION5 or
                 bytes(row[2]) != self.configuration_hash):
             raise EffectV3Error('authority storage5 version/configuration mismatch')
-        self._verify_unique_keys(cursor)
         self._verify_check_constraints(cursor)
         self._verify_owners_and_privileges(cursor)
 

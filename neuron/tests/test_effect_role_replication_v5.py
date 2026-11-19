@@ -106,12 +106,44 @@ class RoleReplicationV5Test(unittest.TestCase):
             json.dumps(S.AUTHORITY_LIMITS5,sort_keys=True,separators=(',',':')).encode('ascii')+b'\0'+
             json.dumps(S.MIGRATION_PROTOCOL5,sort_keys=True,separators=(',',':')).encode('ascii')).digest()
         self.assertNotEqual(legacy,S.MIGRATION5)
+        database=self.db
         class OldMeta(B.SimpleCursor):
+            def __init__(self):
+                super().__init__();self.catalog_projections=[];self.meta_seen=False
             def execute(self,q,params=()):
-                super().execute(q,params)
-                if 'SELECT version,migration_hash' in q:self.answer=(5,legacy,B.h(b'config'))
+                # Complete synthetic prerequisite rows, not a PostgreSQL engine.
+                # The real uniqueness/FK/trigger validators run before metadata;
+                # this test's negative control remains ONLY the legacy digest.
+                if "AND c.contype IN ('p','u')" in q:
+                    self.queries.append((q,params));self.catalog_projections.append('unique')
+                    self.answer=[]
+                    for table,kind,columns in database._uniqueness_keys:
+                        names=[name for name,oid in columns];types=[oid for name,oid in columns]
+                        ops=[{17:'pg_catalog.bytea_ops',20:'pg_catalog.int8_ops',21:'pg_catalog.int2_ops'}[oid] for oid in types]
+                        self.answer.append((table,kind,names,True,False,False,'r','p',
+                            True,True,True,True,True,len(columns),len(columns),True,True,True,
+                            [True]*len(columns),types,ops,True,True,True,True,True))
+                elif "WHERE c.contype='f'" in q:
+                    self.queries.append((q,params));self.catalog_projections.append('foreign')
+                    self.answer=[(oid,child,list(columns),parent,list(refs),True,True,False,False,'a','a','s',True)
+                        for oid,(child,columns,parent,refs) in enumerate(database._foreign_keys,101)]
+                elif 'FROM pg_catalog.pg_trigger tr' in q:
+                    self.queries.append((q,params));self.catalog_projections.append('triggers');self.answer=[]
+                    for oid,(child,columns,parent,refs) in enumerate(database._foreign_keys,101):
+                        for table,function,kind in ((child,'check_ins',5),(child,'check_upd',17),
+                                (parent,'noaction_del',9),(parent,'noaction_upd',17)):
+                            self.answer.append((table,oid,True,'O','pg_catalog.RI_FKey_'+function,
+                                kind,False,False,0,True,True,True))
+                else:
+                    super().execute(q,params)
+                    if 'SELECT version,migration_hash' in q:
+                        self.meta_seen=True;self.answer=(5,legacy,B.h(b'config'))
+            def fetchall(self):return self.answer
+        cursor=OldMeta()
         with self.assertRaisesRegex(B.EffectV3Error,'version/configuration'):
-            self.db._verify_schema(OldMeta())
+            self.db._verify_schema(cursor)
+        self.assertEqual(cursor.catalog_projections,['unique','foreign','triggers'])
+        self.assertTrue(cursor.meta_seen)
     def test_real_migration_entrypoint_denies_before_lock_ddl_grants(self):
         for name in ('fixture_runtime','fixture_owner'):
             c=RoleCursor(name,True);conn=B.ConnectionFixture(c)
