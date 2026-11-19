@@ -1,10 +1,11 @@
 # Cardano Pre-Prod restricted-testnet rehearsal
 
 **Network:** Cardano Pre-Prod, network magic `1`
-**Posture:** local and offline only. `cardano-cli` 11.2.3.0 is installed for
-offline use (owner decision 11). Live Pre-Prod queries, signing, funding and
-submission each need the owner's specific authorization.
-**Last verified:** 2026-11-13 against `cardano/plutus.json`,
+**Posture:** `cardano-cli` 11.2.3.0 is installed (owner decision 11). Live
+read-only Pre-Prod queries through an own node are approved (owner decision
+14). Signing, funding and submission each still need the owner's specific
+authorization.
+**Last verified:** 2026-11-19 against `cardano/plutus.json`,
 `cardano/validators/governance_v2.ak` and
 `docs/audit/schemas/deployment-manifest.schema.json` (schema 2.0.0)
 
@@ -76,6 +77,29 @@ transaction redesign, review pending (`GOVERNANCE-DELEGATION.md`); insurance
 synthetic; contexts are not ledger-validated (fees, min-UTxO, collateral,
 balance, signatures); costs use the evaluator's model, not live Pre-Prod
 parameters. No applied-identity rehearsal exists yet for `agent_registry.ak`.
+
+## Live read-only node (owner decision 14)
+
+A `cardano-node` 11.1.3 from the verified release download syncs Pre-Prod with
+the official configuration, with two local changes: `DiffusionMode:
+InitiatorOnly` and `PeerSharing: false`, so it makes outbound connections only
+and accepts none. Metrics bind to `127.0.0.1:12798`. Data, configuration and
+logs live outside the repository in `~/vams-preprod/`. Binding the node to
+`127.0.0.1` with `--host-addr` does not work: outbound connections inherit the
+loopback source address and fail.
+
+```bash
+bash ~/vams-preprod/run.sh   # foreground; keep the launching session open
+CARDANO_NODE_SOCKET_PATH=~/vams-preprod/node.socket ~/.vams-tools/bin/cardano-cli conway query tip --testnet-magic 1
+```
+
+Under WSL with systemd and no user lingering, a detached background process
+stops when its launching session closes, so the node runs as a foreground
+process held open by the operator session. Wait for `syncProgress` 100.00
+before relying on any query. Allowed: tip, protocol parameters, UTxO of public
+addresses, script and stake state. Record slot, block hash and node version
+with every result. Not allowed: `transaction submit`, signing, funding or
+mainnet.
 
 ## Step 3: offline ledger checks (local, offline cardano-cli)
 

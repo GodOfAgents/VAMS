@@ -1,3 +1,11 @@
+## 2026-11-19: live read-only Cardano Pre-Prod node (owner decision 14)
+
+- The owner approved live Pre-Prod reads through an own node rather than a public API. `cardano-node` 11.1.3 from the verified release download now syncs Pre-Prod (magic 1) with the official configuration plus `DiffusionMode: InitiatorOnly` and `PeerSharing: false`: outbound connections only, no inbound listener, metrics on `127.0.0.1`. Data lives in `~/vams-preprod/`, outside the repository. No new download.
+- First run reached 10 peers and began syncing from genesis. No live query result is recorded yet; live fee, minimum-UTxO, collateral and execution-limit checks wait for full sync.
+- `docs/runbooks/CARDANO_PREPROD_REHEARSAL.md` documents the node, the failed loopback-bind attempt and the allowed read-only queries. Submit, signing, funding and mainnet stay unauthorized.
+
+Readiness remains NOT READY; 13 findings open, 0/36 tracks verified.
+
 ## 2026-11-16: native payment SQL and BYTEA consumer repair
 
 The V5 journal now normalizes the actual PostgreSQL driver's BYTEA memoryviews

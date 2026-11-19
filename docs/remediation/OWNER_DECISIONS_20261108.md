@@ -184,3 +184,21 @@ Asked in chat, the owner chose **"Rename to ARCHITECT"** for the 12%
 
 This changes names only. It grants no deployment, vesting activation or
 role change.
+
+## 14. Live Cardano Pre-Prod reads through an own node (2026-11-19)
+
+The owner approved adding live Pre-Prod reads to the Cardano tool and chose
+**"Our own node"** over the Koios or Blockfrost public APIs.
+
+- Run `cardano-node` 11.1.3 from the already verified release download with
+  its official Pre-Prod configuration (network magic 1). The node syncs from
+  public Pre-Prod relays; no account, API key or third-party query service.
+- Node-to-node port and metrics bind to `127.0.0.1` only; data lives outside
+  the repository under `~/vams-preprod/`. No Mithril or other new download.
+- Allowed: read-only `cardano-cli` queries (tip, protocol parameters,
+  UTxO of public addresses, script and stake state) for fee, minimum-UTxO,
+  collateral and execution-limit checks. Results are labelled live Pre-Prod
+  with slot, block hash and node version.
+- Not allowed: building transactions for submission, `transaction submit`,
+  signing, funding, key generation for real use, or any mainnet access.
+  Each of those still needs its own approval.
