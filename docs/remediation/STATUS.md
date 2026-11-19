@@ -1,3 +1,34 @@
+## 2026-11-16: payment native SQL successor
+
+The exact combined repair passed 195 local methods/474 subtests with no failure
+or skip. Fresh PG18.6 native SQL passed migrations, scope activation/admission,
+reservation, five old-absent component rejections, rewrite rejection and retained
+exposure/unknown conservation. Native BYTEA readback is repaired; all earlier
+failed attempts remain. This is synthetic authority/unfunded-unit SQL evidence,
+not authentic funding, custody, external effects or release qualification.
+
+See repair_20261115/PAYMENT-NATIVE-COMPATIBILITY.md and immutable receipts under
+VAMS-payment-native-20261115-02 for independent compiler/review and exact source
+mapping. Two-root integration and combined full checks are separate receipts.
+No live policy, route, signing, reward or privileged role is activated. Full A--G
+and both chains remain: 13 open findings, 0/36 verified tracks, NOT READY.
+Historical entries below retain their original source identities.
+
+## 2026-11-15: payment foundation candidate
+
+The corrected payment plan begins with an explicit 4,199-path synchronized source capture, preserving newer economics/callback repairs and separate unintegrated candidates. Versioned payment policy/intent/approval and the V5-linked monetary ledger add exact-unit reservations, nonce/idempotency binding, current-policy checks and durable exposure/unknown state. They neither sign nor fund nor release a payment, and remain live-blocked.
+
+The five-file overlay passed 35 local methods and 182 subtests, zero failures/skips. Genuine synthetic signatures and the actual V5 history verifier ran; SQL transaction/catalog doubles do not establish native PostgreSQL or payment qualification. Combined post-integration checks are separately source-bound. See repair_20261115/PAYMENT-FOUNDATION.md and its required-input manifest. Full A-G, both chains, 13 open findings, 0/36 verified tracks and NOT READY remain. Historical entries retain their own source identities.
+
+## 2026-11-13: current synchronized engineering source
+
+The Python import repair and inactive V3 consent consumer are integrated in Windows and WSL. Retained original evidence and candidate packages are preserved. Current selected source is the successor to WSL remediation/phase1 at 0ac74866c841b5eee60e43aaeb9550944a1d1304; these integrations are working-tree changes, not a clean release commit.
+
+Fresh local evidence: Python product 2,789 passed / 0 failed / 1 historical BASE skip, with 4,214 subtests separately; Solidity baseline 1,167 and combined consumer candidate 1,199 in 77 suites / 0 failed/skipped; Rust fmt/check/Clippy and 69 tests; frontend 4 telemetry tests, lint/build and nine-file/seven-pattern bundle scan. Counts overlap and are not aggregated. The Aiken 600-second collection timeout is unpassed. The owner-operated tools do not establish independent hosted CI, authentic proofs/providers, governance custody, privacy acceptance, both-chain rehearsals or actual observation.
+
+The consumer remains inactive and cannot enroll an empty principal slot. Custody/challenge and initial records in tests are synthetic; production enrollment/migration, current-state readers, gateway/client wiring and the Cardano counterpart remain required. A compiled-mutation harness correction is separate and unintegrated pending synthetic/native qualification and scoped native evidence. No test is newly skipped, retired or weakened.
+
+Use [the dated source/evidence reconciliation](repair_20261112/SYNCHRONIZED-QUALIFICATION.md) and its immutable receipts for precise commands, hashes, limitations and successor checks. Historical entries below retain their original source identities and are not current qualification claims. All A-G work and BOTH Polygon Amoy and Cardano Pre-Prod stay in scope: 13 open findings, 0/36 tracks verified, no readiness promotion, NOT READY.
 ## 2026-11-05: inactive V3 heartbeat authority producer
 
 The new non-upgradeable V3 source reads the pinned timelock generation/commitment, policy projection and mandatory custody adapter. Policy configuration computes its digest from those current reads and rolls back on failure. The source checks an explicit expected chain ID at construction and every read. One-time policy binding checks the source's actual policy and timelock instances. Custody reads have a fixed 50,000-gas cap, copy only 96 bytes, require exactly 96 returned bytes, and reject noncanonical integer words. A real custody implementation and its gas envelope remain UNKNOWN; synthetic fixtures supply no custody authority.

@@ -1,3 +1,27 @@
+## 2026-11-16: local payment and PostgreSQL interfaces
+
+PostgresAuthorityDatabaseV5 accepts explicit payment_manifest/payment_stage;
+authority_configuration_v5 binds that manifest. Default configuration bytes and
+closed FK graph remain unchanged. Stages absent/present are immutable: migrate
+with absent instances, validate installation before commit, then construct new
+present instances with the same configuration. Old absent instances reject
+protected use; PaymentLedgerV1 requires the matching manifest. No state is adopted
+automatically. Internal journal BYTEA readback copies exact memoryviews before
+the existing encoding, length and authenticated-history checks.
+
+EIP3009DomainV1/EIP3009AuthorizationV1 construct canonical typed data/digests/ABI
+and verify public EOA signatures. They never sign, submit, reserve tokens or credit
+an allocation. V1 intent projection permits transfer only; a standard transfer
+does not enforce exclusive facilitation. VAMS approval/receipt domains stay
+separate. Live payments remain blocked. See remediation/repair_20261115/
+PAYMENT-NATIVE-COMPATIBILITY.md for exact native/fixture evidence and limitations.
+
+## Local payment foundation interfaces (2026-11-15)
+
+These Python candidate APIs are not HTTP payment routes and reject live runtime modes. `neuron.payments.intent_v1` supplies `PaymentIntentV1.for_attempt`, strict canonical parsing, `PaymentCapabilityV1`, public-only `PaymentApprovalVerifierV1`, configured `PaymentPolicySourceV1` and `PaymentPolicyBindingV1.validate_new`. An approval binds the whole intent under a new digest domain; it is not an ERC-3009 token authorization or an authenticated chain observation.
+
+`neuron.payments.ledger_v1.PaymentLedgerV1` uses the configured V5 database/journal plus a reviewed PG18 schema manifest. `reserve` binds a scoped `PaymentIdempotencyKeyV1` to an existing attempt and monetary budget; identical retries return retained status, changed terms conflict. `mark_potentially_released` revalidates current policy before committing a credential digest; `record_unknown` retains the obligation; `lookup` returns status without new signing authority. Returned records always expose `signing_authorized=False` and `native_payment_verified=False`. No automatic retry, expiry refund, pay/fund/release API, credentials or signing service is supplied. Explicit migration refuses existing/partial payment-schema adoption. See remediation/repair_20261115/PAYMENT-FOUNDATION.md for bounds, evidence and prerequisites.
+
 ## 2026-11-05: normal-rotation body-key pair component
 
 `verify_normal_rotation_signature_pair` (Python) and `verifyNormalRotationSignaturePair` (Solidity) require OLD and NEW body-key signatures over the identical canonical base intent and witness. Missing, malformed, swapped, wrong-key and split-witness signatures reject; enrollment and lost-key recovery reject through this normal-only API. Existing one-role APIs, digest domains and encodings remain unchanged.

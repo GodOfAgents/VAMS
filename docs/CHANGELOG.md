@@ -1,3 +1,67 @@
+## 2026-11-16: native payment SQL and BYTEA consumer repair
+
+The V5 journal now normalizes the actual PostgreSQL driver's BYTEA memoryviews
+before existing immutable-byte/authentication checks. The complete local focused
+candidate passed 195 methods and 474 subtests, zero failures/skips. A fresh PG18.6
+SQL campaign passed actual migrations, scope/admission/reservation, stale-instance
+and rewrite rejection, and exposure/unknown conservation. Compiler artifacts were
+independently reviewed; this is local SQL with synthetic authority and unfunded
+units, not a real token-payment or deployment qualification. Original failures
+and the separate non-qualifying BYTEA diagnostic remain retained.
+
+The same repair includes the explicit manifest-bound V5 payment profile and
+public-only EIP-3009 codec. See remediation/repair_20261115/
+PAYMENT-NATIVE-COMPATIBILITY.md for source-bound results, integration mapping and
+remaining full gates. Full A--G/both chains remain NOT READY; no track is closed.
+
+## 2026-11-15: local payment ledger and policy binding foundation
+
+Added versioned payment intents/capabilities, separate-domain asymmetric approvals and current-policy revalidation linked to retained V5 operation/attempt identities. The PostgreSQL add-on defines exact-unit monetary reservations, scoped idempotency and token-nonce uniqueness, exposure history and uncertainty without refunding or reissuing unresolved obligations. Existing effect cost is not reserved twice. Both modules remain explicitly disabled in live modes; no token authorization, payment adapter, gateway route or deployment is activated.
+
+Focused local qualification passed 35 methods and 182 subtests with no failures/skips; database transport/schema are fixtures and keys are synthetic. Native PG18 compilation/concurrency/recovery, authentic funding/finality, custody and the remaining payment slices stay pending. Current source and unrelated economics/callback work are preserved in the two-root integration journal. See remediation/repair_20261115/PAYMENT-FOUNDATION.md for interfaces, bounds and evidence. Full A-G/both chains remain NOT READY; 13 findings open, 0/36 tracks verified.
+
+## 2026-11-14: callback/lifecycle regressions and checkpoint bond fixes
+
+- Added 25 regression methods across TwoPhaseCommitManager, ComposedSettlement, Heartbeat V3 and StateCheckpointRegistryV2. Public callbacks exercise exact guard errors, authorized transitions, partial-state visibility, atomic failure rollback, retry, inclusive challenge/exclusive finalization boundaries and one-time bond/refund accounting.
+- New lifecycle tests reproduced checkpoint challenger-win payout replay against unrelated roots and token-deposit reentry. Resolution consumption is now separate from validity; invalid roots stay unfinalized. Shared reentry guards and effects before token calls protect all four entrypoints. Bond amounts, deadlines, role policy and existing checkpoint getter tuple are unchanged.
+- Final local gates: 1,267 Solidity tests passed in 86 suites, zero failures/skips; 38 focused cases are included. Sizes pass. Slither reports 0 High, 60 Medium and 28 Optimization with no added exclusions/suppressions; all current Medium IDs/source hashes retain prior review continuity. Both new Heartbeat cases reject a private guard-removed mutant; final old-source checkpoint tests retain five expected failures. Earlier fixture/compiler failures remain separately recorded.
+- Non-author source/test reviews and their authorship/execution limits are retained. The configured-token and synthetic escrow/custody boundaries are not live integration or human assurance. Disabled economics, restricted deployment configuration and the approved TOKENOMICS.md bytes are unchanged; existing immutable deployments are not patched. Readiness remains NOT READY.
+
+[Exact source, tests and evidence](remediation/repair_20261113/CALLBACK-LIFECYCLE-REGRESSIONS.md).
+
+## 2026-11-13: applied owner-approved tokenomics documentation 2.3.0
+
+- Applied the exact reviewed TOKENOMICS.md proposal after the owner's explicit approval. It records the economic repairs, legacy attestation containment, non-author source-review results and remaining verification limits.
+- Allocation tables and the approved restricted economic profile are unchanged. No runtime, deployment, reward, emission, fee, minter, vesting, buyback, distribution, delegation, slashing, governor or DEC configuration changed.
+- The earlier Tokenomics review hold is historical. Documentation validation, explicit Tokenomics link/metadata checks and the existing documentation-validator regressions are recorded in the approval evidence. Readiness remains NOT READY.
+
+## 2026-11-13: non-author review of legacy containment and residual Slither Mediums
+
+- Three fresh non-author AI source reviews cover the retired legacy attestation entrypoint and every one of the 61 residual Medium finding IDs. They identified no additional production defect; source and tests are unchanged. Per-ID verdicts, exact source hashes, reviewer metadata errata and coverage limits are retained.
+- Fresh offline full Solidity run: 1,242 passed in 83 suites, zero failures/skips. Size gate passed with existing warnings. Slither: 0 High, 61 Medium, 28 Optimization, with the same report hash and no changed detector configuration or suppressions.
+- Direct callback/lifecycle tests remain missing for TwoPhaseCommitManager, ComposedSettlement create/refund, nested Heartbeat V3 and checkpoint transitions. These verification gaps remain explicit. The source reviews do not establish independent human assurance, authentic DCAP/custody or readiness.
+- TOKENOMICS.md is held unchanged until the owner reviews the separate proposed update. Restricted economics remain inactive; no allocation, reward, fee, emission, role or activation parameter changes.
+
+[Non-author review and evidence](remediation/repair_20261113/NONAUTHOR-SLITHER-REVIEW.md). Both-chain readiness remains NOT READY; no audit-track promotion or deployment approval follows.
+
+## 2026-11-13: remaining Medium Slither review and legacy trust retirement
+
+- **Genuine trust issue.** The legacy ERC-8004 adapter accepted verifier-approved quotes without a qualified root/action/agent/freshness binding. `verifyAndRegister` now always reverts `LegacyAttestationDisabled()` before external calls; changing its verifier cannot enable acceptance. The separate action-bound DCAP route is unchanged and remains subject to authentic qualification. Existing immutable deployments are not changed by this source repair.
+- **Regression coverage.** Added 11 tests for wrong-root/empty/unqualified attestation acceptance, verifier replacement, cross-index admin callback reentry, string/custom/empty/malformed slasher failures, and well-formed wrong-signer settlement receipts. Rejected receipts preserve reservations, escrow balances, grant usage and bond liabilities.
+- **Review and verification.** Replaced stale grouped claims with per-ID, source-bound rationales for all 62 baseline Medium findings. Final scan: 0 High, 61 Medium, 28 Optimization; no new exclusions or suppressions. Full Solidity suite: 1,242 passed across 83 suites, zero failures/skips; size gate passed with existing warnings. Fresh independent review remains pending because assigned workers stopped for credits/network permission. [Exact evidence and limits](remediation/repair_20261113/SLITHER-MEDIUM-REVIEW.md).
+
+INV-6 is hardened. Restricted economic disablements and all other core invariant enforcement remain unchanged. Readiness remains NOT READY; no release, deployment, live slashing or assurance acceptance follows.
+
+## 2026-11-13: economic audit repairs with restricted features inactive
+
+- **Staking and token.** Re-stakes and permits preserve active aggregate locks; position changes retain accrued rewards, claims consume them once, and zero-principal accounts must claim rather than compound into a new unlocked position. Token and staking annual counters skip all elapsed periods at once. Restricted staking remains at zero rewards/budget without a minter; 14/30-day unbonding remains enforced.
+- **Regional allocation.** Saturated shares, including exact-cap equality, are removed before redistribution; regional and aggregate budget limits remain enforced. Python rejects out-of-contract cap values. Rounding-order and floating-point limits remain documented.
+- **Inactive vesting and collector.** Default durations include the cliff plus post-cliff term; all gated payouts/refunds fail closed on missing/failed/malformed GMV; revoke clears all outstanding locked accounting. Collector collection paths respect pause and reentry guards. No vesting, buyback, reward, delegation, slashing or token-voting feature is activated; 50/50 GMV milestones and freshness remain unqualified.
+- **Docs.** TOKENOMICS.md, WHITEPAPER.md and PITCH_DECK.md record the accepted faucet-only, hard-cap/zero-emission profile for both chains and separate future allocations from deployment evidence and revenue projections.
+- **Verification.** Final combined Solidity suite: 1,231 passed in 81 suites, zero failures/skips; size gate passed; regional Python tests: 35 passed. Slither 0.11.5: zero High, 62 Medium and 28 Optimization findings; Bandit on the changed Python module: no findings. Seven changed-path Medium findings received narrow non-author source review; unrelated findings and release acceptance remain open. Retained BEFORE/compiler/fixture failures are not passes. Exact bindings and input-report reconciliation: [economics audit repair](remediation/repair_20261113/ECONOMICS-AUDIT-REPAIR.md).
+
+Readiness remains NOT READY. INV-1/7/8/9 receive scoped repairs; other core invariant enforcement and restricted disablements remain unchanged.
+
 ## 2026-11-13: frontend token distribution matches the 12% Architect allocation
 
 - The frontend "Token Distribution" list showed an old split (Community 34%, Treasury 21%, Founders 16%, Investors 14%, Team 10%, Liquidity 5%). It now shows the canonical allocation from `docs/team/TOKENOMICS.md`: Community & Ecosystem 50%, Team & Advisors 13%, Investors 13%, Architect 12%, DAO Treasury 12% (total 100%). The contract, deploy script, test, tokenomics, whitepaper and pitch documents already said 12%; this was the only conflicting copy outside dated remediation records.
@@ -30,6 +94,15 @@ No contract, validator, runtime or gateway code changed. Readiness remains NOT R
 - Registered the four documents as current in `docs/documentation-manifest.json`. Docs validator passed; `scripts/audit` + `scripts/docs` tests: 225 passed, 480 subtests passed.
 
 No contract, validator, runtime or gateway code changed. Readiness remains NOT READY; 13 findings open, 0/36 tracks verified. No deployment, signing or live query was performed.
+## 2026-11-12/13: synchronized Python repair and inactive V3 consent consumer
+
+- Fixed demo CLI package imports and direct-script bootstrap so importing the demo no longer corrupts spawned replay workers. Legacy tests use canonical package targets; communication fixtures retain the real audit logger in a private temporary directory.
+- Integrated the separate V3 consent consumer with registry-bound current authority, atomic timelock callback revalidation, paired normal rotation and new-key consent after 48-hour recovery. Existing wire encodings, class pins and restricted activation controls are unchanged. Production enrollment/migration and authentic custody/challenge/finality remain required; no live profile or route is activated.
+- Synchronized repaired source across Windows and WSL with retained preimages. The actual Python product suite passed 2,789 methods plus 4,214 subtests, with one visible historical BASE-dependent skip. Solidity baseline passed 1,167; the consumer candidate passed 1,199 in 77 suites, including 28 focused cases and four runtime measurements. Consumer size: 21,247 runtime / 26,090 creation bytes. Counts overlap and retain their original source identities.
+- Local Rust fmt/check/Clippy and 69 tests passed. Frontend telemetry (4), lint, production build and nine-file/seven-pattern bundle scan passed; an eight-pattern receipt-parser error was corrected through independent retained-stream revalidation without changing the scanner or original receipt. Fresh dependency audits, full repository pytest, native mutation qualification and final-source security gates remain separate.
+- Canonical Aiken check with unchanged CI flags reached its 600-second deadline during scenario collection: no completed test result. Preserve the timeout; do not substitute historical counts. D1-A permits canonical Aiken work; original R28 and Slot 08 remain excluded.
+
+Details and exact receipt hashes: [synchronized qualification](remediation/repair_20261112/SYNCHRONIZED-QUALIFICATION.md). Both-chain readiness remains NOT READY; 13 findings open, 0/36 tracks verified. No deployment, custody, human assurance or actual observation acceptance follows.
 ## 2026-11-11: offline Semgrep discovery, TruffleHog and cardano-cli installed (owner decision 11)
 
 - **Semgrep discovery (D5-B).** CI no longer runs `--config auto --metrics on`. It checks out `semgrep/semgrep-rules` at the pinned commit `a5ad1714…` and scans with the Python, JavaScript, TypeScript, Bash, Dockerfile, YAML and Solidity rule folders, `--metrics off`, with the version check disabled. Baseline: 727 rules, 3,696 files, 1,471 findings, 358 security-tagged, 0 defects. `.semgrep/discovery-adjudications.yml` records every security finding grouped by rule with its reason; other categories are counted as non-blocking.
