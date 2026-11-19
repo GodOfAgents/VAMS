@@ -246,70 +246,93 @@ contract RegionAwareDEC is IRegionAwareDEC, AccessControl {
             return new RegionEmissionAlloc[](0);
         }
 
-        // Phase 2: calculate proportional BPS allocations with cap enforcement
+        return _allocateCapped(raw, activeCount, totalWeightedCap);
+    }
+
+    function _allocateCapped(
+        RegionEmissionAlloc[] memory raw,
+        uint256 activeCount,
+        uint256 totalWeightedCap
+    ) internal view returns (RegionEmissionAlloc[] memory allocations) {
+        // Phase 2: iteratively cap saturated regions and redistribute only
+        // the remaining budget. Equality is saturated too: leaving a region at
+        // exactly the cap out of the capped share would let it receive the same
+        // BPS again during redistribution.
         allocations = new RegionEmissionAlloc[](activeCount);
-        uint256 cappedTotal = 0;
-        uint256 uncappedCount = 0;
+        bool[] memory capped = new bool[](activeCount);
+        bool[] memory selected = new bool[](activeCount);
+        uint256 remainingBps = BPS_DENOMINATOR;
+        uint256 remainingWeight = totalWeightedCap;
+        uint256 uncappedCount = activeCount;
 
-        // First pass: identify capped regions
         for (uint256 i = 0; i < activeCount; i++) {
-            uint256 rawBps = (raw[i].weightedCapacity * BPS_DENOMINATOR) / totalWeightedCap;
-
-            if (rawBps > regionCapBps) {
-                allocations[i] = RegionEmissionAlloc({
-                    regionId: raw[i].regionId,
-                    weightedCapacity: raw[i].weightedCapacity,
-                    allocationBps: regionCapBps,
-                    emittedThisEpoch: 0
-                });
-                cappedTotal += regionCapBps;
-            } else {
-                allocations[i] = RegionEmissionAlloc({
-                    regionId: raw[i].regionId,
-                    weightedCapacity: raw[i].weightedCapacity,
-                    allocationBps: rawBps, // preliminary
-                    emittedThisEpoch: 0
-                });
-                uncappedCount++;
-            }
+            allocations[i] = RegionEmissionAlloc({
+                regionId: raw[i].regionId,
+                weightedCapacity: raw[i].weightedCapacity,
+                allocationBps: 0,
+                emittedThisEpoch: 0
+            });
         }
 
-        // Second pass: redistribute capped surplus proportionally to uncapped regions
-        if (cappedTotal > 0 && uncappedCount > 0) {
-            uint256 remainingBps = BPS_DENOMINATOR - cappedTotal;
-            uint256 uncappedWeightedTotal = 0;
-
+        while (uncappedCount > 0 && remainingBps > 0) {
+            // Select caps from a stable snapshot so the saturated set is
+            // independent of enumeration order within this pass. Integer dust
+            // below is assigned deterministically in registration order.
+            uint256 selectedCount = 0;
             for (uint256 i = 0; i < activeCount; i++) {
-                if (allocations[i].allocationBps < regionCapBps) {
-                    uncappedWeightedTotal += allocations[i].weightedCapacity;
+                if (capped[i]) continue;
+                uint256 projectedBps =
+                    (raw[i].weightedCapacity * remainingBps) / remainingWeight;
+                if (projectedBps >= regionCapBps) {
+                    selected[i] = true;
+                    selectedCount++;
                 }
             }
 
-            if (uncappedWeightedTotal > 0) {
-                uint256 distributedBps = 0;
-                uint256 lastUncappedIndex = activeCount;
-                
+            if (selectedCount > 0) {
                 for (uint256 i = 0; i < activeCount; i++) {
-                    if (allocations[i].allocationBps < regionCapBps) {
-                        uint256 redistributedBps =
-                            (allocations[i].weightedCapacity * remainingBps) / uncappedWeightedTotal;
-                        allocations[i].allocationBps = redistributedBps > regionCapBps ? regionCapBps : redistributedBps;
-                        distributedBps += allocations[i].allocationBps;
-                        lastUncappedIndex = i;
-                    }
+                    if (!selected[i]) continue;
+                    selected[i] = false;
+                    capped[i] = true;
+                    allocations[i].allocationBps = regionCapBps;
+                    remainingBps -= regionCapBps;
+                    remainingWeight -= raw[i].weightedCapacity;
+                    uncappedCount--;
                 }
-                
-                // ECON07: Distribute remaining precision remainder to the last uncapped region
-                if (lastUncappedIndex < activeCount && distributedBps < remainingBps) {
-                    uint256 remainder = remainingBps - distributedBps;
-                    if (allocations[lastUncappedIndex].allocationBps + remainder <= regionCapBps) {
-                        allocations[lastUncappedIndex].allocationBps += remainder;
-                    }
-                }
+                continue;
             }
-        }
 
-        return allocations;
+            // No region is saturated. Allocate proportional shares, then
+            // assign integer-division dust only into remaining cap headroom.
+            uint256 distributedBps = 0;
+            for (uint256 i = 0; i < activeCount; i++) {
+                if (capped[i]) continue;
+                uint256 shareBps =
+                    (raw[i].weightedCapacity * remainingBps) / remainingWeight;
+                allocations[i].allocationBps = shareBps;
+                distributedBps += shareBps;
+            }
+
+            uint256 remainder = remainingBps - distributedBps;
+            _distributeRemainder(allocations, capped, activeCount, remainder);
+            break;
+        }
+    }
+
+    function _distributeRemainder(
+        RegionEmissionAlloc[] memory allocations,
+        bool[] memory capped,
+        uint256 activeCount,
+        uint256 remainder
+    ) internal view {
+        for (uint256 i = activeCount; i > 0 && remainder > 0; i--) {
+            uint256 index = i - 1;
+            if (capped[index]) continue;
+            uint256 headroom = regionCapBps - allocations[index].allocationBps;
+            uint256 extraBps = headroom < remainder ? headroom : remainder;
+            allocations[index].allocationBps += extraBps;
+            remainder -= extraBps;
+        }
     }
 
     /// @inheritdoc IRegionAwareDEC

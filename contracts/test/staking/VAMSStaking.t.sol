@@ -4,6 +4,8 @@ pragma solidity ^0.8.20;
 import "../utils/BaseTest.sol";
 import "../../src/staking/VAMSStaking.sol";
 import "../../src/staking/IVAMSStaking.sol";
+import "../../src/token/VAMSToken.sol";
+import "../../src/token/IVAMSToken.sol";
 
 /**
  * @title VAMSStakingTest
@@ -487,6 +489,153 @@ contract VAMSStakingTest is BaseTest {
         vm.prank(user1);
         vm.expectRevert(IVAMSStaking.NothingToClaim.selector);
         staking.claimRewards();
+    }
+
+    function test_MultiYearDormancyRotatesAnnualRewardBudgetOnce() public {
+        _fundAndApprove(user1, address(staking), MIN_STAKE);
+        _fundAndApprove(user2, address(staking), MIN_STAKE);
+        vm.prank(user1);
+        staking.stake(MIN_STAKE, IVAMSStaking.LockPeriod.SevenDays);
+        vm.prank(user2);
+        staking.stake(MIN_STAKE, IVAMSStaking.LockPeriod.SevenDays);
+
+        vm.prank(admin);
+        staking.updateEmissionBudget(25_000 ether);
+
+        uint256 start = staking.currentMintYearStart();
+        vm.warp(start + 3 * staking.SECONDS_PER_YEAR() + 1);
+        uint256 firstPending = staking.pendingRewards(user1);
+        uint256 secondPending = staking.pendingRewards(user2);
+        assertTrue(firstPending > 0 && secondPending > 0);
+        assertTrue(firstPending + secondPending > staking.annualEmissionBudget());
+
+        vm.prank(user1);
+        staking.claimRewards();
+        assertEq(
+            staking.currentMintYearStart(),
+            start + 3 * staking.SECONDS_PER_YEAR(),
+            "elapsed annual periods were not skipped in one rotation"
+        );
+
+        // Same timestamp: the second claimant must share this one current-year
+        // budget, not gain a fresh cap by advancing one missed year per call.
+        uint256 remainingBudget = staking.annualEmissionBudget() - firstPending;
+        vm.prank(user2);
+        vm.expectRevert(abi.encodeWithSelector(
+            IVAMSStaking.EmissionBudgetExceeded.selector,
+            secondPending,
+            remainingBudget
+        ));
+        staking.claimRewards();
+        assertEq(staking.currentMintYearStart(), start + 3 * staking.SECONDS_PER_YEAR());
+    }
+
+    function test_RewardsRemainClaimableAcrossAddUnstakeRestakeAndClaim() public {
+        uint256 amount = SILVER_THRESHOLD;
+        _fundAndApprove(user1, address(staking), amount + 2 ether);
+
+        vm.prank(user1);
+        staking.stake(amount, IVAMSStaking.LockPeriod.SevenDays);
+
+        _advanceTime(1 days);
+        uint256 beforeAdd = staking.pendingRewards(user1);
+        vm.prank(user1);
+        staking.addStake(1 ether);
+        assertEq(staking.pendingRewards(user1), beforeAdd, "addStake discarded accrued rewards");
+
+        _advanceTime(7 days);
+        uint256 beforeUnstake = staking.pendingRewards(user1);
+        vm.prank(user1);
+        staking.unstake(1 ether);
+        assertEq(staking.pendingRewards(user1), beforeUnstake, "unstake discarded accrued rewards");
+
+        uint256 beforeRestake = staking.pendingRewards(user1);
+        vm.prank(user1);
+        staking.stake(1 ether, IVAMSStaking.LockPeriod.NinetyDays);
+        assertEq(staking.pendingRewards(user1), beforeRestake, "restake discarded accrued rewards");
+
+        _advanceTime(1 days);
+        uint256 expectedClaim = staking.pendingRewards(user1);
+        assertTrue(expectedClaim > beforeRestake, "new accrual should be added once");
+        vm.prank(user1);
+        uint256 claimed = staking.claimRewards();
+        assertEq(claimed, expectedClaim);
+        assertEq(staking.pendingRewards(user1), 0, "claimed rewards remained pending");
+
+        vm.prank(user1);
+        vm.expectRevert(IVAMSStaking.NothingToClaim.selector);
+        staking.claimRewards();
+    }
+
+    function test_FullUnstakeRetainsRewardsButCannotCompoundIntoNewPrincipal() public {
+        _fundAndApprove(user1, address(staking), MIN_STAKE);
+        vm.prank(user1);
+        staking.stake(MIN_STAKE, IVAMSStaking.LockPeriod.SevenDays);
+
+        _advanceTime(7 days + 1);
+        vm.prank(user1);
+        staking.unstake(MIN_STAKE);
+
+        uint256 retained = staking.pendingRewards(user1);
+        assertTrue(retained > 0, "full unstake should retain accrued rewards");
+        assertEq(staking.totalStaked(), 0);
+        IVAMSStaking.StakeInfo memory afterUnstake = staking.getStakeInfo(user1);
+        assertEq(afterUnstake.amount, 0);
+
+        uint256 contractBalanceBefore = token.balanceOf(address(staking));
+        vm.prank(user1);
+        vm.expectRevert(IVAMSStaking.NoStake.selector);
+        staking.compoundRewards();
+
+        IVAMSStaking.StakeInfo memory afterRejectedCompound = staking.getStakeInfo(user1);
+        assertEq(staking.pendingRewards(user1), retained, "rejected compound changed rewards");
+        assertEq(afterRejectedCompound.amount, 0, "rejected compound recreated principal");
+        assertEq(staking.totalStaked(), 0, "rejected compound changed total stake");
+        assertEq(token.balanceOf(address(staking)), contractBalanceBefore, "rejected compound changed token balance");
+
+        uint256 userBalanceBefore = token.balanceOf(user1);
+        vm.prank(user1);
+        uint256 claimed = staking.claimRewards();
+        assertEq(claimed, retained, "claim should pay retained rewards exactly once");
+        assertEq(staking.pendingRewards(user1), 0);
+        assertEq(token.balanceOf(user1), userBalanceBefore + claimed, "claimed rewards did not reach former staker");
+        assertEq(staking.totalStaked(), 0, "claim changed principal accounting");
+    }
+
+    function test_RewardMintFailureRollsBackClaimAndBudgetAccounting() public {
+        VAMSToken cappedToken = new VAMSToken(address(this), address(this));
+        VAMSStaking cappedStaking = new VAMSStaking(
+            address(cappedToken), address(cappedToken), EMISSION_RATE, address(this)
+        );
+        cappedToken.grantRole(cappedToken.MINTER_ROLE(), address(cappedStaking));
+        cappedToken.transfer(user1, MIN_STAKE);
+
+        vm.prank(user1);
+        cappedToken.approve(address(cappedStaking), MIN_STAKE);
+        vm.prank(user1);
+        cappedStaking.stake(MIN_STAKE, IVAMSStaking.LockPeriod.SevenDays);
+
+        uint256 mintYearStartBefore = cappedStaking.currentMintYearStart();
+        uint256 lastRewardTimeBefore = cappedStaking.lastRewardTime();
+        vm.warp(block.timestamp + 1 days);
+        uint256 pendingBefore = cappedStaking.pendingRewards(user1);
+        assertTrue(pendingBefore > 0, "test requires an accrued claim");
+        uint256 expectedAttemptedSupply = cappedToken.totalSupply() + pendingBefore;
+        uint256 supplyCap = cappedToken.MAX_SUPPLY();
+
+        vm.prank(user1);
+        vm.expectRevert(abi.encodeWithSelector(
+            IVAMSToken.MaxSupplyExceeded.selector,
+            expectedAttemptedSupply,
+            supplyCap
+        ));
+        cappedStaking.claimRewards();
+
+        assertEq(cappedToken.totalSupply(), cappedToken.MAX_SUPPLY(), "failed mint changed total supply");
+        assertEq(cappedStaking.currentMintYearStart(), mintYearStartBefore, "failed mint advanced year anchor");
+        assertEq(cappedStaking.annualMintedTokens(), 0, "failed mint consumed annual budget");
+        assertEq(cappedStaking.lastRewardTime(), lastRewardTimeBefore, "failed claim advanced pool time");
+        assertEq(cappedStaking.pendingRewards(user1), pendingBefore, "failed mint lost pending rewards");
     }
     
     // ============ Governance Power Tests ============

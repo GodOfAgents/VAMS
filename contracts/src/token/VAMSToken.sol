@@ -154,10 +154,11 @@ contract VAMSToken is
             revert MaxSupplyExceeded(totalSupply() + amount, MAX_SUPPLY);
         }
         
-        // Rotate year if needed — advance by SECONDS_PER_YEAR, not block.timestamp
-        // to prevent gap-gaming (skipping years compresses the cap window)
+        // Keep fixed TGE-anchored periods, skipping every elapsed period once.
+        // Unused historical caps must not become spendable in successive calls.
         if (block.timestamp >= currentMintYearStart + SECONDS_PER_YEAR) {
-            currentMintYearStart += SECONDS_PER_YEAR;
+            uint256 elapsedYears = (block.timestamp - currentMintYearStart) / SECONDS_PER_YEAR;
+            currentMintYearStart += elapsedYears * SECONDS_PER_YEAR;
             mintedThisYear = 0;
         }
         

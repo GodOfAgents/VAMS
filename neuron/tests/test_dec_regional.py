@@ -3,6 +3,8 @@ Tests for the Region-Aware DEC Simulator.
 Validates emission allocation math, cap enforcement, and provider reward estimation.
 """
 
+from itertools import permutations
+
 import pytest
 from neuron.economics.regional import RegionalEconomics, RegionConfig
 from neuron.economics.dec_regional import (
@@ -40,11 +42,43 @@ def simulator(basic_economics):
     )
 
 
+def _simulate_weight_vector(weights):
+    """Return allocations for positive integer weights with equal multipliers."""
+    regions = {
+        f"r{i}": RegionConfig(
+            f"r{i}", f"Region {i}", target_capacity=weight,
+            bootstrap_multiplier=1.0, current_capacity=weight,
+        )
+        for i, weight in enumerate(weights)
+    }
+    simulator = RegionAwareDECSimulator(
+        regional_economics=RegionalEconomics(regions=regions),
+        region_cap_bps=3_000,
+    )
+    epoch = simulator.simulate_epoch()
+    return {alloc.region_id: alloc.allocation_bps for alloc in epoch.region_allocations}
+
+
 # ═══════════════════════════════════════════════════════════════
 # Epoch Budget Tests
 # ═══════════════════════════════════════════════════════════════
 
 class TestEpochBudget:
+    @pytest.mark.parametrize("region_cap_bps", [500, 3_000])
+    def test_region_cap_accepts_onchain_boundaries(self, region_cap_bps):
+        sim = RegionAwareDECSimulator(region_cap_bps=region_cap_bps)
+        assert sim.region_cap_bps == region_cap_bps
+
+    @pytest.mark.parametrize("region_cap_bps", [0, 499, 3_001, 10_000])
+    def test_region_cap_rejects_out_of_range_values(self, region_cap_bps):
+        with pytest.raises(ValueError, match="integer from 500 through 3000"):
+            RegionAwareDECSimulator(region_cap_bps=region_cap_bps)
+
+    @pytest.mark.parametrize("region_cap_bps", [True, False, 3_000.0, "3000", None])
+    def test_region_cap_rejects_non_integers(self, region_cap_bps):
+        with pytest.raises(ValueError, match="integer from 500 through 3000"):
+            RegionAwareDECSimulator(region_cap_bps=region_cap_bps)
+
     def test_budget_calculation(self, simulator):
         """Verify epoch budget = totalSupply × rate × (days / 365.25)."""
         budget = simulator.get_epoch_emission_budget()
@@ -101,6 +135,40 @@ class TestRegionAllocations:
             assert alloc.allocation_bps <= simulator.region_cap_bps, \
                 f"Region {alloc.region_id} exceeds cap: {alloc.allocation_bps}"
 
+    def test_exact_cap_share_does_not_receive_redistributed_budget(self):
+        # Raw shares are exactly 4000, 3000, 2000 and 1000 BPS. The second
+        # region is saturated at exactly 3000 and must leave the redistribution
+        # denominator and budget together with the first region.
+        allocations = _simulate_weight_vector((4, 3, 2, 1))
+
+        assert allocations == {"r0": 3_000, "r1": 3_000, "r2": 2_666, "r3": 1_334}
+        assert sum(allocations.values()) == 10_000
+        assert all(value <= 3_000 for value in allocations.values())
+
+    def test_iterative_caps_conserve_budget_with_rounding(self):
+        allocations = _simulate_weight_vector((6, 3, 1, 1))
+
+        assert allocations == {"r0": 3_000, "r1": 3_000, "r2": 2_000, "r3": 2_000}
+        assert sum(allocations.values()) == 10_000
+
+    def test_cap_boundary_permutations_never_exceed_budget(self):
+        # Dust follows the simulator's stable sorted region order, but totals
+        # and each regional ceiling must hold for every input permutation.
+        for weights in permutations((4, 3, 2, 1)):
+            allocations = _simulate_weight_vector(weights)
+            assert sum(allocations.values()) == 10_000
+            assert all(value <= 3_000 for value in allocations.values())
+
+    @pytest.mark.parametrize(
+        ("region_count", "expected_bps"),
+        [(1, 3_000), (2, 6_000), (3, 9_000), (4, 10_000)],
+    )
+    def test_region_cap_retains_only_unallocatable_budget(self, region_count, expected_bps):
+        allocations = _simulate_weight_vector((1,) * region_count)
+
+        assert sum(allocations.values()) == expected_bps
+        assert all(value <= 3_000 for value in allocations.values())
+
     def test_strict_cap_redistributes(self):
         """When a region is capped, surplus is redistributed."""
         # Create scenario where one region dominates
@@ -119,7 +187,7 @@ class TestRegionAllocations:
 
         # Dominant region should be capped at 30%
         assert allocs["dominant"].allocation_bps == 3_000
-        # Small region gets the rest
+        # Both regions are capped; the remaining 40% stays unallocated.
         assert allocs["small"].allocation_bps > 0
 
     def test_total_emitted_matches_budget(self, simulator):
@@ -147,34 +215,47 @@ class TestEdgeCases:
         assert epoch.total_emitted == 0.0
 
     def test_all_regions_at_target(self):
-        """When all regions are at 100%+, allocation is proportional to raw capacity."""
+        """Four equally weighted saturated regions fit below the 30% cap."""
         regions = {
-            "r1": RegionConfig("r1", "R1", target_capacity=100, bootstrap_multiplier=3.0, current_capacity=200),
-            "r2": RegionConfig("r2", "R2", target_capacity=100, bootstrap_multiplier=3.0, current_capacity=200),
+            f"r{i}": RegionConfig(
+                f"r{i}", f"R{i}", target_capacity=100,
+                bootstrap_multiplier=3.0, current_capacity=100,
+            )
+            for i in range(4)
         }
         econ = RegionalEconomics(regions=regions)
-        sim = RegionAwareDECSimulator(regional_economics=econ, region_cap_bps=10_000)
+        sim = RegionAwareDECSimulator(regional_economics=econ)
 
         epoch = sim.simulate_epoch()
         allocs = {a.region_id: a for a in epoch.region_allocations}
 
-        # Both at target → multiplier = 1.0x, same capacity → equal allocation
-        assert abs(allocs["r1"].allocation_bps - allocs["r2"].allocation_bps) < 100
+        # All are at target → multiplier = 1.0x and equal 25% shares.
+        assert len(allocs) == 4
+        assert {alloc.allocation_bps for alloc in allocs.values()} == {2_500}
+        assert sum(alloc.allocation_bps for alloc in allocs.values()) == 10_000
 
     def test_zero_capacity_region_gets_minimum(self):
-        """Region with 0 capacity still gets a minimum weight (bootstrapping)."""
+        """A bootstrap region gets positive weight without relaxing the cap."""
         regions = {
             "empty": RegionConfig("empty", "Empty", target_capacity=100, bootstrap_multiplier=3.0, current_capacity=0),
-            "full": RegionConfig("full", "Full", target_capacity=100, bootstrap_multiplier=1.0, current_capacity=100),
+            **{
+                f"full-{i}": RegionConfig(
+                    f"full-{i}", f"Full {i}", target_capacity=100,
+                    bootstrap_multiplier=1.0, current_capacity=100,
+                )
+                for i in range(4)
+            },
         }
         econ = RegionalEconomics(regions=regions)
-        sim = RegionAwareDECSimulator(regional_economics=econ, region_cap_bps=10_000)
+        sim = RegionAwareDECSimulator(regional_economics=econ)
 
         epoch = sim.simulate_epoch()
         allocs = {a.region_id: a for a in epoch.region_allocations}
 
         assert allocs["empty"].allocation_bps > 0, "Empty region should still get an allocation"
         assert allocs["empty"].emitted_this_epoch > 0, "Empty region should still receive tokens"
+        assert all(a.allocation_bps <= 3_000 for a in allocs.values())
+        assert sum(a.allocation_bps for a in allocs.values()) == 10_000
 
     def test_inactive_region_excluded(self):
         """Inactive regions are excluded from allocation."""

@@ -19,6 +19,7 @@ contract DistributionTest is Test {
 
         // 2. Deploy Vesting
         vesting = new VAMSVesting(address(token), deployer);
+        token.addExemptAddress(address(vesting));
 
         // 3. Fund Vesting (Total 900M for distribution test)
         token.approve(address(vesting), 900_000_000 * 1e18);
@@ -58,11 +59,13 @@ contract DistributionTest is Test {
     }
 
     function test_TreasuryVestingParameters() public {
-        // DAO Treasury (Foundation Type) should have 48 month vesting now
+        // DAO Treasury (Foundation Type): 6-month cliff, then 48-month linear vesting.
         bytes32 treasId = vesting.createVestingSchedule(deployer, 120_000_000 * 1e18, IVAMSVesting.ScheduleType.FOUNDATION, true);
         IVAMSVesting.VestingSchedule memory schedule = vesting.getSchedule(treasId);
 
-        uint256 expectedDuration = 48 * 30 days;
-        assertEq(schedule.vestingDuration, expectedDuration, "Treasury should vest over 48 months");
+        uint256 expectedCliff = 6 * 30 days;
+        uint256 expectedDuration = (6 + 48) * 30 days;
+        assertEq(schedule.cliffDuration, expectedCliff, "Treasury cliff should be six months");
+        assertEq(schedule.vestingDuration, expectedDuration, "Treasury completes at month 54");
     }
 }

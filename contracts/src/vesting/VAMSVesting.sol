@@ -13,14 +13,14 @@ import "./IVAMSVesting.sol";
  * @notice Multi-schedule token vesting with cliff and linear unlock
  * @dev Implements 7 schedule types from TOKENOMICS.md:
  *
- * | Type       | Cliff  | Vest   | Cliff Unlock |
+ * | Type       | Cliff  | Linear after cliff | Cliff Unlock |
  * |------------|--------|--------|--------------|
- * | ARCHITECT  | 12 mo  | 48 mo  | 0%           |
- * | TEAM       | 12 mo  | 36 mo  | 0%           |
- * | EARLY_INV  | 6 mo   | 18 mo  | 0%           |
- * | REG_INV    | 12 mo  | 30 mo  | 0%           |
- * | FOUNDATION | 6 mo   | 48 mo  | 0%           |
- * | COMMUNITY  | 0 mo   | 60 mo  | 0%           |
+ * | ARCHITECT  | 12 mo  | 48 mo             | 0%           |
+ * | TEAM       | 12 mo  | 36 mo             | 0%           |
+ * | EARLY_INV  | 6 mo   | 18 mo             | 0%           |
+ * | REG_INV    | 12 mo  | 30 mo             | 0%           |
+ * | FOUNDATION | 6 mo   | 48 mo             | 0%           |
+ * | COMMUNITY  | 0 mo   | 60 mo             | 0%           |
  */
 contract VAMSVesting is IVAMSVesting, AccessControl, ReentrancyGuard {
     using SafeERC20 for IERC20;
@@ -47,7 +47,7 @@ contract VAMSVesting is IVAMSVesting, AccessControl, ReentrancyGuard {
     uint256 private constant CLIFF_COMMUNITY = 0;
     uint256 private constant CLIFF_LIQUIDITY = 0;
 
-    // Vesting durations in seconds
+    // Linear durations after the cliff, in seconds
     uint256 private constant VEST_ARCHITECT = 48 * ONE_MONTH;
     uint256 private constant VEST_TEAM = 36 * ONE_MONTH;
     uint256 private constant VEST_EARLY_INVESTOR = 18 * ONE_MONTH;
@@ -75,6 +75,12 @@ contract VAMSVesting is IVAMSVesting, AccessControl, ReentrancyGuard {
 
     /// @notice Thrown when GMV gate prevents release
     error GmvGateNotMet(uint256 currentGmv, uint256 requiredGmv);
+
+    /// @notice Thrown when a gated schedule has no configured oracle or threshold
+    error GmvConfigurationMissing(address oracle, uint256 threshold);
+
+    /// @notice Thrown when the configured GMV oracle fails or returns malformed data
+    error GmvOracleUnavailable(address oracle);
 
     // ============ State Variables ============
 
@@ -193,24 +199,7 @@ contract VAMSVesting is IVAMSVesting, AccessControl, ReentrancyGuard {
         released = _releasableAmount(schedule);
         if (released == 0) revert NothingToRelease(scheduleId);
 
-        // GMV gate: TEAM and FOUNDATION schedules require protocol usage
-        ScheduleType sType = _scheduleTypes[scheduleId];
-        if (
-            (sType == ScheduleType.TEAM || 
-             sType == ScheduleType.FOUNDATION) &&
-            gmvOracle != address(0) && gmvThreshold > 0
-        ) {
-            // Read current GMV from oracle (expected: function currentGmv() returns (uint256))
-            (bool success, bytes memory data) = gmvOracle.staticcall(
-                abi.encodeWithSignature("currentGmv()")
-            );
-            if (success && data.length >= 32) {
-                uint256 currentGmv = abi.decode(data, (uint256));
-                if (currentGmv < gmvThreshold) {
-                    revert GmvGateNotMet(currentGmv, gmvThreshold);
-                }
-            }
-        }
+        _requireGmvGate(_scheduleTypes[scheduleId]);
 
         schedule.releasedAmount += released;
         _totalLocked -= released;
@@ -236,6 +225,8 @@ contract VAMSVesting is IVAMSVesting, AccessControl, ReentrancyGuard {
             uint256 released = _releasableAmount(schedule);
             if (released == 0) continue;
 
+            _requireGmvGate(_scheduleTypes[scheduleIds[i]]);
+
             schedule.releasedAmount += released;
             _totalLocked -= released;
             totalReleased += released;
@@ -257,6 +248,8 @@ contract VAMSVesting is IVAMSVesting, AccessControl, ReentrancyGuard {
 
             uint256 released = _releasableAmount(schedule);
             if (released == 0) continue;
+
+            _requireGmvGate(_scheduleTypes[scheduleIds[i]]);
 
             schedule.releasedAmount += released;
             _totalLocked -= released;
@@ -290,28 +283,38 @@ contract VAMSVesting is IVAMSVesting, AccessControl, ReentrancyGuard {
     // ============ Revocation ============
 
     /// @inheritdoc IVAMSVesting
-    function revoke(bytes32 scheduleId) external override onlyRole(VESTING_ADMIN_ROLE) {
+    function revoke(bytes32 scheduleId) external override onlyRole(VESTING_ADMIN_ROLE) nonReentrant {
         VestingSchedule storage schedule = _schedules[scheduleId];
 
         if (schedule.beneficiary == address(0)) revert ScheduleNotFound(scheduleId);
         if (!schedule.revocable) revert NotRevocable(scheduleId);
         if (schedule.revoked) revert AlreadyRevoked(scheduleId);
 
+        // A gated schedule's revoke path includes an admin refund of its
+        // unvested balance. Require the same gate before any effect, even
+        // before its cliff; this is conservative containment, not a defined
+        // 50/50 time/performance vesting policy.
+        _requireGmvGate(_scheduleTypes[scheduleId]);
+
         // Calculate unvested amount
         uint256 vested = _vestedAmount(schedule);
         uint256 unvested = schedule.totalAmount - vested;
+        uint256 lockedBeforeRevoke = schedule.totalAmount - schedule.releasedAmount;
 
         // Release any vested but unreleased tokens to beneficiary
         uint256 unreleased = vested - schedule.releasedAmount;
         if (unreleased > 0) {
             schedule.releasedAmount = vested;
+        }
+
+        // Update accounting before the external token transfers.
+        schedule.revoked = true;
+        _totalLocked -= lockedBeforeRevoke;
+
+        if (unreleased > 0) {
             token.safeTransfer(schedule.beneficiary, unreleased);
             emit TokensReleased(scheduleId, schedule.beneficiary, unreleased);
         }
-
-        // Mark as revoked
-        schedule.revoked = true;
-        _totalLocked -= unvested;
 
         // Return unvested tokens to admin
         if (unvested > 0) {
@@ -446,21 +449,21 @@ contract VAMSVesting is IVAMSVesting, AccessControl, ReentrancyGuard {
     /**
      * @notice Get schedule parameters for a schedule type
      */
-    function _getScheduleParams(ScheduleType scheduleType) 
+    function _getScheduleParams(ScheduleType scheduleType)
         internal 
         pure 
-        returns (uint256 cliff, uint256 vest, uint16 unlock) 
+        returns (uint256 cliff, uint256 totalDuration, uint16 unlock)
     {
         if (scheduleType == ScheduleType.ARCHITECT) {
-            return (CLIFF_ARCHITECT, VEST_ARCHITECT, UNLOCK_NONE);
+            return (CLIFF_ARCHITECT, CLIFF_ARCHITECT + VEST_ARCHITECT, UNLOCK_NONE);
         } else if (scheduleType == ScheduleType.TEAM) {
-            return (CLIFF_TEAM, VEST_TEAM, UNLOCK_NONE);
+            return (CLIFF_TEAM, CLIFF_TEAM + VEST_TEAM, UNLOCK_NONE);
         } else if (scheduleType == ScheduleType.EARLY_INVESTOR) {
-            return (CLIFF_EARLY_INVESTOR, VEST_EARLY_INVESTOR, UNLOCK_NONE);
+            return (CLIFF_EARLY_INVESTOR, CLIFF_EARLY_INVESTOR + VEST_EARLY_INVESTOR, UNLOCK_NONE);
         } else if (scheduleType == ScheduleType.REG_INVESTOR) {
-            return (CLIFF_REG_INVESTOR, VEST_REG_INVESTOR, UNLOCK_NONE);
+            return (CLIFF_REG_INVESTOR, CLIFF_REG_INVESTOR + VEST_REG_INVESTOR, UNLOCK_NONE);
         } else if (scheduleType == ScheduleType.FOUNDATION) {
-            return (CLIFF_FOUNDATION, VEST_FOUNDATION, UNLOCK_NONE);
+            return (CLIFF_FOUNDATION, CLIFF_FOUNDATION + VEST_FOUNDATION, UNLOCK_NONE);
         } else if (scheduleType == ScheduleType.COMMUNITY) {
             return (CLIFF_COMMUNITY, VEST_COMMUNITY, UNLOCK_NONE);
         } else if (scheduleType == ScheduleType.LIQUIDITY) {
@@ -469,6 +472,33 @@ contract VAMSVesting is IVAMSVesting, AccessControl, ReentrancyGuard {
             revert("VAMSVesting: no predefined params");
         } else {
             revert("Invalid Schedule Type");
+        }
+    }
+
+    /**
+     * @dev TEAM and FOUNDATION releases remain all-or-nothing against the
+     * configured single cumulative threshold. This does not implement the
+     * proposed 50% time / 50% GMV split or establish oracle freshness.
+     */
+    function _requireGmvGate(ScheduleType scheduleType) internal view {
+        if (scheduleType != ScheduleType.TEAM && scheduleType != ScheduleType.FOUNDATION) {
+            return;
+        }
+
+        if (gmvOracle == address(0) || gmvThreshold == 0) {
+            revert GmvConfigurationMissing(gmvOracle, gmvThreshold);
+        }
+
+        (bool success, bytes memory data) = gmvOracle.staticcall(
+            abi.encodeWithSignature("currentGmv()")
+        );
+        if (!success || data.length != 32) {
+            revert GmvOracleUnavailable(gmvOracle);
+        }
+
+        uint256 currentGmv = abi.decode(data, (uint256));
+        if (currentGmv < gmvThreshold) {
+            revert GmvGateNotMet(currentGmv, gmvThreshold);
         }
     }
 

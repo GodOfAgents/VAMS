@@ -143,7 +143,7 @@ contract VAMSFeeCollector is
     // ============ Fee Collection ============
 
     /// @inheritdoc IVAMSFeeCollector
-    function collectFees(uint256 amount) external override onlyRole(FEE_COLLECTOR_ROLE) {
+    function collectFees(uint256 amount) external override nonReentrant whenNotPaused onlyRole(FEE_COLLECTOR_ROLE) {
         _collectTokenFees(address(vamsToken), amount);
     }
 
@@ -151,7 +151,7 @@ contract VAMSFeeCollector is
     function collectTokenFees(
         address token, 
         uint256 amount
-    ) external override onlyRole(FEE_COLLECTOR_ROLE) {
+    ) external override nonReentrant whenNotPaused onlyRole(FEE_COLLECTOR_ROLE) {
         _collectTokenFees(token, amount);
     }
 

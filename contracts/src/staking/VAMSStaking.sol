@@ -202,7 +202,7 @@ contract VAMSStaking is IVAMSStaking, AccessControl, Pausable, ReentrancyGuard {
         if (info.amount == 0) revert NoStake();
         
         _updatePool();
-        _harvestRewards(msg.sender);
+        _crystallizeRewards(msg.sender);
 
         StakingTier oldTier = _getTier(info.amount);
 
@@ -232,7 +232,7 @@ contract VAMSStaking is IVAMSStaking, AccessControl, Pausable, ReentrancyGuard {
         if (block.timestamp < info.lockedUntil) revert StakeLocked(info.lockedUntil);
 
         _updatePool();
-        _harvestRewards(msg.sender);
+        _crystallizeRewards(msg.sender);
 
         StakingTier oldTier = _getTier(info.amount);
 
@@ -292,12 +292,12 @@ contract VAMSStaking is IVAMSStaking, AccessControl, Pausable, ReentrancyGuard {
     /// @inheritdoc IVAMSStaking
     function claimRewards() external override nonReentrant returns (uint256 amount) {
         _updatePool();
-        amount = _previewHarvest(msg.sender);
+        amount = _crystallizeRewards(msg.sender);
 
         if (amount == 0) revert NothingToClaim();
         
         _validateBudget(amount);
-        amount = _harvestRewards(msg.sender);
+        _stakes[msg.sender].pendingRewards = 0;
 
         // MINT rewards instead of transferring
         _mintRewards_internal(msg.sender, amount);
@@ -307,13 +307,17 @@ contract VAMSStaking is IVAMSStaking, AccessControl, Pausable, ReentrancyGuard {
 
     /// @inheritdoc IVAMSStaking
     function compoundRewards() external override nonReentrant whenNotPaused returns (uint256 amount) {
+        // Compounding creates principal, so it must never resurrect a fully
+        // unstaked position or bypass the lock selected for a new stake.
+        if (_stakes[msg.sender].amount == 0) revert NoStake();
+
         _updatePool();
-        amount = _previewHarvest(msg.sender);
+        amount = _crystallizeRewards(msg.sender);
 
         if (amount == 0) revert NothingToClaim();
         
         _validateBudget(amount);
-        amount = _harvestRewards(msg.sender);
+        _stakes[msg.sender].pendingRewards = 0;
 
         StakeInfo storage info = _stakes[msg.sender];
         StakingTier oldTier = _getTier(info.amount);
@@ -368,17 +372,7 @@ contract VAMSStaking is IVAMSStaking, AccessControl, Pausable, ReentrancyGuard {
             _accRewardPerShare += (reward * PRECISION) / totalStaked;
         }
 
-        uint256 pending = (info.amount * _accRewardPerShare) / PRECISION - info.rewardDebt;
-        
-        // Apply tier and lock multipliers
-        StakingTier tier = _getTier(info.amount);
-        uint256 apyBps = _getBaseAPY(tier);
-        uint256 lockMult = _getLockMultiplier(info.lockPeriod);
-        
-        // Adjust pending by effective multiplier (simplified)
-        pending = (pending * apyBps * lockMult) / (APY_SILVER * BPS_DENOMINATOR);
-
-        return info.pendingRewards + pending;
+        return info.pendingRewards + _accruedRewards(info, _accRewardPerShare);
     }
 
     /// @inheritdoc IVAMSStaking
@@ -485,19 +479,38 @@ contract VAMSStaking is IVAMSStaking, AccessControl, Pausable, ReentrancyGuard {
 
 
         
-        // Harvest existing rewards if any
+        // Crystallize rewards using the existing tier and lock before any
+        // amount, tier, or lock fields are changed.
         if (info.amount > 0) {
-            _harvestRewards(user);
+            _crystallizeRewards(user);
         }
 
         StakingTier oldTier = _getTier(info.amount);
 
+        // This is one aggregate position: a short top-up cannot shorten its
+        // current commitment. A longer lock choice renews the commitment for
+        // the whole resulting position. A shorter type takes effect only
+        // after the existing commitment expires.
+        uint256 requestedLockedUntil = block.timestamp + _getLockDuration(lockPeriod);
+        if (info.amount == 0 || block.timestamp >= info.lockedUntil) {
+            info.stakedAt = block.timestamp;
+            info.lockPeriod = lockPeriod;
+            info.lockedUntil = requestedLockedUntil;
+        } else {
+            if (requestedLockedUntil > info.lockedUntil) {
+                info.lockedUntil = requestedLockedUntil;
+                info.stakedAt = block.timestamp;
+            }
+            if (uint8(lockPeriod) > uint8(info.lockPeriod)) {
+                // Longer lock types have longer durations, so this multiplier
+                // increase also extends the commitment for the whole position.
+                info.lockPeriod = lockPeriod;
+            }
+        }
+
         stakingToken.safeTransferFrom(user, address(this), amount);
 
         info.amount += amount;
-        info.stakedAt = block.timestamp;
-        info.lockPeriod = lockPeriod;
-        info.lockedUntil = block.timestamp + _getLockDuration(lockPeriod);
         info.rewardDebt = (info.amount * accRewardPerShare) / PRECISION;
 
         totalStaked += amount;
@@ -507,7 +520,7 @@ contract VAMSStaking is IVAMSStaking, AccessControl, Pausable, ReentrancyGuard {
             emit TierChanged(user, oldTier, newTier);
         }
 
-        emit Staked(user, amount, lockPeriod, info.lockedUntil);
+        emit Staked(user, amount, info.lockPeriod, info.lockedUntil);
     }
 
     /**
@@ -528,43 +541,30 @@ contract VAMSStaking is IVAMSStaking, AccessControl, Pausable, ReentrancyGuard {
     }
 
     /**
-     * @notice Harvest rewards for user
+     * @notice Crystallize and retain all accrued rewards for later claim
      */
-    function _harvestRewards(address user) internal returns (uint256 harvested) {
+    function _crystallizeRewards(address user) internal returns (uint256 crystallized) {
         StakeInfo storage info = _stakes[user];
-        if (info.amount == 0) return 0;
-
-        uint256 pending = (info.amount * accRewardPerShare) / PRECISION - info.rewardDebt;
-        
-        // Apply tier and lock multipliers
-        StakingTier tier = _getTier(info.amount);
-        uint256 apyBps = _getBaseAPY(tier);
-        uint256 lockMult = _getLockMultiplier(info.lockPeriod);
-        
-        pending = (pending * apyBps * lockMult) / (APY_SILVER * BPS_DENOMINATOR);
-
-        harvested = info.pendingRewards + pending;
-        info.pendingRewards = 0;
-        info.rewardDebt = (info.amount * accRewardPerShare) / PRECISION;
+        if (info.amount > 0) {
+            info.pendingRewards += _accruedRewards(info, accRewardPerShare);
+            info.rewardDebt = (info.amount * accRewardPerShare) / PRECISION;
+        }
+        return info.pendingRewards;
     }
 
-    /**
-     * @notice Preview harvest rewards for user without mutating state
-     */
-    function _previewHarvest(address user) internal view returns (uint256) {
-        StakeInfo storage info = _stakes[user];
-        if (info.amount == 0) return info.pendingRewards;
+    /// @dev Calculate newly accrued rewards at the supplied accumulator value.
+    function _accruedRewards(StakeInfo storage info, uint256 accumulatedRewardPerShare)
+        internal
+        view
+        returns (uint256 pending)
+    {
+        if (info.amount == 0) return 0;
+        pending = (info.amount * accumulatedRewardPerShare) / PRECISION - info.rewardDebt;
 
-        uint256 pending = (info.amount * accRewardPerShare) / PRECISION - info.rewardDebt;
-        
-        // Apply tier and lock multipliers
         StakingTier tier = _getTier(info.amount);
         uint256 apyBps = _getBaseAPY(tier);
         uint256 lockMult = _getLockMultiplier(info.lockPeriod);
-        
         pending = (pending * apyBps * lockMult) / (APY_SILVER * BPS_DENOMINATOR);
-
-        return info.pendingRewards + pending;
     }
 
     /**
@@ -577,6 +577,8 @@ contract VAMSStaking is IVAMSStaking, AccessControl, Pausable, ReentrancyGuard {
         uint256 annualMintedTokens_ = annualMintedTokens;
 
         if (block.timestamp >= currentMintYearStart_ + SECONDS_PER_YEAR) {
+            uint256 elapsedYears = (block.timestamp - currentMintYearStart_) / SECONDS_PER_YEAR;
+            currentMintYearStart_ += elapsedYears * SECONDS_PER_YEAR;
             annualMintedTokens_ = 0;
         }
 
@@ -593,7 +595,8 @@ contract VAMSStaking is IVAMSStaking, AccessControl, Pausable, ReentrancyGuard {
         
         // Year rotation
         if (block.timestamp >= currentMintYearStart + SECONDS_PER_YEAR) {
-            currentMintYearStart += SECONDS_PER_YEAR;
+            uint256 elapsedYears = (block.timestamp - currentMintYearStart) / SECONDS_PER_YEAR;
+            currentMintYearStart += elapsedYears * SECONDS_PER_YEAR;
             annualMintedTokens = 0;
         }
 

@@ -149,6 +149,69 @@ contract RegionAwareDECTest is Test {
         }
     }
 
+    function test_calculateRegionAllocations_exactCapShareConservesBudget() public {
+        // Raw shares are exactly 4000, 3000, 2000, 1000 BPS. The second
+        // region is already at the cap and must be excluded from redistribution.
+        _configureWeights([uint256(4), 3, 2, 1]);
+
+        IRegionAwareDEC.RegionEmissionAlloc[] memory allocs = dec.calculateRegionAllocations();
+        uint256 totalBps = 0;
+        for (uint256 i = 0; i < allocs.length; i++) {
+            totalBps += allocs[i].allocationBps;
+            assertLe(allocs[i].allocationBps, 3_000, "INV-1 regional cap");
+        }
+
+        assertEq(totalBps, 10_000, "allocation must not exceed the epoch budget");
+        assertEq(_allocationFor(allocs, US_EAST), 3_000);
+        assertEq(_allocationFor(allocs, EU_WEST), 3_000);
+        assertEq(_allocationFor(allocs, AF_SOUTH), 2_666);
+        assertEq(_allocationFor(allocs, AP_SOUTH), 1_334);
+    }
+
+    function test_calculateRegionAllocations_iterativeCapsAndRounding() public {
+        // Capping the first region makes the second region exceed the cap on
+        // the next pass. The remaining two regions divide the final 4000 BPS.
+        _configureWeights([uint256(6), 3, 1, 1]);
+
+        IRegionAwareDEC.RegionEmissionAlloc[] memory allocs = dec.calculateRegionAllocations();
+        uint256 totalBps = 0;
+        for (uint256 i = 0; i < allocs.length; i++) {
+            totalBps += allocs[i].allocationBps;
+            assertLe(allocs[i].allocationBps, 3_000, "INV-1 regional cap");
+        }
+
+        assertEq(totalBps, 10_000);
+        assertEq(_allocationFor(allocs, US_EAST), 3_000);
+        assertEq(_allocationFor(allocs, EU_WEST), 3_000);
+        assertEq(_allocationFor(allocs, AF_SOUTH), 2_000);
+        assertEq(_allocationFor(allocs, AP_SOUTH), 2_000);
+    }
+
+    function testFuzz_calculateRegionAllocations_neverExceedsBudgetOrRegionCap(
+        uint256 a,
+        uint256 b,
+        uint256 c,
+        uint256 d
+    ) public {
+        // Bounded positive capacities keep the public calculation in realistic
+        // arithmetic ranges while exercising ties, exact boundaries and dust.
+        _configureWeights([
+            (a % 1_000_000) + 1,
+            (b % 1_000_000) + 1,
+            (c % 1_000_000) + 1,
+            (d % 1_000_000) + 1
+        ]);
+
+        IRegionAwareDEC.RegionEmissionAlloc[] memory allocs = dec.calculateRegionAllocations();
+        uint256 totalBps = 0;
+        for (uint256 i = 0; i < allocs.length; i++) {
+            totalBps += allocs[i].allocationBps;
+            assertLe(allocs[i].allocationBps, dec.regionCapBps(), "INV-1 regional cap");
+        }
+        assertLe(totalBps, 10_000, "aggregate allocation exceeds budget");
+        assertEq(totalBps, 10_000, "four regions can absorb the complete budget");
+    }
+
     function test_calculateRegionAllocations_emptyRegions() public {
         // Deploy fresh RI with no regions configured
         RegionalIncentives emptyRI = new RegionalIncentives(admin);
@@ -197,11 +260,43 @@ contract RegionAwareDECTest is Test {
         IRegionAwareDEC.RegionEmissionAlloc[] memory allocs = dec.calculateRegionAllocations();
         assertEq(allocs.length, 1, "Only 1 active region");
 
-        // Single region gets capped at regionCapBps (default 3000 = 30%)
-        assertTrue(
-            allocs[0].allocationBps <= dec.regionCapBps(),
-            "Single region should be capped"
-        );
+        // INV-1 holds; the unused 7000 BPS remains in the DEC by policy.
+        assertEq(allocs[0].allocationBps, dec.regionCapBps());
+    }
+
+    function test_calculateRegionAllocations_twoRegionsRetainUnallocatableBudget() public {
+        vm.startPrank(admin);
+        ri.deactivateRegion(AF_SOUTH);
+        ri.deactivateRegion(AP_SOUTH);
+        vm.stopPrank();
+
+        IRegionAwareDEC.RegionEmissionAlloc[] memory allocs = dec.calculateRegionAllocations();
+        uint256 totalBps = 0;
+        for (uint256 i = 0; i < allocs.length; i++) {
+            totalBps += allocs[i].allocationBps;
+            assertLe(allocs[i].allocationBps, dec.regionCapBps(), "INV-1 regional cap");
+        }
+
+        // The 30% per-region invariant leaves 40% unallocated when only two
+        // regions are active. This patch does not invent a destination.
+        assertEq(allocs.length, 2);
+        assertEq(totalBps, 6_000);
+    }
+
+    function test_calculateRegionAllocations_threeRegionsRetainUnallocatableBudget() public {
+        vm.prank(admin);
+        ri.deactivateRegion(AP_SOUTH);
+
+        IRegionAwareDEC.RegionEmissionAlloc[] memory allocs = dec.calculateRegionAllocations();
+        uint256 totalBps = 0;
+        for (uint256 i = 0; i < allocs.length; i++) {
+            totalBps += allocs[i].allocationBps;
+            assertLe(allocs[i].allocationBps, dec.regionCapBps(), "INV-1 regional cap");
+        }
+
+        // Three active regions can absorb at most 90% under the fixed 30% cap.
+        assertEq(allocs.length, 3);
+        assertEq(totalBps, 9_000);
     }
 
     // ═══════════════════ Epoch Distribution Tests ═══════════════════
@@ -336,5 +431,25 @@ contract RegionAwareDECTest is Test {
         assertEq(summary.epochId, 1);
         assertTrue(summary.totalEmitted > 0);
         assertEq(summary.regionCount, 4);
+    }
+
+    function _configureWeights(uint256[4] memory weights) internal {
+        bytes32[4] memory regionIds = [US_EAST, EU_WEST, AF_SOUTH, AP_SOUTH];
+        vm.startPrank(admin);
+        for (uint256 i = 0; i < regionIds.length; i++) {
+            ri.setRegionConfig(regionIds[i], "Allocation vector", weights[i], 10_000);
+            ri.updateCapacity(regionIds[i], weights[i]);
+        }
+        vm.stopPrank();
+    }
+
+    function _allocationFor(
+        IRegionAwareDEC.RegionEmissionAlloc[] memory allocations,
+        bytes32 regionId
+    ) internal pure returns (uint256) {
+        for (uint256 i = 0; i < allocations.length; i++) {
+            if (allocations[i].regionId == regionId) return allocations[i].allocationBps;
+        }
+        revert("region allocation not found");
     }
 }

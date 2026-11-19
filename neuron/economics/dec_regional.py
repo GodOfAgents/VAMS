@@ -20,6 +20,9 @@ from neuron.economics.regional import RegionalEconomics, RegionConfig
 
 logger = logging.getLogger("VAMS-DEC-Regional")
 
+MIN_REGION_CAP_BPS = 500
+MAX_REGION_CAP_BPS = 3_000
+
 
 # ═══════════════════════════════════════════════════════════════
 # Data Models
@@ -75,6 +78,15 @@ class RegionAwareDECSimulator:
         epoch_duration_days: float = 7.0,
         region_cap_bps: int = 3_000,  # 30%
     ):
+        valid_region_cap = (
+            type(region_cap_bps) is int
+            and MIN_REGION_CAP_BPS <= region_cap_bps <= MAX_REGION_CAP_BPS
+        )
+        if not valid_region_cap:
+            raise ValueError(
+                f"region_cap_bps must be an integer from {MIN_REGION_CAP_BPS} "
+                f"through {MAX_REGION_CAP_BPS}"
+            )
         self._economics = regional_economics or RegionalEconomics()
         self.total_supply = total_supply
         self.global_emission_rate_bps = global_emission_rate_bps
@@ -136,42 +148,60 @@ class RegionAwareDECSimulator:
                 region_cap_bps=self.region_cap_bps,
             )
 
-        # Phase 2: proportional BPS allocation with cap enforcement
-        for alloc in raw_allocations:
-            alloc.allocation_bps = int((alloc.weighted_capacity * 10_000) / total_weighted_cap)
+        # Phase 2: iteratively cap saturated regions and redistribute only
+        # the remaining budget. Equality is saturated too: leaving a region at
+        # exactly the cap out of the capped share would let it receive the same
+        # BPS again during redistribution.
+        capped = [False] * len(raw_allocations)
+        remaining_bps = 10_000
+        remaining_weight = total_weighted_cap
+        uncapped_count = len(raw_allocations)
 
-        uncapped_indices = list(range(len(raw_allocations)))
-        capped_indices = set()
+        while uncapped_count > 0 and remaining_bps > 0:
+            # Select caps from a stable snapshot so the outcome is independent
+            # of region enumeration order within each pass.
+            selected = []
+            for i, alloc in enumerate(raw_allocations):
+                if capped[i]:
+                    continue
+                projected_bps = int(
+                    (alloc.weighted_capacity * remaining_bps) / remaining_weight
+                )
+                if projected_bps >= self.region_cap_bps:
+                    selected.append(i)
 
-        while True:
-            newly_capped = False
-            for i in uncapped_indices:
-                if raw_allocations[i].allocation_bps > self.region_cap_bps:
-                    raw_allocations[i].allocation_bps = self.region_cap_bps
-                    capped_indices.add(i)
-                    newly_capped = True
-            
-            if not newly_capped:
-                break
-                
-            uncapped_indices = [i for i in range(len(raw_allocations)) if i not in capped_indices]
-            
-            if not uncapped_indices:
-                break
+            if selected:
+                for i in selected:
+                    alloc = raw_allocations[i]
+                    capped[i] = True
+                    alloc.allocation_bps = self.region_cap_bps
+                    remaining_bps -= self.region_cap_bps
+                    remaining_weight -= alloc.weighted_capacity
+                    uncapped_count -= 1
+                continue
 
-            capped_total_bps = sum(raw_allocations[i].allocation_bps for i in capped_indices)
-            remaining_bps = 10_000 - capped_total_bps
-            
-            uncapped_weighted_total = sum(
-                raw_allocations[i].weighted_capacity for i in uncapped_indices
-            )
-            
-            if uncapped_weighted_total > 0:
-                for i in uncapped_indices:
-                    raw_allocations[i].allocation_bps = int(
-                        (raw_allocations[i].weighted_capacity * remaining_bps)
-                        / uncapped_weighted_total
-                    )
+            # No region is saturated. Allocate proportional shares, then
+            # assign integer-division dust only into remaining cap headroom.
+            distributed_bps = 0
+            for i, alloc in enumerate(raw_allocations):
+                if capped[i]:
+                    continue
+                alloc.allocation_bps = int(
+                    (alloc.weighted_capacity * remaining_bps) / remaining_weight
+                )
+                distributed_bps += alloc.allocation_bps
+
+            remainder = remaining_bps - distributed_bps
+            for i in range(len(raw_allocations) - 1, -1, -1):
+                if remainder == 0:
+                    break
+                if capped[i]:
+                    continue
+                headroom = self.region_cap_bps - raw_allocations[i].allocation_bps
+                extra_bps = min(headroom, remainder)
+                raw_allocations[i].allocation_bps += extra_bps
+                remainder -= extra_bps
+            break
 
         # Phase 3: calculate token amounts
         total_emitted = 0.0

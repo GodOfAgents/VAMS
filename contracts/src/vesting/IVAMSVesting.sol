@@ -11,15 +11,14 @@ interface IVAMSVesting {
     // ============ Enums ============
 
     /// @notice Pre-defined vesting schedule types
-    /// @notice Pre-defined vesting schedule types
     enum ScheduleType {
-        ARCHITECT,      // 12mo cliff, 48mo vest, 0% cliff unlock (ordinal 0, unchanged)
-        TEAM,           // 12mo cliff, 36mo vest, 33.33% cliff unlock
-        EARLY_INVESTOR, // 6mo cliff, 18mo vest, 33.33% cliff unlock
-        REG_INVESTOR,   // 12mo cliff, 30mo vest, 40% cliff unlock
-        FOUNDATION,     // 6mo cliff, 48mo vest, 12.5% cliff unlock
-        COMMUNITY,      // 0 cliff, 60mo vest, 0% cliff unlock
-        LIQUIDITY,      // 0 cliff, 12mo vest, 0% cliff unlock
+        ARCHITECT,      // 12mo cliff + 48mo linear after cliff; 0% cliff unlock (ordinal 0)
+        TEAM,           // 12mo cliff + 36mo linear after cliff; 0% cliff unlock
+        EARLY_INVESTOR, // 6mo cliff + 18mo linear after cliff; 0% cliff unlock
+        REG_INVESTOR,   // 12mo cliff + 30mo linear after cliff; 0% cliff unlock
+        FOUNDATION,     // 6mo cliff + 48mo linear after cliff; 0% cliff unlock
+        COMMUNITY,      // 0mo cliff + 60mo linear; 0% cliff unlock
+        LIQUIDITY,      // Legacy path: 0mo cliff + 12mo linear; not the planned TGE airdrop
         CUSTOM          // Custom dynamically created schedule
     }
 
@@ -31,7 +30,7 @@ interface IVAMSVesting {
         uint256 totalAmount;        // Total tokens to vest
         uint256 startTimestamp;     // Vesting start (TGE)
         uint256 cliffDuration;      // Seconds until cliff
-        uint256 vestingDuration;    // Total seconds to full vest
+        uint256 vestingDuration;    // Total seconds from start to full vest, including cliff
         uint16 cliffUnlockBps;      // Basis points unlocked at cliff
         uint256 releasedAmount;     // Tokens already released
         bool revoked;               // If schedule was revoked
