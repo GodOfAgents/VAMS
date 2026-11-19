@@ -4,13 +4,14 @@ pragma solidity ^0.8.20;
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 /**
  * @title StateCheckpointRegistryV2
  * @author VAMS Protocol
  * @notice Validates off-chain state checkpoints (e.g., DBOS) with optimistic fraud proofs, challenger rewards, and operator bonds.
  */
-contract StateCheckpointRegistryV2 is AccessControl {
+contract StateCheckpointRegistryV2 is AccessControl, ReentrancyGuard {
     using SafeERC20 for IERC20;
 
     bytes32 public constant ARBITRATOR_ROLE = keccak256("ARBITRATOR_ROLE");
@@ -32,6 +33,10 @@ contract StateCheckpointRegistryV2 is AccessControl {
     // stateRoot => Checkpoint
     mapping(bytes32 => Checkpoint) public checkpoints;
 
+    // Resolution consumption is separate from validity: a challenger-win root
+    // remains unfinalized/invalid, but its two bonds can be paid only once.
+    mapping(bytes32 => bool) public disputeResolved;
+
     event CheckpointSubmitted(bytes32 indexed stateRoot, address indexed operator, uint256 timestamp);
     event CheckpointChallenged(bytes32 indexed stateRoot, address indexed challenger, uint256 timestamp);
     event CheckpointFinalized(bytes32 indexed stateRoot, uint256 timestamp);
@@ -46,11 +51,8 @@ contract StateCheckpointRegistryV2 is AccessControl {
     /**
      * @notice Submit a new state root checkpoint with a bond
      */
-    function submitCheckpoint(bytes32 _stateRoot) external {
+    function submitCheckpoint(bytes32 _stateRoot) external nonReentrant {
         require(checkpoints[_stateRoot].submittedAt == 0, "Checkpoint already exists");
-
-        // Take operator bond
-        vamsToken.safeTransferFrom(msg.sender, address(this), REQUIRED_BOND);
 
         checkpoints[_stateRoot] = Checkpoint({
             stateRoot: _stateRoot,
@@ -61,24 +63,28 @@ contract StateCheckpointRegistryV2 is AccessControl {
             challenger: address(0)
         });
 
+        // Reserve this root before interacting; failure rolls the reservation back.
+        vamsToken.safeTransferFrom(msg.sender, address(this), REQUIRED_BOND);
+
         emit CheckpointSubmitted(_stateRoot, msg.sender, block.timestamp);
     }
 
     /**
      * @notice Challenge an unfinalized checkpoint by matching the bond
      */
-    function challengeCheckpoint(bytes32 _stateRoot) external {
+    function challengeCheckpoint(bytes32 _stateRoot) external nonReentrant {
         Checkpoint storage cp = checkpoints[_stateRoot];
         require(cp.submittedAt > 0, "Checkpoint missing");
         require(!cp.finalized, "Already finalized");
         require(!cp.challenged, "Already challenged");
         require(block.timestamp <= cp.submittedAt + CHALLENGE_PERIOD, "Challenge period over");
 
-        // Take challenger bond
-        vamsToken.safeTransferFrom(msg.sender, address(this), REQUIRED_BOND);
-
         cp.challenged = true;
         cp.challenger = msg.sender;
+
+        // Consume the challenge slot before taking its bond. A failed transfer
+        // reverts both fields, so the original challenger can retry safely.
+        vamsToken.safeTransferFrom(msg.sender, address(this), REQUIRED_BOND);
 
         emit CheckpointChallenged(_stateRoot, msg.sender, block.timestamp);
     }
@@ -86,7 +92,7 @@ contract StateCheckpointRegistryV2 is AccessControl {
     /**
      * @notice Finalize a checkpoint if the challenge period has passed without dispute
      */
-    function finalizeCheckpoint(bytes32 _stateRoot) external {
+    function finalizeCheckpoint(bytes32 _stateRoot) external nonReentrant {
         Checkpoint storage cp = checkpoints[_stateRoot];
         require(cp.submittedAt > 0, "Checkpoint missing");
         require(!cp.finalized, "Already finalized");
@@ -106,11 +112,16 @@ contract StateCheckpointRegistryV2 is AccessControl {
      * @param _stateRoot The disputed checkpoint root
      * @param _operatorWins True if the operator is correct, False if the challenger is correct
      */
-    function resolveDispute(bytes32 _stateRoot, bool _operatorWins) external onlyRole(ARBITRATOR_ROLE) {
+    function resolveDispute(bytes32 _stateRoot, bool _operatorWins) external nonReentrant onlyRole(ARBITRATOR_ROLE) {
         Checkpoint storage cp = checkpoints[_stateRoot];
         require(cp.submittedAt > 0, "Checkpoint missing");
         require(cp.challenged, "Checkpoint not challenged");
         require(!cp.finalized, "Already finalized"); // Disputed checkpoints don't finalize normally, but they can be marked
+        require(!disputeResolved[_stateRoot], "Dispute already resolved");
+
+        // Effects precede payout for either outcome; a failed transfer rolls this
+        // back. Invalidity must never be represented by finalized=true.
+        disputeResolved[_stateRoot] = true;
 
         // Total bond pool is REQUIRED_BOND (operator) + REQUIRED_BOND (challenger) = 2 * REQUIRED_BOND
         uint256 totalPool = REQUIRED_BOND * 2;
