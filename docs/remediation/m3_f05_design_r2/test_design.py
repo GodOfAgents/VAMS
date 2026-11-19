@@ -4,6 +4,7 @@ from __future__ import annotations
 import copy
 import hashlib
 import json
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -39,13 +40,11 @@ class F05DesignTests(unittest.TestCase):
         )
 
     def test_duplicate_json_keys_rejected(self):
-        path = HERE / ".duplicate-key-test.json"
-        try:
+        with tempfile.TemporaryDirectory(prefix="vams-duplicate-key-") as temp:
+            path = Path(temp) / "duplicate.json"
             path.write_text('{"a":1,"a":2}', encoding="utf-8")
             with self.assertRaises(DesignError):
                 load_json(path)
-        finally:
-            path.unlink(missing_ok=True)
 
     def test_unknown_contract_key_rejected(self):
         changed = copy.deepcopy(CONTRACT)

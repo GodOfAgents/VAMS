@@ -2,8 +2,10 @@
 """Focused public-boundary tests for the M3.1b-R11 provenance contract."""
 from __future__ import annotations
 
+import contextlib
 import copy
 import importlib.util
+import io
 import json
 import os
 import re
@@ -252,11 +254,24 @@ class R11BoundaryTests(unittest.TestCase):
                 record["sha256"] = digest
                 record["size"] = len(mutated.encode())
         manifest_path.write_text(json.dumps(manifest))
-        result = run([sys.executable, str(MODULE_PATH), "--repo-root", str(root), "--aiken", str(AIKEN)], capture_output=True, text=True, check=False)
-        self.assertNotEqual(result.returncode, 0)
-        self.assertNotIn("Traceback", result.stdout + result.stderr)
-        self.assertIn('"ok": false', result.stdout)
-        self.assertIn("malformed lock timestamp", result.stdout)
+        # Only the native-tool precondition is a fixture. The CLI, manifest,
+        # lock parser, and serialized failure are the real implementation.
+        stdout, stderr = io.StringIO(), io.StringIO()
+        with (
+            mock.patch.object(R11, "_verify_tool", return_value=AIKEN) as tool,
+            mock.patch.object(R11, "_run", side_effect=AssertionError("unexpected native call")) as native,
+            contextlib.redirect_stdout(stdout),
+            contextlib.redirect_stderr(stderr),
+        ):
+            exit_code = R11.main(["--repo-root", str(root), "--aiken", str(AIKEN)])
+        self.assertEqual(exit_code, 1)
+        tool.assert_called_once()
+        native.assert_not_called()
+        self.assertEqual(stderr.getvalue(), "")
+        self.assertNotIn("Traceback", stdout.getvalue())
+        result = json.loads(stdout.getvalue())
+        self.assertIs(result["ok"], False)
+        self.assertIn("malformed lock timestamp", result["error"])
 
     def test_r15_package_index_parser_direct_matrix(self) -> None:
         parser = R11._parse_package_index

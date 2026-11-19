@@ -257,21 +257,20 @@ class HistoryRewriteScriptTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
             _, mirror = self._fixture(root)
-            evidence = Path(tempfile.mkdtemp(prefix=".history-evidence-", dir=ROOT))
-            try:
-                result = _run(
-                    _bash(),
-                    SCRIPT.as_posix(),
-                    "--mirror",
-                    mirror.as_posix(),
-                    "--evidence-dir",
-                    evidence.as_posix(),
-                    cwd=ROOT,
-                )
-            finally:
-                shutil.rmtree(evidence, ignore_errors=True)
+            source_head = _git("rev-parse", "refs/heads/main", cwd=mirror)
+            # The existing checkout root itself is forbidden evidence output.
+            result = _run(
+                _bash(),
+                SCRIPT.as_posix(),
+                "--mirror",
+                mirror.as_posix(),
+                "--evidence-dir",
+                ROOT.as_posix(),
+                cwd=ROOT,
+            )
             self.assertNotEqual(result.returncode, 0)
-            self.assertIn("outside the source checkout", result.stderr)
+            self.assertIn("operational evidence must be outside the source checkout", result.stderr)
+            self.assertEqual(source_head, _git("rev-parse", "refs/heads/main", cwd=mirror))
 
     def test_execute_requires_external_rotation_and_approval_evidence(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
