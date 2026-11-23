@@ -35,6 +35,19 @@ PYTHON_TEST_RUN = "\n".join((
     'VAMS_ENVOY_BIN="$RUNNER_TEMP/envoy" pytest -v --tb=short --ignore=docs/remediation/m3_f05_design_r2/test_design.py',
     'VAMS_ENVOY_BIN="$RUNNER_TEMP/envoy" pytest -v --tb=short docs/remediation/m3_f05_design_r2/test_design.py',
 ))
+READINESS_AUDIT_VERIFY_RUN = "\n".join((
+    "cosign verify-blob \\",
+    '  --bundle "$RUNNER_TEMP/vams-audit-evidence/audit-evidence.sigstore.json" \\',
+    "  --certificate-identity-regexp '^https://github.com/GodOfAgents/VAMS/.github/workflows/security-gates.yml@refs/.+$' \\",
+    "  --certificate-oidc-issuer 'https://token.actions.githubusercontent.com' \\",
+    '  "$RUNNER_TEMP/vams-audit-evidence/audit-evidence.json"',
+))
+READINESS_AUDIT_RUN = "\n".join((
+    "python scripts/audit/audit_program.py readiness \\",
+    '  --stage "$RELEASE_STAGE" \\',
+    '  --evidence-manifest "$RUNNER_TEMP/vams-audit-evidence/audit-evidence.json" \\',
+    '  --evidence-signature-bundle "$RUNNER_TEMP/vams-audit-evidence/audit-evidence.sigstore.json"',
+))
 FRONTEND_STEP_CONTRACTS = (
     ("Install Dependencies", "dependency installation", "npm ci"),
     ("Run Frontend Telemetry Security Tests", "frontend telemetry/security test", FRONTEND_TEST_COMMAND),
@@ -163,6 +176,34 @@ def _validate_python_aiken(text: str) -> list[str]:
         errors.append("python-gate must verify Aiken before execution and retain both exact pytest commands")
     if len(setup) == 1 and len(tests) == 1 and job.index(setup[0]) > job.index(tests[0]):
         errors.append("python-gate must install its pinned Aiken before the pytest suite")
+    return errors
+
+
+def _validate_readiness_artifact_location(text: str) -> list[str]:
+    """Keep generated signed evidence outside the strictly clean source tree."""
+    job = _job_section(text, "testnet-readiness-gate")
+    steps = _named_steps(job)
+    downloads = [block for name,block in steps if name == "Download Signed Audit Evidence"]
+    verifies = [block for name,block in steps if name == "Verify Audit Evidence Signature"]
+    gates = [block for name,block in steps if name == "Require Stage-Specific Evidence"]
+    errors: list[str] = []
+    expected_download = (
+        "      - name: Download Signed Audit Evidence\n"
+        "        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1\n"
+        "        with:\n"
+        "          name: testnet-audit-evidence\n"
+        "          path: ${{ runner.temp }}/vams-audit-evidence"
+    )
+    if len(downloads) != 1 or downloads[0].rstrip() != expected_download:
+        errors.append("readiness must download signed audit evidence only outside the source checkout")
+    if len(verifies) != 1 or _step_properties(verifies[0]) != ("run",) or _step_run_value(verifies[0]) != READINESS_AUDIT_VERIFY_RUN:
+        errors.append("readiness must verify the exact downloaded audit artifact without bypass")
+    if len(gates) != 1 or _step_properties(gates[0]) != ("env","run") or _step_run_value(gates[0]) != READINESS_AUDIT_RUN:
+        errors.append("readiness must consume the same verified external audit artifact")
+    if len(downloads) == len(verifies) == len(gates) == 1:
+        positions = [job.index(block) for block in (downloads[0],verifies[0],gates[0])]
+        if positions != sorted(positions):
+            errors.append("readiness must download, verify, then consume audit evidence")
     return errors
 
 
@@ -328,6 +369,7 @@ def validate_workflow_text(text: str) -> list[str]:
     errors.extend(_validate_frontend_ci(text))
     errors.extend(_validate_audit_import_root(text))
     errors.extend(_validate_python_aiken(text))
+    errors.extend(_validate_readiness_artifact_location(text))
     errors.extend(_validate_secret_scanner_result_enforcement(text))
     action_refs = re.findall(r"^\s*uses:\s*[^@\s]+@([^\s#]+)", text, re.MULTILINE)
     if not action_refs:

@@ -1,7 +1,9 @@
 # Portable native compiler dependency for Python CI
 
 **PRE-PUBLICATION QUALIFICATION RECORD; NOT READY.** Non-author review
-accepted the bounded code and focused native evidence. This record was
+accepted the native-compiler repair and focused native evidence. The final clean-source metadata correction below was independently
+accepted by the fresh GPT-6.2 Astra High reviewer.
+This record was
 prepared locally before fresh publication authority; final-commit scans and
 hosted verification are separate evidence. The previous task's single push
 was consumed. Local qualification grants no additional publication authority.
@@ -109,6 +111,54 @@ There was no automatic native retry and no new push authorization.
 
 ## Gate and invariant impact
 
+The completed run's uploaded audit manifest also records `dirty: true`.
+Its current-commit binding is `01c7d5962c98330595a7f90226c0c642c88dba5a`;
+artifact `14796218359` is retained locally under the first execution record.
+No signed artifact or failing job is relabelled as accepted evidence.
+
+Two clean-source defects require correction before another hosted run:
+
+- Four retained F05 Python evidence tools have an LF/CRLF trailing blank
+  line in their committed blobs. Their working bytes match those blobs
+  exactly, yet the blanket `*.py text eol=lf` policy reports them modified.
+  Four exact `-text diff` entries preserve their bytes and textual patches.
+  No historical script, scanner rule or ignore entry is changed. Git's
+  [attribute documentation](https://git-scm.com/docs/gitattributes) distinguishes
+  line-ending conversion from textual diff generation; these settings retain
+  the latter and disable only conversion for those four paths.
+- Readiness downloaded generated signed evidence into the source checkout,
+  although the gate correctly rejects untracked files. The download now
+  targets the runner temporary directory. Cosign and readiness consume the
+  identical explicit files there, with the same issuer/identity checks.
+  The source-cleanliness check, signatures and all stage requirements remain
+  mandatory. No generated-evidence directory is ignored to hide source state.
+
+The unmodified manifest generator is exercised against private real Git
+repositories. Old policy reproduces the false dirty flag; the corrected
+policy produces a clean fresh clone with identical source bytes. Byte and
+line-ending edits remain dirty and produce text patches, untracked source
+and in-checkout evidence remain visible, and other Python files retain LF
+normalization. External generated evidence does not hide actual source edits.
+Workflow mutations reject in-checkout downloads, skipped signature checks,
+or mismatched verification/consumption paths. The first metadata check passed
+**39 tests and 91 subtests**; full final-source qualification is recorded
+separately when complete.
+
+The earlier native repair was committed locally as
+`c47b9cfe5f35638e4606f80266879da94fc82a29`, tree
+`0c6b9db4b54cc2053cf1e337e5a769767709b749`. It remains unpublished. Its
+post-commit guard caught Git's filter-only status differences; raw-byte
+comparison established that no historical source bytes had changed, and
+the attempted cleanup stopped before writing anything. There is no amend,
+reset, rebase or history rewrite: the metadata correction is a separate
+normal local commit after qualification. The earlier review worker exhausted credits before this correction. The
+owner then confirmed restored credits and explicitly authorized one fresh
+GPT-6.2 Astra High review. That reviewer independently matched all ten source
+hashes, the staged tree, historical bytes, real Git regressions and artifact
+bindings, and accepted tree `41af541dbefbb6207311310836f5fd2e251066bd` for local
+commit/integration. No exhausted worker was retried without instruction;
+source review grants no additional publication or deployment authority.
+
 INV-1 through INV-10 enforcement, production validators and the compiled
 mutation harness remain unchanged. The production provenance verifier and
 all nine exact pytest deselections remain unchanged. No runtime mock mode,
@@ -119,3 +169,10 @@ This repairs a CI dependency while retaining its native security tests.
 It does not accept testnet admission, close an audit finding, authorize
 R28/Slot 08 qualification, establish privacy/custody/provider evidence,
 or grant deployment authority. Both-chain readiness remains NOT READY.
+
+
+## Final combined-source qualification
+
+The final combined profile on source tree `41af541dbefbb6207311310836f5fd2e251066bd` passed **3,616 tests and 5,646 subtests**, with 1 existing skip and 9 existing deselections. The separate design command passed **10 tests**, and the audit unittest command passed **254 tests**. All four commands, including the literal compiler bootstrap, exited 0. These are separate runs; their counts are not added.
+
+The final functional source matches the reviewed eight code/configuration paths. This documentation update records the observed results; final policy checks and exact-commit secret scans remain separate receipts. The actual clean-source emitter and all signature/stage checks remain unchanged. Hosted verification still requires a fresh authorized publication; both-chain readiness remains NOT READY.

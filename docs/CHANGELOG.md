@@ -1,3 +1,12 @@
+## 2026-11-23: Preserve clean source and signed CI evidence boundaries
+
+Preserve exact historical bytes for four named evidence tools while keeping
+textual Git diffs. Generated signed audit evidence stays outside the source
+checkout, and both signature verification and readiness consume the same
+explicit artifact paths. Dirty-source, untracked-file, signature and stage
+checks remain strict. Real Git and workflow regressions cover these paths.
+See the [qualification record](remediation/repair_20261123/CI-PYTHON-AIKEN.md).
+
 ## 2026-11-23: Declare verified Aiken for native Python regressions
 
 Give the Python CI job the existing pinned Aiken release and verify its

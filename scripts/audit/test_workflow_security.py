@@ -171,6 +171,26 @@ class WorkflowSecurityTests(unittest.TestCase):
                                     capture_output=True,text=True,check=False,timeout=15)
             self.assertNotEqual(result.returncode,0,result.stdout+result.stderr)
 
+    def test_readiness_signed_artifacts_cannot_pollute_the_source_checkout(self) -> None:
+        text = module.WORKFLOW.read_text(encoding="utf-8")
+        step = self.named_step_block(text,"testnet-readiness-gate","Download Signed Audit Evidence")
+        for changed in ("",step.replace("${{ runner.temp }}/vams-audit-evidence","docs/audit/evidence"),
+                        step.replace("        uses:","        if: false\n        uses:")):
+            with self.subTest(changed=changed):
+                bad = self.replace_named_step(text,"testnet-readiness-gate","Download Signed Audit Evidence",changed)
+                self.assertTrue(any("outside the source checkout" in item for item in module.validate_workflow_text(bad)))
+
+    def test_readiness_verifies_and_consumes_identical_artifacts_without_bypass(self) -> None:
+        text = module.WORKFLOW.read_text(encoding="utf-8")
+        for name in ("Verify Audit Evidence Signature","Require Stage-Specific Evidence"):
+            step = self.named_step_block(text,"testnet-readiness-gate",name)
+            for changed in (step.replace("$RUNNER_TEMP/vams-audit-evidence","docs/audit/evidence"),
+                            step.replace("        run: |\n","        continue-on-error: true\n        run: |\n"),
+                            step.replace("        run: |\n","        if: false\n        run: |\n")):
+                with self.subTest(step=name,changed=changed):
+                    bad = self.replace_named_step(text,"testnet-readiness-gate",name,changed)
+                    self.assertTrue(any("audit artifact" in item for item in module.validate_workflow_text(bad)))
+
     def test_required_github_actions_use_reviewed_node24_releases(self) -> None:
         text = module.WORKFLOW.read_text(encoding="utf-8")
         for action, ref in module.REQUIRED_ACTION_PINS.items():

@@ -7,3 +7,10 @@
 *.yml text eol=lf
 *.yaml text eol=lf
 *.sh text eol=lf
+
+# These retained evidence tools have byte-bound historical contents. Preserve
+# their bytes while keeping normal textual diffs and secret-scanner coverage.
+scripts/remediation/build_f05_2a_proof_other_network_mutant_r1.py -text diff
+scripts/remediation/build_f05_2a_proof_other_validator_hash_r1.py -text diff
+scripts/remediation/test_f05_2a_proof_other_network_mutant_r1.py -text diff
+scripts/remediation/test_f05_2a_proof_other_validator_hash_r1.py -text diff
