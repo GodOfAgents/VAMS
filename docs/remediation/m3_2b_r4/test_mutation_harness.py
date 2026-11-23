@@ -11,7 +11,12 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(ROOT / "scripts/remediation"))
 import test_m3_2b_compiled_mutations as harness
-AIKEN = Path("/home/GodOfAgents/vams-evidence/toolchains/aiken-1.1.21/aiken")
+# CI supplies the reviewed native executable; retain the approved local default
+# only when no override is set. An invalid explicit selection never falls back.
+_configured_aiken = os.environ.get("VAMS_AIKEN_BIN")
+AIKEN = Path("/home/GodOfAgents/vams-evidence/toolchains/aiken-1.1.21/aiken") if _configured_aiken is None else Path(_configured_aiken)
+if _configured_aiken is not None and (not _configured_aiken or not AIKEN.is_absolute()):
+    raise ValueError("VAMS_AIKEN_BIN must be a nonempty absolute executable path")
 HARNESS = ROOT / "scripts/remediation/test_m3_2b_compiled_mutations.py"
 
 

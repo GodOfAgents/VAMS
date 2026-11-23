@@ -1,3 +1,13 @@
+## 2026-11-23: Declare verified Aiken for native Python regressions
+
+Give the Python CI job the existing pinned Aiken release and verify its
+reviewed binary hash/version before execution. The two active native mutation
+tests accept that explicit executable path and retain their real compiler,
+evaluator and assertions. Invalid explicit paths fail without fallback.
+Workflow and subprocess regressions guard the dependency and failure paths.
+Production provenance pins and all existing deselections remain unchanged.
+See the [repair and qualification evidence](remediation/repair_20261123/CI-PYTHON-AIKEN.md).
+
 ## 2026-11-23: Repair three CI qualification blockers
 
 Restore clean-runner audit imports, recognize only hash-pinned existing

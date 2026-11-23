@@ -19,6 +19,22 @@ REQUIRED_GITLEAKS_HISTORY_COMMAND = (
 FRONTEND_TEST_COMMAND = "npm test"
 FRONTEND_BUILD_COMMAND = "npm run build"
 FRONTEND_BUNDLE_SCAN_COMMAND = "npm run scan:bundle"
+PYTHON_AIKEN_SETUP = (
+    "      - name: Setup Pinned Aiken For Python Regressions\n"
+    "        uses: aiken-lang/setup-aiken@1728a4be43be099752e22d8b841706caaa6fdd88 # v1\n"
+    "        with:\n"
+    "          version: 'v1.1.21'"
+)
+PYTHON_TEST_RUN = "\n".join((
+    "set -euo pipefail",
+    'VAMS_AIKEN_BIN="$(command -v aiken)"',
+    '[[ "$VAMS_AIKEN_BIN" = /* && -f "$VAMS_AIKEN_BIN" && -x "$VAMS_AIKEN_BIN" ]]',
+    'echo "07f3f927f1a8c71fc61273fdff850d9b98edb28dde207c8a32585991f2c88e79  $VAMS_AIKEN_BIN" | sha256sum --check --strict',
+    'test "$("$VAMS_AIKEN_BIN" --version)" = \'aiken v1.1.21+42babe5\'',
+    "export VAMS_AIKEN_BIN",
+    'VAMS_ENVOY_BIN="$RUNNER_TEMP/envoy" pytest -v --tb=short --ignore=docs/remediation/m3_f05_design_r2/test_design.py',
+    'VAMS_ENVOY_BIN="$RUNNER_TEMP/envoy" pytest -v --tb=short docs/remediation/m3_f05_design_r2/test_design.py',
+))
 FRONTEND_STEP_CONTRACTS = (
     ("Install Dependencies", "dependency installation", "npm ci"),
     ("Run Frontend Telemetry Security Tests", "frontend telemetry/security test", FRONTEND_TEST_COMMAND),
@@ -129,6 +145,24 @@ def _validate_audit_import_root(text: str) -> list[str]:
         errors.append("audit-program-gate must install its exact pytest and history-test dependencies")
     elif steps and job.index(dependencies[0]) > job.index(steps[0]):
         errors.append("audit-program-gate must install test dependencies before regression tests")
+    return errors
+
+
+def _validate_python_aiken(text: str) -> list[str]:
+    """Retain the real compiler dependency of active Python native regressions."""
+    job = _job_section(text, "python-gate")
+    steps = _named_steps(job)
+    setup = [block for name, block in steps if name == "Setup Pinned Aiken For Python Regressions"]
+    tests = [block for name, block in steps if name == "Run PyTest Suite"]
+    errors: list[str] = []
+    if len(setup) != 1 or setup[0].rstrip() != PYTHON_AIKEN_SETUP:
+        errors.append("python-gate must retain its exact mandatory pinned Aiken setup")
+    if (len(tests) != 1 or _step_properties(tests[0]) != ("shell", "run")
+            or not re.search(r"^        shell: bash$", tests[0], re.MULTILINE)
+            or _step_run_value(tests[0]) != PYTHON_TEST_RUN):
+        errors.append("python-gate must verify Aiken before execution and retain both exact pytest commands")
+    if len(setup) == 1 and len(tests) == 1 and job.index(setup[0]) > job.index(tests[0]):
+        errors.append("python-gate must install its pinned Aiken before the pytest suite")
     return errors
 
 
@@ -293,6 +327,7 @@ def validate_workflow_text(text: str) -> list[str]:
     errors: list[str] = []
     errors.extend(_validate_frontend_ci(text))
     errors.extend(_validate_audit_import_root(text))
+    errors.extend(_validate_python_aiken(text))
     errors.extend(_validate_secret_scanner_result_enforcement(text))
     action_refs = re.findall(r"^\s*uses:\s*[^@\s]+@([^\s#]+)", text, re.MULTILINE)
     if not action_refs:

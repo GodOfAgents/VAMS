@@ -489,6 +489,11 @@ jobs:
         run: |
           bandit -r neuron/ gateway/ -ll -ii
 
+      - name: Setup Pinned Aiken For Python Regressions
+        uses: aiken-lang/setup-aiken@1728a4be43be099752e22d8b841706caaa6fdd88 # v1
+        with:
+          version: 'v1.1.21'
+
       - name: Acquire Checksum-Verified Envoy 1.39.1
         shell: bash
         run: |
@@ -501,7 +506,14 @@ jobs:
           "$RUNNER_TEMP/envoy" --version | grep -F "/1.39.1/Clean/RELEASE/BoringSSL"
 
       - name: Run PyTest Suite
+        shell: bash
         run: |
+          set -euo pipefail
+          VAMS_AIKEN_BIN="$(command -v aiken)"
+          [[ "$VAMS_AIKEN_BIN" = /* && -f "$VAMS_AIKEN_BIN" && -x "$VAMS_AIKEN_BIN" ]]
+          echo "07f3f927f1a8c71fc61273fdff850d9b98edb28dde207c8a32585991f2c88e79  $VAMS_AIKEN_BIN" | sha256sum --check --strict
+          test "$("$VAMS_AIKEN_BIN" --version)" = 'aiken v1.1.21+42babe5'
+          export VAMS_AIKEN_BIN
           VAMS_ENVOY_BIN="$RUNNER_TEMP/envoy" pytest -v --tb=short --ignore=docs/remediation/m3_f05_design_r2/test_design.py
           VAMS_ENVOY_BIN="$RUNNER_TEMP/envoy" pytest -v --tb=short docs/remediation/m3_f05_design_r2/test_design.py
 

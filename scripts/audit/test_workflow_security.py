@@ -1,6 +1,9 @@
 from __future__ import annotations
 
 import importlib.util
+import os
+import shutil
+import subprocess
 import tempfile
 import unittest
 from pathlib import Path
@@ -101,6 +104,72 @@ class WorkflowSecurityTests(unittest.TestCase):
         tests = self.named_step_block(text, "audit-program-gate", "Run Audit Program Regression Tests")
         bad = text.replace(step, "", 1).replace(tests, tests + step, 1)
         self.assertTrue(any("before regression tests" in item for item in module.validate_workflow_text(bad)))
+
+    def test_python_native_compiler_setup_is_pinned_mandatory_and_ordered(self) -> None:
+        text = module.WORKFLOW.read_text(encoding="utf-8")
+        setup = self.named_step_block(text, "python-gate", "Setup Pinned Aiken For Python Regressions")
+        changes = (
+            "",
+            setup.replace("version: 'v1.1.21'", "version: 'latest'"),
+            setup.replace("1728a4be43be099752e22d8b841706caaa6fdd88", "main"),
+            setup.replace("        uses:", "        if: false\n        uses:"),
+            setup.replace("        uses:", "        continue-on-error: true\n        uses:"),
+        )
+        for changed in changes:
+            with self.subTest(changed=changed):
+                bad = self.replace_named_step(text, "python-gate", "Setup Pinned Aiken For Python Regressions", changed)
+                self.assertTrue(any("pinned Aiken setup" in item for item in module.validate_workflow_text(bad)))
+        tests = self.named_step_block(text, "python-gate", "Run PyTest Suite")
+        bad = text.replace(setup, "", 1).replace(tests, tests + setup, 1)
+        self.assertTrue(any("before the pytest suite" in item for item in module.validate_workflow_text(bad)))
+
+    def test_python_compiler_identity_and_test_commands_cannot_be_bypassed(self) -> None:
+        text = module.WORKFLOW.read_text(encoding="utf-8")
+        step = self.named_step_block(text, "python-gate", "Run PyTest Suite")
+        changes = (
+            step.replace("sha256sum --check --strict", "cat"),
+            step.replace("07f3f927", "17f3f927"),
+            step.replace("aiken v1.1.21+42babe5", "aiken v1.1.20"),
+            step.replace('VAMS_AIKEN_BIN="$(command -v aiken)"', 'export VAMS_AIKEN_BIN="$(command -v aiken)"'),
+            step.replace("export VAMS_AIKEN_BIN\n", ""),
+            step.replace("        shell: bash\n", "        if: false\n        shell: bash\n"),
+            step.replace("        shell: bash\n", "        continue-on-error: true\n        shell: bash\n"),
+            step.replace("pytest -v", "pytest --deselect=active_test -v"),
+            step.replace("--tb=short", "--tb=short || true"),
+        )
+        for changed in changes:
+            with self.subTest(changed=changed):
+                bad = self.replace_named_step(text, "python-gate", "Run PyTest Suite", changed)
+                self.assertTrue(any("verify Aiken before execution" in item for item in module.validate_workflow_text(bad)))
+
+    def test_python_bootstrap_rejects_wrong_compiler_before_executing_it(self) -> None:
+        text = module.WORKFLOW.read_text(encoding="utf-8")
+        step = self.named_step_block(text, "python-gate", "Run PyTest Suite")
+        startup = module._step_run_value(step).split("export VAMS_AIKEN_BIN",1)[0]
+        with tempfile.TemporaryDirectory(prefix="vams untrusted compiler ") as directory:
+            root = Path(directory)
+            binary = root/"aiken"
+            marker = root/"executed"
+            binary.write_text('#!/bin/sh\nprintf invoked > "$AIKEN_TEST_EXEC_MARKER"\nprintf "aiken v1.1.21+42babe5\\n"\n')
+            binary.chmod(0o755)
+            environment = os.environ.copy()
+            environment.update(PATH=str(root)+os.pathsep+os.environ.get("PATH",""),AIKEN_TEST_EXEC_MARKER=str(marker))
+            result = subprocess.run([shutil.which("bash"),"-c",startup],env=environment,
+                                    capture_output=True,text=True,check=False,timeout=15)
+            self.assertNotEqual(result.returncode,0,result.stdout+result.stderr)
+            self.assertIn("FAILED",result.stdout)
+            self.assertFalse(marker.exists(),"untrusted compiler executed before digest validation")
+
+    def test_python_bootstrap_missing_compiler_does_not_use_inherited_override(self) -> None:
+        text = module.WORKFLOW.read_text(encoding="utf-8")
+        step = self.named_step_block(text, "python-gate", "Run PyTest Suite")
+        startup = module._step_run_value(step).split("export VAMS_AIKEN_BIN",1)[0]
+        with tempfile.TemporaryDirectory(prefix="vams missing compiler ") as directory:
+            environment = os.environ.copy()
+            environment.update(PATH=directory,VAMS_AIKEN_BIN="/inherited/unused/aiken")
+            result = subprocess.run([shutil.which("bash"),"-c",startup],env=environment,
+                                    capture_output=True,text=True,check=False,timeout=15)
+            self.assertNotEqual(result.returncode,0,result.stdout+result.stderr)
 
     def test_required_github_actions_use_reviewed_node24_releases(self) -> None:
         text = module.WORKFLOW.read_text(encoding="utf-8")
