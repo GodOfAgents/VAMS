@@ -105,6 +105,33 @@ def _step_run_value(step_block: str) -> str | None:
     return "\n".join(lines).strip("\n")
 
 
+def _validate_audit_import_root(text: str) -> list[str]:
+    """Keep direct-script audit commands importable from a clean runner."""
+    job = _job_section(text, "audit-program-gate")
+    errors: list[str] = []
+    if not re.search(
+        r"^    env:\n      PYTHONPATH: \$\{\{ github\.workspace \}\}\s*$",
+        job,
+        re.MULTILINE,
+    ):
+        errors.append("audit-program-gate must bind PYTHONPATH to github.workspace")
+    if re.search(r"^\s{8,}PYTHONPATH\s*:|\b(?:export|unset)\s+PYTHONPATH|\bPYTHONPATH\s*=", "\n".join(_active_lines(job)), re.MULTILINE):
+        errors.append("audit-program-gate must not override its repository import root")
+    steps = [block for name, block in _named_steps(job) if name == "Run Audit Program Regression Tests"]
+    if len(steps) != 1:
+        errors.append("audit-program-gate must contain one mandatory audit regression step")
+    elif _step_properties(steps[0]) != ("run",) or _step_run_value(steps[0]) != "python scripts/audit/test_audit_program.py":
+        errors.append("audit regression tests must retain their exact mandatory command")
+    dependencies = [block for name, block in _named_steps(job) if name == "Install Audit Test Dependencies"]
+    install = "python -m pip install pip==26.2\npython -m pip install pytest==9.1.1 git-filter-repo==2.47.0"
+    if (len(dependencies) != 1 or _step_properties(dependencies[0]) != ("run",)
+            or _step_run_value(dependencies[0]) != install):
+        errors.append("audit-program-gate must install its exact pytest and history-test dependencies")
+    elif steps and job.index(dependencies[0]) > job.index(steps[0]):
+        errors.append("audit-program-gate must install test dependencies before regression tests")
+    return errors
+
+
 def _validate_frontend_ci(text: str) -> list[str]:
     errors: list[str] = []
     frontend_job = _job_section(text, "frontend-gate")
@@ -265,6 +292,7 @@ def _version(value: str) -> tuple[int, ...]:
 def validate_workflow_text(text: str) -> list[str]:
     errors: list[str] = []
     errors.extend(_validate_frontend_ci(text))
+    errors.extend(_validate_audit_import_root(text))
     errors.extend(_validate_secret_scanner_result_enforcement(text))
     action_refs = re.findall(r"^\s*uses:\s*[^@\s]+@([^\s#]+)", text, re.MULTILINE)
     if not action_refs:

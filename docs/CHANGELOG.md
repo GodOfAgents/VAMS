@@ -1,3 +1,15 @@
+## 2026-11-23: Repair three CI qualification blockers
+
+Restore clean-runner audit imports, recognize only hash-pinned existing
+credential detector/negative-test evidence, and make active provenance
+metadata tests independent of a workstation path and ignored caches.
+Regression tests retain runtime credential rejection, fixture integrity,
+workflow failure enforcement and production provenance pins. Historical
+pytest deselections are unchanged. Non-author source review accepted the
+corrected candidate. Exact-commit scans and hosted CI are separate acceptance
+steps; no readiness acceptance or deployment is implied. See the
+[repair evidence](remediation/repair_20261123/CI-BLOCKER-FIX.md).
+
 ## 2026-11-20: Cardano Queue test fixtures and offline verification
 
 Queue tests now call the existing Queue-specific fixture and validator helpers directly. The unfiltered Aiken 1.1.21 workflow command passed all 904 tests offline. See [the source-bound evidence record](remediation/STATUS.md#2026-11-20-cardano-queue-test-fixtures-and-offline-verification). Hosted CI remains pending.

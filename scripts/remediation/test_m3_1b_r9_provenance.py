@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import contextlib
 import copy
+import hashlib
 import importlib.util
 import io
 import json
@@ -17,7 +18,7 @@ from subprocess import CompletedProcess, run
 import sys
 from unittest import mock
 
-ROOT = Path("/home/GodOfAgents/code/VAMS-testnet")
+ROOT = Path(__file__).resolve().parents[2]
 MODULE_PATH = ROOT / "scripts/remediation/verify_m3_1b_r9.py"
 SPEC = importlib.util.spec_from_file_location("m3_r11", MODULE_PATH)
 assert SPEC and SPEC.loader
@@ -36,6 +37,85 @@ EXPECTED_PACKAGES = ["aiken-lang/fuzz", "aiken-lang/stdlib"]
 class R11BoundaryTests(unittest.TestCase):
     def setUp(self) -> None:
         self.manifest = R11.validate_manifest(MANIFEST_PATH)
+
+    def _metadata_fixture(self) -> tuple[tempfile.TemporaryDirectory[str], Path, dict]:
+        """Closed hash/topology fixture, never native compilation evidence.
+
+        Runtime sources, build caches and current blueprints are independent
+        from this historical verifier's metadata contract. Only tracked TOML
+        and lock inputs are reused; source/package/program bytes below are
+        explicitly synthetic. The real verifier and all of its pins remain
+        unchanged. Every negative case first requires this baseline to pass.
+        """
+        holder = tempfile.TemporaryDirectory(prefix="m3-r11-metadata-only-")
+        self.addCleanup(holder.cleanup)
+        root = Path(holder.name)
+        cardano = root / "cardano"
+        manifest = copy.deepcopy(self.manifest)
+
+        def write(relative: str, data: bytes) -> dict:
+            path = cardano / relative
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_bytes(data)
+            return {"path": relative, "size": len(data), "sha256": hashlib.sha256(data).hexdigest()}
+
+        manifest["compilation_sources"] = [
+            write(record["path"], f"// SYNTHETIC METADATA FIXTURE, NOT COMPILER INPUT: {record['path']}\n".encode())
+            for record in manifest["compilation_sources"]
+        ]
+        for name in ("aiken.toml", "aiken.lock"):
+            write(name, (ROOT / "cardano" / name).read_bytes())
+        index = "\n".join(
+            f'[[packages]]\nname = "{item["name"]}"\nversion = "{item["version"]}"\nsource = "{item["source"]}"\n'
+            for item in manifest["package_cache"]["index"]["packages"]
+        ).encode()
+        index_record = write("build/packages/packages.toml", index)
+        manifest["package_cache"]["index"]["sha256"] = index_record["sha256"]
+        for dependency in manifest["dependencies"]:
+            relative = "fixture.txt"
+            data = f"SYNTHETIC METADATA ONLY, NOT AN UPSTREAM PACKAGE: {dependency['name']}\n".encode()
+            record = write(f"build/packages/{dependency['package_dir']}/{relative}", data)
+            digest = record["sha256"]
+            dependency["files"] = [{"path": relative, "type": "regular", "size": len(data), "sha256": digest}]
+            dependency["package_file_count"] = 1
+            # Independently construct the documented single-file tree record.
+            dependency["package_tree_sha256"] = hashlib.sha256(f"{relative}\0{len(data)}\0{digest}\n".encode()).hexdigest()
+        for record in manifest["project_inputs"]:
+            data = (cardano / record["path"]).read_bytes()
+            record.update(size=len(data), sha256=hashlib.sha256(data).hexdigest())
+        manifest["project"]["aiken_toml_sha256"] = hashlib.sha256((cardano / "aiken.toml").read_bytes()).hexdigest()
+        manifest["project"]["lock_sha256"] = hashlib.sha256((cardano / "aiken.lock").read_bytes()).hexdigest()
+        manifest["project"]["lock_normalized_sha256"] = R11.normalized_lock_digest(cardano / "aiken.lock")
+        manifest["forward_provenance"]["current_canonical_raw_lock_sha256"] = manifest["project"]["lock_sha256"]
+        programs = [{"title": item["title"], "compiledCode": bytes([i + 1]).hex()}
+                    for i, item in enumerate(manifest["blueprint"]["programs"])]
+        blueprint = {"preamble": {"title": "SYNTHETIC METADATA ONLY, NOT UPLC"}, "validators": programs}
+        blueprint_record = write("plutus.json", json.dumps(blueprint, sort_keys=True).encode())
+        manifest["blueprint"]["sha256"] = blueprint_record["sha256"]
+        manifest["blueprint"]["programs"] = [
+            {"title": item["title"], "sha256": hashlib.sha256(bytes.fromhex(item["compiledCode"])).hexdigest()}
+            for item in programs
+        ]
+        write("aiken-dependency-manifest.json", json.dumps(manifest, sort_keys=True).encode())
+        parsed = R11.validate_manifest(cardano / "aiken-dependency-manifest.json")
+        with mock.patch.object(R11, "_run", side_effect=AssertionError("metadata tests must not execute native tools")):
+            result = R11.validate_repository_inputs(root, parsed)
+        self.assertEqual(result["source_file_count"], len(manifest["compilation_sources"]))
+        return holder, root, parsed
+
+    def test_closed_metadata_fixture_passes_without_build_cache_or_compiler(self) -> None:
+        _holder, root, manifest = self._metadata_fixture()
+        with self.assertRaisesRegex(R11.VerificationError, "unapproved Aiken executable path"):
+            R11._verify_tool(root / "NO_NATIVE_COMPILER", manifest)
+
+    def test_closed_metadata_fixture_is_relocatable(self) -> None:
+        _holder, root, manifest = self._metadata_fixture()
+        with tempfile.TemporaryDirectory(prefix="relocated metadata fixture ") as directory:
+            relocated = Path(directory) / "project"
+            shutil.copytree(root, relocated)
+            with mock.patch.object(R11, "_run", side_effect=AssertionError("unexpected native call")):
+                result = R11.validate_repository_inputs(relocated, manifest)
+            self.assertEqual(result["source_file_count"], len(manifest["compilation_sources"]))
 
     def _fixture(self) -> tuple[tempfile.TemporaryDirectory[str], Path]:
         holder = tempfile.TemporaryDirectory(prefix="m3-r11-fixture-", dir="/tmp")
@@ -113,7 +193,7 @@ class R11BoundaryTests(unittest.TestCase):
             self.assertEqual(R11.normalized_lock_digest(Path(handle.name)), self.manifest["project"]["lock_normalized_sha256"])
 
     def test_r9_rebound_raw_hash_trailing_byte_fails_normalized_binding(self) -> None:
-        holder, root = self._fixture()
+        holder, root, _manifest = self._metadata_fixture()
         lock = root / "cardano/aiken.lock"
         mutated = lock.read_bytes() + b"\n"
         lock.write_bytes(mutated)
@@ -204,14 +284,15 @@ class R11BoundaryTests(unittest.TestCase):
                 with self.assertRaises(R11.VerificationError): R11.validate_manifest(Path(handle.name))
 
     def test_source_omission_addition_and_rebinding_rejected(self) -> None:
+        _holder, root, fixture_manifest = self._metadata_fixture()
         for mutation in ("omit", "add", "digest", "path"):
-            mutated = copy.deepcopy(self.manifest)
+            mutated = copy.deepcopy(fixture_manifest)
             if mutation == "omit": mutated["compilation_sources"].pop()
             elif mutation == "add": mutated["compilation_sources"].append(copy.deepcopy(mutated["compilation_sources"][-1]))
             elif mutation == "digest": mutated["compilation_sources"][0]["sha256"] = "0" * 64
             else: mutated["compilation_sources"][0]["path"] = "lib/vams/renamed.ak"
-            with self.subTest(mutation=mutation), self.assertRaises(R11.VerificationError):
-                R11.validate_repository_inputs(ROOT, mutated)
+            with self.subTest(mutation=mutation), self.assertRaisesRegex(R11.VerificationError, "compilation source set or digest mismatch"):
+                R11.validate_repository_inputs(root, mutated)
 
     def test_r15_lock_timestamp_boolean_and_scalar_matrix(self) -> None:
         original = (ROOT / "cardano/aiken.lock").read_text()
@@ -239,7 +320,7 @@ class R11BoundaryTests(unittest.TestCase):
                 self.assertIsInstance(R11.parse_lock(Path(handle.name)), dict)
 
     def test_r15_cli_lock_timestamp_failure_is_sanitized(self) -> None:
-        holder, root = self._fixture()
+        holder, root, _manifest = self._metadata_fixture()
         lock = root / "cardano/aiken.lock"
         mutated = re.sub(r"(secs_since_epoch\s*=\s*)[0-9]+", r"\g<1>true", lock.read_text(), count=1)
         lock.write_text(mutated)
@@ -275,7 +356,8 @@ class R11BoundaryTests(unittest.TestCase):
 
     def test_r15_package_index_parser_direct_matrix(self) -> None:
         parser = R11._parse_package_index
-        canonical = parser(ROOT / "cardano/build/packages/packages.toml")
+        _holder, root, _manifest = self._metadata_fixture()
+        canonical = parser(root / "cardano/build/packages/packages.toml")
         self.assertEqual([item["name"] for item in canonical], EXPECTED_PACKAGES)
         cases = [
             ("missing_root", "[unexpected]\nvalue=1\n", "unexpected package index fields"),
@@ -296,31 +378,31 @@ class R11BoundaryTests(unittest.TestCase):
 
     def test_package_index_missing_unknown_and_mutated_rejected(self) -> None:
         for mutation in ("missing", "unknown", "mutated"):
-            holder, root = self._fixture(); index = root / "cardano/build/packages/packages.toml"
+            holder, root, manifest = self._metadata_fixture(); index = root / "cardano/build/packages/packages.toml"
             if mutation == "missing": index.unlink()
             elif mutation == "unknown": index.write_text(index.read_text() + "\n[unexpected]\nvalue=1\n")
             else: index.write_text(index.read_text().replace('version = "' + self.manifest["dependencies"][0]["version"] + '"', 'version = "v9"', 1))
             with self.subTest(mutation=mutation), self.assertRaises(R11.VerificationError):
-                R11.validate_repository_inputs(root, self.manifest)
+                R11.validate_repository_inputs(root, manifest)
 
     def test_package_topology_and_file_mutations_rejected(self) -> None:
         for mutation in ("extra_dir", "missing_dir", "extra_file", "missing_file", "content"):
-            holder, root = self._fixture(); cache = root / "cardano/build/packages"; dep = self.manifest["dependencies"][0]; package = cache / dep["package_dir"]
+            holder, root, manifest = self._metadata_fixture(); cache = root / "cardano/build/packages"; dep = manifest["dependencies"][0]; package = cache / dep["package_dir"]
             if mutation == "extra_dir": (cache / "unreviewed").mkdir()
             elif mutation == "missing_dir": shutil.rmtree(cache / dep["package_dir"])
             elif mutation == "extra_file": (package / "extra.ak").write_text("x")
             elif mutation == "missing_file": (package / dep["files"][0]["path"]).unlink()
             else: (package / dep["files"][0]["path"]).write_bytes(b"changed")
             with self.subTest(mutation=mutation), self.assertRaises(R11.VerificationError):
-                R11.validate_repository_inputs(root, self.manifest)
+                R11.validate_repository_inputs(root, manifest)
 
     def test_missing_cache_symlink_and_special_file_rejected(self) -> None:
-        holder, root = self._fixture(); shutil.rmtree(root / "cardano/build/packages")
-        with self.assertRaises(R11.VerificationError): R11.validate_repository_inputs(root, self.manifest)
-        holder, root = self._fixture(); package = root / "cardano/build/packages/aiken-lang-fuzz"; victim = package / self.manifest["dependencies"][0]["files"][0]["path"]; victim.unlink(); victim.symlink_to(ROOT / "cardano/README.md")
-        with self.assertRaises(R11.VerificationError): R11.validate_repository_inputs(root, self.manifest)
-        holder, root = self._fixture(); os.mkfifo(root / "cardano/build/packages/aiken-lang-fuzz/pipe")
-        with self.assertRaises(R11.VerificationError): R11.validate_repository_inputs(root, self.manifest)
+        holder, root, manifest = self._metadata_fixture(); shutil.rmtree(root / "cardano/build/packages")
+        with self.assertRaises(R11.VerificationError): R11.validate_repository_inputs(root, manifest)
+        holder, root, manifest = self._metadata_fixture(); package = root / "cardano/build/packages/aiken-lang-fuzz"; victim = package / manifest["dependencies"][0]["files"][0]["path"]; victim.unlink(); victim.symlink_to(ROOT / "cardano/README.md")
+        with self.assertRaises(R11.VerificationError): R11.validate_repository_inputs(root, manifest)
+        holder, root, manifest = self._metadata_fixture(); os.mkfifo(root / "cardano/build/packages/aiken-lang-fuzz/pipe")
+        with self.assertRaises(R11.VerificationError): R11.validate_repository_inputs(root, manifest)
 
     def test_package_and_lock_nonvolatile_mutations_fail_but_timestamps_pass(self) -> None:
         lock = R11.parse_lock(ROOT / "cardano/aiken.lock"); changed = copy.deepcopy(lock)
@@ -330,10 +412,12 @@ class R11BoundaryTests(unittest.TestCase):
         with self.assertRaises(R11.VerificationError): R11.validate_semantic_lock(changed, self.manifest)
 
     def test_blueprint_drift_rejected(self) -> None:
+        _holder, root, manifest = self._metadata_fixture()
         with tempfile.TemporaryDirectory(prefix="m3-r11-blueprint-", dir="/tmp") as folder:
-            generated = Path(folder) / "plutus.json"; shutil.copyfile(ROOT / "cardano/plutus.json", generated)
+            generated = Path(folder) / "plutus.json"; shutil.copyfile(root / "cardano/plutus.json", generated)
             doc = json.loads(generated.read_text()); doc["validators"][0]["compiledCode"] = "00"; generated.write_text(json.dumps(doc))
-            with self.assertRaises(R11.VerificationError): R11.verify_blueprint(ROOT / "cardano/plutus.json", generated, self.manifest)
+            with self.assertRaisesRegex(R11.VerificationError, "blueprint hash mismatch"):
+                R11.verify_blueprint(root / "cardano/plutus.json", generated, manifest)
 
     def test_cleanup_after_injected_failure_and_network_boundary(self) -> None:
         before = set(Path("/tmp").glob("m3-r11-aiken-*")); seen = []

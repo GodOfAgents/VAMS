@@ -57,6 +57,51 @@ class WorkflowSecurityTests(unittest.TestCase):
     def test_actions_and_security_tools_are_pinned(self) -> None:
         self.assertEqual(module.validate(), [])
 
+    def test_audit_import_root_cannot_be_removed_or_redirected(self) -> None:
+        text = module.WORKFLOW.read_text(encoding="utf-8")
+        for replacement in ("", "      PYTHONPATH: /tmp\n", "      PYTHONPATH: ''\n"):
+            with self.subTest(replacement=replacement):
+                bad = text.replace("      PYTHONPATH: ${{ github.workspace }}\n", replacement, 1)
+                self.assertTrue(any("import root" in error or "PYTHONPATH" in error
+                                    for error in module.validate_workflow_text(bad)))
+
+    def test_audit_regression_step_cannot_be_skipped_or_made_nonblocking(self) -> None:
+        text = module.WORKFLOW.read_text(encoding="utf-8")
+        step = self.named_step_block(text, "audit-program-gate", "Run Audit Program Regression Tests")
+        for change in ("        if: false\n", "        continue-on-error: true\n"):
+            with self.subTest(change=change):
+                altered = step.replace("        run: |\n", change + "        run: |\n", 1)
+                bad = self.replace_named_step(text, "audit-program-gate", "Run Audit Program Regression Tests", altered)
+                self.assertTrue(module.validate_workflow_text(bad))
+        bad = text.replace("python scripts/audit/test_audit_program.py\n",
+                           "python scripts/audit/test_audit_program.py || true\n", 1)
+        self.assertTrue(module.validate_workflow_text(bad))
+
+    def test_step_level_audit_import_override_is_rejected(self) -> None:
+        text = module.WORKFLOW.read_text(encoding="utf-8")
+        step = self.named_step_block(text, "audit-program-gate", "Run Audit Program Regression Tests")
+        altered = step.replace("        run: |\n", "        env:\n          PYTHONPATH: /tmp\n        run: |\n", 1)
+        bad = self.replace_named_step(text, "audit-program-gate", "Run Audit Program Regression Tests", altered)
+        self.assertTrue(any("import root" in error for error in module.validate_workflow_text(bad)))
+
+    def test_audit_job_installs_its_pinned_test_dependencies_before_tests(self) -> None:
+        text = module.WORKFLOW.read_text(encoding="utf-8")
+        step = self.named_step_block(text, "audit-program-gate", "Install Audit Test Dependencies")
+        changes = (
+            step.replace("pytest==9.1.1 ", ""),
+            step.replace("pytest==9.1.1", "pytest"),
+            step.replace("        run: |\n", "        if: false\n        run: |\n"),
+            step.replace("        run: |\n", "        continue-on-error: true\n        run: |\n"),
+            "",
+        )
+        for changed in changes:
+            with self.subTest(changed=changed):
+                bad = self.replace_named_step(text, "audit-program-gate", "Install Audit Test Dependencies", changed)
+                self.assertTrue(any("test dependencies" in item for item in module.validate_workflow_text(bad)))
+        tests = self.named_step_block(text, "audit-program-gate", "Run Audit Program Regression Tests")
+        bad = text.replace(step, "", 1).replace(tests, tests + step, 1)
+        self.assertTrue(any("before regression tests" in item for item in module.validate_workflow_text(bad)))
+
     def test_required_github_actions_use_reviewed_node24_releases(self) -> None:
         text = module.WORKFLOW.read_text(encoding="utf-8")
         for action, ref in module.REQUIRED_ACTION_PINS.items():
