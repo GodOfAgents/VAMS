@@ -20,6 +20,10 @@ HISTORICAL_PATHS = (
     "scripts/remediation/test_f05_2a_proof_other_network_mutant_r1.py",
     "scripts/remediation/test_f05_2a_proof_other_validator_hash_r1.py",
 )
+REFRESH_PATHS = (
+    "contracts/script/DeployTestnet.s.sol",  # CRLF
+    "gateway/heartbeat_consent_signatures_v2.py",  # Mixed LF/CRLF
+)
 
 
 class SourceByteIntegrityTests(unittest.TestCase):
@@ -41,7 +45,7 @@ class SourceByteIntegrityTests(unittest.TestCase):
         self.git("init","-q")
         self.git("config","core.autocrlf","false")
         self.git("config","core.attributesFile",str(empty))
-        self.originals = {name:(ROOT/name).read_bytes() for name in HISTORICAL_PATHS}
+        self.originals = {name:(ROOT/name).read_bytes() for name in (*HISTORICAL_PATHS, *REFRESH_PATHS)}
 
     def git(self, *arguments: str, root: Path | None = None, data: bytes | None = None) -> bytes:
         result = subprocess.run(self.command+list(arguments),cwd=root or self.repo,
@@ -54,11 +58,11 @@ class SourceByteIntegrityTests(unittest.TestCase):
         attributes = (ROOT/".gitattributes").read_text()
         if old_policy:
             attributes = "\n".join(line for line in attributes.splitlines()
-                                   if not any(line.startswith(name+" ") for name in HISTORICAL_PATHS))+"\n"
+                                   if not any(line.lstrip("/").startswith(name+" ") for name in self.originals))+"\n"
         (self.repo/".gitattributes").write_text(attributes)
         self.git("add","--",".gitattributes")
         for name,data in self.originals.items():
-            self.assertTrue(data.endswith(b"\n\r\n"),"Expected retained mixed-ending evidence bytes")
+            self.assertIn(b"\r\n", data, "Expected retained CRLF bytes")
             path = self.repo/name
             path.parent.mkdir(parents=True,exist_ok=True)
             path.write_bytes(data)
@@ -104,11 +108,28 @@ class SourceByteIntegrityTests(unittest.TestCase):
         self.assertTrue(self.git("status","--porcelain"))
         self.assertTrue(self.manifest_dirty())
 
+    def test_stat_revalidation_preserves_clean_status_for_legacy_blobs(self) -> None:
+        self.prepare()
+        clone = self.folder / "refresh checkout"
+        self.git("clone", "-q", "--no-local", str(self.repo), str(clone))
+        self.assertEqual(self.git("status", "--porcelain", root=clone), b"")
+        for name in REFRESH_PATHS:
+            path = clone / name
+            stat = path.stat()
+            os.utime(path, ns=(stat.st_atime_ns, stat.st_mtime_ns - 120_000_000_000))
+            self.assertEqual(path.read_bytes(), self.originals[name])
+        self.assertEqual(self.git("status", "--porcelain", root=clone), b"")
+        self.assertFalse(self.manifest_dirty(clone))
+
     def test_byte_and_lineending_changes_still_fail_cleanliness_and_show_text_diffs(self) -> None:
         self.prepare()
         for name,data in self.originals.items():
-            for changed in (data+b"# byte_change_marker\n",data[:-2]+b"\n"):
-                with self.subTest(path=name,lineending_only=changed.endswith(b"\n\n")):
+            variants = (
+                ("byte change", data + b"# byte_change_marker\n"),
+                ("line ending change", data.replace(b"\r\n", b"\n")),
+            )
+            for change, changed in variants:
+                with self.subTest(path=name, change=change):
                     (self.repo/name).write_bytes(changed)
                     self.assertTrue(self.manifest_dirty())
                     diff = self.git("diff","--no-ext-diff","--",name)

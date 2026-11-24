@@ -48,6 +48,12 @@ READINESS_AUDIT_RUN = "\n".join((
     '  --evidence-manifest "$RUNNER_TEMP/vams-audit-evidence/audit-evidence.json" \\',
     '  --evidence-signature-bundle "$RUNNER_TEMP/vams-audit-evidence/audit-evidence.sigstore.json"',
 ))
+READINESS_SOURCE_INSPECTION = "\n".join((
+    "git -c core.quotePath=true status --porcelain=v1 --untracked-files=all |",
+    # Encode Actions command delimiters in filenames before sending them to CI logs.
+    """  awk 'NR <= 25 {gsub(/%/, "%25"); gsub(/#/, "%23"); gsub(/:/, "%3A"); print "  " $0}""",
+    """       END {print "Readiness checkout status entries: " NR+0}'""",
+))
 FRONTEND_STEP_CONTRACTS = (
     ("Install Dependencies", "dependency installation", "npm ci"),
     ("Run Frontend Telemetry Security Tests", "frontend telemetry/security test", FRONTEND_TEST_COMMAND),
@@ -204,6 +210,25 @@ def _validate_readiness_artifact_location(text: str) -> list[str]:
         positions = [job.index(block) for block in (downloads[0],verifies[0],gates[0])]
         if positions != sorted(positions):
             errors.append("readiness must download, verify, then consume audit evidence")
+    boundary_steps = (
+        "Checkout Code",
+        "Inspect Readiness Source After Checkout",
+        "Download Signed Audit Evidence",
+        "Verify Audit Evidence Signature",
+        "Verify Closed Canary Signature",
+        "Inspect Readiness Source Before Evaluation",
+        "Require Stage-Specific Evidence",
+    )
+    names = [name for name, _ in steps]
+    if [name for name in names if name in boundary_steps] != list(boundary_steps):
+        errors.append("readiness must inspect source after checkout and after signature verification")
+    for name, block in steps:
+        if name in (boundary_steps[1], boundary_steps[5]) and (
+            _step_properties(block) != ("shell", "run")
+            or "        shell: bash\n" not in block
+            or _step_run_value(block) != READINESS_SOURCE_INSPECTION
+        ):
+            errors.append("readiness source inspection must report bounded tracked and untracked paths")
     return errors
 
 

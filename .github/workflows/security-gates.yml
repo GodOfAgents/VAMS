@@ -852,6 +852,13 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
+      - name: Inspect Readiness Source After Checkout
+        shell: bash
+        run: |
+          git -c core.quotePath=true status --porcelain=v1 --untracked-files=all |
+            awk 'NR <= 25 {gsub(/%/, "%25"); gsub(/#/, "%23"); gsub(/:/, "%3A"); print "  " $0}
+                 END {print "Readiness checkout status entries: " NR+0}'
+
       - name: Download Signed Audit Evidence
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
@@ -877,6 +884,13 @@ jobs:
             --certificate-identity-regexp '^https://github.com/GodOfAgents/VAMS/.github/workflows/.+@refs/.+$' \
             --certificate-oidc-issuer 'https://token.actions.githubusercontent.com' \
             docs/audit/evidence/closed-canary-report.json
+
+      - name: Inspect Readiness Source Before Evaluation
+        shell: bash
+        run: |
+          git -c core.quotePath=true status --porcelain=v1 --untracked-files=all |
+            awk 'NR <= 25 {gsub(/%/, "%25"); gsub(/#/, "%23"); gsub(/:/, "%3A"); print "  " $0}
+                 END {print "Readiness checkout status entries: " NR+0}'
 
       - name: Require Stage-Specific Evidence
         env:

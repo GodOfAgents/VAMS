@@ -1,3 +1,13 @@
+## 2026-11-24: Preserve readiness checkout byte integrity
+
+- Preserve the committed CRLF or mixed line endings of 73 exact paths when Git
+  refreshes file metadata. Their contents and text diffs remain available to
+  review and history scanners.
+- Report tracked and untracked paths after readiness checkout and before
+  evaluation, with a total and up to 25 escaped entries per checkpoint.
+  The readiness evaluator still rejects dirty source and requires the same
+  signed evidence, stage checks and testnet qualification.
+
 ## 2026-11-23: Preserve clean source and signed CI evidence boundaries
 
 Preserve exact historical bytes for four named evidence tools while keeping

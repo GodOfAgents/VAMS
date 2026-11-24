@@ -196,6 +196,45 @@ class WorkflowSecurityTests(unittest.TestCase):
         for action, ref in module.REQUIRED_ACTION_PINS.items():
             self.assertIn(f"uses: {action}@{ref}", text)
 
+    def test_readiness_source_diagnostics_cover_both_boundaries(self) -> None:
+        text = module.WORKFLOW.read_text(encoding="utf-8")
+        job = "testnet-readiness-gate"
+        after_checkout = "Inspect Readiness Source After Checkout"
+        before_evaluation = "Inspect Readiness Source Before Evaluation"
+        for name in (after_checkout, before_evaluation):
+            step = self.named_step_block(text, job, name)
+            for replacement in ("", step.replace("--untracked-files=all", "-uno"),
+                                step.replace("        shell:", "        if: false\n        shell:")):
+                with self.subTest(step=name, replacement=replacement):
+                    bad = self.replace_named_step(text, job, name, replacement)
+                    self.assertTrue(any("readiness" in error for error in module.validate_workflow_text(bad)))
+        early = self.named_step_block(text, job, after_checkout)
+        final = self.named_step_block(text, job, before_evaluation)
+        reordered = text.replace(early, "", 1).replace(final, early + final, 1)
+        self.assertTrue(any("after checkout" in error for error in module.validate_workflow_text(reordered)))
+
+    def test_readiness_source_log_escapes_path_punctuation_and_bounds_output(self) -> None:
+        text = module.WORKFLOW.read_text(encoding="utf-8")
+        step = self.named_step_block(
+            text, "testnet-readiness-gate", "Inspect Readiness Source Before Evaluation"
+        )
+        formatter = module._step_run_value(step).split("|\n", 1)[1]
+        records = [" M docs/100% #1: example.md", "?? untracked.txt"]
+        records.extend(f" M extra-{index}.md" for index in range(29))
+        for label, data in (("dirty", records), ("clean", [])):
+            with self.subTest(label=label):
+                result = subprocess.run(
+                    [shutil.which("bash"), "-c", formatter],
+                    input="".join(record + "\n" for record in data),
+                    capture_output=True, text=True, check=True, timeout=15,
+                )
+                lines = result.stdout.splitlines()
+                self.assertEqual(lines[-1], f"Readiness checkout status entries: {len(data)}")
+                self.assertEqual(len(lines), min(len(data), 25) + 1)
+                if data:
+                    self.assertEqual(lines[0], "   M docs/100%25 %231%3A example.md")
+                    self.assertEqual(lines[1], "  ?? untracked.txt")
+
     def test_failure_manifest_precedes_aggregate_enforcement(self) -> None:
         text = module.WORKFLOW.read_text(encoding="utf-8")
         self.assertLess(
