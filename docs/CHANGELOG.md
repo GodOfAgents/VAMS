@@ -1,3 +1,18 @@
+## 2026-11-25: Correct F13 resolver measurement and floor-row economics
+
+- Define accuracy among decided probes, with separate timeout rates per truth
+  class and explicit accounting for missed deadlines not yet finalized.
+- Fix one campaign at 120 probes per class and one final assessment; allocate
+  the 5% family error budget across four exact one-sided bounds. No sampling
+  until a pass, silent exclusions or automatic repeat campaigns.
+- Complete required measurement and independent acceptance in the closed canary
+  before public promotion; preserve the later 14-day public-observation stage.
+- Use the actual bond floor and integer rounding in small-row economics. A
+  0.1-VAMS row with a 1-VAMS bond needs more than 90.9% honest success before costs.
+- Add an offline, standard-library mathematical verifier and reproducible tables.
+  No live probes or contract/parameter changes. F13 remains REVALIDATED_OPEN;
+  readiness NOT READY. This correction is not independent or operational assurance.
+
 ## 2026-11-25: Dispute bond floor and per-agent dispute cap (owner decision 10b)
 
 - `DeliveryDisputeV1.bondFor` now returns the larger of `ceil(5% * row)` and

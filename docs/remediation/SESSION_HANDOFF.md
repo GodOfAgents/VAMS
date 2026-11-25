@@ -1,3 +1,28 @@
+## 2026-11-25: F13 measurement follow-up, local commit only
+
+Baseline `5ccc5ed`, branch `remediation/phase1`; this entry belongs to the local
+documentation/math correction commit. Changed: the resolver measurement plan,
+floor/cap design economics, offline verifier, scoped changelog entry and these
+handoff/status notes. Contract source/tests, parameters and the F13 ledger
+disposition remain unchanged. Existing payment-ledger and changelog edits are
+preserved and left unstaged.
+
+Verification commands: `python3 scripts/audit/verify_f13_resolver_math.py`
+(exit 0, seven verification groups), `python3 scripts/docs/validate_docs.py --json`
+(exit 0), changed-document relative-link checks and `git diff --cached --check`
+(pass). Exact command receipts, source/output SHA-256 hashes and final commit
+identity are retained outside the checkout under
+`C:/Users/aseem/VAMS-mono/.tmp-history-tests/f13-measurement-plan-20261125-01/`.
+No Foundry/scanner/hosted-CI rerun, operational probes, funding or deployment.
+
+Next: independent review of the candidate and this measurement design; obtain
+authentic F06/F07 evidence and real resolver custody. Before any separately
+authorized probe campaign, freeze operating limits, reviewed case distribution,
+sampling assumptions and operator/privacy evidence. Keep the closed canary open
+until required evidence is accepted; preserve later public-observation time.
+No probe approval or promotion follows from these offline checks. F13 stays
+REVALIDATED_OPEN; 13 findings open, 0/36 accepted; readiness NOT READY.
+
 ## 2026-11-05: inactive V3 heartbeat authority producer
 
 The new non-upgradeable V3 source reads the pinned timelock generation/commitment, policy projection and mandatory custody adapter. Policy configuration computes its digest from those current reads and rolls back on failure. The source checks an explicit expected chain ID at construction and every read. One-time policy binding checks the source's actual policy and timelock instances. Custody reads have a fixed 50,000-gas cap, copy only 96 bytes, require exactly 96 returned bytes, and reject noncanonical integer words. A real custody implementation and its gas envelope remain UNKNOWN; synthetic fixtures supply no custody authority.

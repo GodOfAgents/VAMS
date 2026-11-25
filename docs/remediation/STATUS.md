@@ -1,3 +1,21 @@
+## 2026-11-25: F13 measurement-plan and floor-row math correction
+
+Documentation/math-only follow-up to local source baseline `5ccc5ed` on
+`remediation/phase1`. Correct decision-conditional error rates, separate class
+timeouts, fix 120 probes per class and one final assessment with a four-bound
+family confidence budget, and finish required evidence before public promotion.
+Floor-row incentives now use actual integer bonds. All contract parameters and
+INV-1 through INV-10 enforcement points are unchanged.
+
+Fresh offline checks: seven mathematical/source verification groups,
+documentation validation and changed-document links PASS; see
+`scripts/audit/verify_f13_resolver_math.py` and
+`docs/remediation/repair_20261125/F13-RESOLVER-ACCURACY-PLAN.md`.
+No contract-suite rerun or live probes; this is not calibration, independent
+review or gate acceptance. Raw source-bound streams are outside the checkout at
+`C:/Users/aseem/VAMS-mono/.tmp-history-tests/f13-measurement-plan-20261125-01/`.
+F13 remains REVALIDATED_OPEN; 13 findings open, 0/36 accepted; NOT READY.
+
 ## 2026-11-20: Cardano Queue test fixtures and offline verification
 
 The Queue test fixture change specializes 48 calls and six fixture calls in

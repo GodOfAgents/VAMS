@@ -1,7 +1,7 @@
 # F13 dispute bond floor and per-agent dispute cap: design (2026-11-25)
 
-Status: **APPROVED (owner decision 10b, 2026-11-25: Q1-Q4 as recommended) and implemented in the WSL
-working tree, uncommitted; not independently reviewed.** Implementation evidence:
+Status: **APPROVED (owner decision 10b, 2026-11-25: Q1-Q4 as recommended), implemented and committed
+locally as `b631f67`; not independently reviewed or accepted.** Implementation evidence:
 `.tmp-history-tests/f13-floor-cap-20261125-01/`. F13 stays REVALIDATED_OPEN; readiness NOT READY
 (13 open findings, 0/36 tracks). Decisions 10 and 10a are unchanged by this document.
 
@@ -45,14 +45,60 @@ one actor block every honest agent.
 
 ## 4. Effects and trade-offs
 
-- An honest agent disputing a row smaller than about $B_{min}/1.05$ posts more bond than the row is
-  worth. Expected value stays positive only if the resolver is accurate and responsive:
-  $(1-q)(1-\delta)A > [q + (1-q)\delta]\,B_{min}$. Disputes on very small rows become rare; this is
-  the intended price of protecting resolver capacity.
-- Ring capacity becomes at most $N \times$ (admitted initiators the ring controls), with each dispute
-  costing at least $B_{min}$ of locked capital for up to 14 days. With recycling, the floor adds
-  capital lock rather than loss; the cap is what bounds volume.
-- No change to outcomes, deadlines, recipients, conservation or decision 10a.
+This section supersedes the pre-floor analysis's use of a universal $B/A=0.05$.
+Compute $B$ in integer token base units with section 2's formula and set $b_{eff}=B/A$.
+With the approved 1-VAMS floor, the crossover is **20 VAMS**; above it the rounded
+proportional bond applies. A positive row **below 1 VAMS**, not $B_{min}/1.05$, needs
+a bond greater than its principal. Rounding applies at the crossover plus one base unit.
+
+Use separate timeout rates $q_M$ and $q_H$ for meritless and meritorious complaints.
+$\varepsilon$ and $\delta$ are error rates **among decided cases** in those classes.
+Let $C\geq0$ be incremental gas/capital cost in principal units. Relative to not disputing:
+
+$$EV_M=(1-q_M)\varepsilon(A+B)-B-C,$$
+$$EV_H=p_H A-(1-p_H)B-C,\qquad p_H=(1-q_H)(1-\delta).$$
+
+Meritless filing is profitable only if $\varepsilon>(B+C)/[(1-q_M)(A+B)]$ for $q_M<1$;
+when $q_M=1$, its expected value is $-B-C$. Honest filing has positive monetary expected
+value only if $p_H>(B+C)/(A+B)$. Equality is break-even. When $C\geq A$, even certain
+success cannot yield positive $EV_H$ under this model.
+
+The table uses exact base-unit bonds and $C=0$. Its last column assumes illustrative
+$q_H=0.20$, $\delta=0.10$, losing 28% of the bond on average. None are measured rates or
+acceptance limits.
+
+<!-- BEGIN F13 FLOOR TABLE -->
+| Row A (VAMS) | Bond B (VAMS) | Effective B/A | Honest success needed (strictly above) | Expected honest bond loss / row |
+|---|---|---|---|---|
+| 0.1 | 1 | 10 | 90.9091% | 280.0000% |
+| 1 | 1 | 1 | 50.0000% | 28.0000% |
+| 5 | 1 | 1/5 | 16.6667% | 5.6000% |
+| 20 | 1 | 1/20 | 4.7619% | 1.4000% |
+| 100 | 5 | 1/20 | 4.7619% | 1.4000% |
+<!-- END F13 FLOOR TABLE -->
+
+For a 0.1-VAMS row, expected bond loss in that example is **0.28 VAMS (280% of the row)**
+and $EV_H=0.72(0.1)-0.28=-0.208$ VAMS before costs. For a one-base-unit row ($A=1$,
+$B=10^{18}$ in base units), positive honest $EV_H$ requires
+$p_H>10^{18}/(10^{18}+1)$, a failure probability below $1/(10^{18}+1)$ before costs.
+Do not round this to an achievable 100% estimate or use the proportional regime's
+4.7619% abuse threshold for this row.
+
+The floor increases dust collateral and can make honest small-row disputes uneconomic;
+it does not establish a minimum service charge or prove that small disputes will be rare.
+Commonly controlled agent/provider pairs still recycle the bond. Simple annualized delay
+compensation does not establish universal extortion resistance or price external gains.
+
+For one dispute contract, $K$ admitted ring-controlled agents can hold at most $20K$ OPEN
+disputes concurrently. This is neither a global service-rate bound nor Sybil resistance.
+Resolved slots can be reused and identities multiply the cap. The 14-day deadline makes
+timeout finalization eligible; it does not submit a transaction, release collateral, or
+guarantee provider payment while paused. Failed transactions can prolong actual lock time.
+Admission and funded operator execution remain necessary controls.
+
+No outcome, deadline, recipient, conservation rule or contract parameter changes.
+The [measurement plan](F13-RESOLVER-ACCURACY-PLAN.md) fixes rate definitions and stage order.
+Reproduce the tables with `python3 scripts/audit/verify_f13_resolver_math.py`.
 
 ## 5. Feasibility (throwaway prototype with placeholder values, `prototype/`)
 
