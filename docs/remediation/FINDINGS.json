@@ -388,14 +388,47 @@
       "historical_source_commit": "829ab544571f12efe50ecb5740f129c8acb3e16f",
       "required_repair_from_audit": "A proof/evidence verification call bound to allocation, provider, amount, exact intent/result, chain/domain, policy and nonce; strict configuration bounds; immutable or governed evidence policy; and a complete refund/dispute lifecycle. A GCA rejection must not be bypassable by simply granting a verifier role.",
       "acceptance_from_audit": "Invalid/stale/wrong-intent proof rejects; wrong provider/amount/domain rejects; a valid delivery can be paid only once; unauthorized verifiers cannot approve; all allowed fee configurations leave a valid bounded payout; expiry preserves refund ability.",
-      "current_source_commit": "829ab544571f12efe50ecb5740f129c8acb3e16f",
-      "native_regression_ids": [],
-      "before_artifacts": [],
-      "after_artifacts": [],
-      "repair_commits": [],
+      "current_source_commit": "b631f6757a4a58a89072df396a0348476efdf28a",
+      "native_regression_ids": [
+        "contracts/test/economic/ComposedSettlementF13Acceptance.t.sol",
+        "contracts/test/economic/DeliveryDisputeV1.t.sol",
+        "contracts/test/economic/DeliveryDisputeGovernancePath.t.sol",
+        "contracts/test/economic/DeliveryDisputeFloorCap.t.sol",
+        "contracts/test/economic/DeliveryDisputeEconomics.t.sol",
+        "contracts/test/SettlementActionPolicy.t.sol",
+        "contracts/test/EarnedDeliveryPolicy.t.sol",
+        "contracts/test/economic/EarnedDeliveryAccounting.t.sol",
+        "contracts/test/economic/ComposedSettlement.t.sol"
+      ],
+      "before_artifacts": [
+        "/mnt/c/Users/aseem/VAMS-mono/.tmp-history-tests/f13-forfeit-20261125-01/red-before-fix.txt"
+      ],
+      "after_artifacts": [
+        "contracts/src/economic/ComposedSettlement.sol",
+        "contracts/src/economic/DeliveryDisputeV1.sol",
+        "contracts/src/economic/IComposedSettlement.sol",
+        "contracts/script/DeployRestrictedTestnet.s.sol",
+        "docs/remediation/repair_20261109/F13-SETTLEMENT-ACCEPTANCE.md",
+        "docs/remediation/repair_20261109/F13-DISPUTE-WINDOW-IMPLEMENTATION.md",
+        "docs/remediation/repair_20261125/F13-BOND-FLOOR-DISPUTE-CAP-DESIGN.md",
+        "/mnt/c/Users/aseem/VAMS-mono/.tmp-history-tests/f13-floor-cap-20261125-01/IMPLEMENTATION.md",
+        "/mnt/c/Users/aseem/VAMS-mono/.tmp-history-tests/f13-bond-economics-20261125-01/ANALYSIS.md"
+      ],
+      "repair_commits": [
+        "8ce0299941e2ddbf943d4c1465754b74324320b4",
+        "6440159c01941fbe68fe64ab09777fb9e0994a55",
+        "f91a9337e570a08c99e9520c562db822388f1917",
+        "b631f6757a4a58a89072df396a0348476efdf28a"
+      ],
       "review_evidence": [],
-      "external_blockers": [],
-      "disposition_rationale": "REVALIDATED_OPEN for M4: verifyProviderProof is a VERIFIER_ROLE-authorized boolean assignment with no proof payload or allocation/provider/result/domain/nonce binding."
+      "external_blockers": [
+        "F06/F07: authentic SGX DCAP and EZKL verification for the delivery back-end; every F13 test uses a noncryptographic fixture back-end",
+        "Phase 3 custody: the resolver (governance Safe behind the 48-hour timelock) has UNKNOWN signers",
+        "Independent non-author review of repair commits 8ce0299 through b631f67",
+        "Resolver accuracy and availability measurement (docs/remediation/repair_20261125/F13-RESOLVER-ACCURACY-PLAN.md) needs an authorized closed canary",
+        "Exact-commit scans and hosted CI for the unpublished commits f91a933 and b631f67 (no push or dispatch authority)"
+      ],
+      "disposition_rationale": "REVALIDATED_OPEN for M4. Refreshed 2026-11-25 against local, unpublished b631f67; the previous rationale described 829ab54 and is superseded. Source now: verifyProviderProof and claimProviderShareV2 revert with LegacyInterfaceDisabled and no VERIFIER_ROLE path can approve or pay. Payment requires an on-chain challenge and the immutable deliveryVerifier; ActionDeliveryVerifierV1 binds provider, intent, workload, amount, nonce, issue and expiry times, policy root, version and authority epoch, chain and settlement target, and the settlement consumes the replay key once. Owner decisions 10, 10a and 10b add a 72-hour hold, a 5% bond with a 1 VAMS floor, at most 20 open disputes per agent, 14-day resolution by the timelock, binary outcomes, and on timeout payment to the provider with the bond forfeited to the provider; expiry still refunds unearned rows. The audit acceptance items map to passing Foundry tests (F13-SETTLEMENT-ACCEPTANCE.md, F13-DISPUTE-WINDOW-IMPLEMENTATION.md); local forge test passed 1287/1287 at b631f67, and hosted run 45383752005 covered d0bb4c5 only. Open because: every test uses a fixture evidence back-end, so authentic proof settlement depends on F06/F07; resolver signers are unknown; the bond ratio is uncalibrated (resolver accuracy unmeasured; testnet VAMS has no market value); there is no independent review; the latest repair commits are unpublished. Same-agent-family review notes (.tmp-history-tests/f13-review-20261125-01/F13-FRESH-REVIEW.md) are not acceptance evidence."
     },
     {
       "id": "F14",
