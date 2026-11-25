@@ -1,3 +1,56 @@
+## 2026-11-25: Verified hosted CI for F13 candidate e48a422
+
+[Run 45613978483](https://github.com/GodOfAgents/VAMS/actions/runs/45613978483)
+completed on exactly `e48a42202a484b35adf27fab391a6e4cacda326c`:
+**18 of 19 jobs passed**. All build/test/scan jobs and the Security Evidence
+Gate passed; the sole failed job is **Testnet canary Readiness Gate**.
+Earlier local-only, unpublished and hosted-CI NOT_RUN descriptions below are
+historical; this entry supersedes them for that tested source only. This later
+documentation-only commit has no hosted CI result of its own.
+
+| CI check | Result on e48a422 |
+|---|---|
+| Forge | 1,290 passed in 89 suites; 0 failed, 0 skipped |
+| Slither 0.11.5 | 88 results, 0 High; existing findings are not cleared by exit 0 |
+| Aiken v1.1.21 | 904/904 passed: 897 unit and 7 property tests |
+| Python, main invocation | 3,619 passed, 1 skipped, 9 deselected |
+| Python, separate design-file invocation | 10 passed in `docs/remediation/m3_f05_design_r2/test_design.py` |
+
+The other successful jobs include frontend, Bandit/pip-audit, Gitleaks,
+TruffleHog, reviewed/discovery Semgrep, default-credential and mock-mode policy,
+VIR, Envoy, audit/docs integrity, SBOM/signing and the Security Evidence Gate.
+These are hosted results for one source, not additional local test counts or
+authenticated proof/custody/operational acceptance.
+
+The [Python job log](https://github.com/GodOfAgents/VAMS/actions/runs/45613978483/job/139204571398)
+and source explain the exclusions:
+
+- `DashboardBoundaryTests.test_other_authentication_and_handler_ast_are_unchanged`
+  in `neuron/tests/test_gateway_dashboard_boundary.py` needs a historical
+  pre-repair `BASE` file supplied in script mode. Normal pytest sets `BASE=None`
+  and intentionally skips that AST scope comparison. The dashboard behavior
+  tests execute; the skipped comparison supplies no authentication assurance.
+- `pytest.ini` deselects nine exact historical test IDs: six under owner decision
+  6 and three under decision 7. See [the owner ledger](OWNER_DECISIONS_20261108.md)
+  and [historical-test reasons](HISTORICAL_TESTS.md). Their superseding integration
+  requirements remain open. No skip/deselection rule was changed here.
+- The workflow deliberately runs the design file separately after ignoring it
+  in the main invocation. Report the 10 passes separately; do not add prior runs.
+
+The [readiness job](https://github.com/GodOfAgents/VAMS/actions/runs/45613978483/job/139226771085)
+reports 35 unverified applicable tracks: 3 implemented, 28 partial and 4 blocked
+(`T16`, `T21`, `T30`, `T33`). Five required files are absent under
+`docs/audit/evidence/`: `assurance-index.json`, `polygon-amoy-rehearsal.json`,
+`cardano-preprod-rehearsal.json`, `runtime-integration.json`, `privacy-review.json`.
+Missing artifacts do not prove that all remaining engineering defects are fixed.
+
+F13 remains **REVALIDATED_OPEN**; **13 findings open, 0/36 tracks accepted;
+NOT READY**. Authentic F06/F07 evidence, resolver custody and reviewed measurement,
+independent release assurance, both-chain/runtime/privacy qualification and real
+observation time remain required. INV-1 through INV-10 enforcement, contract
+parameters, restricted disablements and stage gates are unchanged. This update
+performs no push, dispatch, rerun, live probe, funding or deployment.
+
 ## 2026-11-25: Local review and scan follow-up for five unpublished commits
 
 The separate GPT-6 Luna High non-author AI review covers `d0bb4c5..685b289`
