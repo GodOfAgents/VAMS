@@ -1,6 +1,7 @@
 {
   "schema_version": "1.0.0",
   "last_verified": "2026-07-12",
+  "last_verified_scope": "Historical manifest-inventory baseline; not a verification timestamp for every document, implementation or release. Per-document verification metadata has its own stated scope.",
   "current_architecture_version": "0.8.0",
   "documents": [
     {"path":"README.md","lifecycle":"current","authority":"entrypoint"},

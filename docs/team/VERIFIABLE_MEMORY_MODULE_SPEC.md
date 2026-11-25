@@ -61,8 +61,14 @@ All digests are 32-byte SHA-256 values with a domain-separation prefix, in the
 style already used by `neuron/object_grant_v1.py`
 (`b'VAMS:OBJECT-GRANT:v1\0'`) and `neuron/payments/intent_v1.py`. All-zero
 digests are rejected, as `hash32` does in `neuron/effect_protocol_v3.py`.
-Canonical encoding is fixed-order 32-byte words, never JSON, so Python,
-Solidity, Rust and Aiken can reproduce the same digest from published vectors.
+The intended encoding family is fixed-order 32-byte words rather than JSON,
+but **this draft does not yet define a normative wire codec**. The tables are
+logical fields, not sufficient instructions for interoperable hashing. Before
+codecs or cross-language vectors can be accepted, a separately reviewed codec
+specification must fix field order, integer widths/ranges/byte order, enum and
+bitset values, array length framing/order/bounds (especially `parents`),
+optional-field representation, domain framing and rejection rules. No consumer
+may treat a digest inferred from these incomplete tables as protocol-valid.
 
 Proposed domains:
 
@@ -129,6 +135,14 @@ Each operation is one durable DBOS step. The idempotency key is fixed before
 the provider is called, so a crash after the provider acts and before the
 checkpoint reconciles to the same receipt instead of a second write or a second
 payment (GCA_ACCEPTANCE negative case "Crash after effect, before checkpoint").
+
+Every participating Service Block must declare exactly one existing memory
+policy: `STATELESS`, `SESSION_ICL`, `EXTERNAL_READONLY`, or
+`PERSISTENT_MUTATING_REQUIRES_REVIEW`. Missing or unknown declarations fail
+admission. Cognitive-memory operations and durability must respect that mode;
+review-required persistent mutation needs explicit review. A memory record or
+provider output cannot change its own policy declaration. Mandatory core
+protocol safety state remains separate from cognitive-memory policy.
 
 | Operation | Pre-checks (fail closed) | Provider does | Returns |
 |---|---|---|---|
@@ -243,6 +257,15 @@ privacy review in section 8. Content, personal provenance and raw memory are
 never published. The bridge rule INV-10 applies by analogy: the anchor proof
 and the memory payload stay separate fields and are verified separately.
 
+For cognitive-memory publication, the applicable configured V(m) consolidation
+threshold must also be met before committing to DA. Publishing only a digest
+or root does not bypass that gate, and privacy approval does not replace it.
+Preserve the selected consolidation function, thresholds and tests; this draft
+changes none of them. Mandatory protocol-safety roots follow their existing
+governed core path and cannot be replaced, suppressed or reclassified as
+optional cognitive memory by a VMM provider. That separation grants no
+exception for publishing cognitive memory below its consolidation threshold.
+
 ## 8. Privacy
 
 - Commitments over guessable content (short facts, names, yes/no answers) are
@@ -274,7 +297,27 @@ A provider conforms when it passes, without revealing its internal algorithm:
 6. Crash between provider effect and checkpoint: one record, one payment.
 7. Revocation: known dependents are marked; unresolved dependents are listed.
 8. Two different implementations (for example a vector store and a graph
-   store) both pass 1–7 with different internal representations (RW-015).
+   store) with the same advertised capability set pass the applicable
+   conformance cases with different internal representations (RW-015).
+9. Exercise all four declared memory policies, plus missing/unknown policies;
+   reject operations and durability outside each policy. In particular,
+   unreviewed persistent mutation produces zero effects under an observer.
+10. Revoke or update policy while work is pending, then restart/resume. Recheck
+    current authority before effects; a prior approval cannot authorize new
+    effects after revocation. Unrelated task sequences start from a hard-reset
+    context, without losing mandatory authenticated protocol safety state.
+11. Malicious memory and service output cannot mutate grants, policy, nonces
+    or evidence roots, or induce unauthorized provider/DA/payment effects.
+    Demonstrate this with effect observers across task, restart and policy
+    boundaries, not only an error message or unchanged local return value.
+12. Cognitive-memory DA publication below the configured consolidation
+    threshold is rejected even for hash-only anchors; exercise its boundary
+    with privacy approval independently absent/present. No mock DA/TEE path
+    may supply live conformance evidence.
+
+These are required acceptance cases for a future implementation, not tests
+already implemented or executed by this proposal. Codec decisions, observed
+no-effect evidence and independent review remain prerequisites.
 
 ## 11. Current code against this spec
 
@@ -289,7 +332,7 @@ A provider conforms when it passes, without revealing its internal algorithm:
 | Sentinel | Hardware memory-bandwidth benchmark only | Section 7.2 |
 | Composer | `cognitive_requirements` exists; `MemorySpec` is RAM | Add `MemoryServiceRequirement` |
 | x402 | Payment intent and local ledger exist, not wired to memory | Bind intents to receipts |
-| Anchoring | L0 anchor never written; DA adapters mock-only | V3 needs a real anchor path and privacy approval |
+| Anchoring | No VMM receipt/anchor integration is implemented by this proposal | V3 needs authenticated provider-specific DA verification, runtime mock exclusion and privacy approval; adapter existence is not live evidence |
 
 The existing S-MMU, SIRA, HIPIF, EvoMem and V(m) code becomes one provider
 implementation behind the VMM, with its parameters and tests kept. It stops
@@ -300,7 +343,8 @@ being "the" memory system.
 Each phase ends with its tests passing and an independent review. No phase
 changes INV-1 to INV-10 enforcement.
 
-1. **Envelopes and vectors.** Python codec for sections 4.1, 4.2 and
+1. **Envelopes and vectors.** First close the reviewed wire-codec decisions in
+   section 4. Then a Python codec for sections 4.1, 4.2 and
    revocation, plus JSON Schema under `docs/audit/schemas/` and cross-language
    vectors. No runtime change.
 2. **Reference provider.** Wrap the current S-MMU as the first provider,

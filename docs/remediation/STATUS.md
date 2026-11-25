@@ -1,3 +1,21 @@
+## 2026-11-25: Local review and scan follow-up for five unpublished commits
+
+The separate GPT-6 Luna High non-author AI review covers `d0bb4c5..685b289`
+and the bounded follow-up. Add three rollback/fault-injection tests, cap-slot
+reuse for every outcome and interleaved OPEN-entry enumeration fuzz; correct
+the acceptance coverage record and draft memory-policy/codec/conformance claims.
+No contract source or approved parameter changes. Fixed native inputs pass
+1,290 Foundry tests (89 suites), 11 floor/cap methods at 2,000 fuzz runs, sizes,
+Slither (88 existing results, 0 High), reviewed Semgrep, Bandit, math/docs and
+257 audit tests. Original five-commit Gitleaks and all-category TruffleHog are
+clean. Final-range scans are PENDING until the integration commit; their later
+results belong in the external FINAL.json receipt. No test totals are added.
+
+This is local source/fixture evidence, not hosted CI, independent release
+assurance or authentic proof/custody evidence. F13 remains REVALIDATED_OPEN,
+13 findings open, 0/36 accepted; NOT READY. Details:
+`docs/remediation/repair_20261125/F13-LOCAL-SCAN-REVIEW.md`.
+
 ## 2026-11-25: F13 measurement-plan and floor-row math correction
 
 Documentation/math-only follow-up to local source baseline `5ccc5ed` on
