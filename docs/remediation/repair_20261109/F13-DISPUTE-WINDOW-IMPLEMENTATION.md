@@ -115,3 +115,13 @@ path.
 - **Slither path discrepancy.** Investigate the canonical-path result.
 - **Ledger.** The F13 rationale in `FINDINGS.json` is stale (see
   `F13-SETTLEMENT-ACCEPTANCE.md`). No status change is proposed here.
+
+## Amendment 2026-11-25 (owner decision 10a)
+
+P5 changed: on deadline the provider is paid and the bond is **forfeited to the provider**
+(this record's `finalizeTimeout` description and the test table row "Deadline: ... bond back to
+agent" describe the superseded behavior). `finalizeTimeout` now pays `d.provider`; the test is
+`test_timeoutReleasesPaymentAndForfeitsBondToProvider`, plus
+`test_timeoutBondGoesToRecordedProviderRegardlessOfCaller`, and the conservation fuzz treats timed-out
+and rejected disputes alike. Evidence and limits:
+`.tmp-history-tests/f13-forfeit-20261125-01/F13-BOND-FORFEIT.md`. Non-author review still pending.

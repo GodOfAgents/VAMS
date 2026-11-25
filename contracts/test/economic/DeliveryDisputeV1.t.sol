@@ -11,120 +11,11 @@ import {RestrictedTestnetPolicyV1} from "../../src/trust/RestrictedTestnetPolicy
 import {ActionDeliveryVerifierV1} from "../../src/trust/ActionDeliveryVerifierV1.sol";
 import {VAMSTimelockController} from "../../src/governance/VAMSTimelockController.sol";
 
-/// Dispute window acceptance (owner decision 10) against the real
-/// ActionDeliveryVerifierV1 and RestrictedTestnetPolicyV1. The evidence backend
-/// is a noncryptographic fixture; authentic SGX/EZKL evidence is F06/F07.
-contract DisputeAcceptingBackendFixture {
-    function verifyAction(ActionContextV1.Context calldata, bytes32, bytes calldata) external pure returns (bool) {
-        return true;
-    }
-}
-contract DisputeBondFixture {
-    function canAcceptRequest(address, uint256) external pure returns (bool, string memory) { return (true, ""); }
-    function acceptRequest(address, bytes32, uint256) external {}
-    function completeRequest(address, bytes32) external {}
-    function cancelRequest(address, bytes32) external {}
-}
-contract DisputeUnusedRegistryFixture {}
+import {DeliveryDisputeFixture} from "./DeliveryDisputeFixture.sol";
 
-contract DeliveryDisputeV1Test is Test {
-    VAMSToken internal token;
-    ComposedSettlement internal settlement;
-    DeliveryDisputeV1 internal disputes;
-    RestrictedTestnetPolicyV1 internal policy;
-    VAMSTimelockController internal timelock;
-    ActionContextV1.Context internal template;
-    address internal provider;
-    address internal provider2;
-    address internal resolver;
-    address internal stranger;
-    uint256 internal governanceNonce;
-    bytes32 internal workload;
-    uint256 internal constant ROW = 100 ether;
-    uint256 internal constant BOND = 5 ether; // ceil(5% of ROW)
-    uint256 internal constant PAYOUT = 99.95 ether; // ROW minus 5 bps fee, no builder
-    uint256 internal constant FEE = 0.05 ether;
-    address internal constant TREASURY = address(0xFEE);
-
-    function govern(bytes memory data) internal {
-        bytes32 salt = bytes32(++governanceNonce);
-        timelock.schedule(address(policy), 0, data, bytes32(0), salt, 48 hours);
-        vm.warp(block.timestamp + 48 hours);
-        timelock.execute(address(policy), 0, data, bytes32(0), salt);
-    }
-
-    function setUp() public {
-        vm.chainId(80002);
-        provider = vm.addr(uint256(keccak256("LOCAL-ONLY-DISPUTE-PROVIDER-1")));
-        provider2 = vm.addr(uint256(keccak256("LOCAL-ONLY-DISPUTE-PROVIDER-2")));
-        resolver = vm.addr(uint256(keccak256("LOCAL-ONLY-DISPUTE-RESOLVER")));
-        stranger = vm.addr(uint256(keccak256("LOCAL-ONLY-DISPUTE-STRANGER")));
-        token = new VAMSToken(address(this), address(this));
-        address[] memory members = new address[](1); members[0] = address(this);
-        timelock = new VAMSTimelockController(48 hours, members, members, address(this));
-        policy = new RestrictedTestnetPolicyV1(address(timelock), keccak256("amoy-fixture"), keccak256("faucet-base-units"));
-        DisputeAcceptingBackendFixture backend = new DisputeAcceptingBackendFixture();
-        ActionDeliveryVerifierV1 router = new ActionDeliveryVerifierV1(address(policy), address(policy).codehash,
-            address(backend), address(backend).codehash, address(backend), address(backend).codehash);
-        settlement = new ComposedSettlement(address(this), address(token), address(new DisputeBondFixture()),
-            TREASURY, address(new DisputeUnusedRegistryFixture()), address(router), resolver);
-        disputes = settlement.disputes();
-        token.approve(address(settlement), type(uint256).max);
-        token.approve(address(disputes), type(uint256).max);
-        template.runtimeId = keccak256("runtime"); template.modelId = keccak256("model");
-        template.workflowId = keccak256("workflow"); template.inputHash = keccak256("exact-input");
-        template.hostDomain = policy.hostDomain(); template.budgetUnit = policy.budgetUnit();
-        template.target = bytes32(uint256(uint160(address(settlement)))); template.rootScheme = 1;
-        template.chainId = block.chainid; template.capabilities = 4; template.budget = ROW;
-        workload = ActionContextV1.workloadHash(template);
-        govern(abi.encodeCall(policy.configure, (keccak256("policy"), 1, 1, 4, 2 * ROW, 1 hours)));
-        govern(abi.encodeCall(policy.setEligibility, (workload, bytes32(uint256(uint160(provider))), template.target, true)));
-        govern(abi.encodeCall(policy.setEligibility, (workload, bytes32(uint256(uint160(provider2))), template.target, true)));
-        govern(abi.encodeCall(policy.setInitiator, (address(this), true)));
-    }
-
-    // ---- helpers ------------------------------------------------------------
-
-    function create(uint256 rows) internal returns (bytes32 id) {
-        address[] memory providers = new address[](rows);
-        uint256[] memory amounts = new uint256[](rows);
-        bytes32[] memory workloads = new bytes32[](rows);
-        for (uint256 i; i < rows; ++i) {
-            providers[i] = i == 0 ? provider : provider2; amounts[i] = ROW; workloads[i] = workload;
-        }
-        id = settlement.createComposedEscrowV2(IComposedSettlement.EscrowRequestV2(
-            providers, amounts, 1 hours, keccak256("blueprint"), bytes32(0), bytes32(0), workloads));
-    }
-
-    function who(uint256 index) internal view returns (address) {
-        return index == 0 ? provider : provider2;
-    }
-
-    function earn(bytes32 id, uint256 index) internal {
-        address p = who(index);
-        vm.prank(p); settlement.issueDeliveryChallenge(id, index);
-        IComposedDeliveryVerifier.ExpectedDelivery memory e = settlement.getExpectedDelivery(id, index);
-        ActionContextV1.Context memory c = template;
-        c.actorRoot = bytes32(uint256(uint160(p))); c.providerId = c.actorRoot;
-        c.actionHash = e.context; c.intentId = id; c.nonce = e.nonce; c.issuedAt = e.issuedAt;
-        c.expiresAt = e.expiresAt; c.policyRoot = e.policyRoot; c.policyVersion = e.policyVersion;
-        c.authorityEpoch = e.authorityEpoch;
-        vm.prank(p); settlement.recordEarnedDeliveryV3(id, index, keccak256("output"), abi.encode(c, uint8(1), hex"01"));
-    }
-
-    function claim(bytes32 id, uint256 index) internal {
-        vm.prank(who(index)); settlement.claimEarnedProviderShareV3(id, index);
-    }
-
-    function dispute(bytes32 id, uint256 index) internal {
-        disputes.openDispute(id, index, keccak256("reason"));
-    }
-
-    function assertBacking() internal view {
-        assertEq(token.balanceOf(address(settlement)), settlement.totalEscrowed());
-        assertEq(token.balanceOf(address(disputes)), disputes.totalBondsHeld());
-    }
-
+/// Dispute window acceptance (owner decision 10, amended by 10a). Shared fixture:
+/// DeliveryDisputeFixture.sol.
+contract DeliveryDisputeV1Test is DeliveryDisputeFixture {
     // ---- window ---------------------------------------------------------------
 
     function test_parametersMatchOwnerDecision10() public view {
@@ -268,7 +159,10 @@ contract DeliveryDisputeV1Test is Test {
 
     // ---- deadline ---------------------------------------------------------------
 
-    function test_timeoutReleasesPaymentAndReturnsBondToAgent() public {
+    /// Owner decision 10a (supersedes P5): timeout releases the payment and transfers the
+    /// posted bond to the recorded provider. Demonstrated here: balances only. Whether this
+    /// deters a freeze depends on bond size and ownership (not evaluated by this test).
+    function test_timeoutReleasesPaymentAndForfeitsBondToProvider() public {
         bytes32 id = create(1); earn(id, 0); dispute(id, 0);
         uint256 opened = disputes.getDispute(id, 0).openedAt;
         vm.warp(opened + 14 days - 1);
@@ -276,12 +170,30 @@ contract DeliveryDisputeV1Test is Test {
         vm.expectRevert(abi.encodeWithSelector(DeliveryDisputeV1.ResolutionPeriodActive.selector, id, 0));
         disputes.finalizeTimeout(id, 0);
         vm.warp(opened + 14 days);
-        uint256 before = token.balanceOf(address(this));
+        uint256 agentBefore = token.balanceOf(address(this));
+        uint256 providerBefore = token.balanceOf(provider);
         vm.prank(stranger); disputes.finalizeTimeout(id, 0);
-        assertEq(token.balanceOf(address(this)) - before, BOND);
+        assertEq(token.balanceOf(address(this)), agentBefore, "agent bond is not returned");
+        assertEq(token.balanceOf(provider) - providerBefore, BOND, "provider receives the bond");
+        assertEq(uint256(disputes.getDispute(id, 0).state), uint256(DeliveryDisputeV1.State.TIMED_OUT));
         claim(id, 0);
-        assertEq(token.balanceOf(provider), PAYOUT);
+        assertEq(token.balanceOf(provider) - providerBefore, BOND + PAYOUT);
+        assertEq(disputes.totalBondsHeld(), 0);
         assertBacking();
+    }
+
+    /// The forfeit goes to the provider recorded when the dispute opened, whoever finalizes.
+    function test_timeoutBondGoesToRecordedProviderRegardlessOfCaller() public {
+        bytes32 id = create(2); earn(id, 0); earn(id, 1); dispute(id, 1);
+        vm.warp(disputes.getDispute(id, 1).openedAt + 14 days);
+        uint256 p2 = token.balanceOf(provider2);
+        uint256 caller = token.balanceOf(stranger);
+        vm.prank(stranger); disputes.finalizeTimeout(id, 1);
+        assertEq(token.balanceOf(provider2) - p2, BOND);
+        assertEq(token.balanceOf(stranger), caller);
+        vm.prank(stranger);
+        vm.expectRevert(abi.encodeWithSelector(DeliveryDisputeV1.DisputeNotOpen.selector, id, 1));
+        disputes.finalizeTimeout(id, 1);
     }
 
     function test_resolverCannotDecideAfterDeadline() public {
@@ -352,8 +264,10 @@ contract DeliveryDisputeV1Test is Test {
                 expectedAgent += ROW;
             } else {
                 claim(id, i);
-                expectedProviders += PAYOUT + (outcomes[i] == 2 ? BOND : 0);
-                if (outcomes[i] == 2) expectedAgent -= BOND;
+                // Rejected (2) and timed-out (3) disputes both forfeit the bond to the provider.
+                bool forfeited = outcomes[i] == 2 || outcomes[i] == 3;
+                expectedProviders += PAYOUT + (forfeited ? BOND : 0);
+                if (forfeited) expectedAgent -= BOND;
             }
         }
         assertEq(token.balanceOf(address(this)), expectedAgent);

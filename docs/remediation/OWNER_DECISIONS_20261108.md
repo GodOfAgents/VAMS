@@ -116,6 +116,29 @@ Slashing stays disabled (tokenomics R1). The resolver's actual signers remain
 UNKNOWN until the Phase 3 custody inputs arrive. Implementation still
 requires targeted tests, size checks and non-author review before acceptance.
 
+## 10a. F13 timeout bond forfeits to the provider (2026-11-25)
+
+Amends P5 of decision 10. A review pointed out that returning the bond on
+timeout lets an agent freeze any earned payment for 72 hours plus 14 days
+at no net cost whenever the resolver does not act. The owner chose, in chat,
+**"Forfeit bond on timeout"**:
+
+| # | Amended value |
+|---|---|
+| P5 | On deadline: provider paid and the bond is forfeited to the provider (was: returned to the agent) |
+
+P1-P4 and P6 are unchanged; outcomes stay binary and slashing stays disabled.
+The change is the recipient in `DeliveryDisputeV1.finalizeTimeout`: timeout
+transfers the posted bond to the recorded provider. Two consequences to keep
+in view. Resolver inaction now costs an honest disputing agent its bond, so
+resolver liveness (signers UNKNOWN until Phase 3) matters more. And a timeout
+does not show the dispute lacked merit; where agent and provider are commonly
+controlled the bond can be recycled, so whether the 5% bond deters freezes
+depends on bond size and ownership, which is not yet evaluated. The number 10a is used so it cannot collide with entries not yet
+mirrored into this ledger. Implementation record:
+`.tmp-history-tests/f13-forfeit-20261125-01/F13-BOND-FORFEIT.md`. Independent
+review is still required.
+
 ## 11. Tools, Semgrep discovery and first push (2026-11-11)
 
 Recorded from the owner's checklist ticks, then confirmed item by item in chat:

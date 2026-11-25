@@ -21,8 +21,9 @@ interface IDisputeRefundTarget {
  *      the row amount (rounded up). The resolver (the governance timelock) either
  *      upholds it (full row refund to the agent, bond returned) or rejects it (row
  *      released for normal payment, bond to the provider). If unresolved by
- *      RESOLUTION_PERIOD, anyone may finalize: the row is released and the bond goes
- *      back to the agent. No slashing (tokenomics R1). Outcomes are binary.
+ *      RESOLUTION_PERIOD, anyone may finalize: the row is released and the bond is
+ *      forfeited to the provider (owner decision 10a, replacing the original P5 return to
+ *      the agent). No slashing (tokenomics R1). Outcomes are binary.
  */
 contract DeliveryDisputeV1 is ReentrancyGuard {
     using SafeERC20 for IERC20;
@@ -136,7 +137,12 @@ contract DeliveryDisputeV1 is ReentrancyGuard {
         }
     }
 
-    /// @notice After the deadline anyone may finalize: payment is released, bond returns to the agent.
+    /// @notice After the deadline anyone may finalize: payment is released and the bond is
+    ///         forfeited to the provider recorded when the dispute opened (owner decision 10a).
+    /// @dev The caller never receives funds. Timeout transfers the posted bond to the recorded
+    ///      provider, as a rejected dispute does. This does not prove the dispute lacked merit,
+    ///      and it does not make a freeze costly where the agent and provider are commonly
+    ///      controlled and can recycle the bond.
     function finalizeTimeout(bytes32 allocationId, uint256 providerIndex) external nonReentrant {
         Dispute storage d = _disputes[allocationId][providerIndex];
         if (d.state != State.OPEN) revert DisputeNotOpen(allocationId, providerIndex);
@@ -144,7 +150,7 @@ contract DeliveryDisputeV1 is ReentrancyGuard {
             revert ResolutionPeriodActive(allocationId, providerIndex);
         }
         d.state = State.TIMED_OUT;
-        _releaseBond(allocationId, providerIndex, d, d.agent);
+        _releaseBond(allocationId, providerIndex, d, d.provider);
     }
 
     function _releaseBond(bytes32 allocationId, uint256 providerIndex, Dispute storage d, address to) private {

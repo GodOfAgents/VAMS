@@ -1,3 +1,24 @@
+## 2026-11-25: Forfeit the dispute bond on timeout (owner decision 10a)
+
+- `DeliveryDisputeV1.finalizeTimeout` now sends the bond to the provider recorded
+  when the dispute opened, instead of returning it to the agent. The earned
+  payment is still released on timeout; the caller receives nothing. Upheld
+  disputes still return the bond with a full refund, and rejected disputes
+  still pay it to the provider. Resolver inaction now costs a disputing agent its
+  posted bond; this does not show the dispute lacked merit, and where agent and
+  provider are commonly controlled the bond can be recycled, so deterrence still
+  depends on bond size and ownership (not yet evaluated). Deployed bytecode of
+  `ComposedSettlement` is unchanged in size (24,401 B). Contracts are not
+  deployed on any network.
+- Add governance-path tests: the dispute resolver is the real 48-hour timelock, with
+  scheduled, late, cancelled and failed operations and the exact 14-day boundary.
+  The Safe's signature threshold is not modelled.
+- Anchor the Slither `filter_paths` entries to the repository's `contracts/lib`,
+  `contracts/test` and `contracts/script` directories. The old bare `test/` pattern
+  matched any checkout path containing "test" (for example `VAMS-testnet`) and
+  silently dropped every source finding there (0 results instead of 88). Hosted CI
+  paths were unaffected on this tree.
+
 ## 2026-11-24: Preserve readiness checkout byte integrity
 
 - Preserve the committed CRLF or mixed line endings of 73 exact paths when Git
