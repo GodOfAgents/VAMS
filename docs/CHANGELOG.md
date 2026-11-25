@@ -1,3 +1,18 @@
+## 2026-11-25: Dispute bond floor and per-agent dispute cap (owner decision 10b)
+
+- `DeliveryDisputeV1.bondFor` now returns the larger of `ceil(5% * row)` and
+  `MIN_BOND` (1 VAMS), so small rows can no longer be disputed for a negligible
+  bond. Rows above 20 VAMS are unaffected.
+- Each agent may hold at most 20 open disputes (`MAX_OPEN_DISPUTES_PER_AGENT`,
+  equal to `MAX_PROVIDERS`); opening one more reverts with `TooManyOpenDisputes`.
+  Uphold, reject and timeout each release one slot. The cap is per agent only.
+- Values are for the restricted testnet, where VAMS has no market value: they
+  exercise the mechanism and do not demonstrate economic deterrence. The bond
+  ratio remains uncalibrated until resolver accuracy is measured.
+- `ComposedSettlement` runtime is unchanged (24,401 B); its constructor code grows
+  by 336 B because it deploys the dispute contract. Contracts are not deployed on
+  any network.
+
 ## 2026-11-25: Forfeit the dispute bond on timeout (owner decision 10a)
 
 - `DeliveryDisputeV1.finalizeTimeout` now sends the bond to the provider recorded

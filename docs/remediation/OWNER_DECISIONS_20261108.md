@@ -139,6 +139,25 @@ mirrored into this ledger. Implementation record:
 `.tmp-history-tests/f13-forfeit-20261125-01/F13-BOND-FORFEIT.md`. Independent
 review is still required.
 
+## 10b. F13 dispute bond floor and per-agent dispute cap (2026-11-25)
+
+The owner reviewed `repair_20261125/F13-BOND-FLOOR-DISPUTE-CAP-DESIGN.md` and
+approved all four recommendations, in chat: **"Approve all"**.
+
+| # | Approved value |
+|---|---|
+| Q1 | `MIN_BOND` = 1 VAMS (1e18 base units) for the restricted testnet; revisit before any real-value deployment |
+| Q2 | `MAX_OPEN_DISPUTES_PER_AGENT` = 20, equal to `MAX_PROVIDERS` |
+| Q3 | The open-dispute count is released on uphold, reject and timeout |
+| Q4 | The cap applies per agent only; there is no global or provider cap |
+
+The bond becomes the larger of `ceil(5% * row)` and `MIN_BOND`. Decisions 10
+and 10a are otherwise unchanged. On testnet VAMS has no market value, so this
+exercises the mechanism and does not demonstrate economic deterrence. The bond
+ratio itself is still uncalibrated until the resolver accuracy plan
+(`repair_20261125/F13-RESOLVER-ACCURACY-PLAN.md`) can run. Independent review
+is required before acceptance.
+
 ## 11. Tools, Semgrep discovery and first push (2026-11-11)
 
 Recorded from the owner's checklist ticks, then confirmed item by item in chat:

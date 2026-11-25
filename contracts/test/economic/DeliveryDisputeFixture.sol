@@ -53,7 +53,7 @@ abstract contract DeliveryDisputeFixture is Test {
         timelock.execute(address(policy), 0, data, bytes32(0), salt);
     }
 
-    function setUp() public {
+    function setUp() public virtual {
         vm.chainId(80002);
         provider = vm.addr(uint256(keccak256("LOCAL-ONLY-DISPUTE-PROVIDER-1")));
         provider2 = vm.addr(uint256(keccak256("LOCAL-ONLY-DISPUTE-PROVIDER-2")));

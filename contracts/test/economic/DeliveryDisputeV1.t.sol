@@ -26,7 +26,8 @@ contract DeliveryDisputeV1Test is DeliveryDisputeFixture {
         assertEq(disputes.settlement(), address(settlement));
         assertEq(address(disputes.bondToken()), address(token));
         assertEq(disputes.bondFor(ROW), BOND);
-        assertEq(disputes.bondFor(1), 1); // rounds up: no free dispute on a tiny row
+        // Decision 10b: a tiny row posts the floor, not a rounded-up 1-unit bond.
+        assertEq(disputes.bondFor(1), disputes.MIN_BOND());
     }
 
     function test_paymentHeldForWholeWindowThenReleased() public {

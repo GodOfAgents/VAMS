@@ -24,6 +24,8 @@ interface IDisputeRefundTarget {
  *      RESOLUTION_PERIOD, anyone may finalize: the row is released and the bond is
  *      forfeited to the provider (owner decision 10a, replacing the original P5 return to
  *      the agent). No slashing (tokenomics R1). Outcomes are binary.
+ *      Owner decision 10b: the bond is never below MIN_BOND, and each agent may hold at
+ *      most MAX_OPEN_DISPUTES_PER_AGENT open disputes; every outcome releases one slot.
  */
 contract DeliveryDisputeV1 is ReentrancyGuard {
     using SafeERC20 for IERC20;
@@ -32,6 +34,10 @@ contract DeliveryDisputeV1 is ReentrancyGuard {
     uint256 public constant RESOLUTION_PERIOD = 14 days;
     uint256 public constant BOND_BPS = 500;
     uint256 public constant BPS_DENOMINATOR = 10_000;
+    /// @notice Absolute bond floor in bond-token base units (decision 10b Q1: 1 VAMS, restricted testnet).
+    uint256 public constant MIN_BOND = 1e18;
+    /// @notice Open disputes allowed per agent (decision 10b Q2: equals ComposedSettlement.MAX_PROVIDERS).
+    uint256 public constant MAX_OPEN_DISPUTES_PER_AGENT = 20;
 
     enum State { NONE, OPEN, UPHELD, REJECTED, TIMED_OUT }
 
@@ -49,6 +55,8 @@ contract DeliveryDisputeV1 is ReentrancyGuard {
     IERC20 public immutable bondToken;
     /// @notice Bonds currently held; equals this contract's bond-token balance from disputes.
     uint256 public totalBondsHeld;
+    /// @notice OPEN disputes per agent; always equals the number of OPEN entries whose agent is the key.
+    mapping(address => uint256) public openDisputeCount;
 
     mapping(bytes32 => mapping(uint256 => Dispute)) private _disputes;
 
@@ -65,6 +73,7 @@ contract DeliveryDisputeV1 is ReentrancyGuard {
     error ResolutionPeriodEnded(bytes32 allocationId, uint256 providerIndex);
     error ResolutionPeriodActive(bytes32 allocationId, uint256 providerIndex);
     error BondTransferMismatch(uint256 expected, uint256 received);
+    error TooManyOpenDisputes(address agent, uint256 cap);
 
     constructor(address settlement_, address resolver_, address bondToken_) {
         require(settlement_ != address(0) && resolver_ != address(0) && bondToken_ != address(0), "Zero address");
@@ -73,9 +82,11 @@ contract DeliveryDisputeV1 is ReentrancyGuard {
         bondToken = IERC20(bondToken_);
     }
 
-    /// @notice Bond for a row amount: BOND_BPS rounded up, so any nonzero row needs a nonzero bond.
+    /// @notice Bond for a row amount: BOND_BPS rounded up, but never below MIN_BOND (decision 10b),
+    ///         so small rows cannot be disputed for a negligible bond.
     function bondFor(uint256 amount) public pure returns (uint256) {
-        return (amount * BOND_BPS + BPS_DENOMINATOR - 1) / BPS_DENOMINATOR;
+        uint256 proportional = (amount * BOND_BPS + BPS_DENOMINATOR - 1) / BPS_DENOMINATOR;
+        return proportional > MIN_BOND ? proportional : MIN_BOND;
     }
 
     /// @notice Whether settlement may pay an earned row recorded at `recordedAt`.
@@ -107,10 +118,14 @@ contract DeliveryDisputeV1 is ReentrancyGuard {
         if (block.timestamp >= earned.recordedAt + DISPUTE_WINDOW) {
             revert DisputeWindowClosed(allocationId, providerIndex);
         }
+        if (openDisputeCount[agent] >= MAX_OPEN_DISPUTES_PER_AGENT) {
+            revert TooManyOpenDisputes(agent, MAX_OPEN_DISPUTES_PER_AGENT);
+        }
         uint256 bond = bondFor(row.amount);
         _disputes[allocationId][providerIndex] =
             Dispute(State.OPEN, agent, row.provider, bond, block.timestamp, reasonHash);
         totalBondsHeld += bond;
+        openDisputeCount[agent] += 1;
         uint256 before = bondToken.balanceOf(address(this));
         // msg.sender == agent (checked above); pulling only from the caller.
         bondToken.safeTransferFrom(msg.sender, address(this), bond);
@@ -153,9 +168,12 @@ contract DeliveryDisputeV1 is ReentrancyGuard {
         _releaseBond(allocationId, providerIndex, d, d.provider);
     }
 
+    /// @dev Single exit for every outcome (uphold, reject, timeout), so it also releases the
+    ///      agent's open-dispute slot (decision 10b Q3).
     function _releaseBond(bytes32 allocationId, uint256 providerIndex, Dispute storage d, address to) private {
         uint256 bond = d.bond;
         totalBondsHeld -= bond;
+        openDisputeCount[d.agent] -= 1;
         bondToken.safeTransfer(to, bond);
         emit DeliveryDisputeResolved(allocationId, providerIndex, d.state, to, bond);
     }

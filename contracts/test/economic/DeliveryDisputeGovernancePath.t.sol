@@ -75,10 +75,12 @@ contract DeliveryDisputeGovernancePathTest is DeliveryDisputeFixture {
         (bytes32 salt,) = _schedule(data);
         vm.warp(block.timestamp + 48 hours);
         uint256 before = token.balanceOf(address(this));
+        assertEq(disputes.openDisputeCount(address(this)), 1);
         _execute(data, salt);
         assertEq(token.balanceOf(address(this)) - before, ROW + BOND);
         assertEq(uint256(disputes.getDispute(id, 0).state), uint256(DeliveryDisputeV1.State.UPHELD));
         assertEq(disputes.totalBondsHeld(), 0);
+        assertEq(disputes.openDisputeCount(address(this)), 0); // decision 10b: slot released
         assertBacking();
     }
 
